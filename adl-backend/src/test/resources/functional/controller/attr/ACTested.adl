@@ -1,0 +1,5 @@
+
+type controller.attr.ACTested {
+  provides fractal.api.AttributeController as attributeController;
+  provides Main as main;
+}

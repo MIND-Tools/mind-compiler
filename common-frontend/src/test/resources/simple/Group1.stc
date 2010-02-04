@@ -1,0 +1,17 @@
+template simple.Group1 {
+
+simple.Itf1 itf1 = simple.Group2 ;
+
+simple.Itf1 itf2 = plugin(simple);
+
+$${
+
+temp1() ::= << 
+Invocation as bound interface 
+<(itf1.print)(message="HelloWorld")> 
+
+Invocation as plugin interface
+<(itf2.Group2.print)(message="Hi")> >>
+
+}$$
+}

@@ -1,0 +1,12 @@
+// composite assigning sub-component attributes 
+// by using the anonymous definition mechanism
+
+composite attributes.assign3  {
+
+ contains composite attributes.assign1 as subComp {
+   contains primitive attributes.attr1 as A1 {
+  source {{ }};
+    attribute string			attr_string = "foo" ;
+   } ;
+ }
+}

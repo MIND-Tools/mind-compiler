@@ -1,0 +1,1 @@
+two private methods declared in a single statement

@@ -1,0 +1,277 @@
+template st.instances.Component implements st.instances.ComponentInstances{
+
+$${
+
+isClient ::= [ "client" : "true" ]
+isServer ::= [ "server" : "true" ]
+
+ComponentInstances(topLevelDefinition, definition, instances) ::= <<
+
+/* Generated file: <topLevelDefinition;format="nameToPath">_<definition.name;format="toCName">_instances.c */
+
+#define __COMPONENT_IN_<definition.name;format="toUpperCName">
+#include "<definition.name;format="nameToPath">.adl.h"
+
+<if (definition.astNodeTypes.("source"))>
+<if (definition.sources)>
+#include "<definition.name;format="nameToPath">_impl.h"
+<endif>
+<endif>
+
+<instances:IncludeDependencies(definition=definition, instance=it); separator="\n">
+
+<instances:DeclareDependencies(definition=definition, instance=it); separator="\n">
+
+<instances:DeclareInstance(definition=definition, instance=it); separator="\n\n">
+
+<instances:InitInstance(definition=definition, instance=it); separator="\n\n">
+
+<ConstructorCalls(definition=definition, instances=instances)>
+
+>>
+
+TopLevelInstances(topLevelDefinition, definitions, instances) ::= <<
+<ComponentInstances(topLevelDefinition=topLevelDefinition, definition=topLevelDefinition, instances=instances)>
+
+<InitCode(topLevelDefinition=topLevelDefinition, definitions=definitions)>
+
+void *__component_toplevel = &<first(instances).decorations.("instance-name"); format="toCName">;
+
+>>
+
+IncludeDependencies(definition, instance) ::= <<
+<definition.interfaces:IncludeServerHeader(definition=definition, instance=instance, interface=it);separator="\n">
+
+<if (definition.astNodeTypes.("internalInterface"))>
+<if (definition.internalInterfaces)>
+<definition.interfaces:IncludeServerHeader(definition=definition, instance=instance, interface=it, isInternal="true");separator="\n">
+<endif>
+<endif>
+
+<if (definition.astNodeTypes.("component"))>
+<instance.subComponents:IncludeSubComponentHeader();separator="\n">
+<endif>
+>>
+
+IncludeServerHeader(definition, instance, interface, isInternal) ::= <<
+<if (interface.numberOfElement)>
+<interface.astDecorations.("collectionIndexes"):{index |
+<if (instance.decorations.("binding-descriptors").(StaticBindingItfName(itfName=interface.name, index=index, isInternal=isInternal)).serverComponent)>
+#include "<instance.decorations.("binding-descriptors").(StaticBindingItfName(itfName=interface.name, index=index, isInternal=isInternal)).serverComponent.definition.name;format="nameToPath">.adl.h"
+<endif>};separator="\n">
+<else>
+<if (instance.decorations.("binding-descriptors").(StaticBindingItfName(itfName=interface.name, isInternal=isInternal)).serverComponent)>
+#include "<instance.decorations.("binding-descriptors").(StaticBindingItfName(itfName=interface.name, isInternal=isInternal)).serverComponent.definition.name;format="nameToPath">.adl.h"
+<endif>
+<endif>
+>>
+
+IncludeSubComponentHeader(subComponent) ::= <<
+#include "<subComponent.definition.name;format="nameToPath">.adl.h"
+>>
+
+DeclareDependencies(definition, instance) ::= <<
+<definition.interfaces:DeclareServerComponent(definition=definition, instance=instance, interface=it);separator="\n">
+<if (definition.astNodeTypes.("internalInterface"))>
+<if (definition.internalInterfaces)>
+<definition.interfaces:DeclareServerComponent(definition=definition, instance=instance, interface=it, isInternal="true");separator="\n">
+<endif>
+<endif>
+<if (definition.astNodeTypes.("component"))>
+<instance.subComponents:DeclareSubComponent();separator="\n">
+<endif>
+>>
+
+DeclareComponentInstance(instance) ::= <<
+#ifndef INSTANCE_<instance.decorations.("instance-name"); format="toCName">_DECLARED
+<instance.definition.name;format="toUpperCName">_DECLARE_INSTANCE(<instance.decorations.("instance-name"); format="toCName">);
+#define INSTANCE_<instance.decorations.("instance-name"); format="toCName">_DECLARED
+#endif
+
+>>
+
+DeclareServerComponent(definition, instance, interface, isInternal) ::= <<
+<if (interface.numberOfElement)>
+<interface.astDecorations.("collectionIndexes"):{index |
+<if (instance.decorations.("binding-descriptors").(StaticBindingItfName(itfName=interface.name, index=index, isInternal=isInternal)).serverComponent)>
+<DeclareComponentInstance(instance.decorations.("binding-descriptors").(StaticBindingItfName(itfName=interface.name, index=index, isInternal=isInternal)).serverComponent)>
+<endif>};separator="\n">
+<else>
+<if (instance.decorations.("binding-descriptors").(StaticBindingItfName(itfName=interface.name, isInternal=isInternal)).serverComponent)>
+<DeclareComponentInstance(instance.decorations.("binding-descriptors").(StaticBindingItfName(itfName=interface.name, isInternal=isInternal)).serverComponent)>
+<endif>
+<endif>
+>>
+
+DeclareSubComponent(subComponent) ::= <<
+<DeclareComponentInstance(subComponent)>
+>>
+
+DeclareInstance(definition, instance) ::= <<
+<DeclareComponentInstance(instance)>
+>>
+
+InitInstance(definition, instance) ::= <<
+<definition.name;format="toUpperCName">_INIT_INSTANCE(<instance.decorations.("instance-name"); format="toCName"> 
+  <AddItfValues(definition=definition, instance=instance)>
+  <AddSubComponentValues(definition=definition, instance=instance)>
+  <AddAttributeValues(definition=definition, instance=instance)>
+);
+>>
+
+AddItfValues(definition, instance) ::= <<
+<definition.interfaces:AddItfValue(definition=definition, instance=instance, itf=it)>
+<if (definition.astNodeTypes.("internalInterface"))>
+<if (definition.internalInterfaces)>
+<definition.internalInterfaces:AddItfValue(definition=definition, instance=instance, itf=it, isInternal="true")>
+<endif>
+<endif>
+
+>>
+
+AddItfValue(definition, instance, itf, isInternal) ::= <<
+<if (isClient.(itf.role))>
+<if (itf.numberOfElement)>
+<itf.astDecorations.("collectionIndexes"):AddItfCollectionValue(definition=definition, instance=instance, itf=itf, index=it, isInternal=isInternal);separator="\n">
+<else>
+, /* <itf.name> */ <StaticBindingValue(bindingDesc=instance.decorations.("binding-descriptors").(StaticBindingItfName(itfName=itf.name, isInternal=isInternal)))>
+<endif>
+<endif>
+>>
+
+AddItfCollectionValue(definition, instance, itf, index, isInternal) ::= <<
+<if (instance.decorations.("binding-descriptors").(StaticBindingItfName(itfName=itf.name, index=index, isInternal=isInternal)))>
+, /* <itf.name>[<index>] */ <StaticBindingValue(bindingDesc=instance.decorations.("binding-descriptors").(StaticBindingItfName(itfName=itf.name, index=index, isInternal=isInternal)))>
+<else>
+, /* <itf.name>[<index>] */ <StaticCollectionBindingValue(bindingDesc=instance.decorations.("binding-descriptors").(StaticBindingItfName(itfName=itf.name, isInternal=isInternal)), index=index)>
+<endif>
+>>
+
+StaticBindingValue(bindingDesc) ::= <<
+<if (bindingDesc.binding)>
+&(<bindingDesc.serverComponent.decorations.("instance-name"); format="toCName">), &__component_<bindingDesc.serverComponent.definition.name; format="toCName">_<bindingDesc.binding.toInterface><if (bindingDesc.binding.toInterfaceNumber)>_<bindingDesc.binding.toInterfaceNumber><endif>_VTable
+<else>
+(void *) 0, (void *) 0
+<endif> 
+>>
+
+StaticCollectionBindingValue(bindingDesc, index) ::= <<
+<if (bindingDesc.binding)>
+&(<bindingDesc.serverComponent.decorations.("instance-name"); format="toCName">), &__component_<bindingDesc.serverComponent.definition.name; format="toCName">_<bindingDesc.binding.toInterface>_<index>_VTable
+<else>
+(void *) 0, (void *) 0
+<endif> 
+>>
+
+StaticBindingItfName(itfName, index, isInternal) ::= "<if (isInternal)>INTERNAL_<endif><itfName><if (index)>_<index><endif>"
+
+AddAttributeValues(definition, instance) ::= <<
+<if (definition.astNodeTypes.("attribute"))>
+<definition.attributes:AddAttributeValue(definition=definition, instance=instance, attribute=it);separator="\n">
+<endif>
+>>
+
+AddAttributeValue(definition, instance, attribute) ::= <<
+, /* <attribute.name> */ <instance.decorations.("attribute-values").(attribute.name).value>
+>>
+
+AddSubComponentValues(definition, instance) ::= <<
+<if (definition.astNodeTypes.("component"))>
+<instance.subComponents:AddSubComponentValue(definition=definition, instance=instance, subComponent=it);separator="\n">
+<endif>
+>>
+
+AddSubComponentValue(definition, instance, subComponent) ::= <<
+, <subComponent.decorations.("instance-name"); format="toCName">
+>>
+
+ConstructorCalls(definition, instances) ::= <<
+#ifdef CONSTRUCTOR_METHOD_IMPLEMENTED
+<if (definition.astNodeTypes.("data"))>
+<if (definition.data)>
+  void __component_<definition.name;format="toCName">_constructor(void *instance);
+<else>
+  void __component_<definition.name;format="toCName">_constructor(void);
+<endif>
+<endif>
+
+#endif
+
+#define <definition.name;format="toUpperCName">_CONSTRUCTOR_CALLS_DECLARED
+void __component_<definition.name;format="toCName">_constructor_calls(void) {
+#ifdef CONSTRUCTOR_METHOD_IMPLEMENTED
+  <instances:ConstructorCall(definition=definition, instance=it); separator="\n">
+#endif
+}
+
+#ifdef DESTRUCTOR_METHOD_IMPLEMENTED
+<if (definition.astNodeTypes.("data"))>
+<if (definition.data)>
+  void __component_<definition.name;format="toCName">_destructor(void *instance);
+<else>
+  void __component_<definition.name;format="toCName">_destructor(void);
+<endif>
+<endif>
+
+#endif
+
+#define <definition.name;format="toUpperCName">_DESTRUCTOR_CALLS_DECLARED
+void __component_<definition.name;format="toCName">_destructor_calls(void) {
+#ifdef DESTRUCTOR_METHOD_IMPLEMENTED
+  <instances:DestructorCall(definition=definition, instance=it); separator="\n">
+#endif
+}
+>> 
+
+ConstructorCall(definition, instance) ::= <<
+<if (definition.astNodeTypes.("data"))>
+<if (definition.data)>
+  __component_<definition.name;format="toCName">_constructor(& <instance.decorations.("instance-name"); format="toCName">);
+<else>
+  __component_<definition.name;format="toCName">_constructor();
+<endif>
+<endif>
+>>
+
+DestructorCall(definition, instance) ::= <<
+<if (definition.astNodeTypes.("data"))>
+<if (definition.data)>
+  __component_<definition.name;format="toCName">_destructor(& <instance.decorations.("instance-name"); format="toCName">);
+<else>
+  __component_<definition.name;format="toCName">_destructor();
+<endif>
+<endif>
+>>
+
+InitCode(topLevelDefinition, definitions) ::= <<
+  <definitions:DeclareConstructorCalls(definition=it);separator="\n">
+  
+  void __component_global_init(void) {
+    <definitions:{__component_<it.name;format="toCName">_constructor_calls();};separator="\n">
+  }
+  
+  <definitions:DeclareDestructorCalls(definition=it);separator="\n">
+  
+  void __component_global_shutdown(void) {
+    <definitions:{__component_<it.name;format="toCName">_destructor_calls();};separator="\n">
+  }
+
+>>
+
+DeclareConstructorCalls(definition) ::= <<
+#ifndef <definition.name;format="toUpperCName">_CONSTRUCTOR_CALLS_DECLARED
+#define <definition.name;format="toUpperCName">_CONSTRUCTOR_CALLS_DECLARED
+void __component_<it.name;format="toCName">_constructor_calls(void);
+#endif
+>>
+
+DeclareDestructorCalls(definition) ::= <<
+#ifndef <definition.name;format="toUpperCName">_DESTRUCTOR_CALLS_DECLARED
+#define <definition.name;format="toUpperCName">_DESTRUCTOR_CALLS_DECLARED
+void __component_<it.name;format="toCName">_destructor_calls(void);
+#endif
+>>
+
+}$$
+
+}

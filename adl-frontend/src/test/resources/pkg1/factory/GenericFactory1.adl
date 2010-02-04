@@ -1,0 +1,5 @@
+import pkg1.pkg2.Type1;
+
+composite pkg1.factory.GenericFactory1<T conformsto Type1> {
+  contains Factory<T> as factory;
+}

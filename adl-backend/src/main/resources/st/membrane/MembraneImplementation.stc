@@ -1,0 +1,339 @@
+template st.membrane.MembraneImplementation
+  : st.common.ComponentHelper
+  implements st.definitions.implementations.ComponentDefinition {
+
+st.interfaces.IDLDefinition idl2c = st.interfaces.IDL2C;
+st.membrane.ControllerGenerator ctrlGenerator = plugin(st.membrane);
+
+$${
+
+ComponentDefinition(definition, interfaceDefinitions) ::= <<
+/* Generated file: <definition.name;format="nameToPath">_ctrl_impl.c */
+
+#include "<definition.name;format="nameToPath">.inc"
+
+<if (definition.astNodeTypes.("source"))>
+<if (definition.sources)>
+#include "<definition.name;format="nameToPath">_impl.h"
+<endif>
+<endif>
+
+<ComponentFactoryMethod(definition=definition)>
+
+<if (definition.astNodeTypes.("controller"))>
+// Start implementation of controllers
+
+<definition.controllers:ControllerImpl(definition=definition, controller=it, interfaceDefinitions=interfaceDefinitions)>
+
+// End implementation of controllers
+<endif>
+
+<ServerInterfaceStubs(definition=definition, interfaceDefinitions=interfaceDefinitions)>
+
+<ComponentVTableInit(definition=definition, interfaceDefinitions=interfaceDefinitions)>
+
+>>
+
+ControllerImpl(definition, controller, interfaceDefinitions) ::= <<
+<controller.sources:{<(ctrlGenerator.(it.path).ControllerImplementation)(definition=definition, controller=controller, interfaceDefinitions=interfaceDefinitions)>}>
+>>
+
+METHODName(itfName, index, methodName) ::= <<
+<if (index)>
+INTERFACE_COLLECTION_METHOD(<itfName>, <index>, <methodName>)
+<else>
+INTERFACE_METHOD(<itfName>, <methodName>)
+<endif>
+>>
+
+StubName(definition, itfName, index, methodName) ::= <<
+__component_<definition.name;format="toCName">_<itfName><if (index)>_<index><endif>_<methodName>_stub
+>>
+
+
+// -----------------------------------------------------------------------------
+// Component Factory methods
+
+ComponentFactoryMethod(definition) ::= <<
+
+#include "memory/api/Allocator.itf.h"
+
+<DeclareSubComponentFactoryMethods(definition=definition)>
+
+#ifdef CONSTRUCTOR_METHOD_IMPLEMENTED
+void __component_<definition.name;format="toCName">_constructor(PRIVATE_DATA_T* instance);
+#endif
+
+int __component_<definition.name;format="toCName">_factory(void **instance, memory_api_Allocator allocItf) {
+<if (definition.astNodeTypes.("component"))>
+<if (definition.components)>
+  int err = 0;
+<endif>
+<endif>
+
+  PRIVATE_DATA_T* newInstance = (PRIVATE_DATA_T*) CALL_PTR(allocItf, alloc)(sizeof(PRIVATE_DATA_T));
+  if (newInstance == 0) return -1;
+  
+  <InitializeInterfaces(definition=definition)>
+  
+  <InitializeComponents(definition=definition)>
+  
+  <InitializeBindings(definition=definition)>
+
+  <InitializeControllersData(definition=definition)>
+  
+#ifdef CONSTRUCTOR_METHOD_IMPLEMENTED
+  __component_<definition.name;format="toCName">_constructor(newInstance);
+#endif
+  
+  
+  *instance = newInstance;
+  return 0;
+
+<if (definition.astNodeTypes.("component"))>
+<if (definition.components)>
+error0:
+  CALL_PTR(allocItf, free)(newInstance);
+  return err;
+<endif>
+<endif>
+}
+
+int __component_<definition.name;format="toCName">_destroy(void *instance, memory_api_Allocator allocItf) {
+<if (definition.astNodeTypes.("component"))>
+<if (definition.components)>
+  int err = 0;
+<endif>
+<endif>
+
+  PRIVATE_DATA_T* destroyInstance = (PRIVATE_DATA_T*) instance;
+  <DestroyComponents(definition=definition)>
+
+  <DestroyControllersData(definition=definition)>
+
+  CALL_PTR(allocItf, free)(destroyInstance);
+  return 0;
+
+<if (definition.astNodeTypes.("component"))>
+<if (definition.components)>
+error0:
+  return err;
+<endif>
+<endif>
+}
+
+>>
+
+InitializeInterfaces(definition) ::= <<
+<definition.interfaces:InitializeInterface(definition=definition, itf=it)>
+<if (definition.astNodeTypes.("internalInterface"))>
+<definition.internalInterfaces:InitializeInterface(definition=definition, itf=it, isInternal="true")>
+<endif>
+>>
+
+InitializeInterface(definition, itf, isInternal) ::= <<
+<if(isClient.(it.role))>
+<InitializeClientInterface(definition=definition, itf=it, isInternal=isInternal)>
+<else>
+<InitializeServerInterface(definition=definition, itf=it, isInternal=isInternal)>
+<endif>
+>>
+
+InitializeClientInterface(definition, itf, isInternal) ::= <<
+>>
+
+InitializeServerInterface(definition, itf, isInternal) ::= <<
+// initialization of <itf.name> <if (isInternal)>internal<else>external<endif> server interface
+<if (itf.numberOfElement)>
+<itf.astDecorations.("collectionIndexes"):InitializeServerInterface1(definition=definition, itf=itf, index=it, isInternal=isInternal);separator="\n">
+<else>
+<InitializeServerInterface1(definition=definition, itf=itf, isInternal=isInternal)>
+<endif>
+
+>>
+
+InitializeServerInterface1(definition, itf, index, isInternal) ::= <<
+newInstance->__component_internal_data.<if (isInternal)>inner_type<else>type<endif>.<itf.name><if (index)>[<index>]<endif>.selfData = newInstance;
+newInstance->__component_internal_data.<if (isInternal)>inner_type<else>type<endif>.<itf.name><if (index)>[<index>]<endif>.meths = &<vTableInstanceName(definition=definition,itf=itf,index=index)>;
+>>
+
+
+
+DeclareSubComponentFactoryMethods(definition) ::= <<
+<if (definition.astNodeTypes.("component"))>
+<definition.components:DeclareSubComponentFactoryMethod(definition=definition, component=it)>
+<endif>
+>>
+
+DeclareSubComponentFactoryMethod(definition, component) ::= <<
+#ifndef __COMPONENT_<component.definitionReference.name;format="toUpperCName">_FACTORY_DECLARED
+#define __COMPONENT_<component.definitionReference.name;format="toUpperCName">_FACTORY_DECLARED
+int __component_<component.definitionReference.name;format="toCName">_factory(void **instance, memory_api_Allocator allocItf);
+int __component_<component.definitionReference.name;format="toCName">_destroy(void *instance, memory_api_Allocator allocItf);
+#endif
+
+>>
+
+InitializeComponents(definition) ::= <<
+<if (definition.astNodeTypes.("component"))>
+<if (definition.components)>
+<definition.components:InitializeComponent(definition=definition, component=it)>
+<endif>
+<endif>
+>>
+
+InitializeComponent(definition, component) ::= <<
+  // initialization of <component.name> sub-component
+  err = __component_<component.definitionReference.name;format="toCName">_factory((void **) &(newInstance->__component_internal_data.components.<component.name>), allocItf);
+  if (err != 0) goto error0;
+>>
+
+InitializeBindings(definition) ::= <<
+<if (definition.astNodeTypes.("binding"))>
+<definition.bindings:InitializeBinding(definition=definition, binding=it);separator="\n\n">
+<endif>
+>>
+
+InitializeBinding(definition, binding) ::= <<
+  // initialize binding from <binding.fromComponent>.<binding.fromInterface> to <binding.toComponent>.<binding.toInterface>
+  newInstance->__component_internal_data.<if (isThis.(binding.fromComponent))>inner_type<else>components.<binding.fromComponent>->__component_internal_data.type<endif>.<binding.fromInterface><if(binding.fromInterfaceNumber)>[<binding.fromInterfaceNumber>]<endif>.selfData = 
+    newInstance->__component_internal_data.<if (isThis.(binding.toComponent))>inner_type<else>components.<binding.toComponent>->__component_internal_data.type<endif>.<binding.toInterface><if(binding.toInterfaceNumber)>[<binding.toInterfaceNumber>]<endif>.selfData;
+  newInstance->__component_internal_data.<if (isThis.(binding.fromComponent))>inner_type<else>components.<binding.fromComponent>->__component_internal_data.type<endif>.<binding.fromInterface><if(binding.fromInterfaceNumber)>[<binding.fromInterfaceNumber>]<endif>.meths = 
+    newInstance->__component_internal_data.<if (isThis.(binding.toComponent))>inner_type<else>components.<binding.toComponent>->__component_internal_data.type<endif>.<binding.toInterface><if(binding.toInterfaceNumber)>[<binding.toInterfaceNumber>]<endif>.meths;
+>>
+
+InitializeControllersData(definition) ::= <<
+<if (definition.astNodeTypes.("controller"))>
+<definition.controllers:InitializeControllerData(definition=definition, controller=it)>
+<endif>
+
+>>
+
+InitializeControllerData(definition, controller) ::= <<
+<controller.sources:{<(ctrlGenerator.(it.path).ControllerDataFactoryNew)(definition=definition, controller=controller)>}>
+>>
+
+
+DestroyComponents(definition) ::= <<
+<if (definition.astNodeTypes.("component"))>
+<if (definition.components)>
+#define DESTROY_USE_ERROR0_LABEL
+<definition.components:DestroyComponent(definition=definition, component=it)>
+<endif>
+<endif>
+>>
+
+DestroyComponent(definition, component) ::= <<
+  // destroy <component.name> sub-component
+  err = __component_<component.definitionReference.name;format="toCName">_destroy(destroyInstance->__component_internal_data.components.<component.name>, allocItf);
+  if (err != 0) goto error0;
+>>
+
+DestroyControllersData(definition) ::= <<
+<if (definition.astNodeTypes.("controller"))>
+<definition.controllers:DestroyControllerData(definition=definition, controller=it)>
+<endif>
+
+>>
+
+DestroyControllerData(definition, controller) ::= <<
+<controller.sources:{<(ctrlGenerator.(it.path).ControllerDataFactoryDestroy)(definition=definition, controller=controller)>}>
+>>
+
+
+// -----------------------------------------------------------------------------
+// Server interface stubs
+
+ServerInterfaceStubs(definition, interfaceDefinitions) ::= <<
+<if (definition.astNodeTypes.("source"))>
+<if (!definition.data)>
+// Start definition of server stubs
+<definition.interfaces:ServerInterfaceStub(definition=definition, interfaceDefinitions=interfaceDefinitions, itf=it); separator="\n">
+// End definition of server stubs
+<endif>
+<endif>
+>>
+
+ServerInterfaceStub(definition, interfaceDefinitions, itf) ::= <<
+<if (isServer.(itf.role))>
+<if (itf.numberOfElement)>
+<itf.astDecorations.("collectionIndexes"):{index | <interfaceDefinitions.(itf.signature).methods:ServerMethodStub(definition=definition, itf=itf, index=index, method=it); separator="\n">};separator="\n">
+<else>
+<interfaceDefinitions.(itf.signature).methods:ServerMethodStub(definition=definition, itf=itf, method=it); separator="\n">
+<endif>
+<endif>
+>>
+
+ServerMethodStub(definition, itf, index, method) ::= <<
+<(idl2c.methodDef)(method=method,methodName=StubName(definition=definition, itfName=itf.name, index=index, methodName=method.name), withThisPtr="true")> { 
+#ifdef INTERFACE_METHOD_<itf.name>_<method.name>_OVERRIDDEN
+<if (! ((idl2c.isVoidMethod)(method=method)))>
+  return 
+<endif>
+<METHODName(itfName=itf.name, index=index, methodName={INTERFACE_METHOD_<itf.name>_<method.name>_OVERRIDDEN})>(<method.parameters:{<it.name>};separator=", ">);
+#else
+<if (! ((idl2c.isVoidMethod)(method=method)))>
+  return 
+<endif>
+<METHODName(itfName=itf.name, index=index, methodName=method.name)>(<method.parameters:{<it.name>};separator=", ">);
+#endif
+
+}
+>>
+
+
+// -----------------------------------------------------------------------------
+// V-Tables Initialization
+
+ComponentVTableInit(definition, interfaceDefinitions) ::= <<
+// Start initialization of server interface V-Tables.
+<definition.interfaces:ServerInterfaceVTableInit(definition=definition, interfaceDefinitions=interfaceDefinitions, itf=it); separator="\n">
+// End initialization of server interface V-Tables.
+
+<if (definition.astNodeTypes.("internalInterface"))>
+<if (definition.internalInterfaces)>
+// Start initialization of internal server interface V-Tables
+<definition.internalInterfaces:ServerInterfaceVTableInit(definition=definition, interfaceDefinitions=interfaceDefinitions, itf=it); separator="\n">
+// End initialization of internal server interface V-Tables
+<endif>
+<endif>
+
+>>
+
+ServerInterfaceVTableInit(definition, interfaceDefinitions, itf) ::= <<
+<if (isServer.(itf.role))>
+<if (itf.numberOfElement)>
+<itf.astDecorations.("collectionIndexes"):ServerInterfaceVTableInit1(definition=definition, interfaceDefinitions=interfaceDefinitions, itf=itf, index=it);separator="\n">
+<else>
+<ServerInterfaceVTableInit1(definition=definition, interfaceDefinitions=interfaceDefinitions, itf=itf)>
+<endif>
+<endif>
+>>
+
+ServerInterfaceVTableInit1(definition, interfaceDefinitions, itf, index) ::= <<
+<InterfaceVTableType(signature=itf.signature)> <vTableInstanceName(definition=definition, itf=itf, index=index)> = {
+<if(definition.astNodeTypes.("source"))>
+<if(definition.data)>
+  <interfaceDefinitions.(itf.signature).methods:VTableMethodInit(definition=definition, itf=itf, method=it, index=index);separator=",\n">
+<else>
+  <interfaceDefinitions.(itf.signature).methods:StubName(definition=definition, itfName=itf.name, index=index, methodName=it.name);separator=",\n">
+<endif>
+<else>
+  <interfaceDefinitions.(itf.signature).methods:VTableMethodInit(definition=definition, itf=itf, method=it, index=index);separator=",\n">
+<endif>
+
+};
+>>
+
+VTableMethodInit(definition, itf, method, index) ::= <<
+#ifdef INTERFACE_METHOD_<itf.name>_<method.name>_OVERRIDDEN
+<(idl2c.methodPointerCast)(method=method,withThisPtr="true")><METHODName(itfName=itf.name, index=index, methodName={INTERFACE_METHOD_<itf.name>_<method.name>_OVERRIDDEN})>
+#else
+<(idl2c.methodPointerCast)(method=method,withThisPtr="true")><METHODName(itfName=itf.name, index=index, methodName=it.name)>
+#endif
+
+>>
+
+
+}$$
+}

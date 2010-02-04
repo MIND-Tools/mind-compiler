@@ -1,0 +1,8 @@
+#ifndef BAR_IDT
+#define BAR_IDT
+
+#include "../test3.idt"
+
+#define FOO_BAR 3
+
+#endif

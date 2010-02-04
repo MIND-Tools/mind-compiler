@@ -1,0 +1,5 @@
+
+import pkg1.pkg2.Primitive1;
+
+composite pkg1.generic.Composite2 extends Generic2<Primitive1, Primitive1> {
+}

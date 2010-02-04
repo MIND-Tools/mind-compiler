@@ -1,0 +1,11 @@
+#ifndef TEST_2
+#define TEST_2
+
+#include <toto.h>
+#include "test3.idt"
+
+typedef struct {
+  int a, b;
+} s_t;
+
+#endif

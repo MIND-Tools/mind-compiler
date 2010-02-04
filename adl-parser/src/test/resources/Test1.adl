@@ -1,0 +1,28 @@
+
+import foo.Bar;
+import titi.Toto;
+
+@Hello("a")
+@World(n=2, r={"b", "c"}, p=@Coucou)
+composite fuu.Bop<T conformsto Toto>(arg1, arg2) extends Bar<T, Bar> {
+  
+  provides Allocator as alloc;
+  requires FooItf as cItf[10];
+  
+  contains primitive Tutu(arg1) as tutu;
+
+  @Override
+  contains composite Bar<a> as bar {
+    contains primitive Tutu as tutu;
+  }
+ 
+  contains primitive as p1 {
+    provides Allocator as allocator;
+    
+    attribute int attr1 = 20;
+  }
+
+  @Override contains A as a
+  
+  binds a.i to b.j;
+}

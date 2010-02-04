@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
+  "../dtd/docbookx.dtd" [
+<!ENTITY % myents SYSTEM "../shared.ent" >
+%myents;
+]>
+<chapter id="idl">
+     <title>Interface definition language</title>
+    <titleabbrev>IDL</titleabbrev>
+    <para>The IDL language allows to define component interface types. 
+      It is highly inspired by the C-type system. That is, most of the types that can
+      be declared in C can be declared similarly in the IDL language (except 
+      function pointers that are not allowed by the IDL language). In addition
+      the IDL language provides a special construct for the definition of interface 
+      since this kind of notion is not present in C.</para>
+    
+    <para>The IDL language defines two kinds of files : </para>
+    <variablelist>
+      <varlistentry>
+        <term><filename>'.itf'</filename> file</term>
+        <listitem>
+          <para>Contains the definition of an interface. <filename>'.itf'</filename>
+            files follow the same naming scheme as <filename>'.adl'</filename> files.
+            That is, the definition of the interface <classname>foo.bar.Itf1</classname> 
+            must be located in a file called <filename>foo/bar/Itf1.itf</filename>.
+            An <filename>'.itf'</filename> file may also contain type and constant definitions.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><filename>'.idt'</filename> file</term>
+        <listitem>
+          <para>Contains only type and constant definitions. <filename>'.idt'</filename> files are 
+            useful to define types and constants that are used by different interfaces.</para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+
+  <section id="idl-type">
+    <title>Type definition</title>
+    
+    <para>The IDL language supports the same type definition constructs as the C language, 
+      except function pointers. That is, an IDL file (either a <filename>'.itf'</filename> or <filename>'.idt'</filename> file)
+      can define <code>struct</code>, <code>union</code>, <code>enum</code> or 
+      <code>typedef</code> using the same syntax as the C language.</para>
+    
+  </section>
+  
+  <section>
+    <title>Constant definition</title>
+    
+    <para>The IDL language allows to define constant values using a <code>"#define"</code>
+      construct which is similar to the  C preprocessor directive used for macro definitions.
+      Note that, function-like macros are not allowed.</para>
+  </section>
+  
+  <section>
+    <title>Interface definition</title>
+    
+    <para>Interfaces can only be defined in <filename>'.itf'</filename> files. Moreover,
+      similarly to ADL files, an <filename>'.itf'</filename> file must contain one and only
+      one interface definition whose <glossterm linkend="FQN">fully-qualified-name</glossterm>
+      matches the path of the file. (interface <classname>foo.bar.Itf1</classname>
+      must be located in a file called <filename>foo/bar/Itf1.itf</filename>).</para>
+    
+    <para>An interface is defined by the <code>"interface"</code> keyword followed by the
+      fully-qualified-name of the interface and the list of methods inside curly braces
+      (<code>"{"</code> and "}"). Method definitions are similar to traditional C function prototypes.</para>
+    
+    <example>
+      <title>Interface definition</title>
+      
+      <programlisting language="idl" linenumbering="numbered"> interface foo.bar.Itf1 {
+   int meth1(int a, int b);
+   char meth2(struct s *s_ptr);
+ }</programlisting>
+      <para>
+        In the above code excerpt: 
+        <itemizedlist>
+          <listitem>
+            <para>Line 1 defines the interface <classname>foo.bar.Itf1</classname>.</para>
+          </listitem>
+          <listitem>
+            <para>Line 2 defines a method called <varname>meth1</varname> that 
+              takes two integers as parameter and return an integer.</para>
+          </listitem>
+          <listitem>
+            <para>Line 3 defines a method called <varname>meth2</varname> that takes a pointer
+            to a <code>struct s</code> as parameter and returns a character.</para>
+          </listitem>
+        </itemizedlist>
+      </para>
+    </example>
+    
+    <para>Every methods in a given interface must have a unique name.</para>
+    
+    <para>An interface definition may extend another interface definition. 
+      The name of the extended interface is specified after a dash symbol (<code>":"</code>)
+      just after the name of the interface. Methods defined in the extended interface
+      are inherited and cannot be overridden.</para>
+    
+    <example>
+      <title>Interface inheritance</title>
+      <para>Given the following definitions :</para>
+      <programlisting language="idl" linenumbering="numbered"> interface foo.bar.Itf1 {
+   int meth1(int a, int b);
+   char meth2(struct s *s_ptr);
+ }
+ </programlisting>
+      <programlisting language="idl" linenumbering="numbered" startinglinenumber="10"> interface foo.bar.Itf2 : foo.bar.Itf1 {
+   int meth3(int size, int tab[]);
+ }
+ </programlisting>
+      <para>The previous definition is equivalent to : </para>
+      <programlisting language="idl" linenumbering="numbered" startinglinenumber="20"> interface foo.bar.Itf2 {
+   int meth1(int a, int b);
+   char meth2(struct s *s_ptr);
+   int meth3(int size, int tab[]);
+ }
+ </programlisting>
+      <para>
+        In the above code excerpt: 
+          <itemizedlist>
+            <listitem>
+              <para>Line 10 specifies that the interface <classname>foo.bar.Itf2</classname>
+                extends the interface <classname>foo.bar.Itf1</classname>.</para>
+            </listitem>
+          </itemizedlist>
+        </para>
+    </example>
+  </section>  
+</chapter>

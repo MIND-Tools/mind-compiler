@@ -1,0 +1,17 @@
+
+#include <stdint.h>
+#include "foo/test2.idt"
+
+typedef const int myint, (* const mypointer)[];
+
+struct s {
+  myint a, b;
+  int (c[10])[20];
+  int d[10][20];
+  int* e[30];
+};
+
+interface test1 {
+  void* m1(const uint8_t a, out int b);
+  unsigned float m2(float f1);
+};

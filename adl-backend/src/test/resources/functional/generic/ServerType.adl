@@ -1,0 +1,2 @@
+
+type generic.ServerType extends ApplicationType {}

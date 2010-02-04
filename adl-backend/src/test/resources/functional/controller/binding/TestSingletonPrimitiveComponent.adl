@@ -1,0 +1,5 @@
+
+@Run
+composite controller.binding.TestSingletonPrimitiveComponent 
+    extends BCTester<SingletonPrimitiveComponent> {
+}

@@ -1,0 +1,4 @@
+
+interface pkg1.binding.I1ext : I1 {
+  void bar();
+}

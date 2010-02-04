@@ -1,0 +1,81 @@
+template st.definitions.implementations.Component
+  implements st.definitions.implementations.ComponentDefinition {
+
+st.interfaces.IDLDefinition idl2c = st.interfaces.IDL2C ; 
+
+$${
+
+  
+isClient ::= [ "client" : "true" ]
+isServer ::= [ "server" : "true" ]
+
+// -----------------------------------------------------------------------------
+// Implementation of the ComponentDefinition interface
+// -----------------------------------------------------------------------------
+
+ComponentDefinition(definition, interfaceDefinitions) ::= <<
+/* Generated file: <definition.name;format="nameToPath">.inc */
+#define __COMPONENT_IN_<definition.name;format="toUpperCName">
+#include "<definition.name;format="nameToPath">.adl.h"
+
+<ServerMethodsDeclaration(definition=definition, interfaceDefinitions=interfaceDefinitions)>
+
+>>
+
+// -----------------------------------------------------------------------------
+// Internal templates
+// -----------------------------------------------------------------------------
+
+// -----------------------------------------------------------------------------
+// Server method declaration
+
+ServerMethodsDeclaration(definition, interfaceDefinitions) ::= <<
+// Start declaration of server methods
+<definition.interfaces:ServerMethodDecls(definition=definition, interfaceDefinitions=interfaceDefinitions, itf=it); separator="\n">
+<if (definition.astNodeTypes.("internalInterface"))>
+<definition.internalInterfaces:ServerMethodDecls(definition=definition, interfaceDefinitions=interfaceDefinitions, itf=it); separator="\n">
+<endif>
+// End declaration of server methods
+>>
+
+ServerMethodDecls(definition, interfaceDefinitions, itf) ::= <<
+<if (isServer.(itf.role))>
+<if (itf.numberOfElement)>
+<itf.astDecorations.("collectionIndexes"):ServerMethodDecls1(definition=definition, interfaceDefinitions=interfaceDefinitions, itf=itf, index=it);separator="\n">
+<else>
+<ServerMethodDecls1(definition=definition, interfaceDefinitions=interfaceDefinitions, itf=itf)>
+<endif>
+<endif>
+>>
+
+ServerMethodDecls1(definition, interfaceDefinitions, itf, index) ::= <<
+<if(definition.astNodeTypes.("source"))>
+<if(definition.data)>
+<interfaceDefinitions.(itf.signature).methods:MultiServerMethodDecl(definition=definition, itf=itf, index=index, method=it);separator="\n">
+<else>
+<interfaceDefinitions.(itf.signature).methods:SingletonServerMethodDecl(definition=definition, itf=itf, index=index, method=it);separator="\n">
+<endif>
+<else>
+<interfaceDefinitions.(itf.signature).methods:MultiServerMethodDecl(definition=definition, itf=itf, index=index, method=it);separator="\n">
+<endif>
+>>
+
+MultiServerMethodDecl(definition, itf, index, method) ::= <<
+<(idl2c.methodDef)(method=method,methodName=METHODName(itfName=itf.name, index=index, methodName=method.name), withThisPtr="typed")>;
+>>
+
+SingletonServerMethodDecl(definition, itf, index, method) ::= <<
+<(idl2c.methodDef)(method=method,methodName=METHODName(itfName=itf.name, index=index, methodName=method.name), withThisPtr="false")>;
+>>
+
+METHODName(itfName, index, methodName) ::= <<
+<if (index)>
+INTERFACE_COLLECTION_METHOD(<itfName>, <index>, <methodName>)
+<else>
+INTERFACE_METHOD(<itfName>, <methodName>)
+<endif>
+>>
+
+}$$
+ 
+}

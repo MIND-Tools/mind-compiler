@@ -1,0 +1,10 @@
+
+import pkg1.pkg2.Type1;
+
+composite pkg1.parameter.Parameter2 extends Type1 {
+
+  contains Parameter1(10) as subComp1;
+  
+  binds this.sItf to subComp1.sItf;
+  binds subComp1.cItf to this.cItf;
+}

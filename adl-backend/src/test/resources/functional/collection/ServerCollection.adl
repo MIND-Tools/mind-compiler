@@ -1,0 +1,10 @@
+import helloworld.Service;
+
+primitive collection.ServerCollection {
+  
+  provides Service as s[2];
+  
+  attribute int count = 2;
+  
+  source serverCollection.c;
+}

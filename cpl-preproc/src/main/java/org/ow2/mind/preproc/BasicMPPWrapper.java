@@ -1,0 +1,180 @@
+/**
+ * Copyright (C) 2009 STMicroelectronics
+ *
+ * This file is part of "Mind Compiler" is free software: you can redistribute 
+ * it and/or modify it under the terms of the GNU Lesser General Public License 
+ * as published by the Free Software Foundation, either version 3 of the 
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT 
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Contact: mind@ow2.org
+ *
+ * Authors: Matthieu Leclercq
+ * Contributors: 
+ */
+
+package org.ow2.mind.preproc;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import org.antlr.runtime.ANTLRFileStream;
+import org.antlr.runtime.CommonTokenStream;
+import org.antlr.runtime.RecognitionException;
+import org.objectweb.fractal.adl.ADLException;
+import org.objectweb.fractal.adl.CompilerError;
+import org.objectweb.fractal.adl.error.GenericErrors;
+import org.objectweb.fractal.adl.util.FractalADLLogManager;
+import org.ow2.mind.preproc.parser.CPLLexer;
+import org.ow2.mind.preproc.parser.CPLParser;
+
+public class BasicMPPWrapper implements MPPWrapper {
+
+  protected static Logger logger = FractalADLLogManager.getLogger("io");
+
+  public MPPCommand newMPPCommand(final Map<Object, Object> context) {
+    return new BasicMPPCommand(context);
+  }
+
+  protected static class BasicMPPCommand implements MPPCommand {
+
+    protected final Map<Object, Object> context;
+    protected boolean                   singletonMode = false;
+    protected File                      inputFile;
+    protected File                      outputFile;
+    protected File                      headerOutputFile;
+
+    BasicMPPCommand(final Map<Object, Object> context) {
+      this.context = context;
+    }
+
+    public MPPCommand setSingletonMode() {
+      singletonMode = true;
+      return this;
+    }
+
+    public MPPCommand unsetSingletonMode() {
+      singletonMode = false;
+      return this;
+    }
+
+    public MPPCommand setInputFile(final File inputFile) {
+      this.inputFile = inputFile;
+      return this;
+    }
+
+    public MPPCommand setOutputFile(final File outputFile) {
+      this.outputFile = outputFile;
+      return this;
+    }
+
+    public MPPCommand setHeaderOutputFile(final File headerOutputFile) {
+      this.headerOutputFile = headerOutputFile;
+      return this;
+    }
+
+    public Collection<File> getInputFiles() {
+      return Arrays.asList(inputFile);
+    }
+
+    public Collection<File> getOutputFiles() {
+      if (headerOutputFile != null) {
+        return Arrays.asList(outputFile, headerOutputFile);
+      } else {
+        return Arrays.asList(outputFile);
+      }
+    }
+
+    public void exec() throws ADLException, InterruptedException {
+      final CPLLexer lex;
+      try {
+        lex = new CPLLexer(new ANTLRFileStream(inputFile.getPath()));
+      } catch (final IOException e) {
+        // TODO use a specific error
+        throw new ADLException(GenericErrors.GENERIC_ERROR, e,
+            "Can't open file \"" + inputFile.getPath() + "\".");
+      }
+
+      final CommonTokenStream tokens = new CommonTokenStream(lex);
+      final CPLParser mpp = new CPLParser(tokens);
+
+      final PrintStream outPS;
+      try {
+        outputFile.getParentFile().mkdirs();
+        outPS = new PrintStream(new FileOutputStream(outputFile));
+      } catch (final FileNotFoundException e) {
+        throw new CompilerError(GenericErrors.INTERNAL_ERROR, e, "IO error");
+      }
+      lex.setOutPutStream(outPS);
+      mpp.setOutputStream(outPS);
+
+      PrintStream headerOutPS = null;
+      if (headerOutputFile != null) {
+        try {
+          headerOutputFile.getParentFile().mkdirs();
+          headerOutPS = new PrintStream(new FileOutputStream(headerOutputFile));
+        } catch (final FileNotFoundException e) {
+          throw new CompilerError(GenericErrors.INTERNAL_ERROR, e, "IO error");
+        }
+        mpp.setHeaderOutputStream(headerOutPS);
+      }
+
+      mpp.setSingletonMode(singletonMode);
+
+      if (logger.isLoggable(Level.INFO))
+      ;
+      logger.info(getDescription());
+
+      if (logger.isLoggable(Level.FINE))
+        logger.fine("MPP: inputFile=" + inputFile.getPath() + " outputFile="
+            + outputFile.getPath() + " singletonMode=" + singletonMode);
+
+      try {
+        mpp.parseFile();
+      } catch (final RecognitionException e) {
+        throw new ADLException(MPPErrors.PARSE_ERROR, e, inputFile.getPath(),
+            "MPP parse error.");
+      }
+
+      final List<String> errors = mpp.getErrors();
+      if (errors != null && errors.size() > 0) {
+        String errorMsg;
+        if (errors.size() == 1) {
+          errorMsg = errors.get(0);
+        } else {
+          final StringBuilder msg = new StringBuilder();
+          for (final String error : errors) {
+            msg.append("\n    ").append(error);
+          }
+          errorMsg = msg.toString();
+        }
+
+        throw new ADLException(MPPErrors.PARSE_ERROR, inputFile.getPath(),
+            errorMsg.toString());
+      }
+
+      outPS.close();
+      if (headerOutPS != null) headerOutPS.close();
+    }
+
+    public String getDescription() {
+      return "MPP: " + outputFile.getPath();
+    }
+  }
+}

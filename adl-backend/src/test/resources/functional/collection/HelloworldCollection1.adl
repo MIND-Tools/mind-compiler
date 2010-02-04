@@ -1,0 +1,13 @@
+import helloworld.Server;
+
+@Run
+composite collection.HelloworldCollection1 {
+  provides Main as main;
+
+  contains ClientCollection as client;
+  contains Server as server;
+  
+  binds this.main to client.main;
+  binds client.sa[0] to server.s;
+  binds client.sa[1] to server.s;
+}

@@ -1,0 +1,4 @@
+
+@controller.Component
+primitive factory.ControllablePrimitive extends EmptyPrimitive {
+}

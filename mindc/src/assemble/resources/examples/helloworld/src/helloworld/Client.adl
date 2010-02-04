@@ -1,0 +1,11 @@
+
+import boot.Main;
+
+primitive helloworld.Client {
+  nodata;
+  
+  provides Main as main;
+  requires Service as sa ;
+  
+  source client.c;
+}

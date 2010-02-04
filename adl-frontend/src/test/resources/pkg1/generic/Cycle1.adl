@@ -1,0 +1,8 @@
+
+import pkg1.pkg2.Type1;
+import pkg1.I2;
+
+composite pkg1.generic.Cycle1 <T conformsto Type1> {
+
+  contains Cycle1<Cycle1<T>> as subComp1;
+}

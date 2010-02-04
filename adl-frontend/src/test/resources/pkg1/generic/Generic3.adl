@@ -1,0 +1,9 @@
+
+import pkg1.pkg2.Type1;
+import pkg1.pkg2.Primitive1;
+
+composite pkg1.generic.Generic3 <W conformsto Type1> extends Generic2<W, Primitive1> {
+  
+  contains W as c3;
+  contains Generic2<W, Primitive1> as c4;
+}

@@ -1,0 +1,15 @@
+import pkg1.pkg2.Type1;
+import pkg1.pkg2.Primitive1;
+import pkg1.pkg2.Primitive2;
+
+composite pkg1.binding.Export extends Type1 {
+
+  contains Primitive1 as sub_comp1;
+  
+  contains Primitive2 as sub_comp2;
+  
+  binds sub_comp1.cItf to this.cItf;
+
+  binds sub_comp2.cItf to this.cItf;
+  binds sub_comp2.cItf2 to this.cItf;
+}

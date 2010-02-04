@@ -1,0 +1,11 @@
+template simple.Group3 implements simple.Itf1 {
+
+$${
+
+theMap ::= ["entry":"Group3Result"]
+
+print(message) ::= <<  ''''<message> - I get value from my map:[<theMap.entry>]'''' >>
+
+}$$
+
+}

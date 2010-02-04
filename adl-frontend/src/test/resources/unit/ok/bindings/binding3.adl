@@ -1,0 +1,8 @@
+// Composite : Duplicated binding to server interface
+composite bindings.binding3 {
+  contains primitive primitiveServer as server1 ;
+  contains primitive primitiveClient as client1 ;
+  contains primitive primitiveClient as client2 ;
+  binds client1.clientItf to server1.serverItf;
+  binds client2.clientItf to server1.serverItf;
+}

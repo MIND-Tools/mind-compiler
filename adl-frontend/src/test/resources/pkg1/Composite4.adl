@@ -1,0 +1,6 @@
+
+import pkg1.pkg2.Primitive1;
+import pkg1.pkg2.Type1;
+
+composite pkg1.Composite4<T conformsto Type1> extends Composite3<T, Primitive1(5)> {
+}

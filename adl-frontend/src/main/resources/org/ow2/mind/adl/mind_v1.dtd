@@ -1,0 +1,310 @@
+<!--
+  Copyright (C) 2009 STMicroelectronics
+
+ This file is part of "Mind Compiler" is free software: you can redistribute 
+ it and/or modify it under the terms of the GNU Lesser General Public License 
+ as published by the Free Software Foundation, either version 3 of the 
+ License, or (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful, but WITHOUT 
+ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ details.
+
+ You should have received a copy of the GNU Lesser General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+ Contact: mind@ow2.org
+
+ Authors: Matthieu Leclercq
+ Contributors: 
+
+ -->
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!-- *********************************************************************** -->
+<!-- Basic AST structure                                                     -->
+<!-- *********************************************************************** -->
+
+<?add ast="type"      itf="org.ow2.mind.adl.ast.MindDefinition" ?>
+<?add ast="type"      itf="org.objectweb.fractal.adl.interfaces.InterfaceContainer" ?>
+
+<?add ast="primitive" itf="org.ow2.mind.adl.ast.MindDefinition" ?>
+<?add ast="primitive" itf="org.ow2.mind.adl.ast.AbstractDefinition" ?>
+<?add ast="primitive" itf="org.objectweb.fractal.adl.interfaces.InterfaceContainer" ?>
+<?add ast="primitive" itf="org.ow2.mind.adl.ast.AttributeContainer" ?>
+<?add ast="primitive" itf="org.ow2.mind.adl.ast.ImplementationContainer" ?>
+
+<?add ast="composite" itf="org.ow2.mind.adl.ast.MindDefinition" ?>
+<?add ast="composite" itf="org.objectweb.fractal.adl.interfaces.InterfaceContainer" ?>
+<?add ast="composite" itf="org.ow2.mind.adl.ast.ComponentContainer" ?>
+<?add ast="composite" itf="org.ow2.mind.adl.ast.BindingContainer" ?>
+
+<?add ast="extends"    itf="org.ow2.mind.adl.ast.DefinitionReferenceContainer" ?>
+
+<?add ast="definitionReference" itf="org.ow2.mind.adl.ast.DefinitionReference" ?>
+<?map ast="definitionReference" xml="definition" ?>
+
+<?add ast="interface" itf="org.ow2.mind.adl.ast.MindInterface" ?>
+
+<?add ast="attribute" itf="org.ow2.mind.adl.ast.Attribute" ?>
+
+<?add ast="data"      itf="org.ow2.mind.adl.ast.Data" ?>
+
+<?add ast="source"    itf="org.ow2.mind.adl.ast.Source" ?>
+
+<?add ast="component" itf="org.ow2.mind.adl.ast.Component" ?>
+
+<?add ast="binding"   itf="org.ow2.mind.adl.ast.Binding" ?>
+
+
+<!-- *********************************************************************** -->
+<!-- Imports                                                                 -->
+<!-- *********************************************************************** -->
+
+<?add ast="import"    itf="org.ow2.mind.adl.imports.ast.Import" ?>
+
+<?add ast="type"      itf="org.ow2.mind.adl.imports.ast.ImportContainer" ?>
+<?add ast="primitive" itf="org.ow2.mind.adl.imports.ast.ImportContainer" ?>
+<?add ast="composite" itf="org.ow2.mind.adl.imports.ast.ImportContainer" ?>
+
+
+<!-- *********************************************************************** -->
+<!-- ADL Arguments                                                           -->
+<!-- *********************************************************************** -->
+
+<?add ast="formalParameter" itf="org.ow2.mind.adl.parameter.ast.FormalParameter" ?>
+<?map ast="formalParameter" xml="parameter" ?>
+
+<?add ast="primitive"       itf="org.ow2.mind.adl.parameter.ast.FormalParameterContainer" ?>
+<?add ast="composite"       itf="org.ow2.mind.adl.parameter.ast.FormalParameterContainer" ?>
+
+<?add ast="argument"            itf="org.ow2.mind.adl.parameter.ast.Argument" ?>
+<?add ast="definitionReference" itf="org.ow2.mind.adl.parameter.ast.ArgumentContainer" ?>
+
+
+<!-- *********************************************************************** -->
+<!-- Generic ADLs                                                            -->
+<!-- *********************************************************************** -->
+
+<?add ast="formalTypeParameter"      itf="org.ow2.mind.adl.generic.ast.FormalTypeParameter" ?>
+<?map ast="formalTypeParameter"      xml="typeParameter" ?>
+
+<?add ast="composite" itf="org.ow2.mind.adl.generic.ast.FormalTypeParameterContainer" ?>
+
+<?add ast="typeArgument"               itf="org.ow2.mind.adl.generic.ast.TypeArgument" ?>
+<?map xml="typeArgument.name"          ast="typeArgument.typeParameterName" ?>
+<?map xml="typeArgument.typeParameter" ast="typeArgument.typeParameterReference" ?>
+
+<?add ast="definitionReference" itf="org.ow2.mind.adl.generic.ast.TypeArgumentContainer" ?>
+
+<?add ast="component"               itf="org.ow2.mind.adl.generic.ast.FormalTypeParameterReference" ?>
+<?map xml="component.typeParameter" ast="component.typeParameterReference" ?>
+
+
+<!-- *********************************************************************** -->
+<!-- Anonymous Definitions                                                   -->
+<!-- *********************************************************************** -->
+
+<?add ast="component" itf="org.ow2.mind.adl.anonymous.ast.AnonymousDefinitionContainer" ?>
+
+<?add ast="anonymousPrimitive" itf="org.ow2.mind.adl.ast.MindDefinition" ?>
+<?add ast="anonymousPrimitive" itf="org.objectweb.fractal.adl.interfaces.InterfaceContainer" ?>
+<?add ast="anonymousPrimitive" itf="org.ow2.mind.adl.ast.AttributeContainer" ?>
+<?add ast="anonymousPrimitive" itf="org.ow2.mind.adl.ast.ImplementationContainer" ?>
+<?map ast="anonymousPrimitive" type="anonymousDefinition" ?>
+
+<?add ast="anonymousComposite" itf="org.ow2.mind.adl.ast.MindDefinition" ?>
+<?add ast="anonymousComposite" itf="org.objectweb.fractal.adl.interfaces.InterfaceContainer" ?>
+<?add ast="anonymousComposite" itf="org.ow2.mind.adl.ast.ComponentContainer" ?>
+<?add ast="anonymousComposite" itf="org.ow2.mind.adl.ast.BindingContainer" ?>
+<?map ast="anonymousComposite" type="anonymousDefinition" ?>
+
+
+<!-- *********************************************************************** -->
+<!-- Annotation nodes                                                        -->
+<!-- *********************************************************************** -->
+
+<?add ast="annotation"      itf="org.ow2.mind.annotation.ast.AnnotationNode" ?>
+
+<?add ast="import"    itf="org.ow2.mind.annotation.ast.AnnotationContainer" ?>
+<?add ast="use"       itf="org.ow2.mind.annotation.ast.AnnotationContainer" ?>
+<?add ast="type"      itf="org.ow2.mind.annotation.ast.AnnotationContainer" ?>
+<?add ast="primitive" itf="org.ow2.mind.annotation.ast.AnnotationContainer" ?>
+<?add ast="composite" itf="org.ow2.mind.annotation.ast.AnnotationContainer" ?>
+<?add ast="interface" itf="org.ow2.mind.annotation.ast.AnnotationContainer" ?>
+<?add ast="attribute" itf="org.ow2.mind.annotation.ast.AnnotationContainer" ?>
+<?add ast="data"      itf="org.ow2.mind.annotation.ast.AnnotationContainer" ?>
+<?add ast="source"    itf="org.ow2.mind.annotation.ast.AnnotationContainer" ?>
+<?add ast="component" itf="org.ow2.mind.annotation.ast.AnnotationContainer" ?>
+<?add ast="binding"   itf="org.ow2.mind.annotation.ast.AnnotationContainer" ?>
+<?add ast="anonymousPrimitive" itf="org.ow2.mind.annotation.ast.AnnotationContainer" ?>
+<?add ast="anonymousComposite" itf="org.ow2.mind.annotation.ast.AnnotationContainer" ?>
+
+<?add ast="annotationArgument" itf="org.ow2.mind.annotation.ast.AnnotationArgument" ?>
+
+<?add ast="annotationValue" itf="org.ow2.mind.annotation.ast.AnnotationNode" ?>
+<?add ast="annotationValue" itf="org.ow2.mind.value.ast.Value" ?>
+<?map ast="annotationValue" type="value" ?>
+
+
+<!-- *********************************************************************** -->
+<!-- Value nodes                                                             -->
+<!-- *********************************************************************** -->
+
+<?add ast="string"    itf="org.ow2.mind.value.ast.StringLiteral" ?>
+<?map ast="string"     type="value" ?>
+
+<?add ast="integer"   itf="org.ow2.mind.value.ast.NumberLiteral" ?>
+<?map ast="integer"   type="value" ?>
+
+<?add ast="boolean"   itf="org.ow2.mind.value.ast.BooleanLiteral" ?>
+<?map ast="boolean"   type="value" ?>
+
+<?add ast="reference" itf="org.ow2.mind.value.ast.Reference" ?>
+<?map ast="reference" type="value" ?>
+
+<?add ast="array"     itf="org.ow2.mind.value.ast.Array" ?>
+<?map ast="array"     type="value" ?>
+
+
+<!-- *********************************************************************** -->
+<!-- Node grammar                                                            -->
+<!-- *********************************************************************** -->
+
+<!ELEMENT type (import*, annotation*, extends?, interface*) >
+<!ATTLIST type
+  name CDATA #REQUIRED
+>
+
+<!ELEMENT primitive (import*, annotation*, parameter*, extends?, (interface | attribute)*, data?, source* ) >
+<!ATTLIST primitive
+  name CDATA #REQUIRED
+  isAbstract (true|false) "false"
+>
+
+<!ELEMENT composite (import*, annotation*, parameter*, typeParameter*, extends?, (interface | component | binding)* ) >
+<!ATTLIST composite
+  name CDATA #REQUIRED
+>
+
+<!ELEMENT import (annotation*) >
+<!ATTLIST import
+  packageName CDATA #REQUIRED
+  simpleName CDATA #REQUIRED
+>
+
+<!ELEMENT extends (definition*) >
+<!ATTLIST extends >
+
+<!ELEMENT definition (typeArgument*, argument*) >
+<!ATTLIST definition
+  name CDATA #REQUIRED
+  expectedKind (type|primitive|composite) #IMPLIED
+>
+
+<!ELEMENT parameter EMPTY >
+<!ATTLIST parameter
+  name CDATA #REQUIRED
+>
+
+<!ELEMENT argument ( string | integer | reference ) >
+<!ATTLIST argument
+  name CDATA #IMPLIED
+>
+
+<!ELEMENT typeParameter ( definition ) >
+<!ATTLIST typeParameter
+  name CDATA #REQUIRED
+>
+
+<!ELEMENT typeArgument ( definition? ) >
+<!ATTLIST typeArgument
+  name CDATA #IMPLIED
+  typeParameter CDATA #IMPLIED
+>
+
+<!ELEMENT interface ( annotation* ) >
+<!ATTLIST interface
+  name CDATA #REQUIRED
+  role (client | server) #REQUIRED
+  signature CDATA #REQUIRED
+  contingency (mandatory | optional) "mandatory"
+  cardinality (singleton | collection) "singleton"
+  numberOfElement CDATA #IMPLIED
+>
+
+<!ELEMENT attribute ( annotation* , ( string | integer | reference ) ) >
+<!ATTLIST attribute
+  name CDATA #REQUIRED
+  type CDATA #IMPLIED
+>
+
+<!ELEMENT data ( annotation* ) >
+<!ATTLIST data
+  path CDATA #IMPLIED
+  cCode CDATA #IMPLIED
+>
+
+<!ELEMENT source ( annotation* ) >
+<!ATTLIST source
+  path CDATA #IMPLIED
+  cCode CDATA #IMPLIED
+>
+
+<!ELEMENT component ( annotation*, ( definition | anonymousPrimitive | anonymousComposite ) ) >
+<!ATTLIST component
+  name CDATA #REQUIRED
+  typeParameter CDATA #IMPLIED
+>
+
+<!ELEMENT anonymousPrimitive (annotation*, extends?, (interface | attribute)*, data?, source*  ) >
+<!ATTLIST anonymousPrimitive
+  name CDATA #IMPLIED
+>
+
+<!ELEMENT anonymousComposite (annotation*, extends?, (interface | component | binding)* ) >
+<!ATTLIST anonymousComposite
+  name CDATA #IMPLIED
+>
+
+
+<!ELEMENT binding ( annotation*) >
+<!ATTLIST binding
+  fromComponent CDATA #REQUIRED
+  fromInterface CDATA #REQUIRED
+  fromInterfaceNumber CDATA #IMPLIED
+  toComponent CDATA #REQUIRED
+  toInterface CDATA #REQUIRED
+  toInterfaceNumber CDATA #IMPLIED
+>
+
+<!ELEMENT annotation ( annotationArgument* ) >
+<!ATTLIST annotation
+  type CDATA #REQUIRED
+>
+
+<!ELEMENT annotationArgument ( string | integer | array | annotationValue ) >
+<!ATTLIST annotationArgument
+  name CDATA #IMPLIED
+>
+
+<!ELEMENT array ( ( string | integer | array | annotationValue )* ) >
+<!ATTLIST array >
+
+<!ELEMENT string EMPTY >
+<!ATTLIST string
+  value CDATA #REQUIRED
+>
+
+<!ELEMENT integer EMPTY >
+<!ATTLIST integer
+  value CDATA #REQUIRED
+>
+
+<!ELEMENT reference EMPTY >
+<!ATTLIST reference
+  ref CDATA #REQUIRED
+>
+
+

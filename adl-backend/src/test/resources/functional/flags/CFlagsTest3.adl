@@ -1,0 +1,12 @@
+@CompileDef
+@CFlags("-DDEFINITION_LEVEL_FLAG=1")
+primitive flags.CFlagsTest3 {
+
+  provides Main as main;
+  
+  @CFlags("-DSOURCE_LEVEL_FLAG_1=1")
+  source cFlagsTest3_1.c;
+
+  @CFlags("-DSOURCE_LEVEL_FLAG_2=1")
+  source cFlagsTest3_2.c;
+}

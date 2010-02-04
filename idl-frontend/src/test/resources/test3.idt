@@ -1,0 +1,10 @@
+#ifndef TEST3_IDT
+#define TEST3_IDT
+
+struct s {
+  int a;
+  short b;
+  foo.foo fooItf;
+};
+
+#endif

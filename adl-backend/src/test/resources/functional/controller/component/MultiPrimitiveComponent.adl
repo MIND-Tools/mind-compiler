@@ -1,0 +1,9 @@
+
+@Compile
+@controller.Component
+primitive controller.component.MultiPrimitiveComponent {
+  provides Main as main;
+  
+  nodata;
+  source ../../empty_main.c;
+}

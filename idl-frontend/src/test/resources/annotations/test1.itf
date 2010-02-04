@@ -1,0 +1,8 @@
+
+@org.ow2.mind.idl.annotations.FooAnnotation
+interface annotations.test1 {
+  void m1(int a, int b);
+  @org.ow2.mind.idl.annotations.FooAnnotation
+  unsigned float m2(float f1);
+  void* m3(int a, int b);
+};

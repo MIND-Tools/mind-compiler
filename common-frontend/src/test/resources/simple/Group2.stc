@@ -1,0 +1,20 @@
+template simple.Group2 implements simple.Itf1 {
+
+simple.Itf1 itf1 = simple.Group3 ;
+
+$${
+
+theMap ::= ["entry":"result"]
+
+print(message) ::= << 
+  The message is '<message>'. 
+  I can access the map to get the '<theMap.entry>'.
+  And I can call another template with a new '<temp(message="mesage")>'.
+  Finally, I can also call templates of my group as a remote group via an interface to get this remote message '<(itf1.print)(message="Hiiiiii")>'.
+>>
+
+temp(message) ::= << <message> >>
+
+}$$
+
+}

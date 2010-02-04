@@ -1,0 +1,1 @@
+PRIVATE declaration followed by an initialisator

@@ -1,0 +1,9 @@
+// attribute declaration with signed initial value
+
+primitive attributes.attr3{
+  source {{ }};
+  attribute int8_t			attr_int8_t = - 5;
+  attribute int16_t			attr_int16_t = + 5;
+  attribute int32_t			attr_int32_t = - 5;
+  attribute int64_t			attr_int64_t = +5;
+}

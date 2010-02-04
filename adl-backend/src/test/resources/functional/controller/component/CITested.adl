@@ -1,0 +1,4 @@
+
+type controller.component.CITested {
+  provides fractal.api.Component as component;
+}

@@ -1,0 +1,324 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
+  "../dtd/docbookx.dtd" [
+<!ENTITY % myents SYSTEM "../shared.ent" >
+%myents;
+]>
+<chapter id="adv">
+  <title>Advanced Features</title>
+
+  <para>An ADL definition describes a static architecture where every 
+    components are instantiated statically in the compiled binary. The Fractal
+    component model defines components as runtime entities. That is, components
+    of an application are entities that can be manipulated during its execution.
+    In particular, it is possible to create and destroy component dynamically
+    using <emphasis>component factory</emphasis> and it is also possible to
+    introspect and reconfigure components using the <emphasis>Fractal 
+    controllers</emphasis>.</para>
+
+  <section id="adv-fact">
+    <title>Component Factory</title>
+
+    <para>A component factory is a component that provides an interface that can 
+      be used to instantiate or destroy new components. A component 
+      factory is defined using a template-like notation: 
+      <code>Factory&lt;<replaceable>instantiated ADL</replaceable>&gt;</code>.
+      A component factory provides an interface called 
+      <varname>factory</varname> whose signature is defined in the IDL 
+      called <classname>fractal.api.Factory</classname>. A component factory also 
+      requires an interface called <varname>allocator</varname> whose signature 
+      is defined in the IDL called <varname>memory.api.Allocator</varname>. This
+      required interface is by the component factory to allocate/free memory 
+      to store components data.</para>
+    
+    <para>See <xref linkend="api-fapi-F"/> for details on the
+        <classname>fractal.api.Factory</classname> interface signature.</para>
+    
+    <example>
+      <title>Declaration of Component Factory in ADL</title>
+      <programlisting linenumbering="numbered" language="adl"> composite foo.bar.MyComposite {
+   ...
+   contains Factory&lt;AComponent&gt; as myComponentFactory;
+   contains ... as myFactoryUser;
+   contains ... as myAllocator;
+   
+   binds myFactoryUser.factory to myComponentFactory.factory;
+   binds myComponentFactory.allocator to myAllocator.allocator;
+   ...
+   
+ }</programlisting>
+      <para>In the above code excerpt:</para>
+      <itemizedlist>
+        <listitem>
+          <para>Line 3 declares a sub-component called <varname>myComponentFactory</varname>
+            which is a <emphasis>component factory</emphasis> that instantiate 
+            components describes in the ADL called <classname>AComponent</classname>.
+          </para>
+        </listitem>
+        <listitem>
+          <para>Line 7 declares a binding from the <varname>myFactoryUser</varname>
+            component to the <varname>factory</varname> interface of the 
+            <varname>myComponentFactory</varname>. This allows the <varname>myFactoryUser</varname>
+            component to use the factory component to create/destroy components
+            that are described in the ADL called <classname>AComponent</classname>.</para>
+        </listitem>
+        <listitem>
+          <para>Line 8 declares a binding from the <varname>allocator</varname> 
+            provided interface of the <varname>myComponentFactory</varname> component
+            to an <varname>allocator</varname> interface provided by the 
+            <varname>myAllocator</varname> component.</para>
+        </listitem>
+      </itemizedlist>
+    </example>
+    
+    <para>The implementation of the <varname>myFactoryUser</varname> component 
+      may look-like :</para>
+    
+    <example>
+      <title>Use of Component Factory</title>
+      <programlisting linenumbering="numbered" language="cpl"> int err;
+ void *instance;
+ err = CALL(factory, newFcInstance)(&amp;instance);
+ if (err != 0) {
+   // an error occurs 
+   return err;
+ }
+  
+ // do something with this new instance
+ // ...
+
+ err = CALL(factory, destroyFcInstance)(instance);
+ if (err != 0) {
+   // an error occurs 
+   return err;
+ }</programlisting>
+      <para>In the above code excerpt:</para>
+      <itemizedlist>
+        <listitem>
+          <para>Line 3 calls the <varname>newFcInstance</varname> method of the
+            component factory to create a new component and store a pointer to it
+            in the <varname>instance</varname> variable.</para>
+        </listitem>
+        <listitem>
+          <para>Line 12 calls the <varname>destroyFcInstance</varname> method of the
+            component factory to destroy the component that is pointed by the 
+            <varname>instance</varname> variable.</para>
+        </listitem>
+      </itemizedlist>
+    </example>
+    
+    <para>By default a component factory as no controller interface, it has only the 
+      <varname>factory</varname> provided interface and the <varname>allocator</varname> 
+      required interface. In some circumstance, it can be useful to have component
+      factory that have some controller interfaces that allows to introspect and 
+      reconfigure it dynamically. This can be done by using <classname>FactoryWithCtrl</classname>
+      instead of <classname>Factory</classname>. For instance :</para>
+    
+    <programlisting linenumbering="numbered" language="adl"> contains FactoryWithCtrl&lt;AComponent&gt; as myComponentFactory;</programlisting>
+  </section>
+
+  <section id="adv-ctrl">
+    <title>Fractal Controllers</title>
+    <para>A controller is an additional interface provided by a component that 
+      allows to introspect or reconfigure it. The Fractal component model defines 
+      a set of standard controller interfaces. The &productName; toolchain allows
+      to specify in the ADL, the controllers provided by components using 
+      annotations.</para>
+
+    <section id="adv-ctrl-cmp">
+      <title>The <classname>component</classname> controller</title>
+      <para>The  <classname>component</classname> controller allows to introspect
+        the interfaces provided by the component. To add a  <classname>component</classname>
+        controller on a component, the <classname>@controller.Component</classname>
+        annotation must be attached to the ADL definition.</para>
+      
+      <example>
+        <title>Declaration of the <classname>component</classname> controller in ADL</title>
+        <programlisting linenumbering="numbered" language="adl"> @controller.Component
+ primitive foo.bar.MyControlledComponent {
+   ...
+ }</programlisting>
+        <para>Line 1 specifies that a <classname>component</classname> controller
+          must be added to the component <classname>foo.bar.MyControlledComponent</classname>.</para> 
+      </example>
+      
+      <para>When the <classname>@controller.Component</classname> annotation is
+        attached to an ADL definition, a control interface called 
+        <varname>component</varname> is automatically added. The signature of this 
+        interface is defined in the <classname>fractal.api.Component</classname>
+        IDL.</para>
+        
+      <para>See <xref linkend="api-fapi-C"/> for details on the
+        <classname>fractal.api.Component</classname> interface signature.</para>
+            
+      <para>When the <classname>@controller.Component</classname> annotation is
+        attached to an ADL definition, the toolset ensures that the added 
+        <varname>component</varname> interface as the first interface of the 
+        component. This allows to cast a pointer to a component (as returned by 
+        a component factory) to a pointer to a <classname>fractal.api.Component</classname>
+        interface.</para>
+      
+      <example>
+        <title>Use the <varname>component</varname> interface of a component created 
+          by a factory component</title>
+        
+        <programlisting linenumbering="numbered" language="adl"> composite foo.bar.MyComposite {
+   ...
+   contains Factory&lt;foo.bar.MyControlledComponent&gt; 
+       as myComponentFactory;
+   contains ... as myFactoryUser;
+   contains ... as myAllocator;
+   
+   binds myFactoryUser.factory to myComponentFactory.factory;
+   binds myComponentFactory.allocator to myAllocator.allocator;
+   ...
+   
+ }</programlisting>
+        <programlisting linenumbering="numbered" language="cpl"> int err;
+ void *instance;
+ fractal_api_Component componentItf;
+ int nbItfs;
+ err = CALL(factory, newFcInstance)(&amp;instance);
+ if (err != 0) {
+   // an error occurs 
+   return err;
+ }
+  
+ componentItf = (fractal_api_Component) instance;
+ nbItfs = CALL_PTR(componentItf, listFcInterfaces)(NULL);
+ if (nbItfs &lt;) {
+   // an error occurs 
+   return nbItfs;
+ }
+ ...</programlisting>
+        <para>In the above C-code excerpt:</para>
+        <itemizedlist>
+          <listitem>
+            <para>Line 3 declares a variable called <varname>componentItf</varname>
+              that is a pointer to a <classname>fractal.api.Component</classname>
+              interface.</para>
+          </listitem>
+          <listitem>
+            <para>Line 11 casts the <varname>instance</varname> pointer to a 
+              pointer to a <classname>fractal.api.Component</classname> interface.
+              This cast works correctly since components instantiated by the factory
+              have a <classname>component</classname> controller and this controller
+              guaranties that the <varname>component</varname> control interface
+              is the first interface of the component.</para>
+          </listitem>
+          <listitem>
+            <para>Line 12 calls the <varname>listFcInterfaces</varname> method
+              of the <varname>component</varname> control interface of the component
+              created at line 5.</para>
+          </listitem>
+        </itemizedlist>
+      </example>
+    </section>
+
+    <section id="adv-ctrl-bc">
+      <title>The <classname>binding-controller</classname></title>
+      
+      <para>The  <classname>binding-controller</classname> controller allows to introspect
+        and reconfigure the bindings of the required interfaces of the component. 
+        To add a  <classname>binding-controller</classname>
+        on a component, the <classname>@controller.BindingController</classname>
+        annotation must be attached to the ADL definition.</para>
+      
+      <example>
+        <title>Declaration of the <classname>binding-controller</classname> in ADL</title>
+        <programlisting linenumbering="numbered" language="adl"> @controller.BindingController
+ primitive foo.bar.MyControlledComponent {
+   ...
+ }</programlisting>
+        <para>Line 1 specifies that a <classname>binding-controller</classname> 
+          must be added to the component <classname>foo.bar.MyControlledComponent</classname>.</para> 
+      </example>
+      
+      <para>When the <classname>@controller.BindingContrller</classname> annotation is
+        attached to an ADL definition, a control interface called 
+        <varname>bindingController</varname> is automatically added. The signature of this 
+        interface is defined in the <classname>fractal.api.BindingController</classname>
+        IDL.</para>
+        
+      <para>See <xref linkend="api-fapi-BC"/> for details on the
+        <classname>fractal.api.BindingController</classname> interface signature.</para>
+    </section>
+
+    <section id="adv-ctrl-lcc">
+      <title>The <classname>life-cycle-controller</classname></title>
+      <para>The  <classname>life-cycle-controller</classname> controller allows to introspect
+        and change the state (started/stopped) of the component. To add a <classname>life-cycle-controller</classname>
+        on a component, the <classname>@controller.Component</classname>
+        annotation must be attached to the ADL definition.</para>
+      
+      <example>
+        <title>Declaration of the <classname>life-cycle-controller</classname> in ADL</title>
+        <programlisting linenumbering="numbered" language="adl"> @controller.LifeCycleController
+ primitive foo.bar.MyControlledComponent {
+   ...
+ }</programlisting>
+        <para>Line 1 specifies that a <classname>life-cycle-controller</classname>
+          must be added to the component <classname>foo.bar.MyControlledComponent</classname>.</para> 
+      </example>
+      
+      <para>When the <classname>@controller.LifeCycleController</classname> annotation is
+        attached to an ADL definition, a control interface called 
+        <varname>lifeCycleController</varname> is automatically added. The signature of this 
+        interface is defined in the <classname>fractal.api.LifeCycleController</classname>
+        IDL.</para>
+        
+      <para>See <xref linkend="api-fapi-LCC"/> for details on the
+        <classname>fractal.api.LifeCycleController</classname> interface signature.</para>
+      
+      <para>The <classname>@controller.LifeCycleController</classname> annotation 
+        can only be attached to primitive component definitions. In that case,
+        the component implementation must provides the implementation of at least 
+        one of the <varname>startFc</varname> or <varname>stopFc</varname> method of the
+        <varname>lifeCycleController</varname> interface. For instance:</para>
+        
+      <example>
+        <title>Implementation of the <classname>life-cycle-controller</classname>
+          in primitive component.</title>
+        <programlisting linenumbering="numbered" language="cpl"> int METH(lifeCycleController, startFc) (void) {
+   printf("in startFc\n");
+   // ...
+   return FRACTAL_API_OK;
+ }
+
+ int METH(lifeCycleController, stopFc) (void) {
+   printf("in stopFc\n");
+   // ...
+   return FRACTAL_API_OK;
+ }</programlisting>
+      </example>
+      
+    </section>
+
+    <section id="adv-ctrl-ac">
+      <title>The <classname>attribute-controller</classname></title>
+      <para>The  <classname>attribute-controller</classname> allows to introspect
+        and modify the attributes of a component. To add an <classname>attribute-controller</classname>
+        on a component, the <classname>@controller.AttributeController</classname>
+        annotation must be attached to the ADL definition.</para>
+      
+      <example>
+        <title>Declaration of the <classname>attribute-controller</classname> in ADL</title>
+        <programlisting linenumbering="numbered" language="adl"> @controller.AttributeController
+ primitive foo.bar.MyControlledComponent {
+   ...
+ }</programlisting>
+        <para>Line 1 specifies that a <classname>attribute-controller</classname> 
+          must be added to the component <classname>foo.bar.MyControlledComponent</classname>.</para> 
+      </example>
+      
+      <para>When the <classname>@controller.AttributeController</classname> annotation is
+        attached to an ADL definition, a control interface called 
+        <varname>attributeController</varname> is automatically added. The signature of this 
+        interface is defined in the <classname>fractal.api.AttributeController</classname>
+        IDL.</para>
+        
+      <para>See <xref linkend="api-fapi-AC"/> for details on the
+        <classname>fractal.api.AttributeController</classname> interface signature.</para>
+    </section>
+  </section>
+</chapter>

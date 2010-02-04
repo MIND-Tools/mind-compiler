@@ -1,0 +1,99 @@
+/**
+ * Fractal Runtime
+ *
+ * Copyright (C) 2009 STMicroelectronics
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
+ *
+ * Contact: mind@ow2.org
+ *
+ * Authors: Matthieu Leclercq
+ */
+
+#include "ErrorCode.idt"
+
+/**
+ * A component interface to introspect component bindings.
+ */
+interface fractal.api.BindingController {
+
+  /**
+   * Returns the names of the client interfaces of the component to which this
+   * interface belongs. More precisely, if the given <code>clientItfNames</code>
+   * is <code>null</code>, this method returns the number of client interfaces.
+   * If it is not <code>null</code>, this method assumes that the given array is
+   * big enough to contain all the client interface names.
+   *
+   * @param clientItfNames an array into which client interface names are
+   *      copied. Can be <code>null<code>.
+   * @return the number of client interfaces; or
+   *      {@link FRACTAL_API_OPERATION_NOT_SUPPORTED} if this operation is not
+   *      supported.
+   */
+  int listFc(in const string clientItfNames[]);
+
+  /**
+   * Returns the interface to which the given client interface is bound. More
+   * precisely, returns the server interface to which the client interface whose
+   * name is given is bound. This server interface is necessarily in the same
+   * address space as the client interface (see {@link #bindFc}).
+   *
+   * @param clientItfName the name of a client interface of the component to
+   *      which this interface belongs.
+   * @param interfaceReference (out parameter) the server interface to which the
+   *      given interface is bound.
+   * @return <code>0</code> if the operation succeed.
+   *      {@link FRACTAL_API_NO_SUCH_INTERFACE} if there is no such client
+   *      interface.
+   *      {@link FRACTAL_API_OPERATION_NOT_SUPPORTED} if this operation is not
+   *      supported.
+   */
+  int lookupFc(in const string clientItfName, out void* interfaceReference);
+
+  /**
+   * Binds the client interface whose name is given to a server interface. More
+   * precisely, binds the client interface of the component to which this
+   * interface belongs, and whose name is equal to the given name, to the given
+   * server interface. The given server interface must be in the same address
+   * space as the client interface.
+   *
+   * @param clientItfName the name of a client interface of the component to
+   *      which this interface belongs.
+   * @param serverItf a server interface.
+   * @return <code>0</code> if the operation succeed.
+   *      {@link FRACTAL_API_NO_SUCH_INTERFACE} if there is no such client
+   *      interface. {@link FRACTAL_API_ILLEGAL_BINDING} if the binding cannot
+   *      be created. {@link FRACTAL_API_ILLEGAL_LIFE_CYCLE} if this component
+   *      has a {@link LifeCycleController} interface, but it is not in an
+   *       appropriatestate to perform this operation.
+   */
+  int bindFc(in const string clientItfName, in void* serverItf);
+
+  /**
+   * Unbinds the given client interface. More precisely, unbinds the client
+   * interface of the component to which this interface belongs, and whose name
+   * is equal to the given name.
+   *
+   * @param clientItfName the name of a client interface of the component to
+   *      which this interface belongs.
+   * @return <code>0</code> if the operation succeed.
+   *      {@link FRACTAL_API_NO_SUCH_INTERFACE} if there is no such client
+   *      interface. {@link FRACTAL_API_ILLEGAL_BINDING} if the binding cannot
+   *      be removed. {@link FRACTAL_API_ILLEGAL_LIFE_CYCLE} if this component
+   *      has a {@link LifeCycleController} interface, but it is not in an
+   *      appropriate state to perform this operation.
+   */
+  int unbindFc(in const string clientItfName);
+}

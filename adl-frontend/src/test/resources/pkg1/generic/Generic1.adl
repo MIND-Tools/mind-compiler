@@ -1,0 +1,13 @@
+
+import pkg1.pkg2.Type1;
+import pkg1.I2;
+
+composite pkg1.generic.Generic1 <T conformsto Type1> {
+  provides I1 as sItf;
+  requires I2 as cItf;
+
+  contains T as subComp1;
+  
+  binds this.sItf to subComp1.sItf;
+  binds subComp1.cItf to this.cItf;
+}

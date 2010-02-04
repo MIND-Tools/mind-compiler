@@ -1,0 +1,291 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
+  "../dtd/docbookx.dtd" [
+<!ENTITY % myents SYSTEM "../shared.ent" >
+%myents;
+]>
+<chapter id="c">
+  <title>
+      Component Programming Language
+  </title>
+  <titleabbrev>CPL</titleabbrev>
+  <para>The CPL allows to capture the component notions inside traditional
+    C source code. The CPL is a very lightweight pre-processed language on 
+    top of the C-language.</para>
+
+  <section id="c-prvdecl">
+    <title>Component's private-data declaration</title>
+
+    <para>Component's private-data must be declared in a separated header file that 
+      is referenced in the ADL using the <code>"data"</code> construct (see 
+      <xref linkend="adl-impl-data"/> for more details).</para>
+
+    <para>The declaration of private-data takes the form of a declaration of a 
+      global variable called <varname>PRIVATE</varname> whose type is a structure.</para>
+
+    <example>
+      <title>Private-data declaration</title>
+
+      <programlisting language="cpl" linenumbering="numbered"> struct {
+   int a, b;
+   char c[10];
+ } PRIVATE;</programlisting>
+    </example>
+  </section>
+
+  <section id="c-srvmeth">
+    <title>Implementation of component's provided methods</title>
+
+    <para>Primitive components must implements every methods of its provided interface.
+      The CPL provides a <code>"METH"</code> macro to specify that a C function
+      correspond to the implementation of a method of a provided interface.
+      This macro takes two parameters, the first one is the name of the provided 
+      interface (as written in the ADL file) and as second parameter, the name
+      of the method (as written in the IDL file).</para>
+
+    <example>
+      <title>Implementation of provided interfaces</title>
+
+      <para>Assuming that the component provides an interface called <varname>calcItf</varname>
+        whose signature is defined in the following IDL : </para>
+      <programlisting language="idl" linenumbering="numbered"> interface foo.Calculator {
+   int add(int a, int b);
+   int sub(int a, int b);
+ }</programlisting>
+
+      <para>Then the implementation of the component must implement the methods 
+        <varname>add</varname> and <varname>sub</varname> for the <varname>calcItf</varname>:</para>
+
+      <programlisting language="cpl" linenumbering="numbered"> // implements method 'add' of interface 'calcItf'
+ int METH(calcItf, add)(int a, int b) {
+   return a + b;
+ }
+
+ // implements method 'sub' of interface 'calcItf'
+ int METH(calcItf, sub)(int a, int b) {
+   return a - b;
+ }</programlisting>
+    </example>
+  </section>
+
+  <section id="c-prvmeth">
+    <title>Implementation of component's private methods</title>
+
+    <para>A primitive component can also have internal functions that must have
+      access to component's data or call client interfaces.
+      Such functions are called <emphasis>private methods</emphasis>.
+      A private method is declared with the <code>"METH"</code> macro taking only one parameter
+      that correspond to the name of the private method.</para>
+
+    <example>
+      <title>Private Method</title>
+
+      <programlisting language="cpl" linenumbering="numbered"> int METH(myPrivateMeth)(int a) {
+   ...
+ }</programlisting>
+    </example>
+  </section>
+
+  <section id="c-call">
+    <title>Invocation of component's methods</title>
+
+    <para>The invocation of component's methods is done using the <code>"CALL"</code>
+      macro. This macro can take one or two parameters. To invoke a private method, 
+      the macro takes one parameter that correspond to the name of the private method to invoke.
+      To invoke a method of a provided or a required interface, the macro takes two parameters 
+      where the first one must correspond to the name of the interface, and the second one must
+      correspond the the name of the method to invoke.</para>
+
+    <para>Invocation of method can only be done inside an implementation of method
+      of a provided interface or an implementation of a private method.</para>
+
+    <example>
+      <title>Method invocation</title>
+
+      <programlisting language="cpl" linenumbering="numbered"> int METH(calcItf, add)(int a, int b) {
+   CALL(myPrivateMeth)(a);
+   CALL(aRequiredItf, debug)("in add method");
+   return a + b;
+ }</programlisting>
+
+      <para>
+        In the above code excerpt: 
+        <itemizedlist>
+          <listitem>
+            <para>Line 2 invokes the private method called <function>myPrivateMeth</function> 
+              with the <code>a</code> parameter.</para>
+          </listitem>
+          <listitem>
+            <para>Line 3 invokes the <function>debug</function> method of 
+              the required interface <varname>aRequiredItf</varname>.</para>
+          </listitem>
+        </itemizedlist>
+      </para>
+    </example>
+  </section>
+
+  <section id="c-prvaccess">
+    <title>Access to component's private-data</title>
+
+    <para>Component's private-data are accessed inside method implementation simply
+       by accessing the <code>PRIVATE</code> structure.</para>
+
+     <example>
+      <title>Private-data access</title>
+
+      <programlisting language="cpl" linenumbering="numbered"> int METH(calcItf, add)(int a, int b) {
+   PRIVATE.a = a;
+   return a + b;
+ }</programlisting>
+
+      <para>Line 2 assigns the private data called <varname>a</varname> to the
+         value of the <varname>a</varname> parameter of the method.</para>
+    </example>
+  </section>
+
+  <section id="c-attraccess">
+    <title>Access to component's attributes</title>
+
+    <para>Component's attributes are accessed inside method implementation using the
+      <code>"ATTR"</code> macro that takes as argument the name of the attribute.</para>
+
+     <example>
+      <title>Attribute access</title>
+
+      <programlisting language="cpl" linenumbering="numbered"> int METH(calcItf, add)(int a, int b) {
+   PRIVATE.a = a + ATTR(myAttribute);
+   return a + b;
+ }</programlisting>
+ 
+      <para>Line 2 accesses the attribute called <varname>myAttribute</varname>.</para>
+    </example>
+  </section>
+
+  <section>
+    <title>Implementation of constructor and destructor</title>
+
+    <para>A primitive component can defines a constructor and/or a destructor methods
+      that can be used to initialize and clear the private-data.</para>
+
+    <para>The constructor method of a primitive component is called just after 
+      the component is created. The destructor is called just before the component 
+      is destroyed.</para>
+
+    <warning>
+      <para>Required interfaces may not be bound when the constructor or the destructor are called.
+        So the implementation of these methods must not use the required interface of the component.</para>
+    </warning>
+
+    <para>The constructor (reps. destructor) is declared as a function called <code>"CONSTRUCTOR"</code>
+      (resp. <code>"DESTRUCTOR"</code>) that has no parameter and that has no return type 
+      (neither <code>void</code> or anything else, similarly to object-oriented languages 
+      like C++ or Java)</para>
+
+    <example>
+      <title>Implementation of constructor and destructor</title>
+
+      <programlisting language="cpl" linenumbering="numbered"> CONSTRUCTOR() {
+   int i;
+   for (i = 0; i &lt; 10; i++) {
+     PRIVATE.a[i] = 0;
+   }
+ }
+ 
+ DESTRUCTOR() {
+   ...
+ }</programlisting>
+    </example>
+  </section>
+
+  <section id="c-callptr">
+    <title>Method and interface pointer</title>
+
+    <para>The CPL defines constructs to build method and interface pointers
+      an invoke them.</para>
+
+    <section id="c-itfptr">
+      <title>Interface pointer</title>
+
+      <para>A Pointer to an interface of the component (either provided or required) 
+        can be retrieved using the <code>"GET_MY_INTERFACE"</code> macro that takes
+        as parameter the name of the interface. The type of the value returned by the 
+        <code>"GET_MY_INTERFACE"</code> macro is the C-type corresponding to the
+        signature of the interface (see <xref linkend="idl-itfctype"/>).</para>
+
+      <para>An interface pointer can be invoked with the <code>"CALL_PTR"</code>
+        macro that takes two parameter, the first one is the interface pointer to invoke,
+        the second one is the name of the method of the interface.</para>
+
+      <example>
+        <title>Interface pointer</title>
+
+        <programlisting language="cpl" linenumbering="numbered"> int METH(calcItf, add)(int a, int b) {
+   foo_bar_Itf1 itfPointer = GET_MY_INTERFACE(myRequiredItf);
+   CALL_PTR(itfPointer, debug)("in add method");
+   return a + b;
+ }</programlisting>
+
+        <para>
+          In the above code excerpt: 
+          <itemizedlist>
+            <listitem>
+              <para>Line 2 get a pointer to the <varname>myRequiredItf</varname> and assign it to a 
+                local variable (assuming that the signature of this interface is 
+                <classname>foo.bar.Itf1</classname>).</para>
+            </listitem>
+            <listitem>
+              <para>Line 3 invokes the <varname>debug</varname> method of 
+                the <varname>itfPointer</varname> interface pointer.</para>
+            </listitem>
+          </itemizedlist>
+        </para>
+      </example>
+    </section>
+
+    <section>
+      <title>Method pointer</title>
+
+      <para>A pointer to a method (either a method of a provided interface or a 
+        private method) can be retrieved by using the <code>"METH"</code> macro
+        (with one or two parameters) in an expression.</para>
+
+      <para>A variable whose type is a pointer to a method must be declared in a
+        specific way. The variable name must be surrounded by the 
+        <code>"METH_PTR"</code> macro. For instance while <code>int (*f_ptr)(int a);</code>
+        declares a pointer to a C function that takes an integer and returns an integer,
+        the declaration of a pointer to a method with the same prototype must be written
+        <code>int (* METH_PTR(f_ptr))(int a);</code>.</para>
+
+      <para>The <code>"CALL_PTR"</code> macro with one parameter can be used to 
+        invoke a method pointer.</para>
+
+      <example>
+        <title>Method pointer</title>
+
+        <programlisting language="cpl" linenumbering="numbered"> int METH(calcItf, add)(int a, int b) {
+   int (* METH_PTR(f_ptr))(int a);
+   f_ptr = METH(myPrivateMeth);
+   CALL_PTR(f_ptr)(a);
+   return a + b;
+ }</programlisting>
+
+        <para>
+          In the above code excerpt: 
+          <itemizedlist>
+            <listitem>
+              <para>Lline 2 declares a variable called <varname>f_ptr</varname>
+                that is a pointer to a method that takes an integer and return an integer.</para>
+            </listitem>
+            <listitem>
+              <para>Line 3, the <varname>f_ptr</varname> variable is initialized 
+                to point to the <varname>myPrivateMeth</varname> private method.</para>
+            </listitem>
+            <listitem>
+              <para>Line 4 invokes the <varname>f_ptr</varname> method pointer.</para>
+            </listitem>
+          </itemizedlist>
+        </para>
+      </example>
+    </section>
+  </section>
+</chapter>

@@ -1,0 +1,487 @@
+/**
+ * Copyright (C) 2009 France Telecom
+ *
+ * This file is part of "Mind Compiler" is free software: you can redistribute 
+ * it and/or modify it under the terms of the GNU Lesser General Public License 
+ * as published by the Free Software Foundation, either version 3 of the 
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT 
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Contact: mind@ow2.org
+ *
+ * Authors: Matthieu ANNE
+ * Contributors: Olivier Lobry, Matthieu Leclercq
+ */
+ 
+grammar CPL;
+
+options {
+	output = template;
+	backtrack = true;
+}
+
+tokens{
+	METH 		= 'METH';
+    CONSTRUCTOR = 'CONSTRUCTOR';
+    DESTRUCTOR  = 'DESTRUCTOR';
+	CALL 		= 'CALL';
+	CALL_PTR 	= 'CALL_PTR';
+	ATTR 		= 'ATTR';
+	PRIVATE 	= 'PRIVATE';
+	METH_PTR	= 'METH_PTR' ;
+	VOID 		= 'void';
+	STRUCT 	= 'struct';
+}
+
+@header {
+	package org.ow2.mind.preproc.parser;
+    import java.io.*;
+    import java.util.List;
+    import java.util.ArrayList;
+}
+
+@lexer::header {
+	package org.ow2.mind.preproc.parser;
+	import java.io.*;
+}
+
+@members{
+	private PrintStream out = System.out;
+	private PrintStream headerOut = null;
+	private boolean singletonMode = false;
+
+	public void setOutputStream(PrintStream out) { this.out = out;}
+	public void setHeaderOutputStream(PrintStream out) { this.headerOut = out;}
+	public void setSingletonMode(boolean singletonMode) { this.singletonMode = singletonMode; }
+	
+	private List<String> errors = new ArrayList<String>();
+    public void displayRecognitionError(String[] tokenNames,
+                                        RecognitionException e) {
+        String hdr = getErrorHeader(e);
+        String msg = getErrorMessage(e, tokenNames);
+        errors.add(hdr + " " + msg);
+    }
+    public List<String> getErrors() {
+        return errors;
+    }
+}
+
+@lexer::members{
+	private PrintStream out;
+	public void setOutPutStream(PrintStream out) { this.out = out;}
+}
+
+parseFile returns [String res]
+@init{StringBuilder sb = new StringBuilder(); }
+@after{$res=sb.toString(); out.println($res);}
+  :(methDef    {sb.append($methDef.res);}
+  | methCall    {sb.append($methCall.res); }
+  | attAccess     {sb.append($attAccess.res); }
+  | privateAccess   {sb.append($privateAccess.res); }
+  | structDecl    {sb.append($structDecl.res); }
+  | methPtrDef    {sb.append($methPtrDef.res); }
+  | e= ~ (METH | CALL | ATTR | PRIVATE | STRUCT | METH_PTR | CALL_PTR)
+        {sb.append($e.text);}
+  )+  
+  ;
+
+
+protected methPtrDef returns [StringBuilder res = new StringBuilder()] 
+	: METH_PTR ws1=ws { $res.append("METH_PTR").append($ws1.text); }
+	  (
+        '(' ws2=ws ID ws3=ws ')' { $res.append("(").append($ws2.text).append($ID.text).append($ws3.text).append(")"); } 
+        | ptrMethArg             { $res.append($ptrMethArg.res); }
+      )
+      (
+		ws4=WS { $res.append($ws4.text); }
+		| ')'  { $res.append(")"); }
+      )* // handle case of (((... METH_PTR(foo) )))(...
+      ws5=ws { $res.append($ws5.text); } 
+	( paramsDef { $res.append($paramsDef.res); } ) ?
+	;
+
+protected methDef returns [StringBuilder res]
+	: serverMethDef	{$res = $serverMethDef.res;}
+	|privateMethDef {$res = $privateMethDef.res;}
+    |constructorDef {$res = $constructorDef.res;}
+    |destructorDef  {$res = $destructorDef.res;}
+	;
+		
+protected serverMethDef returns [StringBuilder res = new StringBuilder()]
+@init{String tmp = ""; String itfIdx = null;}
+	: METH ws1=ws '(' ws2=ws id=ID ws3=ws ( '[' ws4=ws INT ws5=ws ']' ws6=ws { itfIdx=$INT.text; } )? ',' ws7=ws meth=ID ws8=ws ')' ws9=ws
+      (
+        e = WS { tmp += $e.text; }
+        | ')'  { tmp += ")"; }
+      )* // handle case of (((... METH(foo) )))(...
+    {
+      if (itfIdx == null) {
+          $res.append("INTERFACE_METHOD").append($ws1.text).append("(")
+              .append($ws2.text).append($id.text).append($ws3.text).append(",")
+              .append($ws7.text).append($meth.text).append($ws8.text).append(")")
+              .append(tmp);
+      } else {
+          $res.append("INTERFACE_COLLECTION_METHOD").append($ws1.text).append("(")
+              .append($ws2.text).append($id.text).append($ws3.text).append(",")
+              .append($ws4.text).append(itfIdx).append($ws5.text).append($ws6.text).append(",")
+              .append($ws7.text).append($meth.text).append($ws8.text).append(")")
+              .append(tmp);
+      }
+    }
+    (
+      paramsDef { $res.append($paramsDef.res); }
+      ws9=ws
+      (
+        '{'
+          {
+            if (!singletonMode) 
+              $res.append($ws9.text).append("{ CHECK_CONTEXT_PTR"); 
+            else
+              $res.append($ws9.text).append("{");
+            if (headerOut != null) headerOut.println("#define INTERFACE_METHOD_" + $id.text + "_" + $meth.text + "_IMPLEMENTED"); 
+          }
+      )?
+    )?
+    ;
+
+protected privateMethDef returns [StringBuilder res = new StringBuilder()]
+@init{String tmp = "";}
+    : METH ws1=ws '(' ws2=ws id=ID ws3=ws ')' 
+      (
+        e = WS { tmp += $e.text; }
+        | ')'  { tmp += ")"; }
+	  )* // handle case of (((... PRV(foo) )))(...
+      {
+        $res.append("PRIVATE_METHOD").append($ws1.text).append("(")
+            .append($ws2.text).append($id.text).append($ws3.text).append(")")
+            .append(tmp);
+      }
+      ( paramsDef { $res.append($paramsDef.res); } 
+        ws4=ws 
+        (
+          '{'
+            {
+              if (!singletonMode) 
+                $res.append($ws4.text).append("{ CHECK_CONTEXT_PTR"); 
+              else
+                $res.append($ws4.text).append("{");
+            }
+        )?
+      )?
+	;
+	
+protected constructorDef returns [StringBuilder res = new StringBuilder()]
+    : CONSTRUCTOR ws1=ws '(' ws2=ws { $res.append("void CONSTRUCTOR_METHOD").append($ws1.text).append("(").append($ws2.text); }
+      ( VOID ws3=ws { $res.append($ws3.text); } ) ? 
+      ')' ws4=ws 
+      {
+        if (singletonMode) 
+          $res.append("void)").append($ws4.text);
+        else
+          $res.append("CONTEXT_PTR_DECL)").append($ws4.text);
+      }
+      ( 
+        '{'
+          {
+            if (singletonMode) 
+              $res.append("{"); 
+            else 
+              $res.append("{ CHECK_CONTEXT_PTR");
+            if (headerOut != null) headerOut.println("#define CONSTRUCTOR_METHOD_IMPLEMENTED"); 
+          }
+      )?
+    ;
+        
+protected destructorDef returns [StringBuilder res = new StringBuilder()]
+    : DESTRUCTOR ws1=ws '(' ws2=ws { $res.append("void DESTRUCTOR_METHOD").append($ws1.text).append("(").append($ws2.text); }
+      ( VOID ws3=ws { $res.append($ws3.text); } ) ? 
+      ')' ws4=ws 
+      {
+        if (singletonMode) 
+          $res.append("void)").append($ws4.text);
+        else
+          $res.append("CONTEXT_PTR_DECL)").append($ws4.text);
+      }
+      ( 
+        '{'
+          {
+            if (singletonMode) 
+              $res.append("{"); 
+            else 
+              $res.append("{ CHECK_CONTEXT_PTR");
+            if (headerOut != null) headerOut.println("#define DESTRUCTOR_METHOD_IMPLEMENTED"); 
+          }
+      )?
+    ;
+
+protected ptrMethArg returns [StringBuilder res = new StringBuilder()]
+    : '(' ws1=ws { $res.append("(").append($ws1.text); }
+      (
+        methDef                   { $res.append($methDef.res); }
+        | methPtrDef              { $res.append($methPtrDef.res); }
+        | pma=ptrMethArg          { $res.append($pma.res); }
+        | t2= ~(METH | ')' | '(') { $res.append($t2.text);}
+      )+
+      ws2=ws ')' { $res.append($ws2.text).append(")");}
+   ;
+
+protected expr  returns [String res = ""]
+	: methCall 			{$res += $methCall.res; }
+	| attAccess 		{$res += $attAccess.res; }
+	| privateAccess 	{$res += $privateAccess.res; }
+	;
+	
+protected methCall returns [StringBuilder res ]
+	: itfMethCall 		{ $res = $itfMethCall.res; }
+	| collItfMethCall 	{ $res = $collItfMethCall.res; }
+	| prvMethCall		{ $res = $prvMethCall.res; }
+	| ptrMethCall 		{ $res = $ptrMethCall.res; }
+	;
+
+protected attAccess returns [StringBuilder res = new StringBuilder()]
+    : ATTR ws1=ws '(' ws2=ws att=ID ws3=ws ')' 
+      {
+        $res.append("ATTRIBUTE_ACCESS").append($ws1.text).append("(").append($ws2.text);
+        if (! singletonMode) $res.append("CONTEXT_PTR_ACCESS, ");
+        $res.append($att.text).append($ws3.text).append(")");
+      }
+    ;
+	
+protected structDecl returns [StringBuilder res = new StringBuilder()]
+@init{StringBuilder str = new StringBuilder(); boolean isPrivate = false;}
+    : STRUCT ws1=ws 
+      (
+        (structfield) => 
+            structfield 
+            (
+              (
+                ws2=ws PRIVATE { isPrivate=true; } 
+                ( t = ~('='|';'|',') { str.append($t.text); } )* 
+                ('=' ws3=ws si = structinitializer)?
+              ) ws4=ws 
+              | ( t = ~(';'| PRIVATE) {str.append($t.text); } ) * 
+            ) ';'
+            {
+              if (singletonMode) {
+                $res.append($text); 
+              } else if (isPrivate) {
+                $res.append("typedef struct").append($ws1.text).append("{");
+                $res.append(" COMP_DATA; ");
+                $res.append($structfield.text.substring(1)); // (NB: removes first '{'
+                $res.append($ws2.text).append(" PRIVATE_DATA_T");
+                $res.append(str);
+               
+                // TODO see how to handle struct initializer
+                //$res += "; PRIVATE_DATA_T COMP_DESC ";
+                //if ($si.text != null) {
+                //  $res += " = { ";
+                //  $res += "  COMP_DATA_INIT, ";
+                //  $res += $si.text.substring(1); // (NB: removes first '{'
+                //  $res += "; ";
+                //}  else {
+                //  $res += " = { ";
+                //  $res += "  COMP_DATA_INIT ";
+                //  $res += "}; ";
+                //}
+
+                $res.append(";");
+              } else {
+                $res.append("struct ").append($ws1.text).append($structfield.text)
+                    .append(str).append(";");
+              }
+            }
+        | ( e=~LCURLY { $res.append("struct").append($ws1.text).append($e.text); } )
+      )
+    ;
+
+protected structinitializer
+	: LCURLY (
+		structinitializer |~(LCURLY|RCURLY))* 
+	RCURLY;
+	
+protected structfield 
+	:LCURLY
+	( structfield 
+	| ~(LCURLY|RCURLY) 
+	)*
+	RCURLY
+	;
+
+protected privateAccess returns [StringBuilder res = new StringBuilder()]
+    : PRIVATE ws1=ws '.'{ if (singletonMode) $res.append($text); else $res.append("CONTEXT_PTR_ACCESS").append($ws1.text).append("->"); }
+    | {singletonMode==true}? PRIVATE { $res.append($text); } 
+    ;
+
+protected itfMethCall returns [StringBuilder res = new StringBuilder()]
+	: CALL ws1=ws '(' ws2=ws itf=ID ws3=ws ',' ws4=ws meth=ID ws5=ws ')' ws6=ws params
+      {
+        if ($params.res == null)
+          $res.append("CALL_INTERFACE_METHOD_WITHOUT_PARAM").append($ws1.text).append("(")
+              .append($ws2.text).append($itf.text).append($ws3.text).append(",")
+              .append($ws4.text).append($meth.text).append($ws5.text).append(")")
+              .append($ws6.text);
+       else
+          $res.append("CALL_INTERFACE_METHOD_WITH_PARAM").append($ws1.text).append("(")
+              .append($ws2.text).append($itf.text).append($ws3.text).append(",")
+              .append($ws4.text).append($meth.text).append($ws5.text).append(")")
+              .append($ws6.text).append($params.res);
+      }
+    ;
+		
+protected collItfMethCall returns [StringBuilder res = new StringBuilder()]
+    : CALL ws1=ws '(' ws2=ws itf=ID ws3=ws index ws4=ws ',' ws5=ws meth=ID ws6=ws ')' ws7=ws params
+      {
+        if ($params.res == null)
+          $res.append("CALL_COLLECTION_INTERFACE_METHOD_WITHOUT_PARAM").append($ws1.text).append("(")
+              .append($ws2.text).append($itf.text).append($ws3.text).append(",")
+              .append($index.res).append($ws4.text).append(",")
+              .append($ws5.text).append($meth.text).append($ws5.text).append(")")
+              .append($ws7.text);
+        else
+          $res.append("CALL_COLLECTION_INTERFACE_METHOD_WITH_PARAM").append($ws1.text).append("(")
+              .append($ws2.text).append($itf.text).append($ws3.text).append(",")
+              .append($index.res).append($ws4.text).append(",")
+              .append($ws5.text).append($meth.text).append($ws5.text).append(")")
+              .append($ws7.text).append($params.res);
+       }
+	;
+	
+protected index returns [StringBuilder res]
+	:
+	'[' inIndex ']'	{ $res = $inIndex.res; }
+	;
+	
+protected inIndex returns [StringBuilder res = new StringBuilder()]
+    : (
+        '[' i = inIndex ']' { $res.append("[").append($i.res).append("]"); }
+        | expr              { $res.append($expr.res); }
+        | e = ~('[' | ']')  { $res.append($e.text); }
+      )+
+    ;
+	
+protected prvMethCall returns [StringBuilder res = new StringBuilder()]
+	: CALL ws1=ws '(' ws2=ws ID ws3=ws ')' ws4=ws params
+      {
+        if ($params.res == null)
+          $res.append("CALL_PRIVATE_METHOD_WITHOUT_PARAM").append($ws1.text).append("(")
+              .append($ws2.text).append($ID.text).append($ws3.text).append(")")
+              .append($ws4.text);
+        else
+          $res.append("CALL_PRIVATE_METHOD_WITH_PARAM").append($ws1.text).append("(")
+              .append($ws2.text).append($ID.text).append($ws3.text).append(")")
+              .append($ws4.text).append($params.res);
+      }
+    ;
+	
+protected ptrMethCall returns [StringBuilder res = new StringBuilder()]
+    : CALL_PTR ws1=ws
+      (
+        '(' ws2=ws meth=ID ws3=ws ')' ws4=ws p1=params
+          {
+            $res.append("CALL_METHOD_PTR_").append($p1.res == null ? "WITHOUT_PARAM" : "WITH_PARAM")
+                .append("(METH_PTR").append($ws1.text).append("(")
+                .append($ws2.text).append($meth.text).append($ws3.text).append("))")
+                .append($ws4.text).append($p1.res == null ? "" : $p1.res);
+          }
+		| '(' ws5=ws methExpr=ptrMethCallArg ws6=ws ')' ws7=ws p2=params
+          {
+            $res.append("CALL_METHOD_PTR_").append($p2.res == null ? "WITHOUT_PARAM" : "WITH_PARAM")
+                .append($ws1.text).append("(").append($ws5.text).append($methExpr.res).append($ws6.text).append(")")
+                .append($ws7.text).append($p2.res == null ? "" : $p2.res); 
+          }
+		| '(' ws8=ws itfExpr=ptrMethCallArg ws9=ws ',' ws10=ws methName=ID  ws11=ws ')' ws12=ws p3=params
+		  {
+		    $res.append("CALL_INTERFACE_PTR_").append($p3.res == null ? "WITHOUT_PARAM" : "WITH_PARAM")
+		        .append($ws1.text).append("(").append($ws8.text).append($itfExpr.res).append($ws9.text).append(",")
+		        .append($ws10.text).append($methName.text).append($ws11.text).append(")")
+                .append($ws12.text).append($p3.res == null ? "" : $p3.res);
+		  }
+      )
+    ;
+
+protected ptrMethCallArg returns [StringBuilder res = new StringBuilder()]
+    : (
+        '(' pma = ptrMethCallArg1 ')' { $res.append("(").append($pma.res).append(")") ; }
+        | expr { $res.append($expr.res); }
+        | e = ~('(' | ')' | ',') { $res.append($e.text);}
+      ) +
+	;
+protected ptrMethCallArg1 returns [StringBuilder res = new StringBuilder()]
+    : ( 
+        '(' pma = ptrMethCallArg1 ')' { $res.append("(").append($pma.res).append(")") ; }
+        | expr { $res.append($expr.res); }
+        | e = ~('(' | ')') { $res.append($e.text); }
+      ) +
+	;
+	
+protected paramsDef returns [StringBuilder res = new StringBuilder()]
+	: '(' ws1=ws ')'             { if (singletonMode) $res.append($text); else $res.append("(CONTEXT_PTR_DECL").append($ws1.text).append(")"); }
+	| '(' ws2=ws VOID ws3=ws ')' { if (singletonMode) $res.append($text); else $res.append("(").append($ws2.text).append("CONTEXT_PTR_DECL").append($ws3.text).append(")"); }
+	| '(' inParamsDef ')'        { if (singletonMode) $res.append($text); else $res.append("(CONTEXT_PTR_DECL, ").append($inParamsDef.res).append(")"); }
+	;
+protected inParamsDef returns [StringBuilder res = new StringBuilder()] 
+    : (
+        '(' ip = inParamsDef ')' { $res.append("(").append($ip.res).append(")"); }
+        | e = ~('(' | ')')       { $res.append($e.text); }
+      ) +
+    ;
+
+protected params returns [StringBuilder res = new StringBuilder()]
+    : '(' ws ')'       { $res = null; }
+    | '(' inParams ')' 
+      { 
+        $res = new StringBuilder();
+        $res.append($inParams.res).append(" PARAMS_RPARENT ");
+      }
+    ;
+
+protected inParams  returns [StringBuilder res = new StringBuilder()] 
+    : (
+        '(' ip = inParams ')' { $res.append("(").append($ip.res).append(")"); }
+        | expr                { $res.append($expr.res); }
+        | e = ~('(' | ')')    { $res.append($e.text); }
+      )+
+    ;
+
+protected ws
+	: (WS)* ; //{out.print($WS.text);}
+
+	
+
+STRING_LITERAL
+    :  '"' ( EscapeSequence | ~('\\'|'"') )* '"'
+    ;
+    
+fragment
+EscapeSequence
+    :   '\\' ('b'|'t'|'n'|'f'|'r'|'\"'|'\''|'\\')
+    |   OctalEscape
+    ;
+
+fragment
+OctalEscape
+    :   '\\' ('0'..'3') ('0'..'7') ('0'..'7')
+    |   '\\' ('0'..'7') ('0'..'7')
+    |   '\\' ('0'..'7')
+    ;
+  
+
+	
+ID
+	: ( 'a'..'z'|'A'..'Z'|'_')( 'a'..'z'|'A'..'Z'|'_'|'0'..'9')*
+	;
+WS : ((' ' |'\t' |'\r' |'\n' ))+;
+
+INT : ('0'..'9')+;
+
+LCURLY		:	'{' ;
+
+RCURLY		:	'}' ;
+ANY 		:	 .;

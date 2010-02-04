@@ -1,0 +1,12 @@
+
+@Compile
+@controller.LifeCycleController
+primitive controller.lcc.MultiPrimitiveComponent extends LCCTested {
+  
+  data {{
+    struct {
+      int a;
+    } PRIVATE;
+  }};  
+  source multiLCC.c;
+}

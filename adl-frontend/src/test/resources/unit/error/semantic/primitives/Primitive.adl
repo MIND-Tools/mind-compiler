@@ -1,0 +1,4 @@
+primitive primitives.Primitive {
+	@SemanticError(GroupId="MADL",ErrorId="SOURCE_NOT_FOUND")
+	source my.c;	
+}

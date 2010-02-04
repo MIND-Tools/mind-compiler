@@ -1,0 +1,49 @@
+template st.membrane.InterfaceDelegator
+  : st.common.ComponentHelper
+  implements st.membrane.ControllerGenerator {
+
+st.interfaces.IDLDefinition idl2c = st.interfaces.IDL2C; 
+
+$${
+
+// -----------------------------------------------------------------------------
+// Implementation of the ControllerGenerator interface
+// -----------------------------------------------------------------------------
+
+ControllerData(definition, controller) ::= ""
+
+ControllerImplementation(definition, controller, interfaceDefinitions) ::= <<
+<ItfDelegator(itf=first(controller.controllerInterfaces).astDecorations.("referenced-interface"), interfaceDefinitions=interfaceDefinitions)>
+>>
+
+// -----------------------------------------------------------------------------
+// Internal templates
+// -----------------------------------------------------------------------------
+
+ItfDelegator(itf, interfaceDefinitions) ::= <<
+// Start interface delegator for interface <itf.name>
+<if (itf.numberOfElement)>
+<itf.astDecorations.("collectionIndexes"):{index | <interfaceDefinitions.(itf.signature).methods:MethodDelegator(itf=itf, index=index, method=it);separator="\n">};separator="\n">
+<else>
+<interfaceDefinitions.(itf.signature).methods:MethodDelegator(itf=itf, method=it);separator="\n">
+<endif>
+
+// End interface delegator for interface <itf.name>
+
+
+>>
+
+MethodDelegator(itf, index, method) ::= <<
+<(idl2c.methodDef)(method=method,methodName=ProxyName(itfName=itf.name, index=index, methodName=method.name)) > { 
+<if (! ((idl2c.isVoidMethod)(method=method)))>
+  return
+<endif>
+  PRIVATE.__component_internal_data.<if (isServer.(itf.role))>inner_<endif>type.<itf.name><if (index)>[<index>]<endif>.meths-><method.name>(PRIVATE.__component_internal_data.<if (isServer.(itf.role))>inner_<endif>type.<itf.name><if (index)>[<index>]<endif>.selfData<method.parameters:{, <it.name>}>);
+}
+>>
+
+
+ProxyName(itfName, index, methodName) ::= "METH(<itfName><if (index)>[<index>]<endif>, <methodName>)"
+
+}$$
+}

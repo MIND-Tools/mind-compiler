@@ -1,0 +1,4 @@
+primitive primitiveClient {
+  requires api.Call as clientItf;
+  source {{ }};
+}

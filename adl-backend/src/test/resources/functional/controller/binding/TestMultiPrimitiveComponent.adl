@@ -1,0 +1,5 @@
+
+@Run
+composite controller.binding.TestMultiPrimitiveComponent 
+    extends BCTester<MultiPrimitiveComponent> {
+}

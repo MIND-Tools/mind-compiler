@@ -1,0 +1,15 @@
+import helloworld.Service;
+
+primitive collection.ClientCollection {
+  data {{
+struct {
+  int a, b;
+} PRIVATE;
+}}
+  
+  provides Main as main;
+  requires Service as sa[2] ;
+  
+  
+  source clientCollection.c;
+}

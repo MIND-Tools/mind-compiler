@@ -1,0 +1,8 @@
+import boot.Bootstrap;
+
+composite helloworld.HelloworldApplication {
+  contains Bootstrap as bootstrap;
+  contains Helloworld as app;
+  
+  binds bootstrap.entryPoint to app.main;
+}

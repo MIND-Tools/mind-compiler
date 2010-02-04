@@ -1,0 +1,1 @@
+PRIVATE declared as an array of structure.

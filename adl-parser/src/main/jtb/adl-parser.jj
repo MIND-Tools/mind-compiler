@@ -1,0 +1,670 @@
+/**
+ * Copyright (C) 2009 STMicroelectronics
+ *
+ * This file is part of "Mind Compiler" is free software: you can redistribute 
+ * it and/or modify it under the terms of the GNU Lesser General Public License 
+ * as published by the Free Software Foundation, either version 3 of the 
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT 
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Contact: mind@ow2.org
+ *
+ * Authors: Matthieu Leclercq
+ * Contributors: 
+ */
+
+options {
+ JAVA_UNICODE_ESCAPE = true;
+ STATIC=false;
+}
+
+// -----------------------------------------------------------------------------
+// Main class
+// -----------------------------------------------------------------------------
+
+PARSER_BEGIN(Parser)
+
+package org.ow2.mind.adl.jtb;
+
+public class Parser{
+}
+PARSER_END(Parser)
+
+// -----------------------------------------------------------------------------
+// White spaces
+// -----------------------------------------------------------------------------
+
+SKIP :
+{
+  " "
+| "\t"
+| "\n"
+| "\r"
+| "\f"
+}
+
+// -----------------------------------------------------------------------------
+// Comments
+// -----------------------------------------------------------------------------
+
+TOKEN_MGR_DECLS : {
+	public String lastjavadoc = null;
+}
+
+MORE :
+{
+  "//" : IN_SINGLE_LINE_COMMENT
+|
+  <"/**" ~["/"]> : IN_FORMAL_COMMENT
+|
+  "/*" : IN_MULTI_LINE_COMMENT
+}
+
+<IN_SINGLE_LINE_COMMENT>
+SPECIAL_TOKEN :
+{
+  <SINGLE_LINE_COMMENT: "\n" | "\r" | "\r\n" > : DEFAULT
+}
+
+<IN_FORMAL_COMMENT>
+SPECIAL_TOKEN :
+{
+  <FORMAL_COMMENT: "*/" > { lastjavadoc = image.toString(); } : DEFAULT
+}
+
+<IN_MULTI_LINE_COMMENT>
+SPECIAL_TOKEN :
+{
+  <MULTI_LINE_COMMENT: "*/" > : DEFAULT
+}
+
+<IN_SINGLE_LINE_COMMENT,IN_FORMAL_COMMENT,IN_MULTI_LINE_COMMENT>
+MORE :
+{
+  < ~[] >
+}
+
+// -----------------------------------------------------------------------------
+// Reserved words and literals
+// -----------------------------------------------------------------------------
+
+// C keywords are reserved to avoid their usage as identifier in ADL files
+TOKEN : {
+	<CONTINUE: "continue"> |
+	<VOLATILE: "volatile"> |
+	<REGISTER: "register"> |
+	<UNSIGNED: "unsigned"> |
+	<TYPEDEF: "typedef"> |
+	<DFLT: "default"> |
+	<DOUBLE: "double"> |
+	<SIZEOF: "sizeof"> |
+	<SWITCH: "switch"> |
+	<RETURN: "return"> |
+	<EXTERN: "extern"> |
+	<STRUCT: "struct"> |
+	<STATIC: "static"> |
+	<SIGNED: "signed"> |
+	<WHILE: "while"> |
+	<BREAK: "break"> |
+	<UNION: "union"> |
+	<CONST: "const"> |
+	<FLOAT: "float"> |
+	<SHORT: "short"> |
+	<ELSE: "else"> |
+	<CASE: "case"> |
+	<LONG: "long"> |
+	<ENUM: "enum"> |
+	<AUTO: "auto"> |
+	<VOID: "void"> |
+	<CHAR: "char"> |
+	<GOTO: "goto"> |
+	<FOR: "for"> |
+	<INT: "int"> |
+	<IF: "if"> |
+	<DO: "do">
+}
+
+// ADL keywords
+TOKEN : {
+    <ABSTRACT: "abstract"> |
+	<AS: "as"> |
+	<ATTRIBUTE: "attribute"> |
+	<BINDS: "binds"> |
+	<COMPOSITE: "composite"> |
+	<CONFORMSTO: "conformsto"> |
+	<CONTAINS: "contains"> |
+	<DATA: "data"> |
+	<EXTENDS: "extends"> |
+	<IMPORT: "import"> |
+	<MANDATORY: "mandatory"> |
+	<NODATA: "nodata"> |
+	<OPTIONAL: "optional"> |
+	<PRIMITIVE: "primitive"> |
+	<PROPERTY: "property"> |
+	<PROVIDES: "provides"> |
+	<REQUIRES: "requires"> |
+	<SOURCE: "source"> |
+	<THIS: "this"> |
+	<TO: "to"> |
+	<TYPE: "type"> |
+	<STRING: "string"> |
+	<INT8_T: "int8_t"> |
+	<UINT8_T: "uint8_t"> |
+	<INT16_T: "int16_t"> |
+	<UINT16_T: "uint16_t"> |
+	<INT32_T: "int32_t"> |
+	<UINT32_T: "uint32_t"> |
+	<INT64_T: "int64_t"> |
+	<UINT64_T: "uint64_t"> |
+	<INTPTR_T: "intptr_t"> |
+	<UINTPTR_T: "uintptr_t">
+	
+}
+
+// Indentifiers and literals
+TOKEN : {
+    <BOOLEAN_LITERAL: "true" | "false"> |
+    <IDENTIFIER: <LETTER> (<LETTER> | <DIGIT>)*> |
+    <#LETTER: ["A"-"Z","_","a"-"z"]> |
+    <#DIGIT: ["0"-"9"]> |
+    <STRING_LITERAL: "\"" ( ~["\"","\\","\n","\r"] | "\\" ( ["n","t","b","r","f","\\","\'","\""] | ["0"-"7"] (["0"-"7"])?  | ["0"-"3"] ["0"-"7"] ["0"-"7"] | ( ["\n","\r"] | "\r\n")))* "\""> |
+    <CHARACTER_LITERAL: "\'"   (~["\'","\\","\n","\r"] | "\\" (["n","t","b","r","f","\\","\'","\""] | ["0"-"7"] (["0"-"7"])? | ["0"-"3"] ["0"-"7"] ["0"-"7"])) "\'"> |
+    <INTEGER_LITERAL: <DECIMAL_LITERAL> (["l","L"])? | <HEX_LITERAL> (["l","L"])? | <OCTAL_LITERAL> (["l","L"])?> |
+    <#DECIMAL_LITERAL: (["1"-"9"] (["0"-"9"])*)> |
+    <#HEX_LITERAL: "0" ["x","X"] (["0"-"9","a"-"f","A"-"F"])+> |
+    <#OCTAL_LITERAL: "0" (["0"-"7"])*>
+}
+
+// Separators
+TOKEN :
+{
+  < LPAREN: "(" >
+| < RPAREN: ")" >
+| < LBRACE: "{" >
+| < RBRACE: "}" >
+| < LBRACKET: "[" >
+| < RBRACKET: "]" >
+| < LT: "<" >
+| < GT: ">" >
+| < SEMICOLON: ";" >
+| < COMMA: "," >
+| < DOT: "." >
+| < DOTDOT: ".." >
+| < SLASH: "/" >
+| < START: "*" >
+| < AT: "@" >
+| < ASSIGN: "=" >
+| < ANY: "?" >
+| < MINUS: "-" >
+| < PLUS: "+" >
+}
+
+// Inlined C code
+
+TOKEN :
+{
+  <INLINED_CODE : "{{"((~["}"]) | ("}" ~["}"]))*"}}">
+}
+
+// -----------------------------------------------------------------------------
+// ADL grammar starts here
+// -----------------------------------------------------------------------------
+
+/*******************************************************************************
+  File level grammar
+ ******************************************************************************/
+
+void ADLFile() : {}
+{
+  (LOOKAHEAD( (Annotation())* <IMPORT> ) ImportDefinition() ) *
+  ArchitectureDefinition()
+  <EOF>
+}
+
+void ImportDefinition() : {}
+{
+  (Annotation())* 
+  <IMPORT> <IDENTIFIER> <DOT> ( LOOKAHEAD(2) <IDENTIFIER> <DOT> ) *
+  ( <START> | <IDENTIFIER> ) [ <SEMICOLON> ]
+}
+
+void ArchitectureDefinition() : {}
+{
+  (
+    LOOKAHEAD( (Annotation())* <TYPE> ) TypeDefinition()
+    | LOOKAHEAD( (Annotation())* [ <ABSTRACT> ] <PRIMITIVE> ) PrimitiveDefinition()
+    | CompositeDefinition()
+  )
+}
+
+/*******************************************************************************
+  Definition prototypes grammar
+ ******************************************************************************/
+
+void TypeDefinition() : {}
+{
+  Annotations()
+  <TYPE> FullyQualifiedName() [ ExtendedTypeDefinitions() ]
+  TypeDefinitionBody()
+}
+
+void ExtendedTypeDefinitions() : {}
+{
+  <EXTENDS> TypeDefinitionReference() ( <COMMA> TypeDefinitionReference() ) *
+}
+
+void TypeDefinitionReference() : {}
+{
+  FullyQualifiedName()
+}
+
+void TypeDefinitionBody() : {}
+{
+  <LBRACE> ( TypeDefinitionElement() ) * <RBRACE>
+  | ( TypeDefinitionElement() ) *
+}
+
+void TypeDefinitionElement() : {}
+{
+  InterfaceDefinition()
+}
+
+/******************************************************************************/
+
+void PrimitiveDefinition() : {}
+{
+  Annotations()
+  [ <ABSTRACT> ] <PRIMITIVE> FullyQualifiedName()
+  [ FormalParameterDeclarationList() ]
+  [ ExtendedPrimitiveDefinitions() ]
+  PrimitiveDefinitionBody()
+}
+
+void FormalParameterDeclarationList() : {}
+{
+  <LPAREN> 
+  [ FormalParameterDeclaration() ( <COMMA> FormalParameterDeclaration() ) * ]
+  <RPAREN> 
+}
+
+void FormalParameterDeclaration() : {}
+{
+  <IDENTIFIER>
+}
+
+void ExtendedPrimitiveDefinitions() : {}
+{
+  <EXTENDS> PrimitiveDefinitionReference() 
+  ( <COMMA> PrimitiveDefinitionReference() ) *
+}
+
+void PrimitiveDefinitionReference() : {}
+{
+  FullyQualifiedName() [ ArgumentList() ]
+}
+
+void ArgumentList() : {}
+{
+  <LPAREN>
+  [ 
+    LOOKAHEAD(2) 
+    Argument() ( <COMMA> Argument() ) *
+    | ArgumentAssignement() ( <COMMA> ArgumentAssignement() ) *
+  ]
+  <RPAREN>
+}
+
+void ArgumentAssignement() : {}
+{
+  <IDENTIFIER> <ASSIGN> Argument()
+}
+
+void Argument() : {}
+{
+  StringValue() | IntegerValue() | ReferenceValue()
+}
+
+void PrimitiveDefinitionBody() : {}
+{
+  <LBRACE> ( PrimitiveDefinitionElement() ) * <RBRACE>
+  | ( PrimitiveDefinitionElement() ) *
+}
+
+void PrimitiveDefinitionElement() : {}
+{
+  LOOKAHEAD( (Annotation())* (<PROVIDES>|<REQUIRES>) ) InterfaceDefinition()
+  | LOOKAHEAD( (Annotation())* <ATTRIBUTE> ) AttributeDefinition()
+  | LOOKAHEAD( (Annotation())* (<DATA>|<NODATA>) ) DataDefinition()
+  | LOOKAHEAD( (Annotation())* <SOURCE> ) ImplementationDefinition()
+}
+
+/******************************************************************************/
+
+void CompositeDefinition() : {}
+{
+   Annotations()
+  <COMPOSITE> FullyQualifiedName()
+  [ FormalTypeParameterDeclarationList() ]
+  [ FormalParameterDeclarationList() ]
+  [ ExtendedCompositeDefinitions() ]
+  CompositeDefinitionBody()
+}
+
+void FormalTypeParameterDeclarationList() : {}
+{
+  <LT> 
+  FormalTypeParameterDeclaration() ( <COMMA> FormalTypeParameterDeclaration() ) *
+  <GT>
+}
+
+void FormalTypeParameterDeclaration() : {}
+{
+   <IDENTIFIER> <CONFORMSTO> TypeDefinitionReference() 
+}
+
+void CompositeDefinitionReference() : {}
+{
+  FullyQualifiedName() [ TypeArgumentList() ] [ ArgumentList() ]
+}
+
+void TypeArgumentList() : {}
+{
+  <LT>
+  [ 
+    LOOKAHEAD(2)
+    TypeArgument() ( <COMMA> TypeArgument() ) *
+    | TypeArgumentAssignement() ( <COMMA> TypeArgumentAssignement() ) *
+  ]
+  <GT>
+}
+
+void TypeArgumentAssignement() : {}
+{
+  <IDENTIFIER> <ASSIGN> TypeArgument()
+}
+
+void TypeArgument() : {}
+{
+  CompositeDefinitionReference() | <ANY>
+}
+
+void ExtendedCompositeDefinitions() : {}
+{
+  <EXTENDS> CompositeDefinitionReference()
+  ( <COMMA> CompositeDefinitionReference() ) *
+}
+
+void CompositeDefinitionBody() : {}
+{
+  <LBRACE> ( CompositeDefinitionElement() ) * <RBRACE>
+  | ( CompositeDefinitionElement() ) *
+}
+
+void CompositeDefinitionElement() : {}
+{
+  LOOKAHEAD( (Annotation())* (<PROVIDES>|<REQUIRES>) ) InterfaceDefinition()
+  | LOOKAHEAD( (Annotation())* <BINDS> ) BindingDefinition()
+  | SubComponentDefinition()
+}
+
+/*******************************************************************************
+  Content grammar
+ ******************************************************************************/
+
+void InterfaceDefinition() : {}
+{
+  Annotations()
+  ( <PROVIDES> | <REQUIRES> ) [ <OPTIONAL> ]
+  FullyQualifiedName() <AS>
+  <IDENTIFIER> [ <LBRACKET> [ <INTEGER_LITERAL> ] <RBRACKET> ]
+  [ <SEMICOLON> ]
+}
+
+/******************************************************************************/
+
+void AttributeDefinition() : {}
+{
+  Annotations()
+  <ATTRIBUTE> [ AttributeType() ] <IDENTIFIER> [ <ASSIGN> AttributeValue() ]
+  [ <SEMICOLON> ]
+}
+
+void AttributeType() : {}
+{
+    <INT>
+    | <STRING>
+    | <INT8_T>
+    | <UINT8_T>
+    | <INT16_T>
+    | <UINT16_T>
+    | <INT32_T>
+    | <UINT32_T>
+    | <INT64_T>
+    | <UINT64_T>
+    | <INTPTR_T>
+    | <UINTPTR_T>
+}
+
+void AttributeValue() : {}
+{
+  StringValue() | IntegerValue() | ReferenceValue()
+}
+
+/******************************************************************************/
+
+void DataDefinition() : {}
+{
+  Annotations()
+  (
+    DataFileDefinition()
+    | NoDataDefinition()
+  )
+  [ <SEMICOLON> ]
+}
+
+void DataFileDefinition() : {}
+{
+  <DATA> ( Path() | <INLINED_CODE> )
+}
+
+void NoDataDefinition() : {}
+{
+  <NODATA>
+}
+
+/******************************************************************************/
+
+void ImplementationDefinition() : {}
+{
+  Annotations()
+  <SOURCE> ( Path() | <INLINED_CODE> )
+  [ <SEMICOLON> ]
+}
+
+/******************************************************************************/
+
+void BindingDefinition() : {}
+{
+  Annotations() 
+  <BINDS> BindingComponentName()
+  <DOT> <IDENTIFIER> [ <LBRACKET> <INTEGER_LITERAL> <RBRACKET> ]
+  <TO> BindingComponentName()
+  <DOT> <IDENTIFIER> [ <LBRACKET> <INTEGER_LITERAL> <RBRACKET> ]
+  [ <SEMICOLON> ]
+}
+
+void BindingComponentName() : {}
+{
+  <IDENTIFIER> | <THIS>
+}
+
+/******************************************************************************/
+
+void SubComponentDefinition() : {}
+{
+  Annotations()
+  <CONTAINS> SubComponentReference()
+  [ <SEMICOLON> ]
+}
+
+void SubComponentReference() : {}
+{
+  LOOKAHEAD(2) CompositeSubComponentReference()
+  | CompositeInlinedDefinition()
+  | LOOKAHEAD(2) PrimitiveSubComponentReference()
+  | PrimitiveInlinedDefinition()
+  | SimpleSubComponentReference()
+}
+
+void CompositeSubComponentReference() : {}
+{
+  <COMPOSITE> CompositeDefinitionReference() 
+  <AS> <IDENTIFIER>  
+  [ LOOKAHEAD( (Annotation())* <LBRACE> ) CompositeAnonymousExtension() ]
+}
+
+void CompositeInlinedDefinition() : {}
+{
+  <COMPOSITE> <AS> <IDENTIFIER> CompositeAnonymousExtension()
+}
+
+void PrimitiveSubComponentReference() : {}
+{
+  <PRIMITIVE> PrimitiveDefinitionReference() 
+  <AS> <IDENTIFIER> 
+  [ LOOKAHEAD( (Annotation())* <LBRACE> ) PrimitiveAnonymousExtension() ]
+}
+
+void PrimitiveInlinedDefinition() : {}
+{
+  <PRIMITIVE> <AS> <IDENTIFIER> PrimitiveAnonymousExtension()
+}
+
+void SimpleSubComponentReference() : {}
+{
+  [ CompositeDefinitionReference() ] <AS> <IDENTIFIER> 
+  
+  [ LOOKAHEAD( (Annotation())* ( <PRIMITIVE> | <COMPOSITE> ))
+    ( LOOKAHEAD( (Annotation())* <PRIMITIVE> ) PrimitiveAnonymousDefinition() 
+      | CompositeAnonymousDefinition() ) ]
+}
+
+void PrimitiveAnonymousDefinition() : {}
+{
+  Annotations()
+  <PRIMITIVE> 
+  <LBRACE> 
+  ( PrimitiveDefinitionElement() ) * 
+  <RBRACE>
+}
+
+void CompositeAnonymousDefinition() : {}
+{
+  Annotations()
+  <COMPOSITE> 
+  <LBRACE> 
+  ( CompositeDefinitionElement() ) * 
+  <RBRACE>
+}
+
+void PrimitiveAnonymousExtension() : {}
+{
+  Annotations()
+  <LBRACE>
+  ( PrimitiveDefinitionElement() ) * 
+  <RBRACE>
+}
+
+void CompositeAnonymousExtension() : {}
+{
+  Annotations()
+  <LBRACE>
+  ( CompositeDefinitionElement() ) * 
+  <RBRACE>
+}
+
+/*******************************************************************************
+  Annotation grammar
+ ******************************************************************************/
+
+void Annotations() : {}
+{
+  ( Annotation() ) *
+}
+
+void Annotation() : {}
+{
+  <AT> FullyQualifiedName() [ AnnotationParameters() ]
+}
+
+void AnnotationParameters() : {}
+{
+  <LPAREN> [ AnnotationValuePairs() | AnnotationValue() ] <RPAREN>
+}
+
+void AnnotationValuePairs() : {}
+{
+  AnnotationValuePair() ( <COMMA> AnnotationValuePair() ) * 
+}
+
+void AnnotationValuePair() : {}
+{
+  <IDENTIFIER> <ASSIGN> AnnotationValue()
+}
+
+void AnnotationValue() : {}
+{
+  StringValue()
+  | IntegerValue()
+  | BooleanValue()
+  | AnnotationAnnotationValue()
+  | ArrayAnnotationValue()
+}
+
+void AnnotationAnnotationValue() : {}
+{
+  Annotation()
+}
+
+void ArrayAnnotationValue() : {}
+{
+  <LBRACE> [ AnnotationValue()( <COMMA> AnnotationValue() ) * ] <RBRACE>
+}
+
+void StringValue() : {}
+{
+  <STRING_LITERAL>
+}
+
+void IntegerValue() : {}
+{
+  [ <MINUS> | <PLUS> ] <INTEGER_LITERAL>
+}
+
+void BooleanValue() : {}
+{
+  <BOOLEAN_LITERAL>
+}
+
+void ReferenceValue() : {}
+{
+  <IDENTIFIER>
+}
+
+void FullyQualifiedName() : {}
+{
+  <IDENTIFIER> ( <DOT> <IDENTIFIER> ) *
+}
+
+void Path() : {}
+{
+  [ <DOT> <SLASH> ] ( <DOTDOT> <SLASH> )* 
+  <IDENTIFIER> ( <SLASH> <IDENTIFIER> )* <DOT> <IDENTIFIER>
+}

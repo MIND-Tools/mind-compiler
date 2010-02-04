@@ -1,0 +1,5 @@
+primitive pkg1.annotations.Foo {
+
+  @org.ow2.mind.adl.annotations.FooAnnotation
+  source foo.c;
+}

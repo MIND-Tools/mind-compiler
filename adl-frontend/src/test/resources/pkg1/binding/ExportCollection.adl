@@ -1,0 +1,10 @@
+
+import pkg1.I2;
+
+composite pkg1.binding.ExportCollection {
+  requires I2 as cItf[3];
+  
+  contains pkg1.binding.ClientCollection as subComp;
+  
+  binds subComp.cItf to this.cItf;
+}

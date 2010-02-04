@@ -1,0 +1,9 @@
+// Composite : Duplicated binding of required interface
+composite bindings.binding4 {
+  contains primitive primitiveServer as server1 ;
+  contains primitive primitiveServer as server2 ;
+  contains primitive primitiveClient as client1 ;
+  binds client1.clientItf to server1.serverItf;
+  @SemanticError(GroupId="BDG", ErrorId="DUPLICATED_BINDING")
+  binds client1.clientItf to server2.serverItf;
+}

@@ -1,0 +1,24 @@
+<?xml version='1.0'?>
+<highlighters>
+
+<highlighter type='multiline-comment'>
+  <start><![CDATA[<!--]]></start>
+  <end><![CDATA[-->]]></end>
+</highlighter>
+
+<highlighter type='keywords'>
+  <keyword>target</keyword>
+  <keyword>name</keyword>
+  <keyword>extends</keyword>
+  <keyword>adlMapping</keyword>
+  <keyword>mapping</keyword>
+  <keyword>compiler</keyword>
+  <keyword>path</keyword>
+  <keyword>linker</keyword>
+  <keyword>cFlag</keyword>
+  <keyword>id</keyword>
+  <keyword>value</keyword>
+  <keyword>ldFlag</keyword>
+</highlighter>
+
+</highlighters>

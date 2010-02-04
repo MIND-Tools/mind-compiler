@@ -1,0 +1,113 @@
+template st.membrane.AttributeController
+  : st.common.ComponentHelper
+  implements st.membrane.ControllerGenerator {
+
+st.interfaces.IDLDefinition idl2c = st.interfaces.IDL2C; 
+
+$${
+
+// -----------------------------------------------------------------------------
+// Implementation of the ControllerGenerator interface
+// -----------------------------------------------------------------------------
+
+ControllerGlobalDecl(definition, controller) ::= ""
+ControllerData(definition, controller) ::= ""
+ControllerDataStaticInit(definition, controller) ::= ""
+ControllerDataFactoryNew(definition, controller) ::= ""
+ControllerDataFactoryDestroy(definition, controller) ::= ""
+
+ControllerImplementation(definition, controller, interfaceDefinitions) ::= <<
+
+// --------------------------------------------------------------------------
+// Implementation of the AttributeController interface
+// --------------------------------------------------------------------------
+
+#include "fractal/internal/ACdelegate.h"
+
+<initAttributeDescriptors(definition=definition)>
+
+<listFcAttributes(definition=definition)>
+
+<getFcAttribute(definition=definition)>
+
+<getFcAttributeSize(definition=definition)>
+
+<setFcAttribute(definition=definition)>
+
+>>
+
+// -----------------------------------------------------------------------------
+// Internal templates
+// -----------------------------------------------------------------------------
+
+initAttributeDescriptors(definition) ::= <<
+static struct {
+  int nbAttributes;
+  struct __component_AttributeDescriptor attributeDesc[<length(definition.attributes)>];
+} __component_<definition.name;format="toCName">_attribute_descriptor = {
+  <length(definition.attributes)>, /* nbAttributes */
+  { /* attributeDesc */
+    <definition.attributes:initAttributeDescriptor(definition=definition, attribute=it);separator=",\n">
+  }
+};
+>>
+
+initAttributeDescriptor(definition, attribute) ::= <<
+__COMPONENT_INIT_ATTRIBUTE_DESCRIPTOR(<ComponentTypeName(definitionName=definition.name)>, <attribute.name>)
+>>
+
+listFcAttributes(definition) ::= <<
+int METH(attributeController, listFcAttributes)(const char *attributeNames[]) 
+{
+  return __component_listFcAttributes_delegate(attributeNames,
+      <attributeDescPointer(definition=definition)>);
+}
+>>
+
+getFcAttribute(definition) ::= <<
+int METH(attributeController, getFcAttribute)(const char *attributeName,
+    void **value) 
+{
+  return __component_getFcAttribute_delegate(attributeName, value,
+      <attributeDescPointer(definition=definition)>, 
+      <componentPointer(definition=definition)>);
+}
+>>
+
+getFcAttributeSize(definition) ::= <<
+int METH(attributeController, getFcAttributeSize)(const char *attributeName) 
+{
+  return __component_getFcAttributeSize_delegate(attributeName,
+      <attributeDescPointer(definition=definition)>);
+}
+>>
+
+setFcAttribute(definition) ::= <<
+int METH(attributeController, setFcAttribute)(const char *attributeName, 
+    void *value) 
+{
+  return __component_setFcAttribute_delegate(attributeName, value,
+      <attributeDescPointer(definition=definition)>, 
+      <componentPointer(definition=definition)>);
+}
+>>
+
+
+attributeDescPointer(definition) ::= <<
+((struct __component_AttributeDescriptors *) &__component_<definition.name;format="toCName">_attribute_descriptor)
+>>
+
+componentPointer(definition) ::= <<
+<if (definition.astNodeTypes.("data"))>
+<if (definition.data)>
+CONTEXT_PTR_ACCESS
+<else>
+(&__component_<definition.name;format="toCName">_singleton_instance)
+<endif>
+<else>
+CONTEXT_PTR_ACCESS
+<endif>
+>>
+
+}$$
+}

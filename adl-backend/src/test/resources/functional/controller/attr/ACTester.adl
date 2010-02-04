@@ -1,0 +1,16 @@
+
+composite controller.attr.ACTester<T conformsto ACTested> extends ApplicationType {
+
+  contains primitive as tester {
+    provides Main as main;
+    requires fractal.api.AttributeController as testedAC;
+    requires Main as testedMain;
+    source acTester.c;
+  }
+  
+  contains T as tested;
+  
+  binds this.main to tester.main;
+  binds tester.testedAC to tested.attributeController;
+  binds tester.testedMain to tested.main;
+}

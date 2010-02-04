@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter SYSTEM "../dtd/minddoc.dtd" [
+<!ENTITY % myents SYSTEM "../shared.ent" >
+%myents;
+]>
+<chapter id="combe">
+  <title>
+    Common Backend
+    </title>
+
+  <section id="combe-visit">
+    <title>Generic visitor framework</title>
+
+    <para>TODO</para>
+  </section>
+
+  <section id="combe-comp">
+    <title>Compilation framework</title>
+
+    <para>TODO</para>
+
+  </section>
+  
+  <section id="combe-st">
+    <title>StringTemplate framework</title>
+
+    <para>TODO</para>
+  </section>
+</chapter>

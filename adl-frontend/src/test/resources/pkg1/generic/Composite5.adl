@@ -1,0 +1,5 @@
+
+import pkg1.pkg2.Type1;
+
+composite pkg1.generic.Composite5 extends Generic1<Type1> {
+}

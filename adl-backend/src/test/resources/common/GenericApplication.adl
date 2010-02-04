@@ -1,0 +1,7 @@
+
+composite GenericApplication<App conformsto ApplicationType> {
+  contains App as app;
+  contains Bootstrap as bootstrap;
+  
+  binds bootstrap.entryPoint to app.main;
+}

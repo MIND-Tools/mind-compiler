@@ -1,0 +1,10 @@
+
+composite factory.GenericFactoryTest<T conformsto ApplicationType> extends ApplicationType {
+  contains FactoryTester as tester;
+  contains Factory<T> as factory;
+  contains UnixAllocator as allocator;
+  
+  binds this.main to tester.main;
+  binds tester.factory to factory.factory;
+  binds factory.allocator to allocator.allocator;
+}

@@ -1,0 +1,116 @@
+template st.membrane.ComponentController
+  : st.common.ComponentHelper
+  implements st.membrane.ControllerGenerator {
+
+st.interfaces.IDLDefinition idl2c = st.interfaces.IDL2C; 
+
+$${
+
+// -----------------------------------------------------------------------------
+// Implementation of the ControllerGenerator interface
+// -----------------------------------------------------------------------------
+
+ControllerGlobalDecl(definition, controller) ::= ""
+ControllerData(definition, controller) ::= ""
+ControllerDataStaticInit(definition, controller) ::= ""
+ControllerDataFactoryNew(definition, controller) ::= ""
+ControllerDataFactoryDestroy(definition, controller) ::= ""
+
+ControllerImplementation(definition, controller, interfaceDefinitions) ::= <<
+
+// --------------------------------------------------------------------------
+// Implementation of the Component controller interface
+// --------------------------------------------------------------------------
+
+#include "fractal/internal/CIdelegate.h"
+
+<initInterfaceDescriptors(definition=definition)>
+
+<getFcInterface(definition=definition)>
+
+<getFcInterfaces(definition=definition)>
+
+<listFcInterfaces(definition=definition)>
+
+<getFcInterfaceRole(definition=definition)>
+
+>>
+
+// -----------------------------------------------------------------------------
+// Internal templates
+// -----------------------------------------------------------------------------
+
+initInterfaceDescriptors(definition) ::= <<
+static struct {
+  int nbItfs;
+  struct __component_InterfaceDescriptor itfDesc[<length(definition.interfaces)>];
+} __component_<definition.name;format="toCName">_interface_descriptor = {
+  <length(definition.interfaces)>, /* nbItfs */
+  { /* itfDesc */
+    <definition.interfaces:initInterfaceDescriptor(definition=definition, itf=it);separator=",\n">
+  }
+};
+>>
+
+initInterfaceDescriptor(definition, itf) ::= <<
+<if (isClient.(itf.role))>
+__COMPONENT_INIT_CLIENT_INTERFACE_DESCRIPTOR(<ComponentTypeName(definitionName=definition.name)>, <itf.name>)
+<else>
+__COMPONENT_INIT_SERVER_INTERFACE_DESCRIPTOR(<ComponentTypeName(definitionName=definition.name)>, <itf.name>)
+<endif>
+>>
+
+getFcInterface(definition) ::= <<
+int METH(component, getFcInterface)(const char *interfaceName,
+    void** interfaceReference) 
+{
+  return __component_getFcInterface_delegate(interfaceName, interfaceReference,
+      <itfDescPointer(definition=definition)>, 
+      <componentPointer(definition=definition)>);
+}
+>>
+
+getFcInterfaces(definition) ::= <<
+int METH(component, getFcInterfaces)(void* interfaceReferences[]) 
+{
+  return __component_getFcInterfaces_delegate(interfaceReferences,
+      <itfDescPointer(definition=definition)>, 
+      <componentPointer(definition=definition)>);
+}
+>>
+
+listFcInterfaces(definition) ::= <<
+int METH(component, listFcInterfaces)(const char* interfaceNames[]) 
+{
+  return __component_listFcInterfaces_delegate(interfaceNames,
+      <itfDescPointer(definition=definition)>);
+}
+>>
+
+getFcInterfaceRole(definition) ::= <<
+int METH(component, getFcInterfaceRole)(const char* interfaceName) 
+{
+  return __component_getFcInterfaceRole_delegate(interfaceName,
+      <itfDescPointer(definition=definition)>);
+}
+>>
+
+
+itfDescPointer(definition) ::= <<
+((struct __component_InterfaceDescriptors *) &__component_<definition.name;format="toCName">_interface_descriptor)
+>>
+
+componentPointer(definition) ::= <<
+<if (definition.astNodeTypes.("data"))>
+<if (definition.data)>
+CONTEXT_PTR_ACCESS
+<else>
+(&__component_<definition.name;format="toCName">_singleton_instance)
+<endif>
+<else>
+CONTEXT_PTR_ACCESS
+<endif>
+>>
+
+}$$
+}

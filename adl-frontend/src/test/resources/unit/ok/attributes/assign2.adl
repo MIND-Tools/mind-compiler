@@ -1,0 +1,11 @@
+// composite assigning sub-component attributes 
+// by extending another composite
+
+composite attributes.assign2 extends attributes.assign1 {
+
+ contains primitive attributes.attr1 as A1 {
+  source {{ }};
+  attribute string			attr_string = "foo" ;
+ } ;
+
+}

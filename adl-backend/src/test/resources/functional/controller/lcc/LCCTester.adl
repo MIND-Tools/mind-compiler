@@ -1,0 +1,18 @@
+
+composite controller.lcc.LCCTester<T conformsto LCCTested> 
+    extends ApplicationType {
+  
+  contains primitive as tester {
+    provides Main as main;
+    requires fractal.api.LifeCycleController as testedLCC;
+    requires Main as testedMain;
+    
+    source lccTester.c;
+  }
+  
+  contains T as tested;
+  
+  binds this.main to tester.main;
+  binds tester.testedLCC to tested.lifeCycleController;
+  binds tester.testedMain to tested.main;
+}

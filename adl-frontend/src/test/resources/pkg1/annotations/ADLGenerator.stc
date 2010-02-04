@@ -1,0 +1,13 @@
+template pkg1.annotations.ADLGenerator {
+
+$${
+
+Generate(adlName) ::= <<
+primitive <adlName> {
+  provides pkg1.I2 as itf;
+  source {{ }};
+}
+>>
+
+}$$ 
+}

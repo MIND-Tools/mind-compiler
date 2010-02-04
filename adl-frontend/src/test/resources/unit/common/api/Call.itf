@@ -1,0 +1,4 @@
+// Test API
+interface api.Call { 
+  void call(int8_t data, int8_t b);
+}

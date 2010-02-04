@@ -1,0 +1,9 @@
+
+import pkg1.pkg2.Type1;
+
+composite pkg1.Composite3<U conformsto Type1, V conformsto Type1> {
+  
+  contains U as c1;
+  contains V as c2;
+
+}

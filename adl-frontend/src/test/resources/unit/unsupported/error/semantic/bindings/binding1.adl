@@ -1,0 +1,7 @@
+// Composite : Direct binding this.x to this.y unauthorized
+composite bindings.binding1 {
+  provides api.Call as p0
+  requires api.Call as r0
+  @SemanticError(GroupId="BDG", ErrorId="INVALID_FROM_INTERNAL")
+  binds this.p0 to this.r0
+}

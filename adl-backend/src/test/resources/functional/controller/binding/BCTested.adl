@@ -1,0 +1,6 @@
+
+type controller.binding.BCTested extends ApplicationType {
+  provides fractal.api.BindingController as bindingController;
+  requires Main as clientMain;
+  requires Main as clientCollectionMain[3];
+}

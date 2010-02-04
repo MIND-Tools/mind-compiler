@@ -1,0 +1,28 @@
+template st.common.ComponentHelper {
+
+$${
+isClient ::= [ "client" : "true" ]
+isServer ::= [ "server" : "true" ]
+isCollection ::= [ "collection" : "true" ]
+isThis ::= [ "this" : "true" ]
+
+InterfaceDescType(signature) ::= <<
+struct __component_<signature;format="toCName">_itf_desc
+>>
+
+InterfaceVTableType(signature) ::= <<
+struct __component_<signature; format="toCName">_vTable
+>>
+
+ComponentTypeName(definitionName) ::= <<
+__component_<definitionName;format="toCName">_t
+>>
+
+vTableInstanceName(definition, itf, index) ::= <<
+__component_<definition.name; format="toCName">_<itf.name><if (index)>_<index><endif>_VTable
+>>
+
+
+}$$
+
+}

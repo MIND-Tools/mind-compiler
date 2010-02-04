@@ -1,0 +1,4 @@
+
+primitive pkg1.controller.binding.Primitive1 extends Type1 {
+ source {{  }};
+}

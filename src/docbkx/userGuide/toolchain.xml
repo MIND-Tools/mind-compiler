@@ -1,0 +1,729 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
+  "../dtd/docbookx.dtd" [
+<!ENTITY % myents SYSTEM "../shared.ent" >
+%myents;
+]>
+<chapter id="tool">
+  <title>
+    The <command>mindc</command> command.
+  </title>
+
+  <para>The &productName; toolchain allows to compile component-based application.
+    That is, the toolchain is responsible to read and check ADL, IDL and CPL files, 
+    to generate the C glue-code, and to execute the C-compiler and linker. All these
+    steps are completely automated through a single <command>mindc</command> command.</para>
+    
+  <para>
+    The <command>mindc</command> command has the following forms :
+    <cmdsynopsis>
+      <command>mindc</command>
+      <arg choice="opt" rep="repeat"><replaceable>OPTIONS</replaceable></arg>
+      <arg choice="req" rep="repeat"><replaceable>adlname</replaceable><arg choice="opt">:<replaceable>execname</replaceable></arg></arg>
+    </cmdsynopsis>
+  </para>
+  
+  <para>
+    <replaceable>adlname</replaceable> is the name of the top-level ADL definition
+      to compile, while <replaceable>execname</replaceable> is the name of the executable 
+      file that will be produced. If this latter is not specified, then the name of 
+      the executable file will be the simple name of the ADL and it will be located in a 
+      directory that corresponds to the package nane of the ADL. Several ADL definitions 
+      can be specified on the same command-line.
+  </para>
+  
+  <para>
+    Available options are :
+    <variablelist>
+      <varlistentry>
+        <term><code>[--src-path|-S]=<replaceable>&lt;path-list&gt;</replaceable></code></term>
+        <listitem>
+          <para>the search path of ADL, IDL and implementation files (see <xref linkend="tool-srcpath"/> for more details). </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><code>[--out-path|-o]=<replaceable>&lt;path&gt;</replaceable></code></term>
+        <listitem>
+          <para>the directory where generated files will be put (default is <code>'.'</code>).</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><code>[--target-descriptor|-t]=<replaceable>&lt;name&gt;</replaceable></code></term>
+        <listitem>
+          <para>the target descriptor (see <xref linkend="tool-targetdesc"/> for more details).</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><code>--compiler-command=<replaceable>&lt;cmd&gt;</replaceable></code></term>
+        <listitem>
+          <para>the command of the C compiler (default is <command>gcc</command>).</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><code>[--c-flags|-c]=<replaceable>&lt;flags&gt;</replaceable></code></term>
+        <listitem>
+          <para>the additional flags passed to the C compiler command. This option may be specified several times.</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><code>--linker-command=<replaceable>&lt;cmd&gt;</replaceable></code></term>
+        <listitem>
+          <para>the command of the linker (default is <command>gcc</command>).</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><code>[--ld-flags|-l]=<replaceable>&lt;flags&gt;</replaceable></code></term>
+        <listitem>
+          <para>the additional flags passed to the linker command. This option may be specified several times.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><code>[--linker-script|-T]=<replaceable>&lt;path&gt;</replaceable></code></term>
+        <listitem>
+          <para>the linker script to use (given path is resolved in source path).</para>
+        </listitem>
+      </varlistentry>
+      
+      <varlistentry>
+        <term><code>[--jobs|-j]=<replaceable>&lt;number&gt;</replaceable></code></term>
+        <listitem>
+          <para>the number of concurrent compilation jobs (default is 1).</para>
+        </listitem>
+      </varlistentry>
+      
+      <varlistentry>
+        <term><code>--check-adl</code></term>
+        <listitem>
+          <para>Only check input ADL(s), do not compile.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><code>--def2c|-d</code></term>
+        <listitem>
+          <para>Only generate source code of the given definitions.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><code>--def2o|-D</code></term>
+        <listitem>
+          <para>Generate and compile source code of the given definitions, do not link an executable application.</para>
+        </listitem>
+      </varlistentry>
+      
+      <varlistentry>
+        <term><code>-e</code></term>
+        <listitem>
+          <para>Print error stack-traces (for debugging the compiler).</para>
+        </listitem>
+      </varlistentry>
+      
+      <varlistentry>
+        <term><code>--help|-h</code></term>
+        <listitem>
+          <para>Print help message and exit</para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </para>
+
+  <example>
+    <title><command>mindc</command> command examples</title>
+    <programlisting> $ mindc --src-path=src --out-path=build foo.bar.MyApplication</programlisting>
+    
+    <para>In the above command :
+      <itemizedlist>
+        <listitem>
+          <para>Input files (ADL, IDL an C files) will be shearched in the 
+            <filename>src</filename> directory.</para>
+        </listitem>
+        <listitem>
+          <para>Output files will be placed in the 
+            <filename>build</filename> directory.</para>
+        </listitem>
+        <listitem>
+          <para>The ADL of the top-level component to compile is <classname>foo.bar.MyApplication</classname>.
+            That is, the definition is supposed to be located in the 
+            <filename>src/foo/bar/MyApplication.adl</filename> file. Moreover the produced executable will 
+            be located in the <filename>build/foo/bar/MyApplication</filename> file.</para>
+        </listitem>
+      </itemizedlist>
+    </para>
+    
+    <programlisting> $ mindc --src-path=src --out-path=build foo.bar.MyApplication:myApp</programlisting>
+    
+    <para>The above example is similar to the previous one, except that the produced executable will 
+      be located in the <filename>build/myApp</filename> file.</para>
+  </example>
+
+  <section id="tool-srcpath">
+    <title>Source-path</title>
+    <para>The source-path specifies the base directories used to determine the location
+      of the input files (ADL, IDL or CPL). That is, the source path can be made
+      of several directories. For example, if the toolchain must find the definition
+      of an ADL called <classname>foo.bar.MyComponent</classname>, it will search for 
+      a file called <filename>foo/bar/MyComponent.adl</filename> in each directory
+      of the source path</para>
+    
+    <para>The source path is specified on the <command>mindc</command> command-line
+      using the <code>--src-path</code> (or <code>-S</code>) option. This options 
+      must be followed by an equal sign (<code>'='</code>) itself followed by a
+      list of paths. Paths are separated by <code>':'</code> on Unix-like systems
+      and by <code>';'</code> on Windows systems (similarly to java classpaths).
+      The <code>--src-path</code> (or <code>-S</code>) option can be specified
+      several times on a given command-line.</para>
+    
+    <para>The source path allows to easily integrate external sources like component libraries in your 
+      developments. The only thing you need is to place the external sources in a 
+      well known directory and specify it in the source-path.</para>
+  </section>
+  
+  <section id="tool-mpp">
+    <title>The Mind Pre-Processor</title>
+
+    <para>Component implementation sources are written in the CPL language. This
+      language is a lightweigh dialect on top of the C-language. In order to be 
+      compiled by a traditional C-compiler, the implementation source files must
+      be preprocessed by a specific tool called the 
+      <emphasis>Mind preprocessor</emphasis>. This tools, replaces the CPL constructs
+      like <code>METH</code>, <code>PRIVATE</code> or <code>CALL</code> by a 
+      standard C-code.</para>
+  </section>
+  
+  <section id="tool-compil">
+    <title>Customizing Compilation</title>
+    
+    <para>The &productName; toolchain drives the whole compilation process of the
+      application. That is, it executes the C-compiler for each C source files to
+      obtain object files (i.e. <filename>.o</filename> files) and then executes the
+      linker to obtain an executable file.</para> 
+    
+    <para>The <command>mindc</command> command allows to customize the execution of the 
+      C-compiler and the linker using several options.</para>
+      
+    <itemizedlist>
+      <listitem>
+        <para><code>--compiler-command</code> and <code>--linker-command</code>
+          allows to specify the command of the C-compiler and the linker (respectivly).
+          The default value of these options is <code>gcc</code>. These options 
+          are particularly usefull to use cross-compiler.</para>
+      </listitem>
+      <listitem>
+        <para><code>--c-flags</code> (or <code>-c</code>) option allows to specify
+          additional flags that must be passed to the C-compiler. This is particularly 
+          usefull to specify warning flags (<code>-Wall</code> for instance) or to
+          define preprocessor macros (<code>-DFOO=2</code> for instance). This option can 
+          be specify several times. Note that c-flags can also be specified in ADL
+          using the <classname>CFlags</classname> annotation (see 
+          <xref linkend="adl-annot-cflags"/> for more details).</para>
+      </listitem>
+      <listitem>
+        <para><code>--ld-flags</code> (or <code>-l</code>) option allows to specify
+          additional flags that must be passed to the linker. This option can 
+          be specify several times. Note that ld-flags can also be specified in ADL
+          using the <classname>LDFlags</classname> annotation (see 
+          <xref linkend="adl-annot-ldcflags"/> for more details).</para>
+      </listitem>
+      <listitem>
+        <para><code>--linker-script</code> or <code>-T</code> option allows to 
+          specify the linker-script that must be passed to the linker. 
+          The linker-script file must be located in the source-path. This is 
+          allows to distribute a linker-script for several platforms in a component
+          library alongside component sources. If you want to specify a 
+          linker-script that is not located in the source-path you can use the 
+          <code>--ld-flags</code> option instead (<code>--ld-flags=-TmyLinkerScript.ls</code>
+           for instance).</para>
+      </listitem>
+    </itemizedlist>
+    
+    <para>By default, the &productName; toolchain will print a short message when 
+      it execute the C-compiler or the linker. In some circumstances, it may be 
+      useful to see exactly the command-lines that are executed. This can be 
+      achieved by specifying the verbosity level. See 
+      <xref linkend="tool-verbosity"/> for more details.</para>
+  </section>
+
+  <section id="tool-targetdesc">
+    <title>Target-descriptor</title>
+    <para>When developping component-based application for various embedded 
+      platforms, the managment of the compilation options presented in 
+      <xref linkend="tool-compil"/> can be tedious. The &productName; toolchain 
+      uses the notion of <emphasis>target-descriptor</emphasis> to regroup all 
+      these options (and some other things) in a single file or in a hierarchy 
+      of files.</para>
+    <para>A target-descriptor file is a small XML file suffixed by 
+      <filename>".td"</filename>. It must be placed along-side the component sources
+      and follows naming conventions similar to ADL files (target-descriptor 
+      <classname>foo.bar.MyPlatform</classname> must be located in a file called
+      <filename>foo/bar/MyPlatform.td</filename>).</para>
+      
+    <para>It allows to specify the command of the C-compiler and the linker,
+      so as to specify various c-flags, ld-flags and linker-script. A target 
+      descriptor may also define a mapping between the input ADL and the ADL that
+      is actually compiled by the toolchain. This is useful when an applications
+      must be wrapped in a bootstrap component to be compiled and run correctly
+      on a given platform.</para>
+      
+    <para>A target descriptor may extends one or more other descriptors. This 
+      allows to reuse and extends existing descriptors. This is particularly 
+      useful when many different target platforms partially shares the same 
+      hardware. This can also be usefull to defines different compilation 
+      profiles for a given target platform. For instance: a debug profile with 
+      debug information in binary file and without optimization; and a production
+      profile without debug info and with optimizations.</para>
+      
+    <section id="tool-targetdesc-syntax">
+      <title>Target descriptor syntax</title>
+      <para>A target descriptor must start with the following XML prolog :</para>
+      <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE target SYSTEM
+  "classpath://org/objectweb/fractal/cecilia/targetDescriptor/ast/targe
+tDescriptor.dtd">]]></programlisting>
+      
+      <note>
+        <para>The DTD URL must be written on a single line without linebreak. </para>
+      </note>
+      <para>A target descriptor has a very simple XML structure. The top-level 
+        element is called <code>"target"</code> It must have a <code>"name"</code>
+        attribute that specify its name.</para>
+      
+      <informalexample>
+        <para>For example:</para>
+        <programlisting language="td"><![CDATA[<target name="foo.bar.MyPlatform">
+  ...
+</target>]]></programlisting>
+      </informalexample>
+      
+      <para>The <code>"target"</code> top-level elements can contains the following 
+        sub-elements (in this order):</para>
+      
+      <variablelist>
+        <varlistentry>
+          <term><code>extends</code></term>
+          <listitem>
+            <para>Specify an extended target descriptor. A target-descriptor may
+              contains several <code>extends</code> sub-elements.</para>
+            <para>Attributes:</para>
+            <variablelist>
+              <varlistentry>
+                <term><code>name</code></term>
+                <listitem><para>the name of the extended target descriptor.</para></listitem>
+              </varlistentry>
+            </variablelist>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><code>adlMapping</code></term>
+          <listitem>
+            <para>Defines a mapping from the <emphasis>input ADL</emphasis> to
+              the ADL that is actually compiled.</para>
+            <para>Attributes:</para>
+            <variablelist>
+              <varlistentry>
+                <term><code>mapping</code></term>
+                <listitem><para>the ADL mapping. Use <code>$inputADL</code> to 
+                  refer to the input ADL.</para></listitem>
+              </varlistentry>
+            </variablelist>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><code>compiler</code></term>
+          <listitem>
+            <para>Specifies the C-compiler command</para>
+            <para>Attributes:</para>
+            <variablelist>
+              <varlistentry>
+                <term><code>path</code></term>
+                <listitem><para>the C-compiler command</para></listitem>
+              </varlistentry>
+            </variablelist>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><code>linker</code></term>
+          <listitem>
+            <para>Specifies the linker command</para>
+            <para>Attributes:</para>
+            <variablelist>
+              <varlistentry>
+                <term><code>path</code></term>
+                <listitem><para>the linker command</para></listitem>
+              </varlistentry>
+            </variablelist>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><code>linkerScript</code></term>
+          <listitem>
+            <para>Specifies the linker script</para>
+            <para>Attributes:</para>
+            <variablelist>
+              <varlistentry>
+                <term><code>path</code></term>
+                <listitem><para>the linker script</para></listitem>
+              </varlistentry>
+            </variablelist>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><code>cFlag</code></term>
+          <listitem>
+            <para>Specifies a set of c-flags. A target-descriptor may
+              contains several <code>cFlag</code> sub-elements.</para>
+            <para>Attributes:</para>
+            <variablelist>
+              <varlistentry>
+                <term><code>id</code></term>
+                <listitem><para>the identifier of this set of c-flags (optional)</para></listitem>
+              </varlistentry>
+              <varlistentry>
+                <term><code>value</code></term>
+                <listitem><para>the c-flags</para></listitem>
+              </varlistentry>
+            </variablelist>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><code>ldFlag</code></term>
+          <listitem>
+            <para>Specifies a set of ld-flags. A target-descriptor may
+              contains several <code>ldFlag</code> sub-elements.</para>
+            <para>Attributes:</para>
+            <variablelist>
+              <varlistentry>
+                <term><code>id</code></term>
+                <listitem><para>the identifier of this set of ld-flags (optional)</para></listitem>
+              </varlistentry>
+              <varlistentry>
+                <term><code>value</code></term>
+                <listitem><para>the ld-flags</para></listitem>
+              </varlistentry>
+            </variablelist>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+      
+      <example id="tool-targetdesc-example">
+        <title>Simple target-descriptor</title>
+        <programlisting linenumbering="numbered" language="td"><![CDATA[<target name="unix">
+  <adlMapping 
+    mapping="unix.boot.BootstrappedApplication<${inputADL}>" />
+  <compiler path="gcc" />
+  <linker path="gcc" />
+  <cFlag id="debug" value="-g" />
+  <cFlag id="warning" value="-Wall" />
+</target>]]></programlisting>
+        <para>In the above target-descriptor</para>
+        <itemizedlist>
+          <listitem>
+            <para>Lines 2 and 3 define a mapping from the input ADL (the ADL given on the
+              <command>mindc</command> command line), and the ADL that is actually
+              compiled by the toolchain. So if the command line is </para>
+            <programlisting>mindc --target-descriptor=unix foo.bar.MyComponent</programlisting>
+            <para>Then the ADL that is actually compiled by the toolchain will be
+            <code>unix.boot.BootstrappedApplication&lt;foo.bar.MyComponent&gt;</code></para>
+          </listitem>
+          <listitem>
+            <para>Lines 4 and 5 define <code>gcc</code> as the C-compiler and linker
+              command.</para>
+          </listitem>
+          <listitem>
+            <para>Line 6 defines a set of c-flags with the <code>debug</code> identifier
+              and with <code>"-g"</code> as value. The <code>debug</code> 
+              identifier is used to give a name to this set of c-flags. This 
+              allows other target-descriptors to extend this one and override this
+              set of c-flag. See <xref linkend="tool-targetdesc-extend"/> for 
+              more details.</para>
+          </listitem>
+        </itemizedlist>
+      </example>
+    </section>
+    
+    <section id="tool-targetdesc-extend">
+      <title>Target-description extension</title>
+      <para>A target-descriptor can extends one or more other target-descriptor(s)
+        using the <code>extends</code> sub-element. Elements of extended 
+        target-descriptors are inherited and can be overridden.
+        <code>adlMappind</code>, <code>compiler</code>, <code>linker</code> and
+        <code>linkerScript</code> elements can be overridden simply by specifying
+        a new element of the same kind.</para>
+      <para><code>cFlag</code> and <code>ldFlag</code> are handle differently.
+        Only <code>cFlag</code> (or <code>ldFlag</code>) elements that have an <code>id</code>
+        attribute can be overridden by specifying a new <code>cFlag</code> (or a 
+        new <code>ldFlag</code> respectively) with the same <code>id</code> attribute.
+        <code>cFlag</code> and <code>ldFlag</code> that do not have an <code>id</code>
+        cannot be overridden and are simply inherited.</para>
+      
+      <example>
+        <title>Target-descriptor extension</title>
+        <programlisting linenumbering="numbered" language="td"><![CDATA[<target name="unix.warning">
+  <extends name="unix"/>
+  <cFlag id="warning" value="-Werror -Wall -Wredundant-decls" />
+</target>]]></programlisting>
+
+        <para>In the above target descriptor</para>
+        <itemizedlist>
+          <listitem>
+            <para>Line 2 specifies that this target-descriptor extends the 
+              target-descriptor called <classname>unix</classname> (presented in
+              <xref linkend="tool-targetdesc-example"/>).</para>
+          </listitem>
+          <listitem>
+            <para>Line 3 overrides the specification of the c-flags with the 
+              <code>id</code> <code>"warning"</code> (see line 7 in 
+              <xref linkend="tool-targetdesc-example"/>). This allows to specify 
+              more strict warning flags.</para>
+          </listitem>
+        </itemizedlist>
+        <para>So using the <classname>unix.warning</classname>
+          target descriptor instead of the <classname>unix</classname> one, the 
+          toolchain will use the same compilers and linker, the same ADL mapping, the same c-flags
+          for debug (i.e. the <code>-g</code> flag at line 6 in <xref linkend="tool-targetdesc-example"/>),
+          but will use more strict warning flags.</para>
+      </example>
+    </section>
+  </section>
+  
+  <section id="tool-genfiles">
+    <title>Generated files</title>
+
+    <para>The &productName; toolchain generates many files (the generated executable
+      file but also many C source files and compilation files). These
+      files are located in the <emphasis>output directory</emphasis> that is 
+      specified on the command-line with the <code>--out-path</code> option.
+      This section gives a brief description of these generated files.</para>
+    
+    <section>
+      <title>Generated source files</title>
+    
+      <para>When the &productName; toolchain compiles an ADL, it will generate 
+        various C source files for each ADL that is used directly or indirectly by 
+        the top-level ADL. The name of these generated files follows the same 
+        name-scheme as the ADL. That is, every files generated for an ADL called 
+        <classname>foo.bar.MyComponent</classname>, will be called 
+        <filename>foo/bar/MyComponent_<replaceable>&lt;suffix&gt;</replaceable></filename>
+      </para>
+      
+      <para>For each ADL, the toolchain generates the following files:</para>
+      
+      <variablelist>
+        <varlistentry>
+          <term><filename><replaceable>&lt;ADL prefix&gt;</replaceable>.adl.h</filename></term>
+          <listitem>
+            <para>The C header file that contains the definition of the component 
+              structure. If the ADL correspond to a primitive component that have 
+              private-data, then this file includes the file that contains the 
+              definition of the private-data.</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><filename><replaceable>&lt;ADL prefix&gt;</replaceable>.inc</filename></term>
+          <listitem>
+            <para>The C header file that includes the <filename>.adl.h</filename> file 
+              and that declares every methods of the provided interface of the 
+              component. This file in automatically included by the implementation
+              files of the component.</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><filename><replaceable>&lt;ADL prefix&gt;</replaceable>_ctrl_impl.c</filename></term>
+          <listitem>
+            <para>The C source file that contains the implementation code of the 
+              membrane of the component (code for controllers and factories).</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><filename><replaceable>&lt;ADL prefix&gt;</replaceable>.macro</filename></term>
+          <listitem>
+            <para>The C header file that contains the definition of the CPP macros
+              that are used in the code generated by the Mind Pre-Processor.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+      
+      <para>Moreover, for the top-level ADL, the toolchain generates additional 
+        files in which every component instances are correctly initialized. For each 
+        ADL used by the top-level ADL (directly or indirectly), the toolchain will
+        generate the following file.</para>
+         
+      <variablelist>
+        <varlistentry>
+          <term><filename><replaceable>&lt;top-level ADL&gt;</replaceable>_<replaceable>&lt;used ADL&gt;</replaceable>_instances.c</filename></term>
+          <listitem>
+            <para>This file contains the initialization of the component instances
+              of the <replaceable>&lt;used ADL&gt;</replaceable> ADL 
+              in the application <replaceable>&lt;top-level ADL&gt;</replaceable>.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </section>
+    
+    <section>
+      <title>Generated compilation files</title>
+      
+      <para>When compiling generated source files and user implementations of components, 
+        the toolchain generates various intermediate files, in addition to the 
+        traditional object file (<filename>.o</filename> file). This intermediate files 
+        are used or generated by the Mind-preprocessor.</para>
+      
+      <para>Compilation files of user implementation of components (i.e. source files 
+        referenced in ADL using the <code>source</code> are called 
+        <filename><replaceable>&lt;ADL name&gt;</replaceable>_impl<replaceable>&lt;NUM&gt;.&lt;ext&gt;</replaceable></filename>,
+        where .<replaceable>&lt;NUM&gt;</replaceable> is the index of the source file 
+        in the ADL (since implementation of primitive components may be splitted in several files).
+        While compilation files of generated source files have the same name as the 
+        source file (except the extension).</para>
+        
+      <para>The following compilation files are generated:</para>
+      
+      <variablelist>
+        <varlistentry>
+          <term><filename><replaceable>&lt;filename&gt;</replaceable>.i</filename></term>
+          <listitem>
+            <para>The C-preprocessed file. This file contains the C-source afer 
+            the execution of the C-preprocessor. That is, every C-preprocessor 
+            directives (<code>#include</code>, <code>#define</code>, ...) are 
+            replaced. This file is the input file of the Mind-preprocessor.</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><filename><replaceable>&lt;filename&gt;</replaceable>.mpp.c</filename></term>
+          <listitem>
+            <para>The Mind-preprocessed file. This file contains the C-source afer 
+            the execution of the Mind-preprocessor, where every CPL macros 
+            (<code>METH</code>, <code>CALL</code>, ...) are replaced. 
+            This file is the C-source file that is actually compiled by the 
+            C-compiler.</para>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><filename><replaceable>&lt;filename&gt;</replaceable>.o</filename></term>
+          <listitem>
+            <para>The object file. This file is the file generated by the C-compiler.</para>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </section>
+    
+    <section>
+      <title>Generated files for generic ADLs</title>
+      
+      <para>The prefix of the generated files for generic ADLs is more complex.
+        Indeed, since a generic ADL definition may by used in different contexts,
+        with different values for its template variables, the generated source-code
+        must be different for each set of values of its template variables.
+        For instance, source-code generated for 
+        <classname>MyGeneric&lt;ADL1, ADL2&gt;</classname> must be
+        difiirent from the code generated for 
+        <classname>MyGeneric&lt;ADL3, ADL4&gt;</classname>.</para>
+      
+      <para>That is, the name of generated files for generic ADLS will match
+        <filename><replaceable>&lt;generic ADL name&gt;</replaceable>_tmpl_<replaceable>&lt;hashcode&gt;</replaceable></filename>
+        where <replaceable>&lt;hashcode&gt;</replaceable>
+        is different for each set of values of its template variables. This hashcode
+        is based on the values of the template variables (i.e. the hashcode 
+        of <code>&lt;ADL1, ADL2&gt;</code> or <code>&lt;ADL3, ADL4&gt;</code> in
+        previous examples).</para>
+      
+      <para>If a given generic ADL definition is used several times with different 
+        value for its template variables, then it may be difficult to figure out which
+        files correspond to which component. To solve
+        this problem, the toolchain will generate a file that is called 
+        <filename><replaceable>&lt;generic ADL name&gt;</replaceable>.map</filename>
+        that details the value of the template variables that correspond to a 
+        given hascode.</para>
+    </section>
+  </section>
+  
+  <section id="tool-envvar">
+    <title>Environment variables</title>
+    <para>Two environment variables are available to adapt the behavior of the 
+      &productName; toolchain:</para>
+    
+    <variablelist>
+      <varlistentry>
+        <term><code>MIND_CLASSPATH</code></term>
+        <listitem>
+          <para>Allows to add Java classes to the classpath used to execute the 
+            toolchain. This can be used to extends the toolchain.</para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><code>MIND_OPTS</code></term>
+        <listitem>
+          <para>Allows to pass additional parameters to the Java virtual machine 
+            that runs the toolchain. This can be used, in particular to specify the 
+            verbosity level of the toolchain (see <xref linkend="tool-verbosity"/>
+            for more details).</para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+    
+    <section id="tool-verbosity">
+      <title>Setting the verbosity level</title>
+      <para>By default, the &productName; toolchain print very few messages. It only 
+        print a simple line for each compilation tasks. Nevertheless, the toolchain
+        uses internal a highly configurable logging system that
+        can be customized using the <code>MIND_OPTS</code> environment variable.</para>
+      
+      <para>By setting the <code>MIND_OPTS</code> environment variable to the 
+       following value, the toolchain will print more detailled messages. In 
+       particular it will print the actual command line that is executed for each
+       compilation task.</para>
+       
+     <programlisting>-Ddefault.console.level=FINE</programlisting>
+
+<!--      <para>The logging system is configured by setting Java system properties.-->
+<!--        These system properties can be used to set the level of verbosity of the -->
+<!--        various loggers used by the toolchain by adding the following value to the-->
+<!--        <code>MIND_OPTS</code> environment variable:</para>-->
+<!--      <programlisting>-D<replaceable>&lt;logger name&gt;</replaceable>.<replaceable>&lt;output&gt;</replaceable>.level=<replaceable>&lt;verbosity level&gt;</replaceable></programlisting>-->
+<!--      -->
+<!--      <para>Where the <replaceable>&lt;logger name&gt;</replaceable> can be one of: </para>-->
+<!--      <variablelist>-->
+<!--        <varlistentry>-->
+<!--          <term><code>io</code></term>-->
+<!--          <listitem>-->
+<!--            <para>The logger used to log messages related to file input/output operations-->
+<!--              and compilation tasks. In particular, by setting the verbosity level of-->
+<!--              this logger to <code>FINE</code>, you will see the complet compilation -->
+<!--              commands that are executed by the toolchain.</para>-->
+<!--          </listitem>-->
+<!--        </varlistentry>-->
+<!--        <varlistentry>-->
+<!--          <term><code>launcher</code></term>-->
+<!--          <listitem>-->
+<!--            <para>The logger used by the main class. In particular, by setting -->
+<!--              the verbosity level of this logger to <code>FINE</code>, you will -->
+<!--              see actual arguments that are passed to the toolchain.</para>-->
+<!--          </listitem>-->
+<!--        </varlistentry>-->
+<!--        <varlistentry>-->
+<!--          <term><code>default</code></term>-->
+<!--          <listitem>-->
+<!--            <para>The global logger, can be used to set the verbosity of every -->
+<!--              loggers.</para>-->
+<!--          </listitem>-->
+<!--        </varlistentry>-->
+<!--      </variablelist>-->
+<!--      -->
+<!--      <para>The <replaceable>&lt;logger name&gt;</replaceable> can be one of:</para>-->
+<!--      <variablelist>-->
+<!--        <varlistentry>-->
+<!--          <term><code>console</code></term>-->
+<!--          <listitem>-->
+<!--            <para>To specify the logging level of a logger on the console.</para>-->
+<!--          </listitem>-->
+<!--        </varlistentry>-->
+<!--        <varlistentry>-->
+<!--          <term><code>file</code></term>-->
+<!--          <listitem>-->
+<!--            <para>To specify the logging level of a logger on the log file. By -->
+<!--              default loggers does not log message on the log file. </para>-->
+<!--          </listitem>-->
+<!--        </varlistentry>-->
+<!--      </variablelist>-->
+    </section>
+  </section>
+</chapter>

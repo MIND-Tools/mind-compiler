@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter SYSTEM "../dtd/minddoc.dtd" [
+<!ENTITY % myents SYSTEM "../shared.ent" >
+%myents;
+]>
+<appendix id="fadl">
+  <title>
+    Introduction to FractalADL toolchain
+    </title>
+
+  <para>
+    This appendix presents some aspects introduced by the original FractalADL
+    toolchain that are used in the &productName; toolchain.
+  </para>
+
+  <section id="fadl-ast">
+    <title>Abstract Syntaxic Tree (AST)</title>
+
+    <para>TODO</para>
+    
+  </section>
+
+  <section id="fadl-excp">
+    <title>Exception handling and error reporting in frontends</title>
+
+    <para>TODO</para>
+  </section>
+</appendix>

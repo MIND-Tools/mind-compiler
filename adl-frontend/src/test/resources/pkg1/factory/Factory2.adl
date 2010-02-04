@@ -1,0 +1,4 @@
+
+composite pkg1.factory.Factory2 {
+  contains GenericFactory1<pkg1.Composite1> as subComp;
+}

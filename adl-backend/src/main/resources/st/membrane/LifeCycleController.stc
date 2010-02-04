@@ -1,0 +1,159 @@
+template st.membrane.LifeCycleController
+  : st.common.ComponentHelper
+  implements st.membrane.ControllerGenerator {
+
+st.interfaces.IDLDefinition idl2c = st.interfaces.IDL2C; 
+
+$${
+
+// -----------------------------------------------------------------------------
+// Implementation of the ControllerGenerator interface
+// -----------------------------------------------------------------------------
+
+ControllerGlobalDecl(definition, controller) ::= ""
+
+ControllerData(definition, controller) ::= <<
+struct {
+  int state;
+} lccState;
+>>
+
+ControllerDataStaticInit(definition, controller) ::= <<
+{ /* lccState */ 0 }, 
+>>
+
+ControllerDataFactoryNew(definition, controller) ::= <<
+newInstance->__component_internal_data.lccState.state = 0;
+>>
+
+ControllerDataFactoryDestroy(definition, controller) ::= ""
+
+ControllerImplementation(definition, controller, interfaceDefinitions) ::= <<
+
+// --------------------------------------------------------------------------
+// Implementation of the AttributeController interface
+// --------------------------------------------------------------------------
+
+#include "fractal/internal/LCCdelegate.h"
+
+<if(definition.astNodeTypes.("source"))>
+<if(definition.sources)>
+#if !defined(INTERFACE_METHOD_lifeCycleController_startFc_IMPLEMENTED) && !defined(INTERFACE_METHOD_lifeCycleController_stopFc_IMPLEMENTED)
+#error Component does not implement either stopFc or startFc.
+#endif
+<endif>
+<endif>
+
+<getFcState(definition=definition)>
+
+<startFc(definition=definition)>
+
+<stopFc(definition=definition)>
+
+>>
+
+// -----------------------------------------------------------------------------
+// Internal templates
+// -----------------------------------------------------------------------------
+
+getFcState(definition) ::= <<
+int METH(lifeCycleController, getFcState)(void) 
+{
+  return __component_getFcState_delegate(<lccStatePointer(definition=definition)>);
+}
+>>
+
+startFc(definition) ::= <<
+#ifdef INTERFACE_METHOD_lifeCycleController_startFc_IMPLEMENTED
+#define INTERFACE_METHOD_lifeCycleController_startFc_OVERRIDDEN startFc_override
+int METH(lifeCycleController, startFc_override)(void) 
+{
+  int err;
+
+  <startStopSubComponents(definition=definition, methName="startFc")>
+  
+  err = CALL(lifeCycleController, startFc)();
+  if (err == FRACTAL_API_OK) {
+    __component_startFc_delegate(<lccStatePointer(definition=definition)>);
+  }
+  return err;
+}
+#else
+int METH(lifeCycleController, startFc)(void) 
+{
+  int err;
+
+  <startStopSubComponents(definition=definition, methName="startFc")>
+  
+  err = __component_startFc_delegate(<lccStatePointer(definition=definition)>);
+  return err;
+}
+#endif
+>>
+
+stopFc(definition) ::= <<
+#ifdef INTERFACE_METHOD_lifeCycleController_stopFc_IMPLEMENTED
+#define INTERFACE_METHOD_lifeCycleController_stopFc_OVERRIDDEN stopFc_override
+int METH(lifeCycleController, stopFc_override)(void) 
+{
+  int err;
+
+  <startStopSubComponents(definition=definition, methName="stopFc")>
+  
+  err = CALL(lifeCycleController, stopFc)();
+  if (err == FRACTAL_API_OK) {
+    __component_stopFc_delegate(<lccStatePointer(definition=definition)>);
+  }
+  return err;
+}
+#else
+int METH(lifeCycleController, stopFc)(void) 
+{
+  int err;
+
+  <startStopSubComponents(definition=definition, methName="stopFc")>
+  
+  err =  __component_stopFc_delegate(<lccStatePointer(definition=definition)>);
+  return err;
+}
+#endif
+>>
+
+
+startStopSubComponents(definition, methName) ::= <<
+<if (definition.astNodeTypes.("component"))>
+<definition.components:startStopSubComponent(definition=definition, component=it, methName=methName);separator="\n">
+<endif>
+>>
+
+startStopSubComponent(definition, component, methName) ::= <<
+<if (component.astDecorations.("hasLifeCycleController"))>
+<if (definition.astNodeTypes.("data"))>
+<if (definition.data)>
+err = CALL_PTR(&(CONTEXT_PTR_ACCESS->__component_internal_data.components.<component.name>->__component_internal_data.type.lifeCycleController), <methName>)();
+<else>
+err = CALL_PTR(&(__component_<definition.name;format="toCName">_singleton_instance.__component_internal_data.components.<component.name>->__component_internal_data.type.lifeCycleController), <methName>)();
+<endif>
+<else>
+err = CALL_PTR(&(CONTEXT_PTR_ACCESS->__component_internal_data.components.<component.name>->__component_internal_data.type.lifeCycleController), <methName>)();
+<endif>
+if (err != FRACTAL_API_OK) return err;
+<endif>
+
+>>
+
+
+lccStatePointer(definition) ::= <<
+<if (definition.astNodeTypes.("data"))>
+<if (definition.data)>
+((struct __component_LifeCycleState *) &(CONTEXT_PTR_ACCESS->__component_internal_data.lccState))
+<else>
+((struct __component_LifeCycleState *) (&__component_<definition.name;format="toCName">_singleton_instance.__component_internal_data.lccState))
+<endif>
+<else>
+((struct __component_LifeCycleState *) &(CONTEXT_PTR_ACCESS->__component_internal_data.lccState))
+<endif>
+>>
+
+}$$
+}

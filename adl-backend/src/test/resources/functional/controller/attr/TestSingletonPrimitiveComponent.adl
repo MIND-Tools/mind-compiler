@@ -1,0 +1,5 @@
+
+@Run
+composite controller.attr.TestSingletonPrimitiveComponent 
+    extends ACTester<SingletonPrimitiveComponent> {
+}

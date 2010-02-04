@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter SYSTEM "../dtd/minddoc.dtd" [
+<!ENTITY % myents SYSTEM "../shared.ent" >
+%myents;
+]>
+<chapter id="adlbe">
+  <title>
+    ADL Backend
+    </title>
+
+  <section id="adlbe-ovarch">
+    <title>Overall architecture</title>
+
+    <para>TODO</para>
+    
+    <section>
+      <title>ADL-backend flow</title>
+  
+      <para>TODO</para>
+    </section>
+  </section>
+
+  <section id="adlbe-def">
+    <title>Definition source-generators</title>
+
+    <para>TODO</para>
+
+    <section>
+      <title>Membrane source-generators</title>
+  
+      <para>TODO</para>
+    </section>
+  </section>
+   
+  <section id="adlbe-inst">
+    <title>Instance source-generators</title>
+
+    <para>TODO</para>
+
+  </section>
+     
+  <section id="adlbe-comp">
+    <title>Compilation drivers</title>
+
+    <para>TODO</para>
+
+  </section>
+</chapter>

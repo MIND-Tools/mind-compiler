@@ -1,0 +1,6 @@
+primitive boot.Bootstrap {
+
+  requires Main as entryPoint;
+  
+  source bootstrap.c
+}

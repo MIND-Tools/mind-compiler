@@ -1,0 +1,5 @@
+
+@Run
+composite controller.component.TestInheritedSingletonPrimitiveComponent 
+    extends CITester<InheritedSingletonPrimitiveComponent> {
+}

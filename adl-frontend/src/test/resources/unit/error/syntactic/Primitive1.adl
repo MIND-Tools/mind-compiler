@@ -1,0 +1,3 @@
+priitive Primitive1 { 
+	source my.c;	
+}

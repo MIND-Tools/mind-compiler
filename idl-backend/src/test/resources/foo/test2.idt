@@ -1,0 +1,13 @@
+#ifndef TEST2_IDT
+#define TEST2_IDT
+
+#include "../test3.idt"
+
+typedef enum {
+  A =0,
+  B =1
+} myEnum;
+
+typedef struct s myStruct;
+
+#endif

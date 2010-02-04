@@ -1,0 +1,323 @@
+template st.definitions.header.Component: st.common.ComponentHelper
+  implements st.definitions.header.ComponentDefinitionHeader {
+
+st.membrane.ControllerGenerator ctrlGenerator = plugin(st.membrane);
+
+$${
+
+// -----------------------------------------------------------------------------
+// Implementation of the ComponentDefinitionHeader interface
+// -----------------------------------------------------------------------------
+
+ComponentDefinitionHeader(definition) ::= <<
+/* Generated file: <definition.name;format="nameToPath">.adl.h */
+#ifndef __COMPONENT_<definition.name;format="toUpperCName">_ADL_H
+#define __COMPONENT_<definition.name;format="toUpperCName">_ADL_H
+
+// Start including the interface descriptions 
+<definition.interfaces:{#include "<it.signature; format="nameToPath">.itf.h"}; separator="\n">
+<UsedInterfaceDefinitions(definition=definition)>
+// End including the interface descriptions 
+
+<if (definition.astNodeTypes.("component"))>
+// Start including the sub-component descriptions
+<definition.components:{#include "<it.definitionReference.name;format="nameToPath">.adl.h"}; separator="\n">
+// End including the sub-component descriptions
+<endif>
+
+<ControllerGlobalDecls(definition=definition)>
+
+// Start definition of internal component data type
+struct __component_<definition.name;format="toCName">_internal_data_t {
+<TypeStructures(definition=definition)>
+<SubComponentStructures(definition=definition)>
+<AttributeStructures(definition=definition)>
+<ControllerStructures(definition=definition)>
+};
+// End definition of internal component data type
+
+// Start definition of component type
+<ComponentTypeDef(definition=definition)> 
+// End  definition of component type
+
+// Start declaration of interface V-Tables.
+<ComponentVTableDecl(definition=definition)>
+// End declaration of interface V-Tables.
+
+// Start declaration of factory macro
+<FactoryDef(definition=definition)>
+// End declaration of factory macro
+
+#endif // __COMPONENT_<definition.name;format="toUpperCName">_ADL_H
+
+>>
+
+// -----------------------------------------------------------------------------
+// Internal templates
+// -----------------------------------------------------------------------------
+
+ControllerGlobalDecls(definition) ::= <<
+<if (definition.astNodeTypes.("controller"))>
+<definition.controllers:ControllerGlobalDecl(definition=definition, ctrl=it)>
+<endif>
+>>
+
+ControllerGlobalDecl(definition, ctrl) ::= <<
+<ctrl.sources:{<(ctrlGenerator.(it.path).ControllerGlobalDecl)(definition=definition, controller=ctrl)>}>
+>>
+
+// -----------------------------------------------------------------------------
+// Used interface definitions
+
+UsedInterfaceDefinitions(definition) ::= <<
+<definition.astDecorations.("used-interface-definition").values:UsedInterfaceDefinition(usedItf=it.interfaceDefinition); separator="\n">
+>>
+
+UsedInterfaceDefinition(usedItf) ::= <<
+#include "<usedItf.name; format="nameToPath">.itf.h"
+>>
+
+// -----------------------------------------------------------------------------
+// Internal data type generation
+
+TypeStructures(definition) ::= <<
+<if (definition.interfaces)>
+  struct {
+    <definition.interfaces:InterfaceDescriptorDecl(itf=it); separator="\n">
+  } type;
+<endif>
+<if (definition.astNodeTypes.("internalInterface"))>
+<if (definition.internalInterfaces)>
+  struct {
+    <definition.internalInterfaces:InterfaceDescriptorDecl(itf=it); separator="\n">
+  } inner_type;
+<endif>
+<endif>
+>>
+
+InterfaceDescriptorDecl(itf) ::= << 
+<InterfaceDescType(signature=itf.signature)> <itf.name><if (itf.numberOfElement)>[<itf.numberOfElement>]<endif>;
+>>
+
+SubComponentStructures(definition) ::= <<
+<if (definition.astNodeTypes.("component"))>
+<if (definition.components)>
+  struct {
+    <definition.components:ComponentDescriptorDecl(component=it); separator="\n">
+  } components;
+<endif>
+<endif>
+>>
+
+ComponentDescriptorDecl(component) ::= <<
+  <ComponentTypeName(definitionName=component.definitionReference.name)> *<component.name> ;
+>>
+
+
+AttributeStructures(definition) ::= <<
+<if (definition.astNodeTypes.("attribute"))>
+<if (definition.attributes)>
+  struct {
+    <definition.attributes:AttributeDecl(attr=it); separator="\n">
+  } attributes;
+<endif>
+<endif>
+>>
+
+AttributeDecl(attr) ::= <<
+<attr.type> <attr.name>;
+>>
+
+
+ControllerStructures(definition) ::= <<
+<if (definition.astNodeTypes.("controller"))>
+<definition.controllers:ControllerDataDecl(definition=definition, ctrl=it)>
+<endif>
+>>
+
+ControllerDataDecl(definition, ctrl) ::= <<
+<ctrl.sources:{<(ctrlGenerator.(it.path).ControllerData)(definition=definition, controller=ctrl)>}>
+>>
+
+// -----------------------------------------------------------------------------
+// Component typedef
+
+ComponentTypeDef(definition) ::= <<
+#ifdef __COMPONENT_IN_<definition.name;format="toUpperCName">
+#ifdef COMP_DATA
+#undef COMP_DATA
+#endif
+#define COMP_DATA struct __component_<definition.name;format="toCName">_internal_data_t __component_internal_data
+#ifdef PRIVATE_DATA_T
+#undef PRIVATE_DATA_T
+#endif
+#define PRIVATE_DATA_T <ComponentTypeName(definitionName=definition.name)>
+
+<if (definition.astNodeTypes.("data"))>
+<if (definition.data)>
+<if (definition.data.cCode)>
+// Start inlined data code
+<definition.data.astSource; format="sourceTo#line">
+<definition.data.cCode>
+// End inlined data code.
+<elseif (definition.data.path)>
+// Include data file
+#include "<definition.data.path; format="toCPath">"
+<else>
+// No private data
+typedef struct {
+  COMP_DATA;
+} PRIVATE_DATA_T;
+<endif>
+<else>
+typedef struct {
+  COMP_DATA;
+} PRIVATE_DATA_T;
+// declaration of singleton instance as global variable.
+#define INSTANCE___component_<definition.name;format="toCName">_singleton_instance_DECLARED
+extern PRIVATE_DATA_T __component_<definition.name;format="toCName">_singleton_instance;
+<endif>
+<else>
+typedef struct {
+  COMP_DATA;
+} PRIVATE_DATA_T;
+<endif>
+
+
+#else // __COMPONENT_IN_<definition.name;format="toUpperCName">
+typedef struct {
+  struct __component_<definition.name;format="toCName">_internal_data_t __component_internal_data;
+} <ComponentTypeName(definitionName=definition.name)>;
+#endif // __COMPONENT_IN_<definition.name;format="toUpperCName">
+>>
+
+// -----------------------------------------------------------------------------
+// V-Table declaration
+
+ComponentVTableDecl(definition) ::= <<
+// Start declaration of server interface V-Tables.
+<definition.interfaces:ServerInterfaceVTableDecl(definition=definition, itf=it); separator="\n">
+// End declaration of server interface V-Tables.
+
+<if (definition.astNodeTypes.("internalInterface"))>
+<if (definition.internalInterfaces)>
+// Start declaration of internal server interface V-Tables
+<definition.internalInterfaces:ServerInterfaceVTableDecl(definition=definition, itf=it); separator="\n">
+// End declaration of internal server interface V-Tables
+<endif>
+<endif>
+>>
+
+ServerInterfaceVTableDecl(definition, itf) ::= <<
+<if(isServer.(itf.role))>
+<if (itf.numberOfElement)>
+<itf.astDecorations.("collectionIndexes"):{index | extern <InterfaceVTableType(signature=itf.signature)> <vTableInstanceName(definition=definition,itf=itf,index=index)>;};separator="\n">
+<else>
+extern <InterfaceVTableType(signature=itf.signature)> <vTableInstanceName(definition=definition,itf=itf)>;
+<endif>
+<endif>
+>>
+
+
+// -----------------------------------------------------------------------------
+// Factory macros
+
+FactoryDef(definition) ::= <<
+#define <definition.name;format="toUpperCName">_DECLARE_INSTANCE(instance_name) \
+extern <ComponentTypeName(definitionName=definition.name)> instance_name;
+
+#define <definition.name;format="toUpperCName">_INIT_INSTANCE(instance_name<AddItfNames(definition=definition)><AddSubComponentNames(definition=definition)><AddAttributeNames(definition=definition)>) \
+<ComponentTypeName(definitionName=definition.name)> instance_name = { \
+  { /* __component_internal_data: */ \
+<InitializeInterfaces(definition=definition)><InitializeComponents(definition=definition)><InitializeAttributes(definition=definition)><InitializeControllerStructures(definition=definition)>  } \
+};
+>>
+
+AddItfNames(definition) ::= <<
+<definition.interfaces:AddItfName(itf=it)><if (definition.astNodeTypes.("internalInterface"))>
+<if (definition.internalInterfaces)>
+<definition.internalInterfaces:AddItfName(itf=it)>
+<endif>
+<endif>
+>>
+
+AddItfName(itf) ::= <<
+<if (isClient.(itf.role))>
+<if (itf.numberOfElement)>
+<itf.astDecorations.("collectionIndexes"):{, <itf.name>_<it>_instance, <itf.name>_<it>_vTable}>
+<else>
+, <itf.name>_instance, <itf.name>_vTable
+<endif>
+<endif>
+>>
+
+AddSubComponentNames(definition) ::= <<
+<if (definition.astNodeTypes.("component"))><definition.components:{, <it.name>}><endif>
+>>
+
+AddAttributeNames(definition) ::= <<
+<if (definition.astNodeTypes.("attribute"))><definition.attributes:{, <it.name>}><endif>
+>>
+
+
+InitializeInterfaces(definition) ::= <<
+<if (definition.interfaces)>    { /* type: */ \
+      <definition.interfaces:{/* <it.name> : */ <InitializeInterface(definition=definition, itf=it)>}; separator=", \\\n      " > \
+    }, \
+<endif><if (definition.astNodeTypes.("internalInterface"))><if (definition.internalInterfaces)>    { /* inner_type */ \
+      <definition.internalInterfaces:{/* <it.name> : */ <InitializeInterface(definition=definition, itf=it)>}; separator=", \\\n      " > \
+    }, \
+<endif><endif>
+>>
+
+InitializeInterface(definition, itf) ::= <<
+<if(isClient.(it.role))>
+<InitializeClientInterface(definition=definition, itf=it)>
+<else>
+<InitializeServerInterface(definition=definition, itf=it)>
+<endif>
+>>
+
+InitializeClientInterface(definition, itf) ::= <<
+<if (itf.numberOfElement)>
+{<itf.astDecorations.("collectionIndexes"):{ {<itf.name>_<it>_instance, <itf.name>_<it>_vTable}}; separator=", ">}
+<else>
+{<itf.name>_instance, <itf.name>_vTable}
+<endif>
+>>
+
+InitializeServerInterface(definition, itf) ::= <<
+<if (itf.numberOfElement)>
+{<itf.astDecorations.("collectionIndexes"):{ {&instance_name, &<vTableInstanceName(definition=definition,itf=itf, index=it)>}}; separator=", ">}
+<else>
+{&instance_name, &<vTableInstanceName(definition=definition,itf=itf)>}
+<endif>
+>>
+
+InitializeComponents(definition) ::= <<
+<if (definition.astNodeTypes.("component"))><if (definition.components)>    { /* components */ \
+      <definition.components:{&(<it.name>)}; separator=", \\\n      "> \
+    }, \
+<endif><endif>
+>>  
+
+InitializeAttributes(definition) ::= <<
+<if (definition.astNodeTypes.("attribute"))><if (definition.attributes)>    {  /* attributes: */ \
+    <definition.attributes:{/* <it.name> : */ (<it.name>)};separator=", \\\n      "> \
+    }, \
+<endif><endif>
+>>
+
+InitializeControllerStructures(definition) ::= <<
+<if (definition.astNodeTypes.("controller"))>
+<definition.controllers:InitializeControllerData(definition=definition, ctrl=it)>
+<endif>
+>>
+
+InitializeControllerData(definition, ctrl) ::= <<
+<ctrl.sources:{<(ctrlGenerator.(it.path).ControllerDataStaticInit)(definition=definition, controller=ctrl)>}>
+>>
+
+
+}$$ 
+}

@@ -1,0 +1,9 @@
+@CompileDef
+primitive flags.CFlagsTest1 {
+
+  provides Main as main;
+  
+  @CFlags("-DSOURCE_LEVEL_FLAG=1")
+  source cFlagsTest1.c;
+
+}

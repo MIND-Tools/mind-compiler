@@ -1,0 +1,135 @@
+template st.membrane.BindingController
+  : st.common.ComponentHelper
+  implements st.membrane.ControllerGenerator {
+
+st.interfaces.IDLDefinition idl2c = st.interfaces.IDL2C; 
+
+$${
+
+// -----------------------------------------------------------------------------
+// Implementation of the ControllerGenerator interface
+// -----------------------------------------------------------------------------
+
+ControllerGlobalDecl(definition, controller) ::= ""
+ControllerData(definition, controller) ::= ""
+ControllerDataStaticInit(definition, controller) ::= ""
+ControllerDataFactoryNew(definition, controller) ::= ""
+ControllerDataFactoryDestroy(definition, controller) ::= ""
+
+ControllerImplementation(definition, controller, interfaceDefinitions) ::= <<
+
+// --------------------------------------------------------------------------
+// Implementation of the BindindController interface
+// --------------------------------------------------------------------------
+
+#include "fractal/internal/BCdelegate.h"
+
+<initBindingDescriptors(definition=definition)>
+
+<listFc(definition=definition)>
+
+<lookupFc(definition=definition)>
+
+<bindFc(definition=definition)>
+
+<unbindFc(definition=definition)>
+
+>>
+
+// -----------------------------------------------------------------------------
+// Internal templates
+// -----------------------------------------------------------------------------
+
+initBindingDescriptors(definition) ::= <<
+static struct {
+  int nbBindings;
+  struct __component_BindingDescriptor bindingDesc[<bindingCount(definition=definition)>];
+} __component_<definition.name;format="toCName">_binding_descriptor = {
+  <bindingCount(definition=definition)>, /* nbBindings */
+  { /* bindingDesc */
+    <definition.interfaces:initBindingDescriptor(definition=definition, itf=it)>
+  }
+};
+>>
+
+bindingCount(definition) ::= <<
+<definition.interfaces:countClientInterfaces(itf=it)> 0
+>>
+
+countClientInterfaces(itf) ::= <<
+<if (isClient.(itf.role))>
+<if (itf.numberOfElement)>
+<itf.numberOfElement> + 
+<else>
+1 +
+<endif>
+<endif>
+>>
+
+initBindingDescriptor(definition, itf) ::= <<
+<if (isClient.(itf.role))>
+<if (itf.numberOfElement)>
+<itf.astDecorations.("collectionIndexes"):{__COMPONENT_INIT_BINDING_DESCRIPTOR(<ComponentTypeName(definitionName=definition.name)>, <itf.name>[<it>])};separator=",\n">,
+
+<else>
+__COMPONENT_INIT_BINDING_DESCRIPTOR(<ComponentTypeName(definitionName=definition.name)>, <itf.name>),
+
+<endif>
+<endif>
+>>
+
+listFc(definition) ::= <<
+int METH(bindingController, listFc)(const char *clientItfNames[]) 
+{
+  return __component_listFc_delegate(clientItfNames,
+      <bindingDescPointer(definition=definition)>);
+}
+>>
+
+lookupFc(definition) ::= <<
+int METH(bindingController, lookupFc)(const char *clientItfName,
+    void **interfaceReference) 
+{
+  return __component_lookupFc_delegate(clientItfName, interfaceReference,
+      <bindingDescPointer(definition=definition)>, 
+      <componentPointer(definition=definition)>);
+}
+>>
+
+bindFc(definition) ::= <<
+int METH(bindingController, bindFc)(const char *clientItfName, void *serverItf) 
+{
+  return __component_bindFc_delegate(clientItfName, serverItf,
+      <bindingDescPointer(definition=definition)>, 
+      <componentPointer(definition=definition)>);
+}
+>>
+
+unbindFc(definition) ::= <<
+int METH(bindingController, unbindFc)(const char *clientItfName) 
+{
+  return __component_unbindFc_delegate(clientItfName,
+      <bindingDescPointer(definition=definition)>, 
+      <componentPointer(definition=definition)>);
+}
+>>
+
+
+bindingDescPointer(definition) ::= <<
+((struct __component_BindingDescriptors *) &__component_<definition.name;format="toCName">_binding_descriptor)
+>>
+
+componentPointer(definition) ::= <<
+<if (definition.astNodeTypes.("data"))>
+<if (definition.data)>
+CONTEXT_PTR_ACCESS
+<else>
+(&__component_<definition.name;format="toCName">_singleton_instance)
+<endif>
+<else>
+CONTEXT_PTR_ACCESS
+<endif>
+>>
+
+}$$
+}

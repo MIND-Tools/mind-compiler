@@ -1,0 +1,10 @@
+
+composite generic.GenericComposite<C conformsto ClientType, S conformsto ServerType> 
+  extends ServerType {
+
+  contains C as client;
+  contains S as server;
+  
+  binds this.main to client.main;
+  binds client.clientMain to server.main;
+}

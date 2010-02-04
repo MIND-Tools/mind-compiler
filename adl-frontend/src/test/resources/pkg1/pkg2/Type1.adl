@@ -1,0 +1,7 @@
+
+import pkg1.I2;
+
+type pkg1.pkg2.Type1 {
+  provides I1 as sItf;
+  requires I2 as cItf;
+}

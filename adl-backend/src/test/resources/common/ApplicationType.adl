@@ -1,0 +1,4 @@
+
+type ApplicationType {
+  provides Main as main;
+}

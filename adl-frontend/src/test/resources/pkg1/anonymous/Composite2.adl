@@ -1,0 +1,14 @@
+
+import pkg1.pkg2.Type1;
+import pkg1.pkg2.Primitive1;
+
+composite pkg1.anonymous.Composite2 extends Type1 {
+
+  contains pkg1.Composite1 as subComp1 
+    composite {
+      contains Primitive1 as subComp2;
+    };
+  
+  binds this.sItf to subComp1.sItf;
+  binds subComp1.cItf to this.cItf;
+}

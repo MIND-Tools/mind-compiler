@@ -1,0 +1,8 @@
+
+@CompileDef
+@controller.Cloneable
+primitive controller.cloneable.PrimitiveCloneable {
+  provides Main as main;
+  
+  source ../../empty_main.c;
+}

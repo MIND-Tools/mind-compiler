@@ -1,0 +1,10 @@
+
+@Compile
+@controller.AttributeController
+primitive controller.attr.SingletonPrimitiveComponent extends ACTested {
+  
+  source primitiveComponent.c;
+
+  attribute int attr1=0;
+  attribute int attr2=4;
+}

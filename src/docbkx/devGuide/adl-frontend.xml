@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter SYSTEM "../dtd/minddoc.dtd" [
+<!ENTITY % myents SYSTEM "../shared.ent" >
+%myents;
+]>
+<chapter id="adlfe">
+  <title>
+    ADL Frontend
+    </title>
+
+  <section id="adlfe-ovarch">
+    <title>Overall architecture</title>
+
+    <para>
+      The architecture of the ADL frontend is inspired by
+      <application>FractalADL</application>
+      . The main role of the ADL frontend is to parse ADL input files,
+      check them
+      and build an intermediate representation (
+      <abbrev>aka</abbrev>
+      .
+      <acronym>AST</acronym>
+      )
+      The frontend is organized as a
+      <emphasis>chain of delegating loader components</emphasis>
+      . Each loader is responsible for the verification and the
+      enhancement
+      for a
+      dedicated aspect of the language (checking of
+      bindings, template
+      instantiation, resolution of extended definitions,
+      ...). A loader component
+      may use a
+      <emphasis>sub-chain</emphasis>
+      for the resolution of complex tasks in which multiple language
+      aspects are
+      involved (resolution of definition references for
+      instance).
+    </para>
+
+    <para>
+      The following picture present the global architecture of the ADL
+      frontend.
+    </para>
+
+    <figure id="adlfe-ovarch-fig">
+      <title>ADL frontent global architecture (TODO simplify it)</title>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="images/architecture.png" width="100%"
+            format="PNG" />
+        </imageobject>
+      </mediaobject>
+    </figure>
+  </section>
+  <section id="adlfe-loader">
+    <title>Loader chain</title>
+
+    <para>
+      Each loader component provides a
+      <codelink class="&fadlPkg;.Loader" jdocurl="&fadlJdoc;" />
+      interface and requires an interface of the same kind. Its
+      implementation
+      is similar to :
+    </para>
+    <example>
+      <title>
+        Typical implementation of a
+        loader component</title>
+      <programlisting language="java">
+public class <replaceable>ALoaderComponent</replaceable> extends AbstractLoader {
+  
+  // implementation of the Loader interface.
+  public Definition load(String name, Map&lt;Object, Object&gt; context) 
+        throws ADLException {
+    Definition d = clientLoader.load(name, context);
+    processDefinition(d);
+    return d;
+  }
+  
+  protected void processDefinition(Definition d) 
+        throws ADLException {
+    //process the definition...
+  }
+}</programlisting>
+    <note>
+      <para>
+        The <codelink class="&fadlPkg;.AbstractLoader" jdocurl="&fadlJdoc;"/>
+        class defines the <function>clientLoader</function> client interface 
+        and implements the <codelink class="&fapiPkg;.control.BindingController" jdocurl="&fapiJdoc;"/>
+        interface to manage the <function>clientLoader</function> client interface. 
+      </para>
+    </note>
+    </example>
+
+    <para>
+      Most important Loader components are :
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term><codelink class="&mindPkg;.adl.parser.ADLParser" jdocurl="&mindJdoc;" codeurl="&mindCode;"/> </term>
+        <listitem><para>
+          This loader component in the last loader in the chain. It is 
+          responsible to parser the ADL input files and create the initial AST
+          structure that represent the input file.
+        </para></listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><codelink class="&mindPkg;.adl.CacheLoader" jdocurl="&mindJdoc;" codeurl="&mindCode;"/> </term>
+        <listitem><para>
+          This loader component is the first loader in the chain. It manages a
+          cache of already loaded ADLs to avoid to execute the whole loader 
+          chain several times for the same ADL file. This loader is also 
+          responsible to check that an ADL do not reference itself directly or
+          transitively.
+        </para></listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><codelink class="&mindPkg;.adl.ExtendsLoader" jdocurl="&mindJdoc;" codeurl="&mindCode;"/> </term>
+        <listitem><para>
+          This loader is responsible to merge a definition with the definitions
+          it extends. So loader components located between the <classname>CacheLoader</classname>
+          and this loader in the loader chain, work on an AST where inheritance is resolved (i.e.
+          inherited elements are present in the AST); whereas loader component 
+          that are between this loader and the <classname>ADLParser</classname>,
+          work only the elements that are actually
+          declared in the ADL file (and not on the inherited elements).
+        </para></listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><codelink class="&mindPkg;.adl.idl.InterfaceSignatureLoader" jdocurl="&mindJdoc;" codeurl="&mindCode;"/> </term>
+        <listitem><para>
+          This loader loads the signature of the interfaces that are described
+          in the ADL. This loader component is the bridge between the ADL 
+          frontend and the IDL frontend.
+        </para></listitem>
+      </varlistentry>
+    </variablelist>
+  </section>
+
+  <section id="adlfe-ast">
+    <title>ADL AST structure</title>
+    
+    <para>TODO</para>
+  </section>
+
+  <section id="adlfe-defref">
+    <title>Definition Reference Resolver sub-chain</title>
+    
+    <para>TODO</para>
+  </section>
+
+  <section id="adlfe-tmpl">
+    <title>Template instantiation sub-chain</title>
+    
+    <para>TODO</para>
+  </section>
+</chapter>

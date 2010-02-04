@@ -1,0 +1,16 @@
+#include <toto.h>
+#include "test2.idt"
+
+#define FOO 5 + 12 /** \a foo */
+#define BAR 5 /** \a bar */ \
+    +12  /** \a bar */
+
+struct s {
+  int a;
+  int b[FOO];
+};
+
+interface test1 {
+  void foo(int a, int b);
+  void* bar(u_int_t a, int b);
+}

@@ -1,0 +1,8 @@
+
+import pkg1.factory.GenericFactory1;
+import pkg1.parameter.Parameter1;
+
+composite pkg1.parametricFactory.ParametricFactory2 {
+
+  contains GenericFactory1<Parameter1(10)> as subComp;
+}

@@ -1,0 +1,8 @@
+import memory.api.Allocator;
+
+primitive UnixAllocator {
+  provides Allocator as allocator;
+  
+  nodata;
+  source unixAllocator.c;
+}

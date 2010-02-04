@@ -1,0 +1,150 @@
+/**
+ * Copyright (C) 2009 STMicroelectronics
+ *
+ * This file is part of "Mind Compiler" is free software: you can redistribute 
+ * it and/or modify it under the terms of the GNU Lesser General Public License 
+ * as published by the Free Software Foundation, either version 3 of the 
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT 
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Contact: mind@ow2.org
+ *
+ * Authors: Ali Erdem Ozcan
+ * Contributors: 
+ */
+
+options {
+ JAVA_UNICODE_ESCAPE = true;
+ STATIC=false;
+}
+
+// -----------------------------------------------------------------------------
+// Main class
+// -----------------------------------------------------------------------------
+
+PARSER_BEGIN(Parser)
+
+package org.ow2.mind.st.templates.jtb;
+
+public class Parser{
+}
+PARSER_END(Parser)
+
+// -----------------------------------------------------------------------------
+// White spaces
+// -----------------------------------------------------------------------------
+
+SKIP :
+{
+  " "
+| "\t"
+| "\n"
+| "\r"
+| "\f"
+}
+
+// -----------------------------------------------------------------------------
+// Reserved words and literals
+// -----------------------------------------------------------------------------
+
+
+// Template keywords
+TOKEN : {
+    <TEMPLATE: "template"> |
+	<PLUGIN: "plugin"> |
+	<IMPLEMENTS: "implements"> |
+	<FROM: "from"> |
+	<AS: "as">
+}
+
+// Indentifiers and literals
+TOKEN : {
+    <IDENTIFIER: <LETTER> (<LETTER> | <DIGIT>)*> |
+    <#LETTER: ["A"-"Z","_","a"-"z"]> |
+    <#DIGIT: ["0"-"9"]> |
+    <STRING_LITERAL: "\"" ( ~["\"","\\","\n","\r"] | "\\" ( ["n","t","b","r","f","\\","\'","\""] | ["0"-"7"] (["0"-"7"])?  | ["0"-"3"] ["0"-"7"] ["0"-"7"] | ( ["\n","\r"] | "\r\n")))* "\""> |
+    <CHARACTER_LITERAL: "\'"   (~["\'","\\","\n","\r"] | "\\" (["n","t","b","r","f","\\","\'","\""] | ["0"-"7"] (["0"-"7"])? | ["0"-"3"] ["0"-"7"] ["0"-"7"])) "\'"> |
+    <INTEGER_LITERAL: <DECIMAL_LITERAL> (["l","L"])? | <HEX_LITERAL> (["l","L"])? | <OCTAL_LITERAL> (["l","L"])?> |
+    <#DECIMAL_LITERAL: (["1"-"9"] (["0"-"9"])*)> |
+    <#HEX_LITERAL: "0" ["x","X"] (["0"-"9","a"-"f","A"-"F"])+> |
+    <#OCTAL_LITERAL: "0" (["0"-"7"])*>
+}
+
+// Separators
+TOKEN :
+{
+  < LPAREN: "(" >
+| < RPAREN: ")" >
+| < LBRACE: "{" >
+| < RBRACE: "}" >
+| < LBRACKET: "[" >
+| < RBRACKET: "]" >
+| < SEMICOLON: ";" >
+| < COMMA: "," >
+| < DOT: "." >
+| < DOTDOT: ".." >
+| < SLASH: "/" >
+| < START: "*" >
+| < AT: "@" >
+| < ASSIGN: "=" >
+| < ANY: "?" >
+| < COLON: ":" >
+}
+
+// Inlined C code
+
+TOKEN :
+{
+  <INLINED_CODE : "$${" (~[])* "}$$" >
+}
+
+// -----------------------------------------------------------------------------
+// ADL grammar starts here
+// -----------------------------------------------------------------------------
+
+/*******************************************************************************
+  File level grammar
+ ******************************************************************************/
+
+void TemplateComponentDefinition() : {}
+{
+  <TEMPLATE> FullyQualifiedName()
+  [SuperTemplateDefinition()]
+  [ImplementsDefinitions()]
+  <LBRACE>
+  RequiresDefinitions()
+  <INLINED_CODE>
+  <RBRACE>
+}
+
+void SuperTemplateDefinition() : {}
+{
+  <COLON> FullyQualifiedName()
+}
+
+void ImplementsDefinitions() :{}
+{
+  <IMPLEMENTS>  FullyQualifiedName() ( <COMMA> FullyQualifiedName() ) *
+}
+
+void RequiresDefinitions() : {}
+{
+  (
+    FullyQualifiedName() <IDENTIFIER> <ASSIGN>
+    ( ( <PLUGIN> <LPAREN> FullyQualifiedName() <RPAREN>)
+    | FullyQualifiedName() )
+    <SEMICOLON>
+  )*	
+}
+
+void FullyQualifiedName() : {}
+{
+  <IDENTIFIER> ( <DOT> <IDENTIFIER> ) *
+}

@@ -1,0 +1,3 @@
+composite pkg1.annotations.Composite {
+  contains pkg1.annotations.SourceFlag as sf;
+}

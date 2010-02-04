@@ -1,0 +1,8 @@
+
+@Compile
+@controller.Component
+primitive controller.component.SingletonPrimitiveComponent {
+  provides Main as main;
+  
+  source ../../empty_main.c;
+}

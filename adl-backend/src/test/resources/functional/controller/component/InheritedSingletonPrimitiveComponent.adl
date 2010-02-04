@@ -1,0 +1,4 @@
+
+@Compile
+primitive  controller.component.InheritedSingletonPrimitiveComponent extends SingletonPrimitiveComponent {
+}

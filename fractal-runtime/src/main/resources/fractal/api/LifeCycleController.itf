@@ -1,0 +1,78 @@
+/**
+ * Fractal Runtime
+ *
+ * Copyright (C) 2009 STMicroelectronics
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
+ *
+ * Contact: mind@ow2.org
+ *
+ * Authors: Matthieu Leclercq
+ */
+
+#include "ErrorCode.idt"
+
+/**
+ * A component interface to control the life-cycle of the component to which it
+ * belongs. The life-cycle of a component is supposed to be an automaton, whose
+ * states represent execution states of the component. This interface
+ * corresponds to an automaton with two states called {@link #STARTED
+ * STARTED} and {@link #STOPPED STOPPED}, where all the 4 four
+ * possible transitions are allowed. It is however possible to define completely
+ * different life-cycle controller interfaces to use completely different
+ * automatons, or to define sub interfaces of this interface to define
+ * automatons based on this one, but with more states and more transitions. <p>
+ *
+ * <b>Note:</b> the sub-interfaces of this interface should use the conventions
+ * used in this interface, which are the following. The interface contains one
+ * method per state in the life-cycle automaton. Each of these methods changes
+ * the current state to the state corresponding to its name, if there is a
+ * transition from the current state to this state. The interface also contains
+ * one field per state. The names of these fields correspond to the names of the
+ * methods.
+ */
+interface fractal.api.LifeCycleController {
+
+  /**
+   * Returns the execution state of the component to which this interface
+   * belongs.
+   *
+   * @return <code>0</code> if the component to which this interface belongs is 
+   *      stopped; <code>1</code> if the component is started. 
+   *      {@link FRACTAL_API_OPERATION_NOT_SUPPORTED} if this operation is not
+   *      supported.
+   */
+  int getFcState();
+
+  /**
+   * Starts the component to which this interface belongs.
+   *
+   * @return <code>0</code> if the operation succeed.
+   *      {@link FRACTAL_API_ILLEGAL_LIFE_CYCLE} if it fails.
+   */
+  int startFc();
+
+  /**
+   * Stops the component to which this interface belongs. The result of a method
+   * call on a stopped component is undefined, except on its control interfaces
+   * (these calls are executed normally).
+   *
+   * @return <code>0</code> if the operation succeed.
+   *      {@link FRACTAL_API_ILLEGAL_LIFE_CYCLE} if it fails.
+   *      {@link FRACTAL_API_OPERATION_NOT_SUPPORTED} if this operation is not
+   *      supported.
+   */
+  int stopFc();
+}

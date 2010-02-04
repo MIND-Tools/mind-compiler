@@ -1,0 +1,6 @@
+composite bindings.binding1 {
+  contains primitiveClient as client ;
+  contains primitiveServer as server ;
+  
+  binds client.clientItf to server.serverItf;
+}

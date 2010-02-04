@@ -1,0 +1,13 @@
+
+@Run
+primitive constructor.Constructor2 extends ApplicationType {
+
+  data {{ 
+    struct {
+      int a;
+    } PRIVATE;
+  }};
+  
+  source constructor2.c;
+
+}

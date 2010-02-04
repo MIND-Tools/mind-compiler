@@ -1,0 +1,234 @@
+template st.interfaces.IDL2C 
+  implements st.interfaces.IDLDefinition {
+
+$${
+/** 
+ * Generates a "idl.h" file that defines the C types corresponding to the types
+ * defined in the given idl tree.
+ */
+idlFile(idl) ::= <<
+#ifndef <idl.name;format="pathToUpperCName">_H
+#define <idl.name;format="pathToUpperCName">_H
+
+// This file is a generated file, do not edit.
+
+<idl.includes:includeDirective(include=it); separator="\n">
+<idl.astDecorations.("referenced-interfaces").referencedInterfaces:includeReference(ref=it); separator="\n">
+
+<idl.types:{<(defTemplateMap.(it.astDecorations.kind))(it)>;}; separator="\n\n">
+
+<(defTemplateMap.(idl.astDecorations.kind))(idl)>
+
+#endif // <idl.name;format="pathToUpperCName">_H
+
+>>
+
+includeDirective(include) ::= <<
+#include "<include.path;format="toCPath">"
+>>
+
+includeReference(ref) ::= <<
+#include "<ref.name;format="nameToPath">.itf.h"
+>>
+
+defTemplateMap ::= [
+  "typedef"   : "typeDef",
+  "struct"    : "structDef",
+  "structRef" : "structRefDef",
+  "union"     : "unionDef",
+  "unionRef"  : "unionDefRef",
+  "enum"      : "enumDef",
+  "interface" : "interfaceDef",
+  "constDef"  : "constDef"
+]
+
+typeDef(type) ::= <<
+typedef <typeQualifier(qualifiers=type)><varDef(type=type.type, name=type.name)>
+>>
+
+structDef(type) ::= <<
+struct <type.name> {
+  <type.members:memberDef(); separator="\n">
+}
+>>
+
+structRefDef(type) ::= "struct <type.name>"
+
+unionDef(type) ::= <<
+union <type.name> {
+  <type.members:memberDef(); separator="\n">
+}
+>>
+
+unionRefDef(type) ::= "union <type.name>"
+
+memberDef(member) ::= "<typeQualifier(qualifiers=member)><varDef(type=member.type, name=member.name)>;"
+
+enumDef(type) ::= <<
+enum <type.name> {
+  <type.enumMembers:enumMemberDef(); separator=",\n">
+}
+>>
+
+enumMemberDef(member) ::= "<member.name><if (member.constantExpression)> = <member.constantExpression.expr><endif>"
+
+constDef(const) ::= "#define <const.name> <const.value>"
+
+interfaceDef(itf) ::= <<
+<interfaceVTableDef(itf)>
+
+<interfaceTypeDef(itf)>
+>>
+
+interfaceVTableDef(itf) ::= <<
+struct __component_<itf.name; format="toCName">_vTable {
+  <itf.methods:{<methodPointerDef(method=it, withThisPtr="true")>;}; separator="\n">
+};
+>>
+
+interfaceTypeDef(itf) ::= <<
+struct __component_<itf.name; format="toCName">_itf_desc {
+  void *selfData;
+  struct __component_<itf.name; format="toCName">_vTable *meths;
+};
+typedef struct __component_<itf.name; format="toCName">_itf_desc *<itf.name; format="toCName">;
+>>
+
+methodDef(method, methodName, withThisPtr) ::= <<
+<typeQualifier(qualifiers=method)><varDef(type=method.type, name=methodPrototype(name=methodName, parameters=method.parameters, withThisPtr=withThisPtr))>
+>>
+
+methodPointerCast(method, withThisPtr) ::= <<
+(<varDef(type=method.type, name=methodPrototype(name="(*)", parameters=method.parameters, withThisPtr=withThisPtr))>)
+>>
+
+
+methodPointerDef(method, withThisPtr) ::= "<methodDef(method=method, methodName=methodPointerName(name=method.name), withThisPtr=withThisPtr)> "
+
+methodPointerName(name) ::= "(* <name>)"
+
+thisPointerDef ::= [
+  "true" : "void *_mind_this",
+  "typed" : "CONTEXT_PTR_DECL",
+  "false" : ""
+]
+
+thisPointerComma ::= [
+  "true" : ",",
+  "typed" : ",",
+  "false" : ""
+]
+
+noParamVoid ::= [
+  "true" : "",
+  "typed" : "",
+  "false" : "void"
+]
+
+methodPrototype(name, parameters, withThisPtr) ::= <<
+<name>(<thisPointerDef.(withThisPtr)>  <if(parameters)> <thisPointerComma.(withThisPtr)> <parameters:parameterDef(parameter=it); separator=", "> <else> <noParamVoid.(withThisPtr)> <endif>)
+>>
+
+parameterDef(parameter) ::= <<
+<typeQualifier(qualifiers=parameter)><varDef(type=parameter.type, name=parameterName(parameter=parameter))>
+>>
+
+parameterName(parameter) ::= <<
+<if (parameter.isOut)>
+<outParameterTemplateMap.(parameter.isOut)>
+<else>
+<outParameterTemplateMap.false>
+<endif>
+>>
+
+outParameterTemplateMap ::= [
+  "true"  : "(*<parameter.name>)",
+  "false" : "<parameter.name>",
+  default : "<parameter.name>"
+]
+
+enumRefDef(type) ::= "enum <type.name>"
+
+varDef(type, name) ::= <<
+<(varDefTemplateMap.(type.astDecorations.kind))(type=type, name=name)>
+>>
+
+enumVarDef(type, name) ::= "<enumDef(type=type)> <name>"
+
+enumRefVarDef(type, name) ::= "<enumRefDef(type=type)> <name>"
+
+structVarDef(type, name) ::= "<structDef(type=type)> <name>"
+
+structRefVarDef(type, name) ::= "<structRefDef(type=type)> <name>"
+
+unionVarDef(type, name) ::= "<unionDef(type=type)> <name>"
+
+unionRefVarDef(type, name) ::= "<unionRefDef(type=type)> <name>"
+
+pointerOfVarDef(type, name) ::= "<varDef(type=type.type, name=pointerOfVarName(type=type, name=name))>"
+
+pointerOfVarName(type, name) ::= "(* <typeQualifier(qualifiers=type)><name>)"
+
+arrayOfVarDef(type, name) ::= "<varDef(type=type.type, name=arrayOfVarName(type=type, name=name))>"
+
+arrayOfVarName(type, name) ::= "<name>[<if (type.constantExpression)><type.constantExpression.expr><endif>]"
+
+simpleVarDef(type, name) ::= <<
+<if (primitiveTypeNameMap.(type.name))>
+<primitiveTypeNameMap.(type.name)> <name>
+<else>
+<type.name> <name>
+<endif>
+>>
+
+typedefVarDef(type, name) ::= <<
+<type.name; format="toCName"> <name>
+>>
+
+varDefTemplateMap ::= [
+  "enum" :          "enumVarDef",
+  "enumRef" :       "enumRefVarDef",
+  "struct" :        "structVarDef",
+  "structRef" :     "structRefVarDef",
+  "union" :         "unionVarDef",
+  "unionRef" :      "unionRefVarDef",
+  "pointerOf" :     "pointerOfVarDef",
+  "arrayOf" :       "arrayOfVarDef",
+  "primitiveType" : "simpleVarDef",
+  "typedefRef" :    "typedefVarDef"
+]
+
+primitiveTypeNameMap ::= [
+  "string" : "char*"
+]
+
+typeQualifier(qualifiers) ::= <<
+<constQualiferMap.(qualifiers.isConst)><volatileQualifierMap.(qualifiers.isVolatile)>
+>>
+
+constQualiferMap ::= [
+  "true" : "const ",
+  "false": ""
+]
+
+volatileQualifierMap ::= [
+  "true" : "volatile ",
+  "false": ""
+]
+
+isVoidMethod(method) ::= "<(voidTypeTemplateMap.(method.type.astDecorations.kind))(type=method.type)>"
+
+voidPrimitiveType(type) ::= "<isVoidMap.(type.name)>"
+
+voidComplexType(type) ::= "<isComplexTypeVoidMap.(type)>"
+
+voidTypeTemplateMap ::= [
+  "primitiveType" : "voidPrimitiveType",
+  default         : "voidComplexType"
+]
+
+isVoidMap ::= [ "void" : "true" ]
+isComplexTypeVoidMap ::= [ default : ]
+
+}$$
+}

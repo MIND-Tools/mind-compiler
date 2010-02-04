@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter SYSTEM "../dtd/minddoc.dtd" [
+<!ENTITY % myents SYSTEM "../shared.ent" >
+%myents;
+]>
+<appendix id="codeconv">
+  <title>
+    Code conventions
+    </title>
+
+  <section id="codeconv-jcomp">
+    <title>Implementation of toolchain components in Java</title>
+
+    <para>TODO</para>
+
+    <section id="codeconv-jcomp-name">
+      <title>Naming conventions</title>
+  
+      <para>TODO</para>
+    </section>
+
+    <section id="codeconv-jcomp-struct">
+      <title>Global Class structure</title>
+  
+      <para>TODO</para>
+    </section>
+
+    <section id="codeconv-jcomp-bc">
+      <title>Binding-controller implementation</title>
+  
+      <para>TODO</para>
+    </section>
+
+  </section>
+
+  <section id="codeconv-ast">
+    <title>Access to AST decorations</title>
+
+    <para>TODO</para>
+  </section>
+</appendix>

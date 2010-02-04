@@ -1,0 +1,5 @@
+interface ComponentInstances;
+ 
+ComponentInstances(topLevelDefinition, definition, instances);
+
+TopLevelInstances(topLevelDefinition, definitions, instances);

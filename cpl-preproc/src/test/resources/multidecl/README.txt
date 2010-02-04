@@ -1,0 +1,1 @@
+PRIVATE declaration followed by a second declarator in the same statement

@@ -1,0 +1,4 @@
+@Run()
+composite factory.CompositeFactoryTest 
+    extends GenericFactoryTest<EmptyComposite> {
+}

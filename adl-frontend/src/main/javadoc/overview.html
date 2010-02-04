@@ -1,0 +1,33 @@
+<HTML>
+  <BODY>
+     This module contains a set of components that can be assemble to build a 
+     compiler front-end for the ADL language of the Mind programming model.
+
+     <p>It reuses and adapts some concepts and libraries from 
+     <a href="http://fractal.objectweb.org/fractaladl/index.html">FractalADL</a>.
+     In particular, the intermediate representation (AST) is build with the 
+     <a href="http://fractal.objectweb.org/fractaladl-site/current/ast-core/ast-doc.html">ast-core</a>
+     tool, while the structure of the AST is slightly different with the 
+     classical AST structure used in FractalADL.</p>
+
+     <p>The architecture of the front-end is based on a chain of 
+     <a href="http://fractal.objectweb.org/fractaladl-site/current/fractal-adl/apidocs/org/objectweb/fractal/adl/Loader.html">Loader<a/>
+     components that derive on sub-chains to handle particular aspects of the 
+     language.</p>
+
+     <p>An original feature of this front-end is the support for 
+     <a href="org/objectweb/fractal/mind/adl/BinaryADLLoader.html">binary ADL<a/>.
+     It allows to store checked ADL in a binary file (using the serialization 
+     of the AST) and to increase load performances of already checked definition.
+     <p>
+
+     <p>The overall architecture of the ADL front-end is depicted in the following
+     figure 
+     <a href="org/objectweb/fractal/mind/adl/doc-files/architecture.pdf">[pdf]</a>:</p>
+
+     <a href="org/objectweb/fractal/mind/adl/doc-files/architecture.png"><img src="org/objectweb/fractal/mind/adl/doc-files/architecture.png" width="400"/></a>
+
+     <p>Instances of the ADL front-end can be retrieved using the 
+     <a href="org/objectweb/fractal/mind/adl/Factory.html">Factory</a> utility class.</p>
+  </BODY>
+</HTML>

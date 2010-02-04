@@ -1,0 +1,16 @@
+// attribute declaration with initial value
+
+primitive attributes.attr2{
+  source {{ }};
+  attribute string			attr_string = "hello" ;
+  attribute int8_t			attr_int8_t = 5;
+  attribute uint8_t			attr_uint8_t = 5;
+  attribute int16_t			attr_int16_t = 5;
+  attribute uint16_t		attr_uint16_t = 5;
+  attribute int32_t			attr_int32_t = 5;
+  attribute uint32_t		attr_uint32_t = 5;
+  attribute int64_t			attr_int64_t = 5;
+  attribute uint64_t		attr_uint64_t = 5;
+  attribute intptr_t		attr_intptr_t = 0x800 ;
+  attribute uintptr_t		attr_uintptr_t = 0x7000;
+}

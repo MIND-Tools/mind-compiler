@@ -1,0 +1,22 @@
+import helloworld.Service;
+import helloworld.Server;
+
+@Run
+composite collection.HelloworldCollection4 {
+  provides Main as main;
+
+  contains composite as client {
+    provides Main as main;
+    requires Service as sa[2];
+    
+    contains ClientCollection as subClient;
+    
+    binds this.main to subClient.main;
+    binds subClient.sa to this.sa;
+  };
+  contains ServerCollection as server;
+  
+  binds this.main to client.main;
+  binds client.sa[0] to server.s[0];
+  binds client.sa[1] to server.s[1];
+}

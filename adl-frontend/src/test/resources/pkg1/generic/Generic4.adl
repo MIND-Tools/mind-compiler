@@ -1,0 +1,12 @@
+
+import pkg1.pkg2.Type1;
+import pkg1.I2;
+
+composite pkg1.generic.Generic4 <W conformsto Type1> {
+
+  requires I2 as cItf;
+
+  contains Generic2<Generic1<W>, Generic1<W>> as c1;
+  
+  binds c1.cItf to this.cItf;
+}

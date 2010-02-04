@@ -1,0 +1,53 @@
+template st.membrane.FactoryController
+  : st.common.ComponentHelper
+  implements st.membrane.ControllerGenerator {
+
+st.interfaces.IDLDefinition idl2c = st.interfaces.IDL2C; 
+
+$${
+
+isVoid   ::= [ "void"   : "true" ]
+
+// -----------------------------------------------------------------------------
+// Implementation of the ControllerGenerator interface
+// -----------------------------------------------------------------------------
+
+ControllerData(definition, controller) ::= ""
+ControllerDataStaticInit(definition, controller) ::= ""
+ControllerDataFactoryNew(definition, controller) ::= ""
+ControllerDataFactoryDestroy(definition, controller) ::= ""
+
+ControllerImplementation(definition, controller, interfaceDefinitions) ::= <<
+
+// --------------------------------------------------------------------------
+// Implementation of the Factory interface
+// --------------------------------------------------------------------------
+
+<newFcInstance(definition=definition.astDecorations.("factory-definition").definition)>
+
+<destroyFcInstance(definition=definition.astDecorations.("factory-definition").definition)>
+
+>>
+
+// -----------------------------------------------------------------------------
+// Internal templates
+// -----------------------------------------------------------------------------
+
+newFcInstance(definition) ::= <<
+int __component_<definition.name;format="toCName">_factory(void **instance, memory_api_Allocator allocItf);
+
+int METH(factory, newFcInstance)(void ** instance) {
+  return __component_<definition.name;format="toCName">_factory(instance, GET_MY_INTERFACE(allocator));
+}
+>>
+
+destroyFcInstance(definition) ::= <<
+int __component_<definition.name;format="toCName">_destroy(void *instance, memory_api_Allocator allocItf);
+
+int METH(factory, destroyFcInstance)(void * instance) {
+  return __component_<definition.name;format="toCName">_factory(instance, GET_MY_INTERFACE(allocator));
+}
+>>
+
+}$$
+}

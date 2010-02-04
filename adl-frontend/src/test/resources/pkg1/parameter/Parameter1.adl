@@ -1,0 +1,9 @@
+
+import pkg1.pkg2.Type1;
+
+primitive pkg1.parameter.Parameter1(a) extends Type1 {
+
+  nodata;
+  source {{ }};
+  attribute attr1 = a;
+}

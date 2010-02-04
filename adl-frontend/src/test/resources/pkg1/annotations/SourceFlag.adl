@@ -1,0 +1,5 @@
+primitive pkg1.annotations.SourceFlag {
+
+  @org.ow2.mind.adl.annotations.Flag(value="-DFOO")
+  source foo.c;
+}

@@ -1,0 +1,6 @@
+
+primitive pkg1.pkg2.Primitive1 extends Type1 {
+
+  source {{ }};
+  attribute attr1 = 1;
+}

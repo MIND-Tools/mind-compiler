@@ -1,0 +1,284 @@
+<!--
+  Copyright (C) 2009 STMicroelectronics
+
+ This file is part of "Mind Compiler" is free software: you can redistribute 
+ it and/or modify it under the terms of the GNU Lesser General Public License 
+ as published by the Free Software Foundation, either version 3 of the 
+ License, or (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful, but WITHOUT 
+ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ details.
+
+ You should have received a copy of the GNU Lesser General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+ Contact: mind@ow2.org
+
+ Authors: Matthieu Leclercq
+ Contributors: 
+
+ -->
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!-- *********************************************************************** -->
+<!-- Basic AST structure                                                     -->
+<!-- *********************************************************************** -->
+
+<?add ast="itf"        itf="org.ow2.mind.idl.ast.InterfaceDefinition" ?>
+<?add ast="itf"        itf="org.ow2.mind.idl.ast.TypeCollectionContainer" ?>
+
+<?add ast="idt"        itf="org.ow2.mind.idl.ast.SharedTypeDefinition" ?>
+
+<?add ast="enum"       itf="org.ow2.mind.idl.ast.EnumDefinition" ?>
+<?map ast="enum"       type="type" ?>
+<?add ast="enumRef"    itf="org.ow2.mind.idl.ast.EnumReference" ?>
+<?map ast="enumRef"    type="type" ?>
+
+<?add ast="struct"     itf="org.ow2.mind.idl.ast.StructDefinition" ?>
+<?map ast="struct"     type="type" ?>
+<?add ast="structRef"  itf="org.ow2.mind.idl.ast.StructReference" ?>
+<?map ast="structRef"  type="type" ?>
+
+<?add ast="union"      itf="org.ow2.mind.idl.ast.UnionDefinition" ?>
+<?map ast="union"      type="type" ?>
+<?add ast="unionRef"   itf="org.ow2.mind.idl.ast.UnionReference" ?>
+<?map ast="unionRef"   type="type" ?>
+
+<?add ast="typedef"    itf="org.ow2.mind.idl.ast.TypeDefinition" ?>
+<?map ast="typedef"    type="type" ?>
+<?add ast="typedefRef" itf="org.ow2.mind.idl.ast.TypeDefReference" ?>
+<?map ast="typedefRef" type="type" ?>
+
+<?add ast="constant"   itf="org.ow2.mind.idl.ast.ConstantDefinition" ?>
+<?map ast="constant"   type="type" ?>
+
+<!-- *********************************************************************** -->
+<!-- Members AST structure                                                   -->
+<!-- *********************************************************************** -->
+
+<?add ast="enumMember" itf="org.ow2.mind.idl.ast.EnumMember" ?>
+
+<?add ast="member"     itf="org.ow2.mind.idl.ast.Member" ?>
+
+
+<!-- *********************************************************************** -->
+<!-- Types AST structure                                                     -->
+<!-- *********************************************************************** -->
+
+<?add ast="primitiveType" itf="org.ow2.mind.idl.ast.PrimitiveType" ?>
+<?map ast="primitiveType" type="type" ?>
+
+<?add ast="arrayOf"       itf="org.ow2.mind.idl.ast.ArrayOf" ?>
+<?map ast="arrayOf"       type="type" ?>
+
+<?add ast="pointerOf"     itf="org.ow2.mind.idl.ast.PointerOf" ?>
+<?map ast="pointerOf"     type="type" ?>
+
+
+<!-- *********************************************************************** -->
+<!-- Interface AST structure                                                 -->
+<!-- *********************************************************************** -->
+
+<?add ast="method"       itf="org.ow2.mind.idl.ast.Method" ?>
+<?add ast="parameter"    itf="org.ow2.mind.idl.ast.Parameter" ?>
+
+<!-- *********************************************************************** -->
+<!-- Constant expression AST structure                                       -->
+<!-- *********************************************************************** -->
+
+<!-- TODO change this -->
+<?add ast="constantExpression" itf="org.ow2.mind.idl.ast.ConstantExpression" ?>
+<?map ast="constantExpression" xml="expr" ?>
+
+<!-- *********************************************************************** -->
+<!-- Include AST structure                                                   -->
+<!-- *********************************************************************** -->
+
+<?add ast="include" itf="org.ow2.mind.idl.ast.Include" ?>
+<?add ast="itf" itf="org.ow2.mind.idl.ast.IncludeContainer" ?>
+<?add ast="idt" itf="org.ow2.mind.idl.ast.IncludeContainer" ?>
+
+
+<!-- *********************************************************************** -->
+<!-- Annotation nodes                                                        -->
+<!-- *********************************************************************** -->
+
+<?add ast="annotation"      itf="org.ow2.mind.annotation.ast.AnnotationNode" ?>
+
+<?add ast="itf"        itf="org.ow2.mind.annotation.ast.AnnotationContainer" ?>
+<?add ast="member"     itf="org.ow2.mind.annotation.ast.AnnotationContainer" ?>
+<?add ast="enumMember" itf="org.ow2.mind.annotation.ast.AnnotationContainer" ?>
+<?add ast="method"     itf="org.ow2.mind.annotation.ast.AnnotationContainer" ?>
+<?add ast="parameter"  itf="org.ow2.mind.annotation.ast.AnnotationContainer" ?>
+
+<?add ast="annotationArgument" itf="org.ow2.mind.annotation.ast.AnnotationArgument" ?>
+
+<?add ast="annotationValue" itf="org.ow2.mind.annotation.ast.AnnotationNode" ?>
+<?add ast="annotationValue" itf="org.ow2.mind.value.ast.Value" ?>
+<?map ast="annotationValue" type="value" ?>
+
+
+<!-- *********************************************************************** -->
+<!-- Value nodes                                                             -->
+<!-- *********************************************************************** -->
+
+<?add ast="string"    itf="org.ow2.mind.value.ast.StringLiteral" ?>
+<?map ast="string"     type="value" ?>
+
+<?add ast="integer"   itf="org.ow2.mind.value.ast.NumberLiteral" ?>
+<?map ast="integer"   type="value" ?>
+
+<?add ast="boolean"   itf="org.ow2.mind.value.ast.BooleanLiteral" ?>
+<?map ast="boolean"   type="value" ?>
+
+<?add ast="array"     itf="org.ow2.mind.value.ast.Array" ?>
+<?map ast="array"     type="value" ?>
+
+
+
+<!-- *********************************************************************** -->
+<!-- Node grammar                                                            -->
+<!-- *********************************************************************** -->
+
+<!ELEMENT itf ((include)*, annotation* ,
+               (enum|struct|structRef|union|unionRef|typedef)*,
+               method*) >
+<!ATTLIST itf
+  name CDATA #REQUIRED
+  extends CDATA #IMPLIED
+  isUnmanaged (true|false) "false"
+>
+
+<!ELEMENT idt ((include)*, 
+               (enum|struct|structRef|union|unionRef|typedef)*) >
+<!ATTLIST idt
+  name CDATA #REQUIRED
+>
+
+<!ELEMENT include EMPTY >
+<!ATTLIST include
+  path CDATA #REQUIRED
+>
+
+<!ELEMENT enum (enumMember*) >
+<!ATTLIST enum
+  name CDATA #IMPLIED
+>
+
+<!ELEMENT enumRef EMPTY >
+<!ATTLIST enumRef
+  name CDATA #REQUIRED
+>
+
+<!ELEMENT struct (member*) >
+<!ATTLIST struct
+  name CDATA #IMPLIED
+>
+
+<!ELEMENT structRef EMPTY >
+<!ATTLIST structRef
+  name CDATA #REQUIRED
+>
+
+<!ELEMENT union (member*) >
+<!ATTLIST union
+  name CDATA #IMPLIED
+>
+
+<!ELEMENT unionRef EMPTY >
+<!ATTLIST unionRef
+  name CDATA #REQUIRED
+>
+
+<!ELEMENT typedef (enum | enumRef | struct | structRef | union | unionRef 
+    | typedefRef | primitiveType | arrayOf | pointerOf) >
+<!ATTLIST typedef
+  name CDATA #REQUIRED
+  isVolatile (true|false) #IMPLIED
+  isConst (true|false) #IMPLIED
+>
+
+<!ELEMENT typedefRef EMPTY >
+<!ATTLIST typedefRef
+  name CDATA #REQUIRED
+>
+
+<!ELEMENT enumMember (annotation*, expr?) >
+<!ATTLIST enumMember
+  name CDATA #REQUIRED
+>
+
+<!ELEMENT member (annotation*, (enum | enumRef | struct | structRef | union | unionRef 
+    | typedefRef | primitiveType | arrayOf | pointerOf), expr?) >
+<!ATTLIST member
+  name CDATA #REQUIRED
+  isVolatile (true|false) #IMPLIED
+  isConst (true|false) #IMPLIED
+>
+
+<!ELEMENT method (annotation*, (enumRef | structRef | unionRef | typedefRef | primitiveType
+    | arrayOf | pointerOf), parameter*) >
+<!ATTLIST method
+  name CDATA #REQUIRED
+  isVolatile (true|false) #IMPLIED
+  isConst (true|false) #IMPLIED
+>
+
+<!ELEMENT parameter (annotation*, (enumRef | structRef | unionRef | typedefRef | primitiveType
+    | arrayOf | pointerOf)) >
+<!ATTLIST parameter
+  name CDATA #REQUIRED
+  isIn (true|false) "false"
+  isOut (true|false) "false"
+  isVolatile (true|false) #IMPLIED
+  isConst (true|false) #IMPLIED
+>
+
+<!ELEMENT primitiveType EMPTY >
+<!ATTLIST primitiveType
+  name CDATA #REQUIRED
+>
+
+<!ELEMENT arrayOf ((enum | enumRef | struct | structRef | union | unionRef 
+    | typedefRef | primitiveType | arrayOf | pointerOf), expr?) >
+<!ATTLIST arrayOf
+>
+
+<!ELEMENT pointerOf ((enum | enumRef | struct | structRef | union | unionRef 
+    | typedefRef | primitiveType | arrayOf | pointerOf)) >
+<!ATTLIST pointerOf
+  isVolatile (true|false) #IMPLIED
+  isConst (true|false) #IMPLIED
+>
+
+<!ELEMENT expr EMPTY >
+<!ATTLIST expr 
+  expr CDATA #REQUIRED
+>
+
+<!ELEMENT annotation ( annotationArgument* ) >
+<!ATTLIST annotation
+  type CDATA #REQUIRED
+>
+
+<!ELEMENT annotationArgument ( string | integer | array | annotationValue ) >
+<!ATTLIST annotationArgument
+  name CDATA #IMPLIED
+>
+
+<!ELEMENT array ( ( string | integer | array | annotationValue )* ) >
+<!ATTLIST array >
+
+<!ELEMENT string EMPTY >
+<!ATTLIST string
+  value CDATA #REQUIRED
+>
+
+<!ELEMENT integer EMPTY >
+<!ATTLIST integer
+  value CDATA #REQUIRED
+>
+
+

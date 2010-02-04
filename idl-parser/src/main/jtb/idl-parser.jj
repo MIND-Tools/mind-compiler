@@ -1,0 +1,714 @@
+/**
+ * Copyright (C) 2009 STMicroelectronics
+ *
+ * This file is part of "Mind Compiler" is free software: you can redistribute 
+ * it and/or modify it under the terms of the GNU Lesser General Public License 
+ * as published by the Free Software Foundation, either version 3 of the 
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT 
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Contact: mind@ow2.org
+ *
+ * Authors: Ali-Erdem Ozcan, Matthieu Leclercq
+ * Contributors: 
+ */
+
+options {
+ JAVA_UNICODE_ESCAPE = true;
+ STATIC=false;
+}
+
+// -----------------------------------------------------------------------------
+// Main class
+// -----------------------------------------------------------------------------
+
+PARSER_BEGIN(Parser)
+
+package org.ow2.mind.idl.jtb;
+
+public class Parser{
+}
+PARSER_END(Parser)
+
+// -----------------------------------------------------------------------------
+// White spaces
+// -----------------------------------------------------------------------------
+
+SKIP :
+{
+  " "
+| "\t"
+| "\n"
+| "\r"
+| "\f"
+}
+
+// -----------------------------------------------------------------------------
+// Comments
+// -----------------------------------------------------------------------------
+
+MORE :
+{
+  "//" : IN_SINGLE_LINE_COMMENT
+| <"/**" ~["/"]> : IN_FORMAL_COMMENT
+| "/*" : IN_MULTI_LINE_COMMENT
+}
+
+<IN_SINGLE_LINE_COMMENT>
+SPECIAL_TOKEN :
+{
+  <SINGLE_LINE_COMMENT: "\n" | "\r" | "\r\n" > : DEFAULT
+}
+
+<IN_FORMAL_COMMENT>
+SPECIAL_TOKEN :
+{
+  <FORMAL_COMMENT: "*/" > : DEFAULT
+}
+
+<IN_MULTI_LINE_COMMENT>
+SPECIAL_TOKEN :
+{
+  <MULTI_LINE_COMMENT: "*/" > : DEFAULT
+}
+
+<IN_SINGLE_LINE_COMMENT,IN_FORMAL_COMMENT,IN_MULTI_LINE_COMMENT>
+MORE :
+{
+  < ~[] >
+}
+
+// -----------------------------------------------------------------------------
+// Pseudo pre-processing tokens
+// -----------------------------------------------------------------------------
+
+TOKEN :
+{
+  <PREPROC_START : "#"> : IN_PREPROC
+}
+
+<IN_PREPROC>
+SKIP :
+{
+  " "
+| "\t"
+}
+
+<IN_PREPROC>
+TOKEN :
+{
+  <PREPROC_DEFINE : "define">
+| <PREPROC_INCLUDE : "include">
+| <PREPROC_IFNDEF : "ifndef">
+| <PREPROC_ENDIF : "endif"> : END_OF_PREPROC
+| <PREPROC_PATH : 
+      ( "\"" ( ~["\""]  )* "\"")
+    | ( "<" ( ~[">"] )* ">" )
+  > : END_OF_PREPROC
+| <PREPROC_IDENTIFIER : 
+      <PREPROC_LETTER> (<PREPROC_LETTER> | <PREPROC_DIGIT>)*
+  > : END_OF_PREPROC
+| <#PREPROC_LETTER: ["A"-"Z","_","a"-"z"]>
+| <#PREPROC_DIGIT: ["0"-"9"]>
+}
+
+<END_OF_PREPROC>
+TOKEN : 
+{     
+  <PREPROC_ROL : 
+      ( ~["\n", "\r", "\\"]
+        | ("\\" ~[]) ) *
+      ("\n" | "\r" | "\r\n")
+  > : DEFAULT
+}
+
+// -----------------------------------------------------------------------------
+// Reserved words and literals
+// -----------------------------------------------------------------------------
+
+// C keywords are reserved to avoid their usage as identifier in IDL files
+TOKEN : {
+  <CONTINUE: "continue">
+| <VOLATILE: "volatile">
+| <REGISTER: "register">
+| <UNSIGNED: "unsigned">
+| <TYPEDEF: "typedef">
+| <DFLT: "default">
+| <DOUBLE: "double">
+| <SIZEOF: "sizeof">
+| <SWITCH: "switch">
+| <RETURN: "return">
+| <EXTERN: "extern">
+| <STRUCT: "struct">
+| <STATIC: "static">
+| <SIGNED: "signed">
+| <WHILE: "while">
+| <BREAK: "break">
+| <UNION: "union">
+| <CONST: "const">
+| <FLOAT: "float">
+| <SHORT: "short">
+| <ELSE: "else">
+| <CASE: "case">
+| <LONG: "long">
+| <ENUM: "enum">
+| <AUTO: "auto">
+| <VOID: "void">
+| <CHAR: "char">
+| <GOTO: "goto">
+| <FOR: "for">
+| <INT: "int">
+| <IF: "if">
+| <DO: "do">
+}
+
+// IDL keywords
+TOKEN : {
+  <INTERFACE: "interface">
+| <IN: "in">
+| <OUT: "out">
+| <LDOTS: "...">
+| <UNMANAGED : "unmanaged">
+| <STRING: "string">
+| <INT8_T: "int8_t">
+| <UINT8_T: "uint8_t">
+| <INT16_T: "int16_t">
+| <UINT16_T: "uint16_t">
+| <INT32_T: "int32_t">
+| <UINT32_T: "uint32_t">
+| <INT64_T: "int64_t">
+| <UINT64_T: "uint64_t">
+| <INTPTR_T: "intptr_t">
+| <UINTPTR_T: "uintptr_t">
+}
+
+
+// Indentifiers and literals
+TOKEN : {
+  <IDENTIFIER: <LETTER> (<LETTER> | <DIGIT>)*>
+| <#LETTER: ["A"-"Z","_","a"-"z"]>
+| <#DIGIT: ["0"-"9"]>
+| <STRING_LITERAL:
+    "\"" 
+    ( ~["\"","\\","\n","\r"] 
+      | "\\" ( ["n","t","b","r","f","\\","\'","\""] 
+               | ["0"-"7"] (["0"-"7"])?  
+               | ["0"-"3"] ["0"-"7"] ["0"-"7"] 
+               | ( ["\n","\r"] | "\r\n")
+             )
+    )* "\"">
+| <CHARACTER_LITERAL: 
+    "\'"
+    ( ~["\'","\\","\n","\r"] 
+      | "\\" ( ["n","t","b","r","f","\\","\'","\""] 
+               | ["0"-"7"] (["0"-"7"])? 
+               | ["0"-"3"] ["0"-"7"] ["0"-"7"]
+             )
+    ) "\'">
+| <INTEGER_LITERAL: <DECIMAL_LITERAL> (["l","L"])? | <HEX_LITERAL> (["l","L"])? | <OCTAL_LITERAL> (["l","L"])?>
+| <#DECIMAL_LITERAL: (["1"-"9"] (["0"-"9"])*)>
+| <#HEX_LITERAL: "0" ["x","X"] (["0"-"9","a"-"f","A"-"F"])+>
+| <#OCTAL_LITERAL: "0" (["0"-"7"])*>
+| <FLOATING_POINT_LITERAL: 
+    (["0"-"9"])+ "." (["0"-"9"])* (<EXPONENT>)? (["f","F","d","D"])? 
+    | "." (["0"-"9"])+ (<EXPONENT>)? (["f","F","d","D"])? 
+    | (["0"-"9"])+ <EXPONENT> (["f","F","d","D"])? 
+    | (["0"-"9"])+ (<EXPONENT>)? ["f","F","d","D"]>
+| <#EXPONENT: ["e","E"] (["+","-"])? (["0"-"9"])+>
+}
+
+
+
+// SEPARATORS
+TOKEN : 
+{
+  <LPAREN: "(">
+| <RPAREN: ")">
+| <LBRACE: "{">
+| <RBRACE: "}">
+| <LBRACKET: "[">
+| <RBRACKET: "]">
+| <LT: "<">
+| <GT: ">">
+| <SEMICOLON: ";">
+| <COLON: ":">
+| <COMMA: ",">
+| <DOT: ".">
+| <DOTDOT: "..">
+| <STAR: "*">
+| <AT: "@">
+| <ASSIGN: "=">
+| <SLASH: "/">
+}
+
+
+// -----------------------------------------------------------------------------
+// IDL grammar starts here
+// -----------------------------------------------------------------------------
+
+/*******************************************************************************
+  File level grammar
+ ******************************************************************************/
+
+void ITFFile() : {}
+{
+  (LOOKAHEAD(2) IncludeDirective() )*
+  
+  ( LOOKAHEAD(2) (TypeDefinition() | ConstantDefinition()) )*
+  InterfaceDefinition() [<SEMICOLON>]
+  <EOF>
+}
+
+void IDTFile() : {}
+{
+  <PREPROC_START> <PREPROC_IFNDEF> <PREPROC_IDENTIFIER> <PREPROC_ROL>
+  <PREPROC_START> <PREPROC_DEFINE> <PREPROC_IDENTIFIER> <PREPROC_ROL>
+  
+  ( LOOKAHEAD(2) IncludeDirective() )*
+  
+  ( LOOKAHEAD(2) ( TypeDefinition() | ConstantDefinition()) )*
+  
+  <PREPROC_START> <PREPROC_ENDIF> [<PREPROC_ROL>]
+  <EOF>
+}
+
+void IncludeDirective() : {}
+{
+  <PREPROC_START> <PREPROC_INCLUDE> <PREPROC_PATH> <PREPROC_ROL>
+}
+
+
+/*******************************************************************************
+  Constant Definition grammar
+ ******************************************************************************/
+
+void ConstantDefinition() : {}
+{
+  <PREPROC_START> <PREPROC_DEFINE> <PREPROC_IDENTIFIER> <PREPROC_ROL>
+}
+
+/*******************************************************************************
+  Type Definition grammar
+ ******************************************************************************/
+
+void TypeDefinition() : {}
+{
+  ( TypeDefSpecification()
+    |  StructOrUnionSpecification()
+    |  EnumSpecification()
+  ) <SEMICOLON>
+}
+
+void TypeDefSpecification() : {}
+{
+  <TYPEDEF> QualifiedTypeSpecification() Declarators() 
+}
+
+void QualifiedTypeSpecification() : {}
+{
+  ( TypeQualifier() )*
+  TypeSpecification()
+}
+
+void TypeQualifier() : {}
+{
+  <CONST> 
+  | <VOLATILE>	
+}
+
+void TypeSpecification() : {}
+{
+  TypeDefName()
+  | StructOrUnionSpecification()
+  | EnumSpecification()
+  | TypeSpecifiers()
+}
+
+void TypeDefName() : {}
+{  
+  // cover typedef and interface names
+  FullyQualifiedName()
+}
+
+void TypeSpecifiers() : {}
+{
+  (
+    <VOID>
+    | <CHAR>
+    | <SHORT>
+    | <INT>
+    | <LONG>
+    | <FLOAT>
+    | <DOUBLE>
+    | <SIGNED>
+    | <UNSIGNED>
+    | <STRING>
+    | <INT8_T>
+    | <UINT8_T>
+    | <INT16_T>
+    | <UINT16_T>
+    | <INT32_T>
+    | <UINT32_T>
+    | <INT64_T>
+    | <UINT64_T>
+    | <INTPTR_T>
+    | <UINTPTR_T>
+  ) +
+}
+
+void StructOrUnionSpecification() : {}
+{
+  LOOKAHEAD(3)
+  StructOrUnionDefinition()
+  | StructOrUnionReference()
+}
+
+void StructOrUnionDefinition() : {}
+{
+  StructOrUnion() [ <IDENTIFIER> ] <LBRACE> StructMemberList() <RBRACE> 
+}
+
+void StructOrUnionReference() : {}
+{
+  StructOrUnion() <IDENTIFIER>
+}
+
+void StructOrUnion() : {}
+{
+  <STRUCT>
+  | <UNION>
+}
+
+void StructMemberList() : {}
+{
+  ( StructMember() )* 
+}
+
+void StructMember() : {}
+{
+  Annotations()
+  QualifiedTypeSpecification()
+  Declarators()
+  [ <COLON> ConstantExpression() ]
+  <SEMICOLON>
+}
+
+void EnumSpecification() : {}
+{
+  LOOKAHEAD(3)
+  EnumDefinition()
+  | EnumReference()
+}
+
+void EnumDefinition() : {}
+{
+  <ENUM> [ <IDENTIFIER> ] <LBRACE> EnumMemberList() <RBRACE>
+}
+
+void EnumReference() : {}
+{
+  <ENUM> <IDENTIFIER>
+}
+
+void EnumMemberList() : {}
+{
+  EnumMember()
+  ( <COMMA> EnumMember() )*
+}
+
+void EnumMember() : {}
+{
+  Annotations()
+  <IDENTIFIER>
+  [ EnumValue() ]  	
+}
+
+void EnumValue() : {}
+{
+  <ASSIGN> ConstantExpression()
+}
+
+/*******************************************************************************
+  Declarators grammar
+ ******************************************************************************/
+
+void Declarators() : {}
+{
+  Declarator() ( <COMMA> Declarator() )*
+}
+
+void Declarator() : {}
+{
+  PointerSpecification()
+  DirectDeclarator()
+}
+
+void PointerSpecification() : {}
+{
+  ( QualifierPointerSpecification() )*
+}
+
+void QualifierPointerSpecification() : {}
+{
+  <STAR> ( TypeQualifier() )*
+}
+
+void DirectDeclarator() : {}
+{
+  (
+    <IDENTIFIER>
+    | <LPAREN> Declarator() <RPAREN>
+  )
+  ( ArraySpecification() )*
+}
+
+void ArraySpecification() : {}
+{
+  <LBRACKET> [ ConstantExpression() ] <RBRACKET>
+}
+
+/*******************************************************************************
+  Interface Definition grammar
+ ******************************************************************************/
+
+void InterfaceDefinition() : {}
+{
+  Annotations() 
+  <INTERFACE> [ <UNMANAGED> ] FullyQualifiedName() 
+  [ InterfaceInheritanceSpecification() ] InterfaceBody()
+}
+
+void InterfaceInheritanceSpecification() : {}
+{
+  <COLON> FullyQualifiedName() 
+}
+
+void InterfaceBody() : {}
+{
+  <LBRACE>
+    ( MethodDefinition() <SEMICOLON> )*
+  <RBRACE>
+}
+
+void MethodDefinition() : {}
+{
+  Annotations()
+  QualifiedTypeSpecification()
+  PointerSpecification()
+  <IDENTIFIER>
+  Parameters()
+}
+
+void Parameters() : {}
+{
+  LOOKAHEAD(3) <LPAREN>  [ <VOID> ] <RPAREN>
+  | <LPAREN> ParameterList() <RPAREN> 
+}
+
+void ParameterList() : {}
+{
+  Parameter() 
+  ( LOOKAHEAD(2) <COMMA> Parameter() )*
+  [ <COMMA> <LDOTS> ] 
+}
+
+void Parameter() : {}
+{
+  Annotations()
+  ( ParameterQualifier() )*
+  QualifiedTypeSpecification()
+  Declarator()
+}
+
+void ParameterQualifier() : {}
+{
+  <IN>
+  | <OUT>
+}
+
+
+/*******************************************************************************
+  Expression grammar
+ ******************************************************************************/
+
+void ConstantExpression() : {}
+{
+  LogicalOrExpression()
+}
+
+void LogicalOrExpression() : {}
+{
+  LogicalAndExpression()
+  [ "||" LogicalOrExpression()  ]
+}
+
+void LogicalAndExpression() :{}
+{
+  OrExpression()    
+  [ "&&" LogicalAndExpression() ]
+}
+
+void OrExpression() : {}
+{
+  XorExpression()   
+  [ "|" OrExpression() ] 
+}
+
+void XorExpression() : {}
+{
+  AndExpression()   
+  [ "^" XorExpression() ]
+}
+
+void AndExpression() : {}
+{
+  ShiftExpression() 
+  [ "&" AndExpression() ] 
+}
+
+void ShiftExpression() : {}
+{
+  AdditiveExpression()  
+  [ ShiftOperation() ShiftExpression() ]
+}
+
+void AdditiveExpression() : {}
+{
+  MulExpression()   
+  [ AdditiveOperation() AdditiveExpression() ]
+}
+
+void MulExpression() : {}
+{
+  CastExpression()  
+  [ MulOperation() MulExpression()  ]
+}
+
+void CastExpression() : {}
+{ 
+  LOOKAHEAD(3)
+  <LPAREN>  QualifiedTypeSpecification() <RPAREN> CastExpression()
+  | UnaryExpression() 
+}
+
+void UnaryExpression() : {}
+{
+  [ UnaryOperation() ] 
+  PrimaryExpression()   
+}
+
+void PrimaryExpression() : {}
+{
+  Literal()
+  | <LPAREN> ConstantExpression() <RPAREN>
+}
+
+void Literal() : {}
+{
+  <INTEGER_LITERAL>
+  | <STRING_LITERAL>
+  | <CHARACTER_LITERAL>
+  | <FLOATING_POINT_LITERAL>
+  | <IDENTIFIER> // useful to reference #define
+}
+
+
+void ShiftOperation() : {}
+{
+  "<<"
+  | ">>"    
+}
+
+void AdditiveOperation() : {}
+{
+  "+"
+  | "-" 
+}
+
+void MulOperation() : {}
+{
+  "*"
+  | "/"
+  | "%" 
+}
+
+void UnaryOperation() : {}
+{
+  "&"
+  | "*"
+  | "+"
+  | "-"
+  | "~"
+  | "!" 
+}
+
+
+/*******************************************************************************
+  Annotation grammar
+ ******************************************************************************/
+
+void Annotations() : {}
+{
+  ( Annotation() ) *
+}
+
+void Annotation() : {}
+{
+  <AT> FullyQualifiedName() [ AnnotationParameters() ]
+}
+
+void AnnotationParameters() : {}
+{
+  <LPAREN> [ AnnotationValuePairs() | AnnotationValue() ] <RPAREN>
+}
+
+void AnnotationValuePairs() : {}
+{
+  AnnotationValuePair() ( <COMMA> AnnotationValuePair() ) * 
+}
+
+void AnnotationValuePair() : {}
+{
+  <IDENTIFIER> <ASSIGN> AnnotationValue()
+}
+
+void AnnotationValue() : {}
+{
+  StringValue()
+  | IntegerValue()
+  | AnnotationAnnotationValue()
+  | ArrayAnnotationValue()
+}
+
+void AnnotationAnnotationValue() : {}
+{
+  Annotation()
+}
+
+void ArrayAnnotationValue() : {}
+{
+  <LBRACE> [ AnnotationValue()( <COMMA> AnnotationValue() ) * ] <RBRACE>
+}
+
+void StringValue() : {}
+{
+  <STRING_LITERAL>
+}
+
+void IntegerValue() : {}
+{
+  <INTEGER_LITERAL>
+}
+
+void FullyQualifiedName() : {}
+{
+  <IDENTIFIER> ( <DOT> <IDENTIFIER> ) *
+}
+

@@ -1,0 +1,64 @@
+<assembly>
+    <id>bin</id>
+    <formats>
+        <format>zip</format>
+        <format>tar.gz</format>
+        <format>tar.bz2</format>
+    </formats>
+    <includeBaseDirectory>true</includeBaseDirectory>
+    <dependencySets>
+
+        <dependencySet>
+            <outputDirectory>lib</outputDirectory>
+            <excludes>
+                <exclude>${project.groupId}:fractal-runtime</exclude>
+            </excludes>
+        </dependencySet>
+
+        <dependencySet>
+            <unpack>true</unpack>
+            <unpackOptions>
+                <excludes>
+                    <exclude>META-INF/**</exclude>
+                </excludes>
+            </unpackOptions>
+            <includes>
+                <include>${project.groupId}:fractal-runtime</include>
+            </includes>
+            <outputDirectory>runtime</outputDirectory>
+        </dependencySet>
+
+    </dependencySets>
+    <fileSets>
+        <fileSet>
+            <directory>src/assemble/resources/examples</directory>
+            <filtered>false</filtered>
+            <outputDirectory>examples</outputDirectory>
+        </fileSet>
+    </fileSets>
+    <files>
+        <file>
+            <source>src/assemble/resources/mindc</source>
+            <fileMode>0755</fileMode>
+            <outputDirectory>bin</outputDirectory>
+            <filtered>true</filtered>
+        </file>
+        <file>
+            <source>src/assemble/resources/mindc.bat</source>
+            <fileMode>0755</fileMode>
+            <outputDirectory>bin</outputDirectory>
+            <filtered>true</filtered>
+        </file>
+        <file>
+            <source>src/assemble/resources/README.txt</source>
+            <fileMode>0644</fileMode>
+            <outputDirectory></outputDirectory>
+            <filtered>true</filtered>
+        </file>
+        <file>
+            <source>LICENSES.txt</source>
+            <fileMode>0644</fileMode>
+            <outputDirectory></outputDirectory>
+        </file>
+    </files>
+</assembly>

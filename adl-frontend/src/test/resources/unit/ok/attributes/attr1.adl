@@ -1,0 +1,19 @@
+// attribute declaration with primitive types (simple,pointer)
+
+primitive attributes.attr1{
+ 
+  source {{ }};
+/* simple types */
+attribute string			attr_string ;
+attribute int8_t			attr_int8_t;
+attribute uint8_t			attr_uint8_t;
+attribute int16_t			attr_int16_t;
+attribute uint16_t			attr_uint16_t;
+attribute int32_t			attr_int32_t;
+attribute uint32_t			attr_uint32_t;
+attribute int64_t			attr_int64_t;
+attribute uint64_t			attr_uint64_t;
+attribute intptr_t			attr_intptr_t;
+attribute uintptr_t			attr_uintptr_t;
+
+}

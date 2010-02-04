@@ -1,0 +1,4 @@
+primitive primitiveServer {
+  provides api.Call as serverItf;
+  source {{ }};
+}

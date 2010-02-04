@@ -1,0 +1,5 @@
+// attribute declaration with too big value
+primitive attributes.attr3 {
+  @SemanticError(GroupId="ATTR", ErrorId="TOO_BIG_VALUE")
+  attribute uint8_t attr = 259654676464646343446976767;
+}

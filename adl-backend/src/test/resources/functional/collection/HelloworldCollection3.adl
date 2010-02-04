@@ -1,0 +1,12 @@
+
+@Run
+composite collection.HelloworldCollection3 {
+  provides Main as main;
+
+  contains ClientCollection as client;
+  contains ServerCollection as server;
+  
+  binds this.main to client.main;
+  binds client.sa[0] to server.s[0];
+  binds client.sa[1] to server.s[1];
+}

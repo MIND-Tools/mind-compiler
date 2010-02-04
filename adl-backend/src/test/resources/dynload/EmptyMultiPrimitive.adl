@@ -1,0 +1,7 @@
+
+primitive EmptyMultiPrimitive extends ApplicationType {
+
+  nodata;
+  source empty_main.c
+
+}

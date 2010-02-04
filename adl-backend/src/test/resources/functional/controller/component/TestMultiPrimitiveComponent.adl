@@ -1,0 +1,5 @@
+
+@Run
+composite controller.component.TestMultiPrimitiveComponent 
+    extends CITester<MultiPrimitiveComponent> {
+}

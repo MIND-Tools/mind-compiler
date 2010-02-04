@@ -1,0 +1,10 @@
+
+@Run
+composite generic.TopLevel extends ApplicationType {
+  
+  contains GenericComposite<Client, Server> as subComp1;
+  contains GenericComposite<Client, Server> as subComp2;
+  contains GenericComposite<Client, GenericComposite<Client, Server>> as subComp3;
+  
+  binds this.main to subComp1.main;
+}

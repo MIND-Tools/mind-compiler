@@ -1,0 +1,21 @@
+
+composite controller.binding.BCTester<T conformsto BCTested> extends ApplicationType {
+
+  contains primitive as tester {
+    provides Main as main;
+    requires Main as testedMain;
+    provides Main as test;
+    provides Main as testCollection[3];
+    
+    requires fractal.api.BindingController as testedBC;
+    source bcTester.c;
+  }
+  
+  contains T as tested;
+  
+  binds this.main to tester.main;
+  binds tester.testedMain to tested.main;
+  binds tester.testedBC to tested.bindingController;
+  binds tested.clientMain to tester.test;
+  binds tested.clientCollectionMain to tester.testCollection;
+}

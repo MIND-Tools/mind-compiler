@@ -1,0 +1,6 @@
+// Composite : Mandatory required itf not bounded
+composite bindings.binding3 {
+  contains primitive primitiveServer as sub1 ;
+  @SemanticError(GroupId="BDG", ErrorId="MISSING_FROM")
+  contains primitive primitiveClient as sub2 ;
+}

@@ -1,0 +1,13 @@
+
+
+typedef int myint, (* const mypointer)[];
+
+struct s {
+  int a, b;
+};
+
+interface test1 {
+  void m1(int a, int b);
+  unsigned float m2(float f1);
+  void* m3(int a, int b);
+};

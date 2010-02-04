@@ -1,0 +1,9 @@
+@Compile
+primitive flags.LDFlagsTest1 {
+
+  provides Main as main;
+  
+  @LDFlags("-lm")
+  source ldFlagsTest1.c;
+
+}

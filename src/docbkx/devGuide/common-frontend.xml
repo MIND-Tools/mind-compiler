@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter SYSTEM "../dtd/minddoc.dtd" [
+<!ENTITY % myents SYSTEM "../shared.ent" >
+%myents;
+]>
+<chapter id="comfe">
+  <title>
+    Common Frontend
+    </title>
+
+  <section id="comfe-anno">
+    <title>Generic annotation support</title>
+
+    <para>TODO</para>
+  </section>
+
+  <section id="comfe-srv">
+    <title>Common Frontend services</title>
+
+    <para>TODO</para>
+
+    <section id="comfe-srv-inputrsc">
+      <title>Input resources</title>
+  
+      <para>TODO</para>
+    </section>
+
+    <section id="comfe-srv-helper">
+      <title>Name and Path helpers</title>
+  
+      <para>TODO</para>
+    </section>
+
+  </section>
+</chapter>

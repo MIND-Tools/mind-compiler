@@ -1,0 +1,1 @@
+forget 'CALL' when calling a private method.

@@ -1,0 +1,6 @@
+
+import pkg1.I2;
+
+type pkg1.pkg2.Type2 extends pkg1.pkg2.Type1 {
+  requires I2 as cItf2;
+}

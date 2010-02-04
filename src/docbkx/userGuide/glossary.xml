@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
+  "../dtd/docbookx.dtd" [
+<!ENTITY % myents SYSTEM "../shared.ent" >
+%myents;
+]>
+<appendix id="glossary">
+  <title>
+    Glossary
+    </title>
+  <glossary>
+    <!-- TODO improve glossary -->
+    <glossentry id="ADL">
+      <glossterm>Architecture Description Language</glossterm>
+      <abbrev>ADL</abbrev>
+      <glossdef>
+        <para>The language used to describe the architecture of an application 
+          as a set of interconnected components.</para>
+      </glossdef>
+    </glossentry>
+    
+    <glossentry id="IDL">
+      <glossterm>Interface Definition Language</glossterm>
+      <abbrev>IDL</abbrev>
+      <glossdef>
+        <para>The language used to define the signature of the component 
+          interfaces.</para>
+      </glossdef>
+    </glossentry>
+    
+    <glossentry id="CPL">
+      <glossterm>Component Programming Language</glossterm>
+      <abbrev>CPL</abbrev>
+      <glossdef>
+        <para>The language on top of the C-Language that defines special 
+          constructs to capture component-based notions inside C programs.</para>
+      </glossdef>
+    </glossentry>
+    
+    <glossentry id="FQN">
+      <glossterm>fully-qualified-name</glossterm>
+      <glossdef>
+        <para>
+          The unambiguous name of an architecture definition or an interface
+          signature. A fully-qualified-name is mane of two parts separated by a
+          dot (<code>'.'</code>) : the <emphasis>package-name</emphasis> and the
+          <emphasis>simple-name</emphasis>. The package-name may be empty (which
+          correspond to the <emphasis>default package</emphasis>); in that case,
+          the fully-qualified-name is simply the simple-name (without the dot).
+        </para>
+      </glossdef>
+    </glossentry>
+  </glossary>
+  <para></para>
+</appendix>

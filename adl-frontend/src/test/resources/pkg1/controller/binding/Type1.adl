@@ -1,0 +1,6 @@
+
+@controller.BindingController
+type pkg1.controller.binding.Type1 {
+  provides I1 as i1;
+  requires pkg1.I2 as i2;
+}

@@ -1,0 +1,10 @@
+// Composite : Mandatory required itf not bounded
+composite bindings.binding2 {
+  @SemanticError(GroupId="BDG", ErrorId="MISSING_FROM")
+  contains primitive primitiveNull as sub1 {
+    requires api.Call as client_itf;
+  };
+  contains primitive primitiveNull as sub2 {
+    provides api.Call as server_itf;
+  };
+}

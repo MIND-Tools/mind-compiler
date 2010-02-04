@@ -1,0 +1,7 @@
+// attribute declaration without type
+
+primitive attributes.attr2 {
+  @SemanticError(GroupId="ATTR", ErrorId="UNDEFINED_TYPE")
+  // simple attribute name
+  attribute attr_name1;
+}

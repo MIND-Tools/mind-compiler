@@ -1,0 +1,260 @@
+template st.definitions.implementations.Macro
+  : st.common.ComponentHelper
+  implements st.definitions.implementations.ComponentDefinition {
+
+st.interfaces.IDLDefinition idl2c = st.interfaces.IDL2C ; 
+
+$${
+
+  
+isClient ::= [ "client" : "true" ]
+isServer ::= [ "server" : "true" ]
+isVoid   ::= [ "void"   : "true" ]
+
+// -----------------------------------------------------------------------------
+// Implementation of the ComponentDefinition interface
+// -----------------------------------------------------------------------------
+
+ComponentDefinition(definition, interfaceDefinitions) ::= <<
+/* Generated file: <definition.name;format="nameToPath">.macro */
+
+#define COMP_DATA struct __component_<definition.name;format="toCName">_internal_data_t __component_internal_data
+
+#define PRIVATE_DATA_T <ComponentTypeName(definitionName=definition.name)>
+
+#define CONTEXT_PTR_DECL <ComponentTypeName(definitionName=definition.name)> *_mind_this
+
+#define CONTEXT_PTR_ACCESS _mind_this
+
+<METHOD(definition=definition)>
+
+<CONSTRUCTOR(definition=definition)>
+
+<PRV(definition=definition)>
+
+<ATTR(definition=definition)>
+
+<CALL(definition=definition, interfaceDefinitions=interfaceDefinitions)>
+
+<GET_MY_INTERFACE(definition=definition)>
+
+<BIND_MY_INTERFACE(definition=definition)>
+
+#define CHECK_CONTEXT_PTR // do nothing
+
+>>
+
+// -----------------------------------------------------------------------------
+// Internal templates
+// -----------------------------------------------------------------------------
+
+// -----------------------------------------------------------------------------
+// METHOD macros
+
+METHOD(definition) ::= <<
+// definition of the METHOD macro
+#define INTERFACE_METHOD(itf,meth) __component_<definition.name;format="toCName">_##itf##_##meth
+#define INTERFACE_COLLECTION_METHOD(itf,idx,meth) __component_<definition.name;format="toCName">_##itf##_##idx##_##meth
+>>
+
+CONSTRUCTOR(definition) ::= <<
+// definition of the CONSTRUCTOR macro
+#define CONSTRUCTOR_METHOD __component_<definition.name;format="toCName">_constructor
+
+// definition of the DESTRUCTOR macro
+#define DESTRUCTOR_METHOD __component_<definition.name;format="toCName">_destructor
+>>
+
+PRV(definition) ::= <<
+// definition of the PRV macro
+#define PRIVATE_METHOD(meth) __component_<definition.name;format="toCName">_##meth
+>>
+
+// -----------------------------------------------------------------------------
+// ATTRIBUTE macros
+
+ATTR(definition) ::= <<
+<if (definition.astNodeTypes.("attribute"))>
+<if (definition.attributes)>
+// definition of the ATTR macro
+<if (definition.astNodeTypes.("data"))>
+<if (definition.data)>
+#define ATTRIBUTE_ACCESS(ctxPtr, attrName) (ctxPtr->__component_internal_data.attributes.attrName)
+<else>
+#define ATTRIBUTE_ACCESS(attrName) (__component_<definition.name;format="toCName">_singleton_instance.__component_internal_data.attributes.attrName)
+<endif>
+<endif>
+<endif>
+<endif>
+>>
+
+// -----------------------------------------------------------------------------
+// CALL macros
+
+CALL(definition, interfaceDefinitions) ::= <<
+// definition of the CALL macros
+#define CALL_INTERFACE_METHOD_WITH_PARAM(itfName, methName) CALL_INTERFACE_METHOD_##itfName##_WITH_PARAM(methName)
+#define CALL_INTERFACE_METHOD_WITHOUT_PARAM(itfName, methName) CALL_INTERFACE_METHOD_##itfName##_WITHOUT_PARAM(methName)
+
+#define CALL_COLLECTION_INTERFACE_METHOD_WITH_PARAM(itfName, index, methName) CALL_COLLECTION_INTERFACE_METHOD_##itfName##_WITH_PARAM(index, methName)
+#define CALL_COLLECTION_INTERFACE_METHOD_WITHOUT_PARAM(itfName, index, methName) CALL_COLLECTION_INTERFACE_METHOD_##itfName##_WITHOUT_PARAM(index, methName)
+
+<definition.interfaces:CALLClientInterface(definition=definition, interfaceDefinitions=interfaceDefinitions, itf=it); separator="\n">
+<definition.interfaces:CALLServerInterface(definition=definition, interfaceDefinitions=interfaceDefinitions, itf=it); separator="\n">
+
+<CALL_PRV(definition=definition)>
+
+<CALL_PTR(definition=definition)>
+
+#define PARAMS_RPARENT )
+
+>>
+
+CALLClientInterface(definition, interfaceDefinitions, itf) ::= <<
+<if (isClient.(itf.role))>
+<if (definition.astNodeTypes.("data"))>
+<if (definition.data)>
+<MultiCALLClientInterface(definition=definition, interfaceDefinitions=interfaceDefinitions, itf=itf)>
+<else>
+<SingletonCALLClientInterface(definition=definition, interfaceDefinitions=interfaceDefinitions, itf=itf)>
+<endif>
+<else>
+<MultiCALLClientInterface(definition=definition, interfaceDefinitions=interfaceDefinitions, itf=itf)>
+<endif>
+<endif>
+>>
+
+MultiCALLClientInterface(definition, interfaceDefinitions, itf) ::= <<
+<if (itf.numberOfElement)>
+#define CALL_COLLECTION_INTERFACE_METHOD_<itf.name>_WITH_PARAM(index, methName) CONTEXT_PTR_ACCESS->__component_internal_data.type.<itf.name>[(index)].meths->methName(CONTEXT_PTR_ACCESS->__component_internal_data.type.<itf.name>[(index)].selfData,
+#define CALL_COLLECTION_INTERFACE_METHOD_<itf.name>_WITHOUT_PARAM(index, methName) CONTEXT_PTR_ACCESS->__component_internal_data.type.<itf.name>[(index)].meths->methName(CONTEXT_PTR_ACCESS->__component_internal_data.type.<itf.name>[(index)].selfData)
+<else>
+#define CALL_INTERFACE_METHOD_<itf.name>_WITH_PARAM(methName) CONTEXT_PTR_ACCESS->__component_internal_data.type.<itf.name>.meths->methName(CONTEXT_PTR_ACCESS->__component_internal_data.type.<itf.name>.selfData,
+#define CALL_INTERFACE_METHOD_<itf.name>_WITHOUT_PARAM(methName) CONTEXT_PTR_ACCESS->__component_internal_data.type.<itf.name>.meths->methName(CONTEXT_PTR_ACCESS->__component_internal_data.type.<itf.name>.selfData)
+<endif>
+>>
+
+SingletonCALLClientInterface(definition, interfaceDefinitions, itf) ::= <<
+<if (itf.numberOfElement)>
+#define CALL_COLLECTION_INTERFACE_METHOD_<itf.name>_WITH_PARAM(index, methName) __component_<definition.name;format="toCName">_singleton_instance.__component_internal_data.type.<itf.name>[(index)].meths->methName(__component_<definition.name;format="toCName">_singleton_instance.__component_internal_data.type.<itf.name>[(index)].selfData,
+#define CALL_COLLECTION_INTERFACE_METHOD_<itf.name>_WITHOUT_PARAM(index, methName) __component_<definition.name;format="toCName">_singleton_instance.__component_internal_data.type.<itf.name>[(index)].meths->methName(__component_<definition.name;format="toCName">_singleton_instance.__component_internal_data.type.<itf.name>[(index)].selfData)
+<else>
+#define CALL_INTERFACE_METHOD_<itf.name>_WITH_PARAM(methName) __component_<definition.name;format="toCName">_singleton_instance.__component_internal_data.type.<itf.name>.meths->methName(__component_<definition.name;format="toCName">_singleton_instance.__component_internal_data.type.<itf.name>.selfData,
+#define CALL_INTERFACE_METHOD_<itf.name>_WITHOUT_PARAM(methName) __component_<definition.name;format="toCName">_singleton_instance.__component_internal_data.type.<itf.name>.meths->methName(__component_<definition.name;format="toCName">_singleton_instance.__component_internal_data.type.<itf.name>.selfData)
+<endif>
+>>
+
+CALLServerInterface(definition, interfaceDefinitions, itf) ::= <<
+<if (isServer.(itf.role))>
+<if (definition.astNodeTypes.("data"))>
+<if (definition.data)>
+<MultiCALLServerInterface(definition=definition, interfaceDefinitions=interfaceDefinitions, itf=itf)>
+<else>
+<SingletonCALLServerInterface(definition=definition, interfaceDefinitions=interfaceDefinitions, itf=itf)>
+<endif>
+<else>
+<MultiCALLServerInterface(definition=definition, interfaceDefinitions=interfaceDefinitions, itf=itf)>
+<endif>
+<endif>
+>>
+
+MultiCALLServerInterface(definition, interfaceDefinitions, itf) ::= <<
+<if (itf.numberOfElement)>
+#define CALL_COLLECTION_INTERFACE_METHOD_<itf.name>_WITH_PARAM(index, methName) INTERFACE_METHOD(<itf.name>,methName)(CONTEXT_PTR_ACCESS,
+#define CALL_COLLECTION_INTERFACE_METHOD_<itf.name>_WITHOUT_PARAM(index, methName) INTERFACE_METHOD(<itf.name>,methName)(CONTEXT_PTR_ACCESS)
+<else>
+#define CALL_INTERFACE_METHOD_<itf.name>_WITH_PARAM(methName) INTERFACE_METHOD(<itf.name>,methName)(CONTEXT_PTR_ACCESS,
+#define CALL_INTERFACE_METHOD_<itf.name>_WITHOUT_PARAM(methName) INTERFACE_METHOD(<itf.name>,methName)(CONTEXT_PTR_ACCESS)
+<endif>
+>>
+
+SingletonCALLServerInterface(definition, interfaceDefinitions, itf) ::= <<
+<if (itf.numberOfElement)>
+#define CALL_COLLECTION_INTERFACE_METHOD_<itf.name>_WITH_PARAM(index, methName) INTERFACE_METHOD(<itf.name>,methName)(
+#define CALL_COLLECTION_INTERFACE_METHOD_<itf.name>_WITHOUT_PARAM(index, methName) INTERFACE_METHOD(<itf.name>,methName)()
+<else>
+#define CALL_INTERFACE_METHOD_<itf.name>_WITH_PARAM(methName) INTERFACE_METHOD(<itf.name>,methName)(
+#define CALL_INTERFACE_METHOD_<itf.name>_WITHOUT_PARAM(methName) INTERFACE_METHOD(<itf.name>,methName)()
+<endif>
+>>
+
+CALL_PRV(definition) ::= <<
+// definition of the CALL_PRV macro
+<if (definition.astNodeTypes.("data"))>
+<if (definition.data)>
+<MultiCALL_PRV(definition=definition)>
+<else>
+<SingletonCALL_PRV(definition=definition)>
+<endif>
+<else>
+<MultiCALL_PRV(definition=definition)>
+<endif>
+<endif>
+>>
+
+MultiCALL_PRV(definition) ::= <<
+#define CALL_PRIVATE_METHOD_WITH_PARAM(methName) PRIVATE_METHOD(methName)(CONTEXT_PTR_ACCESS,
+#define CALL_PRIVATE_METHOD_WITHOUT_PARAM(methName) PRIVATE_METHOD(methName)(CONTEXT_PTR_ACCESS)
+>>
+
+SingletonCALL_PRV(definition) ::= <<
+#define CALL_PRIVATE_METHOD_WITH_PARAM(methName) PRIVATE_METHOD(methName)(
+#define CALL_PRIVATE_METHOD_WITHOUT_PARAM(methName) PRIVATE_METHOD(methName)()
+>>
+
+CALL_PTR(definition) ::= <<
+#define CALL_INTERFACE_PTR_WITH_PARAM(itf_ptr, methName) (itf_ptr)->meths->methName((itf_ptr)->selfData,
+#define CALL_INTERFACE_PTR_WITHOUT_PARAM(itf_ptr, methName) (itf_ptr)->meths->methName((itf_ptr)->selfData)
+
+<if (definition.astNodeTypes.("data"))>
+<if (definition.data)>
+<MultiCALL_PTR(definition=definition)>
+<else>
+<SingletonCALL_PTR(definition=definition)>
+<endif>
+<else>
+<MultiCALL_PTR(definition=definition)>
+<endif>
+
+>>
+
+MultiCALL_PTR(definition) ::= <<
+#define CALL_METHOD_PTR_WITH_PARAM(methPtr) (methPtr)(CONTEXT_PTR_ACCESS,
+#define CALL_METHOD_PTR_WITHOUT_PARAM(methPtr) (methPtr)(CONTEXT_PTR_ACCESS)
+>>
+
+SingletonCALL_PTR(definition) ::= <<
+#define CALL_METHOD_PTR_WITH_PARAM(methPtr) (methPtr)(
+#define CALL_METHOD_PTR_WITHOUT_PARAM(methName) (methPtr)()
+>>
+
+// -----------------------------------------------------------------------------
+// other macros
+
+GET_MY_INTERFACE(definition) ::= <<
+// definition of the GET_MY_INTERFACE macro
+<if (definition.astNodeTypes.("data"))>
+<if (definition.data)>
+#define GET_MY_INTERFACE(itfName) (& (CONTEXT_PTR_ACCESS->__component_internal_data.type.itfName))
+<else>
+#define GET_MY_INTERFACE(itfName) (& (__component_<definition.name;format="toCName">_singleton_instance.__component_internal_data.type.itfName))
+<endif>
+<endif>
+>>
+
+BIND_MY_INTERFACE(definition) ::= <<
+// definition of the BIND_MY_INTERFACE macro
+typedef struct {
+  void *selfData;
+  void *meths;
+} *__component_BMI_itfdesc_P;
+
+#define BIND_MY_INTERFACE(itfName, serverItf) do { \
+  ((__component_BMI_itfdesc_P) GET_MY_INTERFACE(itfName))->selfData = ((__component_BMI_itfdesc_P) serverItf)->selfData; \
+  ((__component_BMI_itfdesc_P) GET_MY_INTERFACE(itfName))->meths = ((__component_BMI_itfdesc_P) serverItf)->meths; \
+  } while (0);
+>>
+
+}$$
+
+}

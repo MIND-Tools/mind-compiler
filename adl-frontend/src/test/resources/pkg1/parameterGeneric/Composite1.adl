@@ -1,0 +1,12 @@
+
+import pkg1.pkg2.Primitive1;
+import pkg1.generic.Generic2;
+import pkg1.generic.Generic4;
+import pkg1.parameter.Parameter1;
+
+composite pkg1.parameterGeneric.Composite1 extends Generic2<Parameter1(10), Parameter1(12)> {
+
+  contains Generic4<Parameter1(20)> as c3;
+  
+  binds c3.cItf to this.cItf;
+}

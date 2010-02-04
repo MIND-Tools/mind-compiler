@@ -1,0 +1,4 @@
+
+interface pkg1.I2 {
+  void bar();
+}

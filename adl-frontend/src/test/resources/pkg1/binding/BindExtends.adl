@@ -1,0 +1,12 @@
+import pkg1.pkg2.Type1;
+import pkg1.pkg2.Primitive1;
+import pkg1.pkg2.Primitive2;
+
+composite pkg1.binding.BindExtends extends Type1 {
+
+  contains ProvideI1ext as server_comp;
+  
+  contains RequireI1 as client_comp;
+  
+  binds client_comp.i1 to server_comp.i1;
+}

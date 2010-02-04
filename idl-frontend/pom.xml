@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.ow2.mind</groupId>
+        <artifactId>mind-compiler</artifactId>
+        <version>0.1-beta-3-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>idl-frontend</artifactId>
+    <packaging>jar</packaging>
+    <name>IDL Frontend</name>
+
+    <description>
+        Front-end components for the IDL language of the Mind programming model.
+    </description>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.objectweb.fractal.fractaladl</groupId>
+            <artifactId>fractal-adl</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>common-frontend</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>idl-parser</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <classifier>jdk15</classifier>
+        </dependency>
+
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>common-frontend</artifactId>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+</project>

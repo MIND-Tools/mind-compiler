@@ -1,0 +1,6 @@
+
+import pkg1.pkg2.Primitive1;
+
+// fails: cyclic references
+composite pkg1.Composite6 extends Composite1<Composite6> {
+}

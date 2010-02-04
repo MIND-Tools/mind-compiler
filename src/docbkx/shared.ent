@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!ENTITY productName "mindc">
+
+<!ENTITY mindURL "http://mind.ow2.org/mindc">
+<!ENTITY mindPkg "org.ow2.mind">
+<!ENTITY mindJdoc "&mindURL;/apidocs">
+<!ENTITY mindCode "&mindURL;/xref">
+
+<!ENTITY fapiPkg "org.objectweb.fractal.api">
+<!ENTITY fapiJdoc "http://fractal.ow2.org/current/doc/javadoc/fractal">
+
+<!ENTITY fractalADLVersion "2.4-alpha-6">
+<!ENTITY fadlPkg "org.objectweb.fractal.adl">
+<!ENTITY fadlPkgSlash "org/objectweb/fractal/adl">
+<!ENTITY fractalADLDoc "http://fractal.ow2.org/fractaladl/index.html">
+<!ENTITY fadlJdoc "http://fractal.ow2.org/fractaladl-site/&fractalADLVersion;/fractal-adl/apidocs">
+
+<!ENTITY ceciliaVersion "2.1.0">
+<!ENTITY ceciliaDoc  "http://fractal.ow2.org/cecilia-site/&ceciliaVersion;">
+<!ENTITY ceciliaADLJavaDoc  "&ceciliaDoc;/toolchain-parent/cecilia-adl/apidocs/org/objectweb/fractal/cecilia/adl">

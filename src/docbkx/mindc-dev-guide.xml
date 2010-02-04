@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE book SYSTEM "./dtd/minddoc.dtd" [
+<!ENTITY % myents SYSTEM "./shared.ent" >
+%myents;
+]>
+<book>
+    <title>
+        <emphasis>&productName;</emphasis> developer guide 
+    </title>
+    <subtitle>version <?eval ${project.version}?></subtitle>
+    
+    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="devGuide/intro-chapter.xml" />
+    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="devGuide/common-frontend.xml" />
+    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="devGuide/adl-frontend.xml" />
+    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="devGuide/common-backend.xml" />
+    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="devGuide/mpp.xml" />
+    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="devGuide/adl-backend.xml" />
+    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="devGuide/fractaladl-intro.xml" />
+    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="devGuide/code-convention.xml" />
+</book>

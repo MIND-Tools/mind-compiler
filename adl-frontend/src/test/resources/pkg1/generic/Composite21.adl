@@ -1,0 +1,8 @@
+
+import pkg1.pkg2.Primitive1;
+import pkg1.Composite1;
+
+composite pkg1.generic.Composite21 extends Generic2<?, Primitive1> {
+  
+  @Override contains Composite1 as c1;
+}

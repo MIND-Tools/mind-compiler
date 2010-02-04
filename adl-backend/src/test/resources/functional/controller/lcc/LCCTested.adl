@@ -1,0 +1,5 @@
+
+type controller.lcc.LCCTested {
+  provides fractal.api.LifeCycleController as lifeCycleController;
+  provides Main as main;
+}

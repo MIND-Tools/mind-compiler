@@ -1,0 +1,9 @@
+
+@Compile
+composite controller.lcc.CompositeComponent {
+  provides Main as main;
+
+  contains MultiPrimitiveComponent as subComp;
+  
+  binds this.main to subComp.main;
+}
