@@ -97,7 +97,7 @@
 
     <profiles>
         <profile>
-            <id>release</id>
+            <id>src-packages</id>
             <activation>
                 <property>
                     <name>performRelease</name>
@@ -125,6 +125,21 @@
                             </execution>
                         </executions>
                     </plugin>
+                </plugins>
+            </build>
+        </profile>
+        
+        <profile>
+            <id>release</id>
+            <activation>
+                <property>
+                    <name>performRelease</name>
+                    <value>true</value>
+                </property>
+            </activation>
+
+            <build>
+                <plugins>
                     <plugin>
                         <artifactId>maven-antrun-plugin</artifactId>
                         <inherited>false</inherited>
