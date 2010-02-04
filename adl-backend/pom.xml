@@ -64,18 +64,12 @@
                         <id>unpack-fractal-runtime</id>
                         <phase>generate-test-resources</phase>
                         <goals>
-                            <goal>unpack</goal>
+                            <goal>unpack-dependencies</goal>
                         </goals>
                         <inherited>false</inherited>
                         <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>${project.groupId}</groupId>
-                                    <artifactId>fractal-runtime</artifactId>
-                                    <version>${project.version}</version>
-                                    <outputDirectory>${project.build.testOutputDirectory}/common</outputDirectory>
-                                </artifactItem>
-                            </artifactItems>
+                            <includeArtifactIds>fractal-runtime</includeArtifactIds>
+                            <outputDirectory>${project.build.testOutputDirectory}/common</outputDirectory>
                             <excludes>META-INF/**</excludes>
                         </configuration>
                     </execution>
