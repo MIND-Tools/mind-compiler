@@ -27,7 +27,6 @@ import static org.testng.Assert.assertSame;
 import static org.testng.Assert.fail;
 
 import org.objectweb.fractal.adl.ADLException;
-import org.ow2.mind.preproc.MPPErrors;
 import org.testng.annotations.Test;
 
 public class TestMPPErrors extends AbstractTestMPP {
@@ -36,6 +35,30 @@ public class TestMPPErrors extends AbstractTestMPP {
   public void test1() throws Exception {
     try {
       compileSingleton("error", "error1");
+      fail("An ADLException was expected here");
+    } catch (final ADLException e) {
+      assertNotNull(e.getError());
+      assertSame(e.getError().getTemplate(), MPPErrors.PARSE_ERROR);
+      System.out.println(e.getError().toString());
+    }
+  }
+
+  @Test(groups = {"functional"})
+  public void testinitSingleton() throws Exception {
+    try {
+      compileSingleton("init", "init");
+      fail("An ADLException was expected here");
+    } catch (final ADLException e) {
+      assertNotNull(e.getError());
+      assertSame(e.getError().getTemplate(), MPPErrors.PARSE_ERROR);
+      System.out.println(e.getError().toString());
+    }
+  }
+
+  @Test(groups = {"functional"})
+  public void testinitMulti() throws Exception {
+    try {
+      compileMulti("init", "init");
       fail("An ADLException was expected here");
     } catch (final ADLException e) {
       assertNotNull(e.getError());
