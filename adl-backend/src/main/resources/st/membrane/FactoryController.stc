@@ -45,7 +45,7 @@ destroyFcInstance(definition) ::= <<
 int __component_<definition.name;format="toCName">_destroy(void *instance, memory_api_Allocator allocItf);
 
 int METH(factory, destroyFcInstance)(void * instance) {
-  return __component_<definition.name;format="toCName">_factory(instance, GET_MY_INTERFACE(allocator));
+  return __component_<definition.name;format="toCName">_destroy(instance, GET_MY_INTERFACE(allocator));
 }
 >>
 
