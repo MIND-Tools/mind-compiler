@@ -1,0 +1,29 @@
+-- Use this file in branches to remember last merge from trunk --
+feb 5, 2010 -- 45 -- creation
+<DATE> -- svn merge -r<LAST_MERGE>:<CURRENT> ../../trunk
+-- do not commit this file on the trunk
+
+A method to merge a branch on the trunk:
+1/ make sure branch and trunk are up to date and commited
+$ cd branches/<branch>
+$ svn update
+$ svn status --> no M or A
+$ cd trunk
+$ svn update
+$ svn status --> no M or A
+
+2/ merge branch into trunk
+$ cd trunk
+$ svn merge -r<INITIAL_REV>:<CURRENT_REV> ../branches/<branch> .
+
+3/ make sure everything is ok
+
+4/ fill your changes in the Changelog file *correctly*
+
+5/ commit merge
+$ svn ci -m"merge with branch <branch>"
+
+6/ remove branch
+$ cd ../branches
+$ svn rm <branch>
+

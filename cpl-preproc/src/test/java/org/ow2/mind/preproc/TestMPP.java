@@ -46,15 +46,15 @@ public class TestMPP extends AbstractTestMPP {
     compileMulti("attribute", "attribute");
   }
 
-  @Test(groups = {"functional"})
-  public void testinitSingleton() throws Exception {
-    compileSingleton("init", "init");
-  }
-
-  @Test(groups = {"functional"})
-  public void testinitMulti() throws Exception {
-    compileMulti("init", "init");
-  }
+// @Test(groups = {"functional"})
+// public void testinitSingleton() throws Exception {
+// compileSingleton("init", "init");
+// }
+//
+// @Test(groups = {"functional"})
+// public void testinitMulti() throws Exception {
+// compileMulti("init", "init");
+// }
 
   @Test(groups = {"functional"})
   public void testmultidecl2Singleton() throws Exception {

@@ -56,21 +56,26 @@ tokens{
 	private PrintStream out = System.out;
 	private PrintStream headerOut = null;
 	private boolean singletonMode = false;
+		
+	private String sourceFile = null;
+	private int sourceLineShift = 0;
+	
+	private List<String> errors = new ArrayList<String>();
 
 	public void setOutputStream(PrintStream out) { this.out = out;}
 	public void setHeaderOutputStream(PrintStream out) { this.headerOut = out;}
 	public void setSingletonMode(boolean singletonMode) { this.singletonMode = singletonMode; }
 	
-	private List<String> errors = new ArrayList<String>();
-    public void displayRecognitionError(String[] tokenNames,
-                                        RecognitionException e) {
-        String hdr = getErrorHeader(e);
-        String msg = getErrorMessage(e, tokenNames);
-        errors.add(hdr + " " + msg);
-    }
-    public List<String> getErrors() {
-        return errors;
-    }
+	public void displayRecognitionError(String[] tokenNames,
+                                        			RecognitionException e) {
+		if (sourceFile == null) sourceFile = e.input.getSourceName();
+		String msg = "\nIn file " + sourceFile + " at line " + (e.line + sourceLineShift) + ":" + e.charPositionInLine + " " + super.getErrorMessage(e, tokenNames);
+		errors.add(msg);			
+	}
+	
+	public List<String> getErrors() {
+        		return errors;
+    	}
 }
 
 @lexer::members{
@@ -87,6 +92,7 @@ parseFile returns [String res]
   | privateAccess   {sb.append($privateAccess.res); }
   | structDecl    {sb.append($structDecl.res); }
   | methPtrDef    {sb.append($methPtrDef.res); }
+  | sourceLineInfo		{sb.append($sourceLineInfo.res); }
   | e= ~ (METH | CALL | ATTR | PRIVATE | STRUCT | METH_PTR | CALL_PTR)
         {sb.append($e.text);}
   )+  
@@ -264,7 +270,9 @@ protected structDecl returns [StringBuilder res = new StringBuilder()]
               (
                 ws2=ws PRIVATE { isPrivate=true; } 
                 ( t = ~('='|';'|',') { str.append($t.text); } )* 
-                ('=' ws3=ws si = structinitializer)?
+	 // TODO see how to handle private data initializer
+                 // if private data initialization need to be suported
+//                ('=' ws3=ws si = structinitializer)?
               ) ws4=ws 
               | ( t = ~(';'| PRIVATE) {str.append($t.text); } ) * 
             ) ';'
@@ -453,6 +461,12 @@ protected inParams  returns [StringBuilder res = new StringBuilder()]
 protected ws
 	: (WS)* ; //{out.print($WS.text);}
 
+protected sourceLineInfo returns [StringBuilder res = new StringBuilder()]
+	: '#' ws1=ws {$res.append("#").append($ws1.text);} ( 'line' {$res.append("line");})? ws2=ws line=INT ws3=ws filename=. {$res.append($ws2.text).append($line.text).append($ws3.text).append($filename.text);}
+	{sourceLineShift=Integer.parseInt($line.text) - $line.line - 1;
+	 sourceFile = $filename.text;
+	}
+	;
 	
 
 STRING_LITERAL
