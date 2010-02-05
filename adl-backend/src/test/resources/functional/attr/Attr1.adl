@@ -1,0 +1,27 @@
+
+@CompileDef
+primitive attr.Attr1 extends ApplicationType {
+
+  attribute int attr1 = 12;
+  attribute string attr2 = "toto";
+
+  source {{
+    #include <stdio.h>
+    #include <string.h>
+    
+    
+    int METH(main, main)(int argc, char **argv) {
+      
+      if (ATTR(attr1) != 12) {
+        printf("Invalid value for attr1=%d\n", ATTR(attr1));
+        return 1;
+      }
+      
+      if (strcmp(ATTR(attr2), "toto") != 0) {
+        printf("Invalid value for attr2=%s\n", ATTR(attr2));
+        return 2;
+      }
+      return 0;
+    }
+  }};
+}

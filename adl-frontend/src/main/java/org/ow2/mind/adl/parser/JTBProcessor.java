@@ -616,8 +616,19 @@ public class JTBProcessor extends GJDepthFirst<Node, Node>
   public Node visit(final AttributeType n, final Node argu) {
     assert argu != null;
 
-    castNodeError(argu, Attribute.class).setType(
-        ((NodeToken) n.f0.choice).tokenImage);
+    final Attribute attr = castNodeError(argu, Attribute.class);
+    String type = ((NodeToken) n.f0.choice).tokenImage;
+
+    /*
+     * TODO This is a quick fix to support "string" attributes. a more complete
+     * solution should be found to support any type of attribute See issue
+     * MIND-1
+     */
+    if (type.equals("string")) {
+      type = "char*";
+    }
+
+    attr.setType(type);
 
     return argu;
   }
