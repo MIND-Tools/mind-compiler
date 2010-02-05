@@ -22,7 +22,7 @@
 
 package org.ow2.mind.preproc;
 
-import static org.objectweb.fractal.cecilia.adl.directives.DirectiveHelper.splitOptionString;
+import static org.ow2.mind.compilation.DirectiveHelper.splitOptionString;
 
 import java.io.File;
 import java.net.URL;
@@ -40,9 +40,6 @@ import org.ow2.mind.compilation.CompilerWrapper;
 import org.ow2.mind.compilation.PreprocessorCommand;
 import org.ow2.mind.compilation.gcc.GccCompilerWrapper;
 import org.ow2.mind.io.BasicOutputFileLocator;
-import org.ow2.mind.preproc.BasicMPPWrapper;
-import org.ow2.mind.preproc.MPPCommand;
-import org.ow2.mind.preproc.MPPWrapper;
 import org.testng.annotations.BeforeTest;
 
 public class AbstractTestMPP {

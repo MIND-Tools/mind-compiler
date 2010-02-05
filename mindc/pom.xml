@@ -28,6 +28,11 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>fractal-runtime</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>org.objectweb.fractal.cecilia.toolchain</groupId>
+            <artifactId>target-descriptor</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

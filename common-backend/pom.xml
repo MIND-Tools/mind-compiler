@@ -22,9 +22,5 @@
             <artifactId>testng</artifactId>
             <classifier>jdk15</classifier>
         </dependency>
-        <dependency>
-            <groupId>org.objectweb.fractal.cecilia.toolchain</groupId>
-            <artifactId>cecilia-adl</artifactId>
-        </dependency>
     </dependencies>
 </project>

@@ -22,9 +22,9 @@
 
 package org.ow2.mind.idl;
 
-import static org.objectweb.fractal.cecilia.adl.file.SourceFileWriter.writeToFile;
 import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
 import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
+import static org.ow2.mind.SourceFileWriter.writeToFile;
 
 import java.io.File;
 import java.io.IOException;

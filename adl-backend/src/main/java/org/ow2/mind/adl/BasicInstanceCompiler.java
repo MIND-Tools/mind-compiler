@@ -22,12 +22,12 @@
 
 package org.ow2.mind.adl;
 
-import static org.objectweb.fractal.cecilia.adl.directives.DirectiveHelper.splitOptionString;
 import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
 import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
 import static org.ow2.mind.PathHelper.fullyQualifiedNameToPath;
 import static org.ow2.mind.PathHelper.replaceExtension;
 import static org.ow2.mind.annotation.AnnotationHelper.getAnnotation;
+import static org.ow2.mind.compilation.DirectiveHelper.splitOptionString;
 
 import java.io.File;
 import java.net.URISyntaxException;

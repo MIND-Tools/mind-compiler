@@ -33,14 +33,14 @@ import java.util.List;
 import java.util.Map;
 
 import org.objectweb.fractal.adl.ADLException;
-import org.objectweb.fractal.cecilia.adl.compiler.CompilerErrors;
-import org.objectweb.fractal.cecilia.adl.compiler.ExecutionHelper;
 import org.ow2.mind.compilation.AbstractCompilerCommand;
 import org.ow2.mind.compilation.AbstractLinkerCommand;
 import org.ow2.mind.compilation.AbstractPreprocessorCommand;
 import org.ow2.mind.compilation.CompilerCommand;
 import org.ow2.mind.compilation.CompilerContextHelper;
+import org.ow2.mind.compilation.CompilerErrors;
 import org.ow2.mind.compilation.CompilerWrapper;
+import org.ow2.mind.compilation.ExecutionHelper;
 import org.ow2.mind.compilation.LinkerCommand;
 import org.ow2.mind.compilation.PreprocessorCommand;
 

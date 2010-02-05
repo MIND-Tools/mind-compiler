@@ -24,6 +24,7 @@ package org.ow2.mind;
 
 import static org.ow2.mind.PathHelper.fullyQualifiedNameToPath;
 import static org.ow2.mind.PathHelper.isRelative;
+import static org.ow2.mind.compilation.DirectiveHelper.splitOptionString;
 import static org.testng.Assert.assertNotNull;
 
 import java.io.BufferedReader;
@@ -40,8 +41,6 @@ import org.antlr.stringtemplate.StringTemplateGroupLoader;
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.Loader;
-import org.objectweb.fractal.cecilia.adl.directives.DirectiveHelper;
-import org.ow2.mind.BasicInputResourceLocator;
 import org.ow2.mind.adl.ADLBackendFactory;
 import org.ow2.mind.adl.ADLLocator;
 import org.ow2.mind.adl.DefinitionCompiler;
@@ -158,8 +157,7 @@ public class CompilerRunner {
         "org.ow2.mind.adl.annotation.predefined", context);
 
     final String cFlags = System.getProperty(CFLAGS_PROPERTY, DEFAULT_CFLAGS);
-    CompilerContextHelper.setCFlags(context, DirectiveHelper
-        .splitOptionString(cFlags));
+    CompilerContextHelper.setCFlags(context, splitOptionString(cFlags));
   }
 
   public Definition load(final String adlName) throws ADLException {

@@ -32,8 +32,8 @@ import org.antlr.stringtemplate.StringTemplate;
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.CompilerError;
 import org.objectweb.fractal.adl.Definition;
-import org.objectweb.fractal.cecilia.adl.file.SourceFileWriter;
 import org.ow2.mind.InputResourcesHelper;
+import org.ow2.mind.SourceFileWriter;
 import org.ow2.mind.io.IOErrors;
 
 /**
