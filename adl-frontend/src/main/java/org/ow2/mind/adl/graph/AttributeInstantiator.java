@@ -37,6 +37,7 @@ import org.ow2.mind.adl.parameter.ast.Argument;
 import org.ow2.mind.adl.parameter.ast.ArgumentContainer;
 import org.ow2.mind.adl.parameter.ast.FormalParameterContainer;
 import org.ow2.mind.value.ast.Reference;
+import org.ow2.mind.value.ast.StringLiteral;
 import org.ow2.mind.value.ast.Value;
 
 public class AttributeInstantiator extends AbstractInstantiator {
@@ -80,6 +81,16 @@ public class AttributeInstantiator extends AbstractInstantiator {
             assert value != null;
             attributeValues.put(attribute.getName(), value);
           } else {
+            /*
+             * TODO This is a quick fix to support "string" attribute. a more
+             * complete solution should be found to support any type of
+             * attribute See issue MIND-1
+             */
+            if (attributeValue instanceof StringLiteral) {
+              ((StringLiteral) attributeValue).setValue("\""
+                  + ((StringLiteral) attributeValue).getValue() + "\"");
+            }
+
             attributeValues.put(attribute.getName(), attributeValue);
           }
         }

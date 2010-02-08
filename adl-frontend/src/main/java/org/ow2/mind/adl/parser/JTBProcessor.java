@@ -625,7 +625,7 @@ public class JTBProcessor extends GJDepthFirst<Node, Node>
      * MIND-1
      */
     if (type.equals("string")) {
-      type = "char*";
+      type = "const char*";
     }
 
     attr.setType(type);

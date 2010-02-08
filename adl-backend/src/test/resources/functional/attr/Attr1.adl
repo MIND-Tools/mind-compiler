@@ -1,5 +1,5 @@
 
-@CompileDef
+@Run
 primitive attr.Attr1 extends ApplicationType {
 
   attribute int attr1 = 12;
