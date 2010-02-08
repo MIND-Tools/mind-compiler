@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
 
@@ -209,6 +210,14 @@
                 <groupId>org.objectweb.fractal.cecilia.toolchain</groupId>
                 <artifactId>target-descriptor</artifactId>
                 <version>2.1.0</version>
+                <exclusions>
+                    <!-- Exclude fractal-adl transitive dependency to be sure
+                         to use the version that is actually declared here -->
+                    <exclusion>
+                        <groupId>org.objectweb.fractal.fractaladl</groupId>
+                        <artifactId>fractal-adl</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
 
             <dependency>
@@ -217,6 +226,14 @@
                 <version>2.1.0</version>
                 <classifier>tests</classifier>
                 <scope>tests</scope>
+                <exclusions>
+                    <!-- Exclude fractal-adl transitive dependency to be sure
+                         to use the version that is actually declared here -->
+                    <exclusion>
+                        <groupId>org.objectweb.fractal.fractaladl</groupId>
+                        <artifactId>fractal-adl</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -547,7 +564,11 @@
                                             synbolic link to point to the new
                                             version.
                                         -->
-                                        <sshexec host="${ow2.hostname}" username="${ow2.username}" passphrase="" keyfile="${user.home}/.ssh/id_rsa" command="cd ${ow2.site.deploy.dir}; ln -nfs mindc-${project.version} mindc" />
+                                        <sshexec host="${ow2.hostname}"
+                                            username="${ow2.username}"
+                                            passphrase=""
+                                            keyfile="${user.home}/.ssh/id_rsa"
+                                            command="cd ${ow2.site.deploy.dir}; ln -nfs mindc-${project.version} mindc" />
                                     </tasks>
                                 </configuration>
                             </execution>
