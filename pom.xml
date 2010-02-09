@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
 
@@ -11,7 +10,7 @@
     </parent>
 
     <artifactId>mind-compiler</artifactId>
-    <version>0.1-beta-4-SNAPSHOT</version>
+    <version>0.1</version>
     <name>Mind compiler</name>
     <packaging>pom</packaging>
 
@@ -93,9 +92,9 @@
     </properties>
 
     <scm>
-        <connection>scm:svn:svn://svn.forge.objectweb.org/svnroot/mind/mindc/trunk</connection>
-        <developerConnection>scm:svn:svn+ssh://svn.forge.objectweb.org/svnroot/mind/mindc/trunk</developerConnection>
-        <url>http://fisheye.ow2.org/browse/MIND/mindc/trunk</url>
+        <connection>scm:svn:svn://svn.forge.objectweb.org/svnroot/mind/mindc/tags/mind-compiler-0.1</connection>
+        <developerConnection>scm:svn:svn+ssh://svn.forge.objectweb.org/svnroot/mind/mindc/tags/mind-compiler-0.1</developerConnection>
+        <url>http://fisheye.ow2.org/browse/MIND/mindc/tags/mind-compiler-0.1</url>
     </scm>
 
     <dependencyManagement>
@@ -564,11 +563,7 @@
                                             synbolic link to point to the new
                                             version.
                                         -->
-                                        <sshexec host="${ow2.hostname}"
-                                            username="${ow2.username}"
-                                            passphrase=""
-                                            keyfile="${user.home}/.ssh/id_rsa"
-                                            command="cd ${ow2.site.deploy.dir}; ln -nfs mindc-${project.version} mindc" />
+                                        <sshexec host="${ow2.hostname}" username="${ow2.username}" passphrase="" keyfile="${user.home}/.ssh/id_rsa" command="cd ${ow2.site.deploy.dir}; ln -nfs mindc-${project.version} mindc" />
                                     </tasks>
                                 </configuration>
                             </execution>
