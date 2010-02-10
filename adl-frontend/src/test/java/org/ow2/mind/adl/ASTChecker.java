@@ -31,7 +31,7 @@ import static junit.framework.Assert.fail;
 import static org.ow2.mind.adl.ast.ASTHelper.RESOLVED_DEFINITION_DECORATION_NAME;
 import static org.ow2.mind.adl.ast.ASTHelper.getResolvedComponentDefinition;
 import static org.ow2.mind.adl.parameter.ast.ParameterASTHelper.getInferredParameterType;
-import static org.ow2.mind.value.ast.ValueHelper.getValue;
+import static org.ow2.mind.value.ast.ValueASTHelper.getValue;
 
 import java.util.ArrayList;
 import java.util.HashSet;

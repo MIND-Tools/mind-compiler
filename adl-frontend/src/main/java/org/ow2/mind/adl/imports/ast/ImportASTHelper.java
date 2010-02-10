@@ -22,10 +22,12 @@
 
 package org.ow2.mind.adl.imports.ast;
 
+import static org.ow2.mind.CommonASTHelper.newNode;
+import static org.ow2.mind.CommonASTHelper.turnsTo;
+
 import org.objectweb.fractal.adl.Node;
 import org.objectweb.fractal.adl.NodeFactory;
 import org.objectweb.fractal.adl.merger.NodeMerger;
-import org.ow2.mind.adl.ast.ASTHelper;
 
 /**
  * Helper methods for import AST nodes.
@@ -100,7 +102,7 @@ public final class ImportASTHelper {
    */
   public static Import newImport(final NodeFactory nodeFactory,
       final String packageName, final String simpleName) {
-    final Import imp = ASTHelper.newNode(nodeFactory, "import", Import.class);
+    final Import imp = newNode(nodeFactory, "import", Import.class);
     imp.setPackageName(packageName);
     imp.setSimpleName(simpleName);
     return imp;
@@ -117,7 +119,7 @@ public final class ImportASTHelper {
    */
   public static Import newOnDemandImport(final NodeFactory nodeFactory,
       final String packageName) {
-    final Import imp = ASTHelper.newNode(nodeFactory, "import", Import.class);
+    final Import imp = newNode(nodeFactory, "import", Import.class);
     imp.setPackageName(packageName);
     imp.setSimpleName(Import.ON_DEMAND_IMPORT);
     return imp;
@@ -138,7 +140,6 @@ public final class ImportASTHelper {
    */
   public static ImportContainer turnsToImportContainer(final Node node,
       final NodeFactory nodeFactory, final NodeMerger nodeMerger) {
-    return ASTHelper.turnsTo(node, ImportContainer.class, nodeFactory,
-        nodeMerger);
+    return turnsTo(node, ImportContainer.class, nodeFactory, nodeMerger);
   }
 }
