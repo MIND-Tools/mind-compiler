@@ -74,25 +74,24 @@ public class AttributeInstantiator extends AbstractInstantiator {
       if (attributes.length > 0) {
         final Map<String, Value> attributeValues = new HashMap<String, Value>();
         for (final Attribute attribute : attributes) {
-          final Value attributeValue = attribute.getValue();
+          Value attributeValue = attribute.getValue();
           if (attributeValue instanceof Reference) {
             final Value value = argumentValues.get(((Reference) attributeValue)
                 .getRef());
             assert value != null;
-            attributeValues.put(attribute.getName(), value);
-          } else {
-            /*
-             * TODO This is a quick fix to support "string" attribute. a more
-             * complete solution should be found to support any type of
-             * attribute See issue MIND-1
-             */
-            if (attributeValue instanceof StringLiteral) {
-              ((StringLiteral) attributeValue).setValue("\""
-                  + ((StringLiteral) attributeValue).getValue() + "\"");
-            }
-
-            attributeValues.put(attribute.getName(), attributeValue);
+            attributeValue = value;
           }
+          /*
+           * TODO This is a quick fix to support "string" attribute. a more
+           * complete solution should be found to support any type of attribute
+           * See issue MIND-1
+           */
+          if (attributeValue instanceof StringLiteral) {
+            ((StringLiteral) attributeValue).setValue("\""
+                + ((StringLiteral) attributeValue).getValue() + "\"");
+          }
+
+          attributeValues.put(attribute.getName(), attributeValue);
         }
 
         graph.setDecoration("attribute-values", attributeValues);

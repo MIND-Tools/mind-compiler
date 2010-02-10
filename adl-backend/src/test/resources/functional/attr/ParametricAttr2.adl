@@ -1,0 +1,4 @@
+
+@Run
+primitive attr.ParametricAttr2 extends attr.ParametricAttr1(12, "toto") {
+}
