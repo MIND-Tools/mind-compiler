@@ -45,6 +45,7 @@ tokens{
     import java.io.*;
     import java.util.List;
     import java.util.ArrayList;
+    import org.ow2.mind.preproc.CPLChecker;
 }
 
 @lexer::header {
@@ -56,6 +57,7 @@ tokens{
 	private PrintStream out = System.out;
 	private PrintStream headerOut = null;
 	private boolean singletonMode = false;
+	private CPLChecker cplChecker = null;
 		
 	private String sourceFile = null;
 	private int sourceLineShift = 0;
@@ -65,6 +67,7 @@ tokens{
 	public void setOutputStream(PrintStream out) { this.out = out;}
 	public void setHeaderOutputStream(PrintStream out) { this.headerOut = out;}
 	public void setSingletonMode(boolean singletonMode) { this.singletonMode = singletonMode; }
+	public void setCplChecker(CPLChecker cplChecker){this.cplChecker = cplChecker;}
 	
 	public void displayRecognitionError(String[] tokenNames,
                                         			RecognitionException e) {
@@ -127,7 +130,14 @@ protected serverMethDef returns [StringBuilder res = new StringBuilder()]
         e = WS { tmp += $e.text; }
         | ')'  { tmp += ")"; }
       )* // handle case of (((... METH(foo) )))(...
-    {
+    { try{
+    	cplChecker.serverMethDef($id.text, $meth.text);
+    }catch (final Exception exception) {
+    //TODO the exception cause used to know if the exception is due to id  or meth to determined the line and the charPositionInLine of the error
+    	String msg = "In file "+ sourceFile + " "+ ($id.line+ sourceLineShift) + ":" + $id.pos 
+    	 + exception.getMessage() ;
+        errors.add(msg);
+      }
       if (itfIdx == null) {
           $res.append("INTERFACE_METHOD").append($ws1.text).append("(")
               .append($ws2.text).append($id.text).append($ws3.text).append(",")
@@ -253,7 +263,14 @@ protected methCall returns [StringBuilder res ]
 
 protected attAccess returns [StringBuilder res = new StringBuilder()]
     : ATTR ws1=ws '(' ws2=ws att=ID ws3=ws ')' 
-      {
+      { try{
+    	cplChecker.attAccess($att.text);
+    	}catch (final Exception exception) {
+    //TODO the exception cause used to know if the exception is due to id  or meth to determined the line and the charPositionInLine of the error
+    	String msg = "In file "+ sourceFile + " "+ ($att.line+ sourceLineShift) + ":" + $att.pos 
+    	 + exception.getMessage() ;
+        errors.add(msg);
+      }
         $res.append("ATTRIBUTE_ACCESS").append($ws1.text).append("(").append($ws2.text);
         if (! singletonMode) $res.append("CONTEXT_PTR_ACCESS, ");
         $res.append($att.text).append($ws3.text).append(")");

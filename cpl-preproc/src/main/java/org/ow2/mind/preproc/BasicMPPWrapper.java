@@ -39,6 +39,7 @@ import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.RecognitionException;
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.CompilerError;
+import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.error.GenericErrors;
 import org.objectweb.fractal.adl.util.FractalADLLogManager;
 import org.ow2.mind.preproc.parser.CPLLexer;
@@ -48,19 +49,23 @@ public class BasicMPPWrapper implements MPPWrapper {
 
   protected static Logger logger = FractalADLLogManager.getLogger("io");
 
-  public MPPCommand newMPPCommand(final Map<Object, Object> context) {
-    return new BasicMPPCommand(context);
+  public MPPCommand newMPPCommand(final Definition definition,
+      final Map<Object, Object> context) {
+    return new BasicMPPCommand(definition, context);
   }
 
   protected static class BasicMPPCommand implements MPPCommand {
 
     protected final Map<Object, Object> context;
+    protected CPLChecker                cplChecker;
     protected boolean                   singletonMode = false;
     protected File                      inputFile;
     protected File                      outputFile;
     protected File                      headerOutputFile;
 
-    BasicMPPCommand(final Map<Object, Object> context) {
+    BasicMPPCommand(final Definition definition,
+        final Map<Object, Object> context) {
+      this.cplChecker = new CPLChecker(definition);
       this.context = context;
     }
 
@@ -114,6 +119,8 @@ public class BasicMPPWrapper implements MPPWrapper {
       final CommonTokenStream tokens = new CommonTokenStream(lex);
       final CPLParser mpp = new CPLParser(tokens);
 
+      mpp.setCplChecker(this.cplChecker);
+
       final PrintStream outPS;
       try {
         outputFile.getParentFile().mkdirs();
@@ -154,6 +161,7 @@ public class BasicMPPWrapper implements MPPWrapper {
 
       final List<String> errors = mpp.getErrors();
       if (errors != null && errors.size() > 0) {
+
         String errorMsg;
         if (errors.size() == 1) {
           errorMsg = errors.get(0);

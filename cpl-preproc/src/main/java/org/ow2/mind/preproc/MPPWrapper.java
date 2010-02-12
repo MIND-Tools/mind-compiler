@@ -24,9 +24,11 @@ package org.ow2.mind.preproc;
 
 import java.util.Map;
 
+import org.objectweb.fractal.adl.Definition;
+
 public interface MPPWrapper {
 
   String ITF_NAME = "mpp-wrapper";
 
-  MPPCommand newMPPCommand(Map<Object, Object> context);
+  MPPCommand newMPPCommand(final Definition definition, Map<Object, Object> context);
 }

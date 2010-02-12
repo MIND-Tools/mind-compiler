@@ -285,7 +285,7 @@ public class BasicDefinitionCompiler
   protected MPPCommand newMPPCommand(final Definition definition,
       final File inputFile, final File outputFile, final File headerOutputFile,
       final Map<Object, Object> context) throws ADLException {
-    final MPPCommand command = mppWrapperItf.newMPPCommand(context);
+    final MPPCommand command = mppWrapperItf.newMPPCommand(definition, context);
     command.setOutputFile(outputFile).setInputFile(inputFile);
     if (headerOutputFile != null)
       command.setHeaderOutputFile(headerOutputFile);

@@ -40,9 +40,6 @@ import org.ow2.mind.compilation.CompilerWrapper;
 import org.ow2.mind.compilation.PreprocessorCommand;
 import org.ow2.mind.compilation.gcc.GccCompilerWrapper;
 import org.ow2.mind.io.BasicOutputFileLocator;
-import org.ow2.mind.preproc.BasicMPPWrapper;
-import org.ow2.mind.preproc.MPPCommand;
-import org.ow2.mind.preproc.MPPWrapper;
 import org.testng.annotations.BeforeTest;
 
 public class AbstractTestMPP {
@@ -109,7 +106,7 @@ public class AbstractTestMPP {
 
   protected MPPCommand newMPPCommand(final String dirName,
       final String fileName, final boolean singleton) {
-    final MPPCommand command = mppWrapper.newMPPCommand(context);
+    final MPPCommand command = mppWrapper.newMPPCommand(null, context);
     command.setInputFile(newBuildFile(dirName, fileName, ".i"));
     command.setOutputFile(newBuildFile(dirName, fileName, singleton
         ? ".singleton-mpp.c"
