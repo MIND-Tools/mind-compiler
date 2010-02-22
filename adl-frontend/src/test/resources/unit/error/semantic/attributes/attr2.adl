@@ -1,7 +1,6 @@
+//#SemanticError GroupId=MADL ErrorId=INVALID_ATTRIBUTE_MISSING_TYPE line=5
 // attribute declaration without type
-
 primitive attributes.attr2 {
-  @SemanticError(GroupId="ATTR", ErrorId="UNDEFINED_TYPE")
   // simple attribute name
   attribute attr_name1;
 }

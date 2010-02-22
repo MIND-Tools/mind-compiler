@@ -1,0 +1,6 @@
+//#SemanticError GroupId=MADL ErrorId=INVALID_ATTRIBUTE_VALUE_INCOMPATIBLE_TYPE line=5
+// attribute: integer assigned to string
+primitive attributes.attr5 {
+  attribute string attr = 
+    2;
+}

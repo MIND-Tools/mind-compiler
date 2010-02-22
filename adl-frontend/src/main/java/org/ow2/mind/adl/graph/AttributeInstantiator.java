@@ -82,9 +82,9 @@ public class AttributeInstantiator extends AbstractInstantiator {
             attributeValue = value;
           }
           /*
-           * TODO This is a quick fix to support "string" attribute. a more
-           * complete solution should be found to support any type of attribute
-           * See issue MIND-1
+           * TODO MIND-7 This is a quick fix to support "string" attribute. a
+           * more complete solution should be found to support any type of
+           * attribute
            */
           if (attributeValue instanceof StringLiteral) {
             ((StringLiteral) attributeValue).setValue("\""

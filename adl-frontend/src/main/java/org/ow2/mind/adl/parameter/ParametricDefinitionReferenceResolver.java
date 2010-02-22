@@ -255,6 +255,10 @@ public class ParametricDefinitionReferenceResolver
           result = new HashMap<String, FormalParameter>(formalParameters.length);
           for (final FormalParameter parameter : formalParameters) {
             if (result.put(parameter.getName(), parameter) != null) {
+              /*
+               * TODO strange ADLErrors, and why checking for duplicated
+               * parameters here ?
+               */
               throw new ADLException(
                   ADLErrors.DUPLICATED_TEMPALTE_VARIABLE_NAME, parameter,
                   parameter.getName());

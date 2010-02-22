@@ -43,6 +43,8 @@ import org.ow2.mind.adl.annotation.AnnotationProcessorLoader;
 import org.ow2.mind.adl.anonymous.AnonymousDefinitionExtractorImpl;
 import org.ow2.mind.adl.anonymous.AnonymousDefinitionLoader;
 import org.ow2.mind.adl.anonymous.ImportAnonymousDefinitionExtractor;
+import org.ow2.mind.adl.attribute.AttributeCheckerLoader;
+import org.ow2.mind.adl.attribute.AttributesNormalizerLoader;
 import org.ow2.mind.adl.binding.BasicBindingChecker;
 import org.ow2.mind.adl.binding.BindingChecker;
 import org.ow2.mind.adl.binding.BindingCheckerLoader;
@@ -187,6 +189,8 @@ public final class Factory {
     final BindingCheckerLoader bcl = new BindingCheckerLoader();
     final UnboundInterfaceCheckerLoader uicl = new UnboundInterfaceCheckerLoader();
     final ImplementationLoader il = new ImplementationLoader();
+    final AttributesNormalizerLoader attrnl = new AttributesNormalizerLoader();
+    final AttributeCheckerLoader acl = new AttributeCheckerLoader();
     final AnnotationProcessorLoader apl4 = new AnnotationProcessorLoader();
     final BinaryADLLoader bal = new BinaryADLLoader();
     final TemplateInstanceLoader gidl = new TemplateInstanceLoader();
@@ -196,7 +200,9 @@ public final class Factory {
     cl.clientLoader = gidl;
     gidl.clientLoader = bal;
     bal.clientLoader = apl4;
-    apl4.clientLoader = il;
+    apl4.clientLoader = acl;
+    acl.clientLoader = attrnl;
+    attrnl.clientLoader = il;
     il.clientLoader = uicl;
     uicl.clientLoader = bcl;
     bcl.clientLoader = bnl;

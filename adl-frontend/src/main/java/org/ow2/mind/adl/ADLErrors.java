@@ -119,9 +119,16 @@ public enum ADLErrors implements ErrorTemplate {
       "<location>"),
 
   /** */
-  INVALID_ATTRIBUTE_NAME_OVERRIDE_INHERITED_ATTRIBUTE(
-      "Invalid attribute name, an attribute with the same name already exist in inherited definition at %s",
+  INVALID_ATTRIBUTE_OVERRIDE_INHERITED_ATTRIBUTE_TYPE(
+      "Invalid attribute type, an attribute with the same name already exist in inherited definition with a different type at %s",
       "<location>"),
+
+  /** */
+  INVALID_ATTRIBUTE_MISSING_TYPE("Invalid attribute, missing type"),
+
+  /** */
+  INVALID_ATTRIBUTE_VALUE_INCOMPATIBLE_TYPE(
+      "Invalid attribute, incompatible type"),
 
   /** */
   DUPLICATED_ATTRIBUTE_NAME(

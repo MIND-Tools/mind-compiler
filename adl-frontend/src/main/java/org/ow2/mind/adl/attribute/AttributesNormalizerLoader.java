@@ -20,11 +20,13 @@
  * Contributors: 
  */
 
-package org.ow2.mind.adl;
+package org.ow2.mind.adl.attribute;
 
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.Node;
 import org.objectweb.fractal.adl.error.NodeErrorLocator;
+import org.ow2.mind.adl.ADLErrors;
+import org.ow2.mind.adl.AbstractNormalizerLoader;
 import org.ow2.mind.adl.ast.Attribute;
 import org.ow2.mind.adl.ast.AttributeContainer;
 
