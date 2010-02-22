@@ -133,6 +133,9 @@
 <?add ast="boolean"   itf="org.ow2.mind.value.ast.BooleanLiteral" ?>
 <?map ast="boolean"   type="value" ?>
 
+<?add ast="null"      itf="org.ow2.mind.value.ast.NullLiteral" ?>
+<?map ast="null"      type="value" ?>
+
 <?add ast="array"     itf="org.ow2.mind.value.ast.Array" ?>
 <?map ast="array"     type="value" ?>
 
@@ -263,12 +266,12 @@
   type CDATA #REQUIRED
 >
 
-<!ELEMENT annotationArgument ( string | integer | array | annotationValue ) >
+<!ELEMENT annotationArgument ( string | integer | array | annotationValue | null ) >
 <!ATTLIST annotationArgument
   name CDATA #IMPLIED
 >
 
-<!ELEMENT array ( ( string | integer | array | annotationValue )* ) >
+<!ELEMENT array ( ( string | integer | array | annotationValue | null )* ) >
 <!ATTLIST array >
 
 <!ELEMENT string EMPTY >
@@ -281,4 +284,6 @@
   value CDATA #REQUIRED
 >
 
+<!ELEMENT null EMPTY >
+<!ATTLIST null>
 

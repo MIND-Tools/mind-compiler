@@ -77,6 +77,7 @@ import org.ow2.mind.idl.jtb.syntaxtree.AnnotationValue;
 import org.ow2.mind.idl.jtb.syntaxtree.AnnotationValuePair;
 import org.ow2.mind.idl.jtb.syntaxtree.ArrayAnnotationValue;
 import org.ow2.mind.idl.jtb.syntaxtree.ArraySpecification;
+import org.ow2.mind.idl.jtb.syntaxtree.BooleanValue;
 import org.ow2.mind.idl.jtb.syntaxtree.Declarator;
 import org.ow2.mind.idl.jtb.syntaxtree.Declarators;
 import org.ow2.mind.idl.jtb.syntaxtree.DirectDeclarator;
@@ -85,16 +86,19 @@ import org.ow2.mind.idl.jtb.syntaxtree.FullyQualifiedName;
 import org.ow2.mind.idl.jtb.syntaxtree.IDTFile;
 import org.ow2.mind.idl.jtb.syntaxtree.ITFFile;
 import org.ow2.mind.idl.jtb.syntaxtree.IncludeDirective;
+import org.ow2.mind.idl.jtb.syntaxtree.IntegerValue;
 import org.ow2.mind.idl.jtb.syntaxtree.InterfaceInheritanceSpecification;
 import org.ow2.mind.idl.jtb.syntaxtree.Literal;
 import org.ow2.mind.idl.jtb.syntaxtree.MethodDefinition;
 import org.ow2.mind.idl.jtb.syntaxtree.NodeChoice;
 import org.ow2.mind.idl.jtb.syntaxtree.NodeSequence;
 import org.ow2.mind.idl.jtb.syntaxtree.NodeToken;
+import org.ow2.mind.idl.jtb.syntaxtree.NullValue;
 import org.ow2.mind.idl.jtb.syntaxtree.ParameterQualifier;
 import org.ow2.mind.idl.jtb.syntaxtree.PointerSpecification;
 import org.ow2.mind.idl.jtb.syntaxtree.QualifiedTypeSpecification;
 import org.ow2.mind.idl.jtb.syntaxtree.QualifierPointerSpecification;
+import org.ow2.mind.idl.jtb.syntaxtree.StringValue;
 import org.ow2.mind.idl.jtb.syntaxtree.StructMember;
 import org.ow2.mind.idl.jtb.syntaxtree.StructOrUnionDefinition;
 import org.ow2.mind.idl.jtb.syntaxtree.StructOrUnionReference;
@@ -105,8 +109,12 @@ import org.ow2.mind.idl.jtb.syntaxtree.TypeSpecification;
 import org.ow2.mind.idl.jtb.syntaxtree.TypeSpecifiers;
 import org.ow2.mind.idl.jtb.visitor.GJDepthFirst;
 import org.ow2.mind.value.ast.Array;
+import org.ow2.mind.value.ast.BooleanLiteral;
 import org.ow2.mind.value.ast.MultipleValueContainer;
+import org.ow2.mind.value.ast.NullLiteral;
+import org.ow2.mind.value.ast.NumberLiteral;
 import org.ow2.mind.value.ast.SingleValueContainer;
+import org.ow2.mind.value.ast.StringLiteral;
 import org.ow2.mind.value.ast.Value;
 import org.xml.sax.SAXException;
 
@@ -769,6 +777,82 @@ public class JTBProcessor extends GJDepthFirst<Object, Node> {
     container.setConstantExpression(expr);
 
     return expr;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Value grammar
+  // ---------------------------------------------------------------------------
+
+  @Override
+  public Node visit(final StringValue n, final Node argu) {
+    assert argu != null;
+
+    final StringLiteral value = (StringLiteral) newNode("string", n.f0);
+    value.setValue(n.f0.tokenImage.substring(1, n.f0.tokenImage.length() - 1));
+
+    if (argu instanceof SingleValueContainer) {
+      ((SingleValueContainer) argu).setValue(value);
+    } else {
+      castNodeError(argu, MultipleValueContainer.class).addValue(value);
+    }
+
+    return value;
+  }
+
+  @Override
+  public Node visit(final IntegerValue n, final Node argu) {
+    assert argu != null;
+
+    final NumberLiteral value = (NumberLiteral) newNode("integer", n.f1);
+    if (n.f0.present()) {
+      value.setValue(((NodeToken) ((NodeChoice) n.f0.node).choice).tokenImage
+          + n.f1.tokenImage);
+    } else {
+      value.setValue(n.f1.tokenImage);
+    }
+
+    if (argu instanceof SingleValueContainer) {
+      ((SingleValueContainer) argu).setValue(value);
+    } else {
+      castNodeError(argu, MultipleValueContainer.class).addValue(value);
+    }
+
+    return value;
+  }
+
+  @Override
+  public Node visit(final BooleanValue n, final Node argu) {
+    assert argu != null;
+
+    final BooleanLiteral value = (BooleanLiteral) newNode("boolean", n.f0);
+    if (n.f0.tokenImage.equals(BooleanLiteral.TRUE)) {
+      value.setValue(BooleanLiteral.TRUE);
+    } else {
+      value.setValue(BooleanLiteral.FALSE);
+    }
+
+    if (argu instanceof SingleValueContainer) {
+      ((SingleValueContainer) argu).setValue(value);
+    } else {
+      castNodeError(argu, MultipleValueContainer.class).addValue(value);
+    }
+
+    return value;
+  }
+
+  @Override
+  public Node visit(final NullValue n, final Node argu) {
+    assert argu != null;
+
+    final NullLiteral value = (NullLiteral) newNode("null", n.f0);
+
+    if (argu instanceof SingleValueContainer) {
+      ((SingleValueContainer) argu).setValue(value);
+    } else {
+      castNodeError(argu, MultipleValueContainer.class).addValue(value);
+    }
+
+    return value;
   }
 
   // ---------------------------------------------------------------------------

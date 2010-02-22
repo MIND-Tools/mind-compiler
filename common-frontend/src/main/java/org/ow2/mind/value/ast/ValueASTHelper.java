@@ -74,11 +74,12 @@ public final class ValueASTHelper {
   }
 
   /**
-   * Create a new {@link StringLiteral} node using the given {@link NodeFactory}
+   * Create a new {@link BooleanLiteral} node using the given
+   * {@link NodeFactory}
    * 
    * @param nodeFactory the {@link NodeFactory} to use to create the node.
-   * @param value the {@link StringLiteral#getValue() literal value}.
-   * @return a new {@link StringLiteral} node.
+   * @param value the {@link BooleanLiteral#getValue() literal value}.
+   * @return a new {@link BooleanLiteral} node.
    */
   public static BooleanLiteral newBooleanLiteral(final NodeFactory nodeFactory,
       final boolean value) {
@@ -86,6 +87,16 @@ public final class ValueASTHelper {
         BooleanLiteral.class);
     literal.setValue((value) ? BooleanLiteral.TRUE : BooleanLiteral.FALSE);
     return literal;
+  }
+
+  /**
+   * Create a new {@link NullLiteral} node using the given {@link NodeFactory}
+   * 
+   * @param nodeFactory the {@link NodeFactory} to use to create the node.
+   * @return a new {@link NullLiteral} node.
+   */
+  public static NullLiteral newNullLiteral(final NodeFactory nodeFactory) {
+    return newNode(nodeFactory, "value", NullLiteral.class);
   }
 
   /**

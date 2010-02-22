@@ -95,6 +95,7 @@ import org.ow2.mind.adl.jtb.syntaxtree.NodeChoice;
 import org.ow2.mind.adl.jtb.syntaxtree.NodeOptional;
 import org.ow2.mind.adl.jtb.syntaxtree.NodeSequence;
 import org.ow2.mind.adl.jtb.syntaxtree.NodeToken;
+import org.ow2.mind.adl.jtb.syntaxtree.NullValue;
 import org.ow2.mind.adl.jtb.syntaxtree.Path;
 import org.ow2.mind.adl.jtb.syntaxtree.PrimitiveAnonymousDefinition;
 import org.ow2.mind.adl.jtb.syntaxtree.PrimitiveAnonymousExtension;
@@ -120,6 +121,7 @@ import org.ow2.mind.annotation.ast.AnnotationNode;
 import org.ow2.mind.value.ast.Array;
 import org.ow2.mind.value.ast.BooleanLiteral;
 import org.ow2.mind.value.ast.MultipleValueContainer;
+import org.ow2.mind.value.ast.NullLiteral;
 import org.ow2.mind.value.ast.NumberLiteral;
 import org.ow2.mind.value.ast.Reference;
 import org.ow2.mind.value.ast.SingleValueContainer;
@@ -1176,6 +1178,21 @@ public class JTBProcessor extends GJDepthFirst<Node, Node>
 
     final Reference value = (Reference) newNode("reference", n.f0);
     value.setRef(n.f0.tokenImage);
+
+    if (argu instanceof SingleValueContainer) {
+      ((SingleValueContainer) argu).setValue(value);
+    } else {
+      castNodeError(argu, MultipleValueContainer.class).addValue(value);
+    }
+
+    return value;
+  }
+
+  @Override
+  public Node visit(final NullValue n, final Node argu) {
+    assert argu != null;
+
+    final NullLiteral value = (NullLiteral) newNode("null", n.f0);
 
     if (argu instanceof SingleValueContainer) {
       ((SingleValueContainer) argu).setValue(value);

@@ -145,6 +145,7 @@ TOKEN : {
 	<IMPORT: "import"> |
 	<MANDATORY: "mandatory"> |
 	<NODATA: "nodata"> |
+	<NULL: "NULL" | "null"> |
 	<OPTIONAL: "optional"> |
 	<PRIMITIVE: "primitive"> |
 	<PROPERTY: "property"> |
@@ -328,7 +329,7 @@ void ArgumentAssignement() : {}
 
 void Argument() : {}
 {
-  StringValue() | IntegerValue() | ReferenceValue()
+  StringValue() | IntegerValue() | ReferenceValue() | NullValue()
 }
 
 void PrimitiveDefinitionBody() : {}
@@ -454,7 +455,7 @@ void AttributeType() : {}
 
 void AttributeValue() : {}
 {
-  StringValue() | IntegerValue() | ReferenceValue()
+  StringValue() | IntegerValue() | ReferenceValue() | NullValue()
 }
 
 /******************************************************************************/
@@ -626,6 +627,7 @@ void AnnotationValue() : {}
   | BooleanValue()
   | AnnotationAnnotationValue()
   | ArrayAnnotationValue()
+  | NullValue()
 }
 
 void AnnotationAnnotationValue() : {}
@@ -656,6 +658,10 @@ void BooleanValue() : {}
 void ReferenceValue() : {}
 {
   <IDENTIFIER>
+}
+
+void NullValue() : {}
+{  <NULL>
 }
 
 void FullyQualifiedName() : {}
