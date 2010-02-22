@@ -22,6 +22,8 @@
 
 package org.ow2.mind.adl.attribute;
 
+import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
+import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
 import static org.ow2.mind.adl.parameter.ast.ParameterASTHelper.getInferredParameterType;
 import static org.ow2.mind.adl.parameter.ast.ParameterASTHelper.setInferredParameterType;
 import static org.ow2.mind.adl.parameter.ast.ParameterASTHelper.setUsedFormalParameter;
@@ -32,18 +34,30 @@ import java.util.Map;
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.AbstractLoader;
 import org.objectweb.fractal.adl.Definition;
+import org.objectweb.fractal.adl.NodeFactory;
+import org.objectweb.fractal.api.NoSuchInterfaceException;
+import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.ow2.mind.adl.ADLErrors;
 import org.ow2.mind.adl.ast.Attribute;
 import org.ow2.mind.adl.ast.AttributeContainer;
 import org.ow2.mind.adl.parameter.ast.FormalParameter;
 import org.ow2.mind.adl.parameter.ast.FormalParameterContainer;
 import org.ow2.mind.adl.parameter.ast.ParameterASTHelper.ParameterType;
+import org.ow2.mind.value.ast.NullLiteral;
 import org.ow2.mind.value.ast.NumberLiteral;
 import org.ow2.mind.value.ast.Reference;
 import org.ow2.mind.value.ast.StringLiteral;
 import org.ow2.mind.value.ast.Value;
+import org.ow2.mind.value.ast.ValueASTHelper;
 
 public class AttributeCheckerLoader extends AbstractLoader {
+
+  // ---------------------------------------------------------------------------
+  // Client interfaces
+  // ---------------------------------------------------------------------------
+
+  /** The {@link NodeFactory} client interface. */
+  public NodeFactory nodeFactoryItf;
 
   // ---------------------------------------------------------------------------
   // Implementation of the Loader interface
@@ -86,7 +100,8 @@ public class AttributeCheckerLoader extends AbstractLoader {
             System.out.println("Warning at " + value.astGetSource()
                 + ": Initialize unsigned attribute with negative value");
           }
-        } else if (value instanceof StringLiteral) {
+        } else if (value instanceof StringLiteral
+            || value instanceof NullLiteral) {
           if (type == ParameterType.INTEGER)
             throw new ADLException(
                 ADLErrors.INVALID_ATTRIBUTE_VALUE_INCOMPATIBLE_TYPE, value);
@@ -120,7 +135,60 @@ public class AttributeCheckerLoader extends AbstractLoader {
                 refParamName);
           }
         }
+      } else {
+        // value is null, set a default value
+        if (type == ParameterType.INTEGER) {
+          attr.setValue(ValueASTHelper.newNumberLiteral(nodeFactoryItf, 0));
+        } else {
+          attr.setValue(ValueASTHelper.newNullLiteral(nodeFactoryItf));
+        }
       }
     }
   }
+
+  // ---------------------------------------------------------------------------
+  // Implementation of the BindingController interface
+  // ---------------------------------------------------------------------------
+
+  @Override
+  public void bindFc(final String itfName, final Object value)
+      throws NoSuchInterfaceException, IllegalBindingException {
+    checkItfName(itfName);
+
+    if (itfName.equals(NodeFactory.ITF_NAME)) {
+      this.nodeFactoryItf = (NodeFactory) value;
+    } else {
+      super.bindFc(itfName, value);
+    }
+
+  }
+
+  @Override
+  public String[] listFc() {
+    return listFcHelper(super.listFc(), NodeFactory.ITF_NAME);
+  }
+
+  @Override
+  public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
+    checkItfName(itfName);
+
+    if (itfName.equals(NodeFactory.ITF_NAME)) {
+      return this.nodeFactoryItf;
+    } else {
+      return super.lookupFc(itfName);
+    }
+  }
+
+  @Override
+  public void unbindFc(final String itfName) throws NoSuchInterfaceException,
+      IllegalBindingException {
+    checkItfName(itfName);
+
+    if (itfName.equals(NodeFactory.ITF_NAME)) {
+      this.nodeFactoryItf = null;
+    } else {
+      super.unbindFc(itfName);
+    }
+  }
+
 }

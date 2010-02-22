@@ -1,9 +1,9 @@
 
-@CompileDef
-primitive attr.ParametricAttr2 (a, b) extends ApplicationType {
+@Run
+primitive attr.Attr2 extends ApplicationType {
 
-  attribute int attr1 = a;
-  attribute string attr2 = b;
+  attribute int attr1;
+  attribute string attr2;
 
   source {{
     #include <stdio.h>
@@ -23,4 +23,5 @@ primitive attr.ParametricAttr2 (a, b) extends ApplicationType {
       }
       return 0;
     }
-  }};}
+  }};
+}

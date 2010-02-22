@@ -26,7 +26,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.objectweb.fractal.adl.ADLException;
+import org.objectweb.fractal.adl.CompilerError;
 import org.objectweb.fractal.adl.Definition;
+import org.objectweb.fractal.adl.error.GenericErrors;
 import org.ow2.mind.adl.ADLErrors;
 import org.ow2.mind.adl.ast.Attribute;
 import org.ow2.mind.adl.ast.AttributeContainer;
@@ -36,6 +38,8 @@ import org.ow2.mind.adl.ast.DefinitionReference;
 import org.ow2.mind.adl.parameter.ast.Argument;
 import org.ow2.mind.adl.parameter.ast.ArgumentContainer;
 import org.ow2.mind.adl.parameter.ast.FormalParameterContainer;
+import org.ow2.mind.value.ast.NullLiteral;
+import org.ow2.mind.value.ast.NumberLiteral;
 import org.ow2.mind.value.ast.Reference;
 import org.ow2.mind.value.ast.StringLiteral;
 import org.ow2.mind.value.ast.Value;
@@ -72,26 +76,29 @@ public class AttributeInstantiator extends AbstractInstantiator {
       final Attribute[] attributes = ((AttributeContainer) graph
           .getDefinition()).getAttributes();
       if (attributes.length > 0) {
-        final Map<String, Value> attributeValues = new HashMap<String, Value>();
+        final Map<String, String> attributeValues = new HashMap<String, String>();
         for (final Attribute attribute : attributes) {
-          Value attributeValue = attribute.getValue();
-          if (attributeValue instanceof Reference) {
-            final Value value = argumentValues.get(((Reference) attributeValue)
+          Value valueNode = attribute.getValue();
+          String valueString;
+          if (valueNode instanceof Reference) {
+            final Value value = argumentValues.get(((Reference) valueNode)
                 .getRef());
             assert value != null;
-            attributeValue = value;
-          }
-          /*
-           * TODO MIND-7 This is a quick fix to support "string" attribute. a
-           * more complete solution should be found to support any type of
-           * attribute
-           */
-          if (attributeValue instanceof StringLiteral) {
-            ((StringLiteral) attributeValue).setValue("\""
-                + ((StringLiteral) attributeValue).getValue() + "\"");
+            valueNode = value;
           }
 
-          attributeValues.put(attribute.getName(), attributeValue);
+          if (valueNode instanceof StringLiteral) {
+            valueString = "\"" + ((StringLiteral) valueNode).getValue() + "\"";
+          } else if (valueNode instanceof NumberLiteral) {
+            valueString = ((NumberLiteral) valueNode).getValue();
+          } else if (valueNode instanceof NullLiteral) {
+            valueString = "((void *) 0)";
+          } else {
+            throw new CompilerError(GenericErrors.INTERNAL_ERROR,
+                "Unexpected value");
+          }
+
+          attributeValues.put(attribute.getName(), valueString);
         }
 
         graph.setDecoration("attribute-values", attributeValues);

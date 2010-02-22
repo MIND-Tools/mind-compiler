@@ -227,6 +227,7 @@ public final class Factory {
     bal.inputResourceLocatorItf = inputResourceLocator;
     bal.nodeFactoryItf = nodeFactory;
     fl.nodeFactoryItf = nodeFactory;
+    acl.nodeFactoryItf = nodeFactory;
 
     il.implementationLocatorItf = implementationLocator;
 

@@ -1,0 +1,6 @@
+//#SemanticError GroupId=MADL ErrorId=UNDEFINED_PARAMETER line=5
+// attribute/parameter : use the same parameter to assing an int and a string attr.
+primitive attributes.attr91 {
+  attribute int attr = 
+  b;
+}
