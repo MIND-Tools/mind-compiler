@@ -146,9 +146,12 @@ public class CompilerRunner {
     executor = ADLBackendFactory.newCompilationCommandExecutor();
 
     // init context
+    initContext();
+  }
+
+  public void initContext() {
     context = new HashMap<Object, Object>();
-    final String buildDirName = "target" + File.separator + "build";
-    buildDir = new File(buildDirName);
+    buildDir = new File("target/build");
     if (!buildDir.exists()) {
       buildDir.mkdirs();
     }

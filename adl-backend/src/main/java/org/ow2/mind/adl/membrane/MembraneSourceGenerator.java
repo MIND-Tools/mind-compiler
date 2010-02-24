@@ -23,7 +23,7 @@
 package org.ow2.mind.adl.membrane;
 
 import static org.ow2.mind.PathHelper.fullyQualifiedNameToPath;
-import static org.ow2.mind.adl.AdditionalCompilationUnitDecoration.addAdditionalCompilationUnit;
+import static org.ow2.mind.adl.CompilationDecorationHelper.addAdditionalCompilationUnit;
 
 import java.io.File;
 import java.io.IOException;
@@ -43,9 +43,9 @@ import org.objectweb.fractal.adl.types.TypeInterface;
 import org.ow2.mind.InputResourcesHelper;
 import org.ow2.mind.SourceFileWriter;
 import org.ow2.mind.adl.AbstractSourceGenerator;
-import org.ow2.mind.adl.AdditionalCompilationUnitDecoration;
 import org.ow2.mind.adl.DefinitionSourceGenerator;
 import org.ow2.mind.adl.ImplementationHeaderSourceGenerator;
+import org.ow2.mind.adl.CompilationDecorationHelper.AdditionalCompilationUnitDecoration;
 import org.ow2.mind.adl.ast.ImplementationContainer;
 import org.ow2.mind.adl.ast.Source;
 import org.ow2.mind.adl.idl.InterfaceDefinitionDecorationHelper;

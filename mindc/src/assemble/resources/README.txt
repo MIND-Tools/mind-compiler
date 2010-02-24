@@ -62,6 +62,8 @@ Available options are :
   -D, --def2o                     Generate and compile source code of the given
                                   definitions, do not link an executable 
                                   application
+  -F, --force                     Force the regeneration and the recompilation 
+                                  of every output files
 
 Setting the verbosity level of the mindc compiler
 ====================================================

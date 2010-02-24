@@ -40,9 +40,6 @@ public final class SourceFileWriter {
   private SourceFileWriter() {
   }
 
-  // The dep logger
-  private static Logger       depLogger = FractalADLLogManager.getLogger("dep");
-
   // The io logger
   private static Logger       ioLogger  = FractalADLLogManager.getLogger("io");
 
@@ -77,15 +74,20 @@ public final class SourceFileWriter {
    * 
    * @param outputFile the output file into which the content will be written.
    * @param content the content to write into the file
+   * @return <code>true</code> if the file has been actually written.
    * @throws IOException if an error occurs.
    */
-  public static void writeToFile(final File outputFile, final String content)
+  public static boolean writeToFile(final File outputFile, final String content)
       throws IOException {
-    if (!outputFile.exists()) doWrite(outputFile, content);
+    if (!outputFile.exists()) {
+      doWrite(outputFile, content);
+      return true;
+    }
 
     boolean rewrite = false;
+    FileReader fr = null;
     try {
-      final FileReader fr = new FileReader(outputFile);
+      fr = new FileReader(outputFile);
       final char[] cs = content.toCharArray();
       int inPos = 0;
 
@@ -94,7 +96,7 @@ public final class SourceFileWriter {
       int r;
       do {
         r = fr.read(fc);
-        for (int i = 0; i < r; i++, inPos++) {
+        for (int i = 0; i < r && inPos < cs.length; i++, inPos++) {
           if (cs[inPos] != fc[i]) {
             break;
           }
@@ -104,28 +106,34 @@ public final class SourceFileWriter {
         rewrite = true;
       }
 
-      fr.close();
     } catch (final IOException e) {
       // if an exception happen while comparing file content, ignore it an
       // overwrite the file.
       rewrite = true;
+    } finally {
+      if (fr != null) fr.close();
     }
 
     if (rewrite) {
-      if (ioLogger.isLoggable(Level.FINE))
-        ioLogger.fine("Write generated source file '" + outputFile + "'.");
       doWrite(outputFile, content);
+      return true;
     } else {
-      if (depLogger.isLoggable(Level.FINE))
-        depLogger.fine("Generated source file '" + outputFile
+      if (ioLogger.isLoggable(Level.FINE))
+        ioLogger.fine("Generated source file '" + outputFile
             + "' is unchanged.");
+      return false;
     }
   }
 
   private static void doWrite(final File outputFile, final String content)
       throws IOException {
+    if (ioLogger.isLoggable(Level.FINE))
+      ioLogger.fine("Write generated source file '" + outputFile + "'.");
     final FileWriter fw = new FileWriter(outputFile);
-    fw.write(content);
-    fw.close();
+    try {
+      fw.write(content);
+    } finally {
+      fw.close();
+    }
   }
 }

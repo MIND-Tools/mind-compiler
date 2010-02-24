@@ -101,32 +101,35 @@ public class BasicInstanceSourceGenerator extends AbstractSourceGenerator
     final File outputFile = outputFileLocatorItf.getCSourceOutputFile(
         getInstancesFileName(instanceDesc), context);
 
-    final StringTemplate st;
-    if (instanceDesc.topLevelDefinition == instanceDesc.instanceDefinition) {
-      st = getInstanceOf("TopLevelInstances");
+    if (regenerate(outputFile, instanceDesc.topLevelDefinition, context)) {
 
-      st.setAttribute("topLevelDefinition", instanceDesc.topLevelDefinition);
-      st.setAttribute("instances", instanceDesc.instances);
+      final StringTemplate st;
+      if (instanceDesc.topLevelDefinition == instanceDesc.instanceDefinition) {
+        st = getInstanceOf("TopLevelInstances");
 
-      final Set<Definition> definitions = new HashSet<Definition>();
-      for (final ComponentGraph instance : instanceDesc.instances) {
-        addDefinitions(instance, definitions);
+        st.setAttribute("topLevelDefinition", instanceDesc.topLevelDefinition);
+        st.setAttribute("instances", instanceDesc.instances);
+
+        final Set<Definition> definitions = new HashSet<Definition>();
+        for (final ComponentGraph instance : instanceDesc.instances) {
+          addDefinitions(instance, definitions);
+        }
+
+        st.setAttribute("definitions", definitions);
+      } else {
+        st = getInstanceOf("ComponentInstances");
+
+        st.setAttribute("topLevelDefinition", instanceDesc.topLevelDefinition);
+        st.setAttribute("definition", instanceDesc.instanceDefinition);
+        st.setAttribute("instances", instanceDesc.instances);
       }
 
-      st.setAttribute("definitions", definitions);
-    } else {
-      st = getInstanceOf("ComponentInstances");
-
-      st.setAttribute("topLevelDefinition", instanceDesc.topLevelDefinition);
-      st.setAttribute("definition", instanceDesc.instanceDefinition);
-      st.setAttribute("instances", instanceDesc.instances);
-    }
-
-    try {
-      SourceFileWriter.writeToFile(outputFile, st.toString());
-    } catch (final IOException e) {
-      throw new CompilerError(IOErrors.WRITE_ERROR, e, outputFile
-          .getAbsolutePath());
+      try {
+        SourceFileWriter.writeToFile(outputFile, st.toString());
+      } catch (final IOException e) {
+        throw new CompilerError(IOErrors.WRITE_ERROR, e, outputFile
+            .getAbsolutePath());
+      }
     }
   }
 

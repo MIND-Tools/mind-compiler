@@ -32,6 +32,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.objectweb.fractal.adl.util.ClassLoaderHelper;
@@ -86,23 +87,23 @@ public class BasicInputResourceLocator
 
   public boolean isUpToDate(final long timestamp,
       final Collection<InputResource> inputs, final Map<Object, Object> context) {
-    // XXX always return false to force re-generation during development
-    return false;
-// for (final InputResource dependency : inputs) {
-// try {
-// if (getTimestamp(dependency, context) >= timestamp) {
-// // a dependency is newer than given timestamp.
-// return false;
-// }
-// } catch (final MalformedURLException e) {
-// if (logger.isLoggable(Level.FINE))
-// logger.log(Level.FINE, "Can't determine file timestamps of "
-// + dependency);
-// // if one dependency is missing consider the file as out of date.
-// return false;
-// }
-// }
-// return true;
+    if (ForceRegenContextHelper.getForceRegen(context)) return false;
+
+    for (final InputResource dependency : inputs) {
+      try {
+        if (getTimestamp(dependency, context) >= timestamp) {
+          // a dependency is newer than given timestamp.
+          return false;
+        }
+      } catch (final MalformedURLException e) {
+        if (logger.isLoggable(Level.FINE))
+          logger.log(Level.FINE, "Can't determine file timestamps of "
+              + dependency);
+        // if one dependency is missing consider the file as out of date.
+        return false;
+      }
+    }
+    return true;
   }
 
   public boolean isUpToDate(final File file,

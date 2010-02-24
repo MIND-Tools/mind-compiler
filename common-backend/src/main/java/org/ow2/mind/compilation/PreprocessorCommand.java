@@ -47,5 +47,13 @@ public interface PreprocessorCommand extends CompilationCommand {
 
   PreprocessorCommand setInputFile(File inputFile);
 
+  File getOutputFile();
+
+  File getInputFile();
+
   PreprocessorCommand addDependency(File dependency);
+
+  PreprocessorCommand setAllDependenciesManaged(boolean dependencyManaged);
+
+  PreprocessorCommand setDependencyOutputFile(File dependencyOutputFile);
 }

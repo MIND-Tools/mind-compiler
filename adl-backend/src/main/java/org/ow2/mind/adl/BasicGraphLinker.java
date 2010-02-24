@@ -109,7 +109,8 @@ public class BasicGraphLinker implements GraphCompiler, BindingController {
     for (final CompilationCommand compilationCommand : compilationTasks) {
       result.add(compilationCommand);
       if (compilationCommand instanceof CompilerCommand) {
-        command.addInputFiles(compilationCommand.getOutputFiles());
+        command.addInputFiles(((CompilerCommand) compilationCommand)
+            .getOutputFile());
       }
     }
     command.setOutputFile(outputFile);

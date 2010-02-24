@@ -22,9 +22,8 @@
 
 package org.ow2.mind.preproc;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Arrays;
@@ -41,6 +40,8 @@ import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.CompilerError;
 import org.objectweb.fractal.adl.error.GenericErrors;
 import org.objectweb.fractal.adl.util.FractalADLLogManager;
+import org.ow2.mind.SourceFileWriter;
+import org.ow2.mind.io.IOErrors;
 import org.ow2.mind.preproc.parser.CPLLexer;
 import org.ow2.mind.preproc.parser.CPLParser;
 
@@ -59,6 +60,9 @@ public class BasicMPPWrapper implements MPPWrapper {
     protected File                      inputFile;
     protected File                      outputFile;
     protected File                      headerOutputFile;
+
+    private List<File>                  inputFiles;
+    private List<File>                  outputFiles;
 
     BasicMPPCommand(final Map<Object, Object> context) {
       this.context = context;
@@ -90,14 +94,23 @@ public class BasicMPPWrapper implements MPPWrapper {
     }
 
     public Collection<File> getInputFiles() {
-      return Arrays.asList(inputFile);
+      return inputFiles;
     }
 
     public Collection<File> getOutputFiles() {
+      return outputFiles;
+    }
+
+    public boolean forceExec() {
+      return false;
+    }
+
+    public void prepare() {
+      inputFiles = Arrays.asList(inputFile);
       if (headerOutputFile != null) {
-        return Arrays.asList(outputFile, headerOutputFile);
+        outputFiles = Arrays.asList(outputFile, headerOutputFile);
       } else {
-        return Arrays.asList(outputFile);
+        outputFiles = Arrays.asList(outputFile);
       }
     }
 
@@ -114,32 +127,23 @@ public class BasicMPPWrapper implements MPPWrapper {
       final CommonTokenStream tokens = new CommonTokenStream(lex);
       final CPLParser mpp = new CPLParser(tokens);
 
-      final PrintStream outPS;
-      try {
-        outputFile.getParentFile().mkdirs();
-        outPS = new PrintStream(new FileOutputStream(outputFile));
-      } catch (final FileNotFoundException e) {
-        throw new CompilerError(GenericErrors.INTERNAL_ERROR, e, "IO error");
-      }
+      final ByteArrayOutputStream outS = new ByteArrayOutputStream();
+      final PrintStream outPS = new PrintStream(outS);
+      final ByteArrayOutputStream headerOutS = new ByteArrayOutputStream();
+      final PrintStream headerOutPS = new PrintStream(headerOutS);
+
+      outputFile.getParentFile().mkdirs();
       lex.setOutPutStream(outPS);
       mpp.setOutputStream(outPS);
 
-      PrintStream headerOutPS = null;
       if (headerOutputFile != null) {
-        try {
-          headerOutputFile.getParentFile().mkdirs();
-          headerOutPS = new PrintStream(new FileOutputStream(headerOutputFile));
-        } catch (final FileNotFoundException e) {
-          throw new CompilerError(GenericErrors.INTERNAL_ERROR, e, "IO error");
-        }
+        headerOutputFile.getParentFile().mkdirs();
         mpp.setHeaderOutputStream(headerOutPS);
       }
 
       mpp.setSingletonMode(singletonMode);
 
-      if (logger.isLoggable(Level.INFO))
-      ;
-      logger.info(getDescription());
+      if (logger.isLoggable(Level.INFO)) logger.info(getDescription());
 
       if (logger.isLoggable(Level.FINE))
         logger.fine("MPP: inputFile=" + inputFile.getPath() + " outputFile="
@@ -169,8 +173,23 @@ public class BasicMPPWrapper implements MPPWrapper {
             errorMsg.toString());
       }
 
-      outPS.close();
-      if (headerOutPS != null) headerOutPS.close();
+      try {
+        outPS.close();
+        if (!SourceFileWriter.writeToFile(outputFile, outS.toString())) {
+          /*
+           * if the outputFile has not been rewritten, ensure at least that it
+           * as a timestamp greater than its input file.
+           */
+          outputFile.setLastModified(inputFile.lastModified());
+        }
+        if (headerOutputFile != null) {
+          headerOutPS.close();
+          SourceFileWriter.writeToFile(headerOutputFile, headerOutS.toString());
+        }
+      } catch (final IOException e) {
+        throw new CompilerError(IOErrors.WRITE_ERROR, e, outputFile
+            .getAbsolutePath());
+      }
     }
 
     public String getDescription() {

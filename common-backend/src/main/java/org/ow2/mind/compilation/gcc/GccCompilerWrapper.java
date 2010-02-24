@@ -29,10 +29,14 @@ import static org.ow2.mind.compilation.CompilerContextHelper.getLinkerScript;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.objectweb.fractal.adl.ADLException;
+import org.objectweb.fractal.adl.util.FractalADLLogManager;
 import org.ow2.mind.compilation.AbstractCompilerCommand;
 import org.ow2.mind.compilation.AbstractLinkerCommand;
 import org.ow2.mind.compilation.AbstractPreprocessorCommand;
@@ -40,11 +44,14 @@ import org.ow2.mind.compilation.CompilerCommand;
 import org.ow2.mind.compilation.CompilerContextHelper;
 import org.ow2.mind.compilation.CompilerErrors;
 import org.ow2.mind.compilation.CompilerWrapper;
+import org.ow2.mind.compilation.DependencyHelper;
 import org.ow2.mind.compilation.ExecutionHelper;
 import org.ow2.mind.compilation.LinkerCommand;
 import org.ow2.mind.compilation.PreprocessorCommand;
 
 public class GccCompilerWrapper implements CompilerWrapper {
+
+  protected static Logger depLogger = FractalADLLogManager.getLogger("dep");
 
   public PreprocessorCommand newPreprocessorCommand(
       final Map<Object, Object> context) {
@@ -91,6 +98,11 @@ public class GccCompilerWrapper implements CompilerWrapper {
       return this;
     }
 
+    @Override
+    protected Collection<File> readDependencies() {
+      return readDeps(dependencyOutputFile, outputFile);
+    }
+
     public void exec() throws ADLException, InterruptedException {
       final List<String> cmd = new ArrayList<String>();
       cmd.add(this.cmd);
@@ -98,6 +110,14 @@ public class GccCompilerWrapper implements CompilerWrapper {
 
       cmd.addAll(CompilerContextHelper.getCFlags(context));
       cmd.addAll(flags);
+
+      if (dependencyOutputFile != null) {
+        cmd.add("-MMD");
+        cmd.add("-MF");
+        cmd.add(dependencyOutputFile.getAbsolutePath());
+        cmd.add("-MT");
+        cmd.add(outputFile.getAbsolutePath());
+      }
 
       cmd.add("-o");
       cmd.add(outputFile.getAbsolutePath());
@@ -147,6 +167,11 @@ public class GccCompilerWrapper implements CompilerWrapper {
       return this;
     }
 
+    @Override
+    protected Collection<File> readDependencies() {
+      return readDeps(dependencyOutputFile, outputFile);
+    }
+
     public void exec() throws ADLException, InterruptedException {
 
       final List<String> cmd = new ArrayList<String>();
@@ -155,6 +180,14 @@ public class GccCompilerWrapper implements CompilerWrapper {
 
       cmd.addAll(CompilerContextHelper.getCFlags(context));
       cmd.addAll(flags);
+
+      if (dependencyOutputFile != null) {
+        cmd.add("-MMD");
+        cmd.add("-MF");
+        cmd.add(dependencyOutputFile.getAbsolutePath());
+        cmd.add("-MT");
+        cmd.add(outputFile.getAbsolutePath());
+      }
 
       cmd.add("-o");
       cmd.add(outputFile.getAbsolutePath());
@@ -219,4 +252,47 @@ public class GccCompilerWrapper implements CompilerWrapper {
       return "LD : " + outputFile.getPath();
     }
   }
+
+  private static Collection<File> readDeps(final File dependencyOutputFile,
+      final File outputFile) {
+    if (!dependencyOutputFile.exists()) {
+      if (depLogger.isLoggable(Level.FINE))
+        depLogger.fine("Dependency file '" + dependencyOutputFile
+            + "' does not exist, force compilation.");
+      return null;
+    }
+
+    final Map<File, List<File>> depMap = DependencyHelper
+        .parseDepFile(dependencyOutputFile);
+    if (depMap == null) {
+      if (depLogger.isLoggable(Level.FINE))
+        depLogger.fine("Error in dependency file of '" + outputFile
+            + "', recompile.");
+      return null;
+    }
+
+    Collection<File> depFiles = depMap.get(outputFile);
+    if (depFiles == null) {
+      // try with absolute path
+      depFiles = depMap.get(outputFile.getAbsoluteFile());
+
+      if (depFiles == null) {
+        // try with single file name
+        depFiles = depMap.get(new File(outputFile.getName()));
+
+        if (depFiles == null) {
+          // if depFiles is null (i.e. the dependencyFile is invalid),
+          // recompile.
+          if (depLogger.isLoggable(Level.WARNING))
+            depLogger.warning("Invalid dependency file '"
+                + dependencyOutputFile + "'. Can't find rule for target '"
+                + outputFile + "', recompile.");
+          return null;
+        }
+      }
+    }
+
+    return depFiles;
+  }
+
 }

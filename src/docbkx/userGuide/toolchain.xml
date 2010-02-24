@@ -112,6 +112,13 @@
       </varlistentry>
       
       <varlistentry>
+        <term><code>--force|-F</code></term>
+        <listitem>
+          <para>Force the regeneration and the recompilation of every output files.</para>
+        </listitem>
+      </varlistentry>
+      
+      <varlistentry>
         <term><code>-e</code></term>
         <listitem>
           <para>Print error stack-traces (for debugging the compiler).</para>

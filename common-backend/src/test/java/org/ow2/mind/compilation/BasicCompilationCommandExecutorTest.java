@@ -34,9 +34,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.objectweb.fractal.adl.ADLException;
-import org.ow2.mind.compilation.BasicCompilationCommandExecutor;
-import org.ow2.mind.compilation.CompilationCommand;
-import org.ow2.mind.compilation.CompilationCommandExecutor;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
@@ -132,6 +129,13 @@ public class BasicCompilationCommandExecutorTest {
       return "CPP" + name;
     }
 
+    public boolean forceExec() {
+      return false;
+    }
+
+    public void prepare() {
+    }
+
     public void exec() throws ADLException, InterruptedException {
       if (LOG)
         System.out
@@ -170,6 +174,13 @@ public class BasicCompilationCommandExecutorTest {
 
     public String getDescription() {
       return "GCC" + name;
+    }
+
+    public boolean forceExec() {
+      return false;
+    }
+
+    public void prepare() {
     }
 
     public void exec() throws ADLException, InterruptedException {
@@ -224,6 +235,13 @@ public class BasicCompilationCommandExecutorTest {
 
     public String getDescription() {
       return "LD";
+    }
+
+    public boolean forceExec() {
+      return false;
+    }
+
+    public void prepare() {
     }
 
     public void exec() throws ADLException, InterruptedException {

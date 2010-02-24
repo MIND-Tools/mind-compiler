@@ -29,7 +29,6 @@ import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.Node;
 
 /**
@@ -44,9 +43,9 @@ public final class InputResourcesHelper {
   /**
    * The name of the "input resources" decoration.
    * 
-   * @see #getInputResources(Definition)
-   * @see #addInputResource(Definition, URL)
-   * @see #addInputResources(Definition, Set)
+   * @see #getInputResources(Node)
+   * @see #addInputResource(Node, InputResource)
+   * @see #addInputResources(Node, Set)
    */
   public static final String INPUT_RESOURCES_DECORATION = "input-resources";
 

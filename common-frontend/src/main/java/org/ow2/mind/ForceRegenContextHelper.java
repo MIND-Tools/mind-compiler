@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2009 STMicroelectronics
+ * Copyright (C) 2010 STMicroelectronics
  *
  * This file is part of "Mind Compiler" is free software: you can redistribute 
  * it and/or modify it under the terms of the GNU Lesser General Public License 
@@ -20,24 +20,23 @@
  * Contributors: 
  */
 
-package org.ow2.mind.compilation;
+package org.ow2.mind;
 
-import java.io.File;
-import java.util.Collection;
+import java.util.Map;
 
-import org.objectweb.fractal.adl.ADLException;
+public final class ForceRegenContextHelper {
+  private ForceRegenContextHelper() {
+  }
 
-public interface CompilationCommand {
+  public static final String FORCE_REGEN_CONTEXT_HELPER = "force-regen";
 
-  void prepare();
+  public static boolean getForceRegen(final Map<Object, Object> context) {
+    final Boolean b = (Boolean) context.get(FORCE_REGEN_CONTEXT_HELPER);
+    return b == null || b;
+  }
 
-  Collection<File> getInputFiles();
-
-  Collection<File> getOutputFiles();
-
-  String getDescription();
-
-  boolean forceExec();
-
-  void exec() throws ADLException, InterruptedException;
+  public static void setForceRegen(final Map<Object, Object> context,
+      final boolean forceRegen) {
+    context.put(FORCE_REGEN_CONTEXT_HELPER, forceRegen);
+  }
 }

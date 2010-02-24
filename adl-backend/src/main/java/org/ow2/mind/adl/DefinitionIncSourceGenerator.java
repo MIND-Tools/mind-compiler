@@ -37,7 +37,6 @@ import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.interfaces.Interface;
 import org.objectweb.fractal.adl.interfaces.InterfaceContainer;
 import org.objectweb.fractal.adl.types.TypeInterface;
-import org.ow2.mind.InputResourcesHelper;
 import org.ow2.mind.SourceFileWriter;
 import org.ow2.mind.adl.idl.InterfaceDefinitionDecorationHelper;
 import org.ow2.mind.idl.ast.InterfaceDefinition;
@@ -98,8 +97,7 @@ public class DefinitionIncSourceGenerator extends AbstractSourceGenerator
     final File outputFile = outputFileLocatorItf.getCSourceOutputFile(
         getOutputFileName(definition), context);
 
-    if (!inputResourceLocatorItf.isUpToDate(outputFile, InputResourcesHelper
-        .getInputResources(definition), context)) {
+    if (regenerate(outputFile, definition, context)) {
 
       final StringTemplate st = getInstanceOf("ComponentDefinition");
 

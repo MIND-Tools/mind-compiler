@@ -24,7 +24,6 @@ package org.ow2.mind.adl;
 
 import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
 import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
-import static org.ow2.mind.PathHelper.fullyQualifiedNameToPath;
 import static org.ow2.mind.PathHelper.replaceExtension;
 import static org.ow2.mind.annotation.AnnotationHelper.getAnnotation;
 import static org.ow2.mind.compilation.DirectiveHelper.splitOptionString;
@@ -123,10 +122,12 @@ public class BasicInstanceCompiler
         replaceExtension(instancesFileName, ".mpp.c"), context);
     final File objectFile = outputFileLocatorItf.getCCompiledOutputFile(
         replaceExtension(instancesFileName, ".o"), context);
+    final File depFile = outputFileLocatorItf.getCCompiledOutputFile(
+        replaceExtension(instancesFileName, ".d"), context);
 
     final PreprocessorCommand cppCommand = newPreprocessorCommand(
-        instanceDesc.instanceDefinition, srcFile, dependencies, cppFile,
-        context);
+        instanceDesc.instanceDefinition, srcFile, dependencies, depFile,
+        cppFile, context);
     final MPPCommand mppCommand = newMPPCommand(
         instanceDesc.instanceDefinition, cppFile, mppFile, context);
     final CompilerCommand gccCommand = newCompilerCommand(
@@ -142,11 +143,13 @@ public class BasicInstanceCompiler
 
   protected PreprocessorCommand newPreprocessorCommand(
       final Definition definition, final File inputFile,
-      final Collection<File> dependencies, final File outputFile,
-      final Map<Object, Object> context) throws ADLException {
+      final Collection<File> dependencies, final File depFile,
+      final File outputFile, final Map<Object, Object> context)
+      throws ADLException {
     final PreprocessorCommand command = compilerWrapperItf
         .newPreprocessorCommand(context);
-    command.setOutputFile(outputFile).setInputFile(inputFile);
+    command.setOutputFile(outputFile).setInputFile(inputFile)
+        .setDependencyOutputFile(depFile);
 
     if (dependencies != null) {
       for (final File dep : dependencies) {
@@ -200,15 +203,13 @@ public class BasicInstanceCompiler
       final Map<Object, Object> context) throws ADLException {
     final CompilerCommand command = compilerWrapperItf
         .newCompilerCommand(context);
-    command.setOutputFile(outputFile).setInputFile(inputFile);
+    command.setOutputFile(outputFile).setInputFile(inputFile)
+        .setAllDependenciesManaged(true);
 
     command.addIncludeDir(outputFileLocatorItf.getCSourceOutputDir(context));
 
-    // TODO how to avoid re-computation of this file name ?
-    final String includefileName = fullyQualifiedNameToPath(definition
-        .getName(), DefinitionMacroSourceGenerator.FILE_EXT);
     command.addIncludeFile(outputFileLocatorItf.getCSourceOutputFile(
-        includefileName, context));
+        DefinitionMacroSourceGenerator.getMacroFileName(definition), context));
 
     // Add definition level C-Flags
     final CFlags definitionflags = getAnnotation(definition, CFlags.class);

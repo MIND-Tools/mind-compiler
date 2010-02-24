@@ -172,6 +172,11 @@ public class Launcher extends AbstractLauncher {
                                                                         "def2o",
                                                                         "Generate and compile source code of the given definitions, do not link an executable application");
 
+  protected final CmdFlag                forceOpt                   = new CmdFlag(
+                                                                        "F",
+                                                                        "force",
+                                                                        "Force the regeneration and the recompilation of every output files");
+
   protected boolean                      generateSrc;
   protected boolean                      compileDef;
 
@@ -300,6 +305,10 @@ public class Launcher extends AbstractLauncher {
     }
     compilerContext
         .put(BasicOutputFileLocator.OUTPUT_DIR_CONTEXT_KEY, buildDir);
+
+    // force mode
+    ForceRegenContextHelper.setForceRegen(compilerContext, forceOpt
+        .isPresent(cmdLine));
 
     // build c-flags
     final List<String> cFlagsList = new ArrayList<String>();
@@ -539,7 +548,7 @@ public class Launcher extends AbstractLauncher {
   protected void processCompiler(final Target target,
       final Map<Object, Object> context) {
     final String opt = CompilerContextHelper.getCompilerCommand(context);
-    if (opt == null) {
+    if (opt == CompilerContextHelper.DEFAULT_COMPILER_COMMAND) {
       if (target != null && target.getCompiler() != null) {
         if (logger.isLoggable(Level.FINE)) {
           logger.log(Level.FINE, "Using target compiler : "
@@ -557,7 +566,7 @@ public class Launcher extends AbstractLauncher {
   protected void processLinker(final Target target,
       final Map<Object, Object> context) {
     final String opt = CompilerContextHelper.getLinkerCommand(context);
-    if (opt == null) {
+    if (opt == CompilerContextHelper.DEFAULT_LINKER_COMMAND) {
       if (target != null && target.getLinker() != null) {
         if (logger.isLoggable(Level.FINE)) {
           logger.log(Level.FINE, "Using target linker : "
@@ -679,7 +688,7 @@ public class Launcher extends AbstractLauncher {
     options.addOptions(targetDescOpt, compilerCmdOpt, cFlagsOpt,
         includePathOpt, linkerCmdOpt, ldFlagsOpt, ldPathOpt, linkerScriptOpt,
         concurrentJobCmdOpt, printStackTraceOpt, checkADLModeOpt,
-        generateDefSrcOpt, compileDefOpt);
+        generateDefSrcOpt, compileDefOpt, forceOpt);
   }
 
   @Override
