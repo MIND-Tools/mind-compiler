@@ -271,6 +271,11 @@ public class GccCompilerWrapper implements CompilerWrapper {
       return null;
     }
 
+    if (depMap.size() == 1) {
+      // Only one rule, assume is it the right one
+      return depMap.values().iterator().next();
+    }
+
     Collection<File> depFiles = depMap.get(outputFile);
     if (depFiles == null) {
       // try with absolute path

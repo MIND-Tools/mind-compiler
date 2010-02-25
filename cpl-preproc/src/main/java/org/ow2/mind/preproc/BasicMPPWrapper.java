@@ -22,8 +22,9 @@
 
 package org.ow2.mind.preproc;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Arrays;
@@ -40,8 +41,6 @@ import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.CompilerError;
 import org.objectweb.fractal.adl.error.GenericErrors;
 import org.objectweb.fractal.adl.util.FractalADLLogManager;
-import org.ow2.mind.SourceFileWriter;
-import org.ow2.mind.io.IOErrors;
 import org.ow2.mind.preproc.parser.CPLLexer;
 import org.ow2.mind.preproc.parser.CPLParser;
 
@@ -127,68 +126,63 @@ public class BasicMPPWrapper implements MPPWrapper {
       final CommonTokenStream tokens = new CommonTokenStream(lex);
       final CPLParser mpp = new CPLParser(tokens);
 
-      final ByteArrayOutputStream outS = new ByteArrayOutputStream();
-      final PrintStream outPS = new PrintStream(outS);
-      final ByteArrayOutputStream headerOutS = new ByteArrayOutputStream();
-      final PrintStream headerOutPS = new PrintStream(headerOutS);
-
-      outputFile.getParentFile().mkdirs();
-      lex.setOutPutStream(outPS);
-      mpp.setOutputStream(outPS);
-
-      if (headerOutputFile != null) {
-        headerOutputFile.getParentFile().mkdirs();
-        mpp.setHeaderOutputStream(headerOutPS);
-      }
-
-      mpp.setSingletonMode(singletonMode);
-
-      if (logger.isLoggable(Level.INFO)) logger.info(getDescription());
-
-      if (logger.isLoggable(Level.FINE))
-        logger.fine("MPP: inputFile=" + inputFile.getPath() + " outputFile="
-            + outputFile.getPath() + " singletonMode=" + singletonMode);
-
+      PrintStream outPS = null;
+      PrintStream headerOutPS = null;
       try {
-        mpp.parseFile();
-      } catch (final RecognitionException e) {
-        throw new ADLException(MPPErrors.PARSE_ERROR, e, inputFile.getPath(),
-            "MPP parse error.");
-      }
-
-      final List<String> errors = mpp.getErrors();
-      if (errors != null && errors.size() > 0) {
-        String errorMsg;
-        if (errors.size() == 1) {
-          errorMsg = errors.get(0);
-        } else {
-          final StringBuilder msg = new StringBuilder();
-          for (final String error : errors) {
-            msg.append("\n    ").append(error);
-          }
-          errorMsg = msg.toString();
+        try {
+          outputFile.getParentFile().mkdirs();
+          outPS = new PrintStream(new FileOutputStream(outputFile));
+        } catch (final FileNotFoundException e) {
+          throw new CompilerError(GenericErrors.INTERNAL_ERROR, e, "IO error");
         }
+        lex.setOutPutStream(outPS);
+        mpp.setOutputStream(outPS);
 
-        throw new ADLException(MPPErrors.PARSE_ERROR, inputFile.getPath(),
-            errorMsg.toString());
-      }
-
-      try {
-        outPS.close();
-        if (!SourceFileWriter.writeToFile(outputFile, outS.toString())) {
-          /*
-           * if the outputFile has not been rewritten, ensure at least that it
-           * as a timestamp greater than its input file.
-           */
-          outputFile.setLastModified(inputFile.lastModified());
-        }
         if (headerOutputFile != null) {
-          headerOutPS.close();
-          SourceFileWriter.writeToFile(headerOutputFile, headerOutS.toString());
+          try {
+            headerOutputFile.getParentFile().mkdirs();
+            headerOutPS = new PrintStream(
+                new FileOutputStream(headerOutputFile));
+          } catch (final FileNotFoundException e) {
+            throw new CompilerError(GenericErrors.INTERNAL_ERROR, e, "IO error");
+          }
+          mpp.setHeaderOutputStream(headerOutPS);
         }
-      } catch (final IOException e) {
-        throw new CompilerError(IOErrors.WRITE_ERROR, e, outputFile
-            .getAbsolutePath());
+
+        mpp.setSingletonMode(singletonMode);
+
+        if (logger.isLoggable(Level.INFO)) logger.info(getDescription());
+
+        if (logger.isLoggable(Level.FINE))
+          logger.fine("MPP: inputFile=" + inputFile.getPath() + " outputFile="
+              + outputFile.getPath() + " singletonMode=" + singletonMode);
+
+        try {
+          mpp.parseFile();
+        } catch (final RecognitionException e) {
+          throw new ADLException(MPPErrors.PARSE_ERROR, e, inputFile.getPath(),
+              "MPP parse error.");
+        }
+
+        final List<String> errors = mpp.getErrors();
+        if (errors != null && errors.size() > 0) {
+          String errorMsg;
+          if (errors.size() == 1) {
+            errorMsg = errors.get(0);
+          } else {
+            final StringBuilder msg = new StringBuilder();
+            for (final String error : errors) {
+              msg.append("\n    ").append(error);
+            }
+            errorMsg = msg.toString();
+          }
+
+          throw new ADLException(MPPErrors.PARSE_ERROR, inputFile.getPath(),
+              errorMsg.toString());
+        }
+      } finally {
+        if (outPS != null) outPS.close();
+        if (headerOutPS != null) headerOutPS.close();
       }
     }
 

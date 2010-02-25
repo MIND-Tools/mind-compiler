@@ -39,4 +39,16 @@ public final class ForceRegenContextHelper {
       final boolean forceRegen) {
     context.put(FORCE_REGEN_CONTEXT_HELPER, forceRegen);
   }
+
+  public static final String KEEP_TEMP_CONTEXT_HELPER = "keep-temp";
+
+  public static boolean getKeepTemp(final Map<Object, Object> context) {
+    final Boolean b = (Boolean) context.get(KEEP_TEMP_CONTEXT_HELPER);
+    return b == null || b;
+  }
+
+  public static void setKeepTemp(final Map<Object, Object> context,
+      final boolean keepTemp) {
+    context.put(KEEP_TEMP_CONTEXT_HELPER, keepTemp);
+  }
 }

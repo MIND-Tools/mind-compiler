@@ -64,6 +64,8 @@ Available options are :
                                   application
   -F, --force                     Force the regeneration and the recompilation 
                                   of every output files
+  -K, --keep                      Keep temporary output files in default output
+                                  directory
 
 Setting the verbosity level of the mindc compiler
 ====================================================

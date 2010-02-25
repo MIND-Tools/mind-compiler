@@ -146,15 +146,16 @@ public class MembraneSourceGenerator extends AbstractSourceGenerator
           .getSources();
       if (sources.length == 1) {
         dependencies = new ArrayList<File>();
-        dependencies.add(outputFileLocatorItf.getCSourceOutputFile(
+        dependencies.add(outputFileLocatorItf.getCCompiledTemporaryOutputFile(
             ImplementationHeaderSourceGenerator
                 .getImplHeaderFileName(definition), context));
       } else if (sources.length > 1) {
         dependencies = new ArrayList<File>();
         for (int i = 0; i < sources.length; i++) {
-          dependencies.add(outputFileLocatorItf.getCSourceOutputFile(
-              ImplementationHeaderSourceGenerator.getImplHeaderFileName(
-                  definition, i), context));
+          dependencies.add(outputFileLocatorItf
+              .getCCompiledTemporaryOutputFile(
+                  ImplementationHeaderSourceGenerator.getImplHeaderFileName(
+                      definition, i), context));
         }
       }
     }

@@ -139,8 +139,9 @@ public final class DependencyHelper {
 
   public static Map<File, List<File>> parseDepFile(final File depfile) {
     final Map<File, List<File>> rules = new HashMap<File, List<File>>();
+    BufferedReader reader = null;
     try {
-      final BufferedReader reader = new BufferedReader(new FileReader(depfile));
+      reader = new BufferedReader(new FileReader(depfile));
       String line = null, rule = "";
       while ((line = reader.readLine()) != null) {
         if (line.endsWith("\\")) {
@@ -160,6 +161,12 @@ public final class DependencyHelper {
       depLogger.log(Level.WARNING, "An error occurs while reading \"" + depfile
           + "\".", e);
       return null;
+    } finally {
+      if (reader != null) try {
+        reader.close();
+      } catch (final IOException e) {
+        // ignore
+      }
     }
     return rules;
   }

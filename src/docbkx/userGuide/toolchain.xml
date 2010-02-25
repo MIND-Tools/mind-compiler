@@ -117,6 +117,12 @@
           <para>Force the regeneration and the recompilation of every output files.</para>
         </listitem>
       </varlistentry>
+      <varlistentry>
+        <term><code>--keep|-K</code></term>
+        <listitem>
+          <para>Keep temporary output files in default output directory.</para>
+        </listitem>
+      </varlistentry>
       
       <varlistentry>
         <term><code>-e</code></term>

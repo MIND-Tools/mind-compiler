@@ -46,6 +46,15 @@ public class IncrementalTest extends AbstractFunctionalTest {
   @Test(groups = {"functional"})
   public void incrementalTest1() throws Exception {
     cleanBuildDir();
+    final Map<String, Long> t1 = recompileDefinition("helloworld.Client");
+
+    final Map<String, Long> t2 = recompileDefinition("helloworld.Client");
+    assertUnchangedAll(".*", t1, t2);
+  }
+
+  @Test(groups = {"functional"})
+  public void incrementalTest11() throws Exception {
+    cleanBuildDir();
     final Map<String, Long> t1 = recompile("helloworld.HelloworldApplication");
 
     final Map<String, Long> t2 = recompile("helloworld.HelloworldApplication");
@@ -53,7 +62,7 @@ public class IncrementalTest extends AbstractFunctionalTest {
   }
 
   @Test(groups = {"functional"})
-  public void incrementalTest11() throws Exception {
+  public void incrementalTest12() throws Exception {
     cleanBuildDir();
     final Map<String, Long> t1 = recompile("helloworld.HelloworldApplication");
 
@@ -94,12 +103,11 @@ public class IncrementalTest extends AbstractFunctionalTest {
     pause();
     touchFile("helloworld/client.c");
     t2 = recompileDefinition("helloworld.Client");
-    assertUnchangedAll("helloworld/Client_ctrl.*", t1, t2);
     assertChangedAll("helloworld/Client_impl0.*", t1, t2);
 
     pause();
     final Map<String, Long> t3 = recompileDefinition("helloworld.Client");
-    assertUnchangedAll("helloworld/Helloworld_ctrl_impl.*", t2, t3);
+    assertUnchangedAll("helloworld/Client.*", t2, t3);
   }
 
   @Test(groups = {"functional"})
@@ -135,7 +143,6 @@ public class IncrementalTest extends AbstractFunctionalTest {
         new String[]{"hello world", "Hello World !"});
     t2 = recompileDefinition("helloworld.ClientInlined_modified");
     assertChangedAll("helloworld/ClientInlined_modified_impl0.*", t1, t2);
-    assertUnchangedAll("helloworld/ClientInlined_modified_ctrl.*", t1, t2);
   }
 
   @Test(groups = {"functional"})
@@ -163,8 +170,6 @@ public class IncrementalTest extends AbstractFunctionalTest {
         "Helloworld_modified");
     assertUnchangedAll("helloworld/Helloworld.*", t1, t2);
     assertChangedAll("helloworld/Client_modified_impl0.*", t1, t2);
-    assertUnchangedAll("helloworld/Client_modified_ctrl.*", t1, t2);
-    assertUnchangedAll("GenericApplication_.*", t1, t2);
     assertChangedAll("Helloworld_modified(\\.exe)?", t1, t2);
   }
 
@@ -194,8 +199,6 @@ public class IncrementalTest extends AbstractFunctionalTest {
         "Helloworld_modified");
     assertUnchangedAll("helloworld/Helloworld.*", t1, t2);
     assertChangedAll("helloworld/ClientInlined_modified_impl0.*", t1, t2);
-    assertUnchangedAll("helloworld/ClientInlined_modified_ctrl.*", t1, t2);
-    assertUnchangedAll("GenericApplication_.*", t1, t2);
     assertChangedAll("Helloworld_modified(\\.exe)?", t1, t2);
   }
 
@@ -292,7 +295,8 @@ public class IncrementalTest extends AbstractFunctionalTest {
         SRC_ROOT + "/" + path);
     assertNotNull(resource);
     final File srcFile = new File(resource.toURI());
-    final File newFile = new File(srcFile.getPath().replace(path, newPath));
+    final File newFile = new File(srcFile.getPath().replace(
+        path.replace('/', File.separatorChar), newPath));
 
     LineNumberReader reader = null;
     PrintWriter writer = null;
@@ -325,6 +329,7 @@ public class IncrementalTest extends AbstractFunctionalTest {
     }
     runner.context.put(BasicOutputFileLocator.OUTPUT_DIR_CONTEXT_KEY, buildDir);
     ForceRegenContextHelper.setForceRegen(runner.context, force);
+    ForceRegenContextHelper.setKeepTemp(runner.context, false);
   }
 
   protected void cleanBuildDir() {
@@ -344,7 +349,8 @@ public class IncrementalTest extends AbstractFunctionalTest {
       for (final File subFile : f.listFiles())
         deleteDir(subFile);
     }
-    assertTrue(f.delete(), "Can't delete \"" + f + "\".");
+    f.delete();
+    // assertTrue(f.delete(), "Can't delete \"" + f + "\".");
   }
 
   protected void getTimestamps(final File f, final String path,

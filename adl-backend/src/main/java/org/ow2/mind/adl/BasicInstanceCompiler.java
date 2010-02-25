@@ -102,23 +102,23 @@ public class BasicInstanceCompiler
           .getSources();
       if (sources.length == 1) {
         dependencies = new ArrayList<File>();
-        dependencies.add(outputFileLocatorItf.getCSourceOutputFile(
+        dependencies.add(outputFileLocatorItf.getCSourceTemporaryOutputFile(
             ImplementationHeaderSourceGenerator
                 .getImplHeaderFileName(instanceDesc.instanceDefinition),
             context));
       } else if (sources.length > 1) {
         dependencies = new ArrayList<File>();
         for (int i = 0; i < sources.length; i++) {
-          dependencies.add(outputFileLocatorItf.getCSourceOutputFile(
+          dependencies.add(outputFileLocatorItf.getCSourceTemporaryOutputFile(
               ImplementationHeaderSourceGenerator.getImplHeaderFileName(
                   instanceDesc.instanceDefinition, i), context));
         }
       }
     }
 
-    final File cppFile = outputFileLocatorItf.getCSourceOutputFile(
+    final File cppFile = outputFileLocatorItf.getCSourceTemporaryOutputFile(
         replaceExtension(instancesFileName, ".i"), context);
-    final File mppFile = outputFileLocatorItf.getCSourceOutputFile(
+    final File mppFile = outputFileLocatorItf.getCSourceTemporaryOutputFile(
         replaceExtension(instancesFileName, ".mpp.c"), context);
     final File objectFile = outputFileLocatorItf.getCCompiledOutputFile(
         replaceExtension(instancesFileName, ".o"), context);
@@ -158,6 +158,8 @@ public class BasicInstanceCompiler
     }
 
     command.addIncludeDir(outputFileLocatorItf.getCSourceOutputDir(context));
+    command.addIncludeDir(outputFileLocatorItf
+        .getCSourceTemporaryOutputDir(context));
 
     final URL[] inputResourceRoots = inputResourceLocatorItf
         .getInputResourcesRoot(context);

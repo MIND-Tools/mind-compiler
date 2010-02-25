@@ -177,6 +177,11 @@ public class Launcher extends AbstractLauncher {
                                                                         "force",
                                                                         "Force the regeneration and the recompilation of every output files");
 
+  protected final CmdFlag                keepTempOpt                = new CmdFlag(
+                                                                        "K",
+                                                                        "keep",
+                                                                        "Keep temporary output files in default output directory");
+
   protected boolean                      generateSrc;
   protected boolean                      compileDef;
 
@@ -308,6 +313,8 @@ public class Launcher extends AbstractLauncher {
 
     // force mode
     ForceRegenContextHelper.setForceRegen(compilerContext, forceOpt
+        .isPresent(cmdLine));
+    ForceRegenContextHelper.setKeepTemp(compilerContext, keepTempOpt
         .isPresent(cmdLine));
 
     // build c-flags
@@ -688,7 +695,7 @@ public class Launcher extends AbstractLauncher {
     options.addOptions(targetDescOpt, compilerCmdOpt, cFlagsOpt,
         includePathOpt, linkerCmdOpt, ldFlagsOpt, ldPathOpt, linkerScriptOpt,
         concurrentJobCmdOpt, printStackTraceOpt, checkADLModeOpt,
-        generateDefSrcOpt, compileDefOpt, forceOpt);
+        generateDefSrcOpt, compileDefOpt, forceOpt, keepTempOpt);
   }
 
   @Override

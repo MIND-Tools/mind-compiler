@@ -199,7 +199,7 @@ public class CompilerRunner {
     } else {
       outputPath = fullyQualifiedNameToPath(adlName, null);
     }
-    final File outputFile = outputFileLocator.getCCompiledOutputFile(
+    final File outputFile = outputFileLocator.getCExecutableOutputFile(
         outputPath, context);
 
     Definition d = adlLoader.load(adlName, context);

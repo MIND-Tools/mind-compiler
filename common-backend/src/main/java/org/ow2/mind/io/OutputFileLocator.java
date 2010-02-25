@@ -36,10 +36,25 @@ public interface OutputFileLocator {
 
   File getCSourceOutputDir(Map<Object, Object> context) throws ADLException;
 
+  File getCSourceTemporaryOutputFile(String path, Map<Object, Object> context)
+      throws ADLException;
+
+  File getCSourceTemporaryOutputDir(Map<Object, Object> context)
+      throws ADLException;
+
   File getCCompiledOutputFile(String path, Map<Object, Object> context)
       throws ADLException;
 
+  File getCExecutableOutputFile(String path, Map<Object, Object> context)
+      throws ADLException;
+
   File getCCompiledOutputDir(Map<Object, Object> context) throws ADLException;
+
+  File getCCompiledTemporaryOutputFile(String path, Map<Object, Object> context)
+      throws ADLException;
+
+  File getCCompiledTemporaryOutputDir(Map<Object, Object> context)
+      throws ADLException;
 
   File getMetadataOutputFile(String path, Map<Object, Object> context)
       throws ADLException;

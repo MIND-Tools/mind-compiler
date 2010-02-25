@@ -102,7 +102,7 @@ public class BasicGraphLinker implements GraphCompiler, BindingController {
       outputPath = fullyQualifiedNameToPath(graph.getDefinition().getName(),
           null);
     }
-    final File outputFile = outputFileLocatorItf.getCCompiledOutputFile(
+    final File outputFile = outputFileLocatorItf.getCExecutableOutputFile(
         outputPath, context);
 
     final LinkerCommand command = compilerWrapperItf.newLinkerCommand(context);

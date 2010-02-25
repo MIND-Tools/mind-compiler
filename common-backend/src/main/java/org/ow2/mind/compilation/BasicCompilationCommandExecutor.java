@@ -26,12 +26,11 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -60,8 +59,8 @@ public class BasicCompilationCommandExecutor
   public void exec(final Collection<CompilationCommand> commands,
       final Map<Object, Object> context) throws ADLException,
       InterruptedException {
-    final Map<CompilationCommand, Collection<CommandInfo>> depGraph = new HashMap<CompilationCommand, Collection<CommandInfo>>();
-    final LinkedList<CompilationCommand> readyTask = new LinkedList<CompilationCommand>();
+    final Map<CommandInfo, Collection<CommandInfo>> depGraph = new HashMap<CommandInfo, Collection<CommandInfo>>();
+    final LinkedList<CommandInfo> readyTask = new LinkedList<CommandInfo>();
     final boolean force = ForceRegenContextHelper.getForceRegen(context);
     buildDepGraph(commands, depGraph, readyTask, force);
 
@@ -74,8 +73,8 @@ public class BasicCompilationCommandExecutor
   }
 
   protected void buildDepGraph(final Collection<CompilationCommand> commands,
-      final Map<CompilationCommand, Collection<CommandInfo>> depGraph,
-      final LinkedList<CompilationCommand> readyTasks, final boolean forced) {
+      final Map<CommandInfo, Collection<CommandInfo>> depGraph,
+      final List<CommandInfo> readyTask, final boolean forced) {
 
     final Map<CompilationCommand, CommandInfo> cmdInfos = new IdentityHashMap<CompilationCommand, CommandInfo>();
     for (final CompilationCommand cmd : commands) {
@@ -87,16 +86,17 @@ public class BasicCompilationCommandExecutor
      * Build the fileProviders map that associates files to the command that
      * produces them
      */
-    final Map<File, CompilationCommand> fileProviders = new HashMap<File, CompilationCommand>();
+    final Map<File, CommandInfo> fileProducers = new HashMap<File, CommandInfo>();
     for (final CompilationCommand cmd : commands) {
+      final CommandInfo cmdInfo = cmdInfos.get(cmd);
       for (final File outputFile : cmd.getOutputFiles()) {
-        final CompilationCommand previousProviders = fileProviders.put(
-            outputFile, cmd);
+        final CommandInfo previousProviders = fileProducers.put(outputFile,
+            cmdInfo);
         if (previousProviders != null) {
           if (depLogger.isLoggable(Level.WARNING))
             depLogger.warning("Mmultiple provider of the same output-file \""
                 + outputFile + "\" (" + cmd.getDescription() + " and "
-                + previousProviders.getDescription() + ").");
+                + previousProviders.command.getDescription() + ").");
         }
       }
     }
@@ -130,7 +130,7 @@ public class BasicCompilationCommandExecutor
         fileConsumer.add(cmdInfo);
 
         /* Find command that provides this input files */
-        final CompilationCommand provider = fileProviders.get(inputFile);
+        final CommandInfo provider = fileProducers.get(inputFile);
         if (provider != null) {
           /*
            * Add the current cmd command as a command that depends on the
@@ -151,7 +151,7 @@ public class BasicCompilationCommandExecutor
          * The current cmd command has no dependency, it is ready to be
          * executed.
          */
-        readyTasks.addLast(cmd);
+        readyTask.add(cmdInfo);
 
         /* Check that every input files of this command are actually available. */
         for (final File inputFile : cmd.getInputFiles()) {
@@ -178,122 +178,47 @@ public class BasicCompilationCommandExecutor
     // cache of input file timestamp
     final Map<File, Long> inputFileTimestamps = new HashMap<File, Long>();
 
-    // set of ready tasks that are known as task that must be executed.
-    final Set<CompilationCommand> readyTaskToBeExecuted = new HashSet<CompilationCommand>();
+    for (final CompilationCommand cmd : commands) {
+      final CommandInfo cmdInfo = cmdInfos.get(cmd);
+      getOutputCommandTimestamp(cmdInfo, fileConsumers, outputFileTimestamps);
+    }
+    for (final CompilationCommand cmd : commands) {
+      final CommandInfo cmdInfo = cmdInfos.get(cmd);
+      getInputCommandTimestamp(cmdInfo, fileProducers, inputFileTimestamps);
+    }
 
-    // Iterate until no more command are expunged.
-    boolean commandExpunged;
-    do {
-      commandExpunged = false;
+    for (final CompilationCommand cmd : commands) {
+      final CommandInfo cmdInfo = cmdInfos.get(cmd);
 
-      // for each task in readyTask list.
-      final Iterator<CompilationCommand> iter = readyTasks.iterator();
-      while (iter.hasNext()) {
-        final CompilationCommand readyTask = iter.next();
-        // if the task is known as a task that must be executed, pass it.
-        if (readyTaskToBeExecuted.contains(readyTask)) continue;
-
-        final CommandInfo cmdInfo = cmdInfos.get(readyTask);
-
-        // get the output timestamp of the command.
-        final long cmdTs = getCommandTimestamp(cmdInfo, fileConsumers,
-            outputFileTimestamps);
-        boolean mustBeExceuted;
-        if (cmdTs == 0L) {
-          /*
-           * the timestamp of the task is null (one of its direct or indirect
-           * output file is missing). the task must be executed.
-           */
-          mustBeExceuted = true;
-        } else {
-          /*
-           * Check if an input file as a timestamp greater than the task
-           * timestamp.
-           */
-          mustBeExceuted = false;
-          long maxInputTs = 0L;
-          for (final File inputFile : cmdInfo.command.getInputFiles()) {
-            /* Look into the inputFileTimestamps cache */
-            Long inputTs = inputFileTimestamps.get(inputFile);
-            if (inputTs == null) {
-              if (!inputFile.exists()) {
-                if (depLogger.isLoggable(Level.WARNING))
-                  depLogger.warning("Missing input-file \"" + inputFile
-                      + "\" of compilation command : "
-                      + readyTask.getDescription() + ".");
-                break;
-              } else {
-                inputTs = inputFile.lastModified();
-                if (inputTs > cmdTs) {
-                  /*
-                   * inputFile is more recent than the output files of the task.
-                   * the task must be executed
-                   */
-                  if (depLogger.isLoggable(Level.FINE))
-                    depLogger.fine("Input file '" + inputFile
-                        + "' is more recent than output files of task '"
-                        + readyTask.getDescription() + "', recompile.");
-                  mustBeExceuted = true;
-                }
-              }
-              // put the input file timestamp in cache
-              inputFileTimestamps.put(inputFile, inputTs);
-              if (inputTs > maxInputTs) {
-                maxInputTs = inputTs;
-              }
-            }
-          }
-          if (!mustBeExceuted) {
-            /*
-             * The task do not have to be executed (its output files are
-             * up-to-date). It will be removed from the readyTask, and the tasks
-             * that depends on it may become ready to be executed. So
-             * output-files of this task will become input files of other task.
-             * But these files may not exists (they may be intermediate
-             * temporary files), so the "input file timestamp" of these files is
-             * the greatest timestamp of the input files of the current task.
-             * Put this timestamp in the input file timestamp cache for these
-             * files.
-             */
-            for (final File outputFile : readyTask.getOutputFiles()) {
-              if (!outputFile.exists()) {
-                inputFileTimestamps.put(outputFile, maxInputTs);
-              }
-            }
-          }
-        }
-        if (mustBeExceuted) {
-          /*
-           * The task is known as a task that must be executed (it is
-           * out-of-date).
-           */
-          readyTaskToBeExecuted.add(readyTask);
-        } else {
-          if (depLogger.isLoggable(Level.FINE))
-            depLogger.fine("Command '" + readyTask.getDescription()
-                + "' is up to date, do not recompile.");
-          /*
-           * The task is up-to-date. It is not necessary to execute it. Remove
-           * it for the readyTasks list.
-           */
-          iter.remove();
-          commandExpunged = true;
-          /*
-           * Call the commandEnded method to update the readyTasks list knowing
-           * that the current task do not have to be executed (i.e. it has
-           * already be executed)
-           */
-          if (commandEnded(readyTask, depGraph, readyTasks)) {
-            /*
-             * Break the current loop on readyTasks list since it has been
-             * updated by the commandEnded method.
-             */
-            break;
-          }
-        }
+      if (cmdInfo.maxInputTimestamp > cmdInfo.maxOutputTimestamp) {
+        cmdInfo.setMustBeExecuted(depGraph, fileProducers);
       }
+    }
 
-    } while (commandExpunged == true);
+    final Collection<CommandInfo> expungedTasks = new ArrayList<CommandInfo>();
+    for (final CompilationCommand cmd : commands) {
+      final CommandInfo cmdInfo = cmdInfos.get(cmd);
+      if (cmdInfo.mustBeExecuted) {
+        if (depLogger.isLoggable(Level.FINE))
+          depLogger.fine("Task '" + cmdInfo.command.getDescription()
+              + "' Input file '" + cmdInfo.maxInputFile
+              + "' is more recent than output file '" + cmdInfo.maxOutputFile
+              + "', recompile.");
+      } else {
+
+        expungedTasks.add(cmdInfo);
+        depGraph.remove(cmdInfo);
+        readyTask.remove(cmdInfo);
+        if (depLogger.isLoggable(Level.FINE))
+          depLogger.fine("Command '" + cmd.getDescription()
+              + "' is up to date, do not recompile.");
+      }
+    }
+
+    for (final CompilationCommand cmd : commands) {
+      final CommandInfo cmdInfo = cmdInfos.get(cmd);
+      cmdInfo.dependencies.removeAll(expungedTasks);
+    }
   }
 
   /**
@@ -306,8 +231,8 @@ public class BasicCompilationCommandExecutor
    * <ul>
    * <li>The timestamp is the maximum timestamp of the consumer commands (the
    * commands that use this file as input file), as defined in
-   * {@link #getCommandTimestamp(CommandInfo, Map, Map)}, or zero if one of its
-   * consumer command timestamp is null.</li>
+   * {@link #getOutputCommandTimestamp(CommandInfo, Map, Map)}, or zero if one
+   * of its consumer command timestamp is null.</li>
    * <li>If the file is a final file (i.e. it is not the input-file of a
    * compilation command), its timestamp is zero (since it does not exist).</li>
    * </ul>
@@ -320,6 +245,9 @@ public class BasicCompilationCommandExecutor
     if (ts == null) {
       if (outputFile.exists()) {
         ts = outputFile.lastModified();
+        if (depLogger.isLoggable(Level.FINEST))
+          depLogger.finest("Output file '" + outputFile
+              + "' exists, its timestamp is " + ts + ".");
 
       } else {
         /*
@@ -336,8 +264,8 @@ public class BasicCompilationCommandExecutor
         } else {
           long maxTs = 0L;
           for (final CommandInfo cmdInfo : consumers) {
-            final long cmdTs = getCommandTimestamp(cmdInfo, fileConsumers,
-                outputFileTimestamps);
+            final long cmdTs = getOutputCommandTimestamp(cmdInfo,
+                fileConsumers, outputFileTimestamps);
             if (cmdTs == 0L) {
               maxTs = 0L;
               break;
@@ -346,19 +274,27 @@ public class BasicCompilationCommandExecutor
               maxTs = cmdTs;
             }
           }
+          ts = maxTs;
         }
+        if (depLogger.isLoggable(Level.FINEST))
+          depLogger.finest("Output file '" + outputFile
+              + "' does not exist, its inferred timestamp is " + ts + ".");
+
       }
       outputFileTimestamps.put(outputFile, ts);
     }
     return ts;
   }
 
-  protected long getCommandTimestamp(final CommandInfo cmdInfo,
+  protected long getOutputCommandTimestamp(final CommandInfo cmdInfo,
       final Map<File, Collection<CommandInfo>> fileConsumers,
       final Map<File, Long> outputFileTimestamps) {
-    if (cmdInfo.timestamp == -1L) {
+    if (cmdInfo.maxOutputTimestamp == -1L) {
       if (cmdInfo.command.forceExec()) {
-        cmdInfo.timestamp = 0L;
+        cmdInfo.maxOutputTimestamp = 0L;
+        if (depLogger.isLoggable(Level.FINEST))
+          depLogger.finest("Task '" + cmdInfo.command.getDescription()
+              + "' is forced, set outputTimestamp to 0.");
       } else {
         /* For each file produced by the command */
         for (final File outputFile : cmdInfo.command.getOutputFiles()) {
@@ -366,21 +302,98 @@ public class BasicCompilationCommandExecutor
           final long outputFileTs = getOutputFileTimestamp(outputFile,
               fileConsumers, outputFileTimestamps);
           if (outputFileTs == 0L) {
-            cmdInfo.timestamp = 0L;
+            cmdInfo.maxOutputTimestamp = 0L;
+            cmdInfo.maxOutputFile = outputFile;
+            if (depLogger.isLoggable(Level.FINEST))
+              depLogger.finest("Task '" + cmdInfo.command.getDescription()
+                  + "' output file '" + outputFile
+                  + "' must be regenerated, set output timestamp to 0.");
             break;
           }
-          if (outputFileTs > cmdInfo.timestamp) {
-            cmdInfo.timestamp = outputFileTs;
+          if (outputFileTs > cmdInfo.maxOutputTimestamp) {
+            cmdInfo.maxOutputTimestamp = outputFileTs;
+            cmdInfo.maxOutputFile = outputFile;
+            if (depLogger.isLoggable(Level.FINEST))
+              depLogger.finest("Task '" + cmdInfo.command.getDescription()
+                  + "' set output timestamp to timestamp of output file '"
+                  + outputFile + "' : " + outputFileTs);
           }
         }
       }
     }
-    return cmdInfo.timestamp;
+    return cmdInfo.maxOutputTimestamp;
+  }
+
+  /**
+   * Returns the timestamp of the given inputFile. the Timestamp of an inputFile
+   * is defines as follow :
+   * <ul>
+   * <li>If the file exists, its timestamp is the value returned by
+   * {@link File#lastModified()}.</li>
+   * <li>Otherwise the timestamp is the timestamp of the producer commands (the
+   * commands that produce this file as output file), as defined in
+   * {@link #getInputCommandTimestamp(CommandInfo, Map, Map)}.</li>
+   * </ul>
+   */
+  protected long getInputFileTimestamp(final File inputFile,
+      final Map<File, CommandInfo> fileProducers,
+      final Map<File, Long> inputFileTimestamps) {
+    Long ts = inputFileTimestamps.get(inputFile);
+    if (ts == null) {
+      if (inputFile.exists()) {
+        ts = inputFile.lastModified();
+        if (depLogger.isLoggable(Level.FINEST))
+          depLogger.finest("Input file '" + inputFile
+              + "' exists, its timestamp is " + ts + ".");
+      } else {
+        /*
+         * the inputFile does not exist. Its timestamp is the timestamps of its
+         * producer command
+         */
+        final CommandInfo producer = fileProducers.get(inputFile);
+        ts = getInputCommandTimestamp(producer, fileProducers,
+            inputFileTimestamps);
+        if (depLogger.isLoggable(Level.FINEST))
+          depLogger.finest("Input file '" + inputFile
+              + "' does not exist, its inferred timestamp is " + ts + ".");
+      }
+      inputFileTimestamps.put(inputFile, ts);
+    }
+    return ts;
+  }
+
+  protected long getInputCommandTimestamp(final CommandInfo cmdInfo,
+      final Map<File, CommandInfo> fileProducers,
+      final Map<File, Long> inputFileTimestamps) {
+    if (cmdInfo.maxInputTimestamp == -1L) {
+      if (cmdInfo.command.forceExec()) {
+        cmdInfo.maxInputTimestamp = Long.MAX_VALUE;
+        if (depLogger.isLoggable(Level.FINEST))
+          depLogger.finest("Task '" + cmdInfo.command.getDescription()
+              + "' is forced, set inputTimestamp to MAX.");
+      } else {
+        /* For each file consumed by the command */
+        for (final File inputFile : cmdInfo.command.getInputFiles()) {
+          /* Get the timestamp of the file. */
+          final long inputFileTs = getInputFileTimestamp(inputFile,
+              fileProducers, inputFileTimestamps);
+          if (inputFileTs > cmdInfo.maxInputTimestamp) {
+            cmdInfo.maxInputTimestamp = inputFileTs;
+            cmdInfo.maxInputFile = inputFile;
+            if (depLogger.isLoggable(Level.FINEST))
+              depLogger.finest("Task '" + cmdInfo.command.getDescription()
+                  + "' set task input timestamp to timestamp of input file '"
+                  + inputFile + "' : " + inputFileTs);
+          }
+        }
+      }
+    }
+    return cmdInfo.maxInputTimestamp;
   }
 
   protected void execDepGraph(final int nbJobs,
-      final Map<CompilationCommand, Collection<CommandInfo>> depGraph,
-      final LinkedList<CompilationCommand> readyTask, final boolean force)
+      final Map<CommandInfo, Collection<CommandInfo>> depGraph,
+      final LinkedList<CommandInfo> readyTask, final boolean force)
       throws ADLException, InterruptedException {
     if (nbJobs == 1) {
       execDepGraphSynchronous(depGraph, readyTask, force);
@@ -393,67 +406,21 @@ public class BasicCompilationCommandExecutor
   }
 
   protected void execDepGraphSynchronous(
-      final Map<CompilationCommand, Collection<CommandInfo>> depGraph,
-      final LinkedList<CompilationCommand> readyTask, final boolean force)
+      final Map<CommandInfo, Collection<CommandInfo>> depGraph,
+      final LinkedList<CommandInfo> readyTask, final boolean force)
       throws ADLException, InterruptedException {
     while (!readyTask.isEmpty()) {
-      final CompilationCommand cmd = readyTask.removeFirst();
+      final CommandInfo cmdInfo = readyTask.removeFirst();
 
-      execCmd(cmd, force);
-      commandEnded(cmd, depGraph, readyTask);
+      cmdInfo.command.exec();
+      commandEnded(cmdInfo, depGraph, readyTask);
     }
     assert depGraph.isEmpty();
   }
 
-  protected void execCmd(final CompilationCommand cmd, final boolean force)
-      throws ADLException, InterruptedException {
-    if (force) {
-      cmd.exec();
-      return;
-    }
-
-    long outputTs = Long.MAX_VALUE;
-    for (final File outputFile : cmd.getOutputFiles()) {
-      if (!outputFile.exists()) {
-        outputTs = 0L;
-        if (depLogger.isLoggable(Level.FINE))
-          depLogger.fine("Output file '" + outputFile + "' of task '"
-              + cmd.getDescription() + "' is missing, compile.");
-        break;
-      }
-      final long ts = outputFile.lastModified();
-      if (ts < outputTs) outputTs = ts;
-    }
-
-    boolean recompile;
-    if (outputTs > 0L) {
-      recompile = false;
-      for (final File inputFile : cmd.getInputFiles()) {
-        if (inputFile.lastModified() > outputTs) {
-          if (depLogger.isLoggable(Level.FINE))
-            depLogger.fine("Input file '" + inputFile
-                + "' is more recent than output files of task '"
-                + cmd.getDescription() + "', recompile.");
-          recompile = true;
-          break;
-        }
-      }
-    } else {
-      recompile = true;
-    }
-
-    if (recompile) {
-      cmd.exec();
-    } else {
-      if (depLogger.isLoggable(Level.FINE))
-        depLogger.fine("Task '" + cmd.getDescription()
-            + "'is up-to-date, skip.");
-    }
-  }
-
-  protected boolean commandEnded(final CompilationCommand cmd,
-      final Map<CompilationCommand, Collection<CommandInfo>> depGraph,
-      final LinkedList<CompilationCommand> readyTask) {
+  protected boolean commandEnded(final CommandInfo cmd,
+      final Map<CommandInfo, Collection<CommandInfo>> depGraph,
+      final LinkedList<CommandInfo> readyTask) {
     boolean commandUnlocked = false;
     final Collection<CommandInfo> deps = depGraph.remove(cmd);
     if (deps != null) {
@@ -465,7 +432,7 @@ public class BasicCompilationCommandExecutor
         if (cmdInfo.dependencies.isEmpty()) {
           // every dependency of command are done, place it in ready task.
           iter.remove();
-          readyTask.addLast(cmdInfo.command);
+          readyTask.addLast(cmdInfo);
           commandUnlocked = true;
         }
       }
@@ -474,21 +441,21 @@ public class BasicCompilationCommandExecutor
   }
 
   protected final class ExecutionState {
-    final LinkedList<CompilationCommand>                   readyTask;
-    final Map<CompilationCommand, Collection<CommandInfo>> depGraph;
-    final boolean                                          force;
+    final LinkedList<CommandInfo>                   readyTask;
+    final Map<CommandInfo, Collection<CommandInfo>> depGraph;
+    final boolean                                   force;
 
-    final Lock                                             lock      = new ReentrantLock();
-    Condition                                              condition = lock
-                                                                         .newCondition();
-    Exception                                              exception;
-    int                                                    nbRunningThread;
+    final Lock                                      lock      = new ReentrantLock();
+    Condition                                       condition = lock
+                                                                  .newCondition();
+    Exception                                       exception;
+    int                                             nbRunningThread;
 
-    ExecutionState(final LinkedList<CompilationCommand> rTask,
-        final Map<CompilationCommand, Collection<CommandInfo>> dGraph,
+    ExecutionState(final LinkedList<CommandInfo> readyTask,
+        final Map<CommandInfo, Collection<CommandInfo>> depGraph,
         final int nbJob, final boolean force) {
-      this.readyTask = rTask;
-      this.depGraph = dGraph;
+      this.readyTask = readyTask;
+      this.depGraph = depGraph;
       this.force = force;
 
       lock.lock();
@@ -511,11 +478,11 @@ public class BasicCompilationCommandExecutor
       lock.lock();
       try {
         while (!readyTask.isEmpty()) {
-          final CompilationCommand cmd = readyTask.removeFirst();
+          final CommandInfo cmdInfo = readyTask.removeFirst();
           lock.unlock();
 
           try {
-            execCmd(cmd, force);
+            cmdInfo.command.exec();
           } catch (final Exception e) {
             lock.lock();
             if (exception != null) {
@@ -525,7 +492,7 @@ public class BasicCompilationCommandExecutor
           }
 
           lock.lock();
-          commandEnded(cmd, depGraph, readyTask);
+          commandEnded(cmdInfo, depGraph, readyTask);
         }
       } finally {
         nbRunningThread--;
@@ -556,12 +523,41 @@ public class BasicCompilationCommandExecutor
   }
 
   protected static final class CommandInfo {
-    final CompilationCommand       command;
-    Collection<CompilationCommand> dependencies = new ArrayList<CompilationCommand>();
-    long                           timestamp    = -1L;
+    final CompilationCommand command;
+    Collection<CommandInfo>  dependencies       = new ArrayList<CommandInfo>();
+    File                     maxOutputFile;
+    long                     maxOutputTimestamp = -1L;
+    File                     maxInputFile;
+    long                     maxInputTimestamp  = -1L;
+    boolean                  mustBeExecuted     = false;
 
     CommandInfo(final CompilationCommand command) {
       this.command = command;
+    }
+
+    void setMustBeExecuted(
+        final Map<CommandInfo, Collection<CommandInfo>> depGraph,
+        final Map<File, CommandInfo> fileProducers) {
+      if (!mustBeExecuted) {
+        this.mustBeExecuted = true;
+        final Collection<CommandInfo> cmds = depGraph.get(this);
+        if (cmds != null) {
+          for (final CommandInfo cmdInfo : cmds) {
+            cmdInfo.setMustBeExecuted(depGraph, fileProducers);
+          }
+        }
+
+        for (final File inputFile : command.getInputFiles()) {
+          if (!inputFile.exists()) {
+            /*
+             * The inputFile in not present, the task that produces it must be
+             * executed also.
+             */
+            fileProducers.get(inputFile).setMustBeExecuted(depGraph,
+                fileProducers);
+          }
+        }
+      }
     }
   }
 }
