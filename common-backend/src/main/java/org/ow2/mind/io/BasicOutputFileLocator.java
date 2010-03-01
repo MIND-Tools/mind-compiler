@@ -37,7 +37,7 @@ public class BasicOutputFileLocator implements OutputFileLocator {
 
   public static final String OUTPUT_DIR_CONTEXT_KEY           = "outputdir";
   public static final String DEFAULT_OUTPUT_DIR               = "build";
-  public static final String TEMPORARY_OUTPUT_DIR_CONTEXT_KEY = "temporaryoutputdir";
+  public static final String TEMPORARY_OUTPUT_DIR_CONTEXT_KEY = "temporaryOutputDir";
 
   public File getCSourceOutputFile(final String path,
       final Map<Object, Object> context) throws ADLException {
@@ -199,5 +199,4 @@ public class BasicOutputFileLocator implements OutputFileLocator {
     }
     return tempOutDir;
   }
-
 }

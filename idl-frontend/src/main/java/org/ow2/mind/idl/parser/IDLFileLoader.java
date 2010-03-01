@@ -157,7 +157,7 @@ public class IDLFileLoader implements IDLLoader, BindingController {
 
   protected URL locateIdt(final String name, final Map<Object, Object> context)
       throws ADLException {
-    final URL srcFile = idlLocatorItf.findHeader(name, context);
+    final URL srcFile = idlLocatorItf.findSourceHeader(name, context);
     if (srcFile == null) {
       throw new ADLException(IDLErrors.IDL_NOT_FOUND, name);
     }

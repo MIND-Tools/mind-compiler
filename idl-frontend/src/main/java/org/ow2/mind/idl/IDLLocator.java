@@ -78,7 +78,17 @@ public interface IDLLocator extends GenericResourceLocator {
    * @return the {@link URL} of the header file or <code>null</code> if no
    *         header file can be found for the given path.
    */
-  URL findHeader(String path, Map<Object, Object> context);
+  URL findSourceHeader(String path, Map<Object, Object> context);
+
+  /**
+   * Locate the header binary file for the given path
+   * 
+   * @param path a path to an IDL file.
+   * @param context additional parameters.
+   * @return the {@link URL} of the header file or <code>null</code> if no
+   *         header file can be found for the given path.
+   */
+  URL findBinaryHeader(String path, Map<Object, Object> context);
 
   /**
    * Returns an {@link InputResource} corresponding to the

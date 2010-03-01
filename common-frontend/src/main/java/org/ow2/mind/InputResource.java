@@ -22,6 +22,7 @@
 
 package org.ow2.mind;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.net.URL;
 
@@ -30,7 +31,7 @@ public class InputResource implements Serializable {
   protected final String   kind;
   protected final String   name;
   protected transient URL  location;
-  protected transient long timestamp = -1;
+  protected transient long timestamp;
 
   public InputResource(final String kind, final String name) {
     if (kind == null)
@@ -40,6 +41,7 @@ public class InputResource implements Serializable {
 
     this.kind = kind;
     this.name = name;
+    this.timestamp = -1L;
   }
 
   public String getKind() {
@@ -81,5 +83,11 @@ public class InputResource implements Serializable {
   @Override
   public String toString() {
     return kind + ":" + name;
+  }
+
+  private void readObject(final java.io.ObjectInputStream in)
+      throws IOException, ClassNotFoundException {
+    in.defaultReadObject();
+    timestamp = -1L;
   }
 }

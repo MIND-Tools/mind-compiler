@@ -23,7 +23,6 @@
 package org.ow2.mind.adl;
 
 import java.io.File;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -48,33 +47,38 @@ public final class CompilationDecorationHelper {
 
   public static void addAdditionalCompilationUnit(final Definition def,
       final AdditionalCompilationUnitDecoration decoration) {
-    List<AdditionalCompilationUnitDecoration> list = getDecoration(def);
-    if (list == null) {
-      list = new ArrayList<AdditionalCompilationUnitDecoration>();
-      def.astSetDecoration(ADDITIONAL_COMPILATION_UNIT_DECORATION_NAME, list);
+    AdditionalCompilationUnitDecorationContainer deco = getDecoration(def);
+    if (deco == null) {
+      deco = new AdditionalCompilationUnitDecorationContainer();
+      def.astSetDecoration(ADDITIONAL_COMPILATION_UNIT_DECORATION_NAME, deco);
     }
-    list.add(decoration);
+    deco.list.add(decoration);
   }
 
   public static List<AdditionalCompilationUnitDecoration> getAdditionalCompilationUnit(
       final Definition def) {
-    final List<AdditionalCompilationUnitDecoration> list = getDecoration(def);
-    if (list != null)
-      return list;
+    final AdditionalCompilationUnitDecorationContainer deco = getDecoration(def);
+    if (deco != null)
+      return deco.list;
     else
       return Collections.emptyList();
   }
 
-  @SuppressWarnings("unchecked")
-  private static List<AdditionalCompilationUnitDecoration> getDecoration(
+  private static AdditionalCompilationUnitDecorationContainer getDecoration(
       final Definition def) {
-    return (List<AdditionalCompilationUnitDecoration>) def
+    return (AdditionalCompilationUnitDecorationContainer) def
         .astGetDecoration(ADDITIONAL_COMPILATION_UNIT_DECORATION_NAME);
   }
 
-  public static class AdditionalCompilationUnitDecoration
-      implements
-        Serializable {
+  /*
+   * This class is used to wrap AdditionalCompilationUnitDecoration list in a
+   * non serializable object to avoid the serialization of these decorations.
+   */
+  private static class AdditionalCompilationUnitDecorationContainer {
+    protected final List<AdditionalCompilationUnitDecoration> list = new ArrayList<AdditionalCompilationUnitDecoration>();
+  }
+
+  public static class AdditionalCompilationUnitDecoration {
     protected String           path;
     protected boolean          generatedFile;
     protected Collection<File> dependencies;

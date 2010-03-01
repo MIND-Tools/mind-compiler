@@ -34,6 +34,7 @@ import java.util.Map;
 import org.objectweb.fractal.adl.util.ClassLoaderHelper;
 import org.ow2.mind.InputResource;
 import org.ow2.mind.NameHelper;
+import org.ow2.mind.PathHelper;
 
 /**
  * Basic implementation of the {@link IDLLocator} interface for MIND IDL.
@@ -41,7 +42,24 @@ import org.ow2.mind.NameHelper;
 public class BasicIDLLocator implements IDLLocator {
 
   protected static final String SOURCE_ITF_EXTENSION = ".itf";
-  protected static final String BINARY_ITF_EXTENSION = ".idef";
+  protected static final String BINARY_ITF_EXTENSION = ".itfdef";
+  protected static final String BINARY_IDT_EXTENSION = ".idtdef";
+
+  // ---------------------------------------------------------------------------
+  // Static Methods
+  // ---------------------------------------------------------------------------
+
+  public static String getItfSourceName(final String name) {
+    return fullyQualifiedNameToPath(name, SOURCE_ITF_EXTENSION);
+  }
+
+  public static String getItfBinaryName(final String name) {
+    return fullyQualifiedNameToPath(name, BINARY_ITF_EXTENSION);
+  }
+
+  public static String getHeaderBinaryName(final String path) {
+    return PathHelper.replaceExtension(path, BINARY_IDT_EXTENSION);
+  }
 
   // ---------------------------------------------------------------------------
   // Implementation of the IDLLocator interface
@@ -60,7 +78,7 @@ public class BasicIDLLocator implements IDLLocator {
       throw new IllegalArgumentException("\"" + name + "\" is not a valid name");
 
     return getClassLoader(this, context).getResource(
-        fullyQualifiedNameToPath(name, SOURCE_ITF_EXTENSION).substring(1));
+        getItfSourceName(name).substring(1));
   }
 
   public URL findBinaryItf(final String name, final Map<Object, Object> context) {
@@ -68,10 +86,11 @@ public class BasicIDLLocator implements IDLLocator {
       throw new IllegalArgumentException("\"" + name + "\" is not a valid name");
 
     return getClassLoader(this, context).getResource(
-        fullyQualifiedNameToPath(name, SOURCE_ITF_EXTENSION).substring(1));
+        getItfBinaryName(name).substring(1));
   }
 
-  public URL findHeader(final String path, final Map<Object, Object> context) {
+  public URL findSourceHeader(final String path,
+      final Map<Object, Object> context) {
     if (!isValid(path))
       throw new IllegalArgumentException("\"" + path + "\" is not a valid path");
     if (isRelative(path))
@@ -81,9 +100,21 @@ public class BasicIDLLocator implements IDLLocator {
     return getClassLoader(this, context).getResource(path.substring(1));
   }
 
+  public URL findBinaryHeader(final String path,
+      final Map<Object, Object> context) {
+    if (!isValid(path))
+      throw new IllegalArgumentException("\"" + path + "\" is not a valid path");
+    if (isRelative(path))
+      throw new IllegalArgumentException("\"" + path
+          + "\" is not an absolute path");
+
+    return getClassLoader(this, context).getResource(
+        getHeaderBinaryName(path).substring(1));
+  }
+
   public URL findResource(final String name, final Map<Object, Object> context) {
     if (name.startsWith("/"))
-      return findHeader(name, context);
+      return findSourceHeader(name, context);
     else
       return findSourceItf(name, context);
   }

@@ -73,14 +73,14 @@ public class BasicIncludeResolver implements IncludeResolver, BindingController 
 
     if (path.startsWith("/")) {
       // absolute path.
-      final URL url = idlLocatorItf.findHeader(path, context);
+      final URL url = idlLocatorItf.findSourceHeader(path, context);
       if (url == null) {
         throw new ADLException(IDLErrors.IDL_NOT_FOUND, path);
       }
     } else {
       // look-for header relatively to encapsulatingDir
       final String relPath = toAbsolute(encapsulatingDir, path);
-      URL url = idlLocatorItf.findHeader(relPath, context);
+      URL url = idlLocatorItf.findSourceHeader(relPath, context);
       if (url != null) {
         // IDL found with relPath
         path = relPath;
@@ -91,7 +91,7 @@ public class BasicIncludeResolver implements IncludeResolver, BindingController 
       } else {
         // look-for header relatively to source-path
         path = "/" + path;
-        url = idlLocatorItf.findHeader(path, context);
+        url = idlLocatorItf.findSourceHeader(path, context);
         if (url == null) {
           throw new ADLException(IDLErrors.IDL_NOT_FOUND, path);
         }

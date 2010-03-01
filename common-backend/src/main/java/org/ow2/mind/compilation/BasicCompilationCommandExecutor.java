@@ -64,6 +64,12 @@ public class BasicCompilationCommandExecutor
     final boolean force = ForceRegenContextHelper.getForceRegen(context);
     buildDepGraph(commands, depGraph, readyTask, force);
 
+    if (depGraph.isEmpty()) {
+      if (depLogger.isLoggable(Level.INFO))
+        depLogger.info("Nothing to be done, compiled files are up-to-dates.");
+      return;
+    }
+
     int jobs = 1;
     final Object o = context.get(CONCURENT_JOBS_CONTEXT_KEY);
     if (o instanceof Integer) {
@@ -94,7 +100,7 @@ public class BasicCompilationCommandExecutor
             cmdInfo);
         if (previousProviders != null) {
           if (depLogger.isLoggable(Level.WARNING))
-            depLogger.warning("Mmultiple provider of the same output-file \""
+            depLogger.warning("Multiple provider of the same output-file \""
                 + outputFile + "\" (" + cmd.getDescription() + " and "
                 + previousProviders.command.getDescription() + ").");
         }
@@ -144,25 +150,18 @@ public class BasicCompilationCommandExecutor
           deps.add(cmdInfo);
           /* Add the provider task as a dependency of the current cmd command. */
           cmdInfo.dependencies.add(provider);
+        } else if (!inputFile.exists()) {
+          throw new CompilerError(GenericErrors.INTERNAL_ERROR,
+              "Missing input-file \"" + inputFile
+                  + "\" of compilation command : " + cmd.getDescription() + ".");
         }
       }
-      if (cmdInfo.dependencies.isEmpty()) {
+      if (forced && cmdInfo.dependencies.isEmpty()) {
         /*
          * The current cmd command has no dependency, it is ready to be
          * executed.
          */
         readyTask.add(cmdInfo);
-
-        /* Check that every input files of this command are actually available. */
-        for (final File inputFile : cmd.getInputFiles()) {
-          if (!inputFile.exists()) {
-            if (depLogger.isLoggable(Level.WARNING))
-              depLogger
-                  .warning("Missing input-file \"" + inputFile
-                      + "\" of compilation command : " + cmd.getDescription()
-                      + ".");
-          }
-        }
       }
     }
 
@@ -208,7 +207,6 @@ public class BasicCompilationCommandExecutor
 
         expungedTasks.add(cmdInfo);
         depGraph.remove(cmdInfo);
-        readyTask.remove(cmdInfo);
         if (depLogger.isLoggable(Level.FINE))
           depLogger.fine("Command '" + cmd.getDescription()
               + "' is up to date, do not recompile.");
@@ -218,6 +216,13 @@ public class BasicCompilationCommandExecutor
     for (final CompilationCommand cmd : commands) {
       final CommandInfo cmdInfo = cmdInfos.get(cmd);
       cmdInfo.dependencies.removeAll(expungedTasks);
+      if (cmdInfo.dependencies.isEmpty() && !expungedTasks.contains(cmdInfo)) {
+        /*
+         * The current cmd command has no dependency, it is ready to be
+         * executed.
+         */
+        readyTask.add(cmdInfo);
+      }
     }
   }
 

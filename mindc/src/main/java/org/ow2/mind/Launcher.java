@@ -54,10 +54,12 @@ import org.ow2.mind.adl.DefinitionCompiler;
 import org.ow2.mind.adl.DefinitionSourceGenerator;
 import org.ow2.mind.adl.Factory;
 import org.ow2.mind.adl.GraphCompiler;
+import org.ow2.mind.adl.OutputBinaryADLLocator;
 import org.ow2.mind.adl.graph.ComponentGraph;
 import org.ow2.mind.adl.graph.Instantiator;
 import org.ow2.mind.adl.implementation.BasicImplementationLocator;
 import org.ow2.mind.adl.implementation.ImplementationLocator;
+import org.ow2.mind.adl.st.ADLLoaderASTTransformer;
 import org.ow2.mind.annotation.AnnotationLocatorHelper;
 import org.ow2.mind.compilation.CompilationCommand;
 import org.ow2.mind.compilation.CompilationCommandExecutor;
@@ -72,6 +74,8 @@ import org.ow2.mind.idl.IDLLoader;
 import org.ow2.mind.idl.IDLLoaderChainFactory;
 import org.ow2.mind.idl.IDLLocator;
 import org.ow2.mind.idl.IDLVisitor;
+import org.ow2.mind.idl.OutputBinaryIDLLocator;
+import org.ow2.mind.idl.st.IDLLoaderASTTransformer;
 import org.ow2.mind.io.BasicOutputFileLocator;
 import org.ow2.mind.plugin.SimpleClassPluginFactory;
 import org.ow2.mind.preproc.BasicMPPWrapper;
@@ -416,18 +420,30 @@ public class Launcher extends AbstractLauncher {
   protected void initCompiler(final CommandLine cmdLine) {
     // input locators
     final BasicInputResourceLocator inputResourceLocator = new BasicInputResourceLocator();
-    final IDLLocator idlLocator = IDLLoaderChainFactory.newLocator();
-    final ADLLocator adlLocator = Factory.newLocator();
+    final OutputBinaryIDLLocator obil = new OutputBinaryIDLLocator();
+    obil.clientLocatorItf = IDLLoaderChainFactory
+        .newIDLLocator(inputResourceLocator);
+    final IDLLocator idlLocator = obil;
     final ImplementationLocator implementationLocator = new BasicImplementationLocator();
+
+    final ADLLocator frontendLocator = Factory
+        .newADLLocator(inputResourceLocator);
+    final OutputBinaryADLLocator obal = new OutputBinaryADLLocator();
+    obal.clientLocatorItf = frontendLocator;
+    final ADLLocator adlLocator = obal;
 
     // output locator
     final BasicOutputFileLocator outputFileLocator = new BasicOutputFileLocator();
+    obal.outputFileLocatorItf = outputFileLocator;
+    obil.outputFileLocatorItf = outputFileLocator;
 
     // Plugin Manager Components
     final org.objectweb.fractal.adl.Factory pluginFactory = new SimpleClassPluginFactory();
 
     // compilation task factory
-    final CompilerWrapper compilerWrapper = new GccCompilerWrapper();
+    final GccCompilerWrapper gcw = new GccCompilerWrapper();
+    gcw.outputFileLocatorItf = outputFileLocator;
+    final CompilerWrapper compilerWrapper = gcw;
     final MPPWrapper mppWrapper = new BasicMPPWrapper();
 
     // String Template Component Loaders
@@ -439,9 +455,17 @@ public class Launcher extends AbstractLauncher {
     astTransformer = basicASTTransformer;
 
     // loader chains
-    idlLoader = IDLLoaderChainFactory.newLoader(idlLocator);
-    adlLoader = Factory.newLoader(inputResourceLocator, adlLocator, idlLocator,
-        idlLoader, pluginFactory);
+    final IDLLoaderASTTransformer ilat = new IDLLoaderASTTransformer();
+    ilat.clientIDLLoaderItf = IDLLoaderChainFactory.newLoader(idlLocator,
+        inputResourceLocator);
+    ilat.astTransformerItf = astTransformer;
+    idlLoader = ilat;
+
+    final ADLLoaderASTTransformer alat = new ADLLoaderASTTransformer();
+    alat.clientLoader = Factory.newLoader(inputResourceLocator, adlLocator,
+        idlLocator, implementationLocator, idlLoader, pluginFactory);
+    alat.astTransformerItf = astTransformer;
+    adlLoader = alat;
 
     // instantiator chain
     graphInstantiator = Factory.newInstantiator(adlLoader);

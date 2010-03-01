@@ -27,7 +27,7 @@ import static org.ow2.mind.PathHelper.fullyQualifiedNameToPath;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -110,7 +110,7 @@ public class BasicInstanceSourceGenerator extends AbstractSourceGenerator
         st.setAttribute("topLevelDefinition", instanceDesc.topLevelDefinition);
         st.setAttribute("instances", instanceDesc.instances);
 
-        final Set<Definition> definitions = new HashSet<Definition>();
+        final Set<Definition> definitions = new LinkedHashSet<Definition>();
         for (final ComponentGraph instance : instanceDesc.instances) {
           addDefinitions(instance, definitions);
         }

@@ -22,10 +22,13 @@
 
 package org.ow2.mind.adl;
 
+import static org.ow2.mind.PathHelper.fullyQualifiedNameToPath;
+
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Map;
 
+import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.util.ClassLoaderHelper;
 import org.ow2.mind.InputResource;
 
@@ -34,8 +37,29 @@ import org.ow2.mind.InputResource;
  */
 public class BasicADLLocator implements ADLLocator {
 
-  static final String SOURCE_EXTENSION = ".adl";
-  static final String BINARY_EXTENSION = ".def";
+  public static final String SOURCE_EXTENSION = ".adl";
+  public static final String BINARY_EXTENSION = ".def";
+
+  // ---------------------------------------------------------------------------
+  // public static methods
+  // ---------------------------------------------------------------------------
+
+  public static String getADLSourceName(final Definition definition) {
+    return getADLSourceName(definition.getName());
+  }
+
+  public static String getADLSourceName(final String name) {
+    return fullyQualifiedNameToPath(name, SOURCE_EXTENSION);
+  }
+
+  public static String getADLBinaryName(final Definition definition) {
+    final String name = definition.getName();
+    return getADLBinaryName(name);
+  }
+
+  public static String getADLBinaryName(final String name) {
+    return fullyQualifiedNameToPath(name, BINARY_EXTENSION);
+  }
 
   // ---------------------------------------------------------------------------
   // Implementation of the ADLLocator interface
@@ -51,12 +75,12 @@ public class BasicADLLocator implements ADLLocator {
 
   public URL findBinaryADL(final String name, final Map<Object, Object> context) {
     return ClassLoaderHelper.getClassLoader(this, context).getResource(
-        (name.replace('.', '/') + BINARY_EXTENSION));
+        getADLBinaryName(name).substring(1));
   }
 
   public URL findSourceADL(final String name, final Map<Object, Object> context) {
     return ClassLoaderHelper.getClassLoader(this, context).getResource(
-        (name.replace('.', '/') + SOURCE_EXTENSION));
+        getADLSourceName(name).substring(1));
   }
 
   public URL findResource(final String name, final Map<Object, Object> context) {

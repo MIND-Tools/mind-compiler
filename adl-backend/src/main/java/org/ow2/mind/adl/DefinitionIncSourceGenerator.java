@@ -22,12 +22,14 @@
 
 package org.ow2.mind.adl;
 
+import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
+import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
 import static org.ow2.mind.PathHelper.fullyQualifiedNameToPath;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.antlr.stringtemplate.StringTemplate;
@@ -37,8 +39,11 @@ import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.interfaces.Interface;
 import org.objectweb.fractal.adl.interfaces.InterfaceContainer;
 import org.objectweb.fractal.adl.types.TypeInterface;
+import org.objectweb.fractal.api.NoSuchInterfaceException;
+import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.ow2.mind.SourceFileWriter;
 import org.ow2.mind.adl.idl.InterfaceDefinitionDecorationHelper;
+import org.ow2.mind.idl.IDLLoader;
 import org.ow2.mind.idl.ast.InterfaceDefinition;
 import org.ow2.mind.io.IOErrors;
 
@@ -52,6 +57,13 @@ public class DefinitionIncSourceGenerator extends AbstractSourceGenerator
 
   protected static final String INC_HEADER_TEMPLATE_NAME = "st.definitions.implementations.Component";
   protected final static String FILE_EXT                 = ".inc";
+
+  // ---------------------------------------------------------------------------
+  // Client Interfaces
+  // ---------------------------------------------------------------------------
+
+  /** Client interface used to load IDL files if needed. */
+  public IDLLoader              idlLoaderItf;
 
   // ---------------------------------------------------------------------------
   // Constructors
@@ -106,16 +118,16 @@ public class DefinitionIncSourceGenerator extends AbstractSourceGenerator
       if (definition instanceof InterfaceContainer) {
         final Interface[] itfs = ((InterfaceContainer) definition)
             .getInterfaces();
-        final Map<String, InterfaceDefinition> itfDefs = new HashMap<String, InterfaceDefinition>(
+        final Map<String, InterfaceDefinition> itfDefs = new LinkedHashMap<String, InterfaceDefinition>(
             itfs.length);
         for (final Interface itf : itfs) {
           if (itf instanceof TypeInterface) {
             final TypeInterface tItf = (TypeInterface) itf;
-            // TODO Use a client IDLLoader to load interface definition if
-            // needed
-            itfDefs.put(tItf.getSignature(),
-                InterfaceDefinitionDecorationHelper
-                    .getResolvedInterfaceDefinition(tItf, null, null));
+            itfDefs
+                .put(tItf.getSignature(),
+                    InterfaceDefinitionDecorationHelper
+                        .getResolvedInterfaceDefinition(tItf, idlLoaderItf,
+                            context));
           }
         }
         st.setAttribute("interfaceDefinitions", itfDefs);
@@ -134,5 +146,50 @@ public class DefinitionIncSourceGenerator extends AbstractSourceGenerator
 
   protected String getOutputFileName(final Definition definition) {
     return getIncFileName(definition);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Implementation of the BindingController interface
+  // ---------------------------------------------------------------------------
+
+  @Override
+  public void bindFc(final String itfName, final Object value)
+      throws NoSuchInterfaceException, IllegalBindingException {
+    checkItfName(itfName);
+
+    if (itfName.equals(IDLLoader.ITF_NAME)) {
+      idlLoaderItf = (IDLLoader) value;
+    } else {
+      super.bindFc(itfName, value);
+    }
+
+  }
+
+  @Override
+  public String[] listFc() {
+    return listFcHelper(super.listFc(), IDLLoader.ITF_NAME);
+  }
+
+  @Override
+  public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
+    checkItfName(itfName);
+
+    if (itfName.equals(IDLLoader.ITF_NAME)) {
+      return idlLoaderItf;
+    } else {
+      return super.lookupFc(itfName);
+    }
+  }
+
+  @Override
+  public void unbindFc(final String itfName) throws NoSuchInterfaceException,
+      IllegalBindingException {
+    checkItfName(itfName);
+
+    if (itfName.equals(IDLLoader.ITF_NAME)) {
+      idlLoaderItf = null;
+    } else {
+      super.unbindFc(itfName);
+    }
   }
 }

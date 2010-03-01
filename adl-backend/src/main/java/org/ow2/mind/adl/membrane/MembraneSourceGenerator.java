@@ -22,6 +22,8 @@
 
 package org.ow2.mind.adl.membrane;
 
+import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
+import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
 import static org.ow2.mind.PathHelper.fullyQualifiedNameToPath;
 import static org.ow2.mind.adl.CompilationDecorationHelper.addAdditionalCompilationUnit;
 
@@ -30,7 +32,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.antlr.stringtemplate.StringTemplate;
@@ -40,6 +42,8 @@ import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.interfaces.Interface;
 import org.objectweb.fractal.adl.interfaces.InterfaceContainer;
 import org.objectweb.fractal.adl.types.TypeInterface;
+import org.objectweb.fractal.api.NoSuchInterfaceException;
+import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.ow2.mind.InputResourcesHelper;
 import org.ow2.mind.SourceFileWriter;
 import org.ow2.mind.adl.AbstractSourceGenerator;
@@ -49,6 +53,7 @@ import org.ow2.mind.adl.CompilationDecorationHelper.AdditionalCompilationUnitDec
 import org.ow2.mind.adl.ast.ImplementationContainer;
 import org.ow2.mind.adl.ast.Source;
 import org.ow2.mind.adl.idl.InterfaceDefinitionDecorationHelper;
+import org.ow2.mind.idl.IDLLoader;
 import org.ow2.mind.idl.ast.InterfaceDefinition;
 import org.ow2.mind.io.IOErrors;
 
@@ -59,6 +64,13 @@ public class MembraneSourceGenerator extends AbstractSourceGenerator
   protected static final String MEMBRANE_TEMPLATE_NAME = "st.membrane.MembraneImplementation";
   protected static final String FILE_SUFFIX            = "_ctrl_impl";
   protected static final String FILE_EXT               = ".c";
+
+  // ---------------------------------------------------------------------------
+  // Client Interfaces
+  // ---------------------------------------------------------------------------
+
+  /** Client interface used to load IDL files if needed. */
+  public IDLLoader              idlLoaderItf;
 
   // ---------------------------------------------------------------------------
   // Constructors
@@ -115,16 +127,16 @@ public class MembraneSourceGenerator extends AbstractSourceGenerator
       if (definition instanceof InterfaceContainer) {
         final Interface[] itfs = ((InterfaceContainer) definition)
             .getInterfaces();
-        final Map<String, InterfaceDefinition> itfDefs = new HashMap<String, InterfaceDefinition>(
+        final Map<String, InterfaceDefinition> itfDefs = new LinkedHashMap<String, InterfaceDefinition>(
             itfs.length);
         for (final Interface itf : itfs) {
           if (itf instanceof TypeInterface) {
             final TypeInterface tItf = (TypeInterface) itf;
-            // TODO Use a client IDLLoader to load interface definition if
-            // needed
-            itfDefs.put(tItf.getSignature(),
-                InterfaceDefinitionDecorationHelper
-                    .getResolvedInterfaceDefinition(tItf, null, null));
+            itfDefs
+                .put(tItf.getSignature(),
+                    InterfaceDefinitionDecorationHelper
+                        .getResolvedInterfaceDefinition(tItf, idlLoaderItf,
+                            context));
           }
         }
         st.setAttribute("interfaceDefinitions", itfDefs);
@@ -163,5 +175,50 @@ public class MembraneSourceGenerator extends AbstractSourceGenerator
     addAdditionalCompilationUnit(definition,
         new AdditionalCompilationUnitDecoration(outputFileName, true,
             dependencies));
+  }
+
+  // ---------------------------------------------------------------------------
+  // Implementation of the BindingController interface
+  // ---------------------------------------------------------------------------
+
+  @Override
+  public void bindFc(final String itfName, final Object value)
+      throws NoSuchInterfaceException, IllegalBindingException {
+    checkItfName(itfName);
+
+    if (itfName.equals(IDLLoader.ITF_NAME)) {
+      idlLoaderItf = (IDLLoader) value;
+    } else {
+      super.bindFc(itfName, value);
+    }
+
+  }
+
+  @Override
+  public String[] listFc() {
+    return listFcHelper(super.listFc(), IDLLoader.ITF_NAME);
+  }
+
+  @Override
+  public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
+    checkItfName(itfName);
+
+    if (itfName.equals(IDLLoader.ITF_NAME)) {
+      return idlLoaderItf;
+    } else {
+      return super.lookupFc(itfName);
+    }
+  }
+
+  @Override
+  public void unbindFc(final String itfName) throws NoSuchInterfaceException,
+      IllegalBindingException {
+    checkItfName(itfName);
+
+    if (itfName.equals(IDLLoader.ITF_NAME)) {
+      idlLoaderItf = null;
+    } else {
+      super.unbindFc(itfName);
+    }
   }
 }

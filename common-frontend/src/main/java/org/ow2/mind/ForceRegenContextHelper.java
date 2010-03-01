@@ -31,6 +31,7 @@ public final class ForceRegenContextHelper {
   public static final String FORCE_REGEN_CONTEXT_HELPER = "force-regen";
 
   public static boolean getForceRegen(final Map<Object, Object> context) {
+    if (context == null) return true;
     final Boolean b = (Boolean) context.get(FORCE_REGEN_CONTEXT_HELPER);
     return b == null || b;
   }
@@ -43,6 +44,7 @@ public final class ForceRegenContextHelper {
   public static final String KEEP_TEMP_CONTEXT_HELPER = "keep-temp";
 
   public static boolean getKeepTemp(final Map<Object, Object> context) {
+    if (context == null) return true;
     final Boolean b = (Boolean) context.get(KEEP_TEMP_CONTEXT_HELPER);
     return b == null || b;
   }

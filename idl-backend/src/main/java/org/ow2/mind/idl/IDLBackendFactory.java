@@ -25,8 +25,6 @@ package org.ow2.mind.idl;
 import org.antlr.stringtemplate.StringTemplateGroupLoader;
 import org.ow2.mind.BasicInputResourceLocator;
 import org.ow2.mind.InputResourceLocator;
-import org.ow2.mind.idl.IDLLoader;
-import org.ow2.mind.idl.IDLLoaderChainFactory;
 import org.ow2.mind.idl.st.IDLLoaderASTTransformer;
 import org.ow2.mind.io.BasicOutputFileLocator;
 import org.ow2.mind.io.OutputFileLocator;
@@ -59,11 +57,18 @@ public final class IDLBackendFactory {
       final StringTemplateASTTransformer astTransformer,
       final StringTemplateGroupLoader stcLoader) {
     IDLVisitor idlCompiler;
+    final IDLVisitorDispatcher ivd = new IDLVisitorDispatcher();
     final IDLHeaderCompiler ihc = new IDLHeaderCompiler();
     final IncludeCompiler ic = new IncludeCompiler();
+    final BinaryIDLWriter biw = new BinaryIDLWriter();
 
-    idlCompiler = ic;
+    idlCompiler = ivd;
+    ivd.visitorsItf.put("idl2h", ic);
+    ivd.visitorsItf.put("bin", biw);
+
     ic.clientVisitorItf = ihc;
+    biw.inputResourceLocatorItf = inputResourceLocator;
+    biw.outputFileLocatorItf = outputFileLocator;
 
     ihc.templateGroupLoaderItf = stcLoader;
 

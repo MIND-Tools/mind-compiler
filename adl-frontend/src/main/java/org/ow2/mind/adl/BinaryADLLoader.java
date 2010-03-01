@@ -27,9 +27,6 @@ import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
 import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
 import static org.ow2.mind.InputResourcesHelper.getTimestamp;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -45,14 +42,14 @@ import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.NodeFactory;
 import org.objectweb.fractal.adl.NodeUtil;
 import org.objectweb.fractal.adl.error.GenericErrors;
-import org.objectweb.fractal.adl.io.NodeInputStream;
-import org.objectweb.fractal.adl.io.NodeOutputStream;
 import org.objectweb.fractal.adl.util.FractalADLLogManager;
 import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.fractal.api.control.IllegalBindingException;
+import org.ow2.mind.ForceRegenContextHelper;
 import org.ow2.mind.InputResource;
 import org.ow2.mind.InputResourceLocator;
 import org.ow2.mind.InputResourcesHelper;
+import org.ow2.mind.NodeInputStream;
 
 /**
  * Delegating loader that tries to load ADL definition from binary files (if
@@ -93,10 +90,17 @@ public class BinaryADLLoader extends AbstractLoader {
   public Definition load(final String name, final Map<Object, Object> context)
       throws ADLException {
 
+    if (ForceRegenContextHelper.getForceRegen(context)) {
+      if (logger.isLoggable(Level.FINE))
+        logger.log(Level.FINE, "Load ADL \"" + name
+            + "\". Forced mode, load source");
+      return loadSourceADL(name, context);
+    }
+
     final URL binADL = adlLocatorItf.findBinaryADL(name, context);
     if (binADL == null) {
       if (logger.isLoggable(Level.FINE))
-        logger.log(Level.FINE, "Load \"" + name
+        logger.log(Level.FINE, "Load ADL \"" + name
             + "\". binary ADL not found, load source");
       return loadSourceADL(name, context);
     }
@@ -105,9 +109,9 @@ public class BinaryADLLoader extends AbstractLoader {
     if (srcADL == null) {
       // only binary file is available, load from binary file.
       if (logger.isLoggable(Level.FINE))
-        logger.log(Level.FINE, "Load \"" + name
+        logger.log(Level.FINE, "Load ADL \"" + name
             + "\". source unavailable, load binary");
-      return loadBinaryADL(binADL, context);
+      return loadBinaryADL(name, binADL, context);
     }
 
     // both binary and source file are available, check timestamps:
@@ -118,7 +122,7 @@ public class BinaryADLLoader extends AbstractLoader {
       outOfDate = getTimestamp(srcADL) >= binTimestamp;
     } catch (final MalformedURLException e) {
       if (logger.isLoggable(Level.WARNING))
-        logger.log(Level.WARNING, "Load \"" + name
+        logger.log(Level.WARNING, "Load ADL \"" + name
             + "\". can't determine file timestamps");
       outOfDate = true;
     }
@@ -126,21 +130,28 @@ public class BinaryADLLoader extends AbstractLoader {
       // if binary file is more recent than source file, check dependencies.
 
       // load binary ADL to retrieve list of input resources.
-      final Definition binDef = loadBinaryADL(binADL, context);
+      final Definition binDef = loadBinaryADL(name, binADL, context);
 
       final Set<InputResource> dependencies = InputResourcesHelper
           .getInputResources(binDef);
+      if (logger.isLoggable(Level.FINEST))
+        logger.log(Level.FINEST, "Load ADL \"" + name
+            + "\". check dependencies=" + dependencies);
       if (dependencies != null
           && inputResourceLocatorItf.isUpToDate(binTimestamp, dependencies,
               context)) {
+        if (logger.isLoggable(Level.FINEST))
+          logger.log(Level.FINEST, "Load ADL \"" + name
+              + "\". Binary version is up-to-date");
+
         // binary version is up to date, return it
         return binDef;
       }
     }
 
     if (logger.isLoggable(Level.FINE))
-      logger.log(Level.FINE, "Load \"" + name
-          + "\". binary ADL out of date, load source");
+      logger.log(Level.FINE, "Load ADL \"" + name
+          + "\". Binary ADL out of date, load source");
     // binary version is older than source file, load from source
     return loadSourceADL(name, context);
 
@@ -155,40 +166,20 @@ public class BinaryADLLoader extends AbstractLoader {
 
     if (logger.isLoggable(Level.FINER)) {
       t = currentTimeMillis() - t;
-      logger.log(Level.FINER, "\"" + name + "\" loaded from source in " + t
+      logger.log(Level.FINER, "ADL \"" + name + "\" loaded from source in " + t
           + "ms.");
-    }
-    final File outDir = (File) context.get("binADLdir");
-    if (outDir != null) {
-      final File binADLFile = new File(outDir, name.replace('.',
-          File.separatorChar)
-          + BasicADLLocator.BINARY_EXTENSION);
-      binADLFile.getParentFile().mkdirs();
-      try {
-        if (logger.isLoggable(Level.FINE))
-          logger.log(Level.FINE, "Write ADL to " + binADLFile.toURI());
-        final NodeOutputStream nos = new NodeOutputStream(new FileOutputStream(
-            binADLFile));
-        nos.writeNode(definition);
-        nos.close();
-      } catch (final FileNotFoundException e) {
-        throw new ADLException(GenericErrors.INTERNAL_ERROR, e,
-            "Can't write binary ADL " + name);
-      } catch (final IOException e) {
-        throw new ADLException(GenericErrors.INTERNAL_ERROR, e,
-            "Can't write binary ADL " + name);
-      }
     }
     return definition;
   }
 
-  private Definition loadBinaryADL(final URL location,
+  protected Definition loadBinaryADL(final String name, final URL location,
       final Map<Object, Object> context) throws ADLException {
     try {
       final InputStream is = location.openStream();
       final NodeInputStream nis = new NodeInputStream(is, nodeFactoryItf);
       if (logger.isLoggable(Level.FINE))
-        logger.log(Level.FINE, "Read ADL from " + location);
+        logger.log(Level.FINE, "Load ADL \"" + name + "\". Read ADL from "
+            + location);
 
       long t = 0;
       if (logger.isLoggable(Level.FINER)) t = currentTimeMillis();
@@ -198,8 +189,8 @@ public class BinaryADLLoader extends AbstractLoader {
 
       if (logger.isLoggable(Level.FINER)) {
         t = currentTimeMillis() - t;
-        logger.log(Level.FINER, "\"" + d.getName() + "\" read from file in "
-            + t + "ms.");
+        logger.log(Level.FINER, "Load ADL \"" + name
+            + "\".  read from binary file in " + t + "ms.");
       }
 
       nis.close();

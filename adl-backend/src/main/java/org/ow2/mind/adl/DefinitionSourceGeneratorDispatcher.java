@@ -33,9 +33,8 @@ public class DefinitionSourceGeneratorDispatcher
       DefinitionSourceGenerator {
 
   @Override
-  @SuppressWarnings("unchecked")
   protected VoidVisitor<Definition> castVisitorInterface(final Object serverItf) {
-    return (VoidVisitor<Definition>) serverItf;
+    return (DefinitionSourceGenerator) serverItf;
   }
 
 }

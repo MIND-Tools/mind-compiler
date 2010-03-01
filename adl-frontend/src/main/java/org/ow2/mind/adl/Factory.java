@@ -23,8 +23,6 @@
 package org.ow2.mind.adl;
 
 import static org.ow2.mind.adl.ADLLocator.ADL_RESOURCE_KIND;
-import static org.ow2.mind.idl.IDLLocator.IDT_RESOURCE_KIND;
-import static org.ow2.mind.idl.IDLLocator.ITF_RESOURCE_KIND;
 
 import org.objectweb.fractal.adl.CompilerError;
 import org.objectweb.fractal.adl.Loader;
@@ -106,10 +104,21 @@ public final class Factory {
   private Factory() {
   }
 
-  public static ADLLocator newLocator() {
+  public static ADLLocator newADLLocator(
+      final BasicInputResourceLocator inputResourceLocator) {
     final ADLLocator adlLocator = new BasicADLLocator();
-
+    inputResourceLocator.genericResourceLocators.put(ADL_RESOURCE_KIND,
+        adlLocator);
     return adlLocator;
+  }
+
+  public static ImplementationLocator newImplementationLocator(
+      final BasicInputResourceLocator inputResourceLocator) {
+    final ImplementationLocator implementationLocator = new BasicImplementationLocator();
+    inputResourceLocator.genericResourceLocators.put(
+        ImplementationLocator.IMPLEMENTATION_RESOURCE_KIND,
+        implementationLocator);
+    return implementationLocator;
   }
 
   /**
@@ -121,10 +130,13 @@ public final class Factory {
   public static Loader newLoader() {
 
     final BasicInputResourceLocator inputResourceLocator = new BasicInputResourceLocator();
-    final ADLLocator adlLocator = newLocator();
-    final IDLLocator idlLocator = IDLLoaderChainFactory.newLocator();
+    final ADLLocator adlLocator = newADLLocator(inputResourceLocator);
+    final IDLLocator idlLocator = IDLLoaderChainFactory
+        .newIDLLocator(inputResourceLocator);
+    final ImplementationLocator implementationLocator = newImplementationLocator(inputResourceLocator);
     // IDL Loader Chain
-    final IDLLoader idlLoader = IDLLoaderChainFactory.newLoader(idlLocator);
+    final IDLLoader idlLoader = IDLLoaderChainFactory.newLoader(idlLocator,
+        inputResourceLocator);
 
     final org.objectweb.fractal.adl.Factory pluginFactory;
     final SimpleClassPluginFactory scpf = new SimpleClassPluginFactory();
@@ -132,22 +144,16 @@ public final class Factory {
     // Configuration of plugin factory components
     pluginFactory = scpf;
 
-    // TODO should be moved into IDLFactory
-    inputResourceLocator.genericResourceLocators.put(IDT_RESOURCE_KIND,
-        idlLocator);
-    inputResourceLocator.genericResourceLocators.put(ITF_RESOURCE_KIND,
-        idlLocator);
-
-    return newLoader(inputResourceLocator, adlLocator, idlLocator, idlLoader,
-        pluginFactory);
+    return newLoader(inputResourceLocator, adlLocator, idlLocator,
+        implementationLocator, idlLoader, pluginFactory);
   }
 
   public static Loader newLoader(
       final BasicInputResourceLocator inputResourceLocator,
       final ADLLocator adlLocator, final IDLLocator idlLocator,
+      final ImplementationLocator implementationLocator,
       final IDLLoader idlLoader,
       final org.objectweb.fractal.adl.Factory pluginFactory) {
-    final ImplementationLocator implementationLocator = new BasicImplementationLocator();
 
     // plugin manager components
     PluginManager pluginManager;
@@ -160,12 +166,6 @@ public final class Factory {
     final XMLNodeFactoryImpl xmlNodeFactory = new XMLNodeFactoryImpl();
     final STNodeFactoryImpl nodeFactory = new STNodeFactoryImpl();
     final NodeMergerImpl nodeMerger = new NodeMergerImpl();
-
-    inputResourceLocator.genericResourceLocators.put(ADL_RESOURCE_KIND,
-        adlLocator);
-    inputResourceLocator.genericResourceLocators.put(
-        ImplementationLocator.IMPLEMENTATION_RESOURCE_KIND,
-        implementationLocator);
 
     // ADL Loader chain components
     Loader adlLoader;
