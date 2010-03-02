@@ -27,7 +27,7 @@ import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.IdentityHashMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -60,7 +60,7 @@ public class BasicGraphCompiler implements GraphCompiler, BindingController {
     final List<CompilationCommand> result = new ArrayList<CompilationCommand>();
 
     final List<Definition> definitionList = new ArrayList<Definition>();
-    final Map<Definition, Collection<ComponentGraph>> instanceMap = new IdentityHashMap<Definition, Collection<ComponentGraph>>();
+    final Map<String, Collection<ComponentGraph>> instanceMap = new HashMap<String, Collection<ComponentGraph>>();
 
     // visit graph to build instanceMap and compile definitions
     visitGraph(graph, instanceMap, definitionList, result, context);
@@ -69,7 +69,7 @@ public class BasicGraphCompiler implements GraphCompiler, BindingController {
       final Definition topLevelDef = graph.getDefinition();
       for (final Definition def : definitionList) {
         result.addAll(instanceCompilerItf.visit(new InstancesDescriptor(
-            topLevelDef, def, instanceMap.get(def)), context));
+            topLevelDef, def, instanceMap.get(def.getName())), context));
       }
     }
 
@@ -81,20 +81,20 @@ public class BasicGraphCompiler implements GraphCompiler, BindingController {
   // ---------------------------------------------------------------------------
 
   protected void visitGraph(final ComponentGraph graph,
-      final Map<Definition, Collection<ComponentGraph>> instanceMap,
+      final Map<String, Collection<ComponentGraph>> instanceMap,
       final List<Definition> definitionList,
       final List<CompilationCommand> result, final Map<Object, Object> context)
       throws ADLException {
 
     Collection<ComponentGraph> instances = instanceMap.get(graph
-        .getDefinition());
+        .getDefinition().getName());
     if (instances == null) {
       // new definition, compile it.
       result
           .addAll(definitionCompilerItf.visit(graph.getDefinition(), context));
       instances = new ArrayList<ComponentGraph>();
       instances.add(graph);
-      instanceMap.put(graph.getDefinition(), instances);
+      instanceMap.put(graph.getDefinition().getName(), instances);
       definitionList.add(graph.getDefinition());
     } else {
       // definition already compiled, simply add instance.

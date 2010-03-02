@@ -152,9 +152,12 @@ public class BasicGraphLinker implements GraphCompiler, BindingController {
 
       final File outFile = outputFileLocatorItf.getCCompiledOutputFile(
           replaceExtension(sharedImplementation, ".o"), context);
+      final File depFile = outputFileLocatorItf.getCCompiledOutputFile(
+          replaceExtension(sharedImplementation, ".d"), context);
       final CompilerCommand command = compilerWrapperItf
           .newCompilerCommand(context);
-      command.setInputFile(sharedImpl).setOutputFile(outFile);
+      command.setInputFile(sharedImpl).setOutputFile(outFile)
+          .setDependencyOutputFile(depFile);
 
       result.add(command);
     }

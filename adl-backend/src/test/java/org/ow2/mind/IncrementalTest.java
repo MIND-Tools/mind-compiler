@@ -49,6 +49,7 @@ public class IncrementalTest extends AbstractFunctionalTest {
     cleanBuildDir();
     final Map<String, Long> t1 = recompileDefinition("helloworld.Client");
 
+    pause();
     final Map<String, Long> t2 = recompileDefinition("helloworld.Client");
     assertUnchangedAll(".*", t1, t2);
   }
@@ -58,6 +59,7 @@ public class IncrementalTest extends AbstractFunctionalTest {
     cleanBuildDir();
     final Map<String, Long> t1 = recompile("helloworld.HelloworldApplication");
 
+    pause();
     final Map<String, Long> t2 = recompile("helloworld.HelloworldApplication");
     assertUnchangedAll(".*", t1, t2);
   }
@@ -67,6 +69,7 @@ public class IncrementalTest extends AbstractFunctionalTest {
     cleanBuildDir();
     final Map<String, Long> t1 = recompile("helloworld.HelloworldApplication");
 
+    pause();
     final Map<String, Long> t2 = recompileDefinition("helloworld.Helloworld");
     assertUnchangedAll(".*", t1, t2);
   }
@@ -84,6 +87,28 @@ public class IncrementalTest extends AbstractFunctionalTest {
   }
 
   @Test(groups = {"functional"})
+  public void incrementalTest14() throws Exception {
+    cleanBuildDir();
+    final Map<String, Long> t1 = recompile("GenericApplication<helloworld.HelloworldMultiClient>");
+
+    pause();
+    final Map<String, Long> t2 = recompile("GenericApplication<helloworld.HelloworldMultiClient>");
+    assertChanged("GenericApplication.map", t1, t2);
+    assertUnchangedAll(".*", t1, t2);
+  }
+
+  @Test(groups = {"functional"})
+  public void incrementalTest15() throws Exception {
+    cleanBuildDir();
+    final Map<String, Long> t1 = recompile("GenericApplication<helloworld.HelloworldControlled>");
+
+    pause();
+    final Map<String, Long> t2 = recompile("GenericApplication<helloworld.HelloworldControlled>");
+    assertChanged("GenericApplication.map", t1, t2);
+    assertUnchangedAll(".*", t1, t2);
+  }
+
+  @Test(groups = {"functional"})
   public void incrementalTest2() throws Exception {
     cleanBuildDir();
     final Map<String, Long> t1 = recompile("helloworld.HelloworldApplication");
@@ -96,6 +121,7 @@ public class IncrementalTest extends AbstractFunctionalTest {
 
     pause();
     touchFile("helloworld/Client.adl");
+    pause();
     t2 = recompile("helloworld.HelloworldApplication");
     t1Copy = new HashMap<String, Long>(t1);
     t2Copy = new HashMap<String, Long>(t2);
@@ -118,6 +144,7 @@ public class IncrementalTest extends AbstractFunctionalTest {
 
     pause();
     touchFile("helloworld/client.c");
+    pause();
     t2 = recompile("helloworld.HelloworldApplication");
     t1Copy = new HashMap<String, Long>(t1);
     t2Copy = new HashMap<String, Long>(t2);
@@ -181,6 +208,7 @@ public class IncrementalTest extends AbstractFunctionalTest {
     Map<String, Long> t2Copy = new HashMap<String, Long>(t2);
     assertUnchangedAll(".*", t1Copy, t2Copy);
 
+    pause();
     touchFile("helloworld/ClientInlined.adl");
     pause();
     t2 = recompileDefinition("helloworld.ClientInlined");
@@ -211,6 +239,7 @@ public class IncrementalTest extends AbstractFunctionalTest {
         "helloworld/ClientInlined_modified.adl", new String[]{
             "helloworld\\.ClientInlined", "helloworld.ClientInlined_modified"},
         new String[]{"hello world", "Hello World !"});
+    pause();
     t2 = recompileDefinition("helloworld.ClientInlined_modified");
     t1Copy = new HashMap<String, Long>(t1);
     t2Copy = new HashMap<String, Long>(t2);
@@ -244,6 +273,7 @@ public class IncrementalTest extends AbstractFunctionalTest {
     pause();
     copyFile("helloworld/client.c", "helloworld/client_modified.c",
         new String[]{"hello world", "Hello World !"});
+    pause();
     final Map<String, Long> t2 = recompile(
         "GenericApplication<helloworld.Helloworld_modified>",
         "Helloworld_modified");
@@ -282,6 +312,7 @@ public class IncrementalTest extends AbstractFunctionalTest {
         "helloworld/ClientInlined_modified.adl", new String[]{
             "helloworld\\.ClientInlined", "helloworld.ClientInlined_modified"},
         new String[]{"hello world", "Hello World !"});
+    pause();
     final Map<String, Long> t2 = recompile(
         "GenericApplication<helloworld.Helloworld_modified>",
         "Helloworld_modified");

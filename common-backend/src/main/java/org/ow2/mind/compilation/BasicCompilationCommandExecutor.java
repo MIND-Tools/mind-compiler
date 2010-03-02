@@ -99,10 +99,10 @@ public class BasicCompilationCommandExecutor
         final CommandInfo previousProviders = fileProducers.put(outputFile,
             cmdInfo);
         if (previousProviders != null) {
-          if (depLogger.isLoggable(Level.WARNING))
-            depLogger.warning("Multiple provider of the same output-file \""
-                + outputFile + "\" (" + cmd.getDescription() + " and "
-                + previousProviders.command.getDescription() + ").");
+          throw new CompilerError(GenericErrors.INTERNAL_ERROR,
+              "Multiple provider of the same output-file \"" + outputFile
+                  + "\" (" + cmd.getDescription() + " and "
+                  + previousProviders.command.getDescription() + ").");
         }
       }
     }

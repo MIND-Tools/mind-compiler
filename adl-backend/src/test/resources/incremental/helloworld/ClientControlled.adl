@@ -1,0 +1,14 @@
+@controller.BindingController
+primitive helloworld.ClientControlled {
+  data {{
+struct {
+  int a, b;
+} PRIVATE;
+}}
+  
+  provides Main as main;
+  requires Service as sa ;
+  
+  
+  source client.c;
+}

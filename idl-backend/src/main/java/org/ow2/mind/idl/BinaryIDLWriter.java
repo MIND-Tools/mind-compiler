@@ -27,7 +27,8 @@ import org.ow2.mind.io.OutputFileLocator;
 
 public class BinaryIDLWriter implements IDLVisitor, BindingController {
 
-  protected static Logger     logger = FractalADLLogManager.getLogger("io");
+  protected static Logger     ioLogger  = FractalADLLogManager.getLogger("io");
+  protected static Logger     depLogger = FractalADLLogManager.getLogger("dep");
 
   // ---------------------------------------------------------------------------
   // Client interfaces
@@ -57,8 +58,8 @@ public class BinaryIDLWriter implements IDLVisitor, BindingController {
 
       NodeOutputStream nos = null;
       try {
-        if (logger.isLoggable(Level.FINE))
-          logger.log(Level.FINE, "Write binary IDL to " + outputFile);
+        if (ioLogger.isLoggable(Level.FINE))
+          ioLogger.log(Level.FINE, "Write binary IDL to " + outputFile);
         nos = new NodeOutputStream(new FileOutputStream(outputFile));
         nos.writeNode(idl);
       } catch (final IOException e) {
@@ -69,8 +70,8 @@ public class BinaryIDLWriter implements IDLVisitor, BindingController {
           try {
             nos.close();
           } catch (final IOException e) {
-            if (logger.isLoggable(Level.WARNING))
-              logger
+            if (ioLogger.isLoggable(Level.WARNING))
+              ioLogger
                   .warning("Unable to close stream use to write binary ADL \""
                       + outputFile + "\" : " + e.getMessage());
           }
@@ -87,8 +88,8 @@ public class BinaryIDLWriter implements IDLVisitor, BindingController {
     if (ForceRegenContextHelper.getForceRegen(context)) return true;
 
     if (!outputFile.exists()) {
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("Generated source file '" + outputFile
+      if (depLogger.isLoggable(Level.FINE)) {
+        depLogger.fine("Generated source file '" + outputFile
             + "' does not exist, generate.");
       }
       return true;
@@ -96,14 +97,14 @@ public class BinaryIDLWriter implements IDLVisitor, BindingController {
 
     if (!inputResourceLocatorItf.isUpToDate(outputFile, InputResourcesHelper
         .getInputResources(idl), context)) {
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("Generated source file '" + outputFile
+      if (depLogger.isLoggable(Level.FINE)) {
+        depLogger.fine("Generated source file '" + outputFile
             + "' is out-of-date, regenerate.");
       }
       return true;
     } else {
-      if (logger.isLoggable(Level.FINE)) {
-        logger.fine("Generated source file '" + outputFile
+      if (depLogger.isLoggable(Level.FINE)) {
+        depLogger.fine("Generated source file '" + outputFile
             + "' is up-to-date, do not regenerate.");
       }
       return false;
