@@ -59,7 +59,7 @@ public class BinaryADLWriter extends AbstractSourceGenerator
           } catch (final IOException e) {
             if (logger.isLoggable(Level.WARNING))
               logger
-                  .warning("Unable to close stream use to write binary ADL \""
+                  .warning("Unable to close stream used to write binary ADL \""
                       + outputFile + "\" : " + e.getMessage());
           }
       }

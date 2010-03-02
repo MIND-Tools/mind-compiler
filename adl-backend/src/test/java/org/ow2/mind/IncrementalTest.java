@@ -338,9 +338,14 @@ public class IncrementalTest extends AbstractFunctionalTest {
   }
 
   private void pause() throws InterruptedException {
+    // wait a second and half to be sure that timestamps are actually modified
     synchronized (this) {
-      // wait half a second to be sure that timestamp are actually modified
-      this.wait(1500);
+      final long begin = System.currentTimeMillis();
+      long t = System.currentTimeMillis();
+      while (t - begin < 1500) {
+        this.wait(begin - t + 1500);
+        t = System.currentTimeMillis();
+      }
     }
   }
 
