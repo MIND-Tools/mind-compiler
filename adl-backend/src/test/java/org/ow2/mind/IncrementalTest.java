@@ -153,6 +153,7 @@ public class IncrementalTest extends AbstractFunctionalTest {
 
     pause();
     touchFile("helloworld/Service.itf");
+    pause();
     t2 = recompile("helloworld.HelloworldApplication");
     t1Copy = new HashMap<String, Long>(t1);
     t2Copy = new HashMap<String, Long>(t2);
@@ -181,6 +182,7 @@ public class IncrementalTest extends AbstractFunctionalTest {
     assertUnchangedAll(".*", t1Copy, t2Copy);
 
     touchFile("helloworld/ClientInlined.adl");
+    pause();
     t2 = recompileDefinition("helloworld.ClientInlined");
     t1Copy = new HashMap<String, Long>(t1);
     t2Copy = new HashMap<String, Long>(t2);
@@ -194,6 +196,7 @@ public class IncrementalTest extends AbstractFunctionalTest {
     copyFile("helloworld/ClientInlined.adl",
         "helloworld/ClientInlined_modified.adl", new String[]{
             "helloworld\\.ClientInlined", "helloworld.ClientInlined_modified"});
+    pause();
 
     final Map<String, Long> t1 = recompileDefinition("helloworld.ClientInlined_modified");
 
