@@ -126,7 +126,11 @@ public class BinaryADLLoader extends AbstractLoader {
             + "\". can't determine file timestamps");
       outOfDate = true;
     }
-    if (!outOfDate) {
+    if (outOfDate) {
+      logger.log(Level.FINE, "Load ADL \"" + name
+          + "\". Binary ADL older from source, load source");
+
+    } else {
       // if binary file is more recent than source file, check dependencies.
 
       // load binary ADL to retrieve list of input resources.

@@ -34,11 +34,9 @@ import org.objectweb.fractal.adl.ContextLocal;
 import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.ow2.mind.AbstractDelegatingVoidVisitor;
-import org.ow2.mind.idl.IDLLoader;
-import org.ow2.mind.idl.IncludeDecorationHelper;
-import org.ow2.mind.idl.ReferencedInterfacesDecorationHelper;
 import org.ow2.mind.idl.ast.Header;
 import org.ow2.mind.idl.ast.IDL;
+import org.ow2.mind.idl.ast.IDLASTHelper;
 import org.ow2.mind.idl.ast.Include;
 import org.ow2.mind.idl.ast.IncludeContainer;
 import org.ow2.mind.idl.ast.InterfaceDefinition;
@@ -71,12 +69,21 @@ public class IncludeCompiler extends AbstractDelegatingVoidVisitor<IDL>
       return;
     }
 
+    // First ensure that referenced IDL are actually loaded :
+    if (idl instanceof IncludeContainer) {
+      for (final Include include : ((IncludeContainer) idl).getIncludes()) {
+        IDLASTHelper.getIncludedIDL(include, idlLoaderItf, context);
+      }
+    }
+    IDLASTHelper.getReferencedInterfaces(idl, idlLoaderItf, context);
+
+    // Compile IDL
     clientVisitorItf.visit(idl, context);
 
     // Compile included IDLs
     if (idl instanceof IncludeContainer) {
       for (final Include include : ((IncludeContainer) idl).getIncludes()) {
-        final IDL includedIDL = IncludeDecorationHelper.getIncludedIDL(include,
+        final IDL includedIDL = IDLASTHelper.getIncludedIDL(include,
             idlLoaderItf, context);
         if (!(includedIDL instanceof Header)) {
           visit(includedIDL, context);
@@ -84,8 +91,8 @@ public class IncludeCompiler extends AbstractDelegatingVoidVisitor<IDL>
       }
     }
     // Compile references IDLs
-    for (final InterfaceDefinition itf : ReferencedInterfacesDecorationHelper
-        .getReferencedInterfaces(idl)) {
+    for (final InterfaceDefinition itf : IDLASTHelper.getReferencedInterfaces(
+        idl, idlLoaderItf, context)) {
       visit(itf, context);
     }
 

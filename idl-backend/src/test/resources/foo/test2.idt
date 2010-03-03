@@ -10,4 +10,6 @@ typedef enum {
 
 typedef struct s myStruct;
 
+typedef test2 test2ItfRef; 
+
 #endif

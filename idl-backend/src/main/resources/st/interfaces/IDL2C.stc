@@ -13,7 +13,7 @@ idlFile(idl) ::= <<
 // This file is a generated file, do not edit.
 
 <idl.includes:includeDirective(include=it); separator="\n">
-<idl.astDecorations.("referenced-interfaces").referencedInterfaces:includeReference(ref=it); separator="\n">
+<idl.astDecorations.("referenced-interfaces").referencedInterfaces:includeReference(ref=it.IDL); separator="\n">
 
 <idl.types:{<(defTemplateMap.(it.astDecorations.kind))(it)>;}; separator="\n\n">
 

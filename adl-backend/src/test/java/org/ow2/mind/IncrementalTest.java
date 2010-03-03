@@ -265,6 +265,7 @@ public class IncrementalTest extends AbstractFunctionalTest {
         new String[]{"helloworld\\.Helloworld",
             "helloworld.Helloworld_modified"}, new String[]{"contains Client",
             "contains Client_modified"});
+    pause();
 
     final Map<String, Long> t1 = recompile(
         "GenericApplication<helloworld.Helloworld_modified>",
@@ -302,6 +303,7 @@ public class IncrementalTest extends AbstractFunctionalTest {
         new String[]{"helloworld\\.Helloworld",
             "helloworld.Helloworld_modified"}, new String[]{"contains Client",
             "contains ClientInlined_modified"});
+    pause();
 
     final Map<String, Long> t1 = recompile(
         "GenericApplication<helloworld.Helloworld_modified>",

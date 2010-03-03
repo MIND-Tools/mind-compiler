@@ -82,11 +82,6 @@ public class BasicASTTransformer
             clone.astAddNode(toStringTemplateGraph(subNode, clonedNodes));
         }
       }
-
-      clonedNodes.put(node, clone);
-      // Add the clone itself in the clonedNodes map to avoid to re-clone it in
-      // case of a NodeContainerDecoration that is shared by different nodes.
-      clonedNodes.put(clone, clone);
     }
 
     return clone;
@@ -124,6 +119,11 @@ public class BasicASTTransformer
       }
       newNode = (T) n.astNewInstance();
     }
+
+    clonedNodes.put(node, newNode);
+    // Add the clone itself in the clonedNodes map to avoid to re-clone it in
+    // case of a NodeContainerDecoration that is shared by different nodes.
+    clonedNodes.put(newNode, newNode);
 
     // copy node attributes
     newNode.astSetAttributes(node.astGetAttributes());

@@ -26,13 +26,11 @@ import java.util.Collection;
 
 import junit.framework.TestCase;
 
-import org.ow2.mind.idl.IDLLoader;
-import org.ow2.mind.idl.IDLLoaderChainFactory;
-import org.ow2.mind.idl.ReferencedInterfacesDecorationHelper;
 import org.ow2.mind.idl.ASTChecker.IDLChecker;
 import org.ow2.mind.idl.ASTChecker.IncludeCheckerIterator;
 import org.ow2.mind.idl.ASTChecker.TypeCheckerIterator;
 import org.ow2.mind.idl.ast.IDL;
+import org.ow2.mind.idl.ast.IDLASTHelper;
 import org.ow2.mind.idl.ast.InterfaceDefinition;
 
 public class TestIDLLoaderChain extends TestCase {
@@ -72,8 +70,8 @@ public class TestIDLLoaderChain extends TestCase {
     final IDL idl = idlLoader.load("/test3.idt", null);
     checker.assertIDL(idl).definesType().whereFirst().isStructDef("s")
         .hasMember("fooItf").hasType().isTypedefRefOf("foo.foo");
-    final Collection<InterfaceDefinition> referencedInterfaces = ReferencedInterfacesDecorationHelper
-        .getReferencedInterfaces(idl);
+    final Collection<InterfaceDefinition> referencedInterfaces = IDLASTHelper
+        .getReferencedInterfaces(idl, null, null);
     assertNotNull(referencedInterfaces);
     assertEquals(1, referencedInterfaces.size());
     final InterfaceDefinition foo_foo = referencedInterfaces.iterator().next();

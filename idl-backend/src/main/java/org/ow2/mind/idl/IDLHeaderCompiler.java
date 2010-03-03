@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.util.Map;
 
 import org.antlr.stringtemplate.StringTemplate;
+import org.antlr.stringtemplate.StringTemplateGroup;
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.CompilerError;
 import org.objectweb.fractal.api.NoSuchInterfaceException;
@@ -42,6 +43,7 @@ import org.ow2.mind.idl.ast.IDL;
 import org.ow2.mind.io.IOErrors;
 import org.ow2.mind.io.OutputFileLocator;
 import org.ow2.mind.st.AbstractStringTemplateProcessor;
+import org.ow2.mind.st.BackendFormatRenderer;
 
 /**
  * {@link IDLVisitor} component that generated {@value #IDT_FILE_EXT} and
@@ -107,6 +109,20 @@ public class IDLHeaderCompiler extends AbstractStringTemplateProcessor
             .getAbsolutePath());
       }
     }
+  }
+
+  @Override
+  protected void registerCustomRenderer(final StringTemplateGroup templateGroup) {
+    templateGroup.registerRenderer(String.class, new BackendFormatRenderer() {
+      @Override
+      public String toString(final Object o, final String formatName) {
+        if (TO_C_PATH.equals(formatName) && o.toString().endsWith(".idt")) {
+          return toCPath(o.toString()) + ".h";
+        } else {
+          return super.toString(o, formatName);
+        }
+      }
+    });
   }
 
   // ---------------------------------------------------------------------------

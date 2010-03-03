@@ -22,7 +22,7 @@
 
 package org.ow2.mind.idl;
 
-import static org.ow2.mind.idl.ReferencedInterfacesDecorationHelper.addReferencedInterface;
+import static org.ow2.mind.idl.ast.IDLASTHelper.addReferencedInterface;
 
 import java.util.Map;
 
