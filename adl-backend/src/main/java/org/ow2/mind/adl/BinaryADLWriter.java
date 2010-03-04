@@ -12,6 +12,7 @@ import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.CompilerError;
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.util.FractalADLLogManager;
+import org.ow2.mind.ForceRegenContextHelper;
 import org.ow2.mind.NodeOutputStream;
 import org.ow2.mind.io.IOErrors;
 
@@ -38,6 +39,14 @@ public class BinaryADLWriter extends AbstractSourceGenerator
 
   public void visit(final Definition definition,
       final Map<Object, Object> context) throws ADLException {
+    if (ForceRegenContextHelper.getNoBinaryAST(context)) {
+      if (logger.isLoggable(Level.FINE))
+        logger.log(Level.FINE,
+            "No-binary-AST mode. Do not write binary ADL for "
+                + definition.getName());
+      return;
+    }
+
     final File outputFile = outputFileLocatorItf.getMetadataOutputFile(
         BasicADLLocator.getADLBinaryName(definition), context);
 

@@ -46,6 +46,12 @@ public class BinaryIDLWriter implements IDLVisitor, BindingController {
 
   public void visit(final IDL idl, final Map<Object, Object> context)
       throws ADLException {
+    if (ForceRegenContextHelper.getNoBinaryAST(context)) {
+      if (ioLogger.isLoggable(Level.FINE))
+        ioLogger.log(Level.FINE,
+            "No-binary-AST mode. Do not write binary IDL for " + idl.getName());
+      return;
+    }
     final File outputFile;
     if (idl.getName().startsWith("/"))
       outputFile = outputFileLocatorItf.getMetadataOutputFile(BasicIDLLocator
