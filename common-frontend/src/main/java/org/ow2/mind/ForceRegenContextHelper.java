@@ -53,4 +53,17 @@ public final class ForceRegenContextHelper {
       final boolean keepTemp) {
     context.put(KEEP_TEMP_CONTEXT_HELPER, keepTemp);
   }
+
+  public static final String NO_BINARY_AST_CONTEXT_KEY = "no-binary-ast";
+
+  public static boolean getNoBinaryAST(final Map<Object, Object> context) {
+    if (context == null) return true;
+    final Boolean b = (Boolean) context.get(NO_BINARY_AST_CONTEXT_KEY);
+    return b == null || b;
+  }
+
+  public static void setNoBinaryAST(final Map<Object, Object> context,
+      final boolean noBinaryAST) {
+    context.put(NO_BINARY_AST_CONTEXT_KEY, noBinaryAST);
+  }
 }

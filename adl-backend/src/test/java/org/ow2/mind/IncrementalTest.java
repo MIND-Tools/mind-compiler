@@ -487,6 +487,7 @@ public class IncrementalTest extends AbstractFunctionalTest {
     runner.context.put(BasicOutputFileLocator.OUTPUT_DIR_CONTEXT_KEY, buildDir);
     ForceRegenContextHelper.setForceRegen(runner.context, force);
     ForceRegenContextHelper.setKeepTemp(runner.context, false);
+    ForceRegenContextHelper.setNoBinaryAST(runner.context, false);
   }
 
   protected void cleanBuildDir() {

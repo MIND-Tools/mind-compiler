@@ -123,6 +123,13 @@
           <para>Keep temporary output files in default output directory.</para>
         </listitem>
       </varlistentry>
+      <varlistentry>
+        <term><code>--no-bin|-B</code></term>
+        <listitem>
+          <para>Do not generate binary ADL/IDL ('.def', '.itfdef' and '.idtdef'
+             files).</para>
+        </listitem>
+      </varlistentry>
       
       <varlistentry>
         <term><code>-e</code></term>

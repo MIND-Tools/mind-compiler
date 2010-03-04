@@ -186,6 +186,11 @@ public class Launcher extends AbstractLauncher {
                                                                         "keep",
                                                                         "Keep temporary output files in default output directory");
 
+  protected final CmdFlag                noBinASTOpt                = new CmdFlag(
+                                                                        "B",
+                                                                        "no-bin",
+                                                                        "Do not generate binary ADL/IDL ('.def', '.itfdef' and '.idtdef' files).");
+
   protected boolean                      generateSrc;
   protected boolean                      compileDef;
 
@@ -319,6 +324,8 @@ public class Launcher extends AbstractLauncher {
     ForceRegenContextHelper.setForceRegen(compilerContext, forceOpt
         .isPresent(cmdLine));
     ForceRegenContextHelper.setKeepTemp(compilerContext, keepTempOpt
+        .isPresent(cmdLine));
+    ForceRegenContextHelper.setNoBinaryAST(compilerContext, noBinASTOpt
         .isPresent(cmdLine));
 
     // build c-flags
@@ -719,7 +726,7 @@ public class Launcher extends AbstractLauncher {
     options.addOptions(targetDescOpt, compilerCmdOpt, cFlagsOpt,
         includePathOpt, linkerCmdOpt, ldFlagsOpt, ldPathOpt, linkerScriptOpt,
         concurrentJobCmdOpt, printStackTraceOpt, checkADLModeOpt,
-        generateDefSrcOpt, compileDefOpt, forceOpt, keepTempOpt);
+        generateDefSrcOpt, compileDefOpt, forceOpt, keepTempOpt, noBinASTOpt);
   }
 
   @Override

@@ -66,6 +66,8 @@ Available options are :
                                   of every output files
   -K, --keep                      Keep temporary output files in default output
                                   directory
+  -B, --no-bin                    Do not generate binary ADL/IDL ('.def', 
+                                  '.itfdef' and '.idtdef' files).
 
 Setting the verbosity level of the mindc compiler
 ====================================================
