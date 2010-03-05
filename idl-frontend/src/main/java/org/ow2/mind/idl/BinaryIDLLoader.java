@@ -1,3 +1,24 @@
+/**
+ * Copyright (C) 2010 STMicroelectronics
+ *
+ * This file is part of "Mind Compiler" is free software: you can redistribute 
+ * it and/or modify it under the terms of the GNU Lesser General Public License 
+ * as published by the Free Software Foundation, either version 3 of the 
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT 
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Contact: mind@ow2.org
+ *
+ * Authors: Matthieu Leclercq
+ * Contributors: 
+ */
 
 package org.ow2.mind.idl;
 
@@ -16,9 +37,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.objectweb.fractal.adl.ADLException;
-import org.objectweb.fractal.adl.NodeFactory;
 import org.objectweb.fractal.adl.NodeUtil;
 import org.objectweb.fractal.adl.error.GenericErrors;
+import org.objectweb.fractal.adl.io.NodeInputStream;
 import org.objectweb.fractal.adl.util.FractalADLLogManager;
 import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.fractal.api.control.IllegalBindingException;
@@ -26,7 +47,6 @@ import org.ow2.mind.ForceRegenContextHelper;
 import org.ow2.mind.InputResource;
 import org.ow2.mind.InputResourceLocator;
 import org.ow2.mind.InputResourcesHelper;
-import org.ow2.mind.NodeInputStream;
 import org.ow2.mind.idl.ast.IDL;
 
 public class BinaryIDLLoader extends AbstractIDLLoader {
@@ -34,9 +54,9 @@ public class BinaryIDLLoader extends AbstractIDLLoader {
   protected static Logger     logger = FractalADLLogManager
                                          .getLogger("loader.BinaryLoader");
 
-// ---------------------------------------------------------------------------
-// Client interfaces
-// ---------------------------------------------------------------------------
+  // ---------------------------------------------------------------------------
+  // Client interfaces
+  // ---------------------------------------------------------------------------
 
   /**
    * The {@link IDLLocator} client interface used to locate binary and source
@@ -50,16 +70,9 @@ public class BinaryIDLLoader extends AbstractIDLLoader {
    */
   public InputResourceLocator inputResourceLocatorItf;
 
-  /**
-   * The {@link NodeFactory} used to de-serialize binary ADL.
-   * 
-   * @see NodeInputStream
-   */
-  public NodeFactory          nodeFactoryItf;
-
-// ---------------------------------------------------------------------------
-// Implementation of the Loader interface
-// ---------------------------------------------------------------------------
+  // ---------------------------------------------------------------------------
+  // Implementation of the Loader interface
+  // ---------------------------------------------------------------------------
 
   public IDL load(final String name, final Map<Object, Object> context)
       throws ADLException {
@@ -158,7 +171,7 @@ public class BinaryIDLLoader extends AbstractIDLLoader {
       final Map<Object, Object> context) throws ADLException {
     try {
       final InputStream is = location.openStream();
-      final NodeInputStream nis = new NodeInputStream(is, nodeFactoryItf);
+      final NodeInputStream nis = new NodeInputStream(is);
       if (logger.isLoggable(Level.FINE))
         logger.log(Level.FINE, "Load IDL \"" + name + "\". Read IDL from "
             + location);
@@ -166,7 +179,7 @@ public class BinaryIDLLoader extends AbstractIDLLoader {
       long t = 0;
       if (logger.isLoggable(Level.FINER)) t = currentTimeMillis();
 
-      final IDL idl = NodeUtil.castNodeError(nis.readNode(), IDL.class);
+      final IDL idl = NodeUtil.castNodeError(nis.readObject(), IDL.class);
 
       if (logger.isLoggable(Level.FINER)) {
         t = currentTimeMillis() - t;
@@ -197,8 +210,6 @@ public class BinaryIDLLoader extends AbstractIDLLoader {
 
     if (itfName.equals(IDLLocator.ITF_NAME)) {
       idlLocatorItf = (IDLLocator) value;
-    } else if (itfName.equals(NodeFactory.ITF_NAME)) {
-      nodeFactoryItf = (NodeFactory) value;
     } else if (itfName.equals(InputResourceLocator.ITF_NAME)) {
       inputResourceLocatorItf = (InputResourceLocator) value;
     } else {
@@ -210,7 +221,7 @@ public class BinaryIDLLoader extends AbstractIDLLoader {
   @Override
   public String[] listFc() {
     return listFcHelper(super.listFc(), IDLLocator.ITF_NAME,
-        InputResourceLocator.ITF_NAME, NodeFactory.ITF_NAME);
+        InputResourceLocator.ITF_NAME);
   }
 
   @Override
@@ -219,8 +230,6 @@ public class BinaryIDLLoader extends AbstractIDLLoader {
 
     if (itfName.equals(IDLLocator.ITF_NAME)) {
       return idlLocatorItf;
-    } else if (itfName.equals(NodeFactory.ITF_NAME)) {
-      return nodeFactoryItf;
     } else if (itfName.equals(InputResourceLocator.ITF_NAME)) {
       return inputResourceLocatorItf;
     } else {
@@ -235,8 +244,6 @@ public class BinaryIDLLoader extends AbstractIDLLoader {
 
     if (itfName.equals(IDLLocator.ITF_NAME)) {
       idlLocatorItf = null;
-    } else if (itfName.equals(NodeFactory.ITF_NAME)) {
-      nodeFactoryItf = null;
     } else if (itfName.equals(InputResourceLocator.ITF_NAME)) {
       inputResourceLocatorItf = null;
     } else {

@@ -39,9 +39,9 @@ import java.util.logging.Logger;
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.AbstractLoader;
 import org.objectweb.fractal.adl.Definition;
-import org.objectweb.fractal.adl.NodeFactory;
 import org.objectweb.fractal.adl.NodeUtil;
 import org.objectweb.fractal.adl.error.GenericErrors;
+import org.objectweb.fractal.adl.io.NodeInputStream;
 import org.objectweb.fractal.adl.util.FractalADLLogManager;
 import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.fractal.api.control.IllegalBindingException;
@@ -49,7 +49,6 @@ import org.ow2.mind.ForceRegenContextHelper;
 import org.ow2.mind.InputResource;
 import org.ow2.mind.InputResourceLocator;
 import org.ow2.mind.InputResourcesHelper;
-import org.ow2.mind.NodeInputStream;
 
 /**
  * Delegating loader that tries to load ADL definition from binary files (if
@@ -75,13 +74,6 @@ public class BinaryADLLoader extends AbstractLoader {
    * timestamps of dependencies of ADL AST.
    */
   public InputResourceLocator inputResourceLocatorItf;
-
-  /**
-   * The {@link NodeFactory} used to de-serialize binary ADL.
-   * 
-   * @see NodeInputStream
-   */
-  public NodeFactory          nodeFactoryItf;
 
   // ---------------------------------------------------------------------------
   // Implementation of the Loader interface
@@ -180,7 +172,7 @@ public class BinaryADLLoader extends AbstractLoader {
       final Map<Object, Object> context) throws ADLException {
     try {
       final InputStream is = location.openStream();
-      final NodeInputStream nis = new NodeInputStream(is, nodeFactoryItf);
+      final NodeInputStream nis = new NodeInputStream(is);
       if (logger.isLoggable(Level.FINE))
         logger.log(Level.FINE, "Load ADL \"" + name + "\". Read ADL from "
             + location);
@@ -188,7 +180,7 @@ public class BinaryADLLoader extends AbstractLoader {
       long t = 0;
       if (logger.isLoggable(Level.FINER)) t = currentTimeMillis();
 
-      final Definition d = NodeUtil.castNodeError(nis.readNode(),
+      final Definition d = NodeUtil.castNodeError(nis.readObject(),
           Definition.class);
 
       if (logger.isLoggable(Level.FINER)) {
@@ -220,8 +212,6 @@ public class BinaryADLLoader extends AbstractLoader {
 
     if (itfName.equals(ADLLocator.ITF_NAME)) {
       adlLocatorItf = (ADLLocator) value;
-    } else if (itfName.equals(NodeFactory.ITF_NAME)) {
-      nodeFactoryItf = (NodeFactory) value;
     } else if (itfName.equals(InputResourceLocator.ITF_NAME)) {
       inputResourceLocatorItf = (InputResourceLocator) value;
     } else {
@@ -233,7 +223,7 @@ public class BinaryADLLoader extends AbstractLoader {
   @Override
   public String[] listFc() {
     return listFcHelper(super.listFc(), ADLLocator.ITF_NAME,
-        InputResourceLocator.ITF_NAME, NodeFactory.ITF_NAME);
+        InputResourceLocator.ITF_NAME);
   }
 
   @Override
@@ -242,8 +232,6 @@ public class BinaryADLLoader extends AbstractLoader {
 
     if (itfName.equals(ADLLocator.ITF_NAME)) {
       return adlLocatorItf;
-    } else if (itfName.equals(NodeFactory.ITF_NAME)) {
-      return nodeFactoryItf;
     } else if (itfName.equals(InputResourceLocator.ITF_NAME)) {
       return inputResourceLocatorItf;
     } else {
@@ -258,8 +246,6 @@ public class BinaryADLLoader extends AbstractLoader {
 
     if (itfName.equals(ADLLocator.ITF_NAME)) {
       adlLocatorItf = null;
-    } else if (itfName.equals(NodeFactory.ITF_NAME)) {
-      nodeFactoryItf = null;
     } else if (itfName.equals(InputResourceLocator.ITF_NAME)) {
       inputResourceLocatorItf = null;
     } else {

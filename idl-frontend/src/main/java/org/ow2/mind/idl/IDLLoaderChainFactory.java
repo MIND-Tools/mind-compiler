@@ -134,7 +134,6 @@ public final class IDLLoaderChainFactory {
     final STNodeFactoryImpl nf = new STNodeFactoryImpl();
     ifl.nodeFactoryItf = xnf;
     ihr.nodeFactoryItf = nf;
-    bil.nodeFactoryItf = nf;
 
     bil.inputResourceLocatorItf = inputResourceLocator;
 
