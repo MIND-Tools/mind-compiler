@@ -22,15 +22,9 @@ ComponentDefinition(definition, interfaceDefinitions) ::= <<
 
 #define PRIVATE_DATA_T <ComponentTypeName(definitionName=definition.name)>
 
-#define CONTEXT_PTR_DECL <ComponentTypeName(definitionName=definition.name)> *_mind_this
-
-#define CONTEXT_PTR_ACCESS _mind_this
+<CONTEXT_PTR(definition=definition)>
 
 <METHOD(definition=definition)>
-
-<CONSTRUCTOR(definition=definition)>
-
-<PRV(definition=definition)>
 
 <ATTR(definition=definition)>
 
@@ -49,25 +43,57 @@ ComponentDefinition(definition, interfaceDefinitions) ::= <<
 // -----------------------------------------------------------------------------
 
 // -----------------------------------------------------------------------------
+// CONTEXT_PTR macros
+
+CONTEXT_PTR(definition) ::= <<
+<if (definition.astNodeTypes.("data"))>
+<if (definition.data)>
+<MultiCONTEXT_PTR(definition=definition)>
+<else>
+<SingletonCONTEXT_PTR(definition=definition)>
+<endif>
+<else>
+<MultiCONTEXT_PTR(definition=definition)>
+<endif>
+>>
+
+MultiCONTEXT_PTR(definition) ::= <<
+#define CONTEXT_PTR_DECL <ComponentTypeName(definitionName=definition.name)> *_mind_this
+#define CONTEXT_PTR_DECL_OR_VOID <ComponentTypeName(definitionName=definition.name)> *_mind_this
+#define CONTEXT_PTR_DECL_COMMA  CONTEXT_PTR_DECL,
+
+#define CONTEXT_PTR_ACCESS _mind_this
+#define CONTEXT_PTR_ACCESS_COMMA CONTEXT_PTR_ACCESS,
+>>
+
+SingletonCONTEXT_PTR(definition) ::= <<
+#define CONTEXT_PTR_DECL
+#define CONTEXT_PTR_DECL_OR_VOID void
+#define CONTEXT_PTR_DECL_COMMA
+
+#define CONTEXT_PTR_ACCESS
+#define CONTEXT_PTR_ACCESS_COMMA
+>>
+
+// -----------------------------------------------------------------------------
 // METHOD macros
 
 METHOD(definition) ::= <<
-// definition of the METHOD macro
+// definition of the METH macros
 #define INTERFACE_METHOD(itf,meth) __component_<definition.name;format="toCName">_##itf##_##meth
 #define INTERFACE_COLLECTION_METHOD(itf,idx,meth) __component_<definition.name;format="toCName">_##itf##_##idx##_##meth
->>
+#define PRIVATE_METHOD(meth) __component_<definition.name;format="toCName">_##meth
 
-CONSTRUCTOR(definition) ::= <<
 // definition of the CONSTRUCTOR macro
-#define CONSTRUCTOR_METHOD __component_<definition.name;format="toCName">_constructor
+#define CONSTRUCTOR_METHOD void __component_<definition.name;format="toCName">_constructor NO_PARAM_DECL
 
 // definition of the DESTRUCTOR macro
-#define DESTRUCTOR_METHOD __component_<definition.name;format="toCName">_destructor
->>
+#define DESTRUCTOR_METHOD void __component_<definition.name;format="toCName">_destructor NO_PARAM_DECL
 
-PRV(definition) ::= <<
-// definition of the PRV macro
-#define PRIVATE_METHOD(meth) __component_<definition.name;format="toCName">_##meth
+// definition of the PARAM_DECL macros
+#define PARAM_DECL_BEGIN ( CONTEXT_PTR_DECL_COMMA
+#define PARAM_DECL_END )
+#define NO_PARAM_DECL (CONTEXT_PTR_DECL_OR_VOID)
 >>
 
 // -----------------------------------------------------------------------------
@@ -79,7 +105,7 @@ ATTR(definition) ::= <<
 // definition of the ATTR macro
 <if (definition.astNodeTypes.("data"))>
 <if (definition.data)>
-#define ATTRIBUTE_ACCESS(ctxPtr, attrName) (ctxPtr->__component_internal_data.attributes.attrName)
+#define ATTRIBUTE_ACCESS(attrName) (CONTEXT_PTR_ACCESS->__component_internal_data.attributes.attrName)
 <else>
 #define ATTRIBUTE_ACCESS(attrName) (__component_<definition.name;format="toCName">_singleton_instance.__component_internal_data.attributes.attrName)
 <endif>
@@ -160,21 +186,21 @@ CALLServerInterface(definition, interfaceDefinitions, itf) ::= <<
 
 MultiCALLServerInterface(definition, interfaceDefinitions, itf) ::= <<
 <if (itf.numberOfElement)>
-#define CALL_COLLECTION_INTERFACE_METHOD_<itf.name>_WITH_PARAM(index, methName) INTERFACE_METHOD(<itf.name>,methName)(CONTEXT_PTR_ACCESS,
-#define CALL_COLLECTION_INTERFACE_METHOD_<itf.name>_WITHOUT_PARAM(index, methName) INTERFACE_METHOD(<itf.name>,methName)(CONTEXT_PTR_ACCESS)
+#define CALL_COLLECTION_INTERFACE_METHOD_<itf.name>_WITH_PARAM(index, methName) <vTableInstanceName(definition=definition, itf=itf, index="##index##")>.methName(CONTEXT_PTR_ACCESS,
+#define CALL_COLLECTION_INTERFACE_METHOD_<itf.name>_WITHOUT_PARAM(index, methName) <vTableInstanceName(definition=definition, itf=itf, index="##index##")>.methName(CONTEXT_PTR_ACCESS)
 <else>
-#define CALL_INTERFACE_METHOD_<itf.name>_WITH_PARAM(methName) INTERFACE_METHOD(<itf.name>,methName)(CONTEXT_PTR_ACCESS,
-#define CALL_INTERFACE_METHOD_<itf.name>_WITHOUT_PARAM(methName) INTERFACE_METHOD(<itf.name>,methName)(CONTEXT_PTR_ACCESS)
+#define CALL_INTERFACE_METHOD_<itf.name>_WITH_PARAM(methName) <vTableInstanceName(definition=definition, itf=itf)>.methName(CONTEXT_PTR_ACCESS,
+#define CALL_INTERFACE_METHOD_<itf.name>_WITHOUT_PARAM(methName) <vTableInstanceName(definition=definition, itf=itf)>.methName(CONTEXT_PTR_ACCESS)
 <endif>
 >>
 
 SingletonCALLServerInterface(definition, interfaceDefinitions, itf) ::= <<
 <if (itf.numberOfElement)>
-#define CALL_COLLECTION_INTERFACE_METHOD_<itf.name>_WITH_PARAM(index, methName) INTERFACE_METHOD(<itf.name>,methName)(
-#define CALL_COLLECTION_INTERFACE_METHOD_<itf.name>_WITHOUT_PARAM(index, methName) INTERFACE_METHOD(<itf.name>,methName)()
+#define CALL_COLLECTION_INTERFACE_METHOD_<itf.name>_WITH_PARAM(index, methName) <vTableInstanceName(definition=definition, itf=itf, index="##index##")>.methName(
+#define CALL_COLLECTION_INTERFACE_METHOD_<itf.name>_WITHOUT_PARAM(index, methName) <vTableInstanceName(definition=definition, itf=itf, index="##index##")>.methName()
 <else>
-#define CALL_INTERFACE_METHOD_<itf.name>_WITH_PARAM(methName) INTERFACE_METHOD(<itf.name>,methName)(
-#define CALL_INTERFACE_METHOD_<itf.name>_WITHOUT_PARAM(methName) INTERFACE_METHOD(<itf.name>,methName)()
+#define CALL_INTERFACE_METHOD_<itf.name>_WITH_PARAM(methName) <vTableInstanceName(definition=definition, itf=itf)>.methName(
+#define CALL_INTERFACE_METHOD_<itf.name>_WITHOUT_PARAM(methName) <vTableInstanceName(definition=definition, itf=itf)>.methName()
 <endif>
 >>
 

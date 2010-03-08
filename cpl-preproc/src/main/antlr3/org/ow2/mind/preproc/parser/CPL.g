@@ -137,9 +137,8 @@ protected serverMethDef returns [StringBuilder res = new StringBuilder()]
     }
     (
       paramsDef { $res.append($paramsDef.res); }
-      ws9=ws
       (
-        '{'
+        ws9=ws '{'
           {
             if (!singletonMode) 
               $res.append($ws9.text).append("{ CHECK_CONTEXT_PTR"); 
@@ -164,9 +163,8 @@ protected privateMethDef returns [StringBuilder res = new StringBuilder()]
             .append(tmp);
       }
       ( paramsDef { $res.append($paramsDef.res); } 
-        ws4=ws 
         (
-          '{'
+          ws4=ws '{'
             {
               if (!singletonMode) 
                 $res.append($ws4.text).append("{ CHECK_CONTEXT_PTR"); 
@@ -178,44 +176,32 @@ protected privateMethDef returns [StringBuilder res = new StringBuilder()]
 	;
 	
 protected constructorDef returns [StringBuilder res = new StringBuilder()]
-    : CONSTRUCTOR ws1=ws '(' ws2=ws { $res.append("void CONSTRUCTOR_METHOD").append($ws1.text).append("(").append($ws2.text); }
+    : CONSTRUCTOR ws1=ws '(' ws2=ws { $res.append("CONSTRUCTOR_METHOD").append($ws1.text).append($ws2.text); }
       ( VOID ws3=ws { $res.append($ws3.text); } ) ? 
-      ')' ws4=ws 
-      {
-        if (singletonMode) 
-          $res.append("void)").append($ws4.text);
-        else
-          $res.append("CONTEXT_PTR_DECL)").append($ws4.text);
-      }
+      ')'
       ( 
-        '{'
+        ws4=ws '{'
           {
             if (singletonMode) 
-              $res.append("{"); 
+              $res.append($ws4.text).append("{"); 
             else 
-              $res.append("{ CHECK_CONTEXT_PTR");
+              $res.append($ws4.text).append("{ CHECK_CONTEXT_PTR");
             if (headerOut != null) headerOut.println("#define CONSTRUCTOR_METHOD_IMPLEMENTED"); 
           }
       )?
     ;
         
 protected destructorDef returns [StringBuilder res = new StringBuilder()]
-    : DESTRUCTOR ws1=ws '(' ws2=ws { $res.append("void DESTRUCTOR_METHOD").append($ws1.text).append("(").append($ws2.text); }
+    : DESTRUCTOR ws1=ws '(' ws2=ws { $res.append("DESTRUCTOR_METHOD").append($ws1.text).append($ws2.text); }
       ( VOID ws3=ws { $res.append($ws3.text); } ) ? 
-      ')' ws4=ws 
-      {
-        if (singletonMode) 
-          $res.append("void)").append($ws4.text);
-        else
-          $res.append("CONTEXT_PTR_DECL)").append($ws4.text);
-      }
+      ')'
       ( 
-        '{'
+        ws4=ws '{'
           {
             if (singletonMode) 
-              $res.append("{"); 
+              $res.append($ws4.text).append("{"); 
             else 
-              $res.append("{ CHECK_CONTEXT_PTR");
+              $res.append($ws4.text).append("{ CHECK_CONTEXT_PTR");
             if (headerOut != null) headerOut.println("#define DESTRUCTOR_METHOD_IMPLEMENTED"); 
           }
       )?
@@ -248,9 +234,8 @@ protected methCall returns [StringBuilder res ]
 protected attAccess returns [StringBuilder res = new StringBuilder()]
     : ATTR ws1=ws '(' ws2=ws att=ID ws3=ws ')' 
       {
-        $res.append("ATTRIBUTE_ACCESS").append($ws1.text).append("(").append($ws2.text);
-        if (! singletonMode) $res.append("CONTEXT_PTR_ACCESS, ");
-        $res.append($att.text).append($ws3.text).append(")");
+        $res.append("ATTRIBUTE_ACCESS").append($ws1.text).append("(")
+            .append($ws2.text).append($att.text).append($ws3.text).append(")");
       }
     ;
 	
@@ -422,9 +407,12 @@ protected ptrMethCallArg1 returns [StringBuilder res = new StringBuilder()]
 	;
 	
 protected paramsDef returns [StringBuilder res = new StringBuilder()]
-	: '(' ws1=ws ')'             { if (singletonMode) $res.append($text); else $res.append("(CONTEXT_PTR_DECL").append($ws1.text).append(")"); }
-	| '(' ws2=ws VOID ws3=ws ')' { if (singletonMode) $res.append($text); else $res.append("(").append($ws2.text).append("CONTEXT_PTR_DECL").append($ws3.text).append(")"); }
-	| '(' inParamsDef ')'        { if (singletonMode) $res.append($text); else $res.append("(CONTEXT_PTR_DECL, ").append($inParamsDef.res).append(")"); }
+	: '(' ws1=ws ')'             { $res.append($ws1.text).append(" NO_PARAM_DECL "); }
+	| '(' ws2=ws VOID ws3=ws ')' { $res.append($ws2.text).append(" NO_PARAM_DECL ").append($ws3.text); }
+	| '(' inParamsDef ')'        
+	  {
+	     $res.append(" PARAM_DECL_BEGIN ").append($inParamsDef.res).append(" PARAM_DECL_END ");
+	  }
 	;
 protected inParamsDef returns [StringBuilder res = new StringBuilder()] 
     : (
