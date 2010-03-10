@@ -22,14 +22,16 @@
 
 package org.ow2.mind.adl.annotations;
 
+import static org.ow2.mind.BCImplChecker.checkBCImplementation;
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.antlr.stringtemplate.StringTemplate;
 import org.objectweb.fractal.adl.ADLException;
@@ -42,12 +44,13 @@ import org.ow2.mind.adl.ASTChecker;
 import org.ow2.mind.adl.Factory;
 import org.ow2.mind.adl.annotation.ADLLoaderPhase;
 import org.ow2.mind.adl.annotation.AbstractADLLoaderAnnotationProcessor;
-import org.ow2.mind.adl.ast.Source;
+import org.ow2.mind.adl.annotation.AnnotationProcessorTemplateInstantiator;
 import org.ow2.mind.adl.implementation.ImplementationLocator;
 import org.ow2.mind.annotation.Annotation;
 import org.ow2.mind.idl.IDLLoader;
 import org.ow2.mind.idl.IDLLoaderChainFactory;
 import org.ow2.mind.idl.IDLLocator;
+import org.ow2.mind.idl.annotation.AnnotationProcessorLoader;
 import org.ow2.mind.plugin.SimpleClassPluginFactory;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -77,19 +80,54 @@ public class TestADLAnnotationProcessor {
             implementationLocator, idlLoader, pluginFactory);
     loader = adlLoader;
     // ensure that phases are empty.
-    FooProcessor.phases = new HashSet<ADLLoaderPhase>();
+    FooProcessor.phases = new ArrayList<ProcessParams>();
+  }
+
+  @Test(groups = {"functional", "checkin"})
+  public void testAnnotationProcessorLoaderBC() throws Exception {
+    checkBCImplementation(new AnnotationProcessorLoader());
+  }
+
+  @Test(groups = {"functional", "checkin"})
+  public void testAnnotationTemplateInstantiatorBC() throws Exception {
+    checkBCImplementation(new AnnotationProcessorTemplateInstantiator());
   }
 
   @Test(groups = {"functional"})
   public void test1() throws Exception {
     loader.load("pkg1.annotations.Foo", new HashMap<Object, Object>());
-    assertTrue(FooProcessor.phases.contains(ADLLoaderPhase.AFTER_PARSING));
-    assertTrue(FooProcessor.phases.contains(ADLLoaderPhase.AFTER_CHECKING));
+    assertEquals(FooProcessor.phases.size(), 2);
+    assertPhase(ADLLoaderPhase.AFTER_PARSING);
+    assertPhase(ADLLoaderPhase.AFTER_CHECKING);
+  }
+
+  @Test(groups = {"functional"})
+  public void test2() throws Exception {
+    loader.load("pkg1.annotations.Generic1", new HashMap<Object, Object>());
+    assertEquals(FooProcessor.phases.size(), 2);
+    assertPhase(ADLLoaderPhase.AFTER_PARSING);
+    assertPhase(ADLLoaderPhase.AFTER_CHECKING);
+  }
+
+  @Test(groups = {"functional"})
+  public void test3() throws Exception {
+    loader.load("pkg1.annotations.Composite1", new HashMap<Object, Object>());
+    assertEquals(FooProcessor.phases.size(), 6);
+    assertPhase(ADLLoaderPhase.ON_TEMPLATE_SUB_COMPONENT);
+    assertPhase(ADLLoaderPhase.AFTER_TEMPLATE_INSTANTIATE);
+  }
+
+  protected static ProcessParams assertPhase(final ADLLoaderPhase phase) {
+    for (final ProcessParams params : FooProcessor.phases) {
+      if (params.phase == phase) return params;
+    }
+    fail("Phase " + phase + " not found.");
+    return null;
   }
 
   public static class FooProcessor extends AbstractADLLoaderAnnotationProcessor {
 
-    public static Set<ADLLoaderPhase> phases = new HashSet<ADLLoaderPhase>();
+    static List<ProcessParams> phases = new ArrayList<ProcessParams>();
 
     public Definition processAnnotation(final Annotation annotation,
         final Node node, final Definition definition,
@@ -99,10 +137,9 @@ public class TestADLAnnotationProcessor {
       assertNotNull(node);
       assertNotNull(definition);
       assertNotNull(phase);
-      phases.add(phase);
+      phases.add(new ProcessParams(node, definition, phase));
 
       assertTrue(annotation instanceof FooAnnotation);
-      assertTrue(node instanceof Source);
 
       assertNotNull(nodeFactoryItf);
       assertNotNull(nodeMergerItf);
@@ -122,12 +159,25 @@ public class TestADLAnnotationProcessor {
         final ASTChecker checker = new ASTChecker();
         checker.assertDefinition(d).containsInterfaces("itf").whereFirst()
             .isServer().hasSignature("pkg1.I2");
-      } else {
-        assertSame(phase, ADLLoaderPhase.AFTER_CHECKING);
+      } else if (phase == ADLLoaderPhase.AFTER_CHECKING) {
         assertTrue(isAlreadyGenerated("pkg1.annotations.Generated", context));
       }
 
       return null;
     }
   }
+
+  static final class ProcessParams {
+    final Node           node;
+    final Definition     definition;
+    final ADLLoaderPhase phase;
+
+    ProcessParams(final Node node, final Definition definition,
+        final ADLLoaderPhase phase) {
+      this.node = node;
+      this.definition = definition;
+      this.phase = phase;
+    }
+  }
+
 }

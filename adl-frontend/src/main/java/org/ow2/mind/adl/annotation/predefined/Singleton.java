@@ -22,7 +22,10 @@
 
 package org.ow2.mind.adl.annotation.predefined;
 
+import org.ow2.mind.adl.SingletonAnnotationProcessor;
 import org.ow2.mind.adl.annotation.ADLAnnotationTarget;
+import org.ow2.mind.adl.annotation.ADLLoaderPhase;
+import org.ow2.mind.adl.annotation.ADLLoaderProcessor;
 import org.ow2.mind.annotation.Annotation;
 import org.ow2.mind.annotation.AnnotationTarget;
 
@@ -30,6 +33,9 @@ import org.ow2.mind.annotation.AnnotationTarget;
  * The Singleton annotation is used to specify that a given definition can't be
  * instantiated more that one time in an architecture.
  */
+@ADLLoaderProcessor(processor = SingletonAnnotationProcessor.class, phases = {
+    ADLLoaderPhase.AFTER_CHECKING, ADLLoaderPhase.AFTER_TEMPLATE_INSTANTIATE,
+    ADLLoaderPhase.ON_SUB_COMPONENT, ADLLoaderPhase.ON_TEMPLATE_SUB_COMPONENT})
 public class Singleton implements Annotation {
 
   private static final AnnotationTarget[] ANNOTATION_TARGETS = {ADLAnnotationTarget.DEFINITION};

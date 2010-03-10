@@ -38,6 +38,7 @@ import org.ow2.mind.BasicInputResourceLocator;
 import org.ow2.mind.adl.annotation.ADLLoaderPhase;
 import org.ow2.mind.adl.annotation.AnnotationLoader;
 import org.ow2.mind.adl.annotation.AnnotationProcessorLoader;
+import org.ow2.mind.adl.annotation.AnnotationProcessorTemplateInstantiator;
 import org.ow2.mind.adl.anonymous.AnonymousDefinitionExtractorImpl;
 import org.ow2.mind.adl.anonymous.AnonymousDefinitionLoader;
 import org.ow2.mind.adl.anonymous.ImportAnonymousDefinitionExtractor;
@@ -327,15 +328,19 @@ public final class Factory {
     final FactoryTemplateInstantiator fti = new FactoryTemplateInstantiator();
     final ParametricTemplateInstantiator pti = new ParametricTemplateInstantiator();
     final ParametricFactoryTemplateInstantiator pfti = new ParametricFactoryTemplateInstantiator();
+    final AnnotationProcessorTemplateInstantiator ati = new AnnotationProcessorTemplateInstantiator();
     final CachingTemplateInstantiator cti = new CachingTemplateInstantiator();
 
-    cti.clientInstantiatorItf = pfti;
+    cti.clientInstantiatorItf = ati;
+    ati.clientInstantiatorItf = pfti;
     pfti.clientInstantiatorItf = pti;
     pti.clientInstantiatorItf = fti;
     fti.clientInstantiatorItf = ti;
 
     cti.definitionCacheItf = cl;
     cti.definitionReferenceResolverItf = cdrr;
+    ati.definitionReferenceResolverItf = cdrr;
+    ati.pluginManagerItf = pluginManager;
     pti.definitionReferenceResolverItf = cdrr;
     fti.definitionReferenceResolverItf = cdrr;
     ti.definitionReferenceResolverItf = cdrr;

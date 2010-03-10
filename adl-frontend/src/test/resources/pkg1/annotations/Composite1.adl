@@ -1,0 +1,9 @@
+import pkg1.I2;
+
+composite pkg1.annotations.Composite1 {
+  requires I2 as cItf;
+
+  contains Generic1<Foo> as subComp1;
+
+  binds subComp1.cItf to this.cItf;
+}
