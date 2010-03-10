@@ -2,10 +2,11 @@
 @LDFlags("-ldl")
 composite DynloadTester extends ApplicationType {
 
-  contains primitive ApplicationType as tester 
+  contains ApplicationType as tester 
   @UseIDL({"fractal.api.Component", "fractal.api.BindingController", "fractal.api.Factory"})
+  @Singleton
+  primitive
   {
-  
     requires memory.api.Allocator as allocator;
     source dynloadTester.c
   }

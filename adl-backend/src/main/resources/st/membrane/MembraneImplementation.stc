@@ -245,12 +245,10 @@ DestroyControllerData(definition, controller) ::= <<
 // Server interface stubs
 
 ServerInterfaceStubs(definition, interfaceDefinitions) ::= <<
-<if (definition.astNodeTypes.("source"))>
-<if (!definition.data)>
+<if (definition.astDecorations.("is-singleton"))>
 // Start definition of server stubs
 <definition.interfaces:ServerInterfaceStub(definition=definition, interfaceDefinitions=interfaceDefinitions, itf=it); separator="\n">
 // End definition of server stubs
-<endif>
 <endif>
 >>
 
@@ -312,16 +310,11 @@ ServerInterfaceVTableInit(definition, interfaceDefinitions, itf) ::= <<
 
 ServerInterfaceVTableInit1(definition, interfaceDefinitions, itf, index) ::= <<
 <InterfaceVTableType(signature=itf.signature)> <vTableInstanceName(definition=definition, itf=itf, index=index)> = {
-<if(definition.astNodeTypes.("source"))>
-<if(definition.data)>
-  <interfaceDefinitions.(itf.signature).methods:VTableMethodInit(definition=definition, itf=itf, method=it, index=index);separator=",\n">
-<else>
+<if (definition.astDecorations.("is-singleton"))>
   <interfaceDefinitions.(itf.signature).methods:StubName(definition=definition, itfName=itf.name, index=index, methodName=it.name);separator=",\n">
-<endif>
 <else>
   <interfaceDefinitions.(itf.signature).methods:VTableMethodInit(definition=definition, itf=itf, method=it, index=index);separator=",\n">
 <endif>
-
 };
 >>
 

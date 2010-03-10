@@ -1,6 +1,7 @@
 
 @Compile
 @controller.AttributeController
+@Singleton
 primitive controller.attr.SingletonPrimitiveComponent extends ACTested {
   
   source primitiveComponent.c;

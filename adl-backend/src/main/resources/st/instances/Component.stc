@@ -187,12 +187,10 @@ AddSubComponentValue(definition, instance, subComponent) ::= <<
 
 ConstructorCalls(definition, instances) ::= <<
 #ifdef CONSTRUCTOR_METHOD_IMPLEMENTED
-<if (definition.astNodeTypes.("data"))>
-<if (definition.data)>
-  void __component_<definition.name;format="toCName">_constructor(void *instance);
-<else>
+<if (definition.astDecorations.("is-singleton"))>
   void __component_<definition.name;format="toCName">_constructor(void);
-<endif>
+<else>
+  void __component_<definition.name;format="toCName">_constructor(void *instance);
 <endif>
 
 #endif
@@ -205,12 +203,10 @@ void __component_<definition.name;format="toCName">_constructor_calls(void) {
 }
 
 #ifdef DESTRUCTOR_METHOD_IMPLEMENTED
-<if (definition.astNodeTypes.("data"))>
-<if (definition.data)>
-  void __component_<definition.name;format="toCName">_destructor(void *instance);
-<else>
+<if (definition.astDecorations.("is-singleton"))>
   void __component_<definition.name;format="toCName">_destructor(void);
-<endif>
+<else>
+  void __component_<definition.name;format="toCName">_destructor(void *instance);
 <endif>
 
 #endif
@@ -224,22 +220,18 @@ void __component_<definition.name;format="toCName">_destructor_calls(void) {
 >> 
 
 ConstructorCall(definition, instance) ::= <<
-<if (definition.astNodeTypes.("data"))>
-<if (definition.data)>
-  __component_<definition.name;format="toCName">_constructor(& <instance.decorations.("instance-name"); format="toCName">);
-<else>
+<if (definition.astDecorations.("is-singleton"))>
   __component_<definition.name;format="toCName">_constructor();
-<endif>
+<else>
+  __component_<definition.name;format="toCName">_constructor(& <instance.decorations.("instance-name"); format="toCName">);
 <endif>
 >>
 
 DestructorCall(definition, instance) ::= <<
-<if (definition.astNodeTypes.("data"))>
-<if (definition.data)>
-  __component_<definition.name;format="toCName">_destructor(& <instance.decorations.("instance-name"); format="toCName">);
-<else>
+<if (definition.astDecorations.("is-singleton"))>
   __component_<definition.name;format="toCName">_destructor();
-<endif>
+<else>
+  __component_<definition.name;format="toCName">_destructor(& <instance.decorations.("instance-name"); format="toCName">);
 <endif>
 >>
 

@@ -1,7 +1,6 @@
 
 @CompileDef
 primitive generic.Client extends ClientType {
-  nodata;
   source {{
     int METH(main, main)(int argc, char* argv[]) {
       return CALL(clientMain, main)(argc, argv);

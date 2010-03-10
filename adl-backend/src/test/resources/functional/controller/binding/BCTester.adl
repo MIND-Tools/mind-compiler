@@ -1,7 +1,9 @@
 
 composite controller.binding.BCTester<T conformsto BCTested> extends ApplicationType {
 
-  contains primitive as tester {
+  contains as tester 
+  @Singleton
+  primitive {
     provides Main as main;
     requires Main as testedMain;
     provides Main as test;
