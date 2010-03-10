@@ -64,8 +64,8 @@ public class SingletonAnnotationProcessor
         // TODO find a specific way to print warning
         System.out.println("Warning " + node.astGetSource()
             + ": sub-component \"" + subComp.getName()
-            + "\" is singleton. The definition should be"
-            + " tagged as singleton.");
+            + "\" is singleton. The \"@Singleton\" annotation should be"
+            + " added on definition at " + definition.astGetSource());
         AnnotationHelper.addAnnotation(definition, new Singleton());
       }
 
@@ -90,7 +90,7 @@ public class SingletonAnnotationProcessor
             subComp, loaderItf, context);
         if (ASTHelper.isSingleton(subCompDef)) {
           final Node previousUse = singletonDefs.get(subCompDef);
-          if (subCompDef != null) {
+          if (previousUse != null) {
             throw new ADLException(
                 ADLErrors.INVALID_SUB_COMPONENT_DUPLICATE_SINGLETON, subComp,
                 subComp.getName(), subCompDef.getName(), previousUse

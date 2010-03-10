@@ -3,7 +3,6 @@ import pkg1.pkg2.Type1;
 
 primitive pkg1.parameter.Parameter1(a) extends Type1 {
 
-  nodata;
   source {{ }};
   attribute int attr1 = a;
 }
