@@ -22,7 +22,12 @@
 
 package org.ow2.mind.idl;
 
+import static org.ow2.mind.idl.IDLLocator.IDT_RESOURCE_KIND;
+import static org.ow2.mind.idl.IDLLocator.ITF_RESOURCE_KIND;
+
 import org.objectweb.fractal.adl.xml.XMLNodeFactoryImpl;
+import org.ow2.mind.BasicInputResourceLocator;
+import org.ow2.mind.InputResourceLocator;
 import org.ow2.mind.annotation.AnnotationChainFactory;
 import org.ow2.mind.idl.annotation.AnnotationLoader;
 import org.ow2.mind.idl.annotation.AnnotationProcessorLoader;
@@ -35,19 +40,24 @@ public final class IDLLoaderChainFactory {
   private IDLLoaderChainFactory() {
   }
 
-  public static IDLLocator newLocator() {
-    IDLLocator idlLocator;
-    final BasicIDLLocator bil = new BasicIDLLocator();
-    idlLocator = bil;
-
+  public static IDLLocator newIDLLocator(
+      final BasicInputResourceLocator inputResourceLocator) {
+    final IDLLocator idlLocator = new BasicIDLLocator();
+    inputResourceLocator.genericResourceLocators.put(IDT_RESOURCE_KIND,
+        idlLocator);
+    inputResourceLocator.genericResourceLocators.put(ITF_RESOURCE_KIND,
+        idlLocator);
     return idlLocator;
   }
 
   public static IDLLoader newLoader() {
-    return newLoader(newLocator());
+    final BasicInputResourceLocator inputResourceLocator = new BasicInputResourceLocator();
+
+    return newLoader(newIDLLocator(inputResourceLocator), inputResourceLocator);
   }
 
-  public static IDLLoader newLoader(final IDLLocator idlLocator) {
+  public static IDLLoader newLoader(final IDLLocator idlLocator,
+      final InputResourceLocator inputResourceLocator) {
 
     // Loader chain components
     IDLLoader idlLoader;
@@ -59,10 +69,12 @@ public final class IDLLoaderChainFactory {
     final IDLTypeCheckerLoader tcl = new IDLTypeCheckerLoader();
     final KindDecorationLoader kdl = new KindDecorationLoader();
     final AnnotationProcessorLoader apl2 = new AnnotationProcessorLoader();
+    final BinaryIDLLoader bil = new BinaryIDLLoader();
     final CacheIDLLoader cil = new CacheIDLLoader();
 
     idlLoader = cil;
-    cil.clientIDLLoaderItf = apl2;
+    cil.clientIDLLoaderItf = bil;
+    bil.clientIDLLoaderItf = apl2;
     apl2.clientIDLLoaderItf = kdl;
     kdl.clientIDLLoaderItf = tcl;
     tcl.clientIDLLoaderItf = uil;
@@ -115,12 +127,15 @@ public final class IDLLoaderChainFactory {
     tcl.interfaceReferenceResolverItf = interfaceReferenceResolver;
 
     ifl.idlLocatorItf = idlLocator;
+    bil.idlLocatorItf = idlLocator;
 
     // node factories
     final XMLNodeFactoryImpl xnf = new XMLNodeFactoryImpl();
     final STNodeFactoryImpl nf = new STNodeFactoryImpl();
     ifl.nodeFactoryItf = xnf;
     ihr.nodeFactoryItf = nf;
+
+    bil.inputResourceLocatorItf = inputResourceLocator;
 
     return idlLoader;
   }

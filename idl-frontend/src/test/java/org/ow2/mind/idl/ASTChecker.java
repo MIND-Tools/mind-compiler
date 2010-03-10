@@ -38,13 +38,13 @@ import java.util.Set;
 
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.Node;
-import org.ow2.mind.idl.IncludeDecorationHelper;
 import org.ow2.mind.idl.ast.ArrayOf;
 import org.ow2.mind.idl.ast.ConstantDefinition;
 import org.ow2.mind.idl.ast.EnumDefinition;
 import org.ow2.mind.idl.ast.EnumMember;
 import org.ow2.mind.idl.ast.EnumReference;
 import org.ow2.mind.idl.ast.IDL;
+import org.ow2.mind.idl.ast.IDLASTHelper;
 import org.ow2.mind.idl.ast.Include;
 import org.ow2.mind.idl.ast.IncludeContainer;
 import org.ow2.mind.idl.ast.InterfaceDefinition;
@@ -254,8 +254,7 @@ public class ASTChecker {
 
     public IDLChecker includes() {
       try {
-        return assertIDL(IncludeDecorationHelper.getIncludedIDL(include, null,
-            null));
+        return assertIDL(IDLASTHelper.getIncludedIDL(include, null, null));
       } catch (final ADLException e) {
         // never append
         return null;

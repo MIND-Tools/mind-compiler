@@ -22,7 +22,7 @@
 
 package org.ow2.mind.preproc;
 
-import static org.objectweb.fractal.cecilia.adl.directives.DirectiveHelper.splitOptionString;
+import static org.ow2.mind.compilation.DirectiveHelper.splitOptionString;
 
 import java.io.File;
 import java.net.URL;

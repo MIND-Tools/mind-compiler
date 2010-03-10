@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.ow2.mind</groupId>
         <artifactId>mind-compiler</artifactId>
-        <version>0.1-beta-4-SNAPSHOT</version>
+        <version>0.2-alpha-1-SNAPSHOT</version>
     </parent>
 
     <artifactId>mindc</artifactId>
@@ -27,6 +27,11 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>fractal-runtime</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.objectweb.fractal.cecilia.toolchain</groupId>
+            <artifactId>target-descriptor</artifactId>
         </dependency>
     </dependencies>
 

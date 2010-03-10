@@ -175,6 +175,7 @@ TOKEN : {
 | <IN: "in">
 | <OUT: "out">
 | <LDOTS: "...">
+| <NULL: "NULL" | "null">
 | <UNMANAGED : "unmanaged">
 | <STRING: "string">
 | <INT8_T: "int8_t">
@@ -192,7 +193,8 @@ TOKEN : {
 
 // Indentifiers and literals
 TOKEN : {
-  <IDENTIFIER: <LETTER> (<LETTER> | <DIGIT>)*>
+  <BOOLEAN_LITERAL: "true" | "false">
+| <IDENTIFIER: <LETTER> (<LETTER> | <DIGIT>)*>
 | <#LETTER: ["A"-"Z","_","a"-"z"]>
 | <#DIGIT: ["0"-"9"]>
 | <STRING_LITERAL:
@@ -246,6 +248,8 @@ TOKEN :
 | <AT: "@">
 | <ASSIGN: "=">
 | <SLASH: "/">
+| <MINUS: "-">
+| <PLUS: "+">
 }
 
 
@@ -683,8 +687,10 @@ void AnnotationValue() : {}
 {
   StringValue()
   | IntegerValue()
+  | BooleanValue()
   | AnnotationAnnotationValue()
   | ArrayAnnotationValue()
+  | NullValue()
 }
 
 void AnnotationAnnotationValue() : {}
@@ -704,7 +710,17 @@ void StringValue() : {}
 
 void IntegerValue() : {}
 {
-  <INTEGER_LITERAL>
+  [ <MINUS> | <PLUS> ] <INTEGER_LITERAL>
+}
+
+void BooleanValue() : {}
+{
+  <BOOLEAN_LITERAL>
+}
+
+void NullValue() : {}
+{
+  <NULL>
 }
 
 void FullyQualifiedName() : {}

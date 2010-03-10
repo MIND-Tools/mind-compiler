@@ -38,6 +38,9 @@ public abstract class AbstractLinkerCommand implements LinkerCommand {
   protected final List<String>        libs       = new ArrayList<String>();
   protected File                      outputFile;
   protected String                    optimizationLevel;
+  protected boolean                   forced;
+
+  private List<File>                  outputFiles;
 
   protected AbstractLinkerCommand(final String cmd,
       final Map<Object, Object> context) {
@@ -98,10 +101,19 @@ public abstract class AbstractLinkerCommand implements LinkerCommand {
   }
 
   public Collection<File> getInputFiles() {
-    return new ArrayList<File>(inputFiles);
+    return inputFiles;
   }
 
   public Collection<File> getOutputFiles() {
-    return Arrays.asList(outputFile);
+    return outputFiles;
   }
+
+  public boolean forceExec() {
+    return forced;
+  }
+
+  public void prepare() {
+    outputFiles = Arrays.asList(outputFile);
+  }
+
 }

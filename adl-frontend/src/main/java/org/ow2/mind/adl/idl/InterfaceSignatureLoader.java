@@ -37,6 +37,7 @@ import org.objectweb.fractal.adl.interfaces.InterfaceContainer;
 import org.objectweb.fractal.adl.types.TypeInterface;
 import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.fractal.api.control.IllegalBindingException;
+import org.ow2.mind.InputResourcesHelper;
 import org.ow2.mind.idl.ast.InterfaceDefinition;
 
 public class InterfaceSignatureLoader extends AbstractLoader {
@@ -59,7 +60,7 @@ public class InterfaceSignatureLoader extends AbstractLoader {
     if (def instanceof InterfaceContainer) {
       for (final Interface itf : ((InterfaceContainer) def).getInterfaces()) {
         if (itf instanceof TypeInterface) {
-          processItf((TypeInterface) itf, def, context);
+          processItf(def, (TypeInterface) itf, def, context);
         }
       }
     }
@@ -71,7 +72,7 @@ public class InterfaceSignatureLoader extends AbstractLoader {
   // Utility method
   // ---------------------------------------------------------------------------
 
-  protected void processItf(final TypeInterface itf,
+  protected void processItf(final Definition def, final TypeInterface itf,
       final Definition container, final Map<Object, Object> context)
       throws ADLException {
     InterfaceDefinition itfDef;
@@ -83,6 +84,8 @@ public class InterfaceSignatureLoader extends AbstractLoader {
     }
 
     setResolvedInterfaceDefinition(itf, itfDef);
+    InputResourcesHelper.addInputResources(def, InputResourcesHelper
+        .getInputResources(itfDef));
   }
 
   // ---------------------------------------------------------------------------

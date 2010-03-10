@@ -172,7 +172,7 @@ AddAttributeValues(definition, instance) ::= <<
 >>
 
 AddAttributeValue(definition, instance, attribute) ::= <<
-, /* <attribute.name> */ <instance.decorations.("attribute-values").(attribute.name).value>
+, /* <attribute.name> */ <instance.decorations.("attribute-values").(attribute.name)>
 >>
 
 AddSubComponentValues(definition, instance) ::= <<

@@ -22,11 +22,11 @@
 #define INTERFACE_METHOD_0(compName, itfName, methName) INTERFACE_METHOD_1(compName, itfName, methName)
 #define INTERFACE_METHOD_1(compName, itfName, methName) __component_##compName##_##itfName##_##methName
 
-#define CONSTRUCTOR_METHOD CONSTRUCTOR_METHOD_0(COMPONENT_NAME)
+#define CONSTRUCTOR_METHOD void CONSTRUCTOR_METHOD_0(COMPONENT_NAME) NO_PARAM_DECL
 #define CONSTRUCTOR_METHOD_0(compName) CONSTRUCTOR_METHOD_1(compName)
 #define CONSTRUCTOR_METHOD_1(compName) __component_##compName##_constructor
 
-#define DESTRUCTOR_METHOD DESTRUCTOR_METHOD_0(COMPONENT_NAME)
+#define DESTRUCTOR_METHOD void DESTRUCTOR_METHOD_0(COMPONENT_NAME) NO_PARAM_DECL
 #define DESTRUCTOR_METHOD_0(compName) DESTRUCTOR_METHOD_1(compName)
 #define DESTRUCTOR_METHOD_1(compName) __component_##compName##_destructor
 
@@ -35,11 +35,13 @@
 #define PRIVATE_METHOD_1(compName, methName) __component_##compName##_private_##methName
 
 #ifdef SINGLETON
-#define CALL_INTERFACE_METHOD_WITH_PARAM(itfName, methName) INTERFACE_METHOD(itfName, methName) (
-#define CALL_INTERFACE_METHOD_WITHOUT_PARAM(itfName, methName) INTERFACE_METHOD(itfName, methName) ()
+#define PARAM_DECL_BEGIN (
+#define PARAM_DECL_END )
+#define NO_PARAM_DECL (void)
 #else
-#define CALL_INTERFACE_METHOD_WITH_PARAM(itfName, methName) INTERFACE_METHOD(itfName, methName) (CONTEXT_PTR_ACCESS,
-#define CALL_INTERFACE_METHOD_WITHOUT_PARAM(itfName, methName) INTERFACE_METHOD(itfName, methName) (CONTEXT_PTR_ACCESS)
+#define PARAM_DECL_BEGIN ( CONTEXT_PTR_DECL,
+#define PARAM_DECL_END )
+#define NO_PARAM_DECL (CONTEXT_PTR_DECL)
 #endif
 
 // CALL_COLLECTION_INTERFACE is not supported in MPP tests

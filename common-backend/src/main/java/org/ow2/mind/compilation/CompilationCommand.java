@@ -29,11 +29,15 @@ import org.objectweb.fractal.adl.ADLException;
 
 public interface CompilationCommand {
 
+  void prepare();
+
   Collection<File> getInputFiles();
 
   Collection<File> getOutputFiles();
 
   String getDescription();
+
+  boolean forceExec();
 
   void exec() throws ADLException, InterruptedException;
 }

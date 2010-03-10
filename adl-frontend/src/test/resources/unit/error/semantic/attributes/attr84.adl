@@ -1,0 +1,4 @@
+//#SemanticError GroupId=MADL ErrorId=INCOMPATIBLE_ARGUMENT_TYPE line=4
+// argument: integer assigned to string
+primitive attributes.attr84(a) extends attr83(a,
+ a) {}

@@ -1,0 +1,20 @@
+#ifndef _FRACTAL_API_ERRORCODE
+#define _FRACTAL_API_ERRORCODE
+
+#define FRACTAL_API_OK                       0
+#define FRACTAL_API_INVALID_ARG             -1
+#define FRACTAL_API_OPERATION_NOT_SUPPORTED -2
+#define FRACTAL_API_NO_SUCH_INTERFACE       -3
+#define FRACTAL_API_CLIENT                   0
+#define FRACTAL_API_SERVER                   1
+
+#define FRACTAL_API_ILLEGAL_BINDING        -10
+
+#define FRACTAL_API_NO_SUCH_ATTRIBUTE      -30
+#define FRACTAL_API_ILLEGAL_ATTRIBUTE      -31
+
+#define FRACTAL_API_ILLEGAL_LIFE_CYCLE     -40
+#define FRACTAL_API_STOPPED                  0
+#define FRACTAL_API_STARTED                  1
+
+#endif

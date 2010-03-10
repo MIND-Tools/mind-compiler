@@ -22,6 +22,8 @@
 
 package org.ow2.mind;
 
+import static org.ow2.mind.compilation.DirectiveHelper.splitOptionString;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -30,7 +32,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.objectweb.fractal.adl.ADLException;
-import org.objectweb.fractal.cecilia.adl.directives.DirectiveHelper;
 import org.ow2.mind.compilation.BasicCompilationCommandExecutor;
 import org.ow2.mind.compilation.CompilationCommand;
 import org.ow2.mind.compilation.CompilationCommandExecutor;
@@ -57,8 +58,7 @@ public class CheckDelegatesTest {
     context = new HashMap<Object, Object>();
 
     final String cFlags = System.getProperty(CFLAGS_PROPERTY, DEFAULT_CFLAGS);
-    CompilerContextHelper.setCFlags(context, DirectiveHelper
-        .splitOptionString(cFlags));
+    CompilerContextHelper.setCFlags(context, splitOptionString(cFlags));
   }
 
   @Test(groups = {"checkin", "functional"})

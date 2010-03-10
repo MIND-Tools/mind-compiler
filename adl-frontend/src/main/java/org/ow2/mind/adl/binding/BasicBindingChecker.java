@@ -169,10 +169,10 @@ public class BasicBindingChecker implements BindingChecker {
     if (binding != null) {
       final boolean singleFromInterface = isSingleton(subComponentInterface)
           || (isCollection(subComponentInterface) && binding
-              .getToInterfaceNumber() != null);
+              .getFromInterfaceNumber() != null);
       final boolean singleToInterface = isSingleton(compositeInterface)
           || (isCollection(compositeInterface) && binding
-              .getFromInterfaceNumber() != null);
+              .getToInterfaceNumber() != null);
 
       // only single-to-single or multi-to-multi is allowed.
       if (singleFromInterface != singleToInterface)

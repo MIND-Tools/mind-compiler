@@ -1,0 +1,12 @@
+// This test is related to MIND-21
+@Run
+@controller.LifeCycleController
+primitive controller.lcc.SelfLCCTest extends LCCTested {
+  
+  data {{
+    struct {
+      int a;
+    } PRIVATE;
+  }};  
+  source selfLccTest.c;
+}

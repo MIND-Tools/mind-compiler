@@ -33,6 +33,7 @@ import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.Loader;
 import org.objectweb.fractal.adl.bindings.BindingErrors;
 import org.objectweb.fractal.adl.xml.XMLNodeFactoryImpl;
+import org.ow2.mind.BasicInputResourceLocator;
 import org.ow2.mind.adl.ASTChecker;
 import org.ow2.mind.adl.BasicADLLocator;
 import org.ow2.mind.adl.BasicDefinitionReferenceResolver;
@@ -41,17 +42,12 @@ import org.ow2.mind.adl.CachingDefinitionReferenceResolver;
 import org.ow2.mind.adl.ExtendsLoader;
 import org.ow2.mind.adl.STCFNodeMerger;
 import org.ow2.mind.adl.SubComponentResolverLoader;
-import org.ow2.mind.adl.binding.BasicBindingChecker;
-import org.ow2.mind.adl.binding.BindingChecker;
-import org.ow2.mind.adl.binding.BindingCheckerLoader;
-import org.ow2.mind.adl.binding.BindingNormalizerLoader;
-import org.ow2.mind.adl.binding.IDLBindingChecker;
-import org.ow2.mind.adl.binding.UnboundInterfaceCheckerLoader;
 import org.ow2.mind.adl.idl.BasicInterfaceSignatureResolver;
 import org.ow2.mind.adl.idl.InterfaceSignatureLoader;
 import org.ow2.mind.adl.imports.ImportDefinitionReferenceResolver;
 import org.ow2.mind.adl.imports.ImportInterfaceSignatureResolver;
 import org.ow2.mind.adl.parser.ADLParser;
+import org.ow2.mind.idl.BasicIDLLocator;
 import org.ow2.mind.idl.IDLLoaderChainFactory;
 import org.ow2.mind.idl.IDLLocator;
 import org.testng.annotations.BeforeMethod;
@@ -118,9 +114,10 @@ public class TestBinding {
 
     final BasicInterfaceSignatureResolver bisr = new BasicInterfaceSignatureResolver();
     final ImportInterfaceSignatureResolver iisr = new ImportInterfaceSignatureResolver();
-    final IDLLocator idlLocator = IDLLoaderChainFactory.newLocator();
+    final IDLLocator idlLocator = new BasicIDLLocator();
     iisr.clientResolverItf = bisr;
-    bisr.idlLoaderItf = IDLLoaderChainFactory.newLoader(idlLocator);
+    bisr.idlLoaderItf = IDLLoaderChainFactory.newLoader(idlLocator,
+        new BasicInputResourceLocator());
     iisr.idlLocatorItf = idlLocator;
     isl.interfaceSignatureResolverItf = iisr;
 

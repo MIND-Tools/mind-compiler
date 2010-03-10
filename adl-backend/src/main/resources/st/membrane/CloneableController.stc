@@ -43,7 +43,7 @@ int METH(factory, newFcInstance)(void ** instance) {
 
 destroyFcInstance(definition) ::= <<
 int METH(factory, destroyFcInstance)(void * instance) {
-  return __component_<definition.name;format="toCName">_factory(instance, GET_MY_INTERFACE(allocator));
+  return __component_<definition.name;format="toCName">_destroy(instance, GET_MY_INTERFACE(allocator));
 }
 >>
 

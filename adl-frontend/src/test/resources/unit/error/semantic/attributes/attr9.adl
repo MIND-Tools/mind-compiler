@@ -1,0 +1,7 @@
+//#SemanticError GroupId=MADL ErrorId=INCOMPATIBLE_ARGUMENT_TYPE line=6
+// attribute/parameter : use the same parameter to assing an int and a string attr.
+primitive attributes.attr9(a) {
+  attribute int attr = a;
+  attribute string attr1 = 
+  a;
+}

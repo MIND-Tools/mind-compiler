@@ -32,8 +32,11 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.objectweb.fractal.adl.CompilerError;
+import org.objectweb.fractal.adl.error.GenericErrors;
 import org.objectweb.fractal.adl.util.ClassLoaderHelper;
 import org.objectweb.fractal.adl.util.FractalADLLogManager;
 import org.objectweb.fractal.api.NoSuchInterfaceException;
@@ -75,44 +78,62 @@ public class BasicInputResourceLocator
 
     final GenericResourceLocator genericResourceLocator = genericResourceLocators
         .get(resource.getKind());
-    if (genericResourceLocator != null) {
-      final URL location = genericResourceLocator.findResource(resource
-          .getName(), context);
-      if (location != null) resource.setLocation(location);
-      return location;
+    if (genericResourceLocator == null) {
+      throw new CompilerError(GenericErrors.INTERNAL_ERROR,
+          "Missing GenericResourceLocator for input resources of kind \""
+              + resource.getKind() + "\".");
     }
-    return null;
+    final URL location = genericResourceLocator.findResource(
+        resource.getName(), context);
+    if (location != null) resource.setLocation(location);
+    return location;
   }
 
   public boolean isUpToDate(final long timestamp,
       final Collection<InputResource> inputs, final Map<Object, Object> context) {
-    // XXX always return false to force re-generation during development
-    return false;
-// for (final InputResource dependency : inputs) {
-// try {
-// if (getTimestamp(dependency, context) >= timestamp) {
-// // a dependency is newer than given timestamp.
-// return false;
-// }
-// } catch (final MalformedURLException e) {
-// if (logger.isLoggable(Level.FINE))
-// logger.log(Level.FINE, "Can't determine file timestamps of "
-// + dependency);
-// // if one dependency is missing consider the file as out of date.
-// return false;
-// }
-// }
-// return true;
+    if (ForceRegenContextHelper.getForceRegen(context)) {
+      if (logger.isLoggable(Level.FINEST))
+        logger
+            .log(Level.FINEST, "Forced mode, isUpToDate method return false.");
+      return false;
+    }
+
+    for (final InputResource dependency : inputs) {
+      try {
+        if (getTimestamp(dependency, context) >= timestamp) {
+          // a dependency is newer than given timestamp.
+          if (logger.isLoggable(Level.FINEST))
+            logger.log(Level.FINEST, "Dependency \"" + dependency
+                + "\" is more recent (location=\"" + dependency.getLocation()
+                + "\"), isUpToDate method return false.");
+          return false;
+        }
+      } catch (final MalformedURLException e) {
+        if (logger.isLoggable(Level.WARNING))
+          logger.log(Level.WARNING, "Can't determine file timestamps of "
+              + dependency);
+        // if one dependency is missing consider the file as out of date.
+        return false;
+      }
+    }
+    if (logger.isLoggable(Level.FINEST))
+      logger.log(Level.FINEST,
+          "Dependencies are up-to-dates, isUpToDate method return true.");
+    return true;
   }
 
   public boolean isUpToDate(final File file,
       final Collection<InputResource> inputs, final Map<Object, Object> context) {
+    if (logger.isLoggable(Level.FINEST))
+      logger.log(Level.FINEST, "Checks if file \"" + file + "\" is up-to-date");
     return isUpToDate(file.lastModified(), inputs, context);
   }
 
   public boolean isUpToDate(final URL url,
       final Collection<InputResource> inputs, final Map<Object, Object> context)
       throws MalformedURLException {
+    if (logger.isLoggable(Level.FINEST))
+      logger.log(Level.FINEST, "Checks if URL \"" + url + "\" is up-to-date");
     return isUpToDate(InputResourcesHelper.getTimestamp(url), inputs, context);
   }
 
@@ -128,7 +149,7 @@ public class BasicInputResourceLocator
       if (url != null)
         timestamp = InputResourcesHelper.getTimestamp(url);
       else
-        timestamp = Long.MAX_VALUE;
+        timestamp = 0L;
       resource.setTimestamp(timestamp);
     }
     return timestamp;

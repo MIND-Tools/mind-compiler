@@ -35,10 +35,7 @@ import java.util.Set;
 
 import org.ow2.mind.adl.ASTChecker.CheckerIterator;
 import org.ow2.mind.adl.ASTChecker.DefinitionChecker;
-import org.ow2.mind.adl.ASTChecker.ValueChecker;
-import org.ow2.mind.adl.ASTChecker.ValueCheckerIterator;
 import org.ow2.mind.adl.graph.ComponentGraph;
-import org.ow2.mind.value.ast.Value;
 
 public class GraphChecker {
 
@@ -126,46 +123,31 @@ public class GraphChecker {
       return new ComponentGraphCheckerIterator(list);
     }
 
-    public ValueChecker containsAttributeValue(final String name) {
+    public String containsAttributeValue(final String name) {
       definition().containsAttribute(name);
 
       final Map<?, ?> attributeValues = (Map<?, ?>) graph
           .getDecoration("attribute-values");
       assertNotNull("Component does not contains attribute value",
           attributeValues);
-      final Value v = (Value) attributeValues.get(name);
+      final String v = (String) attributeValues.get(name);
       assertNotNull(
           "Component does not contains attribute value for attribute " + name,
           v);
-      return astChecker.assertValue(v);
+      return v;
     }
 
     public ComponentGraphChecker containsAttributeValue(final String name,
         final int v) {
-      containsAttributeValue(name).is(v);
+      assertEquals("Unexpected integer value", containsAttributeValue(name),
+          Integer.toString(v));
       return this;
     }
 
     public ComponentGraphChecker containsAttributeValue(final String name,
         final String v) {
-      containsAttributeValue(name).is(v);
+      assertEquals("Unexpected String value", containsAttributeValue(name), v);
       return this;
-    }
-
-    public ValueCheckerIterator containsAttributeValues(final String... names) {
-      definition().containsAttributes(names);
-
-      final Set<String> nameSet = new HashSet<String>();
-      final List<ValueChecker> list = new ArrayList<ValueChecker>(names.length);
-      for (final String name : names) {
-        assertTrue("Duplucated string in given names " + names, nameSet
-            .add(name));
-        list.add(containsAttributeValue(name));
-      }
-      assertEquals("Component contains more attribute value than expected.",
-          names.length, ((Map<?, ?>) graph.getDecoration("attribute-values"))
-              .size());
-      return new ValueCheckerIterator(list);
     }
   }
 
@@ -208,21 +190,15 @@ public class GraphChecker {
       return this;
     }
 
-    public ComponentGraphCheckerIterator containsAttributeValues(
-        final String... names) {
-      element.containsAttributeValues(names);
-      return this;
-    }
-
     public ComponentGraphCheckerIterator containsAttributeValue(
         final String name, final int v) {
-      element.containsAttributeValue(name).is(v);
+      element.containsAttributeValue(name, v);
       return this;
     }
 
     public ComponentGraphCheckerIterator containsAttributeValue(
         final String name, final String v) {
-      element.containsAttributeValue(name).is(v);
+      element.containsAttributeValue(name, v);
       return this;
     }
 

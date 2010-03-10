@@ -36,8 +36,7 @@ import org.objectweb.fractal.adl.CompilerError;
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.fractal.api.control.IllegalBindingException;
-import org.objectweb.fractal.cecilia.adl.file.SourceFileWriter;
-import org.ow2.mind.InputResourcesHelper;
+import org.ow2.mind.SourceFileWriter;
 import org.ow2.mind.adl.ast.ImplementationContainer;
 import org.ow2.mind.adl.ast.Source;
 import org.ow2.mind.io.IOErrors;
@@ -111,8 +110,7 @@ public class ImplementationHeaderSourceGenerator
     final File headerFile = outputFileLocatorItf.getCSourceOutputFile(
         getImplHeaderFileName(definition), context);
 
-    if (!inputResourceLocatorItf.isUpToDate(headerFile, InputResourcesHelper
-        .getInputResources(definition), context)) {
+    if (regenerate(headerFile, definition, context)) {
 
       try {
         SourceFileWriter.writeToFile(headerFile, getFileContent(definition));

@@ -22,10 +22,12 @@
 
 package org.ow2.mind.adl.parameter.ast;
 
+import static org.ow2.mind.CommonASTHelper.newNode;
+import static org.ow2.mind.CommonASTHelper.turnsTo;
+
 import org.objectweb.fractal.adl.Node;
 import org.objectweb.fractal.adl.NodeFactory;
 import org.objectweb.fractal.adl.merger.NodeMerger;
-import org.ow2.mind.adl.ast.ASTHelper;
 
 /**
  * Helper methods for parameter AST nodes.
@@ -83,8 +85,8 @@ public final class ParameterASTHelper {
    */
   public static FormalParameter newFormalParameter(
       final NodeFactory nodeFactory, final String name) {
-    final FormalParameter para = ASTHelper.newNode(nodeFactory,
-        "formalParameter", FormalParameter.class);
+    final FormalParameter para = newNode(nodeFactory, "formalParameter",
+        FormalParameter.class);
     para.setName(name);
     return para;
   }
@@ -98,8 +100,7 @@ public final class ParameterASTHelper {
    */
   public static Argument newArgument(final NodeFactory nodeFactory,
       final String name) {
-    final Argument arg = ASTHelper.newNode(nodeFactory, "argument",
-        Argument.class);
+    final Argument arg = newNode(nodeFactory, "argument", Argument.class);
     arg.setName(name);
     return arg;
   }
@@ -119,8 +120,7 @@ public final class ParameterASTHelper {
    */
   public static ArgumentContainer turnsToArgumentContainer(final Node node,
       final NodeFactory nodeFactory, final NodeMerger nodeMerger) {
-    return ASTHelper.turnsTo(node, ArgumentContainer.class, nodeFactory,
-        nodeMerger);
+    return turnsTo(node, ArgumentContainer.class, nodeFactory, nodeMerger);
   }
 
   /**
@@ -139,7 +139,7 @@ public final class ParameterASTHelper {
    */
   public static FormalParameterContainer turnsToParamContainer(final Node node,
       final NodeFactory nodeFactory, final NodeMerger nodeMerger) {
-    return ASTHelper.turnsTo(node, FormalParameterContainer.class, nodeFactory,
+    return turnsTo(node, FormalParameterContainer.class, nodeFactory,
         nodeMerger);
   }
 

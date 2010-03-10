@@ -1,0 +1,10 @@
+
+primitive pkg1.attr.ExtendsAttr1(a) extends Attr1 {
+
+  @Override
+  attribute int attr1 = a;
+  
+  @Override
+  attribute attr3 = "titi";
+
+}

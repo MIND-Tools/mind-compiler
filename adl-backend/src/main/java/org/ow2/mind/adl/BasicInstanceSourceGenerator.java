@@ -27,7 +27,7 @@ import static org.ow2.mind.PathHelper.fullyQualifiedNameToPath;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -35,7 +35,7 @@ import org.antlr.stringtemplate.StringTemplate;
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.CompilerError;
 import org.objectweb.fractal.adl.Definition;
-import org.objectweb.fractal.cecilia.adl.file.SourceFileWriter;
+import org.ow2.mind.SourceFileWriter;
 import org.ow2.mind.adl.graph.ComponentGraph;
 import org.ow2.mind.io.IOErrors;
 
@@ -101,32 +101,35 @@ public class BasicInstanceSourceGenerator extends AbstractSourceGenerator
     final File outputFile = outputFileLocatorItf.getCSourceOutputFile(
         getInstancesFileName(instanceDesc), context);
 
-    final StringTemplate st;
-    if (instanceDesc.topLevelDefinition == instanceDesc.instanceDefinition) {
-      st = getInstanceOf("TopLevelInstances");
+    if (regenerate(outputFile, instanceDesc.topLevelDefinition, context)) {
 
-      st.setAttribute("topLevelDefinition", instanceDesc.topLevelDefinition);
-      st.setAttribute("instances", instanceDesc.instances);
+      final StringTemplate st;
+      if (instanceDesc.topLevelDefinition == instanceDesc.instanceDefinition) {
+        st = getInstanceOf("TopLevelInstances");
 
-      final Set<Definition> definitions = new HashSet<Definition>();
-      for (final ComponentGraph instance : instanceDesc.instances) {
-        addDefinitions(instance, definitions);
+        st.setAttribute("topLevelDefinition", instanceDesc.topLevelDefinition);
+        st.setAttribute("instances", instanceDesc.instances);
+
+        final Set<Definition> definitions = new LinkedHashSet<Definition>();
+        for (final ComponentGraph instance : instanceDesc.instances) {
+          addDefinitions(instance, definitions);
+        }
+
+        st.setAttribute("definitions", definitions);
+      } else {
+        st = getInstanceOf("ComponentInstances");
+
+        st.setAttribute("topLevelDefinition", instanceDesc.topLevelDefinition);
+        st.setAttribute("definition", instanceDesc.instanceDefinition);
+        st.setAttribute("instances", instanceDesc.instances);
       }
 
-      st.setAttribute("definitions", definitions);
-    } else {
-      st = getInstanceOf("ComponentInstances");
-
-      st.setAttribute("topLevelDefinition", instanceDesc.topLevelDefinition);
-      st.setAttribute("definition", instanceDesc.instanceDefinition);
-      st.setAttribute("instances", instanceDesc.instances);
-    }
-
-    try {
-      SourceFileWriter.writeToFile(outputFile, st.toString());
-    } catch (final IOException e) {
-      throw new CompilerError(IOErrors.WRITE_ERROR, e, outputFile
-          .getAbsolutePath());
+      try {
+        SourceFileWriter.writeToFile(outputFile, st.toString());
+      } catch (final IOException e) {
+        throw new CompilerError(IOErrors.WRITE_ERROR, e, outputFile
+            .getAbsolutePath());
+      }
     }
   }
 

@@ -1,5 +1,51 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
+	<classpathentry kind="src" output="common-frontend/target/classes" path="common-frontend/src/main/java"/>
+	<classpathentry kind="src" output="common-frontend/target/classes" path="common-frontend/target/generated-sources/javacc"/>
+	<classpathentry kind="src" output="common-frontend/target/classes" path="common-frontend/target/generated-sources/jtb"/>
+	<classpathentry excluding="**" kind="src" output="common-frontend/target/classes" path="common-frontend"/>
+	<classpathentry excluding="**" kind="src" output="common-frontend/target/classes" path="common-frontend/src/main/resources"/>
+	<classpathentry kind="src" output="common-frontend/target/test-classes" path="common-frontend/src/test/java"/>
+	<classpathentry excluding="**" kind="src" output="common-frontend/target/test-classes" path="common-frontend/src/test/resources"/>
+	<classpathentry kind="src" output="idl-parser/target/classes" path="idl-parser/src/main/java"/>
+	<classpathentry kind="src" output="idl-parser/target/classes" path="idl-parser/target/generated-sources/javacc"/>
+	<classpathentry kind="src" output="idl-parser/target/classes" path="idl-parser/target/generated-sources/jtb"/>
+	<classpathentry kind="src" output="idl-parser/target/test-classes" path="idl-parser/src/test/java"/>
+	<classpathentry excluding="**" kind="src" output="idl-parser/target/test-classes" path="idl-parser/src/test/resources"/>
+	<classpathentry kind="src" output="idl-frontend/target/classes" path="idl-frontend/src/main/java"/>
+	<classpathentry excluding="**" kind="src" output="idl-frontend/target/classes" path="idl-frontend/src/main/resources"/>
+	<classpathentry kind="src" output="idl-frontend/target/test-classes" path="idl-frontend/src/test/java"/>
+	<classpathentry excluding="**" kind="src" output="idl-frontend/target/test-classes" path="idl-frontend/src/test/resources"/>
+	<classpathentry kind="src" output="adl-parser/target/classes" path="adl-parser/src/main/java"/>
+	<classpathentry kind="src" output="adl-parser/target/classes" path="adl-parser/target/generated-sources/javacc"/>
+	<classpathentry kind="src" output="adl-parser/target/classes" path="adl-parser/target/generated-sources/jtb"/>
+	<classpathentry kind="src" output="adl-parser/target/test-classes" path="adl-parser/src/test/java"/>
+	<classpathentry excluding="**" kind="src" output="adl-parser/target/test-classes" path="adl-parser/src/test/resources"/>
+	<classpathentry kind="src" output="adl-frontend/target/classes" path="adl-frontend/src/main/java"/>
+	<classpathentry excluding="**" kind="src" output="adl-frontend/target/classes" path="adl-frontend/src/main/resources"/>
+	<classpathentry kind="src" output="adl-frontend/target/test-classes" path="adl-frontend/src/test/java"/>
+	<classpathentry excluding="**" kind="src" output="adl-frontend/target/test-classes" path="adl-frontend/src/test/resources"/>
+	<classpathentry kind="src" output="common-backend/target/classes" path="common-backend/src/main/java"/>
+	<classpathentry excluding="**" kind="src" output="common-backend/target/classes" path="common-backend/src/main/resources"/>
+	<classpathentry kind="src" output="common-backend/target/test-classes" path="common-backend/src/test/java"/>
+	<classpathentry excluding="**" kind="src" output="common-backend/target/test-classes" path="common-backend/src/test/resources"/>
+	<classpathentry kind="src" output="idl-backend/target/classes" path="idl-backend/src/main/java"/>
+	<classpathentry excluding="**" kind="src" output="idl-backend/target/classes" path="idl-backend/src/main/resources"/>
+	<classpathentry kind="src" output="idl-backend/target/test-classes" path="idl-backend/src/test/java"/>
+	<classpathentry excluding="**" kind="src" output="idl-backend/target/test-classes" path="idl-backend/src/test/resources"/>
+	<classpathentry kind="src" output="cpl-preproc/target/classes" path="cpl-preproc/src/main/java"/>
+	<classpathentry kind="src" output="cpl-preproc/target/classes" path="cpl-preproc/target/generated-sources/antlr3"/>
+	<classpathentry excluding="**" kind="src" output="cpl-preproc/target/classes" path="cpl-preproc/src/main/resources"/>
+	<classpathentry kind="src" output="cpl-preproc/target/test-classes" path="cpl-preproc/src/test/java"/>
+	<classpathentry excluding="**" kind="src" output="cpl-preproc/target/test-classes" path="cpl-preproc/src/test/resources"/>
+	<classpathentry kind="src" output="adl-backend/target/classes" path="adl-backend/src/main/java"/>
+	<classpathentry excluding="**" kind="src" output="adl-backend/target/classes" path="adl-backend/src/main/resources"/>
+	<classpathentry kind="src" output="adl-backend/target/test-classes" path="adl-backend/src/test/java"/>
+	<classpathentry excluding="**" kind="src" output="adl-backend/target/test-classes" path="adl-backend/src/test/resources"/>
+	<classpathentry excluding="**" kind="src" output="fractal-runtime/target/classes" path="fractal-runtime/src/main/resources"/>
+	<classpathentry kind="src" output="fractal-runtime/target/test-classes" path="fractal-runtime/src/test/java"/>
+	<classpathentry excluding="**" kind="src" output="fractal-runtime/target/test-classes" path="fractal-runtime/src/test/resources"/>
+	<classpathentry kind="src" output="mindc/target/classes" path="mindc/src/main/java"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-1.5"/>
 	<classpathentry kind="con" path="org.maven.ide.eclipse.MAVEN2_CLASSPATH_CONTAINER"/>
 	<classpathentry kind="output" path="target/classes"/>

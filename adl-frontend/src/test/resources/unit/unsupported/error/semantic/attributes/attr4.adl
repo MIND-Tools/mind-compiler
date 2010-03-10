@@ -1,5 +1,0 @@
-// attribute: string assigned to integer type
-primitive attributes.attr4 {
-  @SemanticError(GroupId="ATTR", ErrorId="ILLEGAL_CAST_TO_INTEGER")
-  attribute uint8_t attr = "foo" ;
-}

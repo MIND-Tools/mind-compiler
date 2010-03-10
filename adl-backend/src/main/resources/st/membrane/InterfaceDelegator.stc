@@ -34,7 +34,7 @@ ItfDelegator(itf, interfaceDefinitions) ::= <<
 >>
 
 MethodDelegator(itf, index, method) ::= <<
-<(idl2c.methodDef)(method=method,methodName=ProxyName(itfName=itf.name, index=index, methodName=method.name)) > { 
+<(idl2c.methodDef)(method=method,withThisPtr="typed",methodName=ProxyName(itfName=itf.name, index=index, methodName=method.name)) > { 
 <if (! ((idl2c.isVoidMethod)(method=method)))>
   return
 <endif>
@@ -43,7 +43,7 @@ MethodDelegator(itf, index, method) ::= <<
 >>
 
 
-ProxyName(itfName, index, methodName) ::= "METH(<itfName><if (index)>[<index>]<endif>, <methodName>)"
+ProxyName(itfName, index, methodName) ::= "INTERFACE<if (index)>_COLLECTION<endif>_METHOD(<itfName><if (index)>,<index><endif>, <methodName>)"
 
 }$$
 }

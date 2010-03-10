@@ -24,6 +24,7 @@ package org.ow2.mind;
 
 import static org.ow2.mind.PathHelper.fullyQualifiedNameToPath;
 import static org.ow2.mind.PathHelper.isRelative;
+import static org.ow2.mind.compilation.DirectiveHelper.splitOptionString;
 import static org.testng.Assert.assertNotNull;
 
 import java.io.BufferedReader;
@@ -40,18 +41,18 @@ import org.antlr.stringtemplate.StringTemplateGroupLoader;
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.Loader;
-import org.objectweb.fractal.cecilia.adl.directives.DirectiveHelper;
-import org.ow2.mind.BasicInputResourceLocator;
 import org.ow2.mind.adl.ADLBackendFactory;
 import org.ow2.mind.adl.ADLLocator;
 import org.ow2.mind.adl.DefinitionCompiler;
 import org.ow2.mind.adl.DefinitionSourceGenerator;
 import org.ow2.mind.adl.Factory;
 import org.ow2.mind.adl.GraphCompiler;
+import org.ow2.mind.adl.OutputBinaryADLLocator;
 import org.ow2.mind.adl.graph.ComponentGraph;
 import org.ow2.mind.adl.graph.Instantiator;
 import org.ow2.mind.adl.implementation.BasicImplementationLocator;
 import org.ow2.mind.adl.implementation.ImplementationLocator;
+import org.ow2.mind.adl.st.ADLLoaderASTTransformer;
 import org.ow2.mind.annotation.AnnotationLocatorHelper;
 import org.ow2.mind.compilation.CompilationCommand;
 import org.ow2.mind.compilation.CompilationCommandExecutor;
@@ -64,6 +65,8 @@ import org.ow2.mind.idl.IDLLoader;
 import org.ow2.mind.idl.IDLLoaderChainFactory;
 import org.ow2.mind.idl.IDLLocator;
 import org.ow2.mind.idl.IDLVisitor;
+import org.ow2.mind.idl.OutputBinaryIDLLocator;
+import org.ow2.mind.idl.st.IDLLoaderASTTransformer;
 import org.ow2.mind.io.BasicOutputFileLocator;
 import org.ow2.mind.io.OutputFileLocator;
 import org.ow2.mind.plugin.SimpleClassPluginFactory;
@@ -100,17 +103,27 @@ public class CompilerRunner {
 
     // input locators
     final BasicInputResourceLocator inputResourceLocator = new BasicInputResourceLocator();
-    final IDLLocator idlLocator = IDLLoaderChainFactory.newLocator();
-    final ADLLocator adlLocator = Factory.newLocator();
+    final OutputBinaryIDLLocator obil = new OutputBinaryIDLLocator();
+    obil.clientLocatorItf = IDLLoaderChainFactory
+        .newIDLLocator(inputResourceLocator);
+    final IDLLocator idlLocator = obil;
     final ImplementationLocator implementationLocator = new BasicImplementationLocator();
+
+    final OutputBinaryADLLocator obal = new OutputBinaryADLLocator();
+    obal.clientLocatorItf = Factory.newADLLocator(inputResourceLocator);
+    final ADLLocator adlLocator = obal;
 
     // Plugin Manager Components
     final org.objectweb.fractal.adl.Factory pluginFactory = new SimpleClassPluginFactory();
 
     outputFileLocator = new BasicOutputFileLocator();
+    obal.outputFileLocatorItf = outputFileLocator;
+    obil.outputFileLocatorItf = outputFileLocator;
 
     // compiler wrapper
-    final CompilerWrapper compilerWrapper = new GccCompilerWrapper();
+    final GccCompilerWrapper gcw = new GccCompilerWrapper();
+    gcw.outputFileLocatorItf = outputFileLocator;
+    final CompilerWrapper compilerWrapper = gcw;
     final MPPWrapper mppWrapper = new BasicMPPWrapper();
 
     // String Template Component Loaders
@@ -122,9 +135,17 @@ public class CompilerRunner {
     astTransformer = basicASTTransformer;
 
     // loader chains
-    idlLoader = IDLLoaderChainFactory.newLoader(idlLocator);
-    adlLoader = Factory.newLoader(inputResourceLocator, adlLocator, idlLocator,
-        idlLoader, pluginFactory);
+    final IDLLoaderASTTransformer ilat = new IDLLoaderASTTransformer();
+    ilat.clientIDLLoaderItf = IDLLoaderChainFactory.newLoader(idlLocator,
+        inputResourceLocator);
+    ilat.astTransformerItf = astTransformer;
+    idlLoader = ilat;
+
+    final ADLLoaderASTTransformer alat = new ADLLoaderASTTransformer();
+    alat.clientLoader = Factory.newLoader(inputResourceLocator, adlLocator,
+        idlLocator, implementationLocator, idlLoader, pluginFactory);
+    alat.astTransformerItf = astTransformer;
+    adlLoader = alat;
 
     // instantiator chain
     graphInstantiator = Factory.newInstantiator(adlLoader);
@@ -147,9 +168,12 @@ public class CompilerRunner {
     executor = ADLBackendFactory.newCompilationCommandExecutor();
 
     // init context
+    initContext();
+  }
+
+  public void initContext() {
     context = new HashMap<Object, Object>();
-    final String buildDirName = "target" + File.separator + "build";
-    buildDir = new File(buildDirName);
+    buildDir = new File("target/build");
     if (!buildDir.exists()) {
       buildDir.mkdirs();
     }
@@ -158,8 +182,7 @@ public class CompilerRunner {
         "org.ow2.mind.adl.annotation.predefined", context);
 
     final String cFlags = System.getProperty(CFLAGS_PROPERTY, DEFAULT_CFLAGS);
-    CompilerContextHelper.setCFlags(context, DirectiveHelper
-        .splitOptionString(cFlags));
+    CompilerContextHelper.setCFlags(context, splitOptionString(cFlags));
   }
 
   public Definition load(final String adlName) throws ADLException {
@@ -198,7 +221,7 @@ public class CompilerRunner {
     } else {
       outputPath = fullyQualifiedNameToPath(adlName, null);
     }
-    final File outputFile = outputFileLocator.getCCompiledOutputFile(
+    final File outputFile = outputFileLocator.getCExecutableOutputFile(
         outputPath, context);
 
     Definition d = adlLoader.load(adlName, context);

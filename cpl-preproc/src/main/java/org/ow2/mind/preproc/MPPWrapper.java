@@ -17,7 +17,7 @@
  * Contact: mind@ow2.org
  *
  * Authors: Matthieu Leclercq
- * Contributors: 
+ * Contributors: Matthieu ANNE
  */
 
 package org.ow2.mind.preproc;
@@ -30,5 +30,6 @@ public interface MPPWrapper {
 
   String ITF_NAME = "mpp-wrapper";
 
-  MPPCommand newMPPCommand(final Definition definition, Map<Object, Object> context);
+  MPPCommand newMPPCommand(final Definition definition,
+      Map<Object, Object> context);
 }

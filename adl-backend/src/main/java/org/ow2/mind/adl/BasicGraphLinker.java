@@ -28,6 +28,7 @@ import static org.ow2.mind.PathHelper.fullyQualifiedNameToPath;
 import static org.ow2.mind.PathHelper.isRelative;
 import static org.ow2.mind.PathHelper.isValid;
 import static org.ow2.mind.PathHelper.replaceExtension;
+import static org.ow2.mind.compilation.DirectiveHelper.splitOptionString;
 
 import java.io.File;
 import java.net.URISyntaxException;
@@ -46,7 +47,6 @@ import org.objectweb.fractal.adl.error.GenericErrors;
 import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.fractal.api.control.BindingController;
 import org.objectweb.fractal.api.control.IllegalBindingException;
-import org.objectweb.fractal.cecilia.adl.directives.DirectiveHelper;
 import org.ow2.mind.adl.annotation.predefined.LDFlags;
 import org.ow2.mind.adl.ast.ImplementationContainer;
 import org.ow2.mind.adl.ast.Source;
@@ -102,14 +102,15 @@ public class BasicGraphLinker implements GraphCompiler, BindingController {
       outputPath = fullyQualifiedNameToPath(graph.getDefinition().getName(),
           null);
     }
-    final File outputFile = outputFileLocatorItf.getCCompiledOutputFile(
+    final File outputFile = outputFileLocatorItf.getCExecutableOutputFile(
         outputPath, context);
 
     final LinkerCommand command = compilerWrapperItf.newLinkerCommand(context);
     for (final CompilationCommand compilationCommand : compilationTasks) {
       result.add(compilationCommand);
       if (compilationCommand instanceof CompilerCommand) {
-        command.addInputFiles(compilationCommand.getOutputFiles());
+        command.addInputFiles(((CompilerCommand) compilationCommand)
+            .getOutputFile());
       }
     }
     command.setOutputFile(outputFile);
@@ -151,9 +152,12 @@ public class BasicGraphLinker implements GraphCompiler, BindingController {
 
       final File outFile = outputFileLocatorItf.getCCompiledOutputFile(
           replaceExtension(sharedImplementation, ".o"), context);
+      final File depFile = outputFileLocatorItf.getCCompiledOutputFile(
+          replaceExtension(sharedImplementation, ".d"), context);
       final CompilerCommand command = compilerWrapperItf
           .newCompilerCommand(context);
-      command.setInputFile(sharedImpl).setOutputFile(outFile);
+      command.setInputFile(sharedImpl).setOutputFile(outFile)
+          .setDependencyOutputFile(depFile);
 
       result.add(command);
     }
@@ -175,15 +179,13 @@ public class BasicGraphLinker implements GraphCompiler, BindingController {
     if (visitedDefinitions.add(def)) {
       // get LDFlags annotation at definition level.
       LDFlags flags = AnnotationHelper.getAnnotation(def, LDFlags.class);
-      if (flags != null)
-        command.addFlags(DirectiveHelper.splitOptionString(flags.value));
+      if (flags != null) command.addFlags(splitOptionString(flags.value));
 
       // get LDFlags annotation at source level.
       if (def instanceof ImplementationContainer) {
         for (final Source src : ((ImplementationContainer) def).getSources()) {
           flags = AnnotationHelper.getAnnotation(src, LDFlags.class);
-          if (flags != null)
-            command.addFlags(DirectiveHelper.splitOptionString(flags.value));
+          if (flags != null) command.addFlags(splitOptionString(flags.value));
         }
       }
     }

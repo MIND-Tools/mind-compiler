@@ -1,3 +1,24 @@
+/**
+ * Copyright (C) 2010 France Telecom
+ *
+ * This file is part of "Mind Compiler" is free software: you can redistribute 
+ * it and/or modify it under the terms of the GNU Lesser General Public License 
+ * as published by the Free Software Foundation, either version 3 of the 
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT 
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Contact: mind@ow2.org
+ *
+ * Authors: Matthieu ANNE
+ * Contributors: 
+ */
 
 package org.ow2.mind.preproc;
 
@@ -39,22 +60,10 @@ public class CPLChecker {
                 .astGetDecoration("resolved-interface-definition"))
                 .getInterfaceDefinition();
             for (final Method meth : itfDef.getMethods()) {
-
-              // TODO This code sample should replace the next test
-              // which accept an "_override" suffix.
-              // The replacement should be done when the Jira track
-              // concerning abusive used of the METH macro is resolved.
-              // if (meth.getName().equals(methName)) {
-              // foundMeth = true;
-              // break;
-              // }
-              if (meth.getName().equals(methName)
-                  || meth.getName().concat("_override").equals(methName)) {
+              if (meth.getName().equals(methName)) {
                 foundMeth = true;
                 break;
               }
-              // TODO End of the part to remove
-
             }
           }
           foundItf = true;
@@ -72,14 +81,9 @@ public class CPLChecker {
               + "\" unknown method \"" + methName + "\" ");
         }
       } else {
-        // TODO The following test should be removed end directly throw the
-        // exception when the Jira track concerning abusive used of the METH
-        // macro is resolved
-        if (definition.astGetType().compareTo("composite") == 0) {
-          throw new Exception(" Interface \"" + itfName
-              + "\" is a client interface, method \"" + methName
-              + "\" cannot be defined here");
-        }
+        throw new Exception(" Interface \"" + itfName
+            + "\" is a client interface, method \"" + methName
+            + "\" cannot be defined here");
       }
     }
   }

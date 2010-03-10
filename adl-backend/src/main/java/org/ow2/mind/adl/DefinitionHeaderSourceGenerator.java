@@ -32,8 +32,7 @@ import org.antlr.stringtemplate.StringTemplate;
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.CompilerError;
 import org.objectweb.fractal.adl.Definition;
-import org.objectweb.fractal.cecilia.adl.file.SourceFileWriter;
-import org.ow2.mind.InputResourcesHelper;
+import org.ow2.mind.SourceFileWriter;
 import org.ow2.mind.io.IOErrors;
 
 /**
@@ -83,8 +82,7 @@ public class DefinitionHeaderSourceGenerator extends AbstractSourceGenerator
     final File outputFile = outputFileLocatorItf.getCSourceOutputFile(
         getHeaderFileName(definition), context);
 
-    if (!inputResourceLocatorItf.isUpToDate(outputFile, InputResourcesHelper
-        .getInputResources(definition), context)) {
+    if (regenerate(outputFile, definition, context)) {
 
       final StringTemplate st = getInstanceOf("ComponentDefinitionHeader");
       st.setAttribute("definition", definition);
@@ -97,5 +95,4 @@ public class DefinitionHeaderSourceGenerator extends AbstractSourceGenerator
       }
     }
   }
-
 }

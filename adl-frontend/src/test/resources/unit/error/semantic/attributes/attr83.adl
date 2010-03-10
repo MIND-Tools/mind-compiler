@@ -1,0 +1,1 @@
+primitive attributes.attr83(a, b) extends attr7(a), attr8(b) {}

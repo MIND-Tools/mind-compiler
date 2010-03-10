@@ -40,7 +40,6 @@ import org.ow2.mind.idl.IDLBackendFactory;
 import org.ow2.mind.idl.IDLLoader;
 import org.ow2.mind.idl.IDLLoaderChainFactory;
 import org.ow2.mind.idl.IDLVisitor;
-import org.ow2.mind.idl.st.IDLLoaderASTTransformer;
 import org.ow2.mind.io.BasicOutputFileLocator;
 import org.ow2.mind.io.OutputFileLocator;
 import org.ow2.mind.preproc.BasicMPPWrapper;
@@ -87,6 +86,7 @@ public final class ADLBackendFactory {
     final MembraneSourceGenerator msg = new MembraneSourceGenerator();
     final IDLDefinitionSourceGenerator idsg = new IDLDefinitionSourceGenerator();
     final GenericDefinitionNameSourceGenerator gdnsg = new GenericDefinitionNameSourceGenerator();
+    final BinaryADLWriter baw = new BinaryADLWriter();
 
     definitionSourceGenerator = cidsg;
     cidsg.clientSourceGeneratorItf = dsgd;
@@ -97,12 +97,14 @@ public final class ADLBackendFactory {
     dsgd.visitorsItf.put("membrane", msg);
     dsgd.visitorsItf.put("idl", idsg);
     dsgd.visitorsItf.put("generic-names", gdnsg);
+    dsgd.visitorsItf.put("binary-writer", baw);
 
     dhsg.inputResourceLocatorItf = inputResourceLocator;
     disg.inputResourceLocatorItf = inputResourceLocator;
     ihsg.inputResourceLocatorItf = inputResourceLocator;
     dmsg.inputResourceLocatorItf = inputResourceLocator;
     msg.inputResourceLocatorItf = inputResourceLocator;
+    baw.inputResourceLocatorItf = inputResourceLocator;
 
     dhsg.outputFileLocatorItf = outputFileLocator;
     disg.outputFileLocatorItf = outputFileLocator;
@@ -110,12 +112,12 @@ public final class ADLBackendFactory {
     dmsg.outputFileLocatorItf = outputFileLocator;
     msg.outputFileLocatorItf = outputFileLocator;
     gdnsg.outputFileLocatorItf = outputFileLocator;
+    baw.outputFileLocatorItf = outputFileLocator;
 
-    final IDLLoaderASTTransformer ilat = new IDLLoaderASTTransformer();
-    ilat.clientIDLLoaderItf = idlLoader;
-    ilat.astTransformerItf = astTransformer;
+    disg.idlLoaderItf = idlLoader;
+    msg.idlLoaderItf = idlLoader;
 
-    idsg.idlLoaderItf = ilat;
+    idsg.idlLoaderItf = idlLoader;
     idsg.idlCompilerItf = idlCompiler;
 
     dhsg.templateGroupLoaderItf = stcLoader;

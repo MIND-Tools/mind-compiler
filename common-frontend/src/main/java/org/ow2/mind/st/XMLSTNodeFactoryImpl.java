@@ -20,22 +20,23 @@
  * Contributors: 
  */
 
-package org.ow2.mind.value.ast;
+package org.ow2.mind.st;
 
-public final class ValueHelper {
-  private ValueHelper() {
-  }
+import org.objectweb.fractal.adl.NodeFactory;
+import org.objectweb.fractal.adl.xml.XMLNode;
+import org.objectweb.fractal.adl.xml.XMLNodeFactoryImpl;
+import org.xml.sax.SAXException;
 
-  public static int getValue(final NumberLiteral intValue) {
-    return Integer.parseInt(intValue.getValue());
-  }
+/**
+ * A {@link NodeFactory} component that uses {@link AbstractXMLSTNode} as
+ * default base class of generated node classes. So nodes created by this node
+ * factory are suitable for StringTemplate.
+ */
+public class XMLSTNodeFactoryImpl extends XMLNodeFactoryImpl {
 
-  public static String getValue(final StringLiteral strValue) {
-    return strValue.getValue();
-  }
-
-  public static boolean getValue(final BooleanLiteral boolValue) {
-    return boolValue.getValue() != null
-        && boolValue.getValue().equals(BooleanLiteral.TRUE);
+  @Override
+  public XMLNode newXMLNode(final String systemId, final String qualifiedName)
+      throws SAXException {
+    return newXMLNode(systemId, qualifiedName, AbstractXMLSTNode.class);
   }
 }

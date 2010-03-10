@@ -49,5 +49,13 @@ public interface CompilerCommand extends CompilationCommand {
 
   CompilerCommand setInputFile(File inputFile);
 
+  File getOutputFile();
+
+  File getInputFile();
+
   CompilerCommand addDependency(File dependency);
+
+  CompilerCommand setAllDependenciesManaged(boolean dependencyManaged);
+
+  CompilerCommand setDependencyOutputFile(File dependencyOutputFile);
 }

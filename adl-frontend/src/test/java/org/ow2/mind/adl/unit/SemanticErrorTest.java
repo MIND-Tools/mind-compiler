@@ -22,23 +22,27 @@
 
 package org.ow2.mind.adl.unit;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.fail;
-import static org.testng.AssertJUnit.assertEquals;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import junit.framework.AssertionFailedError;
 
 import org.objectweb.fractal.adl.ADLException;
-import org.objectweb.fractal.adl.Node;
-import org.objectweb.fractal.adl.error.BasicErrorLocator;
 import org.objectweb.fractal.adl.error.ChainedErrorLocator;
 import org.objectweb.fractal.adl.error.Error;
 import org.objectweb.fractal.adl.error.ErrorLocator;
-import org.objectweb.fractal.adl.error.NodeErrorLocator;
-import org.ow2.mind.annotation.AnnotationHelper;
 import org.ow2.mind.unit.UnitTestDataProvider;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 public class SemanticErrorTest extends AbstractADLLoaderTest {
+
+  protected static final Pattern SEMANTIC_ERROR_PATTERN = Pattern
+                                                            .compile("//#\\s*SemanticError\\s+GroupId=(\\w+)\\s+ErrorId=(\\w+)\\s+line=(\\d+)");
 
   @DataProvider(name = "unit-test")
   protected Object[][] dataProvider() throws Exception {
@@ -49,8 +53,11 @@ public class SemanticErrorTest extends AbstractADLLoaderTest {
   public void semanticErrorTest(final String rootDir, final String adlName)
       throws Exception {
     initSourcePath(rootDir);
+    final ExpectedError expectedError = parserFirstLine(adlName);
     try {
       loader.load(adlName, context);
+      if (expectedError != null)
+        fail("Successful loading of erroneous " + adlName + " ADL.");
     } catch (final ADLException e) {
       final Error error = e.getError();
       if (error == null) {
@@ -58,42 +65,18 @@ public class SemanticErrorTest extends AbstractADLLoaderTest {
             "Loader returned an exception without error.");
       }
       ErrorLocator locator = error.getLocator();
-      if (locator instanceof ChainedErrorLocator) {
+      while (locator instanceof ChainedErrorLocator) {
         locator = ((ChainedErrorLocator) locator).getRootLocator();
       }
 
-      Node node = null;
-      if (locator == null) {
-        throw new AssertionFailedError(
-            "Loader returned an error without locator. The error message was \n"
-                + error.getMessage());
-      }
-      if (locator instanceof BasicErrorLocator) {
-        throw new AssertionFailedError(
-            "There is no node assotiated to the raised error. Received error message is \n"
-                + error.getMessage());
-      } else {
-
-        node = ((NodeErrorLocator) locator).getNode();
-        if (node == null) {
-          throw new AssertionFailedError(
-              "The node causing the error doesn't contain an error locator.\n The expected error was \n"
-                  + e.getError());
-        }
-      }
-      final SemanticError annotation = AnnotationHelper.getAnnotation(node,
-          SemanticError.class);
-      if (annotation == null) {
-        throw new AssertionFailedError(
-            "The node causing the error doesn't contain an annotation specifying the expected error.\n The expected error was \n"
-                + e.getError());
-      }
-
-      assertEquals(annotation.ErrorId, ((Enum) error.getTemplate()).name());
-      assertEquals(annotation.GroupId, error.getTemplate().getGroupId());
-      return;
+      assertNotNull(locator, "Caught ADLException have no locator");
+      assertEquals(((Enum<?>) error.getTemplate()).name(),
+          expectedError.errorId, "Unexpected errorId of caught ADLException");
+      assertEquals(error.getTemplate().getGroupId(), expectedError.groupId,
+          "Unexpected groupId of caught ADLException");
+      assertEquals(locator.getBeginLine(), expectedError.line,
+          "Unexpected line of caught ADLException");
     }
-    fail("Successful loading of erroneous adl file.");
   }
 
   @DataProvider(name = "unsupported-unit-test")
@@ -107,4 +90,24 @@ public class SemanticErrorTest extends AbstractADLLoaderTest {
     semanticErrorTest(rootDir, adlName);
   }
 
+  protected ExpectedError parserFirstLine(final String adlName)
+      throws Exception {
+    final String line = readFirstLine(adlName);
+    if (!line.startsWith("//#")) return null;
+    final Matcher matcher = SEMANTIC_ERROR_PATTERN.matcher(line);
+    if (!matcher.matches())
+      throw new Exception("Invalid SemanticError specification in ADL "
+          + adlName);
+    final ExpectedError expectedError = new ExpectedError();
+    expectedError.groupId = matcher.group(1);
+    expectedError.errorId = matcher.group(2);
+    expectedError.line = Integer.parseInt(matcher.group(3));
+    return expectedError;
+  }
+
+  protected static class ExpectedError {
+    public String groupId;
+    public String errorId;
+    public int    line;
+  }
 }

@@ -25,9 +25,18 @@ package org.ow2.mind.adl;
 import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
 import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
 
+import java.io.File;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import org.objectweb.fractal.adl.Definition;
+import org.objectweb.fractal.adl.util.FractalADLLogManager;
 import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.fractal.api.control.IllegalBindingException;
+import org.ow2.mind.ForceRegenContextHelper;
 import org.ow2.mind.InputResourceLocator;
+import org.ow2.mind.InputResourcesHelper;
 import org.ow2.mind.io.OutputFileLocator;
 import org.ow2.mind.st.AbstractStringTemplateProcessor;
 
@@ -37,6 +46,9 @@ import org.ow2.mind.st.AbstractStringTemplateProcessor;
 public abstract class AbstractSourceGenerator
     extends
       AbstractStringTemplateProcessor {
+
+  // The dep logger
+  protected static Logger     depLogger = FractalADLLogManager.getLogger("dep");
 
   // ---------------------------------------------------------------------------
   // Client Interfaces
@@ -54,6 +66,39 @@ public abstract class AbstractSourceGenerator
 
   protected AbstractSourceGenerator(final String templateGroupName) {
     super(templateGroupName);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Utility methods
+  // ---------------------------------------------------------------------------
+
+  protected boolean regenerate(final File outputFile,
+      final Definition definition, final Map<Object, Object> context) {
+    if (ForceRegenContextHelper.getForceRegen(context)) return true;
+
+    if (!outputFile.exists()) {
+      if (depLogger.isLoggable(Level.FINE)) {
+        depLogger.fine("Generated source file '" + outputFile
+            + "' does not exist, generate.");
+      }
+      return true;
+    }
+
+    if (!inputResourceLocatorItf.isUpToDate(outputFile, InputResourcesHelper
+        .getInputResources(definition), context)) {
+      if (depLogger.isLoggable(Level.FINE)) {
+        depLogger.fine("Generated source file '" + outputFile
+            + "' is out-of-date, regenerate.");
+      }
+      return true;
+    } else {
+      if (depLogger.isLoggable(Level.FINE)) {
+        depLogger.fine("Generated source file '" + outputFile
+            + "' is up-to-date, do not regenerate.");
+      }
+      return false;
+    }
+
   }
 
   // ---------------------------------------------------------------------------
@@ -107,5 +152,4 @@ public abstract class AbstractSourceGenerator
       super.unbindFc(itfName);
     }
   }
-
 }

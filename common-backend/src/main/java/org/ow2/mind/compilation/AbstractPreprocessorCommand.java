@@ -35,10 +35,16 @@ public abstract class AbstractPreprocessorCommand
 
   protected final Map<Object, Object> context;
   protected final String              cmd;
-  protected final List<String>        flags = new ArrayList<String>();
+  protected final List<String>        flags             = new ArrayList<String>();
   protected File                      inputFile;
   protected File                      outputFile;
+  protected File                      dependencyOutputFile;
   protected Collection<File>          dependencies;
+  protected boolean                   dependencyManaged = false;
+  protected boolean                   forced            = false;
+
+  private List<File>                  inputFiles;
+  private List<File>                  outputFiles;
 
   protected AbstractPreprocessorCommand(final String cmd,
       final Map<Object, Object> context) {
@@ -73,9 +79,17 @@ public abstract class AbstractPreprocessorCommand
     return this;
   }
 
+  public File getInputFile() {
+    return inputFile;
+  }
+
   public PreprocessorCommand setOutputFile(final File outputFile) {
     this.outputFile = outputFile;
     return this;
+  }
+
+  public File getOutputFile() {
+    return outputFile;
   }
 
   public PreprocessorCommand addDependency(final File dependency) {
@@ -86,17 +100,57 @@ public abstract class AbstractPreprocessorCommand
     return this;
   }
 
+  public PreprocessorCommand setDependencyOutputFile(
+      final File dependencyOutputFile) {
+    this.dependencyOutputFile = dependencyOutputFile;
+    return this;
+  }
+
+  public PreprocessorCommand setAllDependenciesManaged(
+      final boolean dependencyManaged) {
+    this.dependencyManaged = dependencyManaged;
+    return this;
+  }
+
   public Collection<File> getInputFiles() {
-    if (dependencies != null) {
-      final Collection<File> inputFiles = new ArrayList<File>(dependencies);
-      inputFiles.add(inputFile);
-      return inputFiles;
-    } else {
-      return Arrays.asList(inputFile);
-    }
+    return inputFiles;
   }
 
   public Collection<File> getOutputFiles() {
-    return Arrays.asList(outputFile);
+    return outputFiles;
   }
+
+  public boolean forceExec() {
+    return forced;
+  }
+
+  public void prepare() {
+    if (dependencyManaged || dependencyOutputFile != null) {
+      forced = false;
+    } else {
+      forced = true;
+    }
+
+    inputFiles = new ArrayList<File>();
+    inputFiles.add(inputFile);
+    if (dependencies != null) {
+      inputFiles.addAll(dependencies);
+    }
+    if (dependencyOutputFile != null) {
+      final Collection<File> deps = readDependencies();
+      if (deps != null) {
+        inputFiles.addAll(deps);
+      } else {
+        // Can't read dependencies, force execution.
+        forced = true;
+      }
+    }
+
+    if (dependencyOutputFile != null)
+      outputFiles = Arrays.asList(outputFile, dependencyOutputFile);
+    else
+      outputFiles = Arrays.asList(outputFile);
+  }
+
+  protected abstract Collection<File> readDependencies();
 }

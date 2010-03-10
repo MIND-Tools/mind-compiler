@@ -8,7 +8,6 @@ import java.util.Map;
 
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.AbstractLoader;
-import org.objectweb.fractal.adl.CompilerError;
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.NodeFactory;
 import org.objectweb.fractal.api.NoSuchInterfaceException;
@@ -50,9 +49,8 @@ public class TemplateInstanceLoader extends AbstractLoader {
 
   protected DefinitionReference toDefinitionReference(
       final DefinitionName definitionName) {
-    final DefinitionReference defRef = newDefinitionReference();
-
-    defRef.setName(definitionName.getName());
+    final DefinitionReference defRef = ASTHelper.newDefinitionReference(
+        nodeFactoryItf, definitionName.getName());
 
     for (final DefinitionNameArgument arg : definitionName.getTypeArguments()) {
       final TypeArgument typeArgument = GenericASTHelper
@@ -64,11 +62,6 @@ public class TemplateInstanceLoader extends AbstractLoader {
     }
 
     return defRef;
-  }
-
-  protected DefinitionReference newDefinitionReference() throws CompilerError {
-    return ASTHelper.newNode(nodeFactoryItf, "definitionReference",
-        DefinitionReference.class, TypeArgumentContainer.class);
   }
 
   // ---------------------------------------------------------------------------

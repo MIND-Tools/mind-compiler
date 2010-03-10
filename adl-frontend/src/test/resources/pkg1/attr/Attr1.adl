@@ -1,0 +1,8 @@
+
+primitive pkg1.attr.Attr1 {
+
+  attribute int     attr1 = 12;
+  attribute uint8_t attr2 = 11;
+  attribute string  attr3 = "toto";
+
+}

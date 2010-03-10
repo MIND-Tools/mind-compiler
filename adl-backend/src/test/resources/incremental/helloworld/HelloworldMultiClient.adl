@@ -1,0 +1,12 @@
+@Run
+composite helloworld.HelloworldMultiClient {
+  provides Main as main;
+
+  contains Client as client1;
+  contains Client as client2;
+  contains Server as server;
+  
+  binds this.main to client1.main;
+  binds client1.sa to server.s;
+  binds client2.sa to server.s;
+}

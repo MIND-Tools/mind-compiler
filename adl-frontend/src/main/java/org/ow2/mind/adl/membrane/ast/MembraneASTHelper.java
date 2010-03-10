@@ -22,10 +22,12 @@
 
 package org.ow2.mind.adl.membrane.ast;
 
+import static org.ow2.mind.CommonASTHelper.newNode;
+import static org.ow2.mind.CommonASTHelper.turnsTo;
+
 import org.objectweb.fractal.adl.Node;
 import org.objectweb.fractal.adl.NodeFactory;
 import org.objectweb.fractal.adl.merger.NodeMerger;
-import org.ow2.mind.adl.ast.ASTHelper;
 import org.ow2.mind.adl.ast.Data;
 import org.ow2.mind.adl.ast.MindInterface;
 import org.ow2.mind.adl.ast.Source;
@@ -58,8 +60,7 @@ public final class MembraneASTHelper {
    */
   public static MindInterface newInternalInterfaceNode(
       final NodeFactory nodeFactory) {
-    return ASTHelper.newNode(nodeFactory, "internalInterface",
-        MindInterface.class);
+    return newNode(nodeFactory, "internalInterface", MindInterface.class);
   }
 
   /**
@@ -69,7 +70,7 @@ public final class MembraneASTHelper {
    * @return a new {@link Controller} node.
    */
   public static Controller newControllerNode(final NodeFactory nodeFactory) {
-    return ASTHelper.newNode(nodeFactory, "controller", Controller.class);
+    return newNode(nodeFactory, "controller", Controller.class);
   }
 
   /**
@@ -84,8 +85,8 @@ public final class MembraneASTHelper {
   public static ControllerInterface newControllerInterfaceNode(
       final NodeFactory nodeFactory, final String itfName,
       final boolean isInternal) {
-    final ControllerInterface controllerInterface = ASTHelper.newNode(
-        nodeFactory, "controllerInterface", ControllerInterface.class);
+    final ControllerInterface controllerInterface = newNode(nodeFactory,
+        "controllerInterface", ControllerInterface.class);
     controllerInterface.setName(itfName);
     if (isInternal)
       controllerInterface.setIsInternal(ControllerInterface.TRUE);
@@ -101,7 +102,7 @@ public final class MembraneASTHelper {
    */
   public static Data newDataNode(final NodeFactory nodeFactory,
       final String path) {
-    final Data data = ASTHelper.newNode(nodeFactory, "data", Data.class);
+    final Data data = newNode(nodeFactory, "data", Data.class);
     data.setPath(path);
     return data;
   }
@@ -115,7 +116,7 @@ public final class MembraneASTHelper {
    */
   public static Source newSourceNode(final NodeFactory nodeFactory,
       final String path) {
-    final Source src = ASTHelper.newNode(nodeFactory, "source", Source.class);
+    final Source src = newNode(nodeFactory, "source", Source.class);
     src.setPath(path);
     return src;
   }
@@ -135,8 +136,7 @@ public final class MembraneASTHelper {
    */
   public static ControllerContainer turnToControllerContainer(final Node node,
       final NodeFactory nodeFactory, final NodeMerger nodeMerger) {
-    return ASTHelper.turnsTo(node, ControllerContainer.class, nodeFactory,
-        nodeMerger);
+    return turnsTo(node, ControllerContainer.class, nodeFactory, nodeMerger);
   }
 
   /**
@@ -156,7 +156,7 @@ public final class MembraneASTHelper {
   public static InternalInterfaceContainer turnToInternalInterfaceContainer(
       final Node node, final NodeFactory nodeFactory,
       final NodeMerger nodeMerger) {
-    return ASTHelper.turnsTo(node, InternalInterfaceContainer.class,
-        nodeFactory, nodeMerger);
+    return turnsTo(node, InternalInterfaceContainer.class, nodeFactory,
+        nodeMerger);
   }
 }

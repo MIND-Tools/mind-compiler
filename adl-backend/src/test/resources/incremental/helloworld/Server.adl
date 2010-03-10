@@ -1,0 +1,10 @@
+
+primitive helloworld.Server {
+  
+  provides Service as s ;
+  
+  attribute int count = 2;
+  
+  source server1.c;
+  source server2.c;
+}

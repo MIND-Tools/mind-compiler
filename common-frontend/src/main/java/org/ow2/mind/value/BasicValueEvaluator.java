@@ -34,10 +34,11 @@ import org.objectweb.fractal.api.control.BindingController;
 import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.ow2.mind.value.ast.Array;
 import org.ow2.mind.value.ast.BooleanLiteral;
+import org.ow2.mind.value.ast.NullLiteral;
 import org.ow2.mind.value.ast.NumberLiteral;
 import org.ow2.mind.value.ast.StringLiteral;
 import org.ow2.mind.value.ast.Value;
-import org.ow2.mind.value.ast.ValueHelper;
+import org.ow2.mind.value.ast.ValueASTHelper;
 
 public class BasicValueEvaluator implements ValueEvaluator, BindingController {
 
@@ -104,7 +105,7 @@ public class BasicValueEvaluator implements ValueEvaluator, BindingController {
         return evaluatePrimitiveType((BooleanLiteral) value, expectedType);
       }
       try {
-        return expectedType.cast(Boolean.valueOf(ValueHelper
+        return expectedType.cast(Boolean.valueOf(ValueASTHelper
             .getValue((BooleanLiteral) value)));
       } catch (final ClassCastException e) {
         throw new ValueEvaluationException(
@@ -125,6 +126,14 @@ public class BasicValueEvaluator implements ValueEvaluator, BindingController {
             arrayComponentType, context));
       }
       return expectedType.cast(result);
+    } else if (value instanceof NullLiteral) {
+      try {
+        return expectedType.cast(null);
+      } catch (final ClassCastException e) {
+        throw new ValueEvaluationException(
+            "Incompatible value type, found NULL where "
+                + expectedType.getName() + " was expected", value, e);
+      }
     } else {
       throw new ValueEvaluationException("Unknow value type", value);
     }

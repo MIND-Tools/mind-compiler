@@ -22,17 +22,16 @@
 
 package org.ow2.mind.adl;
 
-import static org.objectweb.fractal.cecilia.adl.directives.DirectiveHelper.splitOptionString;
 import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
 import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
 import static org.ow2.mind.PathHelper.fullyQualifiedNameToPath;
 import static org.ow2.mind.PathHelper.replaceExtension;
-import static org.ow2.mind.adl.AdditionalCompilationUnitDecoration.getAdditionalCompilationUnit;
+import static org.ow2.mind.adl.CompilationDecorationHelper.getAdditionalCompilationUnit;
 import static org.ow2.mind.annotation.AnnotationHelper.getAnnotation;
+import static org.ow2.mind.compilation.DirectiveHelper.splitOptionString;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -46,6 +45,8 @@ import org.objectweb.fractal.adl.error.GenericErrors;
 import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.fractal.api.control.BindingController;
 import org.objectweb.fractal.api.control.IllegalBindingException;
+import org.ow2.mind.SourceFileWriter;
+import org.ow2.mind.adl.CompilationDecorationHelper.AdditionalCompilationUnitDecoration;
 import org.ow2.mind.adl.annotation.predefined.CFlags;
 import org.ow2.mind.adl.annotation.predefined.Singleton;
 import org.ow2.mind.adl.ast.ImplementationContainer;
@@ -115,39 +116,41 @@ public class BasicDefinitionCompiler
     for (int i = 0; i < sources.length; i++) {
       final Source src = sources[i];
       final String implSuffix = "_impl" + i;
-      final File cppFile = outputFileLocatorItf.getCSourceOutputFile(
+      final File cppFile = outputFileLocatorItf.getCSourceTemporaryOutputFile(
           fullyQualifiedNameToPath(definition.getName(), implSuffix, ".i"),
           context);
-      final File mppFile = outputFileLocatorItf.getCSourceOutputFile(
+      final File mppFile = outputFileLocatorItf.getCSourceTemporaryOutputFile(
           fullyQualifiedNameToPath(definition.getName(), implSuffix, ".mpp.c"),
           context);
       final File objectFile = outputFileLocatorItf.getCCompiledOutputFile(
           fullyQualifiedNameToPath(definition.getName(), implSuffix, ".o"),
           context);
+      final File depFile = outputFileLocatorItf.getCCompiledOutputFile(
+          fullyQualifiedNameToPath(definition.getName(), implSuffix, ".d"),
+          context);
 
       final File headerFile;
       if (sources.length == 1) {
-        headerFile = outputFileLocatorItf.getCSourceOutputFile(
+        headerFile = outputFileLocatorItf.getCSourceTemporaryOutputFile(
             ImplementationHeaderSourceGenerator
                 .getImplHeaderFileName(definition), context);
       } else {
-        headerFile = outputFileLocatorItf.getCSourceOutputFile(
+        headerFile = outputFileLocatorItf.getCSourceTemporaryOutputFile(
             ImplementationHeaderSourceGenerator.getImplHeaderFileName(
                 definition, i), context);
       }
 
       final File srcFile;
-      final String inlinedCCode = src.getCCode();
+      String inlinedCCode = src.getCCode();
       if (inlinedCCode != null) {
         // Implementation code is inlined in the ADL. Dump it in a file.
         srcFile = outputFileLocatorItf.getCSourceOutputFile(
             fullyQualifiedNameToPath(definition.getName(), implSuffix, ".c"),
             context);
+        inlinedCCode = BackendFormatRenderer.sourceToLine(src) + "\n"
+            + inlinedCCode + "\n";
         try {
-          final PrintStream ps = new PrintStream(srcFile);
-          ps.println(BackendFormatRenderer.sourceToLine(src));
-          ps.println(inlinedCCode);
-          ps.close();
+          SourceFileWriter.writeToFile(srcFile, inlinedCCode);
         } catch (final IOException e) {
           throw new CompilerError(IOErrors.WRITE_ERROR, e, srcFile
               .getAbsolutePath());
@@ -164,17 +167,14 @@ public class BasicDefinitionCompiler
       }
 
       final PreprocessorCommand cppCommand = newPreprocessorCommand(definition,
-          srcFile, null, cppFile, context);
+          srcFile, null, depFile, cppFile, context);
       final MPPCommand mppCommand = newMPPCommand(definition, cppFile, mppFile,
           headerFile, context);
       final CompilerCommand gccCommand = newCompilerCommand(definition,
           mppFile, objectFile, context);
 
-      // add include of '.inc' file in C preprocessing command.
-      final String includefileName = DefinitionIncSourceGenerator
-          .getIncFileName(definition);
       cppCommand.addIncludeFile(outputFileLocatorItf.getCSourceOutputFile(
-          includefileName, context));
+          DefinitionIncSourceGenerator.getIncFileName(definition), context));
 
       // Add source-level C-Flags
       final CFlags sourceFlags = getAnnotation(src, CFlags.class);
@@ -198,12 +198,14 @@ public class BasicDefinitionCompiler
     for (final AdditionalCompilationUnitDecoration additionalCompilationUnit : additionalCompilationUnits) {
 
       final String path = additionalCompilationUnit.getPath();
-      final File cppFile = outputFileLocatorItf.getCSourceOutputFile(
+      final File cppFile = outputFileLocatorItf.getCSourceTemporaryOutputFile(
           replaceExtension(path, ".i"), context);
-      final File mppFile = outputFileLocatorItf.getCSourceOutputFile(
+      final File mppFile = outputFileLocatorItf.getCSourceTemporaryOutputFile(
           replaceExtension(path, ".mpp.c"), context);
       final File objectFile = outputFileLocatorItf.getCCompiledOutputFile(
           replaceExtension(path, ".o"), context);
+      final File depFile = outputFileLocatorItf.getCCompiledOutputFile(
+          replaceExtension(path, ".d"), context);
 
       final File srcFile;
 
@@ -230,8 +232,8 @@ public class BasicDefinitionCompiler
       }
 
       final PreprocessorCommand cppCommand = newPreprocessorCommand(definition,
-          srcFile, additionalCompilationUnit.getDependencies(), cppFile,
-          context);
+          srcFile, additionalCompilationUnit.getDependencies(), depFile,
+          cppFile, context);
       final MPPCommand mppCommand = newMPPCommand(definition, cppFile, mppFile,
           null, context);
       final CompilerCommand gccCommand = newCompilerCommand(definition,
@@ -245,11 +247,13 @@ public class BasicDefinitionCompiler
 
   protected PreprocessorCommand newPreprocessorCommand(
       final Definition definition, final File inputFile,
-      final Collection<File> dependencies, final File outputFile,
-      final Map<Object, Object> context) throws ADLException {
+      final Collection<File> dependencies, final File depFile,
+      final File outputFile, final Map<Object, Object> context)
+      throws ADLException {
     final PreprocessorCommand command = compilerWrapperItf
         .newPreprocessorCommand(context);
-    command.setOutputFile(outputFile).setInputFile(inputFile);
+    command.setOutputFile(outputFile).setInputFile(inputFile)
+        .setDependencyOutputFile(depFile);
 
     if (dependencies != null) {
       for (final File dep : dependencies) {
@@ -258,6 +262,8 @@ public class BasicDefinitionCompiler
     }
 
     command.addIncludeDir(outputFileLocatorItf.getCSourceOutputDir(context));
+    command.addIncludeDir(outputFileLocatorItf
+        .getCSourceTemporaryOutputDir(context));
 
     final URL[] inputResourceRoots = implementationLocatorItf
         .getInputResourcesRoot(context);
@@ -305,14 +311,14 @@ public class BasicDefinitionCompiler
       final Map<Object, Object> context) throws ADLException {
     final CompilerCommand command = compilerWrapperItf
         .newCompilerCommand(context);
-    command.setOutputFile(outputFile).setInputFile(inputFile);
+    command.setOutputFile(outputFile).setInputFile(inputFile)
+        .setAllDependenciesManaged(true);
 
     command.addIncludeDir(outputFileLocatorItf.getCSourceOutputDir(context));
 
-    final String includefileName = fullyQualifiedNameToPath(definition
-        .getName(), DefinitionMacroSourceGenerator.FILE_EXT);
     command.addIncludeFile(outputFileLocatorItf.getCSourceOutputFile(
-        includefileName, context));
+        fullyQualifiedNameToPath(definition.getName(),
+            DefinitionMacroSourceGenerator.FILE_EXT), context));
 
     // Add definition level C-Flags
     final CFlags definitionflags = getAnnotation(definition, CFlags.class);

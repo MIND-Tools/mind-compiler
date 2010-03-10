@@ -247,14 +247,17 @@ public class ParametricDefinitionReferenceResolver
     Map<String, FormalParameter> result = parameters.get(d);
 
     if (result == null) {
+      result = new HashMap<String, FormalParameter>();
       if (d instanceof FormalParameterContainer) {
         final FormalParameter[] formalParameters = ((FormalParameterContainer) d)
             .getFormalParameters();
         if (formalParameters.length > 0) {
-
-          result = new HashMap<String, FormalParameter>(formalParameters.length);
           for (final FormalParameter parameter : formalParameters) {
             if (result.put(parameter.getName(), parameter) != null) {
+              /*
+               * TODO strange ADLErrors, and why checking for duplicated
+               * parameters here ?
+               */
               throw new ADLException(
                   ADLErrors.DUPLICATED_TEMPALTE_VARIABLE_NAME, parameter,
                   parameter.getName());

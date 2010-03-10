@@ -1,4 +1,4 @@
-@SemanticError(GroupId="ADL", ErrorId="WRONG_DEFINITION_NAME")
+//#SemanticError GroupId=ADL ErrorId=WRONG_DEFINITION_NAME line=2
 primitive BaddName {
 	source my.c;	
 }

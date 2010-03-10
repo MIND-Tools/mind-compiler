@@ -22,6 +22,9 @@
 
 package org.ow2.mind.adl.generic.ast;
 
+import static org.ow2.mind.CommonASTHelper.newNode;
+import static org.ow2.mind.CommonASTHelper.turnsTo;
+
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.Node;
 import org.objectweb.fractal.adl.NodeFactory;
@@ -166,7 +169,7 @@ public final class GenericASTHelper extends ASTHelper {
   public static FormalTypeParameter newFormalTypeParameter(
       final NodeFactory nodeFactory, final String name,
       final DefinitionReference conformsto) {
-    final FormalTypeParameter para = ASTHelper.newNode(nodeFactory,
+    final FormalTypeParameter para = newNode(nodeFactory,
         "formalTypeParameter", FormalTypeParameter.class);
     para.setName(name);
     para.setDefinitionReference(conformsto);
@@ -180,7 +183,7 @@ public final class GenericASTHelper extends ASTHelper {
    * @return a new {@link TypeArgument} node.
    */
   public static TypeArgument newTypeArgument(final NodeFactory nodeFactory) {
-    final TypeArgument typeArg = ASTHelper.newNode(nodeFactory, "typeArgument",
+    final TypeArgument typeArg = newNode(nodeFactory, "typeArgument",
         TypeArgument.class);
     return typeArg;
   }
@@ -202,8 +205,8 @@ public final class GenericASTHelper extends ASTHelper {
   public static FormalTypeParameterContainer turnsToFormalTypeParameterContainer(
       final Node node, final NodeFactory nodeFactory,
       final NodeMerger nodeMerger) {
-    return ASTHelper.turnsTo(node, FormalTypeParameterContainer.class,
-        nodeFactory, nodeMerger);
+    return turnsTo(node, FormalTypeParameterContainer.class, nodeFactory,
+        nodeMerger);
   }
 
   /**
@@ -223,7 +226,6 @@ public final class GenericASTHelper extends ASTHelper {
   public static TypeArgumentContainer turnsToTypeArgumentContainer(
       final Node node, final NodeFactory nodeFactory,
       final NodeMerger nodeMerger) {
-    return ASTHelper.turnsTo(node, TypeArgumentContainer.class, nodeFactory,
-        nodeMerger);
+    return turnsTo(node, TypeArgumentContainer.class, nodeFactory, nodeMerger);
   }
 }

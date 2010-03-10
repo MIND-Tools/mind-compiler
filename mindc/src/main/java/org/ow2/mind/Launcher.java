@@ -23,39 +23,50 @@
 package org.ow2.mind;
 
 import java.io.File;
+import java.io.PrintStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.antlr.stringtemplate.StringTemplateGroupLoader;
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.Definition;
+import org.objectweb.fractal.adl.JavaFactory;
 import org.objectweb.fractal.adl.Loader;
 import org.objectweb.fractal.adl.error.GenericErrors;
-import org.objectweb.fractal.cecilia.adl.directives.DirectiveHelper;
+import org.objectweb.fractal.adl.util.FractalADLLogManager;
 import org.objectweb.fractal.cecilia.targetDescriptor.TargetDescriptorException;
 import org.objectweb.fractal.cecilia.targetDescriptor.TargetDescriptorLoader;
-import org.ow2.mind.BasicInputResourceLocator;
+import org.objectweb.fractal.cecilia.targetDescriptor.TargetDescriptorLoaderJavaFactory;
+import org.objectweb.fractal.cecilia.targetDescriptor.ast.ADLMapping;
+import org.objectweb.fractal.cecilia.targetDescriptor.ast.CFlag;
+import org.objectweb.fractal.cecilia.targetDescriptor.ast.LdFlag;
+import org.objectweb.fractal.cecilia.targetDescriptor.ast.Target;
 import org.ow2.mind.adl.ADLBackendFactory;
 import org.ow2.mind.adl.ADLLocator;
 import org.ow2.mind.adl.DefinitionCompiler;
 import org.ow2.mind.adl.DefinitionSourceGenerator;
 import org.ow2.mind.adl.Factory;
 import org.ow2.mind.adl.GraphCompiler;
+import org.ow2.mind.adl.OutputBinaryADLLocator;
 import org.ow2.mind.adl.graph.ComponentGraph;
 import org.ow2.mind.adl.graph.Instantiator;
 import org.ow2.mind.adl.implementation.BasicImplementationLocator;
 import org.ow2.mind.adl.implementation.ImplementationLocator;
+import org.ow2.mind.adl.st.ADLLoaderASTTransformer;
 import org.ow2.mind.annotation.AnnotationLocatorHelper;
 import org.ow2.mind.compilation.CompilationCommand;
 import org.ow2.mind.compilation.CompilationCommandExecutor;
 import org.ow2.mind.compilation.CompilerCommand;
 import org.ow2.mind.compilation.CompilerContextHelper;
 import org.ow2.mind.compilation.CompilerWrapper;
+import org.ow2.mind.compilation.DirectiveHelper;
 import org.ow2.mind.compilation.LinkerCommand;
 import org.ow2.mind.compilation.gcc.GccCompilerWrapper;
 import org.ow2.mind.idl.IDLBackendFactory;
@@ -63,6 +74,8 @@ import org.ow2.mind.idl.IDLLoader;
 import org.ow2.mind.idl.IDLLoaderChainFactory;
 import org.ow2.mind.idl.IDLLocator;
 import org.ow2.mind.idl.IDLVisitor;
+import org.ow2.mind.idl.OutputBinaryIDLLocator;
+import org.ow2.mind.idl.st.IDLLoaderASTTransformer;
 import org.ow2.mind.io.BasicOutputFileLocator;
 import org.ow2.mind.plugin.SimpleClassPluginFactory;
 import org.ow2.mind.preproc.BasicMPPWrapper;
@@ -72,18 +85,128 @@ import org.ow2.mind.st.STLoaderFactory;
 import org.ow2.mind.st.STNodeFactoryImpl;
 import org.ow2.mind.st.StringTemplateASTTransformer;
 
-public class Launcher extends org.objectweb.fractal.cecilia.adl.Launcher {
+public class Launcher extends AbstractLauncher {
+
+  protected static final String          PROGRAM_NAME_PROPERTY_NAME = "cecilia.launcher.name";
+
+  // TODO use helper methods for this context entry
+  public static final String             EXEC_NAME                  = "executable-name";
 
   // System property name for external mind annotation packages
-  protected static final String          MIND_ANNOTATION_PACKAGES = "mind.annotation.packages";
+  protected static final String          MIND_ANNOTATION_PACKAGES   = "mind.annotation.packages";
+
+  protected final CmdArgument            targetDescOpt              = new CmdArgument(
+                                                                        "t",
+                                                                        "target-descriptor",
+                                                                        "Specify the target descriptor",
+                                                                        "<name>");
+
+  protected final CmdArgument            compilerCmdOpt             = new CmdArgument(
+                                                                        null,
+                                                                        "compiler-command",
+                                                                        "the command of the C compiler",
+                                                                        "<path>",
+                                                                        "gcc",
+                                                                        false);
+
+  protected final CmdAppendOption        cFlagsOpt                  = new CmdAppendOption(
+                                                                        "c",
+                                                                        "c-flags",
+                                                                        "the c-flags compiler directives",
+                                                                        "<flags>");
+
+  protected final CmdPathOption          includePathOpt             = new CmdPathOption(
+                                                                        "I",
+                                                                        "inc-path",
+                                                                        "the list of path to be added in compiler include paths",
+                                                                        "<path list>");
+
+  protected final CmdArgument            linkerCmdOpt               = new CmdArgument(
+                                                                        null,
+                                                                        "linker-command",
+                                                                        "the command of the linker",
+                                                                        "<path>",
+                                                                        "gcc",
+                                                                        false);
+
+  protected final CmdAppendOption        ldFlagsOpt                 = new CmdAppendOption(
+                                                                        "l",
+                                                                        "ld-flags",
+                                                                        "the ld-flags compiler directives",
+                                                                        "<flags>");
+
+  protected final CmdPathOption          ldPathOpt                  = new CmdPathOption(
+                                                                        "L",
+                                                                        "ld-path",
+                                                                        "the list of path to be added to linker library search path",
+                                                                        "<path list>");
+
+  protected final CmdArgument            linkerScriptOpt            = new CmdArgument(
+                                                                        "T",
+                                                                        "linker-script",
+                                                                        "linker script to use (given path is resolved in source path)",
+                                                                        "<path>");
+
+  protected final CmdArgument            concurrentJobCmdOpt        = new CmdArgument(
+                                                                        "j",
+                                                                        "jobs",
+                                                                        "The number of concurrent compilation jobs",
+                                                                        "<number>",
+                                                                        "1",
+                                                                        false);
+
+  protected final CmdFlag                printStackTraceOpt         = new CmdFlag(
+                                                                        "e",
+                                                                        null,
+                                                                        "Print error stack traces");
+
+  protected final CmdFlag                checkADLModeOpt            = new CmdFlag(
+                                                                        null,
+                                                                        "check-adl",
+                                                                        "Only check input ADL(s), do not compile");
 
   // command line options
-  protected CmdFlag                      generateDefSrcOpt;
+  protected final CmdFlag                generateDefSrcOpt          = new CmdFlag(
+                                                                        "d",
+                                                                        "def2c",
+                                                                        "Only generate source code of the given definitions");                                               ;
 
-  protected CmdFlag                      compileDefOpt;
+  protected final CmdFlag                compileDefOpt              = new CmdFlag(
+                                                                        "D",
+                                                                        "def2o",
+                                                                        "Generate and compile source code of the given definitions, do not link an executable application");
+
+  protected final CmdFlag                forceOpt                   = new CmdFlag(
+                                                                        "F",
+                                                                        "force",
+                                                                        "Force the regeneration and the recompilation of every output files");
+
+  protected final CmdFlag                keepTempOpt                = new CmdFlag(
+                                                                        "K",
+                                                                        "keep",
+                                                                        "Keep temporary output files in default output directory");
+
+  protected final CmdFlag                noBinASTOpt                = new CmdFlag(
+                                                                        "B",
+                                                                        "no-bin",
+                                                                        "Do not generate binary ADL/IDL ('.def', '.itfdef' and '.idtdef' files).");
 
   protected boolean                      generateSrc;
   protected boolean                      compileDef;
+
+  protected static Logger                logger                     = FractalADLLogManager
+                                                                        .getLogger("launcher");
+
+  protected Map<String, String>          adlToExecName;
+  protected Map<Object, Object>          compilerContext            = new HashMap<Object, Object>();
+
+  protected Target                       targetDescriptor;
+
+  protected boolean                      printStackTrace            = false;
+
+  protected boolean                      checkADLMode               = false;
+
+  protected File                         buildDir;
 
   // compiler components :
   protected Loader                       adlLoader;
@@ -103,10 +226,18 @@ public class Launcher extends org.objectweb.fractal.cecilia.adl.Launcher {
    * @throws Exception
    */
   public Launcher(final String... args) throws Exception {
-    super(args);
+    try {
+      init(args);
+      compile();
+    } catch (final InvalidCommandLineException e) {
+      handleException(e);
+    } catch (final CompilerInstantiationException e) {
+      handleException(e);
+    } catch (final ADLException e) {
+      handleException(e);
+    }
   }
 
-  @Override
   protected void init(final String... args) throws InvalidCommandLineException,
       CompilerInstantiationException {
     if (logger.isLoggable(Level.CONFIG)) {
@@ -114,14 +245,6 @@ public class Launcher extends org.objectweb.fractal.cecilia.adl.Launcher {
         logger.config("[arg] " + arg);
       }
     }
-
-    generateDefSrcOpt = new CmdFlag("d", "def2c",
-        "Only generate source code of the given definitions");
-
-    compileDefOpt = new CmdFlag(
-        "D",
-        "def2o",
-        "Generate and compile source code of the given definitions, do not link an executable application");
 
     addOptions();
 
@@ -197,6 +320,14 @@ public class Launcher extends org.objectweb.fractal.cecilia.adl.Launcher {
     compilerContext
         .put(BasicOutputFileLocator.OUTPUT_DIR_CONTEXT_KEY, buildDir);
 
+    // force mode
+    ForceRegenContextHelper.setForceRegen(compilerContext, forceOpt
+        .isPresent(cmdLine));
+    ForceRegenContextHelper.setKeepTemp(compilerContext, keepTempOpt
+        .isPresent(cmdLine));
+    ForceRegenContextHelper.setNoBinaryAST(compilerContext, noBinASTOpt
+        .isPresent(cmdLine));
+
     // build c-flags
     final List<String> cFlagsList = new ArrayList<String>();
     final List<String> incPaths = new ArrayList<String>();
@@ -252,13 +383,6 @@ public class Launcher extends org.objectweb.fractal.cecilia.adl.Launcher {
       CompilerContextHelper.setLinkerCommand(compilerContext, optValue);
     }
 
-    if (archiverCmdOpt.isPresent(cmdLine)) {
-      optValue = archiverCmdOpt.getValue(cmdLine);
-      if (optValue.length() == 0)
-        throw new InvalidCommandLineException("Invalid archiver ''", 1);
-      compilerContext.put(ARCHIVER_COMMAND, optValue);
-    }
-
     Integer jobs = null;
     try {
       jobs = Integer.decode(concurrentJobCmdOpt.getValue(cmdLine));
@@ -282,10 +406,8 @@ public class Launcher extends org.objectweb.fractal.cecilia.adl.Launcher {
           .getPath());
     }
 
-    AnnotationLocatorHelper
-        .addDefaultAnnotationPackage(
-            "org.ow2.mind.adl.annotation.predefined",
-            compilerContext);
+    AnnotationLocatorHelper.addDefaultAnnotationPackage(
+        "org.ow2.mind.adl.annotation.predefined", compilerContext);
 
     final String annotationPackages = System
         .getProperty(MIND_ANNOTATION_PACKAGES);
@@ -305,18 +427,30 @@ public class Launcher extends org.objectweb.fractal.cecilia.adl.Launcher {
   protected void initCompiler(final CommandLine cmdLine) {
     // input locators
     final BasicInputResourceLocator inputResourceLocator = new BasicInputResourceLocator();
-    final IDLLocator idlLocator = IDLLoaderChainFactory.newLocator();
-    final ADLLocator adlLocator = Factory.newLocator();
+    final OutputBinaryIDLLocator obil = new OutputBinaryIDLLocator();
+    obil.clientLocatorItf = IDLLoaderChainFactory
+        .newIDLLocator(inputResourceLocator);
+    final IDLLocator idlLocator = obil;
     final ImplementationLocator implementationLocator = new BasicImplementationLocator();
+
+    final ADLLocator frontendLocator = Factory
+        .newADLLocator(inputResourceLocator);
+    final OutputBinaryADLLocator obal = new OutputBinaryADLLocator();
+    obal.clientLocatorItf = frontendLocator;
+    final ADLLocator adlLocator = obal;
 
     // output locator
     final BasicOutputFileLocator outputFileLocator = new BasicOutputFileLocator();
+    obal.outputFileLocatorItf = outputFileLocator;
+    obil.outputFileLocatorItf = outputFileLocator;
 
     // Plugin Manager Components
     final org.objectweb.fractal.adl.Factory pluginFactory = new SimpleClassPluginFactory();
 
     // compilation task factory
-    final CompilerWrapper compilerWrapper = new GccCompilerWrapper();
+    final GccCompilerWrapper gcw = new GccCompilerWrapper();
+    gcw.outputFileLocatorItf = outputFileLocator;
+    final CompilerWrapper compilerWrapper = gcw;
     final MPPWrapper mppWrapper = new BasicMPPWrapper();
 
     // String Template Component Loaders
@@ -328,9 +462,17 @@ public class Launcher extends org.objectweb.fractal.cecilia.adl.Launcher {
     astTransformer = basicASTTransformer;
 
     // loader chains
-    idlLoader = IDLLoaderChainFactory.newLoader(idlLocator);
-    adlLoader = Factory.newLoader(inputResourceLocator, adlLocator, idlLocator,
-        idlLoader, pluginFactory);
+    final IDLLoaderASTTransformer ilat = new IDLLoaderASTTransformer();
+    ilat.clientIDLLoaderItf = IDLLoaderChainFactory.newLoader(idlLocator,
+        inputResourceLocator);
+    ilat.astTransformerItf = astTransformer;
+    idlLoader = ilat;
+
+    final ADLLoaderASTTransformer alat = new ADLLoaderASTTransformer();
+    alat.clientLoader = Factory.newLoader(inputResourceLocator, adlLocator,
+        idlLocator, implementationLocator, idlLoader, pluginFactory);
+    alat.astTransformerItf = astTransformer;
+    adlLoader = alat;
 
     // instantiator chain
     graphInstantiator = Factory.newInstantiator(adlLoader);
@@ -353,7 +495,166 @@ public class Launcher extends org.objectweb.fractal.cecilia.adl.Launcher {
     executor = ADLBackendFactory.newCompilationCommandExecutor();
   }
 
-  @Override
+  protected TargetDescriptorLoader createTargetDescriptorLoader(
+      final Map<Object, Object> compilerContext)
+      throws CompilerInstantiationException {
+    try {
+      final JavaFactory factory = new TargetDescriptorLoaderJavaFactory();
+      final Map<?, ?> component = (Map<?, ?>) factory.newComponent();
+      return (TargetDescriptorLoader) component.get("loader");
+    } catch (final Exception e) {
+      throw new CompilerInstantiationException(
+          "Unable to instantiate target descriptor loader", e, 101);
+    }
+  }
+
+  protected Map<String, String> parserADLList(final List<String> adlList,
+      final CommandLine cmdLine) throws InvalidCommandLineException {
+    final Map<String, String> adlToExecName = new LinkedHashMap<String, String>();
+
+    // parse adlNames
+    for (final String adlName : adlList) {
+      final int i = adlName.indexOf(':');
+      if (i == -1) {
+        adlToExecName.put(adlName, null);
+      } else {
+        final String adl = adlName.substring(0, i);
+        final String exec = adlName.substring(i + 1);
+        adlToExecName.put(adl, exec);
+      }
+    }
+
+    return adlToExecName;
+  }
+
+  protected String processContext(final Target targetDesc,
+      final String inputADL, final Map<Object, Object> context) {
+    processCFlags(targetDesc, context);
+    processLdFlags(targetDesc, context);
+    processCompiler(targetDesc, context);
+    processLinker(targetDesc, context);
+    processLinkerScript(targetDesc, context);
+    return processADLMapping(targetDesc, inputADL, context);
+  }
+
+  protected void processCFlags(final Target target,
+      final Map<Object, Object> context) {
+    if (target != null && target.getCFlags().length > 0) {
+      final CFlag[] flags = target.getCFlags();
+
+      final List<String> targetFlags = new ArrayList<String>();
+      for (final CFlag flag : flags) {
+        targetFlags.addAll(DirectiveHelper.splitOptionString(flag.getValue()));
+      }
+
+      if (logger.isLoggable(Level.FINE))
+        logger.log(Level.FINE, "Adding target c-flags: " + targetFlags);
+
+      CompilerContextHelper.getCFlags(context);
+      List<String> contextFlags = CompilerContextHelper.getCFlags(context);
+      ;
+      if (contextFlags == null) {
+        contextFlags = new ArrayList<String>();
+      }
+      contextFlags.addAll(targetFlags);
+      CompilerContextHelper.setCFlags(context, contextFlags);
+    }
+  }
+
+  protected void processLdFlags(final Target target,
+      final Map<Object, Object> context) {
+    if (target != null && target.getLdFlags().length > 0) {
+      final LdFlag[] flags = target.getLdFlags();
+
+      final List<String> targetFlags = new ArrayList<String>();
+      for (final LdFlag flag : flags) {
+        targetFlags.addAll(DirectiveHelper.splitOptionString(flag.getValue()));
+      }
+
+      if (logger.isLoggable(Level.FINE))
+        logger.log(Level.FINE, "Adding target ld-flags: " + targetFlags);
+
+      List<String> contextFlags = CompilerContextHelper.getLDFlags(context);
+      if (contextFlags == null) {
+        contextFlags = new ArrayList<String>();
+      }
+      contextFlags.addAll(targetFlags);
+      CompilerContextHelper.setLDFlags(context, contextFlags);
+    }
+  }
+
+  protected void processCompiler(final Target target,
+      final Map<Object, Object> context) {
+    final String opt = CompilerContextHelper.getCompilerCommand(context);
+    if (opt == CompilerContextHelper.DEFAULT_COMPILER_COMMAND) {
+      if (target != null && target.getCompiler() != null) {
+        if (logger.isLoggable(Level.FINE)) {
+          logger.log(Level.FINE, "Using target compiler : "
+              + target.getCompiler().getPath());
+        }
+        CompilerContextHelper.setCompilerCommand(context, target.getCompiler()
+            .getPath());
+      } else {
+        CompilerContextHelper.setCompilerCommand(context, compilerCmdOpt
+            .getDefaultValue());
+      }
+    }
+  }
+
+  protected void processLinker(final Target target,
+      final Map<Object, Object> context) {
+    final String opt = CompilerContextHelper.getLinkerCommand(context);
+    if (opt == CompilerContextHelper.DEFAULT_LINKER_COMMAND) {
+      if (target != null && target.getLinker() != null) {
+        if (logger.isLoggable(Level.FINE)) {
+          logger.log(Level.FINE, "Using target linker : "
+              + target.getLinker().getPath());
+        }
+        CompilerContextHelper.setLinkerCommand(context, target.getLinker()
+            .getPath());
+      } else {
+        CompilerContextHelper.setLinkerCommand(context, linkerCmdOpt
+            .getDefaultValue());
+      }
+    }
+  }
+
+  protected void processLinkerScript(final Target target,
+      final Map<Object, Object> context) {
+    if (target != null) {
+      final String opt = CompilerContextHelper.getLinkerScript(context);
+      if (opt == null && target.getLinkerScript() != null) {
+        if (logger.isLoggable(Level.FINE)) {
+          logger.log(Level.FINE, "Using target linker script : "
+              + target.getLinkerScript().getPath());
+        }
+        CompilerContextHelper.setLinkerScript(context, target.getLinkerScript()
+            .getPath());
+      }
+    }
+  }
+
+  protected String processADLMapping(final Target target,
+      final String inputADL, final Map<Object, Object> context) {
+    if (target != null) {
+      final ADLMapping mapping = target.getAdlMapping();
+      if (mapping == null) return inputADL;
+
+      if (mapping.getOutputName() != null) {
+        final String outputName = ((String) context.get(EXEC_NAME)).replace(
+            "${inputADL}", inputADL);
+        if (logger.isLoggable(Level.FINE)) {
+          logger.log(Level.FINE, "Compiling ADL : " + outputName);
+        }
+        context.put(EXEC_NAME, outputName);
+      }
+
+      return mapping.getMapping().replace("${inputADL}", inputADL);
+    } else {
+      return inputADL;
+    }
+  }
+
   public List<Object> compile() throws ADLException,
       InvalidCommandLineException {
     // Check if at least 1 adlName is specified
@@ -421,12 +722,59 @@ public class Launcher extends org.objectweb.fractal.cecilia.adl.Launcher {
     }
   }
 
-  @Override
   protected void addOptions() {
     options.addOptions(targetDescOpt, compilerCmdOpt, cFlagsOpt,
         includePathOpt, linkerCmdOpt, ldFlagsOpt, ldPathOpt, linkerScriptOpt,
         concurrentJobCmdOpt, printStackTraceOpt, checkADLModeOpt,
-        generateDefSrcOpt, compileDefOpt);
+        generateDefSrcOpt, compileDefOpt, forceOpt, keepTempOpt, noBinASTOpt);
+  }
+
+  @Override
+  protected void printUsage(final PrintStream ps) {
+    final String prgName = System.getProperty(PROGRAM_NAME_PROPERTY_NAME,
+        getClass().getName());
+    ps.println("Usage: " + prgName + " [OPTIONS] (<definition>[:<execname>])+");
+    ps.println("  where <definition> is the name of the component to"
+        + " be compiled, ");
+    ps
+        .println("  and <execname> is the name of the output file to be created.");
+  }
+
+  protected void handleException(final InvalidCommandLineException e)
+      throws Exception {
+    logger.log(Level.FINER, "Caught an InvalidCommandLineException", e);
+    if (printStackTrace) {
+      e.printStackTrace();
+    } else {
+      System.err.println(e.getMessage());
+      printHelp(System.err);
+      System.exit(e.exitValue);
+    }
+  }
+
+  protected void handleException(final CompilerInstantiationException e)
+      throws Exception {
+    logger.log(Level.FINER, "Caught a CompilerInstantiationException", e);
+    e.printStackTrace();
+    System.exit(e.exitValue);
+  }
+
+  protected void handleException(final ADLException e) throws Exception {
+    logger.log(Level.FINER, "Caught an ADL Exception", e);
+    if (printStackTrace) {
+      e.printStackTrace();
+    } else {
+      final StringBuffer sb = new StringBuffer();
+      sb.append(e.getMessage()).append('\n');
+      Throwable cause = e.getCause();
+      while (cause != null) {
+        sb.append("caused by : ");
+        sb.append(cause.getMessage()).append('\n');
+        cause = cause.getCause();
+      }
+      System.err.println(sb);
+    }
+    System.exit(1);
   }
 
   /**
@@ -442,4 +790,29 @@ public class Launcher extends org.objectweb.fractal.cecilia.adl.Launcher {
       e.printStackTrace();
     }
   }
+
+  protected static boolean nullOrEmpty(final String s) {
+    return s == null || s.length() == 0;
+  }
+
+  /**
+   * Exception thrown when the compiler can't be instantiated.
+   */
+  public static class CompilerInstantiationException extends Exception {
+
+    final int exitValue;
+
+    /**
+     * @param message detail message.
+     * @param cause cause.
+     * @param exitValue exit value.
+     */
+    public CompilerInstantiationException(final String message,
+        final Throwable cause, final int exitValue) {
+      super(message, cause);
+      this.exitValue = exitValue;
+    }
+
+  }
+
 }

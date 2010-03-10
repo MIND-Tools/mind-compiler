@@ -24,8 +24,8 @@ package org.ow2.mind.idl;
 
 import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
 import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
-import static org.ow2.mind.idl.IncludeDecorationHelper.getIncludedIDL;
-import static org.ow2.mind.idl.IncludeDecorationHelper.setIncludedIDL;
+import static org.ow2.mind.idl.ast.IDLASTHelper.getIncludedIDL;
+import static org.ow2.mind.idl.ast.IDLASTHelper.setIncludedIDL;
 
 import java.util.Map;
 

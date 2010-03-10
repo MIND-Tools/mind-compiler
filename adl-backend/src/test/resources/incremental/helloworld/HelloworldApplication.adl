@@ -1,0 +1,4 @@
+@Run(addBootstrap=false)
+composite helloworld.HelloworldApplication 
+    extends GenericApplication<Helloworld> {
+}

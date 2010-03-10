@@ -33,11 +33,17 @@ public abstract class AbstractCompilerCommand implements CompilerCommand {
 
   protected final Map<Object, Object> context;
   protected final String              cmd;
-  protected final List<String>        flags = new ArrayList<String>();
+  protected final List<String>        flags             = new ArrayList<String>();
   protected File                      inputFile;
   protected File                      outputFile;
+  protected File                      dependencyOutputFile;
   protected Collection<File>          dependencies;
   protected String                    optimizationLevel;
+  protected boolean                   dependencyManaged = false;
+  protected boolean                   forced            = false;
+
+  private List<File>                  inputFiles;
+  private List<File>                  outputFiles;
 
   protected AbstractCompilerCommand(final String cmd,
       final Map<Object, Object> context) {
@@ -72,6 +78,10 @@ public abstract class AbstractCompilerCommand implements CompilerCommand {
     return this;
   }
 
+  public File getInputFile() {
+    return inputFile;
+  }
+
   public CompilerCommand setOptimizationLevel(final String level) {
     this.optimizationLevel = level;
     return this;
@@ -82,6 +92,10 @@ public abstract class AbstractCompilerCommand implements CompilerCommand {
     return this;
   }
 
+  public File getOutputFile() {
+    return outputFile;
+  }
+
   public CompilerCommand addDependency(final File dependency) {
     if (dependencies == null) {
       dependencies = new ArrayList<File>();
@@ -90,32 +104,56 @@ public abstract class AbstractCompilerCommand implements CompilerCommand {
     return this;
   }
 
+  public CompilerCommand setDependencyOutputFile(final File dependencyOutputFile) {
+    this.dependencyOutputFile = dependencyOutputFile;
+    return this;
+  }
+
+  public CompilerCommand setAllDependenciesManaged(
+      final boolean dependencyManaged) {
+    this.dependencyManaged = dependencyManaged;
+    return this;
+  }
+
   public Collection<File> getInputFiles() {
-    if (dependencies != null) {
-      final Collection<File> inputFiles = new ArrayList<File>(dependencies);
-      inputFiles.add(inputFile);
-      return inputFiles;
-    } else {
-      return Arrays.asList(inputFile);
-    }
+    return inputFiles;
   }
 
   public Collection<File> getOutputFiles() {
-    return Arrays.asList(outputFile);
+    return outputFiles;
   }
 
-  @Override
-  public int hashCode() {
-    // TODO Auto-generated method stub
-    return super.hashCode();
+  public boolean forceExec() {
+    return forced;
   }
 
-  @Override
-  public boolean equals(final Object obj) {
-    if (obj == this) return true;
-    if (!(obj instanceof AbstractCompilerCommand)) return false;
-    final AbstractCompilerCommand cmd = (AbstractCompilerCommand) obj;
+  public void prepare() {
+    if (dependencyManaged || dependencyOutputFile != null) {
+      forced = false;
+    } else {
+      forced = true;
+    }
 
-    return super.equals(obj);
+    inputFiles = new ArrayList<File>();
+    inputFiles.add(inputFile);
+    if (dependencies != null) {
+      inputFiles.addAll(dependencies);
+    }
+    if (dependencyOutputFile != null) {
+      final Collection<File> deps = readDependencies();
+      if (deps != null) {
+        inputFiles.addAll(deps);
+      } else {
+        // Can't read dependencies, force execution.
+        forced = true;
+      }
+    }
+
+    if (dependencyOutputFile != null)
+      outputFiles = Arrays.asList(outputFile, dependencyOutputFile);
+    else
+      outputFiles = Arrays.asList(outputFile);
   }
+
+  protected abstract Collection<File> readDependencies();
 }

@@ -41,6 +41,7 @@ import org.ow2.mind.adl.ASTChecker;
 import org.ow2.mind.adl.Factory;
 import org.ow2.mind.adl.annotation.predefined.controller.BindingController;
 import org.ow2.mind.adl.ast.ASTHelper;
+import org.ow2.mind.adl.implementation.ImplementationLocator;
 import org.ow2.mind.adl.membrane.ControllerInterfaceDecorationHelper;
 import org.ow2.mind.adl.membrane.ast.Controller;
 import org.ow2.mind.adl.membrane.ast.ControllerContainer;
@@ -64,16 +65,21 @@ public class TestBindingController {
   public void setUp() throws Exception {
     // input locators
     final BasicInputResourceLocator inputResourceLocator = new BasicInputResourceLocator();
-    final IDLLocator idlLocator = IDLLoaderChainFactory.newLocator();
-    final ADLLocator adlLocator = Factory.newLocator();
+    final IDLLocator idlLocator = IDLLoaderChainFactory
+        .newIDLLocator(inputResourceLocator);
+    final ADLLocator adlLocator = Factory.newADLLocator(inputResourceLocator);
+    final ImplementationLocator implementationLocator = Factory
+        .newImplementationLocator(inputResourceLocator);
 
     // Plugin Manager Components
     final org.objectweb.fractal.adl.Factory pluginFactory = new SimpleClassPluginFactory();
 
     // loader chains
-    final IDLLoader idlLoader = IDLLoaderChainFactory.newLoader(idlLocator);
-    final Loader adlLoader = Factory.newLoader(inputResourceLocator,
-        adlLocator, idlLocator, idlLoader, pluginFactory);
+    final IDLLoader idlLoader = IDLLoaderChainFactory.newLoader(idlLocator,
+        inputResourceLocator);
+    final Loader adlLoader = Factory
+        .newLoader(inputResourceLocator, adlLocator, idlLocator,
+            implementationLocator, idlLoader, pluginFactory);
     loader = adlLoader;
 
     context = new HashMap<Object, Object>();

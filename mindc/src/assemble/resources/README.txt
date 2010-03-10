@@ -62,6 +62,12 @@ Available options are :
   -D, --def2o                     Generate and compile source code of the given
                                   definitions, do not link an executable 
                                   application
+  -F, --force                     Force the regeneration and the recompilation 
+                                  of every output files
+  -K, --keep                      Keep temporary output files in default output
+                                  directory
+  -B, --no-bin                    Do not generate binary ADL/IDL ('.def', 
+                                  '.itfdef' and '.idtdef' files).
 
 Setting the verbosity level of the mindc compiler
 ====================================================

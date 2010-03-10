@@ -74,12 +74,20 @@ public class GenericDefinitionNameSourceGenerator
         fullyQualifiedNameToPath(templateName, FILE_EXT), context);
     final Properties map = new Properties();
     if (mapFile.exists()) {
+      FileInputStream mapInStream = null;
       try {
-        map.load(new FileInputStream(mapFile));
+        mapInStream = new FileInputStream(mapFile);
+        map.load(mapInStream);
       } catch (final FileNotFoundException e) {
         // ignore
       } catch (final IOException e) {
         // ignore
+      } finally {
+        if (mapInStream != null) try {
+          mapInStream.close();
+        } catch (final IOException e) {
+          // ignore
+        }
       }
     }
     final String previousName = (String) map.put(toValidName(name), name);
@@ -88,8 +96,10 @@ public class GenericDefinitionNameSourceGenerator
           "Name clash in template instance name: \"" + name + "\" and \""
               + previousName + "\"");
     }
+    FileOutputStream mapOutStream = null;
     try {
-      map.store(new FileOutputStream(mapFile), "Template instance names");
+      mapOutStream = new FileOutputStream(mapFile);
+      map.store(mapOutStream, "Template instance names");
     } catch (final FileNotFoundException e) {
       // ignore
       // TODO raise a warning
@@ -100,6 +110,12 @@ public class GenericDefinitionNameSourceGenerator
       // TODO raise a warning
       System.err.println("Error while writing template name file");
       e.printStackTrace();
+    } finally {
+      if (mapOutStream != null) try {
+        mapOutStream.close();
+      } catch (final IOException e) {
+        // ignore
+      }
     }
   }
 

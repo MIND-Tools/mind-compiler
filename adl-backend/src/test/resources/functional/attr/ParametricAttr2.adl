@@ -1,0 +1,26 @@
+
+@CompileDef
+primitive attr.ParametricAttr2 (a, b) extends ApplicationType {
+
+  attribute int attr1 = a;
+  attribute string attr2 = b;
+
+  source {{
+    #include <stdio.h>
+    #include <string.h>
+    
+    
+    int METH(main, main)(int argc, char **argv) {
+      
+      if (ATTR(attr1) != 0) {
+        printf("Invalid value for attr1=%d\n", ATTR(attr1));
+        return 1;
+      }
+      
+      if (ATTR(attr2) != 0) {
+        printf("Invalid value for attr2=%s\n", ATTR(attr2));
+        return 2;
+      }
+      return 0;
+    }
+  }};}

@@ -63,7 +63,8 @@ public class STCFNodeMerger extends NodeMergerImpl {
 
     if (subNodeType.equals("annotation")
         || subNodeType.equals("formalParameter")
-        || subNodeType.equals("formalTypeParameter")) {
+        || subNodeType.equals("formalTypeParameter")
+        || subNodeType.equals("value")) {
       // these elements are simply overridden (i.e. not merged).
       super.computeSubNodeMergeInfos(subNode, parentInfo, subNodeType, infos);
 
@@ -72,12 +73,19 @@ public class STCFNodeMerger extends NodeMergerImpl {
       throw new InvalidMergeException(
           ADLErrors.INVALID_INTERFACE_NAME_OVERRIDE_INHERITED_INTERFACE,
           subNode, new NodeErrorLocator(inheritedSubNode));
-// XXX Allows attribute overriding. But should be restricted.
-// } else if (subNodeType.equals("attribute")) {
-// // interface elements can't be merge, this is considered as an error
-// throw new InvalidMergeException(
-// ADLErrors.INVALID_ATTRIBUTE_NAME_OVERRIDE_INHERITED_ATTRIBUTE,
-// subNode, new NodeErrorLocator(inheritedSubNode));
+
+    } else if (subNodeType.equals("attribute")) {
+      // Attribute can be overridden, but the type cannot be changed
+      final String inheritedType = inheritedSubNode.astGetAttributes().get(
+          "type");
+      final String overridingType = subNode.astGetAttributes().get("type");
+      if (overridingType != null && !overridingType.equals(inheritedType)) {
+        throw new InvalidMergeException(
+            ADLErrors.INVALID_ATTRIBUTE_OVERRIDE_INHERITED_ATTRIBUTE_TYPE,
+            subNode, new NodeErrorLocator(inheritedSubNode));
+      }
+      super.computeMergedSubNodesMergeInfos(subNode, inheritedSubNode,
+          parentInfo, infos, idAttributes, subNodeType);
 
     } else if (subNodeType.equals("component")) {
 

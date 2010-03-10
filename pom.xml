@@ -6,11 +6,11 @@
     <parent>
         <groupId>org.ow2.mind</groupId>
         <artifactId>mind-parent</artifactId>
-        <version>2</version>
+        <version>3</version>
     </parent>
 
     <artifactId>mind-compiler</artifactId>
-    <version>0.1-beta-4-SNAPSHOT</version>
+    <version>0.2-alpha-1-SNAPSHOT</version>
     <name>Mind compiler</name>
     <packaging>pom</packaging>
 
@@ -66,26 +66,12 @@
         <url>http://bamboo.ow2.org/browse/MIND-MINDC</url>
     </ciManagement>
 
-    <issueManagement>
-        <system>jira</system>
-        <url>http://jira.ow2.org/browse/MIND</url>
-    </issueManagement>
-
-    <inceptionYear>2009</inceptionYear>
-
-    <organization>
-        <name>OW2</name>
-        <url>http://ow2.org/</url>
-    </organization>
-
     <properties>
         <!--
             The version of the fractal-adl artifacts which this tool-set depends
             on
         -->
-        <fractaladl.dependencies.version>
-            2.4-alpha-6
-        </fractaladl.dependencies.version>
+        <fractaladl.dependencies.version>2.5-SNAPSHOT</fractaladl.dependencies.version>
 
         <!-- By default run tests for groups "functional" and "checkin" -->
         <test.groups>functional, checkin</test.groups>
@@ -207,8 +193,16 @@
 
             <dependency>
                 <groupId>org.objectweb.fractal.cecilia.toolchain</groupId>
-                <artifactId>cecilia-adl</artifactId>
+                <artifactId>target-descriptor</artifactId>
                 <version>2.1.0</version>
+                <exclusions>
+                    <!-- Exclude fractal-adl transitive dependency to be sure
+                         to use the version that is actually declared here -->
+                    <exclusion>
+                        <groupId>org.objectweb.fractal.fractaladl</groupId>
+                        <artifactId>fractal-adl</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
 
             <dependency>
@@ -217,6 +211,14 @@
                 <version>2.1.0</version>
                 <classifier>tests</classifier>
                 <scope>tests</scope>
+                <exclusions>
+                    <!-- Exclude fractal-adl transitive dependency to be sure
+                         to use the version that is actually declared here -->
+                    <exclusion>
+                        <groupId>org.objectweb.fractal.fractaladl</groupId>
+                        <artifactId>fractal-adl</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -438,6 +440,7 @@
                 <!-- By default run tests for groups "functional" and "checkin" -->
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
+                    <version>2.5</version>
                     <configuration>
                         <groups>${test.groups}</groups>
                     </configuration>

@@ -125,8 +125,16 @@ AttributeStructures(definition) ::= <<
 >>
 
 AttributeDecl(attr) ::= <<
+<if (attrTypeNameMap.(attr.type))>
+<attrTypeNameMap.(attr.type)> <attr.name>;
+<else>
 <attr.type> <attr.name>;
+<endif>
 >>
+
+attrTypeNameMap ::= [
+  "string" : "const char*"
+]
 
 
 ControllerStructures(definition) ::= <<
