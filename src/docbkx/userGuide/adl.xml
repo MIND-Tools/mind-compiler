@@ -281,7 +281,7 @@
 
       <para>The specification of component's private-data is only required for the
         components that may be instantiated multiple times. This specification may be done
-        under three different forms using the ADL:</para>
+        under two different forms using the ADL:</para>
       <orderedlist>
         <listitem>
           <para>The private-data structure definition can be put in a separate header file,
@@ -289,7 +289,7 @@
             followed by the path to this header file;</para>
         </listitem>
         <listitem>
-          <para>The private-data structure definition can be inlined directly in the 
+          <para>Or, the private-data structure definition can be inlined directly in the 
             ADL definition in between double curly braces (<code>"{{"</code> 
             and <code>"}}"</code>) following the <code>"data"</code> keyword;</para>
             
@@ -298,11 +298,6 @@
             and <code>"}}"</code>). Please make sure that consecutive curly 
             braces in the inline source-code are separated by at least one 
             whitespace character.</para></warning>
-        </listitem>
-        <listitem>
-          <para>Finally, if the component has no private-data, the <code>"nodata"</code>
-            keyword can be used in the ADL definition. This keyword is a shortcut for 
-            <code>"data {{ struct { } PRIVATE; }}"</code></para>
         </listitem>
       </orderedlist>
       
@@ -324,10 +319,6 @@
 
         <para>The above code excerpt makes an inlined definition of private-data structure
           directly in the ADL file.</para>
-        
-        <programlisting linenumbering="numbered" language="adl"> nodata;</programlisting>
- 
-        <para>The above code excerpt specifies that the component has no private-data.</para>
       </example>
     </section>
     
@@ -694,7 +685,6 @@
       <programlisting linenumbering="numbered" language="adl" startinglinenumber="20"> primitive foo.bar.APrimitive {
    provides Itf3 as itf3;
    
-   nodata;
    source aPrimitiveImpl.c;
    
    attributes int attr1 = 2; 
@@ -713,7 +703,6 @@
    requires Itf2 as itf2;
    provides Itf3 as itf3;
    
-   nodata;
    source aPrimitiveImpl.c;
    source anotherPrimitiveImpl.c;
    
@@ -729,9 +718,9 @@
               and the primitive definition <classname>foo.bar.APrimitive</classname>.</para>
           </listitem>
           <listitem>
-            <para>At line 47, the declaration of the attribute <varname>attr1</varname>
-              overrides the declaration of the attribute with the same name at line 26. 
-              The <code>@Override</code> annotation at line 46 specifies that the 
+            <para>At line 46, the declaration of the attribute <varname>attr1</varname>
+              overrides the declaration of the attribute with the same name at line 25. 
+              The <code>@Override</code> annotation at line 45 specifies that the 
               declaration of the attribute is expected to override the inherited
               attribute (see <xref linkend="adl-annot-override"/> for more details.).</para>
           </listitem>
@@ -1251,8 +1240,13 @@
            An error is reported by the &productName; toolchain if a definition 
            with this annotation is instantiated more that once in an application.</para>
           
-         <note><para>Definitions of primitive components without 
-           private-data declaration are implicitly declared as singleton.</para></note>
+         <note><para>Composite definition that contains at least on singleton 
+           sub-component are implicitly declared singleton. It is recommanded to 
+           add explicitly the <classname>Singleton</classname> annotation on such
+           composite definition.</para></note>
+           
+         <note><para>Instantiating a generic definition by passing a singleton 
+           definition as value result in a singleton definition.</para></note>
       </section>
       
       <section id="adl-annot-cflags">
@@ -1621,7 +1615,6 @@
         <rhs>
           <nonterminal def="#adlgrammar-Annotations" /> <sbr />
           'data' (<nonterminal def="#adlgrammar-Path" /> | &lt;INLINE_CODE&gt;) [ ';' ] <sbr/>
-          | 'nodata' [ ';' ] <sbr />
         </rhs>
       </production>
 
