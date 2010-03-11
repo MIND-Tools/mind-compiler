@@ -25,8 +25,8 @@
 #ifndef FRACTAL_INTERNAL_LCCDELEGATE
 #define FRACTAL_INTERNAL_LCCDELEGATE
 
-/* Include ErrorCode.idt directly since it contains only pure C constructs. */
-#include "../api/ErrorCode.idt"
+#include "fractal/api/ErrorCode.idt.h"
+#include "fractal/api/LifeCycleController.itf.h"
 
 struct __component_LifeCycleState{
   int state;

@@ -159,6 +159,25 @@ public class BasicGraphLinker implements GraphCompiler, BindingController {
       command.setInputFile(sharedImpl).setOutputFile(outFile)
           .setDependencyOutputFile(depFile);
 
+      command.addIncludeDir(outputFileLocatorItf.getCSourceOutputDir(context));
+      command.addIncludeDir(outputFileLocatorItf
+          .getCSourceTemporaryOutputDir(context));
+
+      final URL[] inputResourceRoots = implementationLocatorItf
+          .getInputResourcesRoot(context);
+      if (inputResourceRoots != null) {
+        for (final URL inputResourceRoot : inputResourceRoots) {
+          try {
+            final File inputDir = new File(inputResourceRoot.toURI());
+            if (inputDir.isDirectory()) {
+              command.addIncludeDir(inputDir);
+            }
+          } catch (final URISyntaxException e) {
+            continue;
+          }
+        }
+      }
+
       result.add(command);
     }
   }

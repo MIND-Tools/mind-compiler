@@ -32,6 +32,8 @@ ControllerImplementation(definition, controller, interfaceDefinitions) ::= <<
 
 <getFcAttributeSize(definition=definition)>
 
+<getFcAttributeType(definition=definition)>
+
 <setFcAttribute(definition=definition)>
 
 >>
@@ -53,7 +55,7 @@ static struct {
 >>
 
 initAttributeDescriptor(definition, attribute) ::= <<
-__COMPONENT_INIT_ATTRIBUTE_DESCRIPTOR(<ComponentTypeName(definitionName=definition.name)>, <attribute.name>)
+__COMPONENT_INIT_ATTRIBUTE_DESCRIPTOR(<ComponentTypeName(definitionName=definition.name)>, <attribute.name>, <attribute.type;format="toUpper">_ATTR_TYPE)
 >>
 
 listFcAttributes(definition) ::= <<
@@ -78,6 +80,14 @@ getFcAttributeSize(definition) ::= <<
 int METH(attributeController, getFcAttributeSize)(const char *attributeName) 
 {
   return __component_getFcAttributeSize_delegate(attributeName,
+      <attributeDescPointer(definition=definition)>);
+}
+>>
+
+getFcAttributeType(definition) ::= <<
+enum AttributeType METH(attributeController, getFcAttributeType)(const char *attributeName) 
+{
+  return __component_getFcAttributeType_delegate(attributeName,
       <attributeDescPointer(definition=definition)>);
 }
 >>

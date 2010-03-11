@@ -64,7 +64,7 @@ public class BasicCompilationCommandExecutor
     final boolean force = ForceRegenContextHelper.getForceRegen(context);
     buildDepGraph(commands, depGraph, readyTask, force);
 
-    if (depGraph.isEmpty()) {
+    if (depGraph.isEmpty() && readyTask.isEmpty()) {
       if (depLogger.isLoggable(Level.INFO))
         depLogger.info("Nothing to be done, compiled files are up-to-dates.");
       return;
