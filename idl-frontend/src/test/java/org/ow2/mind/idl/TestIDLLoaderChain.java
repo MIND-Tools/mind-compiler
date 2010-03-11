@@ -53,7 +53,7 @@ public class TestIDLLoaderChain extends TestCase {
         .isPrimitiveType("int");
     definesType.andNext().isStructDef("s").hasMembers("a", "b");
 
-    idlChecker.containsMethods("m1", "m2", "m3");
+    idlChecker.containsMethods("m1", "m2", "m3", "m4", "m5");
   }
 
   public void test2() throws Exception {

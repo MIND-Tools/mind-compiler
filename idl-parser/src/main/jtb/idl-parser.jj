@@ -478,6 +478,19 @@ void ArraySpecification() : {}
   <LBRACKET> [ ConstantExpression() ] <RBRACKET>
 }
 
+void AbstractDeclarator() : {}
+{
+  PointerSpecification()
+  AbstractDirectDeclarator()
+}
+
+void AbstractDirectDeclarator() : {}
+{
+  ( <LPAREN> AbstractDeclarator() <RPAREN> ( ArraySpecification() )* )
+  |  ( ( ArraySpecification() )+ )
+}
+
+
 /*******************************************************************************
   Interface Definition grammar
  ******************************************************************************/
@@ -528,7 +541,9 @@ void Parameter() : {}
   Annotations()
   ( ParameterQualifier() )*
   QualifiedTypeSpecification()
-  Declarator()
+  (    LOOKAHEAD(Declarator())
+    Declarator() | [ AbstractDeclarator() ]
+  )
 }
 
 void ParameterQualifier() : {}
