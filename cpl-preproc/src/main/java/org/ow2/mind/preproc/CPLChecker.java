@@ -26,6 +26,7 @@ import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.interfaces.Interface;
 import org.objectweb.fractal.adl.interfaces.InterfaceContainer;
 import org.objectweb.fractal.adl.types.TypeInterface;
+import org.objectweb.fractal.adl.types.TypeInterfaceUtil;
 import org.ow2.mind.adl.ast.Attribute;
 import org.ow2.mind.adl.ast.AttributeContainer;
 import org.ow2.mind.adl.idl.InterfaceDefinitionDecorationHelper;
@@ -53,12 +54,11 @@ public class CPLChecker {
           .getInterfaces()) {
         if (itf.getName().equals(itfName)) {
 
-          if (((TypeInterface) itf).getRole() == "server") {
+          if (TypeInterfaceUtil.isServer(itf)) {
             isServer = true;
 
-            final InterfaceDefinition itfDef = ((InterfaceDefinitionDecorationHelper.InterfaceDefinitionDecoration) itf
-                .astGetDecoration("resolved-interface-definition"))
-                .getInterfaceDefinition();
+            final InterfaceDefinition itfDef = InterfaceDefinitionDecorationHelper
+                .getResolvedInterfaceDefinition((TypeInterface) itf, null, null);
             for (final Method meth : itfDef.getMethods()) {
               if (meth.getName().equals(methName)) {
                 foundMeth = true;
