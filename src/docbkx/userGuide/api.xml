@@ -18,92 +18,182 @@
       
       <para>This interface defines the following methods:</para>
       
-      <programlisting language="idl"> int getFcInterface(in const string interfaceName,
+      <informaltable border="all" width="100%">
+        <tr>
+          <td>
+            <programlisting language="idl"> int getFcInterface(in const string interfaceName,
    out void* interfaceReference);</programlisting>
-
-      <para>The <varname>getFcInterface</varname> method returns an external interface of the component to which this interface
-        belongs.</para>
-      <variablelist>
-        <varlistentry>
-          <term><varname>interfaceName</varname></term>
-          <listitem><para>the name of the external interface that must be
-            returned.</para></listitem>
-        </varlistentry>
-        <varlistentry>
-          <term><varname>interfaceReference</varname></term>
-          <listitem><para> (out parameter) the external interface of the
-            component to which this interface belongs, whose name is equal to the
-            given name.</para></listitem>
-        </varlistentry>
-        <varlistentry>
-          <term>return</term>
-          <listitem><para><code>0</code> if the interface exist and as been returned
-            correctly or <varname>FRACTAL_API_NO_SUCH_INTERFACE</varname> if there
-            is no such interface.</para></listitem>
-        </varlistentry>
-      </variablelist>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <para>The <varname>getFcInterface</varname> method returns an external interface of the component to which this interface
+              belongs.</para>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <variablelist>
+              <varlistentry>
+                <term><varname>interfaceName</varname></term>
+                <listitem><para>the name of the external interface that must be
+                  returned.</para></listitem>
+              </varlistentry>
+              <varlistentry>
+                <term><varname>interfaceReference</varname></term>
+                <listitem><para> (out parameter) the external interface of the
+                  component to which this interface belongs, whose name is equal to the
+                  given name.</para></listitem>
+              </varlistentry>
+              <varlistentry>
+                <term>return</term>
+                <listitem><para><code>0</code> if the interface exist and has been returned
+                  correctly or <varname>FRACTAL_API_NO_SUCH_INTERFACE</varname> if there
+                  is no such interface.</para></listitem>
+              </varlistentry>
+            </variablelist>
+          </td>
+        </tr>
+      </informaltable>
     
-      <programlisting language="idl"> int listFcInterfaces(in const string interfaceNames[]);</programlisting>
+      <informaltable border="all" width="100%">
+        <tr>
+          <td>
+            <programlisting language="idl"> int listFcInterfaces(in const string interfaceNames[]);</programlisting>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <para>The <varname>listFcInterfaces</varname> method returns the names of the external interfaces of the component to which this
+              interface belongs. More precisely, if the given <code>interfaceNames</code>
+              is <code>null</code>, this method returns the number of external 
+              interfaces. If it is not <code>null</code>, this method assumes that the 
+              given array is big enough to contain all the names of the external 
+              interfaces.</para>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <variablelist>
+              <varlistentry>
+                <term><varname>interfaceNames</varname></term>
+                <listitem><para>an array into which names of the external
+                  interfaces are copied. Can be <code>null</code>.</para></listitem>
+              </varlistentry>
+              <varlistentry>
+                <term>return</term>
+                <listitem><para>the number of interface names; or
+                  <varname>FRACTAL_API_OPERATION_NOT_SUPPORTED</varname> if this 
+                  operation is not supported.</para></listitem>
+              </varlistentry>
+            </variablelist>
+          </td>
+        </tr>
+      </informaltable>
     
-      <para>The <varname>listFcInterfaces</varname> method returns the names of the external interfaces of the component to which this
-        interface belongs. More precisely, if the given <code>interfaceNames</code>
-        is <code>null</code>, this method returns the number of external 
-        interfaces. If it is not <code>null</code>, this method assumes that the 
-        given array is big enough to contain all the names of the external 
-        interfaces.</para>
-      <variablelist>
-        <varlistentry>
-          <term><varname>interfaceNames</varname></term>
-          <listitem><para>an array into which names of the external
-            interfaces are copied. Can be <code>null</code>.</para></listitem>
-        </varlistentry>
-        <varlistentry>
-          <term>return</term>
-          <listitem><para>the number of interface names; or
-            <varname>FRACTAL_API_OPERATION_NOT_SUPPORTED</varname> if this 
-            operation is not supported.</para></listitem>
-        </varlistentry>
-      </variablelist>
+      <informaltable border="all" width="100%">
+        <tr>
+          <td>
+            <programlisting language="idl"> int getFcInterfaceRole(in const string interfaceName);</programlisting>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <para>The <varname>getFcInterfaceRole</varname> method returns the role of an external interface of the component to which 
+              this interface belongs.</para>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <variablelist>
+              <varlistentry>
+                <term><varname>interfaceName</varname></term>
+                <listitem><para>the name of an external interface.</para></listitem>
+              </varlistentry>
+              <varlistentry>
+                <term>return</term>
+                <listitem><para><code>0</code> if the interface exist and is a client interface;
+                  <code>1</code> if the interface exist and is a server interface;
+                  or <varname>FRACTAL_API_NO_SUCH_INTERFACE</varname> if there is no such
+                  interface.</para></listitem>
+              </varlistentry>
+            </variablelist>
+          </td>
+        </tr>
+      </informaltable>
     
-      <programlisting language="idl"> int getFcInterfaceRole(in const string interfaceName);</programlisting>
+      <informaltable border="all" width="100%">
+        <tr>
+          <td>
+            <programlisting language="idl"> int getFcInterfaceSignature(in const string interfaceName,
+   out const string signature);</programlisting>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <para>The <varname>getFcInterfaceSignature</varname> method returns the 
+              signature of an external interface of the component to which 
+              this interface belongs.</para>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <variablelist>
+              <varlistentry>
+                <term><varname>interfaceName</varname></term>
+                <listitem><para>the name of an external interface.</para></listitem>
+              </varlistentry>
+              <varlistentry>
+                <term><varname>signature</varname></term>
+                <listitem><para>(out parameter) the signature of the external interface of
+                  the component to which this interface belongs, whose name is equal to
+                  the given name.the signature of the external interface.</para></listitem>
+              </varlistentry>
+              <varlistentry>
+                <term>return</term>
+                <listitem><para><code>0</code> if the interface exist and its signature has been
+                  returned correctly or <varname>FRACTAL_API_NO_SUCH_INTERFACE</varname> if there
+                  is no such interface.</para></listitem>
+              </varlistentry>
+            </variablelist>
+          </td>
+        </tr>
+      </informaltable>
     
-      <para>The <varname>getFcInterfaceRole</varname> method returns the role of an external interface of the component to which 
-        this interface belongs.</para>
-      <variablelist>
-        <varlistentry>
-          <term><varname>interfaceName</varname></term>
-          <listitem><para>the name of an external interface.</para></listitem>
-        </varlistentry>
-        <varlistentry>
-          <term>return</term>
-          <listitem><para><code>0</code> if the interface exist and is a client interface;
-            <code>1</code> if the interface exist and is a server interface;
-            or <varname>FRACTAL_API_NO_SUCH_INTERFACE</varname> if there is no such
-            interface.</para></listitem>
-        </varlistentry>
-      </variablelist>
-    
-      <programlisting language="idl"> int getFcInterfaces(in void* interfaceReferences[]);</programlisting>
-    
-      <para>The <varname>getFcInterfaces</varname> method returns the external 
-        interfaces of the component to which this interface
-        belongs. More precisely, if the given <code>interfaceReferences</code> is
-        <code>null</code>, this method returns the number of external interfaces.
-        If it is not <code>null</code>, this method assumes that the given array is
-        big enough to contain all the external interfaces.</para>
-      <variablelist>
-        <varlistentry>
-          <term><varname>interfaceReferences</varname></term>
-          <listitem><para>an array into which references of the external
-            interfaces are copied. Can be <code>null</code>.</para></listitem>
-        </varlistentry>
-        <varlistentry>
-          <term>return</term>
-          <listitem><para>the number of interface references; or
-            <varname>FRACTAL_API_OPERATION_NOT_SUPPORTED</varname> if this operation is not
-            supported.</para></listitem>
-        </varlistentry>
-      </variablelist>
+      <informaltable border="all" width="100%">
+        <tr>
+          <td>
+            <programlisting language="idl"> int getFcInterfaces(in void* interfaceReferences[]);</programlisting>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <para>The <varname>getFcInterfaces</varname> method returns the external 
+              interfaces of the component to which this interface
+              belongs. More precisely, if the given <code>interfaceReferences</code> is
+              <code>null</code>, this method returns the number of external interfaces.
+              If it is not <code>null</code>, this method assumes that the given array is
+              big enough to contain all the external interfaces.</para>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <variablelist>
+              <varlistentry>
+                <term><varname>interfaceReferences</varname></term>
+                <listitem><para>an array into which references of the external
+                  interfaces are copied. Can be <code>null</code>.</para></listitem>
+              </varlistentry>
+              <varlistentry>
+                <term>return</term>
+                <listitem><para>the number of interface references; or
+                  <varname>FRACTAL_API_OPERATION_NOT_SUPPORTED</varname> if this operation is not
+                  supported.</para></listitem>
+              </varlistentry>
+            </variablelist>
+          </td>
+        </tr>
+      </informaltable>
     </section>
     
     <section id="api-fapi-BC">
@@ -114,107 +204,159 @@
       
       <para>This interface defines the following methods:</para>
 
-      <programlisting language="idl"> int listFc(in const string clientItfNames[]);</programlisting>
-      
-      <para>The <varname>listFc</varname> method returns the names of the
-        client interfaces of the component to which this
-        interface belongs. More precisely, if the given <code>clientItfNames</code>
-        is <code>null</code>, this method returns the number of client interfaces.
-        If it is not <code>null</code>, this method assumes that the given array is
-        big enough to contain all the client interface names.</para>
-      <variablelist>
-        <varlistentry>
-          <term><varname>clientItfNames</varname></term>
-          <listitem><para>an array into which client interface names are
-            copied. Can be <code>null</code>.</para></listitem>
-        </varlistentry>
-        <varlistentry>
-          <term>return</term>
-          <listitem><para>the number of client interfaces; or
-            <code>FRACTAL_API_OPERATION_NOT_SUPPORTED</code> if this operation is not
-            supported.</para></listitem>
-        </varlistentry>
-      </variablelist>
-      
-      <programlisting language="idl"> int lookupFc(in const string clientItfName, 
+      <informaltable border="all" width="100%">
+        <tr>
+          <td>
+            <programlisting language="idl"> int listFc(in const string clientItfNames[]);</programlisting>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <para>The <varname>listFc</varname> method returns the names of the
+              client interfaces of the component to which this
+              interface belongs. More precisely, if the given <code>clientItfNames</code>
+              is <code>null</code>, this method returns the number of client interfaces.
+              If it is not <code>null</code>, this method assumes that the given array is
+              big enough to contain all the client interface names.</para>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <variablelist>
+              <varlistentry>
+                <term><varname>clientItfNames</varname></term>
+                <listitem><para>an array into which client interface names are
+                  copied. Can be <code>null</code>.</para></listitem>
+              </varlistentry>
+              <varlistentry>
+                <term>return</term>
+                <listitem><para>the number of client interfaces; or
+                  <code>FRACTAL_API_OPERATION_NOT_SUPPORTED</code> if this operation is not
+                  supported.</para></listitem>
+              </varlistentry>
+            </variablelist>
+          </td>
+        </tr>
+      </informaltable>
+    
+      <informaltable border="all" width="100%">
+        <tr>
+          <td>
+            <programlisting language="idl"> int lookupFc(in const string clientItfName, 
    out void* interfaceReference);</programlisting>
-      
-      <para>The <varname>lookupFc</varname> method returns the interface to which the 
-        given client interface is bound. More
-        precisely, returns the server interface to which the client interface whose
-        name is given is bound. This server interface is necessarily in the same
-        address space as the client interface.</para>
-      <variablelist>
-        <varlistentry>
-          <term><varname>clientItfName</varname></term>
-          <listitem><para>the name of a client interface of the component to
-            which this interface belongs.</para></listitem>
-        </varlistentry>
-        <varlistentry>
-          <term><varname>interfaceReference</varname></term>
-          <listitem><para>(out parameter) the server interface to which the
-            given interface is bound.</para></listitem>
-        </varlistentry>
-        <varlistentry>
-          <term>return</term>
-          <listitem><para><code>0</code> if the operation succeed.
-            <code>FRACTAL_API_NO_SUCH_INTERFACE</code> if there is no such client
-            interface.
-            <code>FRACTAL_API_OPERATION_NOT_SUPPORTED</code> if this operation is not
-            supported.</para></listitem>
-        </varlistentry>
-      </variablelist>
-      
-      <programlisting language="idl"> int bindFc(in const string clientItfName, in void* serverItf);</programlisting>
-      
-      <para>The <varname>bindFc</varname> method binds the client interface whose
-        name is given to a server interface. More precisely, binds the client 
-        interface of the component to which this interface belongs, and whose 
-        name is equal to the given name, to the given server interface. The given
-        server interface must be in the same address space as the client interface.</para>
-      <variablelist>
-        <varlistentry>
-          <term><varname>clientItfName</varname></term>
-          <listitem><para>the name of a client interface of the component to
-            which this interface belongs.</para></listitem>
-        </varlistentry>
-        <varlistentry>
-          <term><varname>serverItf</varname></term>
-          <listitem><para>a server interface.</para></listitem>
-        </varlistentry>
-        <varlistentry>
-          <term>return</term>
-          <listitem><para><code>0</code> if the operation succeed.
-            <code>FRACTAL_API_NO_SUCH_INTERFACE</code> if there is no such client
-            interface. <code>FRACTAL_API_ILLEGAL_BINDING</code> if the binding cannot
-            be created. <code>FRACTAL_API_ILLEGAL_LIFE_CYCLE</code> if this component
-            has a {<code>LifeCycleController</code> interface, but it is not in an
-            appropriatestate to perform this operation.</para></listitem>
-        </varlistentry>
-      </variablelist>
-      
-      <programlisting language="idl"> int unbindFc(in const string clientItfName);</programlisting>
-      
-      <para>The <varname>unbindFc</varname> method unbinds the given client 
-        interface. More precisely, unbinds the client
-        interface of the component to which this interface belongs, and whose name
-        is equal to the given name.</para>
-      <variablelist>
-        <varlistentry>
-          <term><varname>clientItfName</varname></term>
-          <listitem><para>the name of a client interface of the component to
-            which this interface belongs.</para></listitem>
-        </varlistentry>
-        <varlistentry>
-          <term>return</term>
-          <listitem><para><code>0</code> if the operation succeed.
-            <code>FRACTAL_API_NO_SUCH_INTERFACE</code> if there is no such client
-            interface. <code>FRACTAL_API_ILLEGAL_BINDING</code> if the binding cannot
-            be created. <code>FRACTAL_API_ILLEGAL_LIFE_CYCLE</code> if this component
-            has a {<code>LifeCycleController</code> interface, but it is not in an
-            appropriatestate to perform this operation.</para></listitem>
-        </varlistentry>
-      </variablelist>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <para>The <varname>lookupFc</varname> method returns the interface to which the 
+              given client interface is bound. More
+              precisely, returns the server interface to which the client interface whose
+              name is given is bound. This server interface is necessarily in the same
+              address space as the client interface.</para>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <variablelist>
+              <varlistentry>
+                <term><varname>clientItfName</varname></term>
+                <listitem><para>the name of a client interface of the component to
+                  which this interface belongs.</para></listitem>
+              </varlistentry>
+              <varlistentry>
+                <term><varname>interfaceReference</varname></term>
+                <listitem><para>(out parameter) the server interface to which the
+                  given interface is bound.</para></listitem>
+              </varlistentry>
+              <varlistentry>
+                <term>return</term>
+                <listitem><para><code>0</code> if the operation succeed.
+                  <code>FRACTAL_API_NO_SUCH_INTERFACE</code> if there is no such client
+                  interface.
+                  <code>FRACTAL_API_OPERATION_NOT_SUPPORTED</code> if this operation is not
+                  supported.</para></listitem>
+              </varlistentry>
+            </variablelist>
+          </td>
+        </tr>
+      </informaltable>
+    
+      <informaltable border="all" width="100%">
+        <tr>
+          <td>
+            <programlisting language="idl"> int bindFc(in const string clientItfName, in void* serverItf);</programlisting>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <para>The <varname>bindFc</varname> method binds the client interface whose
+              name is given to a server interface. More precisely, binds the client 
+              interface of the component to which this interface belongs, and whose 
+              name is equal to the given name, to the given server interface. The given
+              server interface must be in the same address space as the client interface.</para>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <variablelist>
+              <varlistentry>
+                <term><varname>clientItfName</varname></term>
+                <listitem><para>the name of a client interface of the component to
+                  which this interface belongs.</para></listitem>
+              </varlistentry>
+              <varlistentry>
+                <term><varname>serverItf</varname></term>
+                <listitem><para>a server interface.</para></listitem>
+              </varlistentry>
+              <varlistentry>
+                <term>return</term>
+                <listitem><para><code>0</code> if the operation succeed.
+                  <code>FRACTAL_API_NO_SUCH_INTERFACE</code> if there is no such client
+                  interface. <code>FRACTAL_API_ILLEGAL_BINDING</code> if the binding cannot
+                  be created. <code>FRACTAL_API_ILLEGAL_LIFE_CYCLE</code> if this component
+                  has a {<code>LifeCycleController</code> interface, but it is not in an
+                  appropriatestate to perform this operation.</para></listitem>
+              </varlistentry>
+            </variablelist>
+          </td>
+        </tr>
+      </informaltable>
+    
+      <informaltable border="all" width="100%">
+        <tr>
+          <td>
+            <programlisting language="idl"> int unbindFc(in const string clientItfName);</programlisting>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <para>The <varname>unbindFc</varname> method unbinds the given client 
+              interface. More precisely, unbinds the client
+              interface of the component to which this interface belongs, and whose name
+              is equal to the given name.</para>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <variablelist>
+              <varlistentry>
+                <term><varname>clientItfName</varname></term>
+                <listitem><para>the name of a client interface of the component to
+                  which this interface belongs.</para></listitem>
+              </varlistentry>
+              <varlistentry>
+                <term>return</term>
+                <listitem><para><code>0</code> if the operation succeed.
+                  <code>FRACTAL_API_NO_SUCH_INTERFACE</code> if there is no such client
+                  interface. <code>FRACTAL_API_ILLEGAL_BINDING</code> if the binding cannot
+                  be created. <code>FRACTAL_API_ILLEGAL_LIFE_CYCLE</code> if this component
+                  has a {<code>LifeCycleController</code> interface, but it is not in an
+                  appropriatestate to perform this operation.</para></listitem>
+              </varlistentry>
+            </variablelist>
+          </td>
+        </tr>
+      </informaltable>
     
     </section>
     
@@ -224,88 +366,203 @@
       <para>This interface use constants defined in 
         <link linkend="api-fapi-EC"><filename>fractal/api/ErrorConst.idt</filename></link>.</para>
       
+      <para>This interface defines the following type:</para>
+      
+      <informaltable border="all" width="100%">
+        <tr>
+          <td>
+            <programlisting language="idl"> enum AttributeType {
+   INT_ATTR_TYPE,
+   STRING_ATTR_TYPE,
+   UINT8_ATTR_TYPE,
+   INT16_ATTR_TYPE,
+   UINT16_ATTR_TYPE,
+   INT32_ATTR_TYPE,
+   UINT32_ATTR_TYPE,
+   INT64_ATTR_TYPE,
+   UINT64_ATTR_TYPE,
+   INTPTR_ATTR_TYPE,
+   UINTPTR_ATTR_TYPE
+ };</programlisting>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <para>The <varname>enum AttributeType</varname> enumerates the available 
+              attribute types.</para>
+          </td>
+        </tr>
+      </informaltable>
+      
       <para>This interface defines the following methods:</para>
 
-      <programlisting language="idl"> int listFcAttributes(in const string attributeNames[]);</programlisting>
-      
-      <para>The <varname>listFcAttributes</varname> method returns the names of 
-        the attributes of the component to which this
-        interface belongs. More precisely, if the given <code>attributeNames</code>
-        is <code>null</code>, this method returns the number of attributes. If it
-        is not <code>null</code>, this method assumes that the given array is big
-        enough to contain all the attribute names.</para>
-      <variablelist>
-        <varlistentry>
-          <term><varname>attributeNames</varname></term>
-          <listitem><para>an array into which attribute names are
-            copied. Can be <code>null</code>.</para></listitem>
-        </varlistentry>
-        <varlistentry>
-          <term>return</term>
-          <listitem><para>the number of attributes; or
-            <code>FRACTAL_API_OPERATION_NOT_SUPPORTED</code> if this operation is not
-            supported.</para></listitem>
-        </varlistentry>
-      </variablelist>
-      
-      <programlisting language="idl"> int getFcAttribute(in const string attributeName, out void *value);</programlisting>
-      
-      <para>The <varname>getFcAttribute</varname> method returns the value of an
-        attribute.</para>
-      <variablelist>
-        <varlistentry>
-          <term><varname>attributeName</varname></term>
-          <listitem><para>the name of the attribute to return.</para></listitem>
-        </varlistentry>
-        <varlistentry>
-          <term><varname>value</varname></term>
-          <listitem><para>(out parameter) the value of the attribute.</para></listitem>
-        </varlistentry>
-        <varlistentry>
-          <term>return</term>
-          <listitem><para><code>0</code> if the operation succeed.
-            <code>FRACTAL_API_NO_SUCH_ATTRIBUTE</code> if there is no such 
-            attribute.</para></listitem>
-        </varlistentry>
-      </variablelist>
-      
-      <programlisting language="idl"> int getFcAttributeSize(in const string attributeName);</programlisting>
-      
-      <para>The <varname>getFcAttributeSize</varname> method returns the size of
-        an attribute (in byte).</para>
-      <variablelist>
-        <varlistentry>
-          <term><varname>attributeName</varname></term>
-          <listitem><para>the name of the attribute to return.</para></listitem>
-        </varlistentry>
-        <varlistentry>
-          <term>return</term>
-          <listitem><para>the size if the attribute or <code>FRACTAL_API_NO_SUCH_ATTRIBUTE</code>
-            if there is no such attribute.</para></listitem>
-        </varlistentry>
-      </variablelist>
-      
-      <programlisting language="idl"> int setFcAttribute(in const string attributeName, in void *value);</programlisting>
-      
-      <para>The <varname>setFcAttribute</varname> method sets the value of an attribute.</para>
-      <variablelist>
-        <varlistentry>
-          <term><varname>attributeName</varname></term>
-          <listitem><para>the name of the attribute to set.</para></listitem>
-        </varlistentry>
-        <varlistentry>
-          <term><varname>value</varname></term>
-          <listitem><para>the value of the attribute to set.</para></listitem>
-        </varlistentry>
-        <varlistentry>
-          <term>return</term>
-          <listitem><para><code>0</code> if the operation succeed.
-            <code>FRACTAL_API_NO_SUCH_ATTRIBUTE</code> if there is no such attribute.
-            <code>FRACTAL_API_ILLEGAL_ATTRIBUTE</code> if the attribute is not settable.
-            <code>FRACTAL_API_OPERATION_NOT_SUPPORTED</code> if this operation is not
-            supported.</para></listitem>
-        </varlistentry>
-      </variablelist>
+      <informaltable border="all" width="100%">
+        <tr>
+          <td>
+            <programlisting language="idl"> int listFcAttributes(in const string attributeNames[]);</programlisting>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <para>The <varname>listFcAttributes</varname> method returns the names of 
+              the attributes of the component to which this
+              interface belongs. More precisely, if the given <code>attributeNames</code>
+              is <code>null</code>, this method returns the number of attributes. If it
+              is not <code>null</code>, this method assumes that the given array is big
+              enough to contain all the attribute names.</para>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <variablelist>
+              <varlistentry>
+                <term><varname>attributeNames</varname></term>
+                <listitem><para>an array into which attribute names are
+                  copied. Can be <code>null</code>.</para></listitem>
+              </varlistentry>
+              <varlistentry>
+                <term>return</term>
+                <listitem><para>the number of attributes; or
+                  <code>FRACTAL_API_OPERATION_NOT_SUPPORTED</code> if this operation is not
+                  supported.</para></listitem>
+              </varlistentry>
+            </variablelist>
+          </td>
+        </tr>
+      </informaltable>
+    
+      <informaltable border="all" width="100%">
+        <tr>
+          <td>
+            <programlisting language="idl"> int getFcAttribute(in const string attributeName, out void *value);</programlisting>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <para>The <varname>getFcAttribute</varname> method returns the value of an
+              attribute.</para>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <variablelist>
+              <varlistentry>
+                <term><varname>attributeName</varname></term>
+                <listitem><para>the name of the attribute to return.</para></listitem>
+              </varlistentry>
+              <varlistentry>
+                <term><varname>value</varname></term>
+                <listitem><para>(out parameter) the value of the attribute.</para></listitem>
+              </varlistentry>
+              <varlistentry>
+                <term>return</term>
+                <listitem><para><code>0</code> if the operation succeed.
+                  <code>FRACTAL_API_NO_SUCH_ATTRIBUTE</code> if there is no such 
+                  attribute.</para></listitem>
+              </varlistentry>
+            </variablelist>
+          </td>
+        </tr>
+      </informaltable>
+    
+      <informaltable border="all" width="100%">
+        <tr>
+          <td>
+            <programlisting language="idl"> int getFcAttributeSize(in const string attributeName);</programlisting>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <para>The <varname>getFcAttributeSize</varname> method returns the size of
+              an attribute (in byte).</para>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <variablelist>
+              <varlistentry>
+                <term><varname>attributeName</varname></term>
+                <listitem><para>the name of the attribute to return.</para></listitem>
+              </varlistentry>
+              <varlistentry>
+                <term>return</term>
+                <listitem><para>the size if the attribute or <code>FRACTAL_API_NO_SUCH_ATTRIBUTE</code>
+                  if there is no such attribute.</para></listitem>
+              </varlistentry>
+            </variablelist>
+          </td>
+        </tr>
+      </informaltable>
+    
+      <informaltable border="all" width="100%">
+        <tr>
+          <td>
+            <programlisting language="idl"> int getFcAttributeType(in const string attributeName,
+   out enum AttributeType type);</programlisting>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <para>The <varname>getFcAttributeType</varname> method returns the type of
+        an attribute.</para>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <variablelist>
+              <varlistentry>
+                <term><varname>attributeName</varname></term>
+                <listitem><para>the name of the attribute to return.</para></listitem>
+              </varlistentry>
+              <varlistentry>
+                <term><varname>type</varname></term>
+                <listitem><para>(out parameter) the type of the attribute.</para></listitem>
+              </varlistentry>
+              <varlistentry>
+                <term>return</term>
+                <listitem><para><code>0</code> if the operation succeed.
+                  <code>FRACTAL_API_NO_SUCH_ATTRIBUTE</code> if there is no such 
+                  attribute.</para></listitem>
+              </varlistentry>
+            </variablelist>
+          </td>
+        </tr>
+      </informaltable>
+    
+      <informaltable border="all" width="100%">
+        <tr>
+          <td>
+            <programlisting language="idl"> int setFcAttribute(in const string attributeName, in void *value);</programlisting>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <para>The <varname>setFcAttribute</varname> method sets the value of an attribute.</para>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <variablelist>
+              <varlistentry>
+                <term><varname>attributeName</varname></term>
+                <listitem><para>the name of the attribute to set.</para></listitem>
+              </varlistentry>
+              <varlistentry>
+                <term><varname>value</varname></term>
+                <listitem><para>the value of the attribute to set.</para></listitem>
+              </varlistentry>
+              <varlistentry>
+                <term>return</term>
+                <listitem><para><code>0</code> if the operation succeed.
+                  <code>FRACTAL_API_NO_SUCH_ATTRIBUTE</code> if there is no such attribute.
+                  <code>FRACTAL_API_ILLEGAL_ATTRIBUTE</code> if the attribute is not settable.
+                  <code>FRACTAL_API_OPERATION_NOT_SUPPORTED</code> if this operation is not
+                  supported.</para></listitem>
+              </varlistentry>
+            </variablelist>
+          </td>
+        </tr>
+      </informaltable>
     </section>
     
     <section id="api-fapi-LCC">
@@ -316,46 +573,85 @@
       
       <para>This interface defines the following methods:</para>
 
-      <programlisting language="idl"> int getFcState();</programlisting>
-      
-      <para>The <varname>getFcState</varname> method returns the execution state of the component
-        to which this interface belongs.</para>
-      <variablelist>
-        <varlistentry>
-          <term>return</term>
-          <listitem><para><code>0</code> if the component to which this interface belongs is 
-            stopped; <code>1</code> if the component is started. 
-            <code>FRACTAL_API_OPERATION_NOT_SUPPORTED</code> if this operation is not
-            supported.</para></listitem>
-        </varlistentry>
-      </variablelist>
-      
-      <programlisting language="idl"> int startFc();</programlisting>
-      
-      <para>The <varname>startFc</varname> method starts the component to which
-        this interface belongs.</para>
-      <variablelist>
-        <varlistentry>
-          <term>return</term>
-          <listitem><para><code>0</code> if the operation succeed.
-            <code>FRACTAL_API_ILLEGAL_LIFE_CYCLE</code> if it fails.</para></listitem>
-        </varlistentry>
-      </variablelist>
-      
-      <programlisting language="idl"> int stopFc();</programlisting>
-      
-      <para>The <varname>stopFc</varname> method stops the component to which this interface belongs. The result of a method
-        call on a stopped component is undefined, except on its control interfaces
-       (these calls are executed normally).</para>
-      <variablelist>
-        <varlistentry>
-          <term>return</term>
-          <listitem><para><code>0</code> if the operation succeed.
-            <code>FRACTAL_API_ILLEGAL_LIFE_CYCLE</code> if it fails.
-            <code>FRACTAL_API_OPERATION_NOT_SUPPORTED</code> if this operation is not
-            supported.</para></listitem>
-        </varlistentry>
-      </variablelist>
+      <informaltable border="all" width="100%">
+        <tr>
+          <td>
+            <programlisting language="idl"> int getFcState();</programlisting>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <para>The <varname>getFcState</varname> method returns the execution state of the component
+              to which this interface belongs.</para>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <variablelist>
+              <varlistentry>
+                <term>return</term>
+                <listitem><para><code>0</code> if the component to which this interface belongs is 
+                  stopped; <code>1</code> if the component is started. 
+                  <code>FRACTAL_API_OPERATION_NOT_SUPPORTED</code> if this operation is not
+                  supported.</para></listitem>
+              </varlistentry>
+            </variablelist>
+          </td>
+        </tr>
+      </informaltable>
+    
+      <informaltable border="all" width="100%">
+        <tr>
+          <td>
+            <programlisting language="idl"> int startFc();</programlisting>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <para>The <varname>startFc</varname> method starts the component to which
+              this interface belongs.</para>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <variablelist>
+              <varlistentry>
+                <term>return</term>
+                <listitem><para><code>0</code> if the operation succeed.
+                  <code>FRACTAL_API_ILLEGAL_LIFE_CYCLE</code> if it fails.</para></listitem>
+              </varlistentry>
+            </variablelist>
+          </td>
+        </tr>
+      </informaltable>
+    
+      <informaltable border="all" width="100%">
+        <tr>
+          <td>
+            <programlisting language="idl"> int stopFc();</programlisting>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <para>The <varname>stopFc</varname> method stops the component to which this interface belongs. The result of a method
+              call on a stopped component is undefined, except on its control interfaces
+             (these calls are executed normally).</para>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <variablelist>
+              <varlistentry>
+                <term>return</term>
+                <listitem><para><code>0</code> if the operation succeed.
+                  <code>FRACTAL_API_ILLEGAL_LIFE_CYCLE</code> if it fails.
+                  <code>FRACTAL_API_OPERATION_NOT_SUPPORTED</code> if this operation is not
+                  supported.</para></listitem>
+              </varlistentry>
+            </variablelist>
+          </td>
+        </tr>
+      </informaltable>
     </section>
     
     <section id="api-fapi-F">
@@ -366,38 +662,64 @@
       
       <para>This interface defines the following methods:</para>
 
-      <programlisting language="idl"> int newFcInstance(out void* instance);</programlisting>
-      
-      <para>The <varname>newFcInstance</varname> method creates a new component.</para>
-      <variablelist>
-        <varlistentry>
-          <term><varname>instance</varname></term>
-          <listitem><para>(out parameter) the created instance.</para></listitem>
-        </varlistentry>
-        <varlistentry>
-          <term>return</term>
-          <listitem><para><code>0</code> if the new instance has been created correctly.
-           <code>INSTANTIATION_ERROR</code> if the instantiation fails.</para></listitem>
-        </varlistentry>
-      </variablelist>
-      
-      <programlisting language="idl"> int destroyFcInstance(in void* instance);</programlisting>
-      
-      <para>The <varname>destroyFcInstance</varname> method destroys a previously created component.</para>
-      <variablelist>
-        <varlistentry>
-          <term><varname>instance</varname></term>
-          <listitem><para>the component instance to destroy.</para></listitem>
-        </varlistentry>
-        <varlistentry>
-          <term>return</term>
-          <listitem><para><code>0</code> if the new instance has been created correctly.
-          <code>ILLEGAL_LIFE_CYCLE</code> if the component has a
-          <classname>LifeCycleController</classname> interface, but it is not in 
-          an appropriate state to perform this operation.
-          <code>INSTANTIATION_ERROR</code> if the destroy fails.</para></listitem>
-        </varlistentry>
-      </variablelist>
+      <informaltable border="all" width="100%">
+        <tr>
+          <td>
+            <programlisting language="idl"> int newFcInstance(out void* instance);</programlisting>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <para>The <varname>newFcInstance</varname> method creates a new component.</para>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <variablelist>
+              <varlistentry>
+                <term><varname>instance</varname></term>
+                <listitem><para>(out parameter) the created instance.</para></listitem>
+              </varlistentry>
+              <varlistentry>
+                <term>return</term>
+                <listitem><para><code>0</code> if the new instance has been created correctly.
+                 <code>INSTANTIATION_ERROR</code> if the instantiation fails.</para></listitem>
+              </varlistentry>
+            </variablelist>
+          </td>
+        </tr>
+      </informaltable>
+    
+      <informaltable border="all" width="100%">
+        <tr>
+          <td>
+            <programlisting language="idl"> int destroyFcInstance(in void* instance);</programlisting>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <para>The <varname>destroyFcInstance</varname> method destroys a previously created component.</para>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <variablelist>
+              <varlistentry>
+                <term><varname>instance</varname></term>
+                <listitem><para>the component instance to destroy.</para></listitem>
+              </varlistentry>
+              <varlistentry>
+                <term>return</term>
+                <listitem><para><code>0</code> if the new instance has been created correctly.
+                <code>ILLEGAL_LIFE_CYCLE</code> if the component has a
+                <classname>LifeCycleController</classname> interface, but it is not in 
+                an appropriate state to perform this operation.
+                <code>INSTANTIATION_ERROR</code> if the destroy fails.</para></listitem>
+              </varlistentry>
+            </variablelist>
+          </td>
+        </tr>
+      </informaltable>
     </section>
     
     <section id="api-fapi-EC">
