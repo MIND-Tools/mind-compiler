@@ -10,7 +10,7 @@ idlFile(idl) ::= <<
 #ifndef <idl.name;format="pathToUpperCName">_H
 #define <idl.name;format="pathToUpperCName">_H
 
-// This file is a generated file, do not edit.
+/* This file is a generated file, do not edit. */
 
 <idl.includes:includeDirective(include=it); separator="\n">
 <idl.astDecorations.("referenced-interfaces").referencedInterfaces:includeReference(ref=it.IDL); separator="\n">
@@ -19,7 +19,7 @@ idlFile(idl) ::= <<
 
 <(defTemplateMap.(idl.astDecorations.kind))(idl)>
 
-#endif // <idl.name;format="pathToUpperCName">_H
+#endif /* <idl.name;format="pathToUpperCName">_H */
 
 >>
 

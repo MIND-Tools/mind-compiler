@@ -39,6 +39,14 @@ import org.ow2.mind.compilation.CompilerCommand;
 import org.ow2.mind.compilation.CompilerContextHelper;
 import org.ow2.mind.compilation.CompilerWrapper;
 import org.ow2.mind.compilation.gcc.GccCompilerWrapper;
+import org.ow2.mind.idl.IDLBackendFactory;
+import org.ow2.mind.idl.IDLLoader;
+import org.ow2.mind.idl.IDLLoaderChainFactory;
+import org.ow2.mind.idl.IDLVisitor;
+import org.ow2.mind.idl.ast.IDL;
+import org.ow2.mind.io.BasicOutputFileLocator;
+import org.ow2.mind.st.BasicASTTransformer;
+import org.ow2.mind.st.STNodeFactoryImpl;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
@@ -47,15 +55,31 @@ public class CheckDelegatesTest {
   public static final String DEFAULT_CFLAGS  = "-std=c89 -g -Wall -Werror -Wredundant-decls -Wunreachable-code -Wstrict-prototypes -Wwrite-strings";
   public static final String CFLAGS_PROPERTY = "mind.test.cflags";
 
+  IDLLoader                  idlLoader;
+  IDLVisitor                 idlCompiler;
+  BasicASTTransformer        astTransformer;
+
   CompilerWrapper            compilerWrapper;
   CompilationCommandExecutor commandExecutor;
   Map<Object, Object>        context;
+  File                       buildDir;
 
   @BeforeTest(alwaysRun = true)
   public void setUp() {
+    idlLoader = IDLLoaderChainFactory.newLoader();
+    idlCompiler = IDLBackendFactory.newIDLCompiler(idlLoader);
+    astTransformer = new BasicASTTransformer();
+    astTransformer.nodeFactoryItf = new STNodeFactoryImpl();
+
     compilerWrapper = new GccCompilerWrapper();
     commandExecutor = new BasicCompilationCommandExecutor();
+
     context = new HashMap<Object, Object>();
+    buildDir = new File("target/build");
+    if (!buildDir.exists()) {
+      buildDir.mkdirs();
+    }
+    context.put(BasicOutputFileLocator.OUTPUT_DIR_CONTEXT_KEY, buildDir);
 
     final String cFlags = System.getProperty(CFLAGS_PROPERTY, DEFAULT_CFLAGS);
     CompilerContextHelper.setCFlags(context, splitOptionString(cFlags));
@@ -63,22 +87,32 @@ public class CheckDelegatesTest {
 
   @Test(groups = {"checkin", "functional"})
   public void compileCIdelegate() throws Exception {
+    compileIDL("fractal.api.Component");
     compileDelegate("CIdelegate");
   }
 
   @Test(groups = {"checkin", "functional"})
   public void compileBCdelegate() throws Exception {
+    compileIDL("fractal.api.BindingController");
     compileDelegate("BCdelegate");
   }
 
   @Test(groups = {"checkin", "functional"})
   public void compileACdelegate() throws Exception {
+    compileIDL("fractal.api.AttributeController");
     compileDelegate("ACdelegate");
   }
 
   @Test(groups = {"checkin", "functional"})
   public void compileLCCdelegate() throws Exception {
+    compileIDL("fractal.api.LifeCycleController");
     compileDelegate("LCCdelegate");
+  }
+
+  private void compileIDL(final String idlName) throws ADLException {
+    IDL idl = idlLoader.load(idlName, context);
+    idl = astTransformer.toStringTemplateAST(idl);
+    idlCompiler.visit(idl, context);
   }
 
   private void compileDelegate(final String delegateName)
@@ -87,8 +121,9 @@ public class CheckDelegatesTest {
     final CompilerCommand command = compilerWrapper.newCompilerCommand(context);
     final File src = new File(getClass().getClassLoader().getResource(
         "fractal/internal/" + delegateName + ".c").toURI());
-    final File outputFile = File.createTempFile(delegateName, ".o");
+    final File outputFile = new File(buildDir, delegateName + ".o");
     command.setInputFile(src).setOutputFile(outputFile);
+    command.addIncludeDir(buildDir);
     commandExecutor.exec(Arrays.asList((CompilationCommand) command), context);
   }
 

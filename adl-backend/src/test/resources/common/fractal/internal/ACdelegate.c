@@ -78,6 +78,25 @@ int __component_getFcAttributeSize_delegate(const char *attributeName,
   return FRACTAL_API_NO_SUCH_ATTRIBUTE;
 }
 
+int __component_getFcAttributeType_delegate(const char *attributeName,
+    enum AttributeType *type,
+    struct __component_AttributeDescriptors *desc)
+{
+  unsigned int i;
+
+  if (attributeName == NULL) {
+    return FRACTAL_API_INVALID_ARG;
+  }
+
+  for (i = 0; i < desc->nbAttributes; i++) {
+    if (strcmp(desc->attributeDesc[i].name, attributeName) == 0) {
+      *type = desc->attributeDesc[i].type;
+      return FRACTAL_API_OK;
+    }
+  }
+  return FRACTAL_API_NO_SUCH_ATTRIBUTE;
+}
+
 int __component_setFcAttribute_delegate(const char *attributeName, void *value,
     struct __component_AttributeDescriptors *desc, void* component_ptr)
 {

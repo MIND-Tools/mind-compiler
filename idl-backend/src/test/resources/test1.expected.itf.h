@@ -1,7 +1,7 @@
 #ifndef TEST1_H
 #define TEST1_H
 
-// This file is a generated file, do not edit.
+/* This file is a generated file, do not edit. */
 
 #include "./stdint.h"
 #include "foo/test2.idt.h"
@@ -29,4 +29,4 @@ struct __component_test1_itf_desc {
 };
 typedef struct __component_test1_itf_desc *test1;
 
-#endif // TEST1_H
+#endif /* TEST1_H */

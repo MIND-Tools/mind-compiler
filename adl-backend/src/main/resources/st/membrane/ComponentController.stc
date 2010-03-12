@@ -34,6 +34,8 @@ ControllerImplementation(definition, controller, interfaceDefinitions) ::= <<
 
 <getFcInterfaceRole(definition=definition)>
 
+<getFcInterfaceSignature(definition=definition)>
+
 >>
 
 // -----------------------------------------------------------------------------
@@ -54,9 +56,9 @@ static struct {
 
 initInterfaceDescriptor(definition, itf) ::= <<
 <if (isClient.(itf.role))>
-__COMPONENT_INIT_CLIENT_INTERFACE_DESCRIPTOR(<ComponentTypeName(definitionName=definition.name)>, <itf.name>)
+__COMPONENT_INIT_CLIENT_INTERFACE_DESCRIPTOR(<ComponentTypeName(definitionName=definition.name)>, <itf.name>, "<itf.signature>")
 <else>
-__COMPONENT_INIT_SERVER_INTERFACE_DESCRIPTOR(<ComponentTypeName(definitionName=definition.name)>, <itf.name>)
+__COMPONENT_INIT_SERVER_INTERFACE_DESCRIPTOR(<ComponentTypeName(definitionName=definition.name)>, <itf.name>, "<itf.signature>")
 <endif>
 >>
 
@@ -91,6 +93,15 @@ getFcInterfaceRole(definition) ::= <<
 int METH(component, getFcInterfaceRole)(const char* interfaceName) 
 {
   return __component_getFcInterfaceRole_delegate(interfaceName,
+      <itfDescPointer(definition=definition)>);
+}
+>>
+
+getFcInterfaceSignature(definition) ::= <<
+int METH(component, getFcInterfaceSignature)(const char* interfaceName,
+  const char **signature) 
+{
+  return __component_getFcInterfaceSignature_delegate(interfaceName, signature,
       <itfDescPointer(definition=definition)>);
 }
 >>

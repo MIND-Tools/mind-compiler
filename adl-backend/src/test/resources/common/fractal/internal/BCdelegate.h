@@ -27,8 +27,8 @@
 
 #include <stdint.h>
 
-/* Include ErrorCode.idt directly since it contains only pure C constructs. */
-#include "../api/ErrorCode.idt"
+#include "fractal/api/ErrorCode.idt.h"
+#include "fractal/api/BindingController.itf.h"
 
 struct __component_BindingDescriptor
 {

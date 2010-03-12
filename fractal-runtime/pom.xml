@@ -17,7 +17,7 @@
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>idl-frontend</artifactId>
+            <artifactId>idl-backend</artifactId>
             <scope>test</scope>
         </dependency>
 

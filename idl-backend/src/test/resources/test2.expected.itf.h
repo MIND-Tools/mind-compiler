@@ -1,7 +1,7 @@
 #ifndef TEST2_H
 #define TEST2_H
 
-// This file is a generated file, do not edit.
+/* This file is a generated file, do not edit. */
 
 #include "test1.itf.h"
 
@@ -18,4 +18,4 @@ struct __component_test2_itf_desc {
 };
 typedef struct __component_test2_itf_desc *test2;
 
-#endif // TEST2_H
+#endif /* TEST2_H */

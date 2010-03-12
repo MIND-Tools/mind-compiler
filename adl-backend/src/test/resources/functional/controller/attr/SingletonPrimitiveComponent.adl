@@ -8,4 +8,5 @@ primitive controller.attr.SingletonPrimitiveComponent extends ACTested {
 
   attribute int attr1=0;
   attribute int attr2=4;
+  attribute string attr3="toto";
 }
