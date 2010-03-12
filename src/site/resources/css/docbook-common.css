@@ -105,6 +105,11 @@ h6
 
 }
 
+table
+{
+    margin:0px 0px 10px 0px;
+}
+
 td
 {
     color: black;

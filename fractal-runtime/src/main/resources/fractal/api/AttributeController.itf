@@ -85,9 +85,12 @@ interface fractal.api.AttributeController {
    * Returns the type of an attribute.
    *
    * @param attributeName the name of the attribute to return.
-   * @return the type of the attribute.
+   * @param type (out parameter) the type of the attribute.
+   * @return <code>0</code> if the operation succeed.
+   *      {@link FRACTAL_API_NO_SUCH_ATTRIBUTE} if there is no such attribute.
    */
-  enum AttributeType getFcAttributeType(in const string attributeName);
+  int getFcAttributeType(in const string attributeName,
+      out enum AttributeType type);
 
   /**
    * Sets the value of an attribute.

@@ -78,7 +78,8 @@ int __component_getFcAttributeSize_delegate(const char *attributeName,
   return FRACTAL_API_NO_SUCH_ATTRIBUTE;
 }
 
-enum AttributeType __component_getFcAttributeType_delegate(const char *attributeName,
+int __component_getFcAttributeType_delegate(const char *attributeName,
+    enum AttributeType *type,
     struct __component_AttributeDescriptors *desc)
 {
   unsigned int i;
@@ -89,7 +90,8 @@ enum AttributeType __component_getFcAttributeType_delegate(const char *attribute
 
   for (i = 0; i < desc->nbAttributes; i++) {
     if (strcmp(desc->attributeDesc[i].name, attributeName) == 0) {
-      return desc->attributeDesc[i].type;
+      *type = desc->attributeDesc[i].type;
+      return FRACTAL_API_OK;
     }
   }
   return FRACTAL_API_NO_SUCH_ATTRIBUTE;

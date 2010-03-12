@@ -85,9 +85,10 @@ int METH(attributeController, getFcAttributeSize)(const char *attributeName)
 >>
 
 getFcAttributeType(definition) ::= <<
-enum AttributeType METH(attributeController, getFcAttributeType)(const char *attributeName) 
+int METH(attributeController, getFcAttributeType)(const char *attributeName,
+  enum AttributeType *type) 
 {
-  return __component_getFcAttributeType_delegate(attributeName,
+  return __component_getFcAttributeType_delegate(attributeName, type,
       <attributeDescPointer(definition=definition)>);
 }
 >>

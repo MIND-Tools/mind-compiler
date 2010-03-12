@@ -25,11 +25,13 @@ int METH(main, main) (int argc, char *argv[]) {
   assert(err == NB_ATTR);
 
   for (i = 0; i < NB_ATTR; i++) {
+    enum AttributeType type;
     assert(attrNames[i] != NULL);
     assert(strcmp(attrNames[i], expectedNames[i]) == 0);
 
     assert(CALL(testedAC, getFcAttributeSize)(attrNames[i]) == expectedSizes[i]);
-    assert(CALL(testedAC, getFcAttributeType)(attrNames[i]) == expectedTypes[i]);
+    assert(CALL(testedAC, getFcAttributeType)(attrNames[i], &type) == FRACTAL_API_OK);
+    assert(type == expectedTypes[i]);
 
     if (expectedTypes[i] == INT_ATTR_TYPE) {
       int attrValue;

@@ -60,7 +60,8 @@ int __component_getFcAttribute_delegate(const char *attributeName,
 int __component_getFcAttributeSize_delegate(const char *attributeName,
     struct __component_AttributeDescriptors *desc);
 
-enum AttributeType __component_getFcAttributeType_delegate(const char *attributeName,
+int __component_getFcAttributeType_delegate(const char *attributeName,
+    enum AttributeType *type,
     struct __component_AttributeDescriptors *desc);
 
 int __component_setFcAttribute_delegate(const char *attributeName, void *value,

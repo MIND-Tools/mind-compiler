@@ -13,7 +13,7 @@
 
 <xsl:attribute-set name="monospace.verbatim.properties">
   <xsl:attribute name="background-color">#E8EAF0</xsl:attribute>
-  <xsl:attribute name="padding">0.1in</xsl:attribute>
+<!--  <xsl:attribute name="padding">0.1in</xsl:attribute>-->
 </xsl:attribute-set>
 
 <xsl:param name="ulinkShow" select="0"/>
