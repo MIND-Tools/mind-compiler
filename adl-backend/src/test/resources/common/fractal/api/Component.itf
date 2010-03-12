@@ -38,7 +38,7 @@ interface fractal.api.Component {
    * @param interfaceReference (out parameter) the external interface of the
    *      component to which this interface belongs, whose name is equal to the
    *      given name.
-   * @return <code>0</code> if the interface exist and as been returned
+   * @return <code>0</code> if the interface exist and has been returned
    *      correctly or {@link FRACTAL_API_NO_SUCH_INTERFACE} if there is no such
    *      interface.
    */
@@ -71,6 +71,21 @@ interface fractal.api.Component {
    *      interface.
    */
   int getFcInterfaceRole(in const string interfaceName);
+  
+  /**
+   * Returns the signature of an external interface of the component to which 
+   * this interface belongs.
+   *
+   * @param interfaceName the name of an external interface.
+   * @param signature (out parameter) the signature of the external interface of
+   *      the component to which this interface belongs, whose name is equal to
+   *      the given name.the signature of the external interface.
+   * @return <code>0</code> if the interface exist and its signature has been
+   *      returned correctly or {@link FRACTAL_API_NO_SUCH_INTERFACE} if there
+   *      is no such interface.
+   */
+  int getFcInterfaceSignature(in const string interfaceName,
+      out const string signature); 
 
   /**
    * Returns the external interfaces of the component to which this interface

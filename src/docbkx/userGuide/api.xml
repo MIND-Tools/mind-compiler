@@ -47,7 +47,7 @@
               </varlistentry>
               <varlistentry>
                 <term>return</term>
-                <listitem><para><code>0</code> if the interface exist and as been returned
+                <listitem><para><code>0</code> if the interface exist and has been returned
                   correctly or <varname>FRACTAL_API_NO_SUCH_INTERFACE</varname> if there
                   is no such interface.</para></listitem>
               </varlistentry>
@@ -116,6 +116,44 @@
                   <code>1</code> if the interface exist and is a server interface;
                   or <varname>FRACTAL_API_NO_SUCH_INTERFACE</varname> if there is no such
                   interface.</para></listitem>
+              </varlistentry>
+            </variablelist>
+          </td>
+        </tr>
+      </informaltable>
+    
+      <informaltable border="all" width="100%">
+        <tr>
+          <td>
+            <programlisting language="idl"> int getFcInterfaceSignature(in const string interfaceName,
+   out const string signature);</programlisting>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <para>The <varname>getFcInterfaceSignature</varname> method returns the 
+              signature of an external interface of the component to which 
+              this interface belongs.</para>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <variablelist>
+              <varlistentry>
+                <term><varname>interfaceName</varname></term>
+                <listitem><para>the name of an external interface.</para></listitem>
+              </varlistentry>
+              <varlistentry>
+                <term><varname>signature</varname></term>
+                <listitem><para>(out parameter) the signature of the external interface of
+                  the component to which this interface belongs, whose name is equal to
+                  the given name.the signature of the external interface.</para></listitem>
+              </varlistentry>
+              <varlistentry>
+                <term>return</term>
+                <listitem><para><code>0</code> if the interface exist and its signature has been
+                  returned correctly or <varname>FRACTAL_API_NO_SUCH_INTERFACE</varname> if there
+                  is no such interface.</para></listitem>
               </varlistentry>
             </variablelist>
           </td>

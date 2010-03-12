@@ -34,7 +34,8 @@ struct __component_InterfaceDescriptor
 {
   const char *name;
   intptr_t offset;
-  int type;
+  int role;
+  const char *signature;
 };
 
 struct __component_InterfaceDescriptors
@@ -43,11 +44,11 @@ struct __component_InterfaceDescriptors
   struct __component_InterfaceDescriptor itfDesc[2];
 };
 
-#define __COMPONENT_INIT_CLIENT_INTERFACE_DESCRIPTOR(typeName, itfName) \
-  {#itfName, ((intptr_t) &(((typeName *) 0x0)->__component_internal_data.type.itfName)), 0}
+#define __COMPONENT_INIT_CLIENT_INTERFACE_DESCRIPTOR(typeName, itfName, signature) \
+  {#itfName, ((intptr_t) &(((typeName *) 0x0)->__component_internal_data.type.itfName)), FRACTAL_API_CLIENT, signature}
 
-#define __COMPONENT_INIT_SERVER_INTERFACE_DESCRIPTOR(typeName, itfName) \
-  {#itfName, ((intptr_t) &(((typeName *) 0x0)->__component_internal_data.type.itfName)), 1}
+#define __COMPONENT_INIT_SERVER_INTERFACE_DESCRIPTOR(typeName, itfName, signature) \
+  {#itfName, ((intptr_t) &(((typeName *) 0x0)->__component_internal_data.type.itfName)), FRACTAL_API_SERVER, signature}
 
 int __component_getFcInterface_delegate(const char *interfaceName,
     void **interfaceReference, struct __component_InterfaceDescriptors *desc,
@@ -61,5 +62,8 @@ int __component_listFcInterfaces_delegate(const char* interfaceNames[],
 
 int __component_getFcInterfaceRole_delegate(const char* interfaceName,
     struct __component_InterfaceDescriptors *desc);
+
+int __component_getFcInterfaceSignature_delegate(const char* interfaceName,
+    const char **signature, struct __component_InterfaceDescriptors *desc);
 
 #endif
