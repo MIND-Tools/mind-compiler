@@ -112,16 +112,13 @@ itfDescPointer(definition) ::= <<
 >>
 
 componentPointer(definition) ::= <<
-<if (definition.astNodeTypes.("data"))>
-<if (definition.data)>
-CONTEXT_PTR_ACCESS
-<else>
+<if (definition.astDecorations.("is-singleton"))>
 (&__component_<definition.name;format="toCName">_singleton_instance)
-<endif>
 <else>
 CONTEXT_PTR_ACCESS
 <endif>
 >>
+
 
 }$$
 }

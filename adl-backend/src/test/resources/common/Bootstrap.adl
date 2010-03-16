@@ -1,3 +1,4 @@
+@Singleton
 primitive Bootstrap {
 
   requires Main as entryPoint;

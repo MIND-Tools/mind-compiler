@@ -1,0 +1,7 @@
+import pkg1.pkg2.Type1;
+
+@Singleton
+primitive pkg1.singleton.SingletonPrimitive extends Type1 {
+
+  source {{ }};
+}

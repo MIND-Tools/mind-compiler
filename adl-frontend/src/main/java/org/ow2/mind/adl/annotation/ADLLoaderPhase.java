@@ -56,5 +56,22 @@ public enum ADLLoaderPhase {
    * and the <code>node</code> parameter is the component node for which the
    * definition has the annotation.
    */
-  ON_SUB_COMPONENT
+  ON_SUB_COMPONENT,
+
+  /**
+   * This phase is only applicable for template definitions. Correspond to the
+   * phase just after an instantiation of the template definition.
+   */
+  AFTER_TEMPLATE_INSTANTIATE,
+
+  /**
+   * This phase is only applicable for template definitions. Allows to execute
+   * the annotation processor if the annotation is present on the concrete
+   * definition of a template sub-component. <br>
+   * The <code>definition</code> parameter passed to the
+   * ADLLoaderAnnotationProcessor is the definition of the composite component,
+   * and the <code>node</code> parameter is the component node for which the
+   * definition has the annotation.
+   */
+  ON_TEMPLATE_SUB_COMPONENT
 }

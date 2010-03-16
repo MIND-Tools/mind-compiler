@@ -49,14 +49,14 @@ public class AnnotationProcessorLoader extends AbstractLoader
   ADLLoaderPhase             phase;
 
   // ---------------------------------------------------------------------------
-  // Implementation of the Loader interface
+  // Client interfaces
   // ---------------------------------------------------------------------------
 
   /** The name of the {@link #pluginManagerItf} client interface */
   public final static String PLUGIN_MANAGER_ITF_NAME = "plugin-manager";
 
   /** Plugin manager client interface */
-  public PluginManager       pluginManagerItf        = null;
+  public PluginManager       pluginManagerItf;
 
   // ---------------------------------------------------------------------------
   // Implementation of the Loader interface

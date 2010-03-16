@@ -3,6 +3,5 @@ primitive factory.FactoryTester extends ApplicationType {
 
   requires fractal.api.Factory as factory;
   
-  nodata;
   source factoryTester.c;
 }

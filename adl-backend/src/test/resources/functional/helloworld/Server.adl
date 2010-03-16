@@ -1,4 +1,4 @@
-
+@Singleton
 primitive helloworld.Server {
   
   provides Service as s ;

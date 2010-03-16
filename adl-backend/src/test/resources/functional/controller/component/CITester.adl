@@ -1,7 +1,9 @@
 
 composite controller.component.CITester<T conformsto CITested> extends ApplicationType {
 
-  contains primitive as tester {
+  contains as tester
+  @Singleton 
+  primitive {
     provides Main as main;
     requires fractal.api.Component as testedComponent;
     source ciTester.c;

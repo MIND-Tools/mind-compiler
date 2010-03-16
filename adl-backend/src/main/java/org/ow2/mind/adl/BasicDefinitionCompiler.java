@@ -48,7 +48,7 @@ import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.ow2.mind.SourceFileWriter;
 import org.ow2.mind.adl.CompilationDecorationHelper.AdditionalCompilationUnitDecoration;
 import org.ow2.mind.adl.annotation.predefined.CFlags;
-import org.ow2.mind.adl.annotation.predefined.Singleton;
+import org.ow2.mind.adl.ast.ASTHelper;
 import org.ow2.mind.adl.ast.ImplementationContainer;
 import org.ow2.mind.adl.ast.Source;
 import org.ow2.mind.adl.implementation.ImplementationLocator;
@@ -296,10 +296,7 @@ public class BasicDefinitionCompiler
     if (headerOutputFile != null)
       command.setHeaderOutputFile(headerOutputFile);
 
-    final Singleton singleton = getAnnotation(definition, Singleton.class);
-    if ((singleton != null)
-        || ((definition instanceof ImplementationContainer) && ((ImplementationContainer) definition)
-            .getData() == null)) {
+    if (ASTHelper.isSingleton(definition)) {
       command.setSingletonMode();
     }
 

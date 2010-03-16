@@ -2,13 +2,12 @@
 import pkg1.pkg2.Type1;
 import pkg1.I2;
 
-composite pkg1.generic.Generic2 <U conformsto Type1, V conformsto Type1> {
+composite pkg1.generic.Generic2 <U conformsto Type1, V conformsto Type1> extends Type1{
  
-  requires I2 as cItf;
-  
   contains U as c1;
   contains V as c2;
 
+  binds this.sItf to c1.sItf;
   binds c1.cItf to this.cItf;
   binds c2.cItf to this.cItf;
 }

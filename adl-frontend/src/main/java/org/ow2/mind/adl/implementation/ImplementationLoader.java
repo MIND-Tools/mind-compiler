@@ -36,11 +36,9 @@ import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.ow2.mind.adl.ADLErrors;
-import org.ow2.mind.adl.annotation.predefined.Singleton;
 import org.ow2.mind.adl.ast.Data;
 import org.ow2.mind.adl.ast.ImplementationContainer;
 import org.ow2.mind.adl.ast.Source;
-import org.ow2.mind.annotation.AnnotationHelper;
 
 public class ImplementationLoader extends AbstractLoader {
 
@@ -73,13 +71,6 @@ public class ImplementationLoader extends AbstractLoader {
     final Data data = container.getData();
     if (data != null) {
       processData(def, data, context);
-    } else {
-      // definition has no data, it is a singleton
-      if (AnnotationHelper.getAnnotation(def, Singleton.class) == null) {
-        // add the Singleton annotation
-        // TODO print a warning ?
-        AnnotationHelper.addAnnotation(def, new Singleton());
-      }
     }
 
     for (final Source src : container.getSources()) {

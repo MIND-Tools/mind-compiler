@@ -1,6 +1,5 @@
 
 @CompileDef
 primitive generic.Server extends ServerType {
-  nodata;
   source ../empty_main.c
 }

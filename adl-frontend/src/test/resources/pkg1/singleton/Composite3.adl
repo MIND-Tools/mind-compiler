@@ -1,0 +1,13 @@
+import pkg1.pkg2.Type1;
+import pkg1.pkg2.Primitive1;
+import pkg1.generic.Generic1;
+import pkg1.generic.Generic2;
+
+composite pkg1.singleton.Composite3 extends Type1 {
+
+  contains Generic2<Generic1<SingletonPrimitive>, Generic1<Primitive1>> as subComp1;
+    
+  binds this.sItf to subComp1.sItf;
+  binds subComp1.cItf to this.cItf;
+  
+}

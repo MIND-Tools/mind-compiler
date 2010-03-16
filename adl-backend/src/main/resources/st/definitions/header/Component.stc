@@ -156,6 +156,7 @@ ComponentTypeDef(definition) ::= <<
 #undef COMP_DATA
 #endif
 #define COMP_DATA struct __component_<definition.name;format="toCName">_internal_data_t __component_internal_data
+
 #ifdef PRIVATE_DATA_T
 #undef PRIVATE_DATA_T
 #endif
@@ -178,19 +179,24 @@ typedef struct {
 } PRIVATE_DATA_T;
 <endif>
 <else>
+// No private data
 typedef struct {
   COMP_DATA;
 } PRIVATE_DATA_T;
-// declaration of singleton instance as global variable.
-#define INSTANCE___component_<definition.name;format="toCName">_singleton_instance_DECLARED
-extern PRIVATE_DATA_T __component_<definition.name;format="toCName">_singleton_instance;
 <endif>
 <else>
+// No private data
 typedef struct {
   COMP_DATA;
 } PRIVATE_DATA_T;
 <endif>
 
+
+<if (definition.astDecorations.("is-singleton"))>
+// declaration of singleton instance as global variable.
+#define INSTANCE___component_<definition.name;format="toCName">_singleton_instance_DECLARED
+extern PRIVATE_DATA_T __component_<definition.name;format="toCName">_singleton_instance;
+<endif>
 
 #else // __COMPONENT_IN_<definition.name;format="toUpperCName">
 typedef struct {

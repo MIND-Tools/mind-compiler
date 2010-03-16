@@ -2,8 +2,8 @@
 composite generic.GenericProxy<S conformsto ServerType> 
   extends ServerType {
 
-  contains primitive ClientType as proxy {
-    nodata;
+  contains ClientType as proxy 
+  primitive {
     source {{
       void METH(main, main)(int argc, char* argv[]) {
         return CALL(clientMain, main)(argc, argv);

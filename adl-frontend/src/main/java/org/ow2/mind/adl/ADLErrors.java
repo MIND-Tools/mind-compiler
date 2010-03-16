@@ -57,6 +57,11 @@ public enum ADLErrors implements ErrorTemplate {
   INVALID_SUB_COMPONENT("Invalid sub-component."),
 
   /** */
+  INVALID_SUB_COMPONENT_DUPLICATE_SINGLETON(
+      "Invalid sub-component \"%s\" : duplicates singleton definition \"%s\". Previous use of singleton definition at %s",
+      "<sub-comp>", "<singleton def>", "<previous location>"),
+
+  /** */
   INVALID_REFERENCE_MISSING_TEMPLATE_VALUE(
       "Invalid reference: missing type arguments."),
 
