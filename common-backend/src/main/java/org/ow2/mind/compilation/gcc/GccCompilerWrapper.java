@@ -58,6 +58,7 @@ import org.ow2.mind.compilation.DependencyHelper;
 import org.ow2.mind.compilation.ExecutionHelper;
 import org.ow2.mind.compilation.LinkerCommand;
 import org.ow2.mind.compilation.PreprocessorCommand;
+import org.ow2.mind.compilation.ExecutionHelper.ExecutionResult;
 import org.ow2.mind.io.OutputFileLocator;
 
 public class GccCompilerWrapper implements CompilerWrapper, BindingController {
@@ -65,6 +66,7 @@ public class GccCompilerWrapper implements CompilerWrapper, BindingController {
   private static final String TEMP_DIR  = "$TEMP_DIR";
 
   protected static Logger     depLogger = FractalADLLogManager.getLogger("dep");
+  protected static Logger     ioLogger  = FractalADLLogManager.getLogger("io");
 
   // ---------------------------------------------------------------------------
   // Client interfaces
@@ -146,14 +148,20 @@ public class GccCompilerWrapper implements CompilerWrapper, BindingController {
       cmd.add(inputFile.getPath());
 
       // execute command
-      final int rValue = ExecutionHelper.exec(getDescription(), cmd);
-      if (dependencyOutputFile != null) {
+      final ExecutionResult result = ExecutionHelper
+          .exec(getDescription(), cmd);
+      if (dependencyOutputFile != null && dependencyOutputFile.exists()) {
         processDependencyOutputFile(dependencyOutputFile, context);
       }
 
-      if (rValue != 0) {
-        throw new ADLException(CompilerErrors.COMPILER_ERROR, inputFile
-            .getPath());
+      if (result.getExitValue() != 0) {
+        throw new ADLException(CompilerErrors.COMPILER_ERROR, outputFile
+            .getPath(), result.getOutput());
+      }
+      if (result.getOutput() != null) {
+        // command returns 0 and generates an output (warning)
+        // TODO find a specific way to print warnings
+        ioLogger.warning(result.getOutput());
       }
     }
 
@@ -220,14 +228,20 @@ public class GccCompilerWrapper implements CompilerWrapper, BindingController {
       cmd.add(inputFile.getPath());
 
       // execute command
-      final int rValue = ExecutionHelper.exec(getDescription(), cmd);
+      final ExecutionResult result = ExecutionHelper
+          .exec(getDescription(), cmd);
       if (dependencyOutputFile != null && dependencyOutputFile.exists()) {
         processDependencyOutputFile(dependencyOutputFile, context);
       }
 
-      if (rValue != 0) {
-        throw new ADLException(CompilerErrors.COMPILER_ERROR, inputFile
-            .getPath());
+      if (result.getExitValue() != 0) {
+        throw new ADLException(CompilerErrors.COMPILER_ERROR, outputFile
+            .getPath(), result.getOutput());
+      }
+      if (result.getOutput() != null) {
+        // command returns 0 and generates an output (warning)
+        // TODO find a specific way to print warnings
+        ioLogger.warning(result.getOutput());
       }
     }
 
@@ -270,10 +284,16 @@ public class GccCompilerWrapper implements CompilerWrapper, BindingController {
       cmd.addAll(flags);
 
       // execute command
-      final int rValue = ExecutionHelper.exec(getDescription(), cmd);
-      if (rValue != 0) {
-        throw new ADLException(CompilerErrors.COMPILER_ERROR, outputFile
-            .getPath());
+      final ExecutionResult result = ExecutionHelper
+          .exec(getDescription(), cmd);
+      if (result.getExitValue() != 0) {
+        throw new ADLException(CompilerErrors.LINKER_ERROR, outputFile
+            .getPath(), result.getOutput());
+      }
+      if (result.getOutput() != null) {
+        // command returns 0 and generates an output (warning)
+        // TODO find a specific way to print warnings
+        ioLogger.warning(result.getOutput());
       }
     }
 
