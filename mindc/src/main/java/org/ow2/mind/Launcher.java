@@ -219,25 +219,6 @@ public class Launcher extends AbstractLauncher {
 
   protected StringTemplateASTTransformer astTransformer;
 
-  /**
-   * Creates a new Compiler launcher context and run compilation.
-   * 
-   * @param args the command line arguments.
-   * @throws Exception
-   */
-  public Launcher(final String... args) throws Exception {
-    try {
-      init(args);
-      compile();
-    } catch (final InvalidCommandLineException e) {
-      handleException(e);
-    } catch (final CompilerInstantiationException e) {
-      handleException(e);
-    } catch (final ADLException e) {
-      handleException(e);
-    }
-  }
-
   protected void init(final String... args) throws InvalidCommandLineException,
       CompilerInstantiationException {
     if (logger.isLoggable(Level.CONFIG)) {
@@ -740,8 +721,7 @@ public class Launcher extends AbstractLauncher {
         .println("  and <execname> is the name of the output file to be created.");
   }
 
-  protected void handleException(final InvalidCommandLineException e)
-      throws Exception {
+  protected void handleException(final InvalidCommandLineException e) {
     logger.log(Level.FINER, "Caught an InvalidCommandLineException", e);
     if (printStackTrace) {
       e.printStackTrace();
@@ -752,14 +732,13 @@ public class Launcher extends AbstractLauncher {
     }
   }
 
-  protected void handleException(final CompilerInstantiationException e)
-      throws Exception {
+  protected void handleException(final CompilerInstantiationException e) {
     logger.log(Level.FINER, "Caught a CompilerInstantiationException", e);
     e.printStackTrace();
     System.exit(e.exitValue);
   }
 
-  protected void handleException(final ADLException e) throws Exception {
+  protected void handleException(final ADLException e) {
     logger.log(Level.FINER, "Caught an ADL Exception", e);
     if (printStackTrace) {
       e.printStackTrace();
@@ -783,12 +762,25 @@ public class Launcher extends AbstractLauncher {
    * @param args
    */
   public static void main(final String... args) {
+    final Launcher l = new Launcher();
     try {
-      new Launcher(args);
-    } catch (final Exception e) {
-      // never append
-      e.printStackTrace();
+      l.init(args);
+      l.compile();
+    } catch (final InvalidCommandLineException e) {
+      l.handleException(e);
+    } catch (final CompilerInstantiationException e) {
+      l.handleException(e);
+    } catch (final ADLException e) {
+      l.handleException(e);
     }
+  }
+
+  public static void nonExitMain(final String... args)
+      throws InvalidCommandLineException, CompilerInstantiationException,
+      ADLException {
+    final Launcher l = new Launcher();
+    l.init(args);
+    l.compile();
   }
 
   protected static boolean nullOrEmpty(final String s) {
