@@ -32,6 +32,8 @@ ComponentDefinition(definition, interfaceDefinitions) ::= <<
 
 <GET_MY_INTERFACE(definition=definition)>
 
+<GET_COLLECTION_SIZE(definition=definition)>
+
 <BIND_MY_INTERFACE(definition=definition)>
 
 #define CHECK_CONTEXT_PTR // do nothing
@@ -242,6 +244,21 @@ GET_MY_INTERFACE(definition) ::= <<
 #define GET_MY_INTERFACE(itfName) (& (__component_<definition.name;format="toCName">_singleton_instance.__component_internal_data.type.itfName))
 <else>
 #define GET_MY_INTERFACE(itfName) (& (CONTEXT_PTR_ACCESS->__component_internal_data.type.itfName))
+<endif>
+>>
+
+GET_COLLECTION_SIZE(definition) ::= <<
+// definition of the GET_COLLECTION_SIZE macro
+#define GET_COLLECTION_SIZE(itfName) GET_COLLECTION_SIZE_##itfName
+
+<definition.interfaces:GET_COLLECTION_SIZEInterface(definition=definition, itf=it); separator="\n">
+>>
+
+GET_COLLECTION_SIZEInterface(definition, itf) ::= <<
+<if (itf.numberOfElement)>
+#define GET_COLLECTION_SIZE_<itf.name> <itf.numberOfElement>
+<else>
+#define GET_COLLECTION_SIZE_<itf.name> 0
 <endif>
 >>
 
