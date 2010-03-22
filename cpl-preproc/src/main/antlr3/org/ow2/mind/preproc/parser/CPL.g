@@ -31,6 +31,7 @@ tokens{
 	METH 		= 'METH';
     CONSTRUCTOR = 'CONSTRUCTOR';
     DESTRUCTOR  = 'DESTRUCTOR';
+    GET_MY_INTERFACE = 'GET_MY_INTERFACE';
 	CALL 		= 'CALL';
 	CALL_PTR 	= 'CALL_PTR';
 	ATTR 		= 'ATTR';
@@ -229,6 +230,7 @@ protected methCall returns [StringBuilder res ]
 	| collItfMethCall 	{ $res = $collItfMethCall.res; }
 	| prvMethCall		{ $res = $prvMethCall.res; }
 	| ptrMethCall 		{ $res = $ptrMethCall.res; }
+	| getMyInterfaceCall{ $res = $getMyInterfaceCall.res; }
 	;
 
 protected attAccess returns [StringBuilder res = new StringBuilder()]
@@ -405,6 +407,20 @@ protected ptrMethCallArg1 returns [StringBuilder res = new StringBuilder()]
         | e = ~('(' | ')') { $res.append($e.text); }
       ) +
 	;
+
+protected getMyInterfaceCall returns [StringBuilder res = new StringBuilder()]
+@init{StringBuilder idx = null;}
+	: GET_MY_INTERFACE ws1=ws '(' ws2=ws ID ws3=ws ( index ws4=ws {idx = $index.res;} ) ? ')'
+      {
+        if (idx == null)
+          $res.append("GET_MY_INTERFACE").append($ws1.text).append("(")
+              .append($ws2.text).append($ID.text).append($ws3.text).append(")");
+        else
+          $res.append("GET_MY_INTERFACE_COLLECTION").append($ws1.text).append("(")
+              .append($ws2.text).append($ID.text).append($ws3.text).append(",")
+              .append(idx).append($ws4.text).append(")");
+      }
+    ;
 	
 protected paramsDef returns [StringBuilder res = new StringBuilder()]
 	: '(' ws1=ws ')'             { $res.append($ws1.text).append(" NO_PARAM_DECL "); }

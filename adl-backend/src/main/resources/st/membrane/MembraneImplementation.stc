@@ -196,10 +196,8 @@ InitializeBindings(definition) ::= <<
 
 InitializeBinding(definition, binding) ::= <<
   // initialize binding from <binding.fromComponent>.<binding.fromInterface> to <binding.toComponent>.<binding.toInterface>
-  newInstance->__component_internal_data.<if (isThis.(binding.fromComponent))>inner_type<else>components.<binding.fromComponent>->__component_internal_data.type<endif>.<binding.fromInterface><if(binding.fromInterfaceNumber)>[<binding.fromInterfaceNumber>]<endif>.selfData = 
-    newInstance->__component_internal_data.<if (isThis.(binding.toComponent))>inner_type<else>components.<binding.toComponent>->__component_internal_data.type<endif>.<binding.toInterface><if(binding.toInterfaceNumber)>[<binding.toInterfaceNumber>]<endif>.selfData;
-  newInstance->__component_internal_data.<if (isThis.(binding.fromComponent))>inner_type<else>components.<binding.fromComponent>->__component_internal_data.type<endif>.<binding.fromInterface><if(binding.fromInterfaceNumber)>[<binding.fromInterfaceNumber>]<endif>.meths = 
-    newInstance->__component_internal_data.<if (isThis.(binding.toComponent))>inner_type<else>components.<binding.toComponent>->__component_internal_data.type<endif>.<binding.toInterface><if(binding.toInterfaceNumber)>[<binding.toInterfaceNumber>]<endif>.meths;
+  newInstance->__component_internal_data.<if (isThis.(binding.fromComponent))>inner_type<else>components.<binding.fromComponent>->__component_internal_data.type<endif>.<binding.fromInterface><if(binding.fromInterfaceNumber)>[<binding.fromInterfaceNumber>]<endif> = 
+    & newInstance->__component_internal_data.<if (isThis.(binding.toComponent))>inner_type<else>components.<binding.toComponent>->__component_internal_data.type<endif>.<binding.toInterface><if(binding.toInterfaceNumber)>[<binding.toInterfaceNumber>]<endif>;
 >>
 
 InitializeControllersData(definition) ::= <<

@@ -6,6 +6,10 @@ isServer ::= [ "server" : "true" ]
 isCollection ::= [ "collection" : "true" ]
 isThis ::= [ "this" : "true" ]
 
+InterfaceType(signature) ::= <<
+<signature;format="toCName">
+>>
+
 InterfaceDescType(signature) ::= <<
 struct __component_<signature;format="toCName">_itf_desc
 >>

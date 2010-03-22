@@ -25,13 +25,7 @@
 #include "BCdelegate.h"
 #include <string.h>
 
-#define ITF_PTR(offset) ((void *) (((intptr_t)component_ptr) + offset))
-
-struct GenericItfDesc
-{
-  void *selfData;
-  void *meths;
-};
+#define ITF_PTR(offset) ((void **) (((intptr_t)component_ptr) + offset))
 
 int __component_listFc_delegate(const char *clientItfNames[],
     struct __component_BindingDescriptors *desc)
@@ -58,11 +52,7 @@ int __component_lookupFc_delegate(const char *clientItfName,
 
   for (i = 0; i < desc->nbBindings; i++) {
     if (strcmp(desc->bindingDesc[i].name, clientItfName) == 0) {
-      if (((struct GenericItfDesc *) ITF_PTR(desc->bindingDesc[i].offset))->meths == NULL) {
-        *interfaceReference = NULL;
-      } else {
-        *interfaceReference = ITF_PTR(desc->bindingDesc[i].offset);
-      }
+      *interfaceReference = *(ITF_PTR(desc->bindingDesc[i].offset));
       return FRACTAL_API_OK;
     }
   }
@@ -80,15 +70,7 @@ int __component_bindFc_delegate(const char *clientItfName, void *serverItf,
 
   for (i = 0; i < desc->nbBindings; i++) {
     if (strcmp(desc->bindingDesc[i].name, clientItfName) == 0) {
-      if (serverItf == NULL) {
-        ((struct GenericItfDesc*) ITF_PTR(desc->bindingDesc[i].offset))->selfData
-            = NULL;
-        ((struct GenericItfDesc*) ITF_PTR(desc->bindingDesc[i].offset))->meths
-            = NULL;
-      } else {
-        *((struct GenericItfDesc*) ITF_PTR(desc->bindingDesc[i].offset))
-            = *((struct GenericItfDesc*) serverItf);
-      }
+      *ITF_PTR(desc->bindingDesc[i].offset) = serverItf;
       return FRACTAL_API_OK;
     }
   }

@@ -43,9 +43,12 @@ MethodDelegator(itf, index, method) ::= <<
 <if (! ((idl2c.isVoidMethod)(method=method)))>
   return
 <endif>
-  CONTEXT_PTR_ACCESS->__component_internal_data.<if (isServer.(itf.role))>inner_<endif>type.<itf.name><if (index)>[<index>]<endif>.meths-><method.name>(
-      CONTEXT_PTR_ACCESS->__component_internal_data.<if (isServer.(itf.role))>inner_<endif>type.<itf.name><if (index)>[<index>]<endif>.selfData
-      <method.parameters:{, <it.name>}>);
+<if (method.parameters)>
+  CALL_INTERFACE_PTR_WITH_PARAM(CONTEXT_PTR_ACCESS->__component_internal_data.<if (isServer.(itf.role))>inner_<endif>type.<itf.name><if (index)>[<index>]<endif>, <method.name>)
+       <method.parameters:{<it.name>};separator=", "> PARAMS_RPARENT;
+<else>
+  CALL_INTERFACE_PTR_WITHOUT_PARAM(CONTEXT_PTR_ACCESS->__component_internal_data.<if (isServer.(itf.role))>inner_<endif>type.<itf.name><if (index)>[<index>]<endif>, <method.name>);
+<endif>
 }
 >>
 

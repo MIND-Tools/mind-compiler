@@ -95,8 +95,12 @@ TypeStructures(definition) ::= <<
 <endif>
 >>
 
-InterfaceDescriptorDecl(itf) ::= << 
+InterfaceDescriptorDecl(itf) ::= <<
+<if (isClient.(itf.role))>
+<InterfaceType(signature=itf.signature)> <itf.name><if (itf.numberOfElement)>[<itf.numberOfElement>]<endif>;
+<else>
 <InterfaceDescType(signature=itf.signature)> <itf.name><if (itf.numberOfElement)>[<itf.numberOfElement>]<endif>;
+<endif>
 >>
 
 SubComponentStructures(definition) ::= <<
@@ -258,9 +262,9 @@ AddItfNames(definition) ::= <<
 AddItfName(itf) ::= <<
 <if (isClient.(itf.role))>
 <if (itf.numberOfElement)>
-<itf.astDecorations.("collectionIndexes"):{, <itf.name>_<it>_instance, <itf.name>_<it>_vTable}>
+<itf.astDecorations.("collectionIndexes"):{, <itf.name>_<it>_ptr, <itf.name>_<it>_instance, <itf.name>_<it>_vTable}>
 <else>
-, <itf.name>_instance, <itf.name>_vTable
+, <itf.name>_ptr, <itf.name>_instance, <itf.name>_vTable
 <endif>
 <endif>
 >>
@@ -294,9 +298,9 @@ InitializeInterface(definition, itf) ::= <<
 
 InitializeClientInterface(definition, itf) ::= <<
 <if (itf.numberOfElement)>
-{<itf.astDecorations.("collectionIndexes"):{ {<itf.name>_<it>_instance, <itf.name>_<it>_vTable}}; separator=", ">}
+{<itf.astDecorations.("collectionIndexes"):{ <itf.name>_<it>_ptr}; separator=", ">}
 <else>
-{<itf.name>_instance, <itf.name>_vTable}
+<itf.name>_ptr
 <endif>
 >>
 
