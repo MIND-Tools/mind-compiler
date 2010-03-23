@@ -116,7 +116,7 @@ protected methDef returns [StringBuilder res]
 		
 protected serverMethDef returns [StringBuilder res = new StringBuilder()]
 @init{String tmp = ""; String itfIdx = null;}
-	: METH ws1=ws '(' ws2=ws id=ID ws3=ws ( '[' ws4=ws INT ws5=ws ']' ws6=ws { itfIdx=$INT.text; } )? ',' ws7=ws meth=ID ws8=ws ')' ws9=ws
+	: METH ws1=ws '(' ws2=ws id=ID ws3=ws ( '[' ws4=ws INT ws5=ws ']' ws6=ws { itfIdx=$INT.text; } )? ',' ws7=ws meth=ID ws8=ws ')'
       (
         e = WS { tmp += $e.text; }
         | ')'  { tmp += ")"; }
