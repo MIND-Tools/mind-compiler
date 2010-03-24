@@ -3,7 +3,9 @@
 
 /* This file is a generated file, do not edit. */
 
-#include "./stdint.h"
+#include "mindcommon.h"
+
+#include <stdint.h>
 #include "foo/test2.idt.h"
 
 typedef const int myint;

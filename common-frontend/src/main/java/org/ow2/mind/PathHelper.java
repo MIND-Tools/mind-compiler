@@ -51,12 +51,12 @@ public final class PathHelper {
   }
 
   /**
-   * Returns <code>true</code> if the given path is a relative path (i.e. starts
-   * with <code>"./"</code> or <code>"../"</code>)
+   * Returns <code>true</code> if the given path is a relative path (i.e. do not
+   * starts with <code>"/"</code>)
    * 
    * @param path a valid path (see {@link #isValid(String)}).
-   * @return <code>true</code> if the given path is a relative path (i.e. starts
-   *         with <code>"./"</code> or <code>"../"</code>)
+   * @return <code>true</code> if the given path is a relative path (i.e. do not
+   *         starts with <code>"/"</code>)
    */
   public static boolean isRelative(final String path) {
     return !path.startsWith("/");

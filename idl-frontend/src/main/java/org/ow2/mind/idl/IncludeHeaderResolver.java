@@ -25,16 +25,16 @@ package org.ow2.mind.idl;
 import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
 import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
 import static org.ow2.mind.PathHelper.getExtension;
+import static org.ow2.mind.idl.ast.IDLASTHelper.getIncludedPath;
 import static org.ow2.mind.idl.ast.Include.HEADER_EXTENSION;
 
 import java.util.Map;
 
 import org.objectweb.fractal.adl.ADLException;
-import org.objectweb.fractal.adl.CompilerError;
 import org.objectweb.fractal.adl.NodeFactory;
-import org.objectweb.fractal.adl.error.GenericErrors;
 import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.fractal.api.control.IllegalBindingException;
+import org.ow2.mind.CommonASTHelper;
 import org.ow2.mind.idl.ast.Header;
 import org.ow2.mind.idl.ast.IDL;
 import org.ow2.mind.idl.ast.Include;
@@ -53,18 +53,13 @@ public class IncludeHeaderResolver extends AbstractIncludeResolver {
 
   public IDL resolve(final Include include, final IDL encapsulatingContainer,
       final Map<Object, Object> context) throws ADLException {
-    if (getExtension(include.getPath()).equals(HEADER_EXTENSION)) {
+    final String includedPath = getIncludedPath(include);
+    if (getExtension(includedPath).equals(HEADER_EXTENSION)) {
       // include node references a header C file.
       // create a new Header AST node
-      Header header;
-      try {
-        header = (Header) nodeFactoryItf.newNode("header", Header.class
-            .getName());
-      } catch (final ClassNotFoundException e) {
-        throw new CompilerError(GenericErrors.INTERNAL_ERROR, e,
-            "can't create AST node");
-      }
-      header.setName(include.getPath());
+      final Header header = CommonASTHelper.newNode(nodeFactoryItf, "header",
+          Header.class);
+      header.setName(includedPath);
       return header;
     } else {
       return clientResolverItf

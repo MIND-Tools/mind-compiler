@@ -3,13 +3,15 @@
 
 /* This file is a generated file, do not edit. */
 
+#include "mindcommon.h"
+
 #include "test1.itf.h"
 
 
 struct __component_test2_vTable {
-  void (* (* m3)(void *_mind_this   , struct s (* s_ptr) )) ;
   void (* (* m1)(void *_mind_this   , const uint8_t a, int (*b) )) ;
   unsigned float (* m2)(void *_mind_this   , float f1 ) ;
+  void (* (* m3)(void *_mind_this   , struct s (* s_ptr), __MIND_STRING_TYPEDEF s )) ;
 };
 
 struct __component_test2_itf_desc {
