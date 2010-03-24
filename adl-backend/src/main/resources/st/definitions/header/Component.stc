@@ -72,11 +72,11 @@ ControllerGlobalDecl(definition, ctrl) ::= <<
 // Used interface definitions
 
 UsedInterfaceDefinitions(definition) ::= <<
-<definition.astDecorations.("used-interface-definition").values:UsedInterfaceDefinition(usedItf=it.interfaceDefinition); separator="\n">
+<definition.astDecorations.("used-interface-definition").values:UsedInterfaceDefinition(usedItfName=it.interfaceName); separator="\n">
 >>
 
-UsedInterfaceDefinition(usedItf) ::= <<
-#include "<usedItf.name; format="nameToPath">.itf.h"
+UsedInterfaceDefinition(usedItfName) ::= <<
+#include "<usedItfName; format="nameToPath">.itf.h"
 >>
 
 // -----------------------------------------------------------------------------
