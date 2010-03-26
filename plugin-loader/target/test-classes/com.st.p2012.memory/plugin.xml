@@ -1,0 +1,5 @@
+<plugin id="com.st.p2012.memory" name="Memory Banks Extension">
+  <extension point="org.ow2.mind.mindc.cpl">
+    <cpl class="foo.bar"/>
+  </extension>
+</plugin>

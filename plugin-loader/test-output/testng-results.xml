@@ -1,0 +1,16 @@
+<testng-results>
+  <reporter-output>
+  </reporter-output>
+  <suite name="plugin-loader">
+    <groups>
+    </groups>
+    <test name="org.ow2.mind.plugin.BasicTest">
+      <class name="org.ow2.mind.plugin.BasicTest">
+        <test-method status="PASS" signature="setUpNodeFactory()" name="setUpNodeFactory" is-config="true" duration-ms="11" started-at="2010-03-25T16:37:46Z" finished-at="2010-03-25T16:37:46Z">
+        </test-method>
+        <test-method status="PASS" signature="test1()" name="test1" duration-ms="71" started-at="2010-03-25T16:37:46Z" finished-at="2010-03-25T16:37:46Z">
+        </test-method>
+      </class>
+    </test>
+  </suite>
+</testng-results>

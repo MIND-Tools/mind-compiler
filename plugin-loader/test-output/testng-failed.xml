@@ -1,0 +1,13 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+<suite thread-count="5" skipfailedinvocationCounts="false" verbose="1" name="Failed suite [plugin-loader]" junit="false" parallel="false" annotations="JDK">
+  <test name="org.ow2.mind.plugin.BasicTest(failed)" junit="false" parallel="false" annotations="JDK">
+    <classes>
+      <class name="org.ow2.mind.plugin.BasicTest">
+        <methods>
+          <include name="setUpNodeFactory"/>
+          <include name="test1"/>
+        </methods>
+      </class>
+    </classes>
+  </test>
+</suite>
