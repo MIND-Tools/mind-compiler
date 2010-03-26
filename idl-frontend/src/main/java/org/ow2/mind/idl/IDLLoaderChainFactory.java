@@ -131,6 +131,8 @@ public final class IDLLoaderChainFactory {
 
     // node factories
     final XMLNodeFactoryImpl xnf = new XMLNodeFactoryImpl();
+    // set my class loader as classloader used by XMLNodeFactory
+    xnf.setClassLoader(IDLLoaderChainFactory.class.getClassLoader());
     final STNodeFactoryImpl nf = new STNodeFactoryImpl();
     ifl.nodeFactoryItf = xnf;
     ihr.nodeFactoryItf = nf;

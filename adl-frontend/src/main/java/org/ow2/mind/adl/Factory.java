@@ -166,6 +166,8 @@ public final class Factory {
     // node management components
     final STCFNodeMerger stcfNodeMerger = new STCFNodeMerger();
     final XMLNodeFactoryImpl xmlNodeFactory = new XMLNodeFactoryImpl();
+    // set my class loader as classloader used by XMLNodeFactory
+    xmlNodeFactory.setClassLoader(Factory.class.getClassLoader());
     final STNodeFactoryImpl nodeFactory = new STNodeFactoryImpl();
     final NodeMergerImpl nodeMerger = new NodeMergerImpl();
 
