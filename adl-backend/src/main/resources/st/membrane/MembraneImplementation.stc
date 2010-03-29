@@ -249,6 +249,14 @@ ServerInterfaceStubs(definition, interfaceDefinitions) ::= <<
 // Start definition of server stubs
 <definition.interfaces:ServerInterfaceStub(definition=definition, interfaceDefinitions=interfaceDefinitions, itf=it); separator="\n">
 // End definition of server stubs
+
+<if (definition.astNodeTypes.("internalInterface"))>
+<if (definition.internalInterfaces)>
+// Start definition of internal server stubs
+<definition.internalInterfaces:ServerInterfaceStub(definition=definition, interfaceDefinitions=interfaceDefinitions, itf=it); separator="\n">
+// End definition of internal server stubs
+<endif>
+<endif>
 <endif>
 >>
 
