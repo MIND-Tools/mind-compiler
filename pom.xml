@@ -41,6 +41,7 @@
         <module>mindc</module>
         <module>fractal-runtime</module>
         <module>fractal-adl-bundle</module>
+        <module>plugin-loader</module>
     </modules>
 
     <developers>
