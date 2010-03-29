@@ -1,32 +1,40 @@
-<?xml version="1.0" encoding="UTF-8"?><project>
-  <parent>
-    <artifactId>mind-compiler</artifactId>
-    <groupId>org.ow2.mind</groupId>
-    <version>0.2-alpha-2-SNAPSHOT</version>
-  </parent>
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>org.ow2.mind</groupId>
-  <artifactId>plugin-loader</artifactId>
-  <name>plugin-loader</name>
-  <version>0.2-alpha-2-SNAPSHOT</version>
-  <url>http://maven.apache.org</url>
-  <dependencies>
-   <dependency>
-      <groupId>org.objectweb.fractal.fractaladl</groupId>
-      <artifactId>fractal-adl</artifactId>
-   </dependency>
-   <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>3.8.1</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-	  <groupId>org.testng</groupId>
-	  <artifactId>testng</artifactId>
-	  <classifier>jdk15</classifier>
-	  <scope>test</scope>
-	</dependency>
-    
-  </dependencies>
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.ow2.mind</groupId>
+        <artifactId>mind-compiler</artifactId>
+        <version>0.2-alpha-2-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>plugin-loader</artifactId>
+    <name>plugin-loader</name>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.objectweb.fractal.fractaladl</groupId>
+            <artifactId>fractal-adl</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>common-frontend</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>3.8.1</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <classifier>jdk15</classifier>
+        </dependency>
+    </dependencies>
 </project>

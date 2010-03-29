@@ -1,85 +1,281 @@
+/**
+ * Copyright (C) 2010 STMicroelectronics
+ *
+ * This file is part of "Mind Compiler" is free software: you can redistribute 
+ * it and/or modify it under the terms of the GNU Lesser General Public License 
+ * as published by the Free Software Foundation, either version 3 of the 
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT 
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Contact: mind@ow2.org
+ *
+ * Authors: Matthieu Leclercq
+ * Contributors: Ali Erdem Ozcan
+ */
+
 package org.ow2.mind.plugin;
 
-import java.net.MalformedURLException;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Map;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.CompilerError;
+import org.objectweb.fractal.adl.NodeFactory;
 import org.objectweb.fractal.adl.error.GenericErrors;
-import org.ow2.mind.PluginLoader;
+import org.ow2.mind.CommonASTHelper;
 import org.ow2.mind.plugin.ast.Extension;
 import org.ow2.mind.plugin.ast.ExtensionPoint;
 import org.ow2.mind.plugin.ast.Plugin;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 public class BasicPluginManager implements PluginManager {
 
-	/**
-	 * The name of the plugin-loader client interface.
-	 */
-	public static final String PLUGIN_LOADER_ITF = "plugin-loader";
-	/**
-	 * The plugin-loader client interface.
-	 */
-	public PluginLoader pluginLoader;
+	public static final String PLUGIN_XML = "mind-plugin.xml";
 
-	public Plugin[] getPlugins(String extensionPoint, Map<Object, Object> context) {
-		// TODO Auto-generated method stub
-		List<Plugin> pluginList = (List<Plugin>) PluginManagerHelper.getContextMap(
-				context).get(extensionPoint);
-		return pluginList.toArray(new Plugin[0]);
+	protected PluginRegistry pluginRegistry;
+	protected ClassLoader classLoader;
+	protected DocumentBuilder builder = null;
+
+	// ---------------------------------------------------------------------------
+	// Client interfaces
+	// ---------------------------------------------------------------------------
+
+	/** Client interface for node factory. */
+	public NodeFactory nodeFactoryItf;
+
+	// public XMLNodeFactory xmlNodeFactoryItf;
+
+	// ---------------------------------------------------------------------------
+	// Constructor
+	// ---------------------------------------------------------------------------
+
+	public BasicPluginManager() {
+		final DocumentBuilderFactory builderFactory = DocumentBuilderFactory
+				.newInstance();
+		try {
+			builder = builderFactory.newDocumentBuilder();
+		} catch (final ParserConfigurationException e) {
+			throw new CompilerError(GenericErrors.INTERNAL_ERROR, e,
+					"Can't initialize document builder");
+		}
 	}
 
-	/*
-	 * FIXME: The current version doesn't use the context-based plugin management.
-	 */
-	public void registerPlugin(String pluginId, Map<Object, Object> context)
+	// ---------------------------------------------------------------------------
+	// Implementation of the PluginManager interface
+	// ---------------------------------------------------------------------------
+
+	public void setClassLoader(final ClassLoader cl) {
+		classLoader = cl;
+		// invalidate plugin registry
+		pluginRegistry = null;
+	};
+
+	public Collection<Extension> getExtensions(final String extensionPoint,
+			final Map<Object, Object> context) throws ADLException {
+		return Collections.unmodifiableCollection(getRegistry(context).extensions
+				.get(extensionPoint));
+	}
+
+	// ---------------------------------------------------------------------------
+	// Utility classes and methods
+	// ---------------------------------------------------------------------------
+
+	protected PluginRegistry initRegistry(final Map<Object, Object> context)
 			throws ADLException {
-		URL[] pluginUrls = new URL[1];
+		final PluginRegistry registry = new PluginRegistry();
+
+		final ClassLoader classLoader = (this.classLoader != null) ? this.classLoader
+				: this.getClass().getClassLoader();
+		Enumeration<URL> plugins = null;
 		try {
-			pluginUrls[0] = new URL("file://"
-					+ ClassLoader.getSystemResource(pluginId).getPath() + "/");
-		} catch (MalformedURLException e) {
+			plugins = classLoader.getResources(PLUGIN_XML);
+		} catch (final IOException e) {
 			throw new CompilerError(GenericErrors.INTERNAL_ERROR, e,
-					"Unable to access the plugin '" + pluginId + "'.");
+					"Can't find plugin descriptors");
 		}
-		URL pluginUrl = URLClassLoader.newInstance(pluginUrls).getResource(
-				"plugin.xml");
 
-		Plugin plugin = pluginLoader.load(pluginUrl.getFile());
+		while (plugins.hasMoreElements()) {
+			final URL url = plugins.nextElement();
+			initPlugin(url, registry, context);
+		}
 
-		Map<String, List<Plugin>> pluginMap = PluginManagerHelper
-				.getContextMap(context);
-		// Register new extension points.
-		for (ExtensionPoint extensionPoint : plugin.getExtensionPoints()) {
-			String extensionPointName = plugin.getId() + '.' + extensionPoint.getId();
-			List<Plugin> extensionList = pluginMap.get(extensionPointName);
-			// If this extension point is not already registered, create a new plugin
-			// list.
-			// Otherwise, nothing to do.
-			if (extensionList == null) {
-				extensionList = new ArrayList<Plugin>();
-				pluginMap.put(extensionPointName, extensionList);
+		// bind extensions to extension points :
+		for (final Plugin plugin : registry.plugins.values()) {
+			System.out.println("Initing the plugin " + plugin.getId());
+			for (final Extension extension : plugin.getExtensions()) {
+				final ExtensionPoint point = registry.extensionPoints.get(extension
+						.getPoint());
+				if (point == null) {
+					throw new CompilerError(GenericErrors.INTERNAL_ERROR,
+							"Unknown Extenstion point ID \"" + extension.getPoint()
+									+ "\" referenced by plugin \"" + plugin.getId() + "\".");
+				}
+				registry.extensions.get(extension.getPoint()).add(extension);
 			}
 		}
 
-		for (Extension extension : plugin.getExtensions()) {
-			List<Plugin> pluginList = pluginMap.get(extension.getPoint());
-			// Check if there is already an extension point which is defined for this
-			// extension.
-			if (pluginList == null) {
-				throw new CompilerError(GenericErrors.INTERNAL_ERROR,
-						"No extension point registered for the extension '"
-								+ extension.getPoint() + "' provided by the plugin '"
-								+ pluginId + "'.");
-			}
-			// Add the plugin to the list.
-			pluginList.add(plugin);
+		return registry;
+	}
+
+	protected void initPlugin(final URL pluginDesc,
+			final PluginRegistry registry, final Map<Object, Object> context)
+			throws ADLException {
+
+		final Plugin plugin = loadPlugin(pluginDesc);
+		final Plugin prevPlugin = registry.plugins.put(plugin.getId(), plugin);
+		if (prevPlugin != null) {
+			throw new CompilerError(GenericErrors.INTERNAL_ERROR,
+					"Invalid plugin ID \"" + plugin.getId()
+							+ "\" A plugin with the same name is already defined.");
 		}
 
-		System.out.println(plugin.getName());
+		for (final ExtensionPoint point : plugin.getExtensionPoints()) {
+			final ExtensionPoint prevPoint = registry.extensionPoints.put(
+					getQualifiedExtensionName(plugin, point), point);
+			if (prevPoint != null) {
+				throw new CompilerError(
+						GenericErrors.INTERNAL_ERROR,
+						"Invalid Extenstion point ID \""
+								+ plugin.getId()
+								+ "\" An extension point with the same name is already defined.");
+			}
+			registry.extensions.put(getQualifiedExtensionName(plugin, point),
+					new ArrayList<Extension>());
+		}
+	}
+
+	protected String getQualifiedExtensionName(Plugin plugin, ExtensionPoint point) {
+		return plugin.getId() + "." + point.getId();
+	}
+
+	protected PluginRegistry getRegistry(final Map<Object, Object> context)
+			throws ADLException {
+		if (pluginRegistry == null) {
+			pluginRegistry = initRegistry(context);
+		}
+		return pluginRegistry;
+	}
+
+	protected Plugin loadPlugin(final URL pluginDesc) throws ADLException {
+		Document document = null;
+		try {
+			document = builder.parse(pluginDesc.openStream());
+		} catch (final FileNotFoundException e) {
+			throw new CompilerError(GenericErrors.INTERNAL_ERROR, e,
+					"Unable to find the plugin descriptor '" + pluginDesc + "'.");
+		} catch (final IOException e) {
+			throw new CompilerError(GenericErrors.INTERNAL_ERROR, e,
+					"Unable to access the plugin descriptor '" + pluginDesc + "'.");
+		} catch (final SAXException e) {
+			throw new CompilerError(GenericErrors.INTERNAL_ERROR, e,
+					"Unable to parse the XML plugin descriptor '" + pluginDesc + "'.");
+		}
+		final Element root = document.getDocumentElement();
+		// Setting the base information
+		final Plugin plugin = newPluginNode(root.getAttribute("id"), root
+				.getAttribute("name"));
+
+		// Setting the extension points
+		final NodeList nodes = root.getChildNodes();
+		for (int i = 0; i < nodes.getLength(); i++) {
+			final org.w3c.dom.Node node = nodes.item(i);
+			if (node instanceof Element) {
+				final Element element = (Element) node;
+				if (element.getNodeName().equals("extension")) {
+					final Extension extension = newExtensionNode(element
+							.getAttribute("point"));
+					extension.astSetDecoration("xml-element", element);
+					plugin.addExtension(extension);
+				} else if (element.getNodeName().equals("extension-point")) {
+					final ExtensionPoint extensionPoint = newExtensionPointNode(element
+							.getAttribute("id"), element.getAttribute("dtd"));
+					extensionPoint.astSetDecoration("xml-element", element);
+					plugin.addExtensionPoint(extensionPoint);
+				}
+			}
+		}
+		return plugin;
+	}
+
+	// protected Node loadASTFromDom(final String dtd, final Element element) {
+	// XMLNode node;
+	// try {
+	// node = xmlNodeFactoryItf.newXMLNode(dtd, element.getLocalName());
+	// } catch (final SAXException e) {
+	// throw new CompilerError(GenericErrors.INTERNAL_ERROR, e,
+	// "Invalid extension point DTD \"" + dtd + "\".");
+	// }
+	//
+	// // set attributes
+	// final NamedNodeMap attributes = element.getAttributes();
+	// final Map<String, String> attributeMap = new HashMap<String, String>(
+	// attributes.getLength());
+	// for (int i = 0; i < attributes.getLength(); i++) {
+	// final Attr attr = (Attr) attributes.item(i);
+	// attributeMap.put(attr.getName(), attr.getValue());
+	// }
+	// node.astSetAttributes(attributeMap);
+	//
+	// // add sub nodes
+	// final NodeList childNodes = element.getChildNodes();
+	// for (int i = 0; i < childNodes.getLength(); i++) {
+	// final org.w3c.dom.Node child = childNodes.item(i);
+	// if (child instanceof Element) {
+	// node.astAddNode(loadASTFromDom(dtd, (Element) child));
+	// }
+	// }
+	//
+	// return node;
+	// }
+
+	protected Plugin newPluginNode(final String id, final String name) {
+		final Plugin plugin = CommonASTHelper.newNode(nodeFactoryItf, "plugin",
+				Plugin.class);
+		plugin.setId(id);
+		plugin.setName(name);
+		return plugin;
+	}
+
+	protected ExtensionPoint newExtensionPointNode(final String id,
+			final String dtd) {
+		final ExtensionPoint extensionPoint = CommonASTHelper.newNode(
+				nodeFactoryItf, "extensionPoint", ExtensionPoint.class);
+		extensionPoint.setId(id);
+		extensionPoint.setDtd(dtd);
+		return extensionPoint;
+	}
+
+	protected Extension newExtensionNode(final String point) {
+		final Extension extension = CommonASTHelper.newNode(nodeFactoryItf,
+				"extension", Extension.class);
+		extension.setPoint(point);
+		return extension;
+	}
+
+	protected static final class PluginRegistry {
+		final Map<String, Plugin> plugins = new HashMap<String, Plugin>();
+		final Map<String, ExtensionPoint> extensionPoints = new HashMap<String, ExtensionPoint>();
+		final Map<String, Collection<Extension>> extensions = new HashMap<String, Collection<Extension>>();
 	}
 }
