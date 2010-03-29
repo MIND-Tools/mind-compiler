@@ -1,3 +1,0 @@
-<plugin id="org.ow2.mind.mindc" name="The host plugin">
-  <extension-point id="cpl" dtd="org.ow2.mind.cpl.extension" /> 
-</plugin>

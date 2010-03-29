@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="org.ow2.mind.plugin.BasicTest" failures="0" tests="1" time="0.096" errors="0">
-  <properties/>
-  <testcase name="test1" time="0.071" classname="org.ow2.mind.plugin.BasicTest"/>
-</testsuite>
