@@ -350,6 +350,7 @@ public final class Factory {
     gidl.definitionReferenceResolverItf = cdrr;
 
     gdrr.templateInstantiatorItf = cti;
+    fti.loaderItf = adlLoader;
 
     pti.nodeFactoryItf = nodeFactory;
     pti.nodeMergerItf = nodeMerger;
