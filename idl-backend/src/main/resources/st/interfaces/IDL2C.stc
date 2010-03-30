@@ -12,6 +12,8 @@ idlFile(idl) ::= <<
 
 /* This file is a generated file, do not edit. */
 
+#include "mindcommon.h"
+
 <idl.includes:includeDirective(include=it); separator="\n">
 <idl.astDecorations.("referenced-interfaces").referencedInterfaces:includeReference(ref=it.IDL); separator="\n">
 
@@ -24,7 +26,7 @@ idlFile(idl) ::= <<
 >>
 
 includeDirective(include) ::= <<
-#include "<include.path;format="toCPath">"
+#include <include.path;format="toIncludePath">
 >>
 
 includeReference(ref) ::= <<
@@ -199,7 +201,7 @@ varDefTemplateMap ::= [
 ]
 
 primitiveTypeNameMap ::= [
-  "string" : "char*"
+  "string" : "__MIND_STRING_TYPEDEF"
 ]
 
 typeQualifier(qualifiers) ::= <<

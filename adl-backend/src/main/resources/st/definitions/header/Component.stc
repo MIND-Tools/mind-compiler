@@ -14,6 +14,8 @@ ComponentDefinitionHeader(definition) ::= <<
 #ifndef __COMPONENT_<definition.name;format="toUpperCName">_ADL_H
 #define __COMPONENT_<definition.name;format="toUpperCName">_ADL_H
 
+#include "mindcommon.h"
+
 // Start including the interface descriptions 
 <definition.interfaces:{#include "<it.signature; format="nameToPath">.itf.h"}; separator="\n">
 <UsedInterfaceDefinitions(definition=definition)>
@@ -70,11 +72,11 @@ ControllerGlobalDecl(definition, ctrl) ::= <<
 // Used interface definitions
 
 UsedInterfaceDefinitions(definition) ::= <<
-<definition.astDecorations.("used-interface-definition").values:UsedInterfaceDefinition(usedItf=it.interfaceDefinition); separator="\n">
+<definition.astDecorations.("used-interface-definition").values:UsedInterfaceDefinition(usedItfName=it.interfaceName); separator="\n">
 >>
 
-UsedInterfaceDefinition(usedItf) ::= <<
-#include "<usedItf.name; format="nameToPath">.itf.h"
+UsedInterfaceDefinition(usedItfName) ::= <<
+#include "<usedItfName; format="nameToPath">.itf.h"
 >>
 
 // -----------------------------------------------------------------------------

@@ -76,8 +76,19 @@ public class ExtendsInterfaceLoader extends AbstractIDLLoader {
 
   protected void mergeInterface(final InterfaceDefinition itf,
       final InterfaceDefinition superItf) {
+    // remove method from itf
+    final Method[] meths = itf.getMethods();
+    for (final Method method : meths) {
+      itf.removeMethod(method);
+    }
+    // add clone of inherited methods
     for (final Method method : superItf.getMethods()) {
       itf.addMethod(cloneGraph(method));
+    }
+    // re-add methods from itf. (this ensure that methods defined in "itf" are
+    // after methods defined in "superItf"
+    for (final Method method : meths) {
+      itf.addMethod(method);
     }
   }
 

@@ -10,10 +10,6 @@
   //
 </highlighter>
 
-<highlighter type='oneline-comment'>
-  #
-</highlighter>
-
 <highlighter type='string'>
   <string>"</string>
   <escape>\</escape>
@@ -29,6 +25,11 @@
 </highlighter>
 
 <highlighter type='keywords'>
+  <keyword>ifdef</keyword>
+  <keyword>ifndef</keyword>
+  <keyword>endif</keyword>
+  <keyword>define</keyword>
+
   <keyword>and</keyword>
   <keyword>auto</keyword>
   <keyword>break</keyword>

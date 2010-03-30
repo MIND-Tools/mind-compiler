@@ -42,6 +42,7 @@ import org.ow2.mind.adl.annotation.AnnotationProcessorTemplateInstantiator;
 import org.ow2.mind.adl.anonymous.AnonymousDefinitionExtractorImpl;
 import org.ow2.mind.adl.anonymous.AnonymousDefinitionLoader;
 import org.ow2.mind.adl.anonymous.ImportAnonymousDefinitionExtractor;
+import org.ow2.mind.adl.anonymous.InputResourceAnonymousDefinitionExtractor;
 import org.ow2.mind.adl.attribute.AttributeCheckerLoader;
 import org.ow2.mind.adl.attribute.AttributesNormalizerLoader;
 import org.ow2.mind.adl.binding.BasicBindingChecker;
@@ -165,6 +166,8 @@ public final class Factory {
     // node management components
     final STCFNodeMerger stcfNodeMerger = new STCFNodeMerger();
     final XMLNodeFactoryImpl xmlNodeFactory = new XMLNodeFactoryImpl();
+    // set my class loader as classloader used by XMLNodeFactory
+    xmlNodeFactory.setClassLoader(Factory.class.getClassLoader());
     final STNodeFactoryImpl nodeFactory = new STNodeFactoryImpl();
     final NodeMergerImpl nodeMerger = new NodeMergerImpl();
 
@@ -358,10 +361,12 @@ public final class Factory {
     final ImportAnonymousDefinitionExtractor iadr = new ImportAnonymousDefinitionExtractor();
     final GenericAnonymousDefinitionExtractor gadr = new GenericAnonymousDefinitionExtractor();
     final ParametricAnonymousDefinitionExtractor padr = new ParametricAnonymousDefinitionExtractor();
+    final InputResourceAnonymousDefinitionExtractor iradr = new InputResourceAnonymousDefinitionExtractor();
 
     padr.clientExtractorItf = gadr;
     gadr.clientExtractorItf = iadr;
-    iadr.clientExtractorItf = adr;
+    iadr.clientExtractorItf = iradr;
+    iradr.clientExtractorItf = adr;
 
     adl.anonymousDefinitionExtractorItf = padr;
 

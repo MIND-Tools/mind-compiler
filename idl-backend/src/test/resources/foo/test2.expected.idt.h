@@ -3,6 +3,8 @@
 
 /* This file is a generated file, do not edit. */
 
+#include "mindcommon.h"
+
 #include "test3.idt.h"
 #include "test2.itf.h"
 

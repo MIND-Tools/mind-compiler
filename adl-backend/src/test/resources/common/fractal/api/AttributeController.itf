@@ -60,7 +60,7 @@ interface fractal.api.AttributeController {
    *      {@link FRACTAL_API_OPERATION_NOT_SUPPORTED} if this operation is not
    *      supported.
    */
-  int listFcAttributes(in const string attributeNames[]);
+  int listFcAttributes(in string attributeNames[]);
 
   /**
    * Returns the value of an attribute.
@@ -70,7 +70,7 @@ interface fractal.api.AttributeController {
    * @return <code>0</code> if the operation succeed.
    *      {@link FRACTAL_API_NO_SUCH_ATTRIBUTE} if there is no such attribute.
    */
-  int getFcAttribute(in const string attributeName, out void *value);
+  int getFcAttribute(in string attributeName, out void *value);
 
   /**
    * Returns the size of an attribute (in byte).
@@ -79,7 +79,7 @@ interface fractal.api.AttributeController {
    * @return the size if the attribute or {@link FRACTAL_API_NO_SUCH_ATTRIBUTE}
    *       if there is no such attribute.
    */
-  int getFcAttributeSize(in const string attributeName);
+  int getFcAttributeSize(in string attributeName);
 
   /**
    * Returns the type of an attribute.
@@ -89,7 +89,7 @@ interface fractal.api.AttributeController {
    * @return <code>0</code> if the operation succeed.
    *      {@link FRACTAL_API_NO_SUCH_ATTRIBUTE} if there is no such attribute.
    */
-  int getFcAttributeType(in const string attributeName,
+  int getFcAttributeType(in string attributeName,
       out enum AttributeType type);
 
   /**
@@ -103,5 +103,5 @@ interface fractal.api.AttributeController {
    *      {@link FRACTAL_API_OPERATION_NOT_SUPPORTED} if this operation is not
    *      supported.
    */
-  int setFcAttribute(in const string attributeName, in void *value);
+  int setFcAttribute(in string attributeName, in void *value);
 }
