@@ -44,10 +44,18 @@ import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.CompilerError;
 import org.objectweb.fractal.adl.error.GenericErrors;
 import org.objectweb.fractal.adl.util.FractalADLLogManager;
+import org.ow2.mind.plugin.PluginManager;
 
 public class BasicMPPWrapper implements MPPWrapper {
 
-  protected static Logger logger = FractalADLLogManager.getLogger("io");
+  protected static Logger     logger             = FractalADLLogManager
+                                                     .getLogger("io");
+
+  /** Plugin manager client interface name **/
+  public static final String  PLUGIN_MANAGER_ITF = "plugin-manager";
+
+  /** Plugin manager client interface **/
+  public static PluginManager pluginManagerItf;
 
   public MPPCommand newMPPCommand(final Map<Object, Object> context) {
     return new BasicMPPCommand(context);
@@ -117,7 +125,8 @@ public class BasicMPPWrapper implements MPPWrapper {
     public void exec() throws ADLException, InterruptedException {
       final Lexer lex;
       try {
-        lex = ExtensionHelper.getLexer(inputFile.getPath(), context);
+        lex = ExtensionHelper.getLexer(pluginManagerItf, inputFile.getPath(),
+            context);
       } catch (final IOException e) {
         // TODO use a specific error
         throw new ADLException(GenericErrors.GENERIC_ERROR, e,
@@ -125,7 +134,8 @@ public class BasicMPPWrapper implements MPPWrapper {
       }
 
       final CommonTokenStream tokens = new CommonTokenStream(lex);
-      final Parser mpp = ExtensionHelper.getParser(tokens, context);
+      final Parser mpp = ExtensionHelper.getParser(pluginManagerItf, tokens,
+          context);
 
       PrintStream outPS = null;
       PrintStream headerOutPS = null;

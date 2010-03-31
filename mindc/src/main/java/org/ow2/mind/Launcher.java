@@ -77,9 +77,9 @@ import org.ow2.mind.idl.IDLVisitor;
 import org.ow2.mind.idl.OutputBinaryIDLLocator;
 import org.ow2.mind.idl.st.IDLLoaderASTTransformer;
 import org.ow2.mind.io.BasicOutputFileLocator;
+import org.ow2.mind.plugin.BasicPluginManager;
 import org.ow2.mind.plugin.SimpleClassPluginFactory;
 import org.ow2.mind.preproc.BasicMPPWrapper;
-import org.ow2.mind.preproc.MPPWrapper;
 import org.ow2.mind.st.BasicASTTransformer;
 import org.ow2.mind.st.STLoaderFactory;
 import org.ow2.mind.st.STNodeFactoryImpl;
@@ -425,21 +425,27 @@ public class Launcher extends AbstractLauncher {
     obal.outputFileLocatorItf = outputFileLocator;
     obil.outputFileLocatorItf = outputFileLocator;
 
+    // NodeFactory Component
+    final STNodeFactoryImpl stNodeFactory = new STNodeFactoryImpl();
+
     // Plugin Manager Components
     final org.objectweb.fractal.adl.Factory pluginFactory = new SimpleClassPluginFactory();
+    final BasicPluginManager pluginManager = new BasicPluginManager();
+    pluginManager.nodeFactoryItf = stNodeFactory;
 
     // compilation task factory
     final GccCompilerWrapper gcw = new GccCompilerWrapper();
     gcw.outputFileLocatorItf = outputFileLocator;
     final CompilerWrapper compilerWrapper = gcw;
-    final MPPWrapper mppWrapper = new BasicMPPWrapper();
+    final BasicMPPWrapper mppWrapper = new BasicMPPWrapper();
+    mppWrapper.pluginManagerItf = pluginManager;
 
     // String Template Component Loaders
     final StringTemplateGroupLoader stcLoader = STLoaderFactory.newSTLoader();
 
     // AST Transformer;
     final BasicASTTransformer basicASTTransformer = new BasicASTTransformer();
-    basicASTTransformer.nodeFactoryItf = new STNodeFactoryImpl();
+    basicASTTransformer.nodeFactoryItf = stNodeFactory;
     astTransformer = basicASTTransformer;
 
     // loader chains

@@ -12,10 +12,8 @@ import org.antlr.runtime.Lexer;
 import org.antlr.runtime.Parser;
 import org.antlr.runtime.TokenStream;
 import org.objectweb.fractal.adl.ADLException;
-import org.objectweb.fractal.adl.NodeFactory;
-import org.objectweb.fractal.adl.NodeFactoryImpl;
 import org.objectweb.fractal.adl.error.GenericErrors;
-import org.ow2.mind.plugin.BasicPluginManager;
+import org.ow2.mind.plugin.PluginManager;
 import org.ow2.mind.plugin.ast.Extension;
 import org.ow2.mind.preproc.parser.CPLLexer;
 import org.ow2.mind.preproc.parser.CPLParser;
@@ -24,23 +22,16 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 public final class ExtensionHelper {
-  protected static final NodeFactory        nodeFactory;
-  protected static final BasicPluginManager pluginManager;
-  static {
-    nodeFactory = new NodeFactoryImpl();
-    pluginManager = new BasicPluginManager();
-    pluginManager.nodeFactoryItf = nodeFactory;
-  }
+  public static final String CPL_EXTENSION = "org.ow2.mind.preproc.cpl-parser";
 
-  public static final String                CPL_EXTENSION = "org.ow2.mind.preproc.cpl-parser";
-
-  public static Lexer getLexer(final String path,
-      final Map<Object, Object> context) throws ADLException, IOException {
-    final Collection<Extension> extensions = pluginManager.getExtensions(
+  public static Lexer getLexer(final PluginManager pluginManagerItf,
+      final String inputPath, final Map<Object, Object> context)
+      throws ADLException, IOException {
+    final Collection<Extension> extensions = pluginManagerItf.getExtensions(
         CPL_EXTENSION, context);
     if (extensions.size() == 0) {
       // Return the default lexer
-      return new CPLLexer(new ANTLRFileStream(path));
+      return new CPLLexer(new ANTLRFileStream(inputPath));
     }
     if (extensions.size() > 1) {
       throw new ADLException(GenericErrors.GENERIC_ERROR,
@@ -57,7 +48,7 @@ public final class ExtensionHelper {
           .getClassLoader().loadClass(lexerClassName);
       final Class[] parameters = {CharStream.class};
       return lexerClass.getConstructor(parameters).newInstance(
-          new ANTLRFileStream(path));
+          new ANTLRFileStream(inputPath));
     } catch (final InstantiationException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
@@ -84,9 +75,10 @@ public final class ExtensionHelper {
     return null;
   }
 
-  public static Parser getParser(final TokenStream tokens,
-      final Map<Object, Object> context) throws ADLException {
-    final Collection<Extension> extensions = pluginManager.getExtensions(
+  public static Parser getParser(final PluginManager pluginManagerItf,
+      final TokenStream tokens, final Map<Object, Object> context)
+      throws ADLException {
+    final Collection<Extension> extensions = pluginManagerItf.getExtensions(
         CPL_EXTENSION, context);
     if (extensions.size() == 0) {
       // Return the default lexer
