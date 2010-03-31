@@ -10,4 +10,6 @@ interface test1 {
   void m1(int a, int b);
   unsigned float m2(float f1);
   void* m3(int a, int b);
+  int m4(int, int);
+  int m5(int, float p0);
 };

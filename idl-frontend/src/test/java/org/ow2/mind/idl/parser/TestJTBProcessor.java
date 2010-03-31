@@ -28,6 +28,9 @@ import junit.framework.TestCase;
 
 import org.objectweb.fractal.adl.xml.XMLNodeFactory;
 import org.objectweb.fractal.adl.xml.XMLNodeFactoryImpl;
+import org.ow2.mind.idl.ASTChecker;
+import org.ow2.mind.idl.ASTChecker.MethodCheckerIterator;
+import org.ow2.mind.idl.ASTChecker.ParameterCheckerIterator;
 import org.ow2.mind.idl.ast.InterfaceDefinition;
 import org.ow2.mind.idl.jtb.Parser;
 import org.ow2.mind.idl.jtb.syntaxtree.ITFFile;
@@ -56,6 +59,40 @@ public class TestJTBProcessor extends TestCase {
     final ITFFile content = parser.ITFFile();
     final InterfaceDefinition idlFile = processor
         .toInterfaceDefinition(content);
+    final MethodCheckerIterator methodsChecker = new ASTChecker().assertIDL(
+        idlFile).containsMethods("m1", "m2", "m3", "m4", "m5");
+    ParameterCheckerIterator paramsChecker;
+
+    // check m1;
+    methodsChecker.whereFirst().returnsType().isPrimitiveType("void");
+    paramsChecker = methodsChecker.hasParameters("a", "b");
+    paramsChecker.whereFirst().hasType().isPrimitiveType("int");
+    paramsChecker.andNext().hasType().isPrimitiveType("int");
+
+    // check m2;
+    methodsChecker.andNext().returnsType().isPrimitiveType("unsigned float");
+    methodsChecker.hasParameters("f1").whereFirst().hasType().isPrimitiveType(
+        "float");
+
+    // check m3;
+    methodsChecker.andNext().returnsType().isPointerOf()
+        .isPrimitiveType("void");
+    paramsChecker = methodsChecker.hasParameters("a", "b");
+    paramsChecker.whereFirst().hasType().isPrimitiveType("int");
+    paramsChecker.andNext().hasType().isPrimitiveType("int");
+
+    // check m4;
+    methodsChecker.andNext().returnsType().isPrimitiveType("int");
+    paramsChecker = methodsChecker.hasParameters("p0", "p1");
+    paramsChecker.whereFirst().hasType().isPrimitiveType("int");
+    paramsChecker.andNext().hasType().isPrimitiveType("int");
+
+    // check m5;
+    methodsChecker.andNext().returnsType().isPrimitiveType("int");
+    paramsChecker = methodsChecker.hasParameters("p1", "p0");
+    paramsChecker.whereFirst().hasType().isPrimitiveType("int");
+    paramsChecker.andNext().hasType().isPrimitiveType("float");
+
     assertNotNull(idlFile);
   }
 }
