@@ -22,6 +22,8 @@
 
 package org.ow2.mind.preproc;
 
+import static org.ow2.mind.preproc.InvocationHelper.invokeMethod;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -34,15 +36,14 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.antlr.runtime.ANTLRFileStream;
 import org.antlr.runtime.CommonTokenStream;
+import org.antlr.runtime.Lexer;
+import org.antlr.runtime.Parser;
 import org.antlr.runtime.RecognitionException;
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.CompilerError;
 import org.objectweb.fractal.adl.error.GenericErrors;
 import org.objectweb.fractal.adl.util.FractalADLLogManager;
-import org.ow2.mind.preproc.parser.CPLLexer;
-import org.ow2.mind.preproc.parser.CPLParser;
 
 public class BasicMPPWrapper implements MPPWrapper {
 
@@ -114,9 +115,9 @@ public class BasicMPPWrapper implements MPPWrapper {
     }
 
     public void exec() throws ADLException, InterruptedException {
-      final CPLLexer lex;
+      final Lexer lex;
       try {
-        lex = new CPLLexer(new ANTLRFileStream(inputFile.getPath()));
+        lex = ExtensionHelper.getLexer(inputFile.getPath(), context);
       } catch (final IOException e) {
         // TODO use a specific error
         throw new ADLException(GenericErrors.GENERIC_ERROR, e,
@@ -124,7 +125,7 @@ public class BasicMPPWrapper implements MPPWrapper {
       }
 
       final CommonTokenStream tokens = new CommonTokenStream(lex);
-      final CPLParser mpp = new CPLParser(tokens);
+      final Parser mpp = ExtensionHelper.getParser(tokens, context);
 
       PrintStream outPS = null;
       PrintStream headerOutPS = null;
@@ -135,8 +136,10 @@ public class BasicMPPWrapper implements MPPWrapper {
         } catch (final FileNotFoundException e) {
           throw new CompilerError(GenericErrors.INTERNAL_ERROR, e, "IO error");
         }
-        lex.setOutPutStream(outPS);
-        mpp.setOutputStream(outPS);
+        invokeMethod(lex, "setOutPutStream", new Class[]{PrintStream.class},
+            new Object[]{outPS});
+        invokeMethod(mpp, "setOutputStream", new Class[]{PrintStream.class},
+            new Object[]{outPS});
 
         if (headerOutputFile != null) {
           try {
@@ -146,10 +149,12 @@ public class BasicMPPWrapper implements MPPWrapper {
           } catch (final FileNotFoundException e) {
             throw new CompilerError(GenericErrors.INTERNAL_ERROR, e, "IO error");
           }
-          mpp.setHeaderOutputStream(headerOutPS);
+          invokeMethod(mpp, "setHeaderOutputStream",
+              new Class[]{PrintStream.class}, new Object[]{headerOutPS});
         }
 
-        mpp.setSingletonMode(singletonMode);
+        invokeMethod(mpp, "setSingletonMode", new Class[]{boolean.class},
+            new Object[]{singletonMode});
 
         if (logger.isLoggable(Level.INFO)) logger.info(getDescription());
 
@@ -158,13 +163,15 @@ public class BasicMPPWrapper implements MPPWrapper {
               + outputFile.getPath() + " singletonMode=" + singletonMode);
 
         try {
-          mpp.parseFile();
+          invokeMethod(mpp, "parseFile", new Class[]{}, new Object[]{},
+              RecognitionException.class);
         } catch (final RecognitionException e) {
           throw new ADLException(MPPErrors.PARSE_ERROR, e, inputFile.getPath(),
               "MPP parse error.");
         }
 
-        final List<String> errors = mpp.getErrors();
+        final List<String> errors = (List<String>) invokeMethod(mpp,
+            "getErrors", new Class[]{}, new Object[]{});
         if (errors != null && errors.size() > 0) {
           String errorMsg;
           if (errors.size() == 1) {

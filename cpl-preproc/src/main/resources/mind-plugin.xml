@@ -1,0 +1,3 @@
+<plugin id="org.ow2.mind.preproc" name="The MIND preprocessor plugin.">
+  <extension-point id="cpl-parser"/> 
+</plugin>
