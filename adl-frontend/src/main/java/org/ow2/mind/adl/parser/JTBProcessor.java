@@ -79,7 +79,6 @@ import org.ow2.mind.adl.jtb.syntaxtree.CompositeDefinitionReference;
 import org.ow2.mind.adl.jtb.syntaxtree.CompositeInlinedDefinition;
 import org.ow2.mind.adl.jtb.syntaxtree.CompositeSubComponentReference;
 import org.ow2.mind.adl.jtb.syntaxtree.DataDefinition;
-import org.ow2.mind.adl.jtb.syntaxtree.DataFileDefinition;
 import org.ow2.mind.adl.jtb.syntaxtree.ExtendedCompositeDefinitions;
 import org.ow2.mind.adl.jtb.syntaxtree.ExtendedPrimitiveDefinitions;
 import org.ow2.mind.adl.jtb.syntaxtree.ExtendedTypeDefinitions;
@@ -90,7 +89,6 @@ import org.ow2.mind.adl.jtb.syntaxtree.ImplementationDefinition;
 import org.ow2.mind.adl.jtb.syntaxtree.ImportDefinition;
 import org.ow2.mind.adl.jtb.syntaxtree.IntegerValue;
 import org.ow2.mind.adl.jtb.syntaxtree.InterfaceDefinition;
-import org.ow2.mind.adl.jtb.syntaxtree.NoDataDefinition;
 import org.ow2.mind.adl.jtb.syntaxtree.NodeChoice;
 import org.ow2.mind.adl.jtb.syntaxtree.NodeOptional;
 import org.ow2.mind.adl.jtb.syntaxtree.NodeSequence;
@@ -630,8 +628,17 @@ public class JTBProcessor extends GJDepthFirst<Node, Node>
   public Node visit(final DataDefinition n, final Node argu) {
     assert argu != null;
 
-    final Data data = (Data) n.f1.accept(this, argu);
+    final Data data = (Data) newNode("data", n.f1);
 
+    // process Path() | <CCode>
+    if (n.f2.choice instanceof NodeToken) {
+      assert ((NodeToken) n.f2.choice).kind == INLINED_CODE;
+      final String inlinedCCode = ((NodeToken) n.f2.choice).tokenImage;
+      data.setCCode(inlinedCCode.substring(2, inlinedCCode.length() - 2));
+    } else {
+      assert n.f2.choice instanceof Path;
+      data.setPath(path((Path) n.f2.choice));
+    }
     // process annotations
     n.f0.accept(this, data);
 
@@ -639,29 +646,6 @@ public class JTBProcessor extends GJDepthFirst<Node, Node>
     castNodeError(argu, ImplementationContainer.class).setData(data);
 
     return data;
-  }
-
-  @Override
-  public Node visit(final DataFileDefinition n, final Node argu) {
-
-    final Data data = (Data) newNode("data", n.f0);
-
-    // process Path() | <CCode>
-    if (n.f1.choice instanceof NodeToken) {
-      assert ((NodeToken) n.f1.choice).kind == INLINED_CODE;
-      final String inlinedCCode = ((NodeToken) n.f1.choice).tokenImage;
-      data.setCCode(inlinedCCode.substring(2, inlinedCCode.length() - 2));
-    } else {
-      assert n.f1.choice instanceof Path;
-      data.setPath(path((Path) n.f1.choice));
-    }
-
-    return data;
-  }
-
-  @Override
-  public Node visit(final NoDataDefinition n, final Node argu) {
-    return newNode("data", n.f0);
   }
 
   // ---------------------------------------------------------------------------

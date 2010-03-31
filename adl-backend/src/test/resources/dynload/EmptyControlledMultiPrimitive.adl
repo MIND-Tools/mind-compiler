@@ -2,7 +2,6 @@
 @controller.Component
 primitive EmptyControlledMultiPrimitive extends ApplicationType {
 
-  nodata;
   source empty_main.c
 
 }

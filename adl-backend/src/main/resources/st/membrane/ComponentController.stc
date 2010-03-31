@@ -63,7 +63,7 @@ __COMPONENT_INIT_SERVER_INTERFACE_DESCRIPTOR(<ComponentTypeName(definitionName=d
 >>
 
 getFcInterface(definition) ::= <<
-int METH(component, getFcInterface)(const char *interfaceName,
+int METH(component, getFcInterface)(__MIND_STRING_TYPEDEF interfaceName,
     void** interfaceReference) 
 {
   return __component_getFcInterface_delegate(interfaceName, interfaceReference,
@@ -82,7 +82,7 @@ int METH(component, getFcInterfaces)(void* interfaceReferences[])
 >>
 
 listFcInterfaces(definition) ::= <<
-int METH(component, listFcInterfaces)(const char* interfaceNames[]) 
+int METH(component, listFcInterfaces)(__MIND_STRING_TYPEDEF interfaceNames[]) 
 {
   return __component_listFcInterfaces_delegate(interfaceNames,
       <itfDescPointer(definition=definition)>);
@@ -90,7 +90,7 @@ int METH(component, listFcInterfaces)(const char* interfaceNames[])
 >>
 
 getFcInterfaceRole(definition) ::= <<
-int METH(component, getFcInterfaceRole)(const char* interfaceName) 
+int METH(component, getFcInterfaceRole)(__MIND_STRING_TYPEDEF interfaceName) 
 {
   return __component_getFcInterfaceRole_delegate(interfaceName,
       <itfDescPointer(definition=definition)>);
@@ -98,7 +98,7 @@ int METH(component, getFcInterfaceRole)(const char* interfaceName)
 >>
 
 getFcInterfaceSignature(definition) ::= <<
-int METH(component, getFcInterfaceSignature)(const char* interfaceName,
+int METH(component, getFcInterfaceSignature)(__MIND_STRING_TYPEDEF interfaceName,
   const char **signature) 
 {
   return __component_getFcInterfaceSignature_delegate(interfaceName, signature,
@@ -112,16 +112,13 @@ itfDescPointer(definition) ::= <<
 >>
 
 componentPointer(definition) ::= <<
-<if (definition.astNodeTypes.("data"))>
-<if (definition.data)>
-CONTEXT_PTR_ACCESS
-<else>
+<if (definition.astDecorations.("is-singleton"))>
 (&__component_<definition.name;format="toCName">_singleton_instance)
-<endif>
 <else>
 CONTEXT_PTR_ACCESS
 <endif>
 >>
+
 
 }$$
 }

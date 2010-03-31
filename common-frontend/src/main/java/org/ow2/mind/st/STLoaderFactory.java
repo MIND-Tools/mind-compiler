@@ -35,6 +35,8 @@ public final class STLoaderFactory {
     final StringTemplateComponentLoader stcLoader = new StringTemplateComponentLoader();
     final StringTemplateLoader templateLoader = new StringTemplateLoader();
     final XMLNodeFactory xmlNodeFactory = new XMLNodeFactoryImpl();
+    // set my class loader as classloader used by XMLNodeFactory
+    xmlNodeFactory.setClassLoader(STLoaderFactory.class.getClassLoader());
     templateLoader.nodeFactoryItf = xmlNodeFactory;
     stcLoader.loaderItf = templateLoader;
 

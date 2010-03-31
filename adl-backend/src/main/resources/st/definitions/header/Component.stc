@@ -14,6 +14,8 @@ ComponentDefinitionHeader(definition) ::= <<
 #ifndef __COMPONENT_<definition.name;format="toUpperCName">_ADL_H
 #define __COMPONENT_<definition.name;format="toUpperCName">_ADL_H
 
+#include "mindcommon.h"
+
 // Start including the interface descriptions 
 <definition.interfaces:{#include "<it.signature; format="nameToPath">.itf.h"}; separator="\n">
 <UsedInterfaceDefinitions(definition=definition)>
@@ -70,11 +72,11 @@ ControllerGlobalDecl(definition, ctrl) ::= <<
 // Used interface definitions
 
 UsedInterfaceDefinitions(definition) ::= <<
-<definition.astDecorations.("used-interface-definition").values:UsedInterfaceDefinition(usedItf=it.interfaceDefinition); separator="\n">
+<definition.astDecorations.("used-interface-definition").values:UsedInterfaceDefinition(usedItfName=it.interfaceName); separator="\n">
 >>
 
-UsedInterfaceDefinition(usedItf) ::= <<
-#include "<usedItf.name; format="nameToPath">.itf.h"
+UsedInterfaceDefinition(usedItfName) ::= <<
+#include "<usedItfName; format="nameToPath">.itf.h"
 >>
 
 // -----------------------------------------------------------------------------
@@ -156,6 +158,7 @@ ComponentTypeDef(definition) ::= <<
 #undef COMP_DATA
 #endif
 #define COMP_DATA struct __component_<definition.name;format="toCName">_internal_data_t __component_internal_data
+
 #ifdef PRIVATE_DATA_T
 #undef PRIVATE_DATA_T
 #endif
@@ -178,19 +181,24 @@ typedef struct {
 } PRIVATE_DATA_T;
 <endif>
 <else>
+// No private data
 typedef struct {
   COMP_DATA;
 } PRIVATE_DATA_T;
-// declaration of singleton instance as global variable.
-#define INSTANCE___component_<definition.name;format="toCName">_singleton_instance_DECLARED
-extern PRIVATE_DATA_T __component_<definition.name;format="toCName">_singleton_instance;
 <endif>
 <else>
+// No private data
 typedef struct {
   COMP_DATA;
 } PRIVATE_DATA_T;
 <endif>
 
+
+<if (definition.astDecorations.("is-singleton"))>
+// declaration of singleton instance as global variable.
+#define INSTANCE___component_<definition.name;format="toCName">_singleton_instance_DECLARED
+extern PRIVATE_DATA_T __component_<definition.name;format="toCName">_singleton_instance;
+<endif>
 
 #else // __COMPONENT_IN_<definition.name;format="toUpperCName">
 typedef struct {

@@ -255,7 +255,7 @@ public class JTBProcessor extends GJDepthFirst<Object, Node> {
 
     final Include include = (Include) newNode("include", n.f0);
 
-    include.setPath(n.f2.tokenImage.substring(1, n.f2.tokenImage.length() - 1));
+    include.setPath(n.f2.tokenImage);
 
     container.addInclude(include);
 

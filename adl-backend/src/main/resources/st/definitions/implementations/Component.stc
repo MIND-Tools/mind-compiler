@@ -49,12 +49,8 @@ ServerMethodDecls(definition, interfaceDefinitions, itf) ::= <<
 >>
 
 ServerMethodDecls1(definition, interfaceDefinitions, itf, index) ::= <<
-<if(definition.astNodeTypes.("source"))>
-<if(definition.data)>
-<interfaceDefinitions.(itf.signature).methods:MultiServerMethodDecl(definition=definition, itf=itf, index=index, method=it);separator="\n">
-<else>
+<if (definition.astDecorations.("is-singleton"))>
 <interfaceDefinitions.(itf.signature).methods:SingletonServerMethodDecl(definition=definition, itf=itf, index=index, method=it);separator="\n">
-<endif>
 <else>
 <interfaceDefinitions.(itf.signature).methods:MultiServerMethodDecl(definition=definition, itf=itf, index=index, method=it);separator="\n">
 <endif>

@@ -124,6 +124,7 @@ public class CheckDelegatesTest {
     final File outputFile = new File(buildDir, delegateName + ".o");
     command.setInputFile(src).setOutputFile(outputFile);
     command.addIncludeDir(buildDir);
+    command.addIncludeDir(new File("target/classes"));
     commandExecutor.exec(Arrays.asList((CompilationCommand) command), context);
   }
 

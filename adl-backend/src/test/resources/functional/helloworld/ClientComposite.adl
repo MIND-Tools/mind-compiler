@@ -1,0 +1,10 @@
+@CompileDef
+composite helloworld.ClientComposite {
+
+  provides Main as main;
+  requires Service as sa ;
+  
+  contains Client as client;
+  binds this.main to client.main;
+  binds client.sa to this.sa;
+}

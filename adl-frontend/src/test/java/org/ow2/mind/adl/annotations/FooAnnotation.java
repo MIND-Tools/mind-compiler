@@ -29,10 +29,13 @@ import org.ow2.mind.annotation.Annotation;
 import org.ow2.mind.annotation.AnnotationTarget;
 
 @ADLLoaderProcessor(processor = TestADLAnnotationProcessor.FooProcessor.class, phases = {
-    ADLLoaderPhase.AFTER_PARSING, ADLLoaderPhase.AFTER_CHECKING})
+    ADLLoaderPhase.AFTER_PARSING, ADLLoaderPhase.AFTER_CHECKING,
+    ADLLoaderPhase.ON_TEMPLATE_SUB_COMPONENT,
+    ADLLoaderPhase.AFTER_TEMPLATE_INSTANTIATE})
 public class FooAnnotation implements Annotation {
 
-  private static final AnnotationTarget[] TARGETS = {ADLAnnotationTarget.SOURCE};
+  private static final AnnotationTarget[] TARGETS = {
+      ADLAnnotationTarget.SOURCE, ADLAnnotationTarget.BINDING};
 
   public AnnotationTarget[] getAnnotationTargets() {
     return TARGETS;

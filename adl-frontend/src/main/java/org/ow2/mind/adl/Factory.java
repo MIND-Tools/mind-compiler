@@ -38,9 +38,11 @@ import org.ow2.mind.BasicInputResourceLocator;
 import org.ow2.mind.adl.annotation.ADLLoaderPhase;
 import org.ow2.mind.adl.annotation.AnnotationLoader;
 import org.ow2.mind.adl.annotation.AnnotationProcessorLoader;
+import org.ow2.mind.adl.annotation.AnnotationProcessorTemplateInstantiator;
 import org.ow2.mind.adl.anonymous.AnonymousDefinitionExtractorImpl;
 import org.ow2.mind.adl.anonymous.AnonymousDefinitionLoader;
 import org.ow2.mind.adl.anonymous.ImportAnonymousDefinitionExtractor;
+import org.ow2.mind.adl.anonymous.InputResourceAnonymousDefinitionExtractor;
 import org.ow2.mind.adl.attribute.AttributeCheckerLoader;
 import org.ow2.mind.adl.attribute.AttributesNormalizerLoader;
 import org.ow2.mind.adl.binding.BasicBindingChecker;
@@ -164,6 +166,8 @@ public final class Factory {
     // node management components
     final STCFNodeMerger stcfNodeMerger = new STCFNodeMerger();
     final XMLNodeFactoryImpl xmlNodeFactory = new XMLNodeFactoryImpl();
+    // set my class loader as classloader used by XMLNodeFactory
+    xmlNodeFactory.setClassLoader(Factory.class.getClassLoader());
     final STNodeFactoryImpl nodeFactory = new STNodeFactoryImpl();
     final NodeMergerImpl nodeMerger = new NodeMergerImpl();
 
@@ -327,21 +331,26 @@ public final class Factory {
     final FactoryTemplateInstantiator fti = new FactoryTemplateInstantiator();
     final ParametricTemplateInstantiator pti = new ParametricTemplateInstantiator();
     final ParametricFactoryTemplateInstantiator pfti = new ParametricFactoryTemplateInstantiator();
+    final AnnotationProcessorTemplateInstantiator ati = new AnnotationProcessorTemplateInstantiator();
     final CachingTemplateInstantiator cti = new CachingTemplateInstantiator();
 
-    cti.clientInstantiatorItf = pfti;
+    cti.clientInstantiatorItf = ati;
+    ati.clientInstantiatorItf = pfti;
     pfti.clientInstantiatorItf = pti;
     pti.clientInstantiatorItf = fti;
     fti.clientInstantiatorItf = ti;
 
     cti.definitionCacheItf = cl;
     cti.definitionReferenceResolverItf = cdrr;
+    ati.definitionReferenceResolverItf = cdrr;
+    ati.pluginManagerItf = pluginManager;
     pti.definitionReferenceResolverItf = cdrr;
     fti.definitionReferenceResolverItf = cdrr;
     ti.definitionReferenceResolverItf = cdrr;
     gidl.definitionReferenceResolverItf = cdrr;
 
     gdrr.templateInstantiatorItf = cti;
+    fti.loaderItf = adlLoader;
 
     pti.nodeFactoryItf = nodeFactory;
     pti.nodeMergerItf = nodeMerger;
@@ -353,10 +362,12 @@ public final class Factory {
     final ImportAnonymousDefinitionExtractor iadr = new ImportAnonymousDefinitionExtractor();
     final GenericAnonymousDefinitionExtractor gadr = new GenericAnonymousDefinitionExtractor();
     final ParametricAnonymousDefinitionExtractor padr = new ParametricAnonymousDefinitionExtractor();
+    final InputResourceAnonymousDefinitionExtractor iradr = new InputResourceAnonymousDefinitionExtractor();
 
     padr.clientExtractorItf = gadr;
     gadr.clientExtractorItf = iadr;
-    iadr.clientExtractorItf = adr;
+    iadr.clientExtractorItf = iradr;
+    iradr.clientExtractorItf = adr;
 
     adl.anonymousDefinitionExtractorItf = padr;
 

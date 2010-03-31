@@ -116,8 +116,16 @@ public class IDLHeaderCompiler extends AbstractStringTemplateProcessor
     templateGroup.registerRenderer(String.class, new BackendFormatRenderer() {
       @Override
       public String toString(final Object o, final String formatName) {
-        if (TO_C_PATH.equals(formatName) && o.toString().endsWith(".idt")) {
-          return toCPath(o.toString()) + ".h";
+        if ("toIncludePath".equals(formatName)) {
+          final String s = o.toString();
+          String path = s.substring(1, s.length() - 1);
+          if (path.endsWith(".idt")) {
+            path += ".h";
+          }
+          if (path.startsWith("/")) {
+            path = path.substring(1);
+          }
+          return s.substring(0, 1) + path + s.substring(s.length() - 1);
         } else {
           return super.toString(o, formatName);
         }

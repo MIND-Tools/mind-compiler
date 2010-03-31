@@ -34,11 +34,18 @@ ItfDelegator(itf, interfaceDefinitions) ::= <<
 >>
 
 MethodDelegator(itf, index, method) ::= <<
+<if (definition.astDecorations.("is-singleton"))>
+<(idl2c.methodDef)(method=method,withThisPtr="false",methodName=ProxyName(itfName=itf.name, index=index, methodName=method.name)) > { 
+<else>
 <(idl2c.methodDef)(method=method,withThisPtr="typed",methodName=ProxyName(itfName=itf.name, index=index, methodName=method.name)) > { 
+<endif>
+
 <if (! ((idl2c.isVoidMethod)(method=method)))>
   return
 <endif>
-  PRIVATE.__component_internal_data.<if (isServer.(itf.role))>inner_<endif>type.<itf.name><if (index)>[<index>]<endif>.meths-><method.name>(PRIVATE.__component_internal_data.<if (isServer.(itf.role))>inner_<endif>type.<itf.name><if (index)>[<index>]<endif>.selfData<method.parameters:{, <it.name>}>);
+  CONTEXT_PTR_ACCESS->__component_internal_data.<if (isServer.(itf.role))>inner_<endif>type.<itf.name><if (index)>[<index>]<endif>.meths-><method.name>(
+      CONTEXT_PTR_ACCESS->__component_internal_data.<if (isServer.(itf.role))>inner_<endif>type.<itf.name><if (index)>[<index>]<endif>.selfData
+      <method.parameters:{, <it.name>}>);
 }
 >>
 

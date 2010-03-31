@@ -32,6 +32,8 @@ ComponentDefinition(definition, interfaceDefinitions) ::= <<
 
 <GET_MY_INTERFACE(definition=definition)>
 
+<GET_COLLECTION_SIZE(definition=definition)>
+
 <BIND_MY_INTERFACE(definition=definition)>
 
 #define CHECK_CONTEXT_PTR // do nothing
@@ -46,12 +48,8 @@ ComponentDefinition(definition, interfaceDefinitions) ::= <<
 // CONTEXT_PTR macros
 
 CONTEXT_PTR(definition) ::= <<
-<if (definition.astNodeTypes.("data"))>
-<if (definition.data)>
-<MultiCONTEXT_PTR(definition=definition)>
-<else>
+<if (definition.astDecorations.("is-singleton"))>
 <SingletonCONTEXT_PTR(definition=definition)>
-<endif>
 <else>
 <MultiCONTEXT_PTR(definition=definition)>
 <endif>
@@ -63,6 +61,7 @@ MultiCONTEXT_PTR(definition) ::= <<
 #define CONTEXT_PTR_DECL_COMMA  CONTEXT_PTR_DECL,
 
 #define CONTEXT_PTR_ACCESS _mind_this
+#define CONTEXT_PTR_ACCESS_OR_VOID _mind_this
 #define CONTEXT_PTR_ACCESS_COMMA CONTEXT_PTR_ACCESS,
 >>
 
@@ -71,7 +70,8 @@ SingletonCONTEXT_PTR(definition) ::= <<
 #define CONTEXT_PTR_DECL_OR_VOID void
 #define CONTEXT_PTR_DECL_COMMA
 
-#define CONTEXT_PTR_ACCESS
+#define CONTEXT_PTR_ACCESS (&__component_<definition.name;format="toCName">_singleton_instance)
+#define CONTEXT_PTR_ACCESS_OR_VOID
 #define CONTEXT_PTR_ACCESS_COMMA
 >>
 
@@ -103,12 +103,10 @@ ATTR(definition) ::= <<
 <if (definition.astNodeTypes.("attribute"))>
 <if (definition.attributes)>
 // definition of the ATTR macro
-<if (definition.astNodeTypes.("data"))>
-<if (definition.data)>
-#define ATTRIBUTE_ACCESS(attrName) (CONTEXT_PTR_ACCESS->__component_internal_data.attributes.attrName)
-<else>
+<if (definition.astDecorations.("is-singleton"))>
 #define ATTRIBUTE_ACCESS(attrName) (__component_<definition.name;format="toCName">_singleton_instance.__component_internal_data.attributes.attrName)
-<endif>
+<else>
+#define ATTRIBUTE_ACCESS(attrName) (CONTEXT_PTR_ACCESS->__component_internal_data.attributes.attrName)
 <endif>
 <endif>
 <endif>
@@ -138,12 +136,8 @@ CALL(definition, interfaceDefinitions) ::= <<
 
 CALLClientInterface(definition, interfaceDefinitions, itf) ::= <<
 <if (isClient.(itf.role))>
-<if (definition.astNodeTypes.("data"))>
-<if (definition.data)>
-<MultiCALLClientInterface(definition=definition, interfaceDefinitions=interfaceDefinitions, itf=itf)>
-<else>
+<if (definition.astDecorations.("is-singleton"))>
 <SingletonCALLClientInterface(definition=definition, interfaceDefinitions=interfaceDefinitions, itf=itf)>
-<endif>
 <else>
 <MultiCALLClientInterface(definition=definition, interfaceDefinitions=interfaceDefinitions, itf=itf)>
 <endif>
@@ -172,12 +166,8 @@ SingletonCALLClientInterface(definition, interfaceDefinitions, itf) ::= <<
 
 CALLServerInterface(definition, interfaceDefinitions, itf) ::= <<
 <if (isServer.(itf.role))>
-<if (definition.astNodeTypes.("data"))>
-<if (definition.data)>
-<MultiCALLServerInterface(definition=definition, interfaceDefinitions=interfaceDefinitions, itf=itf)>
-<else>
+<if (definition.astDecorations.("is-singleton"))>
 <SingletonCALLServerInterface(definition=definition, interfaceDefinitions=interfaceDefinitions, itf=itf)>
-<endif>
 <else>
 <MultiCALLServerInterface(definition=definition, interfaceDefinitions=interfaceDefinitions, itf=itf)>
 <endif>
@@ -206,15 +196,10 @@ SingletonCALLServerInterface(definition, interfaceDefinitions, itf) ::= <<
 
 CALL_PRV(definition) ::= <<
 // definition of the CALL_PRV macro
-<if (definition.astNodeTypes.("data"))>
-<if (definition.data)>
-<MultiCALL_PRV(definition=definition)>
-<else>
+<if (definition.astDecorations.("is-singleton"))>
 <SingletonCALL_PRV(definition=definition)>
-<endif>
 <else>
 <MultiCALL_PRV(definition=definition)>
-<endif>
 <endif>
 >>
 
@@ -232,12 +217,8 @@ CALL_PTR(definition) ::= <<
 #define CALL_INTERFACE_PTR_WITH_PARAM(itf_ptr, methName) (itf_ptr)->meths->methName((itf_ptr)->selfData,
 #define CALL_INTERFACE_PTR_WITHOUT_PARAM(itf_ptr, methName) (itf_ptr)->meths->methName((itf_ptr)->selfData)
 
-<if (definition.astNodeTypes.("data"))>
-<if (definition.data)>
-<MultiCALL_PTR(definition=definition)>
-<else>
+<if (definition.astDecorations.("is-singleton"))>
 <SingletonCALL_PTR(definition=definition)>
-<endif>
 <else>
 <MultiCALL_PTR(definition=definition)>
 <endif>
@@ -259,12 +240,25 @@ SingletonCALL_PTR(definition) ::= <<
 
 GET_MY_INTERFACE(definition) ::= <<
 // definition of the GET_MY_INTERFACE macro
-<if (definition.astNodeTypes.("data"))>
-<if (definition.data)>
-#define GET_MY_INTERFACE(itfName) (& (CONTEXT_PTR_ACCESS->__component_internal_data.type.itfName))
-<else>
+<if (definition.astDecorations.("is-singleton"))>
 #define GET_MY_INTERFACE(itfName) (& (__component_<definition.name;format="toCName">_singleton_instance.__component_internal_data.type.itfName))
+<else>
+#define GET_MY_INTERFACE(itfName) (& (CONTEXT_PTR_ACCESS->__component_internal_data.type.itfName))
 <endif>
+>>
+
+GET_COLLECTION_SIZE(definition) ::= <<
+// definition of the GET_COLLECTION_SIZE macro
+#define GET_COLLECTION_SIZE(itfName) GET_COLLECTION_SIZE_##itfName
+
+<definition.interfaces:GET_COLLECTION_SIZEInterface(definition=definition, itf=it); separator="\n">
+>>
+
+GET_COLLECTION_SIZEInterface(definition, itf) ::= <<
+<if (itf.numberOfElement)>
+#define GET_COLLECTION_SIZE_<itf.name> <itf.numberOfElement>
+<else>
+#define GET_COLLECTION_SIZE_<itf.name> 0
 <endif>
 >>
 

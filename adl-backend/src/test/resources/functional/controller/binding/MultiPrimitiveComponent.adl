@@ -3,6 +3,5 @@
 @controller.BindingController
 primitive controller.binding.MultiPrimitiveComponent extends BCTested {
 
-  nodata;  
   source primitiveComponent.c;
 }

@@ -43,10 +43,12 @@ import org.objectweb.fractal.adl.interfaces.InterfaceContainer;
 import org.objectweb.fractal.adl.types.TypeInterface;
 import org.objectweb.fractal.api.control.BindingController;
 import org.ow2.mind.NodeContainerDecoration;
+import org.ow2.mind.adl.annotation.predefined.Singleton;
 import org.ow2.mind.adl.generic.ast.FormalTypeParameterContainer;
 import org.ow2.mind.adl.generic.ast.TypeArgumentContainer;
 import org.ow2.mind.adl.parameter.ast.ArgumentContainer;
 import org.ow2.mind.adl.parameter.ast.FormalParameterContainer;
+import org.ow2.mind.annotation.AnnotationHelper;
 
 /**
  * Helper methods for ADL AST nodes.
@@ -91,6 +93,34 @@ public class ASTHelper {
    */
   public static boolean isComposite(final Definition def) {
     return def instanceof ComponentContainer;
+  }
+
+  /**
+   * The name of the decoration used to indicate if a definition is singleton.
+   * This decoration should only be used by StringTemplate.
+   */
+  public static final String SINGLETON_DECORATION_NAME = "is-singleton";
+
+  /**
+   * Returns <code>true</code> if the given definition has the {@link Singleton}
+   * decoration.
+   * 
+   * @param def a definition.
+   * @return <code>true</code> if the given definition has the {@link Singleton}
+   *         decoration.
+   */
+  public static boolean isSingleton(final Definition def) {
+    return AnnotationHelper.getAnnotation(def, Singleton.class) != null;
+  }
+
+  /**
+   * Sets the {@value #SINGLETON_DECORATION_NAME} decoration to
+   * <code>true</code> on the given definition.
+   * 
+   * @param def a definition.
+   */
+  public static void setSingletonDecoration(final Definition def) {
+    def.astSetDecoration(SINGLETON_DECORATION_NAME, Boolean.TRUE);
   }
 
   /**
