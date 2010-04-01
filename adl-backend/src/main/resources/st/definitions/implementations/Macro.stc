@@ -36,7 +36,7 @@ ComponentDefinition(definition, interfaceDefinitions) ::= <<
 
 <BIND_MY_INTERFACE(definition=definition)>
 
-#define CHECK_CONTEXT_PTR // do nothing
+#define CHECK_CONTEXT_PTR /* do nothing */
 
 >>
 
@@ -79,18 +79,18 @@ SingletonCONTEXT_PTR(definition) ::= <<
 // METHOD macros
 
 METHOD(definition) ::= <<
-// definition of the METH macros
+/* definition of the METH macros */
 #define INTERFACE_METHOD(itf,meth) __component_<definition.name;format="toCName">_##itf##_##meth
 #define INTERFACE_COLLECTION_METHOD(itf,idx,meth) __component_<definition.name;format="toCName">_##itf##_##idx##_##meth
 #define PRIVATE_METHOD(meth) __component_<definition.name;format="toCName">_##meth
 
-// definition of the CONSTRUCTOR macro
+/* definition of the CONSTRUCTOR macro */
 #define CONSTRUCTOR_METHOD void __component_<definition.name;format="toCName">_constructor NO_PARAM_DECL
 
-// definition of the DESTRUCTOR macro
+/* definition of the DESTRUCTOR macro */
 #define DESTRUCTOR_METHOD void __component_<definition.name;format="toCName">_destructor NO_PARAM_DECL
 
-// definition of the PARAM_DECL macros
+/* definition of the PARAM_DECL macros */
 #define PARAM_DECL_BEGIN ( CONTEXT_PTR_DECL_COMMA
 #define PARAM_DECL_END )
 #define NO_PARAM_DECL (CONTEXT_PTR_DECL_OR_VOID)
@@ -102,7 +102,7 @@ METHOD(definition) ::= <<
 ATTR(definition) ::= <<
 <if (definition.astNodeTypes.("attribute"))>
 <if (definition.attributes)>
-// definition of the ATTR macro
+/* definition of the ATTR macro */
 <if (definition.astDecorations.("is-singleton"))>
 #define ATTRIBUTE_ACCESS(attrName) (__component_<definition.name;format="toCName">_singleton_instance.__component_internal_data.attributes.attrName)
 <else>
@@ -116,7 +116,7 @@ ATTR(definition) ::= <<
 // CALL macros
 
 CALL(definition, interfaceDefinitions) ::= <<
-// definition of the CALL macros
+/* definition of the CALL macros */
 #define CALL_INTERFACE_METHOD_WITH_PARAM(itfName, methName) CALL_INTERFACE_METHOD_##itfName##_WITH_PARAM(methName)
 #define CALL_INTERFACE_METHOD_WITHOUT_PARAM(itfName, methName) CALL_INTERFACE_METHOD_##itfName##_WITHOUT_PARAM(methName)
 
@@ -195,7 +195,7 @@ SingletonCALLServerInterface(definition, interfaceDefinitions, itf) ::= <<
 >>
 
 CALL_PRV(definition) ::= <<
-// definition of the CALL_PRV macro
+/* definition of the CALL_PRV macro */
 <if (definition.astDecorations.("is-singleton"))>
 <SingletonCALL_PRV(definition=definition)>
 <else>
@@ -239,7 +239,7 @@ SingletonCALL_PTR(definition) ::= <<
 // other macros
 
 GET_MY_INTERFACE(definition) ::= <<
-// definition of the GET_MY_INTERFACE macro
+/* definition of the GET_MY_INTERFACE macro */
 <if (definition.astDecorations.("is-singleton"))>
 #define GET_MY_INTERFACE(itfName) (& (__component_<definition.name;format="toCName">_singleton_instance.__component_internal_data.type.itfName))
 <else>
@@ -248,7 +248,7 @@ GET_MY_INTERFACE(definition) ::= <<
 >>
 
 GET_COLLECTION_SIZE(definition) ::= <<
-// definition of the GET_COLLECTION_SIZE macro
+/* definition of the GET_COLLECTION_SIZE macro */
 #define GET_COLLECTION_SIZE(itfName) GET_COLLECTION_SIZE_##itfName
 
 <definition.interfaces:GET_COLLECTION_SIZEInterface(definition=definition, itf=it); separator="\n">
@@ -263,7 +263,7 @@ GET_COLLECTION_SIZEInterface(definition, itf) ::= <<
 >>
 
 BIND_MY_INTERFACE(definition) ::= <<
-// definition of the BIND_MY_INTERFACE macro
+/* definition of the BIND_MY_INTERFACE macro */
 typedef struct {
   void *selfData;
   void *meths;

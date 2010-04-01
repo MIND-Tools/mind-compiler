@@ -18,9 +18,9 @@ ControllerDataFactoryDestroy(definition, controller) ::= ""
 
 ControllerImplementation(definition, controller, interfaceDefinitions) ::= <<
 
-// --------------------------------------------------------------------------
-// Implementation of the BindindController interface
-// --------------------------------------------------------------------------
+/* -----------------------------------------------------------------------------
+   Implementation of the BindindController interface
+----------------------------------------------------------------------------- */
 
 #include "fractal/internal/BCdelegate.h"
 

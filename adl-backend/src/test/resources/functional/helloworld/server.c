@@ -1,10 +1,10 @@
 #include <stdio.h>
 
-// -----------------------------------------------------------------------------
-// Implementation of the service interface.
-// -----------------------------------------------------------------------------
+/* -----------------------------------------------------------------------------
+   Implementation of the service interface.
+----------------------------------------------------------------------------- */
 
-// void print(string msg)
+/* void print(string msg) */
 void METH(s, print)(const char *msg)
 {
   int i;
@@ -32,5 +32,5 @@ void METH(s, println)(const char *msg)
 
 void METH(s, flush)(void)
 {
-  // Nothing to do...
+  /* Nothing to do... */
 }

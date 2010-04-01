@@ -18,9 +18,9 @@ ControllerDataFactoryDestroy(definition, controller) ::= ""
 
 ControllerImplementation(definition, controller, interfaceDefinitions) ::= <<
 
-// --------------------------------------------------------------------------
-// Implementation of the Component controller interface
-// --------------------------------------------------------------------------
+/* -----------------------------------------------------------------------------
+   Implementation of the Component controller interface
+----------------------------------------------------------------------------- */
 
 #include "fractal/internal/CIdelegate.h"
 

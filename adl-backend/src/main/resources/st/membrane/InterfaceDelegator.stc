@@ -21,14 +21,14 @@ ControllerImplementation(definition, controller, interfaceDefinitions) ::= <<
 // -----------------------------------------------------------------------------
 
 ItfDelegator(itf, interfaceDefinitions) ::= <<
-// Start interface delegator for interface <itf.name>
+/* Start interface delegator for interface <itf.name> */
 <if (itf.numberOfElement)>
 <itf.astDecorations.("collectionIndexes"):{index | <interfaceDefinitions.(itf.signature).methods:MethodDelegator(itf=itf, index=index, method=it);separator="\n">};separator="\n">
 <else>
 <interfaceDefinitions.(itf.signature).methods:MethodDelegator(itf=itf, method=it);separator="\n">
 <endif>
 
-// End interface delegator for interface <itf.name>
+/* End interface delegator for interface <itf.name> */
 
 
 >>

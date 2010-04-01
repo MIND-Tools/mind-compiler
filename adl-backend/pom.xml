@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -53,10 +54,36 @@
                     <systemPropertyVariables>
                         <default.file.level>FINEST</default.file.level>
                         <loggers.outfile>${project.build.testOutputDirectory}/test-log.txt</loggers.outfile>
+                        <mind.test.cflags>-g -Wall -Werror -Wredundant-decls
+                            -Wunreachable-code -Wstrict-prototypes
+                            -Wwrite-strings</mind.test.cflags>
                     </systemPropertyVariables>
                 </configuration>
             </plugin>
-
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>stdc89</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <groups>${test.groups}</groups>
+                            <systemPropertyVariables>
+                                <default.file.level>FINEST</default.file.level>
+                                <loggers.outfile>${project.build.testOutputDirectory}/test-log.txt</loggers.outfile>
+                                <mind.test.cflags>-g -std=c89
+                                    -D__MIND_STRICT_C89 -Wall -Werror
+                                    -Wredundant-decls -Wunreachable-code
+                                    -Wstrict-prototypes -Wwrite-strings</mind.test.cflags>
+                            </systemPropertyVariables>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

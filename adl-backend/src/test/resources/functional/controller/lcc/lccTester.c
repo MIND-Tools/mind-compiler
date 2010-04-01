@@ -1,10 +1,10 @@
 #include <assert.h>
 
-// -----------------------------------------------------------------------------
-// Implementation of the main interface.
-// -----------------------------------------------------------------------------
+/* -----------------------------------------------------------------------------
+   Implementation of the main interface.
+----------------------------------------------------------------------------- */
 
-// int main(int argc, string[] argv)
+/* int main(int argc, string[] argv) */
 int METH(main, main) (int argc, char *argv[]) {
   int err;
 

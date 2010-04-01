@@ -1,10 +1,10 @@
 #include <assert.h>
 
-// -----------------------------------------------------------------------------
-// Implementation of the main interface.
-// -----------------------------------------------------------------------------
+/* -----------------------------------------------------------------------------
+   Implementation of the main interface.
+----------------------------------------------------------------------------- */
 
-// int main(int argc, string[] argv)
+/* int main(int argc, string[] argv) */
 int METH(main, main) (int argc, char *argv[]) {
   int err;
 
@@ -30,9 +30,9 @@ int METH(main, main) (int argc, char *argv[]) {
   return 0;
 }
 
-// -----------------------------------------------------------------------------
-// Implementation of the lifeCycleController interface.
-// -----------------------------------------------------------------------------
+/* -----------------------------------------------------------------------------
+   Implementation of the lifeCycleController interface.
+----------------------------------------------------------------------------- */
 
 int METH(lifeCycleController, startFc) (void) {
   PRIVATE.a = 1;
