@@ -29,8 +29,6 @@ import org.objectweb.fractal.adl.Loader;
 import org.objectweb.fractal.adl.NodeFactory;
 import org.objectweb.fractal.adl.error.GenericErrors;
 import org.objectweb.fractal.adl.merger.NodeMerger;
-import org.objectweb.fractal.adl.merger.NodeMergerImpl;
-import org.objectweb.fractal.adl.xml.XMLNodeFactoryImpl;
 import org.objectweb.fractal.api.control.BindingController;
 import org.objectweb.fractal.cecilia.adl.plugin.JavaPluginManager;
 import org.objectweb.fractal.cecilia.adl.plugin.PluginManager;
@@ -93,10 +91,10 @@ import org.ow2.mind.idl.IDLLoader;
 import org.ow2.mind.idl.IDLLoaderChainFactory;
 import org.ow2.mind.idl.IDLLocator;
 import org.ow2.mind.plugin.SimpleClassPluginFactory;
-import org.ow2.mind.st.BasicASTTransformer;
 import org.ow2.mind.st.STLoaderFactory;
 import org.ow2.mind.st.STNodeFactoryImpl;
-import org.ow2.mind.st.StringTemplateASTTransformer;
+import org.ow2.mind.st.STNodeMergerImpl;
+import org.ow2.mind.st.XMLSTNodeFactoryImpl;
 
 /**
  * This utility class can be used get an instance of the ADL Front-end.
@@ -166,11 +164,11 @@ public final class Factory {
     // node management components
     final STCFNodeMerger stcfNodeMerger = new STCFNodeMerger();
     stcfNodeMerger.setClassLoader(Factory.class.getClassLoader());
-    final XMLNodeFactoryImpl xmlNodeFactory = new XMLNodeFactoryImpl();
+    final XMLSTNodeFactoryImpl xmlNodeFactory = new XMLSTNodeFactoryImpl();
     // set my class loader as classloader used by XMLNodeFactory
     xmlNodeFactory.setClassLoader(Factory.class.getClassLoader());
     final STNodeFactoryImpl nodeFactory = new STNodeFactoryImpl();
-    final NodeMergerImpl nodeMerger = new NodeMergerImpl();
+    final STNodeMergerImpl nodeMerger = new STNodeMergerImpl();
     nodeMerger.setClassLoader(Factory.class.getClassLoader());
 
     // ADL Loader chain components
@@ -384,8 +382,6 @@ public final class Factory {
     padr.nodeFactoryItf = nodeFactory;
     padr.nodeMergerItf = nodeMerger;
 
-    final BasicASTTransformer bas = new BasicASTTransformer();
-    bas.nodeFactoryItf = nodeFactory;
     // configuration of plugin-manager
     try {
       ((BindingController) pluginManager).bindFc(NodeFactory.ITF_NAME,
@@ -402,8 +398,6 @@ public final class Factory {
       ((BindingController) pluginManager).bindFc(IDLLoader.ITF_NAME, idlLoader);
       ((BindingController) pluginManager).bindFc("template-loader",
           STLoaderFactory.newSTLoader());
-      ((BindingController) pluginManager).bindFc(
-          StringTemplateASTTransformer.ITF_NAME, bas);
     } catch (final Exception e) {
       throw new CompilerError(GenericErrors.INTERNAL_ERROR, e,
           "adl-frontend instantiation error");

@@ -32,6 +32,7 @@ import java.util.Set;
 
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.Definition;
+import org.objectweb.fractal.adl.Loader;
 import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.fractal.api.control.BindingController;
 import org.objectweb.fractal.api.control.IllegalBindingException;
@@ -48,6 +49,9 @@ public class FactoryGraphCompiler implements GraphCompiler, BindingController {
   // ---------------------------------------------------------------------------
   // Client interfaces
   // ---------------------------------------------------------------------------
+
+  public static final String CLIENT_LOADER_ITF_NAME       = "loader";
+  public Loader              loaderItf;
 
   public static final String CLIENT_COMPILER_ITF_NAME     = "client-compiler";
   public GraphCompiler       clientCompilerItf;
@@ -75,7 +79,8 @@ public class FactoryGraphCompiler implements GraphCompiler, BindingController {
       final Collection<CompilationCommand> compilationCommands,
       final Map<Object, Object> context) throws ADLException {
     final Definition factoryDefinition = ASTHelper
-        .getFactoryInstantiatedDefinition(graph.getDefinition(), null, null);
+        .getFactoryInstantiatedDefinition(graph.getDefinition(), loaderItf,
+            context);
 
     if (factoryDefinition != null) {
       // the "graph" component is a factory component.
@@ -121,11 +126,11 @@ public class FactoryGraphCompiler implements GraphCompiler, BindingController {
       for (final Component subComp : ((ComponentContainer) definition)
           .getComponents()) {
         final Definition subCompDef = ASTHelper.getResolvedComponentDefinition(
-            subComp, null, null);
+            subComp, loaderItf, context);
         compileFactoryDef(subCompDef, compiledDefs, compilationCommands,
             context);
         final Definition factoryDefinition = ASTHelper
-            .getFactoryInstantiatedDefinition(subCompDef, null, null);
+            .getFactoryInstantiatedDefinition(subCompDef, loaderItf, context);
         if (factoryDefinition != null) {
           // the sub-component is a factory component.
           compileFactoryDef(factoryDefinition, compiledDefs,
@@ -153,7 +158,9 @@ public class FactoryGraphCompiler implements GraphCompiler, BindingController {
       throws NoSuchInterfaceException, IllegalBindingException {
     checkItfName(itfName);
 
-    if (itfName.equals(CLIENT_COMPILER_ITF_NAME)) {
+    if (itfName.equals(CLIENT_LOADER_ITF_NAME)) {
+      loaderItf = (Loader) value;
+    } else if (itfName.equals(CLIENT_COMPILER_ITF_NAME)) {
       clientCompilerItf = (GraphCompiler) value;
     } else if (itfName.equals(DEFINITION_COMPILER_ITF_NAME)) {
       definitionCompilerItf = (DefinitionCompiler) value;
@@ -165,13 +172,16 @@ public class FactoryGraphCompiler implements GraphCompiler, BindingController {
   }
 
   public String[] listFc() {
-    return listFcHelper(CLIENT_COMPILER_ITF_NAME, DEFINITION_COMPILER_ITF_NAME);
+    return listFcHelper(CLIENT_LOADER_ITF_NAME, CLIENT_COMPILER_ITF_NAME,
+        DEFINITION_COMPILER_ITF_NAME);
   }
 
   public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
     checkItfName(itfName);
 
-    if (itfName.equals(CLIENT_COMPILER_ITF_NAME)) {
+    if (itfName.equals(CLIENT_LOADER_ITF_NAME)) {
+      return loaderItf;
+    } else if (itfName.equals(CLIENT_COMPILER_ITF_NAME)) {
       return clientCompilerItf;
     } else if (itfName.equals(DEFINITION_COMPILER_ITF_NAME)) {
       return definitionCompilerItf;
@@ -185,7 +195,9 @@ public class FactoryGraphCompiler implements GraphCompiler, BindingController {
       IllegalBindingException {
     checkItfName(itfName);
 
-    if (itfName.equals(CLIENT_COMPILER_ITF_NAME)) {
+    if (itfName.equals(CLIENT_LOADER_ITF_NAME)) {
+      loaderItf = null;
+    } else if (itfName.equals(CLIENT_COMPILER_ITF_NAME)) {
       clientCompilerItf = null;
     } else if (itfName.equals(DEFINITION_COMPILER_ITF_NAME)) {
       definitionCompilerItf = null;

@@ -1,0 +1,13 @@
+@Run
+composite helloworld.HelloworldFactoryClient {
+  provides Main as main;
+
+  contains Client as client;
+  contains Factory<Client> as clientFactory;
+  contains Server as server;
+  contains UnixAllocator as allocator;
+  
+  binds this.main to client.main;
+  binds client.sa to server.s;
+  binds clientFactory.allocator to allocator.allocator;
+}

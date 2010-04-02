@@ -25,13 +25,9 @@ package org.ow2.mind.idl;
 import org.antlr.stringtemplate.StringTemplateGroupLoader;
 import org.ow2.mind.BasicInputResourceLocator;
 import org.ow2.mind.InputResourceLocator;
-import org.ow2.mind.idl.st.IDLLoaderASTTransformer;
 import org.ow2.mind.io.BasicOutputFileLocator;
 import org.ow2.mind.io.OutputFileLocator;
-import org.ow2.mind.st.BasicASTTransformer;
 import org.ow2.mind.st.STLoaderFactory;
-import org.ow2.mind.st.STNodeFactoryImpl;
-import org.ow2.mind.st.StringTemplateASTTransformer;
 
 public final class IDLBackendFactory {
   private IDLBackendFactory() {
@@ -41,19 +37,15 @@ public final class IDLBackendFactory {
     final BasicInputResourceLocator inputResourceLocator = new BasicInputResourceLocator();
     final BasicOutputFileLocator outputFileLocator = new BasicOutputFileLocator();
 
-    final BasicASTTransformer astTransformer = new BasicASTTransformer();
-    astTransformer.nodeFactoryItf = new STNodeFactoryImpl();
-
     final StringTemplateGroupLoader stcLoader = STLoaderFactory.newSTLoader();
 
     return newIDLCompiler(idlLoader, inputResourceLocator, outputFileLocator,
-        astTransformer, stcLoader);
+        stcLoader);
   }
 
   public static IDLVisitor newIDLCompiler(final IDLLoader idlLoader,
       final InputResourceLocator inputResourceLocator,
       final OutputFileLocator outputFileLocator,
-      final StringTemplateASTTransformer astTransformer,
       final StringTemplateGroupLoader stcLoader) {
     IDLVisitor idlCompiler;
     final IDLVisitorDispatcher ivd = new IDLVisitorDispatcher();
@@ -71,11 +63,7 @@ public final class IDLBackendFactory {
 
     ihc.templateGroupLoaderItf = stcLoader;
 
-    final IDLLoaderASTTransformer ilat = new IDLLoaderASTTransformer();
-    ilat.clientIDLLoaderItf = idlLoader;
-    ilat.astTransformerItf = astTransformer;
-
-    ic.idlLoaderItf = ilat;
+    ic.idlLoaderItf = idlLoader;
     ihc.inputResourceLocatorItf = inputResourceLocator;
     ihc.outputFileLocatorItf = outputFileLocator;
 

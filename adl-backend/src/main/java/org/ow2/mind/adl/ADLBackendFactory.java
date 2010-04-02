@@ -23,6 +23,7 @@
 package org.ow2.mind.adl;
 
 import org.antlr.stringtemplate.StringTemplateGroupLoader;
+import org.objectweb.fractal.adl.Loader;
 import org.ow2.mind.BasicInputResourceLocator;
 import org.ow2.mind.InputResourceLocator;
 import org.ow2.mind.adl.factory.FactoryGraphCompiler;
@@ -44,10 +45,7 @@ import org.ow2.mind.io.BasicOutputFileLocator;
 import org.ow2.mind.io.OutputFileLocator;
 import org.ow2.mind.preproc.BasicMPPWrapper;
 import org.ow2.mind.preproc.MPPWrapper;
-import org.ow2.mind.st.BasicASTTransformer;
 import org.ow2.mind.st.STLoaderFactory;
-import org.ow2.mind.st.STNodeFactoryImpl;
-import org.ow2.mind.st.StringTemplateASTTransformer;
 
 public final class ADLBackendFactory {
   private ADLBackendFactory() {
@@ -58,23 +56,18 @@ public final class ADLBackendFactory {
     final BasicInputResourceLocator inputResourceLocator = new BasicInputResourceLocator();
     final BasicOutputFileLocator outputFileLocator = new BasicOutputFileLocator();
 
-    final BasicASTTransformer astTransformer = new BasicASTTransformer();
-    astTransformer.nodeFactoryItf = new STNodeFactoryImpl();
-
     final StringTemplateGroupLoader stcLoader = STLoaderFactory.newSTLoader();
     final IDLVisitor idlCompiler = IDLBackendFactory.newIDLCompiler(idlLoader,
-        inputResourceLocator, outputFileLocator, astTransformer, stcLoader);
+        inputResourceLocator, outputFileLocator, stcLoader);
 
     return newDefinitionSourceGenerator(inputResourceLocator,
-        outputFileLocator, idlLoader, idlCompiler, astTransformer, stcLoader);
+        outputFileLocator, idlLoader, idlCompiler, stcLoader);
   }
 
   public static final DefinitionSourceGenerator newDefinitionSourceGenerator(
       final InputResourceLocator inputResourceLocator,
       final OutputFileLocator outputFileLocator, final IDLLoader idlLoader,
-      final IDLVisitor idlCompiler,
-      final StringTemplateASTTransformer astTransformer,
-      final StringTemplateGroupLoader stcLoader) {
+      final IDLVisitor idlCompiler, final StringTemplateGroupLoader stcLoader) {
 
     DefinitionSourceGenerator definitionSourceGenerator;
     final CollectionInterfaceDefinitionSourceGenerator cidsg = new CollectionInterfaceDefinitionSourceGenerator();
@@ -134,16 +127,13 @@ public final class ADLBackendFactory {
     final BasicOutputFileLocator outputFileLocator = new BasicOutputFileLocator();
     final ImplementationLocator implementationLocator = new BasicImplementationLocator();
 
-    final BasicASTTransformer astTransformer = new BasicASTTransformer();
-    astTransformer.nodeFactoryItf = new STNodeFactoryImpl();
-
     final StringTemplateGroupLoader stcLoader = STLoaderFactory.newSTLoader();
 
     final IDLVisitor idlCompiler = IDLBackendFactory.newIDLCompiler(idlLoader,
-        inputResourceLocator, outputFileLocator, astTransformer, stcLoader);
+        inputResourceLocator, outputFileLocator, stcLoader);
     final DefinitionSourceGenerator definitionSourceGenerator = newDefinitionSourceGenerator(
         inputResourceLocator, outputFileLocator, idlLoader, idlCompiler,
-        astTransformer, stcLoader);
+        stcLoader);
     final CompilerWrapper compilerWrapper = new GccCompilerWrapper();
     final MPPWrapper mppWrapper = new BasicMPPWrapper();
     return newDefinitionCompiler(definitionSourceGenerator,
@@ -174,7 +164,7 @@ public final class ADLBackendFactory {
       final ImplementationLocator implementationLocator,
       final OutputFileLocator outputFileLocator,
       final CompilerWrapper compilerWrapper, final MPPWrapper mppWrapper,
-      final DefinitionCompiler definitionCompiler,
+      final DefinitionCompiler definitionCompiler, final Loader adlLoader,
       final StringTemplateGroupLoader stcLoader) {
 
     // Instance source generator
@@ -208,6 +198,7 @@ public final class ADLBackendFactory {
     fgc.clientCompilerItf = bgc;
 
     fgc.definitionCompilerItf = definitionCompiler;
+    fgc.loaderItf = adlLoader;
 
     bgl.compilerWrapperItf = compilerWrapper;
     bgl.outputFileLocatorItf = outputFileLocator;
@@ -219,22 +210,20 @@ public final class ADLBackendFactory {
   }
 
   public static GraphCompiler newGraphCompiler() {
+    final Loader adlLoader = Factory.newLoader();
     final IDLLoader idlLoader = IDLLoaderChainFactory.newLoader();
     final BasicInputResourceLocator inputResourceLocator = new BasicInputResourceLocator();
     final BasicOutputFileLocator outputFileLocator = new BasicOutputFileLocator();
     final ImplementationLocator implementationLocator = new BasicImplementationLocator();
 
-    final BasicASTTransformer astTransformer = new BasicASTTransformer();
-    astTransformer.nodeFactoryItf = new STNodeFactoryImpl();
-
     final StringTemplateGroupLoader stcLoader = STLoaderFactory.newSTLoader();
 
     final IDLVisitor idlCompiler = IDLBackendFactory.newIDLCompiler(idlLoader,
-        inputResourceLocator, outputFileLocator, astTransformer, stcLoader);
+        inputResourceLocator, outputFileLocator, stcLoader);
 
     final DefinitionSourceGenerator definitionSourceGenerator = newDefinitionSourceGenerator(
         inputResourceLocator, outputFileLocator, idlLoader, idlCompiler,
-        astTransformer, stcLoader);
+        stcLoader);
     final CompilerWrapper compilerWrapper = new GccCompilerWrapper();
     final MPPWrapper mppWrapper = new BasicMPPWrapper();
 
@@ -244,7 +233,7 @@ public final class ADLBackendFactory {
 
     return newGraphCompiler(inputResourceLocator, implementationLocator,
         outputFileLocator, compilerWrapper, mppWrapper, definitionCompiler,
-        stcLoader);
+        adlLoader, stcLoader);
   }
 
   public static CompilationCommandExecutor newCompilationCommandExecutor() {

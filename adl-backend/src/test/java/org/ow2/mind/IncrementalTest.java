@@ -109,6 +109,18 @@ public class IncrementalTest extends AbstractFunctionalTest {
   }
 
   @Test(groups = {"functional"})
+  public void incrementalTest16() throws Exception {
+    cleanBuildDir();
+    final Map<String, Long> t1 = recompile("GenericApplication<helloworld.HelloworldFactoryClient>");
+
+    pause();
+    final Map<String, Long> t2 = recompile("GenericApplication<helloworld.HelloworldFactoryClient>");
+    assertChanged("GenericApplication.map", t1, t2);
+    assertChanged("Factory.map", t1, t2);
+    assertUnchangedAll(".*", t1, t2);
+  }
+
+  @Test(groups = {"functional"})
   public void incrementalTest2() throws Exception {
     cleanBuildDir();
     final Map<String, Long> t1 = recompile("helloworld.HelloworldApplication");
