@@ -166,15 +166,6 @@ SingletonCALLClientInterface(definition, interfaceDefinitions, itf) ::= <<
 
 CALLServerInterface(definition, interfaceDefinitions, itf) ::= <<
 <if (isServer.(itf.role))>
-<if (definition.astDecorations.("is-singleton"))>
-<SingletonCALLServerInterface(definition=definition, interfaceDefinitions=interfaceDefinitions, itf=itf)>
-<else>
-<MultiCALLServerInterface(definition=definition, interfaceDefinitions=interfaceDefinitions, itf=itf)>
-<endif>
-<endif>
->>
-
-MultiCALLServerInterface(definition, interfaceDefinitions, itf) ::= <<
 <if (itf.numberOfElement)>
 #define CALL_COLLECTION_INTERFACE_METHOD_<itf.name>_WITH_PARAM(index, methName) <vTableInstanceName(definition=definition, itf=itf, index="##index##")>.methName(CONTEXT_PTR_ACCESS,
 #define CALL_COLLECTION_INTERFACE_METHOD_<itf.name>_WITHOUT_PARAM(index, methName) <vTableInstanceName(definition=definition, itf=itf, index="##index##")>.methName(CONTEXT_PTR_ACCESS)
@@ -182,15 +173,6 @@ MultiCALLServerInterface(definition, interfaceDefinitions, itf) ::= <<
 #define CALL_INTERFACE_METHOD_<itf.name>_WITH_PARAM(methName) <vTableInstanceName(definition=definition, itf=itf)>.methName(CONTEXT_PTR_ACCESS,
 #define CALL_INTERFACE_METHOD_<itf.name>_WITHOUT_PARAM(methName) <vTableInstanceName(definition=definition, itf=itf)>.methName(CONTEXT_PTR_ACCESS)
 <endif>
->>
-
-SingletonCALLServerInterface(definition, interfaceDefinitions, itf) ::= <<
-<if (itf.numberOfElement)>
-#define CALL_COLLECTION_INTERFACE_METHOD_<itf.name>_WITH_PARAM(index, methName) <vTableInstanceName(definition=definition, itf=itf, index="##index##")>.methName(
-#define CALL_COLLECTION_INTERFACE_METHOD_<itf.name>_WITHOUT_PARAM(index, methName) <vTableInstanceName(definition=definition, itf=itf, index="##index##")>.methName()
-<else>
-#define CALL_INTERFACE_METHOD_<itf.name>_WITH_PARAM(methName) <vTableInstanceName(definition=definition, itf=itf)>.methName(
-#define CALL_INTERFACE_METHOD_<itf.name>_WITHOUT_PARAM(methName) <vTableInstanceName(definition=definition, itf=itf)>.methName()
 <endif>
 >>
 

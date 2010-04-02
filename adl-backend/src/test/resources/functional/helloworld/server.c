@@ -15,6 +15,7 @@ void METH(s, print)(const char *msg)
   }
 
   printf("Server: print done\n");
+  CALL(s, flush)();
 }
 
 void METH(s, println)(const char *msg)
@@ -23,7 +24,8 @@ void METH(s, println)(const char *msg)
 
   printf("Server: begin printing...\n");
   for (i = 0; i < ATTR(count); ++i) {
-    printf("%s\n", msg);
+    CALL(s, print)(msg);
+    CALL(s, print)("\n");
   }
 
   printf("Server: print done\n");
