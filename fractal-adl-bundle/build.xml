@@ -8,16 +8,16 @@
 		<artifact:dependencies sourcesFilesetId="sources.dependency.fileset">
 			<dependency groupId="org.objectweb.fractal.fractaladl" artifactId="fractal-adl" version="2.6-SNAPSHOT" scope="compile" type="java-source" />
 		</artifact:dependencies>
-		<delete dir="src/dep/java" />
-		<mkdir dir="src/dep/java" />
+		<delete dir="target/src-dep" />
+		<mkdir dir="target/src-dep" />
 
-		<unjar dest="src/dep/java">
+		<unjar dest="target/src-dep">
 			<fileset refid="sources.dependency.fileset" />
 		</unjar>
-		<delete dir="src/dep/java/META-INF" />
+		<delete dir="target/src-dep/META-INF" />
 		<delete file="target/${mypom.name}.source_${mypom.version}.jar" />
 
-		<jar destfile="target/${mypom.name}.source_${mypom.version}.jar" basedir="src/dep/java">
+		<jar destfile="target/${mypom.name}.source_${mypom.version}.jar" basedir="target/src-dep">
 			<manifest>
 				<attribute name="Bundle-SymbolicName" value="${mypom.name}.source" />
 				<attribute name="Bundle-Name" value="${mypom.name}.source" />
