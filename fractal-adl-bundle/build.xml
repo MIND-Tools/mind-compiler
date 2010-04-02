@@ -1,0 +1,34 @@
+<project name="aggregate-source" default="source" xmlns:artifact="antlib:org.apache.maven.artifact.ant">
+
+	<target name="source">
+		<path id="maven-ant-tasks.classpath" path="maven-ant-tasks-2.1.0.jar" />
+		<typedef resource="org/apache/maven/artifact/ant/antlib.xml" uri="antlib:org.apache.maven.artifact.ant" classpathref="maven-ant-tasks.classpath" />
+
+		<artifact:pom id="mypom" file="pom.xml" />
+		<artifact:dependencies sourcesFilesetId="sources.dependency.fileset">
+			<dependency groupId="org.objectweb.fractal.fractaladl" artifactId="fractal-adl" version="2.6-SNAPSHOT" scope="compile" type="java-source" />
+		</artifact:dependencies>
+		<delete dir="src/dep/java" />
+		<mkdir dir="src/dep/java" />
+
+		<unjar dest="src/dep/java">
+			<fileset refid="sources.dependency.fileset" />
+		</unjar>
+		<delete dir="src/dep/java/META-INF" />
+		<delete file="target/${mypom.name}.source_${mypom.version}.jar" />
+
+		<jar destfile="target/${mypom.name}.source_${mypom.version}.jar" basedir="src/dep/java">
+			<manifest>
+				<attribute name="Bundle-SymbolicName" value="${mypom.name}.source" />
+				<attribute name="Bundle-Name" value="${mypom.name}.source" />
+				<attribute name="Bundle-Version" value="${mypom.version}" />
+				<attribute name="Eclipse-SourceBundle" value="${mypom.name};version=&quot;${mypom.version}&quot;" />
+			</manifest>
+		</jar>
+		<artifact:install>
+			<pom refid="mypom" />
+			<attach file="target/${mypom.name}.source_${mypom.version}.jar" type="java-source" />
+		</artifact:install>
+	</target>
+
+</project>
