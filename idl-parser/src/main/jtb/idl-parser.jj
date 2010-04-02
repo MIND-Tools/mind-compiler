@@ -481,13 +481,13 @@ void ArraySpecification() : {}
 void AbstractDeclarator() : {}
 {
   PointerSpecification()
-  AbstractDirectDeclarator()
+  [ AbstractDirectDeclarator() ]
 }
 
 void AbstractDirectDeclarator() : {}
 {
-  ( <LPAREN> AbstractDeclarator() <RPAREN> ( ArraySpecification() )* )
-  |  ( ( ArraySpecification() )+ )
+  <LPAREN> AbstractDeclarator() <RPAREN> ( ArraySpecification() )*
+  | ( ArraySpecification() )+
 }
 
 
@@ -542,7 +542,7 @@ void Parameter() : {}
   ( ParameterQualifier() )*
   QualifiedTypeSpecification()
   (    LOOKAHEAD(Declarator())
-    Declarator() | [ AbstractDeclarator() ]
+    Declarator() | AbstractDeclarator()
   )
 }
 
