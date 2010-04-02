@@ -1,0 +1,8 @@
+@Run
+composite helloworld.HelloworldGeneric {
+  provides Main as main;
+
+  contains GenericComposite<Client, Server> as subComp1;
+ 
+  binds this.main to subComp1.main;
+}

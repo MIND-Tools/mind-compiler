@@ -1,0 +1,13 @@
+@Run
+composite helloworld.HelloworldAnonymous {
+  provides Main as main;
+
+  contains Client as client
+    primitive {
+      attribute int a;
+    };
+  contains Server as server;
+  
+  binds this.main to client.main;
+  binds client.sa to server.s;
+}

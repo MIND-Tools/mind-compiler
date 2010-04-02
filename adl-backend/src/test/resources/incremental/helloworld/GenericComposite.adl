@@ -1,0 +1,10 @@
+
+composite helloworld.GenericComposite<C conformsto ClientType, S conformsto ServerType> {
+  provides Main as main;
+
+  contains C as client;
+  contains S as server;
+  
+  binds this.main to client.main;
+  binds client.sa to server.s;
+}

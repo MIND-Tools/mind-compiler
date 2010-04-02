@@ -57,6 +57,7 @@ import org.ow2.mind.adl.generic.ExtendsGenericDefinitionReferenceResolver;
 import org.ow2.mind.adl.generic.GenericAnonymousDefinitionExtractor;
 import org.ow2.mind.adl.generic.GenericDefinitionLoader;
 import org.ow2.mind.adl.generic.GenericDefinitionReferenceResolver;
+import org.ow2.mind.adl.generic.InputResourceTemplateInstantiator;
 import org.ow2.mind.adl.generic.NoAnySubComponentLoader;
 import org.ow2.mind.adl.generic.NoAnyTypeArgumentDefinitionReferenceResolver;
 import org.ow2.mind.adl.generic.TemplateInstanceLoader;
@@ -196,14 +197,14 @@ public final class Factory {
     final AttributesNormalizerLoader attrnl = new AttributesNormalizerLoader();
     final AttributeCheckerLoader acl = new AttributeCheckerLoader();
     final AnnotationProcessorLoader apl4 = new AnnotationProcessorLoader();
-    final BinaryADLLoader bal = new BinaryADLLoader();
     final TemplateInstanceLoader gidl = new TemplateInstanceLoader();
+    final BinaryADLLoader bal = new BinaryADLLoader();
     final CacheLoader cl = new CacheLoader();
 
     adlLoader = cl;
-    cl.clientLoader = gidl;
-    gidl.clientLoader = bal;
-    bal.clientLoader = apl4;
+    cl.clientLoader = bal;
+    bal.clientLoader = gidl;
+    gidl.clientLoader = apl4;
     apl4.clientLoader = acl;
     acl.clientLoader = attrnl;
     attrnl.clientLoader = il;
@@ -328,6 +329,7 @@ public final class Factory {
 
     // template instantiator chain
     final TemplateInstantiatorImpl ti = new TemplateInstantiatorImpl();
+    final InputResourceTemplateInstantiator irti = new InputResourceTemplateInstantiator();
     final FactoryTemplateInstantiator fti = new FactoryTemplateInstantiator();
     final ParametricTemplateInstantiator pti = new ParametricTemplateInstantiator();
     final ParametricFactoryTemplateInstantiator pfti = new ParametricFactoryTemplateInstantiator();
@@ -338,7 +340,8 @@ public final class Factory {
     ati.clientInstantiatorItf = pfti;
     pfti.clientInstantiatorItf = pti;
     pti.clientInstantiatorItf = fti;
-    fti.clientInstantiatorItf = ti;
+    fti.clientInstantiatorItf = irti;
+    irti.clientInstantiatorItf = ti;
 
     cti.definitionCacheItf = cl;
     cti.definitionReferenceResolverItf = cdrr;
@@ -346,6 +349,7 @@ public final class Factory {
     ati.pluginManagerItf = pluginManager;
     pti.definitionReferenceResolverItf = cdrr;
     fti.definitionReferenceResolverItf = cdrr;
+    irti.definitionReferenceResolverItf = cdrr;
     ti.definitionReferenceResolverItf = cdrr;
     gidl.definitionReferenceResolverItf = cdrr;
 

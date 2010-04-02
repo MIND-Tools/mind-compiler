@@ -53,11 +53,11 @@ public final class IDLBackendFactory {
     final IncludeCompiler ic = new IncludeCompiler();
     final BinaryIDLWriter biw = new BinaryIDLWriter();
 
-    idlCompiler = ivd;
-    ivd.visitorsItf.put("idl2h", ic);
+    idlCompiler = ic;
+    ic.clientVisitorItf = ivd;
+    ivd.visitorsItf.put("idl2h", ihc);
     ivd.visitorsItf.put("bin", biw);
 
-    ic.clientVisitorItf = ihc;
     biw.inputResourceLocatorItf = inputResourceLocator;
     biw.outputFileLocatorItf = outputFileLocator;
 
