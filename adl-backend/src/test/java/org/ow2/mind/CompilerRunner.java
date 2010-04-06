@@ -54,6 +54,7 @@ import org.ow2.mind.adl.implementation.BasicImplementationLocator;
 import org.ow2.mind.adl.implementation.ImplementationLocator;
 import org.ow2.mind.adl.st.ADLLoaderASTTransformer;
 import org.ow2.mind.annotation.AnnotationLocatorHelper;
+import org.ow2.mind.annotation.PredefinedAnnotationsHelper;
 import org.ow2.mind.compilation.CompilationCommand;
 import org.ow2.mind.compilation.CompilationCommandExecutor;
 import org.ow2.mind.compilation.CompilerCommand;
@@ -99,7 +100,7 @@ public class CompilerRunner {
   public File                         buildDir;
   public Map<Object, Object>          context;
 
-  public CompilerRunner() {
+  public CompilerRunner() throws ADLException {
 
     // input locators
     final BasicInputResourceLocator inputResourceLocator = new BasicInputResourceLocator();
@@ -175,6 +176,14 @@ public class CompilerRunner {
 
     // init context
     initContext();
+
+    // Add additional predefined annotation packages
+    for (final String annotationPackage : PredefinedAnnotationsHelper
+        .getPredefinedAnnotations(pluginManager, context)) {
+      AnnotationLocatorHelper.addDefaultAnnotationPackage(annotationPackage,
+          context);
+    }
+
   }
 
   public void initContext() {
