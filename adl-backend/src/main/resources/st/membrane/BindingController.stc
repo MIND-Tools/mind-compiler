@@ -116,7 +116,7 @@ int METH(bindingController, unbindFc)(__MIND_STRING_TYPEDEF clientItfName)
 
 
 bindingDescPointer(definition) ::= <<
-((struct __component_BindingDescriptors *) &__component_<definition.name;format="toCName">_binding_descriptor)
+((void *) &__component_<definition.name;format="toCName">_binding_descriptor)
 >>
 
 componentPointer(definition) ::= <<

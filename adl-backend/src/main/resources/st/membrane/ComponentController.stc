@@ -108,7 +108,7 @@ int METH(component, getFcInterfaceSignature)(__MIND_STRING_TYPEDEF interfaceName
 
 
 itfDescPointer(definition) ::= <<
-((struct __component_InterfaceDescriptors *) &__component_<definition.name;format="toCName">_interface_descriptor)
+((void *) &__component_<definition.name;format="toCName">_interface_descriptor)
 >>
 
 componentPointer(definition) ::= <<
