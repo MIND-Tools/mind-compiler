@@ -1,4 +1,3 @@
-@CompileDef
 composite helloworld.ClientComposite {
 
   provides Main as main;
