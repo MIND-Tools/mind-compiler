@@ -38,9 +38,9 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.CompilerError;
+import org.objectweb.fractal.adl.Node;
 import org.objectweb.fractal.adl.NodeFactory;
 import org.objectweb.fractal.adl.error.GenericErrors;
-import org.ow2.mind.CommonASTHelper;
 import org.ow2.mind.plugin.ast.Extension;
 import org.ow2.mind.plugin.ast.ExtensionPoint;
 import org.ow2.mind.plugin.ast.Plugin;
@@ -250,7 +250,7 @@ public class BasicPluginManager implements PluginManager {
 	// }
 
 	protected Plugin newPluginNode(final String id, final String name) {
-		final Plugin plugin = CommonASTHelper.newNode(nodeFactoryItf, "plugin",
+		final Plugin plugin = newNode(nodeFactoryItf, "plugin",
 				Plugin.class);
 		plugin.setId(id);
 		plugin.setName(name);
@@ -259,7 +259,7 @@ public class BasicPluginManager implements PluginManager {
 
 	protected ExtensionPoint newExtensionPointNode(final String id,
 			final String dtd) {
-		final ExtensionPoint extensionPoint = CommonASTHelper.newNode(
+		final ExtensionPoint extensionPoint = newNode(
 				nodeFactoryItf, "extensionPoint", ExtensionPoint.class);
 		extensionPoint.setId(id);
 		extensionPoint.setDtd(dtd);
@@ -267,7 +267,7 @@ public class BasicPluginManager implements PluginManager {
 	}
 
 	protected Extension newExtensionNode(final String point) {
-		final Extension extension = CommonASTHelper.newNode(nodeFactoryItf,
+		final Extension extension = newNode(nodeFactoryItf,
 				"extension", Extension.class);
 		extension.setPoint(point);
 		return extension;
@@ -278,4 +278,22 @@ public class BasicPluginManager implements PluginManager {
 		final Map<String, ExtensionPoint> extensionPoints = new HashMap<String, ExtensionPoint>();
 		final Map<String, Collection<Extension>> extensions = new HashMap<String, Collection<Extension>>();
 	}
+	
+
+	protected static <T extends Node> T newNode(final NodeFactory nodeFactory,
+			final String nodeType, final Class<T> nodeItf,
+			final Class<?>... itfs) {
+		final String[] itfNames = new String[itfs.length + 1];
+		itfNames[0] = nodeItf.getName();
+		for (int i = 0; i < itfs.length; i++) {
+			itfNames[i + 1] = itfs[i].getName();
+		}
+		try {
+			return nodeItf.cast(nodeFactory.newNode(nodeType, itfNames));
+		} catch (final ClassNotFoundException e) {
+			throw new CompilerError(GenericErrors.INTERNAL_ERROR, e,
+					"Unexpected error.");
+		}
+	}
+
 }
