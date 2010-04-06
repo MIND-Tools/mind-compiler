@@ -1,13 +1,32 @@
+/**
+ * Copyright (C) 2009 STMicroelectronics
+ *
+ * This file is part of "Mind Compiler" is free software: you can redistribute 
+ * it and/or modify it under the terms of the GNU Lesser General Public License 
+ * as published by the Free Software Foundation, either version 3 of the 
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT 
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Contact: mind@ow2.org
+ *
+ * Authors: Ali Erdem Ozcan
+ * Contributors: 
+ */
 
 package org.ow2.mind.preproc;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.Map;
 
 import org.antlr.runtime.ANTLRFileStream;
-import org.antlr.runtime.CharStream;
 import org.antlr.runtime.Lexer;
 import org.antlr.runtime.Parser;
 import org.antlr.runtime.TokenStream;
@@ -15,118 +34,60 @@ import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.error.GenericErrors;
 import org.ow2.mind.plugin.PluginManager;
 import org.ow2.mind.plugin.ast.Extension;
-import org.ow2.mind.preproc.parser.CPLLexer;
-import org.ow2.mind.preproc.parser.CPLParser;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 public final class ExtensionHelper {
-  public static final String CPL_EXTENSION = "org.ow2.mind.preproc.cpl-parser";
+  public static final String                         CPL_EXTENSION   = "org.ow2.mind.preproc.cpl-parser";
+
+  private static final DefaultCPLPreprocessorFactory defaultFactory  = new DefaultCPLPreprocessorFactory();
+
+  private static CPLPreprocessorFactory              ppFactory       = null;
+
+  private static boolean                             extensionLoaded = false;
+
+  private static void loadExtension(final PluginManager pluginManagerItf,
+      final Map<Object, Object> context) throws ADLException {
+    if (!extensionLoaded) {
+      final Collection<Extension> extensions = pluginManagerItf.getExtensions(
+          CPL_EXTENSION, context);
+      if (extensions.size() == 0) {
+        ppFactory = defaultFactory;
+      } else if (extensions.size() == 1) {
+        ppFactory = getExtensionFactory(extensions.iterator().next(),
+            "factory", CPLPreprocessorFactory.class);
+      } else {
+        throw new ADLException(GenericErrors.GENERIC_ERROR,
+            "There are more than one extensions for the extension-point '"
+                + CPL_EXTENSION + "'. This is illegal.");
+      }
+      extensionLoaded = true;
+    }
+  }
 
   public static Lexer getLexer(final PluginManager pluginManagerItf,
       final String inputPath, final Map<Object, Object> context)
       throws ADLException, IOException {
-    final Collection<Extension> extensions = pluginManagerItf.getExtensions(
-        CPL_EXTENSION, context);
-    if (extensions.size() == 0) {
-      // Return the default lexer
-      return new CPLLexer(new ANTLRFileStream(inputPath));
+    if (!extensionLoaded) {
+      loadExtension(pluginManagerItf, context);
     }
-    if (extensions.size() > 1) {
-      throw new ADLException(GenericErrors.GENERIC_ERROR,
-          "There are more than one extensions for the extension-point '"
-              + CPL_EXTENSION + "'. This is illegal.");
-    }
-    // Get the single extension element
-    final Extension extension = extensions.iterator().next();
-    final String lexerClassName = getExtensionClassName(extension, "lexer");
-    // Get the parser class
-    try {
-      @SuppressWarnings("unchecked")
-      final Class<Lexer> lexerClass = (Class<Lexer>) ExtensionHelper.class
-          .getClassLoader().loadClass(lexerClassName);
-      final Class[] parameters = {CharStream.class};
-      return lexerClass.getConstructor(parameters).newInstance(
-          new ANTLRFileStream(inputPath));
-    } catch (final InstantiationException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    } catch (final IllegalAccessException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    } catch (final ClassNotFoundException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    } catch (final IllegalArgumentException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    } catch (final SecurityException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    } catch (final InvocationTargetException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    } catch (final NoSuchMethodException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
-
-    return null;
+    return ppFactory.getLexer(new ANTLRFileStream(inputPath));
   }
 
   public static Parser getParser(final PluginManager pluginManagerItf,
       final TokenStream tokens, final Map<Object, Object> context)
       throws ADLException {
-    final Collection<Extension> extensions = pluginManagerItf.getExtensions(
-        CPL_EXTENSION, context);
-    if (extensions.size() == 0) {
-      // Return the default lexer
-      return new CPLParser(tokens);
+    if (!extensionLoaded) {
+      loadExtension(pluginManagerItf, context);
     }
-    if (extensions.size() > 1) {
-      throw new ADLException(GenericErrors.GENERIC_ERROR,
-          "There are more than one extensions for the extension-point '"
-              + CPL_EXTENSION + "'. This is illegal.");
-    }
-    // Get the single extension element
-    final Extension extension = extensions.iterator().next();
-    final String parserClassName = getExtensionClassName(extension, "parser");
-    // Get the parser class
-    try {
-      @SuppressWarnings("unchecked")
-      final Class<Parser> parserClass = (Class<Parser>) ExtensionHelper.class
-          .getClassLoader().loadClass(parserClassName);
-      final Class[] parameters = {TokenStream.class};
-      return parserClass.getConstructor(parameters).newInstance(tokens);
-    } catch (final InstantiationException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    } catch (final IllegalAccessException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    } catch (final ClassNotFoundException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    } catch (final IllegalArgumentException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    } catch (final SecurityException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    } catch (final InvocationTargetException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    } catch (final NoSuchMethodException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
-
-    return null;
+    return ppFactory.getParser(tokens);
   }
 
-  public static String getExtensionClassName(final Extension extension,
-      final String extensionName) throws ADLException {
+  public static <T> T getExtensionFactory(final Extension extension,
+      final String extensionName, final Class<? extends T> expectedType)
+      throws ADLException {
+    String className;
     final NodeList nodes = ((Element) extension.astGetDecoration("xml-element"))
         .getChildNodes();
     for (int i = 0; i < nodes.getLength(); i++) {
@@ -134,7 +95,23 @@ public final class ExtensionHelper {
       if (node instanceof Element) {
         final Element element = (Element) node;
         if (element.getNodeName().equals(extensionName)) {
-          return element.getAttribute("class");
+          className = element.getAttribute("class");
+          try {
+            final Class<? extends T> extensionClass = ExtensionHelper.class
+                .getClassLoader().loadClass(className).asSubclass(expectedType);
+            return extensionClass.newInstance();
+          } catch (final ClassNotFoundException e) {
+            throw new ADLException(GenericErrors.GENERIC_ERROR, e,
+                "Extension class '" + extensionName + "' not found.");
+          } catch (final InstantiationException e) {
+            throw new ADLException(GenericErrors.GENERIC_ERROR, e,
+                "Extension class '" + extensionName
+                    + "' cannot be instantiated.");
+          } catch (final IllegalAccessException e) {
+            throw new ADLException(GenericErrors.GENERIC_ERROR, e,
+                "Illegal access to the extension class '" + extensionName
+                    + "'.");
+          }
         }
       }
     }

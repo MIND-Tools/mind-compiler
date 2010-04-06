@@ -1,0 +1,3 @@
+<plugin id="org.ow2.mind" name="The MIND Compiler.">
+	<extension-point id="predefined-annotations"/>
+</plugin>

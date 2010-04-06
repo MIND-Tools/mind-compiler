@@ -39,6 +39,7 @@ import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.JavaFactory;
 import org.objectweb.fractal.adl.Loader;
+import org.objectweb.fractal.adl.NodeFactory;
 import org.objectweb.fractal.adl.error.GenericErrors;
 import org.objectweb.fractal.adl.util.FractalADLLogManager;
 import org.objectweb.fractal.cecilia.targetDescriptor.TargetDescriptorException;
@@ -61,6 +62,7 @@ import org.ow2.mind.adl.implementation.BasicImplementationLocator;
 import org.ow2.mind.adl.implementation.ImplementationLocator;
 import org.ow2.mind.adl.st.ADLLoaderASTTransformer;
 import org.ow2.mind.annotation.AnnotationLocatorHelper;
+import org.ow2.mind.annotation.PredefinedAnnotationsHelper;
 import org.ow2.mind.compilation.CompilationCommand;
 import org.ow2.mind.compilation.CompilationCommandExecutor;
 import org.ow2.mind.compilation.CompilerCommand;
@@ -78,6 +80,7 @@ import org.ow2.mind.idl.OutputBinaryIDLLocator;
 import org.ow2.mind.idl.st.IDLLoaderASTTransformer;
 import org.ow2.mind.io.BasicOutputFileLocator;
 import org.ow2.mind.plugin.BasicPluginManager;
+import org.ow2.mind.plugin.PluginManager;
 import org.ow2.mind.plugin.SimpleClassPluginFactory;
 import org.ow2.mind.preproc.BasicMPPWrapper;
 import org.ow2.mind.st.BasicASTTransformer;
@@ -387,25 +390,37 @@ public class Launcher extends AbstractLauncher {
           .getPath());
     }
 
+    /****** Initialization of the PluginManager Component *******/
+    // NodeFactory Component
+    final STNodeFactoryImpl stNodeFactory = new STNodeFactoryImpl();
+
+    final BasicPluginManager pluginManager = new BasicPluginManager();
+    pluginManager.nodeFactoryItf = stNodeFactory;
+
     AnnotationLocatorHelper.addDefaultAnnotationPackage(
         "org.ow2.mind.adl.annotation.predefined", compilerContext);
-
-    final String annotationPackages = System
-        .getProperty(MIND_ANNOTATION_PACKAGES);
-    if (annotationPackages != null) {
-      for (final String string : annotationPackages.split(File.pathSeparator)) {
-        AnnotationLocatorHelper.addDefaultAnnotationPackage(string,
-            compilerContext);
-      }
+    String[] annotationPackages;
+    try {
+      annotationPackages = PredefinedAnnotationsHelper
+          .getPredefinedAnnotations(pluginManager, compilerContext);
+    } catch (final ADLException e) {
+      throw new CompilerInstantiationException(
+          "Cannot load predefined annotations.", e, 101);
     }
+    for (final String annotationPackage : annotationPackages) {
+      AnnotationLocatorHelper.addDefaultAnnotationPackage(annotationPackage,
+          compilerContext);
+    }
+
     // initialize compiler
-    initCompiler(cmdLine);
+    initCompiler(cmdLine, stNodeFactory, pluginManager);
   }
 
   /**
    * @param cmdLine
    */
-  protected void initCompiler(final CommandLine cmdLine) {
+  protected void initCompiler(final CommandLine cmdLine,
+      final NodeFactory stNodeFactory, final PluginManager pluginManager) {
     // input locators
     final BasicInputResourceLocator inputResourceLocator = new BasicInputResourceLocator();
     final OutputBinaryIDLLocator obil = new OutputBinaryIDLLocator();
@@ -425,20 +440,15 @@ public class Launcher extends AbstractLauncher {
     obal.outputFileLocatorItf = outputFileLocator;
     obil.outputFileLocatorItf = outputFileLocator;
 
-    // NodeFactory Component
-    final STNodeFactoryImpl stNodeFactory = new STNodeFactoryImpl();
-
-    // Plugin Manager Components
-    final org.objectweb.fractal.adl.Factory pluginFactory = new SimpleClassPluginFactory();
-    final BasicPluginManager pluginManager = new BasicPluginManager();
-    pluginManager.nodeFactoryItf = stNodeFactory;
-
     // compilation task factory
     final GccCompilerWrapper gcw = new GccCompilerWrapper();
     gcw.outputFileLocatorItf = outputFileLocator;
     final CompilerWrapper compilerWrapper = gcw;
     final BasicMPPWrapper mppWrapper = new BasicMPPWrapper();
     mppWrapper.pluginManagerItf = pluginManager;
+
+    // Plugin Factory Component
+    final org.objectweb.fractal.adl.Factory pluginFactory = new SimpleClassPluginFactory();
 
     // String Template Component Loaders
     final StringTemplateGroupLoader stcLoader = STLoaderFactory.newSTLoader();

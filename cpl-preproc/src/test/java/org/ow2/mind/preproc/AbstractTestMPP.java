@@ -40,6 +40,8 @@ import org.ow2.mind.compilation.CompilerWrapper;
 import org.ow2.mind.compilation.PreprocessorCommand;
 import org.ow2.mind.compilation.gcc.GccCompilerWrapper;
 import org.ow2.mind.io.BasicOutputFileLocator;
+import org.ow2.mind.plugin.BasicPluginManager;
+import org.ow2.mind.st.STNodeFactoryImpl;
 import org.testng.annotations.BeforeTest;
 
 public class AbstractTestMPP {
@@ -49,6 +51,8 @@ public class AbstractTestMPP {
   protected MPPWrapper                 mppWrapper;
   protected CompilerWrapper            compilerWrapper;
   protected CompilationCommandExecutor executor;
+  protected STNodeFactoryImpl          stNodeFactory;
+  protected BasicPluginManager         pluginManager;
 
   protected Map<Object, Object>        context;
   protected File                       buildDir;
@@ -57,7 +61,12 @@ public class AbstractTestMPP {
 
   @BeforeTest(alwaysRun = true)
   public void setUp() {
+    pluginManager = new BasicPluginManager();
+    stNodeFactory = new STNodeFactoryImpl();
+    pluginManager.nodeFactoryItf = stNodeFactory;
+
     mppWrapper = new BasicMPPWrapper();
+    ((BasicMPPWrapper) mppWrapper).pluginManagerItf = pluginManager;
     compilerWrapper = new GccCompilerWrapper();
     executor = new BasicCompilationCommandExecutor();
 

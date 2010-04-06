@@ -29,7 +29,6 @@
         <dependency>
         	<groupId>${project.groupId}</groupId>
         	<artifactId>plugin-loader</artifactId>
-        	<version>${project.version}</version>
         </dependency>
     </dependencies>
 

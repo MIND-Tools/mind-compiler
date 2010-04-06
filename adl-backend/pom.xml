@@ -29,6 +29,10 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>cpl-preproc</artifactId>
         </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>plugin-loader</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>org.testng</groupId>
