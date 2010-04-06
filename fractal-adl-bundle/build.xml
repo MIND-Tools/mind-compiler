@@ -23,6 +23,7 @@
 				<attribute name="Bundle-Name" value="${mypom.name}.source" />
 				<attribute name="Bundle-Version" value="${mypom.version}" />
 				<attribute name="Eclipse-SourceBundle" value="${mypom.name};version=&quot;${mypom.version}&quot;" />
+				<attribute name="Bundle-ManifestVersion" value="2"/>
 			</manifest>
 		</jar>
 		<artifact:install>
