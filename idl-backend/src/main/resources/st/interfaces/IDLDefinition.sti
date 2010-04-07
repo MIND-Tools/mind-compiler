@@ -2,7 +2,7 @@ interface IDLDefinition;
 
 idlFile(idl);
 interfaceDef(itf);
-methodPrototype(name, parameters, withThisPtr);
+methodPrototype(name, parameters, withThisPtr, vaArgs);
 methodDef(method, methodName, withThisPtr);
 methodPointerDef(method, withThisPtr);
 methodPointerName(name);

@@ -8,6 +8,8 @@
 #include <stdint.h>
 #include "foo/test2.idt.h"
 
+
+
 typedef const int myint;
 
 typedef const int (* const mypointer)[];
@@ -21,8 +23,8 @@ struct s {
 };
 
 struct __component_test1_vTable {
-  void (* (* m1)(void *_mind_this   , const uint8_t a, int (*b) )) ;
-  unsigned float (* m2)(void *_mind_this   , float f1 ) ;
+  void (* (* m1)(void *_mind_this , const uint8_t a, int (*b) )) ;
+  unsigned float (* m2)(void *_mind_this , float f1 ) ;
 };
 
 struct __component_test1_itf_desc {

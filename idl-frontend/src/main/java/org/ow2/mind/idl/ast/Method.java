@@ -23,9 +23,16 @@
 package org.ow2.mind.idl.ast;
 
 public interface Method extends TypeContainer, TypeQualifier {
+
+  String TRUE = "true";
+
   String getName();
 
   void setName(String name);
+
+  String getVaArgs();
+
+  void setVaArgs(String vaArgs);
 
   void addParameter(Parameter node);
 
