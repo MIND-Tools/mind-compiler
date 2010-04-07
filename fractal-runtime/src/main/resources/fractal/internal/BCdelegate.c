@@ -71,6 +71,10 @@ int __component_bindFc_delegate(const char *clientItfName, void *serverItf,
   for (i = 0; i < desc->nbBindings; i++) {
     if (strcmp(desc->bindingDesc[i].name, clientItfName) == 0) {
       *ITF_PTR(desc->bindingDesc[i].offset) = serverItf;
+
+      if (desc->bindingDesc[i].isBoundOffset != 0) {
+        *ITF_PTR(desc->bindingDesc[i].isBoundOffset) = serverItf;
+      }
       return FRACTAL_API_OK;
     }
   }

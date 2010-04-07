@@ -264,13 +264,17 @@ GET_COLLECTION_SIZEInterface(definition, itf) ::= <<
 BIND_MY_INTERFACE(definition) ::= <<
 
 #define BIND_MY_INTERFACE(itfName, serverItf) do { \
-  GET_MY_INTERFACE(itfName)) = serverItf; \
+  GET_MY_INTERFACE(itfName)) = (serverItf); \
+  } while (0)
+#define BIND_MY_INTERFACE_COLLECTION(itfName, idx, serverItf) do { \
+  GET_MY_INTERFACE_COLLECTION(itfName, idx)) = (serverItf); \
   } while (0)
 >>
 
 IS_BOUND(definition) ::= <<
 
 #define IS_BOUND(itfName) IS_BOUND_PTR(GET_MY_INTERFACE(itfName))
+#define IS_BOUND_COLLECTION(itfName, idx) IS_BOUND_PTR(GET_MY_INTERFACE_COLLECTION(itfName, idx))
 #define IS_BOUND_PTR(itfPtr) __component_is_bound(itfPtr)
 
 >>

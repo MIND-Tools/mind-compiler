@@ -50,7 +50,7 @@ import org.testng.annotations.Test;
 
 public class CheckDelegatesTest {
 
-  public static final String DEFAULT_CFLAGS  = "-std=c89 -g -Wall -Werror -Wredundant-decls -Wunreachable-code -Wstrict-prototypes -Wwrite-strings";
+  public static final String DEFAULT_CFLAGS  = "-g -Wall -Werror -Wredundant-decls -Wunreachable-code -Wstrict-prototypes -Wwrite-strings";
   public static final String CFLAGS_PROPERTY = "mind.test.cflags";
 
   IDLLoader                  idlLoader;
