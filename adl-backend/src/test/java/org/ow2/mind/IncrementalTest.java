@@ -79,6 +79,7 @@ public class IncrementalTest extends AbstractFunctionalTest {
     cleanBuildDir();
     final Map<String, Long> t1 = recompile("helloworld.HelloworldApplication");
 
+    pause();
     initContext(true);
     runner.compile("helloworld.HelloworldApplication");
     final Map<String, Long> t2 = getBuildTimestamps();
