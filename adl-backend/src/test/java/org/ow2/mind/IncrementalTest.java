@@ -236,6 +236,7 @@ public class IncrementalTest extends AbstractFunctionalTest {
     cleanBuildDir();
     final Map<String, Long> t1 = recompile("GenericApplication<helloworld.HelloworldGeneric>");
 
+    pause();
     Map<String, Long> t2 = recompile("GenericApplication<helloworld.HelloworldGeneric>");
     Map<String, Long> t1Copy = new HashMap<String, Long>(t1);
     Map<String, Long> t2Copy = new HashMap<String, Long>(t2);
