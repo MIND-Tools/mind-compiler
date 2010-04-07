@@ -100,6 +100,7 @@ import org.ow2.mind.idl.jtb.syntaxtree.NodeListOptional;
 import org.ow2.mind.idl.jtb.syntaxtree.NodeSequence;
 import org.ow2.mind.idl.jtb.syntaxtree.NodeToken;
 import org.ow2.mind.idl.jtb.syntaxtree.NullValue;
+import org.ow2.mind.idl.jtb.syntaxtree.ParameterList;
 import org.ow2.mind.idl.jtb.syntaxtree.ParameterQualifier;
 import org.ow2.mind.idl.jtb.syntaxtree.PointerSpecification;
 import org.ow2.mind.idl.jtb.syntaxtree.QualifiedTypeSpecification;
@@ -784,6 +785,22 @@ public class JTBProcessor extends GJDepthFirst<Object, Node> {
     // add method in interface definition
     itfDef.addMethod(method);
 
+    return method;
+  }
+
+  @Override
+  public Object visit(final ParameterList n, final Node argu) {
+    assert argu != null;
+    final Method method = castNodeError(argu, Method.class);
+
+    // process parameters
+    n.f0.accept(this, argu);
+    n.f1.accept(this, argu);
+
+    // process ...
+    if (n.f2.present()) {
+      method.setVaArgs(Method.TRUE);
+    }
     return method;
   }
 

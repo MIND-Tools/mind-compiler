@@ -17,6 +17,10 @@ idlFile(idl) ::= <<
 <idl.includes:includeDirective(include=it); separator="\n">
 <idl.astDecorations.("referenced-interfaces").referencedInterfaces:includeReference(ref=it.IDL); separator="\n">
 
+<if (idl.astNodeTypes.("method"))>
+<idl.methods:{<if (vaArgsMap.(it.vaArgs))>#include \<stdarg.h> <endif>};separator="\n">
+<endif>
+
 <idl.types:{<(defTemplateMap.(it.astDecorations.kind))(it)>;}; separator="\n\n">
 
 <(defTemplateMap.(idl.astDecorations.kind))(idl)>
@@ -127,11 +131,11 @@ typedef struct __component_<itf.name; format="toCName">_itf_desc *<itf.name; for
 >>
 
 methodDef(method, methodName, withThisPtr) ::= <<
-<typeQualifier(qualifiers=method)><varDef(type=method.type, name=methodPrototype(name=methodName, parameters=method.parameters, withThisPtr=withThisPtr))>
+<typeQualifier(qualifiers=method)><varDef(type=method.type, name=methodPrototype(name=methodName, parameters=method.parameters, withThisPtr=withThisPtr, vaArgs=vaArgsMap.(method.vaArgs)))>
 >>
 
 methodPointerCast(method, withThisPtr) ::= <<
-(<varDef(type=method.type, name=methodPrototype(name="(*)", parameters=method.parameters, withThisPtr=withThisPtr))>)
+(<varDef(type=method.type, name=methodPrototype(name="(*)", parameters=method.parameters, withThisPtr=withThisPtr, vaArgs=vaArgsMap.(method.vaArgs)))>)
 >>
 
 
@@ -157,8 +161,20 @@ noParamVoid ::= [
   "false" : "void"
 ]
 
-methodPrototype(name, parameters, withThisPtr) ::= <<
-<name>(<thisPointerDef.(withThisPtr)>  <if(parameters)> <thisPointerComma.(withThisPtr)> <parameters:parameterDef(parameter=it); separator=", "> <else> <noParamVoid.(withThisPtr)> <endif>)
+vaArgsMap ::= [
+   "true" : "true",
+   default :
+]
+
+methodPrototype(name, parameters, withThisPtr, vaArgs) ::= <<
+<name>(<thisPointerDef.(withThisPtr)> <if(parameters)>
+<thisPointerComma.(withThisPtr)> <parameters:parameterDef(parameter=it); separator=", "> <if (vaArgs)>, ...<endif>
+<else> 
+<if (vaArgs)> <thisPointerComma.(withThisPtr)> ...
+<else>
+<noParamVoid.(withThisPtr)> 
+<endif>
+<endif>)
 >>
 
 parameterDef(parameter) ::= <<
