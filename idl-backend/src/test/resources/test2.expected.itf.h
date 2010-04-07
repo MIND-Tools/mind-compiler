@@ -1,4 +1,4 @@
-|#ifndef TEST2_H
+#ifndef TEST2_H
 #define TEST2_H
 
 /* This file is a generated file, do not edit. */
