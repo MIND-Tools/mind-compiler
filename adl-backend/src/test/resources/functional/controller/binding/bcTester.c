@@ -1,10 +1,6 @@
 #include <assert.h>
 #include <string.h>
 
-// -----------------------------------------------------------------------------
-// Implementation of the main interface.
-// -----------------------------------------------------------------------------
-
 int testCalled = 0;
 int testCollection0Called = 0;
 int testCollection1Called = 0;
@@ -18,7 +14,11 @@ void *expectedBinding[NB_ITF] = { GET_MY_INTERFACE(test),
     GET_MY_INTERFACE(testCollection[0]), GET_MY_INTERFACE(testCollection[1]),
     GET_MY_INTERFACE(testCollection[2]) };
 
-// int main(int argc, string[] argv)
+/* -----------------------------------------------------------------------------
+   Implementation of the main interface.
+----------------------------------------------------------------------------- */
+
+/* int main(int argc, string[] argv) */
 int METH(main, main)(int argc, char *argv[]) {
   int nbItf, err, i;
   const char *itfNames[NB_ITF];
@@ -60,18 +60,18 @@ int METH(main, main)(int argc, char *argv[]) {
   return 0;
 }
 
-// -----------------------------------------------------------------------------
-// Implementation of the test interface.
-// -----------------------------------------------------------------------------
+/* -----------------------------------------------------------------------------
+   Implementation of the test interface.
+----------------------------------------------------------------------------- */
 
 int METH(test, main) (int argc, char *argv[]) {
   testCalled = 1;
   return 5;
 }
 
-// -----------------------------------------------------------------------------
-// Implementation of the testCollection interface.
-// -----------------------------------------------------------------------------
+/* -----------------------------------------------------------------------------
+   Implementation of the testCollection interface.
+----------------------------------------------------------------------------- */
 
 int METH(testCollection[0], main) (int argc, char *argv[]) {
   testCollection0Called = 1;

@@ -16,11 +16,11 @@ typedef struct
 static int METH(checkComponent)(fractal_api_Component compItf);
 static void printUsage(void);
 
-// -----------------------------------------------------------------------------
-// Implementation of the main interface.
-// -----------------------------------------------------------------------------
+/* -----------------------------------------------------------------------------
+   Implementation of the main interface.
+----------------------------------------------------------------------------- */
 
-// int main(int argc, string[] argv)
+/* int main(int argc, string[] argv) */
 int METH(main, main) (int argc, char *argv[]) {
   int factory=0, controlled=0, factoryOfControlled=0;
   char *libPath;
@@ -118,9 +118,9 @@ int METH(main, main) (int argc, char *argv[]) {
   return 0;
 }
 
-// -----------------------------------------------------------------------------
-// internal function.
-// -----------------------------------------------------------------------------
+/* -----------------------------------------------------------------------------
+   internal function.
+----------------------------------------------------------------------------- */
 
 static int METH(checkComponent)(fractal_api_Component compItf)
 {

@@ -30,9 +30,9 @@ ControllerDataFactoryDestroy(definition, controller) ::= ""
 
 ControllerImplementation(definition, controller, interfaceDefinitions) ::= <<
 
-// --------------------------------------------------------------------------
-// Implementation of the AttributeController interface
-// --------------------------------------------------------------------------
+/* -----------------------------------------------------------------------------
+   Implementation of the LifeCycleController interface
+----------------------------------------------------------------------------- */
 
 #include "fractal/internal/LCCdelegate.h"
 

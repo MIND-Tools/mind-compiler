@@ -1,4 +1,3 @@
-@CompileDef
 @Singleton
 composite helloworld.ClientCompositeSingleton {
 

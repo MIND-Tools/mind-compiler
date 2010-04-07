@@ -1,0 +1,4 @@
+
+type helloworld.ServerType {
+  provides Service as s ;
+}

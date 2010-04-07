@@ -37,7 +37,6 @@ import org.antlr.stringtemplate.language.AngleBracketTemplateLexer;
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.Loader;
-import org.objectweb.fractal.adl.Node;
 import org.objectweb.fractal.adl.NodeFactory;
 import org.objectweb.fractal.adl.error.BasicErrorLocator;
 import org.objectweb.fractal.adl.error.ErrorLocator;
@@ -50,7 +49,6 @@ import org.ow2.mind.adl.DefinitionReferenceResolver;
 import org.ow2.mind.adl.idl.InterfaceSignatureResolver;
 import org.ow2.mind.adl.parser.ADLParserContextHelper;
 import org.ow2.mind.idl.IDLLoader;
-import org.ow2.mind.st.StringTemplateASTTransformer;
 
 /**
  * Base class for the implementation of annotation processors integrated in the
@@ -69,31 +67,28 @@ public abstract class AbstractADLLoaderAnnotationProcessor
   // ---------------------------------------------------------------------------
 
   /** The client interface used to create new AST nodes. */
-  public NodeFactory                  nodeFactoryItf;
+  public NodeFactory                 nodeFactoryItf;
 
   /** The client interface used to merge AST nodes. */
-  public NodeMerger                   nodeMergerItf;
+  public NodeMerger                  nodeMergerItf;
 
   /** The {@link DefinitionCache} client interface. */
-  public DefinitionCache              definitionCacheItf;
+  public DefinitionCache             definitionCacheItf;
 
   /** The {@link Loader} client interface. */
-  public Loader                       loaderItf;
+  public Loader                      loaderItf;
 
   /** The {@link IDLLoader} client interface. */
-  public IDLLoader                    idlLoaderItf;
+  public IDLLoader                   idlLoaderItf;
 
   /** The {@link DefinitionReferenceResolver} client interface. */
-  public DefinitionReferenceResolver  defRefResolverItf;
+  public DefinitionReferenceResolver defRefResolverItf;
 
   /** the {@link InterfaceSignatureResolver} client interface. */
-  public InterfaceSignatureResolver   itfSignatureResolverItf;
+  public InterfaceSignatureResolver  itfSignatureResolverItf;
 
   /** The {@link StringTemplateGroupLoader} client interface. */
-  public StringTemplateGroupLoader    templateLoaderItf;
-
-  /** The {@link StringTemplateASTTransformer} client interface. */
-  public StringTemplateASTTransformer astTransformerItf;
+  public StringTemplateGroupLoader   templateLoaderItf;
 
   // ---------------------------------------------------------------------------
   // Utility methods
@@ -170,18 +165,6 @@ public abstract class AbstractADLLoaderAnnotationProcessor
   }
 
   /**
-   * Translate the given AST to an AST suitable for StringTemplate.
-   * 
-   * @param <T> the type of the root node of the AST.
-   * @param tree the root of the AST to translate.
-   * @return an AST that is suitable for StringTemplate.
-   * @see StringTemplateASTTransformer#toStringTemplateAST(Node)
-   */
-  protected <T extends Node> T toStringTemplateAST(final T tree) {
-    return astTransformerItf.toStringTemplateAST(tree);
-  }
-
-  /**
    * Returns the StringTemplate template with the given
    * <code>templateName</code> name and found in the
    * <code>templateGroupName</code> group.
@@ -218,8 +201,7 @@ public abstract class AbstractADLLoaderAnnotationProcessor
     return listFcHelper(NodeFactory.ITF_NAME, NodeMerger.ITF_NAME,
         DefinitionCache.ITF_NAME, "loader", IDLLoader.ITF_NAME,
         DefinitionReferenceResolver.ITF_NAME,
-        InterfaceSignatureResolver.ITF_NAME, "template-loader",
-        StringTemplateASTTransformer.ITF_NAME);
+        InterfaceSignatureResolver.ITF_NAME, "template-loader");
   }
 
   public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
@@ -241,8 +223,6 @@ public abstract class AbstractADLLoaderAnnotationProcessor
       return itfSignatureResolverItf;
     } else if (itfName.equals("template-loader")) {
       return templateLoaderItf;
-    } else if (itfName.equals(StringTemplateASTTransformer.ITF_NAME)) {
-      return astTransformerItf;
     } else {
       throw new NoSuchInterfaceException("No client interface named '"
           + itfName + "'");
@@ -269,8 +249,6 @@ public abstract class AbstractADLLoaderAnnotationProcessor
       itfSignatureResolverItf = (InterfaceSignatureResolver) serverItf;
     } else if (itfName.equals("template-loader")) {
       templateLoaderItf = (StringTemplateGroupLoader) serverItf;
-    } else if (itfName.equals(StringTemplateASTTransformer.ITF_NAME)) {
-      astTransformerItf = (StringTemplateASTTransformer) serverItf;
     } else {
       throw new NoSuchInterfaceException("No client interface named '"
           + itfName + "'");
@@ -297,8 +275,6 @@ public abstract class AbstractADLLoaderAnnotationProcessor
       itfSignatureResolverItf = null;
     } else if (itfName.equals("template-loader")) {
       templateLoaderItf = null;
-    } else if (itfName.equals(StringTemplateASTTransformer.ITF_NAME)) {
-      astTransformerItf = null;
     } else {
       throw new NoSuchInterfaceException("No client interface named '"
           + itfName + "'");

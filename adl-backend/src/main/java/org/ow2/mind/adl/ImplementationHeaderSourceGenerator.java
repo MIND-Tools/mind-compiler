@@ -137,8 +137,8 @@ public class ImplementationHeaderSourceGenerator
           toCPath(getImplHeaderFileName(definition, i))).append("\"\n");
     }
 
-    sb.append("#endif //").append(toUpperCName(definition.getName())).append(
-        "_IMPL_H\n");
+    sb.append("#endif /* ").append(toUpperCName(definition.getName())).append(
+        "_IMPL_H */\n");
 
     return sb.toString();
   }

@@ -30,12 +30,12 @@ ComponentDefinition(definition, interfaceDefinitions) ::= <<
 // Server method declaration
 
 ServerMethodsDeclaration(definition, interfaceDefinitions) ::= <<
-// Start declaration of server methods
+/* Start declaration of server methods */
 <definition.interfaces:ServerMethodDecls(definition=definition, interfaceDefinitions=interfaceDefinitions, itf=it); separator="\n">
 <if (definition.astNodeTypes.("internalInterface"))>
 <definition.internalInterfaces:ServerMethodDecls(definition=definition, interfaceDefinitions=interfaceDefinitions, itf=it); separator="\n">
 <endif>
-// End declaration of server methods
+/* End declaration of server methods */
 >>
 
 ServerMethodDecls(definition, interfaceDefinitions, itf) ::= <<

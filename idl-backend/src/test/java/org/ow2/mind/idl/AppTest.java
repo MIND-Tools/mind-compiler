@@ -15,28 +15,20 @@ import org.objectweb.fractal.adl.ADLException;
 import org.ow2.mind.PathHelper;
 import org.ow2.mind.idl.ast.IDL;
 import org.ow2.mind.io.BasicOutputFileLocator;
-import org.ow2.mind.st.BasicASTTransformer;
-import org.ow2.mind.st.STNodeFactoryImpl;
-import org.ow2.mind.st.StringTemplateASTTransformer;
 
 /**
  * Unit test for simple App.
  */
 public class AppTest extends TestCase {
 
-  IDLLoader                    loader;
-  IDLVisitor                   idlVisitor;
-  StringTemplateASTTransformer astTransformer;
-  Map<Object, Object>          context;
+  IDLLoader           loader;
+  IDLVisitor          idlVisitor;
+  Map<Object, Object> context;
 
   @Override
   protected void setUp() throws Exception {
     loader = IDLLoaderChainFactory.newLoader();
     idlVisitor = IDLBackendFactory.newIDLCompiler(loader);
-
-    final BasicASTTransformer basicASTTransformer = new BasicASTTransformer();
-    basicASTTransformer.nodeFactoryItf = new STNodeFactoryImpl();
-    astTransformer = basicASTTransformer;
 
     context = new HashMap<Object, Object>();
     context.put(BasicOutputFileLocator.OUTPUT_DIR_CONTEXT_KEY, new File(
@@ -74,8 +66,7 @@ public class AppTest extends TestCase {
   }
 
   private File process(final String testName) throws ADLException {
-    final IDL idl = astTransformer.toStringTemplateAST(loader.load(testName,
-        context));
+    final IDL idl = loader.load(testName, context);
     idlVisitor.visit(idl, context);
     if (testName.startsWith("/")) {
       return new File("target/build" + testName + ".h");

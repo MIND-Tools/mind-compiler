@@ -18,9 +18,9 @@ ControllerDataFactoryDestroy(definition, controller) ::= ""
 
 ControllerImplementation(definition, controller, interfaceDefinitions) ::= <<
 
-// --------------------------------------------------------------------------
-// Implementation of the AttributeController interface
-// --------------------------------------------------------------------------
+/* -----------------------------------------------------------------------------
+   Implementation of the AttributeController interface
+----------------------------------------------------------------------------- */
 
 #include "fractal/internal/ACdelegate.h"
 

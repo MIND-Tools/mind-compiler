@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2009 STMicroelectronics
+ * Copyright (C) 2010 STMicroelectronics
  *
  * This file is part of "Mind Compiler" is free software: you can redistribute 
  * it and/or modify it under the terms of the GNU Lesser General Public License 
@@ -22,11 +22,13 @@
 
 package org.ow2.mind.st;
 
-import org.objectweb.fractal.adl.Node;
+import org.objectweb.fractal.adl.AbstractNode;
+import org.objectweb.fractal.adl.merger.NodeMergerImpl;
 
-public interface StringTemplateASTTransformer {
+public class STNodeMergerImpl extends NodeMergerImpl {
 
-  String ITF_NAME = "ast-transformer";
-
-  <T extends Node> T toStringTemplateAST(T tree);
+  @Override
+  protected Class<? extends AbstractNode> getBaseClass() {
+    return AbstractSTNode.class;
+  }
 }
