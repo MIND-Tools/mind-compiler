@@ -308,9 +308,17 @@ InitializeClientInterface(definition, itf) ::= <<
 
 InitializeServerInterface(definition, itf) ::= <<
 <if (itf.numberOfElement)>
-{<itf.astDecorations.("collectionIndexes"):{ {&instance_name, &<vTableInstanceName(definition=definition,itf=itf, index=it)>}}; separator=", ">}
+{<itf.astDecorations.("collectionIndexes"):{ {&instance_name, &<vTableInstanceName(definition=definition,itf=itf, index=it)>, <isBoundValue(definition=definition, itf=itf, index=it)>}}; separator=", ">}
 <else>
-{&instance_name, &<vTableInstanceName(definition=definition,itf=itf)>}
+{&instance_name, &<vTableInstanceName(definition=definition,itf=itf)>, <isBoundValue(definition=definition, itf=itf)>}
+<endif>
+>>
+
+isBoundValue(definition, itf, index) ::= <<
+<if (itf.astDecorations.("delegated-interface"))>
+<itf.astDecorations.("delegated-interface").name><if (index)>_<index><endif>_ptr
+<else>
+&instance_name
 <endif>
 >>
 

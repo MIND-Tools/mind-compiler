@@ -47,7 +47,7 @@ static struct {
 } __component_<definition.name;format="toCName">_binding_descriptor = {
   <bindingCount(definition=definition)>, /* nbBindings */
   { /* bindingDesc */
-    <definition.interfaces:initBindingDescriptor(definition=definition, itf=it)>
+    <definition.interfaces:initBindingDescriptor(definition=definition, itf=it);separator="\n">
   }
 };
 >>
@@ -69,14 +69,20 @@ countClientInterfaces(itf) ::= <<
 initBindingDescriptor(definition, itf) ::= <<
 <if (isClient.(itf.role))>
 <if (itf.numberOfElement)>
-<itf.astDecorations.("collectionIndexes"):{__COMPONENT_INIT_BINDING_DESCRIPTOR(<ComponentTypeName(definitionName=definition.name)>, <itf.name>[<it>])};separator=",\n">,
-
+<itf.astDecorations.("collectionIndexes"):initBindingDescriptor1(definition=definition, itf=itf, index=it);separator=",\n">,
 <else>
-__COMPONENT_INIT_BINDING_DESCRIPTOR(<ComponentTypeName(definitionName=definition.name)>, <itf.name>),
-
+<initBindingDescriptor1(definition=definition, itf=itf)>,
 <endif>
 <endif>
 >>
+
+initBindingDescriptor1(definition, itf, index) ::= <<
+<if (itf.astDecorations.("delegated-interface"))>
+__COMPONENT_INIT_DELEGATE_BINDING_DESCRIPTOR(<ComponentTypeName(definitionName=definition.name)>, <itf.name><if (index)>[<index>]<endif>, <itf.astDecorations.("delegated-interface").name><if (index)>[<index>]<endif>)
+<else>
+__COMPONENT_INIT_BINDING_DESCRIPTOR(<ComponentTypeName(definitionName=definition.name)>, <itf.name><if (index)>[<index>]<endif>)
+<endif>
+>> 
 
 listFc(definition) ::= <<
 int METH(bindingController, listFc)(__MIND_STRING_TYPEDEF clientItfNames[]) 

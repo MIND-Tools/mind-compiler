@@ -36,6 +36,8 @@ ComponentDefinition(definition, interfaceDefinitions) ::= <<
 
 <BIND_MY_INTERFACE(definition=definition)>
 
+<IS_BOUND(definition=definition)>
+
 #define CHECK_CONTEXT_PTR // do nothing
 
 >>
@@ -282,6 +284,13 @@ BIND_MY_INTERFACE(definition) ::= <<
 #define BIND_MY_INTERFACE(itfName, serverItf) do { \
   GET_MY_INTERFACE(itfName)) = serverItf; \
   } while (0)
+>>
+
+IS_BOUND(definition) ::= <<
+
+#define IS_BOUND(itfName) IS_BOUND_PTR(GET_MY_INTERFACE(itfName))
+#define IS_BOUND_PTR(itfPtr) __component_is_bound(itfPtr)
+
 >>
 
 }$$

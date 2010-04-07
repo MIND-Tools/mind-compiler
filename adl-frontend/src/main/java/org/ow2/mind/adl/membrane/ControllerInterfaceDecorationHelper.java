@@ -42,4 +42,16 @@ public final class ControllerInterfaceDecorationHelper {
         .astGetDecoration(REFERENCED_INTERFACE_DECORATION_NAME);
   }
 
+  public static final String DELEGATED_INTERFACE_DECORATION_NAME = "delegated-interface";
+
+  public static void setDelegatedInterface(final Interface itf,
+      final Interface delegatedItf) {
+    itf.astSetDecoration(DELEGATED_INTERFACE_DECORATION_NAME, delegatedItf);
+  }
+
+  public static Interface getDelegatedInterface(final Interface itf) {
+    return (Interface) itf
+        .astGetDecoration(DELEGATED_INTERFACE_DECORATION_NAME);
+  }
+
 }

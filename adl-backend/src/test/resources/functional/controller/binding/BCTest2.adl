@@ -1,0 +1,65 @@
+import fractal.api.Component;
+import fractal.api.BindingController;
+
+@Run(executableName="bcTest2")
+composite controller.binding.BCTest2 extends ApplicationType {
+
+  contains ApplicationType as compositeTester
+    @controller.BindingController
+    @controller.Component
+    composite {
+      requires optional Main as clientMain;
+      requires Component as clientComp[2];
+      requires BindingController as superBC;
+      
+      contains ApplicationType as tester
+        @controller.BindingController
+        primitive {
+          requires optional Main as clientMain;
+          requires Component as clientComp[3];
+          requires BindingController as superBC;
+          
+          source bcTester2.c;
+        }
+
+      contains ApplicationType as tested0
+        @controller.Component
+        primitive {
+          source {{
+            int METH(main, main)(int argc, char *argv[]) {
+              return 0;
+            }
+          }}
+        }
+      
+      binds tester.clientComp[0] to tested0.component;
+      binds tester.clientComp[1] to this.clientComp[0];
+      binds tester.clientComp[2] to this.clientComp[1];
+      binds tester.superBC to this.superBC;
+      
+      binds this.main to tester.main;
+      binds tester.clientMain to this.clientMain;
+    }
+  
+  contains ApplicationType as tested1
+    @controller.Component
+    primitive {
+      source {{
+        int METH(main, main)(int argc, char *argv[]) {
+          return 1;
+        }
+      }}
+    }
+
+  contains as tested2
+    @controller.Component
+    composite {
+      provides optional Main as main;
+    }
+  
+  binds this.main to compositeTester.main;
+  binds compositeTester.clientMain to tested1.main;
+  binds compositeTester.superBC to compositeTester.bindingController;
+  binds compositeTester.clientComp[0] to tested1.component;
+  binds compositeTester.clientComp[1] to tested2.component;
+}
