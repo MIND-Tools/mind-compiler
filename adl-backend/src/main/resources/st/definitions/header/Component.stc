@@ -97,8 +97,12 @@ TypeStructures(definition) ::= <<
 <endif>
 >>
 
-InterfaceDescriptorDecl(itf) ::= << 
+InterfaceDescriptorDecl(itf) ::= <<
+<if (isClient.(itf.role))>
+<InterfaceType(signature=itf.signature)> <itf.name><if (itf.numberOfElement)>[<itf.numberOfElement>]<endif>;
+<else>
 <InterfaceDescType(signature=itf.signature)> <itf.name><if (itf.numberOfElement)>[<itf.numberOfElement>]<endif>;
+<endif>
 >>
 
 SubComponentStructures(definition) ::= <<
@@ -260,9 +264,9 @@ AddItfNames(definition) ::= <<
 AddItfName(itf) ::= <<
 <if (isClient.(itf.role))>
 <if (itf.numberOfElement)>
-<itf.astDecorations.("collectionIndexes"):{, <itf.name>_<it>_instance, <itf.name>_<it>_vTable}>
+<itf.astDecorations.("collectionIndexes"):{, <itf.name>_<it>_ptr, <itf.name>_<it>_instance, <itf.name>_<it>_vTable}>
 <else>
-, <itf.name>_instance, <itf.name>_vTable
+, <itf.name>_ptr, <itf.name>_instance, <itf.name>_vTable
 <endif>
 <endif>
 >>
@@ -296,17 +300,25 @@ InitializeInterface(definition, itf) ::= <<
 
 InitializeClientInterface(definition, itf) ::= <<
 <if (itf.numberOfElement)>
-{<itf.astDecorations.("collectionIndexes"):{ {<itf.name>_<it>_instance, <itf.name>_<it>_vTable}}; separator=", ">}
+{<itf.astDecorations.("collectionIndexes"):{ <itf.name>_<it>_ptr}; separator=", ">}
 <else>
-{<itf.name>_instance, <itf.name>_vTable}
+<itf.name>_ptr
 <endif>
 >>
 
 InitializeServerInterface(definition, itf) ::= <<
 <if (itf.numberOfElement)>
-{<itf.astDecorations.("collectionIndexes"):{ {&instance_name, &<vTableInstanceName(definition=definition,itf=itf, index=it)>}}; separator=", ">}
+{<itf.astDecorations.("collectionIndexes"):{ {&instance_name, &<vTableInstanceName(definition=definition,itf=itf, index=it)>, <isBoundValue(definition=definition, itf=itf, index=it)>}}; separator=", ">}
 <else>
-{&instance_name, &<vTableInstanceName(definition=definition,itf=itf)>}
+{&instance_name, &<vTableInstanceName(definition=definition,itf=itf)>, <isBoundValue(definition=definition, itf=itf)>}
+<endif>
+>>
+
+isBoundValue(definition, itf, index) ::= <<
+<if (itf.astDecorations.("delegated-interface"))>
+<itf.astDecorations.("delegated-interface").name><if (index)>_<index><endif>_ptr
+<else>
+&instance_name
 <endif>
 >>
 

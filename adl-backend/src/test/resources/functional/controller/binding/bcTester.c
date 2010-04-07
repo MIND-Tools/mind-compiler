@@ -19,8 +19,7 @@ void *expectedBinding[NB_ITF] = { GET_MY_INTERFACE(test),
 ----------------------------------------------------------------------------- */
 
 /* int main(int argc, string[] argv) */
-int METH( main, main)
-(int argc, char *argv[]) {
+int METH(main, main)(int argc, char *argv[]) {
   int nbItf, err, i;
   const char *itfNames[NB_ITF];
   void *itfRef;

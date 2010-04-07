@@ -31,6 +31,9 @@ tokens{
 	METH 		= 'METH';
     CONSTRUCTOR = 'CONSTRUCTOR';
     DESTRUCTOR  = 'DESTRUCTOR';
+    GET_MY_INTERFACE = 'GET_MY_INTERFACE';
+    BIND_MY_INTERFACE = 'BIND_MY_INTERFACE';
+    IS_BOUND    = 'IS_BOUND';
 	CALL 		= 'CALL';
 	CALL_PTR 	= 'CALL_PTR';
 	ATTR 		= 'ATTR';
@@ -87,7 +90,9 @@ parseFile returns [String res]
   | privateAccess   {sb.append($privateAccess.res); }
   | structDecl    {sb.append($structDecl.res); }
   | methPtrDef    {sb.append($methPtrDef.res); }
-  | e= ~ (METH | CALL | ATTR | PRIVATE | STRUCT | METH_PTR | CALL_PTR)
+  | e= ~ (METH | CALL | ATTR | PRIVATE | STRUCT | METH_PTR | CALL_PTR
+           | CONSTRUCTOR | DESTRUCTOR | GET_MY_INTERFACE | BIND_MY_INTERFACE
+           | IS_BOUND )
         {sb.append($e.text);}
   )+  
   ;
@@ -229,6 +234,9 @@ protected methCall returns [StringBuilder res ]
 	| collItfMethCall 	{ $res = $collItfMethCall.res; }
 	| prvMethCall		{ $res = $prvMethCall.res; }
 	| ptrMethCall 		{ $res = $ptrMethCall.res; }
+	| getMyInterfaceCall{ $res = $getMyInterfaceCall.res; }
+	| bindMyInterfaceCall{ $res = $bindMyInterfaceCall.res; }
+	| isBoundCall       { $res = $isBoundCall.res; }
 	;
 
 protected attAccess returns [StringBuilder res = new StringBuilder()]
@@ -405,6 +413,51 @@ protected ptrMethCallArg1 returns [StringBuilder res = new StringBuilder()]
         | e = ~('(' | ')') { $res.append($e.text); }
       ) +
 	;
+
+protected getMyInterfaceCall returns [StringBuilder res = new StringBuilder()]
+@init{StringBuilder idx = null;}
+	: GET_MY_INTERFACE ws1=ws '(' ws2=ws ID ws3=ws ( index ws4=ws {idx = $index.res;} ) ? ')'
+      {
+        if (idx == null)
+          $res.append("GET_MY_INTERFACE").append($ws1.text).append("(")
+              .append($ws2.text).append($ID.text).append($ws3.text).append(")");
+        else
+          $res.append("GET_MY_INTERFACE_COLLECTION").append($ws1.text).append("(")
+              .append($ws2.text).append($ID.text).append($ws3.text).append(",")
+              .append(idx).append($ws4.text).append(")");
+      }
+    ;
+	
+protected bindMyInterfaceCall returns [StringBuilder res = new StringBuilder()]
+@init{StringBuilder idx = null;}
+	: BIND_MY_INTERFACE ws1=ws '(' ws2=ws ID ws3=ws ( index ws4=ws {idx = $index.res;} ) ? 
+	  ',' ws5=ws sItf=macroParam ws6=ws ')'
+      {
+        if (idx == null)
+          $res.append("BIND_MY_INTERFACE").append($ws1.text).append("(")
+              .append($ws2.text).append($ID.text).append($ws3.text).append(",")
+              .append($ws5.text).append($sItf.res).append($ws6.text).append(")");
+        else
+          $res.append("BIND_MY_INTERFACE_COLLECTION").append($ws1.text).append("(")
+              .append($ws2.text).append($ID.text).append($ws3.text).append(",")
+              .append(idx).append($ws4.text).append(",")
+              .append($ws5.text).append($sItf.res).append($ws6.text).append(")");
+      }
+    ;
+	
+protected isBoundCall returns [StringBuilder res = new StringBuilder()]
+@init{StringBuilder idx = null;}
+	: IS_BOUND ws1=ws '(' ws2=ws ID ws3=ws ( index ws4=ws {idx = $index.res;} ) ? ')'
+      {
+        if (idx == null)
+          $res.append("IS_BOUND").append($ws1.text).append("(")
+              .append($ws2.text).append($ID.text).append($ws3.text).append(")");
+        else
+          $res.append("IS_BOUND_COLLECTION").append($ws1.text).append("(")
+              .append($ws2.text).append($ID.text).append($ws3.text).append(",")
+              .append(idx).append($ws4.text).append(")");
+      }
+    ;
 	
 protected paramsDef returns [StringBuilder res = new StringBuilder()]
 	: '(' ws1=ws ')'             { $res.append($ws1.text).append(" NO_PARAM_DECL "); }
@@ -425,7 +478,6 @@ protected params returns [StringBuilder res = new StringBuilder()]
     : '(' ws ')'       { $res = null; }
     | '(' inParams ')' 
       { 
-        $res = new StringBuilder();
         $res.append($inParams.res).append(" PARAMS_RPARENT ");
       }
     ;
@@ -435,6 +487,14 @@ protected inParams  returns [StringBuilder res = new StringBuilder()]
         '(' ip = inParams ')' { $res.append("(").append($ip.res).append(")"); }
         | expr                { $res.append($expr.res); }
         | e = ~('(' | ')')    { $res.append($e.text); }
+      )+
+    ;
+
+protected macroParam returns [StringBuilder res = new StringBuilder()]
+    : (
+        expr                     { $res.append($expr.res); }
+        | '(' inParams ')'       { $res.append("(").append($inParams.res).append(")"); }
+        | e = ~('(' | ')' | ',') { $res.append($e.text); }
       )+
     ;
 

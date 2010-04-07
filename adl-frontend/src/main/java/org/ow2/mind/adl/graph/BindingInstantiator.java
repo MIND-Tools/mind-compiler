@@ -112,6 +112,8 @@ public class BindingInstantiator extends AbstractInstantiator {
         assert desc != null;
         desc.binding = binding;
         desc.serverComponent = serverComponent;
+        desc.toInternalServer = Binding.THIS_COMPONENT.equals(binding
+            .getToComponent());
       }
     }
 
@@ -144,5 +146,6 @@ public class BindingInstantiator extends AbstractInstantiator {
   public static class BindingDescriptor {
     public Binding        binding;
     public ComponentGraph serverComponent;
+    public boolean        toInternalServer;
   }
 }
