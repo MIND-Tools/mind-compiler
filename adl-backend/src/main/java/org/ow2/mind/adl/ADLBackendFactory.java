@@ -22,16 +22,25 @@
 
 package org.ow2.mind.adl;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.antlr.stringtemplate.StringTemplateGroupLoader;
+import org.objectweb.fractal.adl.ADLException;
+import org.objectweb.fractal.adl.Definition;
+import org.objectweb.fractal.api.NoSuchInterfaceException;
+import org.objectweb.fractal.api.control.BindingController;
+import org.objectweb.fractal.api.control.IllegalBindingException;
+import org.objectweb.fractal.api.control.IllegalLifeCycleException;
 import org.ow2.mind.BasicInputResourceLocator;
 import org.ow2.mind.InputResourceLocator;
+import org.ow2.mind.VoidVisitor;
+import org.ow2.mind.adl.DefinitionVisitorExtensionHelper.VisitorExtension;
 import org.ow2.mind.adl.factory.FactoryGraphCompiler;
-import org.ow2.mind.adl.generic.GenericDefinitionNameSourceGenerator;
-import org.ow2.mind.adl.idl.IDLDefinitionSourceGenerator;
 import org.ow2.mind.adl.implementation.BasicImplementationLocator;
 import org.ow2.mind.adl.implementation.ImplementationLocator;
 import org.ow2.mind.adl.interfaces.CollectionInterfaceDefinitionSourceGenerator;
-import org.ow2.mind.adl.membrane.MembraneSourceGenerator;
 import org.ow2.mind.compilation.BasicCompilationCommandExecutor;
 import org.ow2.mind.compilation.CompilationCommandExecutor;
 import org.ow2.mind.compilation.CompilerWrapper;
@@ -42,21 +51,38 @@ import org.ow2.mind.idl.IDLLoaderChainFactory;
 import org.ow2.mind.idl.IDLVisitor;
 import org.ow2.mind.io.BasicOutputFileLocator;
 import org.ow2.mind.io.OutputFileLocator;
+import org.ow2.mind.plugin.BasicPluginManager;
+import org.ow2.mind.plugin.PluginManager;
 import org.ow2.mind.preproc.BasicMPPWrapper;
 import org.ow2.mind.preproc.MPPWrapper;
 import org.ow2.mind.st.BasicASTTransformer;
 import org.ow2.mind.st.STLoaderFactory;
 import org.ow2.mind.st.STNodeFactoryImpl;
 import org.ow2.mind.st.StringTemplateASTTransformer;
+import org.ow2.mind.st.StringTemplateComponentLoader;
 
 public final class ADLBackendFactory {
+
   private ADLBackendFactory() {
   }
 
-  public static final DefinitionSourceGenerator newDefinitionSourceGenerator() {
+  // ///////////////////////////////////////////////////////////
+  // Services that can be used by visitor plugins //
+  // //////////////////////////////////////////////////////////
+  public static final String INPUT_RESOURCE_LOCATOR_ITF_NAME = InputResourceLocator.ITF_NAME;
+  public static final String OUTPUT_FILE_LOCATOR_ITF_NAME    = OutputFileLocator.ITF_NAME;
+  public static final String IDL_LOADER_ITF_NAME             = IDLLoader.ITF_NAME;
+  public static final String IDL_COMPILER_ITF_NAME           = "idl-compiler";
+  public static final String TEMPLATE_GROUP_LOADER_ITF_NAME  = StringTemplateComponentLoader.ITF_NAME;
+
+  public static final DefinitionSourceGenerator newDefinitionSourceGenerator(
+      final Map<Object, Object> context) throws ADLException {
     final IDLLoader idlLoader = IDLLoaderChainFactory.newLoader();
     final BasicInputResourceLocator inputResourceLocator = new BasicInputResourceLocator();
     final BasicOutputFileLocator outputFileLocator = new BasicOutputFileLocator();
+    final BasicPluginManager pluginManager = new BasicPluginManager();
+    final STNodeFactoryImpl nodeFactory = new STNodeFactoryImpl();
+    pluginManager.nodeFactoryItf = nodeFactory;
 
     final BasicASTTransformer astTransformer = new BasicASTTransformer();
     astTransformer.nodeFactoryItf = new STNodeFactoryImpl();
@@ -66,7 +92,8 @@ public final class ADLBackendFactory {
         inputResourceLocator, outputFileLocator, astTransformer, stcLoader);
 
     return newDefinitionSourceGenerator(inputResourceLocator,
-        outputFileLocator, idlLoader, idlCompiler, astTransformer, stcLoader);
+        outputFileLocator, idlLoader, idlCompiler, astTransformer, stcLoader,
+        pluginManager, context);
   }
 
   public static final DefinitionSourceGenerator newDefinitionSourceGenerator(
@@ -74,65 +101,58 @@ public final class ADLBackendFactory {
       final OutputFileLocator outputFileLocator, final IDLLoader idlLoader,
       final IDLVisitor idlCompiler,
       final StringTemplateASTTransformer astTransformer,
-      final StringTemplateGroupLoader stcLoader) {
+      final StringTemplateGroupLoader templateGroupLoader,
+      final PluginManager pluginManagerItf, final Map<Object, Object> context)
+      throws ADLException {
+
+    final Map<String, Object> serviceMap = new HashMap<String, Object>();
+    serviceMap.put(INPUT_RESOURCE_LOCATOR_ITF_NAME, inputResourceLocator);
+    serviceMap.put(OUTPUT_FILE_LOCATOR_ITF_NAME, outputFileLocator);
+    serviceMap.put(IDL_LOADER_ITF_NAME, idlLoader);
+    serviceMap.put(IDL_COMPILER_ITF_NAME, idlCompiler);
+    serviceMap.put(TEMPLATE_GROUP_LOADER_ITF_NAME, templateGroupLoader);
 
     DefinitionSourceGenerator definitionSourceGenerator;
     final CollectionInterfaceDefinitionSourceGenerator cidsg = new CollectionInterfaceDefinitionSourceGenerator();
     final DefinitionSourceGeneratorDispatcher dsgd = new DefinitionSourceGeneratorDispatcher();
-    final DefinitionHeaderSourceGenerator dhsg = new DefinitionHeaderSourceGenerator();
-    final DefinitionIncSourceGenerator disg = new DefinitionIncSourceGenerator();
-    final ImplementationHeaderSourceGenerator ihsg = new ImplementationHeaderSourceGenerator();
-    final DefinitionMacroSourceGenerator dmsg = new DefinitionMacroSourceGenerator();
-    final MembraneSourceGenerator msg = new MembraneSourceGenerator();
-    final IDLDefinitionSourceGenerator idsg = new IDLDefinitionSourceGenerator();
-    final GenericDefinitionNameSourceGenerator gdnsg = new GenericDefinitionNameSourceGenerator();
-    final BinaryADLWriter baw = new BinaryADLWriter();
 
     definitionSourceGenerator = cidsg;
     cidsg.clientSourceGeneratorItf = dsgd;
-    dsgd.visitorsItf.put("header", dhsg);
-    dsgd.visitorsItf.put("include", disg);
-    dsgd.visitorsItf.put("impl", ihsg);
-    dsgd.visitorsItf.put("macro", dmsg);
-    dsgd.visitorsItf.put("membrane", msg);
-    dsgd.visitorsItf.put("idl", idsg);
-    dsgd.visitorsItf.put("generic-names", gdnsg);
-    dsgd.visitorsItf.put("binary-writer", baw);
 
-    dhsg.inputResourceLocatorItf = inputResourceLocator;
-    disg.inputResourceLocatorItf = inputResourceLocator;
-    ihsg.inputResourceLocatorItf = inputResourceLocator;
-    dmsg.inputResourceLocatorItf = inputResourceLocator;
-    msg.inputResourceLocatorItf = inputResourceLocator;
-    baw.inputResourceLocatorItf = inputResourceLocator;
-
-    dhsg.outputFileLocatorItf = outputFileLocator;
-    disg.outputFileLocatorItf = outputFileLocator;
-    ihsg.outputFileLocatorItf = outputFileLocator;
-    dmsg.outputFileLocatorItf = outputFileLocator;
-    msg.outputFileLocatorItf = outputFileLocator;
-    gdnsg.outputFileLocatorItf = outputFileLocator;
-    baw.outputFileLocatorItf = outputFileLocator;
-
-    disg.idlLoaderItf = idlLoader;
-    msg.idlLoaderItf = idlLoader;
-
-    idsg.idlLoaderItf = idlLoader;
-    idsg.idlCompilerItf = idlCompiler;
-
-    dhsg.templateGroupLoaderItf = stcLoader;
-    disg.templateGroupLoaderItf = stcLoader;
-    dmsg.templateGroupLoaderItf = stcLoader;
-    msg.templateGroupLoaderItf = stcLoader;
+    final Collection<VisitorExtension> visitorExtensions = DefinitionVisitorExtensionHelper
+        .getVisitorExtensions(pluginManagerItf, context);
+    for (final VisitorExtension visitorExtension : visitorExtensions) {
+      final VoidVisitor<Definition> visitor = visitorExtension.getVisitor();
+      dsgd.visitorsItf.put(visitorExtension.getVisitorName(), visitor);
+      for (final String itfName : visitorExtension.getRequiredInterfaces()) {
+        try {
+          ((BindingController) visitor)
+              .bindFc(itfName, serviceMap.get(itfName));
+        } catch (final NoSuchInterfaceException e) {
+          // TODO Auto-generated catch block
+          e.printStackTrace();
+        } catch (final IllegalBindingException e) {
+          // TODO Auto-generated catch block
+          e.printStackTrace();
+        } catch (final IllegalLifeCycleException e) {
+          // TODO Auto-generated catch block
+          e.printStackTrace();
+        }
+      }
+    }
 
     return definitionSourceGenerator;
   }
 
-  public static DefinitionCompiler newDefinitionCompiler() {
+  public static DefinitionCompiler newDefinitionCompiler(
+      final Map<Object, Object> context) throws ADLException {
     final IDLLoader idlLoader = IDLLoaderChainFactory.newLoader();
     final BasicInputResourceLocator inputResourceLocator = new BasicInputResourceLocator();
     final BasicOutputFileLocator outputFileLocator = new BasicOutputFileLocator();
     final ImplementationLocator implementationLocator = new BasicImplementationLocator();
+    final BasicPluginManager pluginManager = new BasicPluginManager();
+    final STNodeFactoryImpl nodeFactory = new STNodeFactoryImpl();
+    pluginManager.nodeFactoryItf = nodeFactory;
 
     final BasicASTTransformer astTransformer = new BasicASTTransformer();
     astTransformer.nodeFactoryItf = new STNodeFactoryImpl();
@@ -143,7 +163,7 @@ public final class ADLBackendFactory {
         inputResourceLocator, outputFileLocator, astTransformer, stcLoader);
     final DefinitionSourceGenerator definitionSourceGenerator = newDefinitionSourceGenerator(
         inputResourceLocator, outputFileLocator, idlLoader, idlCompiler,
-        astTransformer, stcLoader);
+        astTransformer, stcLoader, pluginManager, context);
     final CompilerWrapper compilerWrapper = new GccCompilerWrapper();
     final MPPWrapper mppWrapper = new BasicMPPWrapper();
     return newDefinitionCompiler(definitionSourceGenerator,
@@ -218,11 +238,15 @@ public final class ADLBackendFactory {
     return graphCompiler;
   }
 
-  public static GraphCompiler newGraphCompiler() {
+  public static GraphCompiler newGraphCompiler(final Map<Object, Object> context)
+      throws ADLException {
     final IDLLoader idlLoader = IDLLoaderChainFactory.newLoader();
     final BasicInputResourceLocator inputResourceLocator = new BasicInputResourceLocator();
     final BasicOutputFileLocator outputFileLocator = new BasicOutputFileLocator();
     final ImplementationLocator implementationLocator = new BasicImplementationLocator();
+    final BasicPluginManager pluginManager = new BasicPluginManager();
+    final STNodeFactoryImpl nodeFactory = new STNodeFactoryImpl();
+    pluginManager.nodeFactoryItf = nodeFactory;
 
     final BasicASTTransformer astTransformer = new BasicASTTransformer();
     astTransformer.nodeFactoryItf = new STNodeFactoryImpl();
@@ -234,7 +258,7 @@ public final class ADLBackendFactory {
 
     final DefinitionSourceGenerator definitionSourceGenerator = newDefinitionSourceGenerator(
         inputResourceLocator, outputFileLocator, idlLoader, idlCompiler,
-        astTransformer, stcLoader);
+        astTransformer, stcLoader, pluginManager, context);
     final CompilerWrapper compilerWrapper = new GccCompilerWrapper();
     final MPPWrapper mppWrapper = new BasicMPPWrapper();
 

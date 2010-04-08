@@ -22,8 +22,6 @@
 
 package org.ow2.mind.adl;
 
-import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
-import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
 import static org.ow2.mind.PathHelper.fullyQualifiedNameToPath;
 import static org.ow2.mind.st.BackendFormatRenderer.toCPath;
 import static org.ow2.mind.st.BackendFormatRenderer.toUpperCName;
@@ -34,24 +32,14 @@ import java.io.IOException;
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.CompilerError;
 import org.objectweb.fractal.adl.Definition;
-import org.objectweb.fractal.api.NoSuchInterfaceException;
-import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.ow2.mind.SourceFileWriter;
 import org.ow2.mind.adl.ast.ImplementationContainer;
 import org.ow2.mind.adl.ast.Source;
 import org.ow2.mind.io.IOErrors;
-import org.ow2.mind.io.OutputFileLocator;
 
 public class ImplementationHeaderSourceGenerator
     extends
       AbstractSourceGenerator implements DefinitionSourceGenerator {
-
-  // ---------------------------------------------------------------------------
-  // Client Interfaces
-  // ---------------------------------------------------------------------------
-
-  /** Client interface used to locate output files. */
-  public OutputFileLocator outputFileLocatorItf;
 
   // ---------------------------------------------------------------------------
   // Constructor
@@ -143,51 +131,4 @@ public class ImplementationHeaderSourceGenerator
     return sb.toString();
   }
 
-  // ---------------------------------------------------------------------------
-  // Implementation of the BindingController interface
-  // ---------------------------------------------------------------------------
-
-  @Override
-  public void bindFc(final String itfName, final Object value)
-      throws NoSuchInterfaceException, IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(OutputFileLocator.ITF_NAME)) {
-      outputFileLocatorItf = (OutputFileLocator) value;
-    } else {
-      throw new NoSuchInterfaceException("There is no interface named '"
-          + itfName + "'");
-    }
-
-  }
-
-  @Override
-  public String[] listFc() {
-    return listFcHelper(OutputFileLocator.ITF_NAME);
-  }
-
-  @Override
-  public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
-    checkItfName(itfName);
-
-    if (itfName.equals(OutputFileLocator.ITF_NAME)) {
-      return outputFileLocatorItf;
-    } else {
-      throw new NoSuchInterfaceException("There is no interface named '"
-          + itfName + "'");
-    }
-  }
-
-  @Override
-  public void unbindFc(final String itfName) throws NoSuchInterfaceException,
-      IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(OutputFileLocator.ITF_NAME)) {
-      outputFileLocatorItf = null;
-    } else {
-      throw new NoSuchInterfaceException("There is no interface named '"
-          + itfName + "'");
-    }
-  }
 }

@@ -163,7 +163,8 @@ public class CompilerRunner {
             basicASTTransformer, stcLoader);
     final DefinitionSourceGenerator definitionSourceGenerator = ADLBackendFactory
         .newDefinitionSourceGenerator(inputResourceLocator, outputFileLocator,
-            idlLoader, idlCompiler, basicASTTransformer, stcLoader);
+            idlLoader, idlCompiler, basicASTTransformer, stcLoader,
+            pluginManager, context);
     definitionCompiler = ADLBackendFactory.newDefinitionCompiler(
         definitionSourceGenerator, implementationLocator, outputFileLocator,
         compilerWrapper, mppWrapper);

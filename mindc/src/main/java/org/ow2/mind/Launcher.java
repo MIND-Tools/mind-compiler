@@ -413,14 +413,20 @@ public class Launcher extends AbstractLauncher {
     }
 
     // initialize compiler
-    initCompiler(cmdLine, stNodeFactory, pluginManager);
+    try {
+      initCompiler(cmdLine, stNodeFactory, pluginManager, compilerContext);
+    } catch (final ADLException e) {
+      throw new CompilerInstantiationException(
+          "Cannot instantiate the compiler.", e, 101);
+    }
   }
 
   /**
    * @param cmdLine
    */
   protected void initCompiler(final CommandLine cmdLine,
-      final NodeFactory stNodeFactory, final PluginManager pluginManager) {
+      final NodeFactory stNodeFactory, final PluginManager pluginManager,
+      final Map<Object, Object> compilerContext) throws ADLException {
     // input locators
     final BasicInputResourceLocator inputResourceLocator = new BasicInputResourceLocator();
     final OutputBinaryIDLLocator obil = new OutputBinaryIDLLocator();
@@ -480,7 +486,7 @@ public class Launcher extends AbstractLauncher {
             basicASTTransformer, stcLoader);
     definitionSourceGenerator = ADLBackendFactory.newDefinitionSourceGenerator(
         inputResourceLocator, outputFileLocator, idlLoader, idlCompiler,
-        basicASTTransformer, stcLoader);
+        basicASTTransformer, stcLoader, pluginManager, compilerContext);
 
     definitionCompiler = ADLBackendFactory.newDefinitionCompiler(
         definitionSourceGenerator, implementationLocator, outputFileLocator,
