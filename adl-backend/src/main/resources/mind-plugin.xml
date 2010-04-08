@@ -1,4 +1,4 @@
 <plugin id="org.ow2.mind.adl" name="The plugin for ADL backend extensions">
 	<extension-point id="definition-source-generators"/>
-
+	<extension-point id="instance-source-generators"/>
 </plugin>

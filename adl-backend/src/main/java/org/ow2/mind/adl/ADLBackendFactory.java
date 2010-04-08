@@ -37,7 +37,7 @@ import org.objectweb.fractal.api.control.IllegalLifeCycleException;
 import org.ow2.mind.BasicInputResourceLocator;
 import org.ow2.mind.InputResourceLocator;
 import org.ow2.mind.VoidVisitor;
-import org.ow2.mind.adl.DefinitionVisitorExtensionHelper.VisitorExtension;
+import org.ow2.mind.adl.VisitorExtensionHelper.VisitorExtension;
 import org.ow2.mind.adl.factory.FactoryGraphCompiler;
 import org.ow2.mind.adl.generic.GenericDefinitionNameSourceGenerator;
 import org.ow2.mind.adl.idl.IDLDefinitionSourceGenerator;
@@ -151,10 +151,13 @@ public final class ADLBackendFactory {
     }
 
     // Instantiate and bind the visitor extensions
-    final Collection<VisitorExtension> visitorExtensions = DefinitionVisitorExtensionHelper
-        .getVisitorExtensions(pluginManagerItf, context);
+    final Collection<VisitorExtension> visitorExtensions = VisitorExtensionHelper
+        .getVisitorExtensions(
+            VisitorExtensionHelper.DEFINITION_SOURCE_GENERATOR_EXTENSION,
+            pluginManagerItf, context);
     for (final VisitorExtension visitorExtension : visitorExtensions) {
-      final VoidVisitor<Definition> visitor = visitorExtension.getVisitor();
+      final VoidVisitor<Definition> visitor = (VoidVisitor<Definition>) visitorExtension
+          .getVisitor();
       dsgd.visitorsItf.put(visitorExtension.getVisitorName(), visitor);
       for (final String itfName : ((BindingController) visitor).listFc()) {
         bindVisitor(serviceMap, visitorExtension.getVisitorName(), visitor,
@@ -216,17 +219,39 @@ public final class ADLBackendFactory {
       final OutputFileLocator outputFileLocator,
       final CompilerWrapper compilerWrapper, final MPPWrapper mppWrapper,
       final DefinitionCompiler definitionCompiler,
-      final StringTemplateGroupLoader stcLoader) {
+      final StringTemplateGroupLoader templateGroupLoader,
+      final PluginManager pluginManagerItf, final Map<Object, Object> context)
+      throws ADLException {
+
+    final Map<String, Object> serviceMap = new HashMap<String, Object>();
+    serviceMap.put(INPUT_RESOURCE_LOCATOR_ITF_NAME, inputResourceLocator);
+    serviceMap.put(OUTPUT_FILE_LOCATOR_ITF_NAME, outputFileLocator);
+    serviceMap.put(TEMPLATE_GROUP_LOADER_ITF_NAME, templateGroupLoader);
+    serviceMap.put("compiler-wrapper", compilerWrapper);
+    serviceMap.put("mpp-wrapper", mppWrapper);
+    serviceMap.put("definition-compiler", definitionCompiler);
 
     // Instance source generator
-    InstanceSourceGenerator instanceSourceGenerator;
-    final BasicInstanceSourceGenerator bisg = new BasicInstanceSourceGenerator();
+    InstanceSourceGenerator instanceSourceGenerator = null;
+    // Check if there is an extension overriding the default one
+    for (final VisitorExtension visitorExtension : VisitorExtensionHelper
+        .getVisitorExtensions(VisitorExtensionHelper.INSTANCE_SOURCE_GENERATOR,
+            pluginManagerItf, context)) {
+      if (visitorExtension.getVisitorName().equals("instance")) {
+        instanceSourceGenerator = (InstanceSourceGenerator) visitorExtension
+            .getVisitor();
+      }
+    }
+    // If the instance-source-generator is not overriden,
+    // then use the default one.
+    if (instanceSourceGenerator == null) {
+      instanceSourceGenerator = new BasicInstanceSourceGenerator();
+    }
 
-    instanceSourceGenerator = bisg;
-    bisg.inputResourceLocatorItf = inputResourceLocator;
-    bisg.outputFileLocatorItf = outputFileLocator;
-
-    bisg.templateGroupLoaderItf = stcLoader;
+    for (final String itfName : ((BindingController) instanceSourceGenerator)
+        .listFc()) {
+      bindVisitor(serviceMap, "instance", instanceSourceGenerator, itfName);
+    }
 
     // Instance compiler
     InstanceCompiler instanceCompiler;
@@ -289,7 +314,7 @@ public final class ADLBackendFactory {
 
     return newGraphCompiler(inputResourceLocator, implementationLocator,
         outputFileLocator, compilerWrapper, mppWrapper, definitionCompiler,
-        stcLoader);
+        stcLoader, pluginManager, context);
   }
 
   public static CompilationCommandExecutor newCompilationCommandExecutor() {
@@ -297,7 +322,7 @@ public final class ADLBackendFactory {
   }
 
   private static void bindVisitor(final Map<String, Object> serviceMap,
-      final String visitorName, final VoidVisitor<Definition> visitor,
+      final String visitorName, final VoidVisitor<?> visitor,
       final String itfName) throws ADLException {
     try {
       ((BindingController) visitor).bindFc(itfName, serviceMap.get(itfName));

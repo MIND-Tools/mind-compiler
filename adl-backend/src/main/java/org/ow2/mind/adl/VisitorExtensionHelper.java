@@ -24,6 +24,7 @@ package org.ow2.mind.adl;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.objectweb.fractal.adl.ADLException;
@@ -36,42 +37,47 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-public final class DefinitionVisitorExtensionHelper {
-  private DefinitionVisitorExtensionHelper() {
-  }
+public class VisitorExtensionHelper {
 
-  public static final String                    DEFINITION_VISITOR_EXTENSION = "org.ow2.mind.adl.definition-source-generators";
+  public static final String                                 DEFINITION_SOURCE_GENERATOR_EXTENSION = "org.ow2.mind.adl.definition-source-generators";
+  public static final String                                 INSTANCE_SOURCE_GENERATOR             = "org.ow2.mind.adl.instance-source-generators";
 
-  protected static Collection<VisitorExtension> visitorExtensions            = null;
+  public static final String[]                               extensionPoints                       = {
+      DEFINITION_SOURCE_GENERATOR_EXTENSION, INSTANCE_SOURCE_GENERATOR                             };
+
+  protected static Map<String, Collection<VisitorExtension>> visitorExtensions                     = null;
 
   public static Collection<VisitorExtension> getVisitorExtensions(
-      final PluginManager pluginManagerItf, final Map<Object, Object> context)
-      throws ADLException {
+      final String extensionPoint, final PluginManager pluginManagerItf,
+      final Map<Object, Object> context) throws ADLException {
     if (visitorExtensions == null) {
       initVisitorExtensions(pluginManagerItf, context);
     }
-    return visitorExtensions;
+    return visitorExtensions.get(extensionPoint);
   }
 
   protected static void initVisitorExtensions(
       final PluginManager pluginManagerItf, final Map<Object, Object> context)
       throws ADLException {
-    visitorExtensions = new ArrayList<VisitorExtension>();
-
-    final Collection<Extension> extensions = pluginManagerItf.getExtensions(
-        DEFINITION_VISITOR_EXTENSION, context);
-    for (final Extension extension : extensions) {
-      final VisitorExtension visitorExtension = new VisitorExtension();
-      visitorExtensions.add(visitorExtension);
-      final NodeList nodes = ((Element) extension
-          .astGetDecoration("xml-element")).getChildNodes();
-      for (int i = 0; i < nodes.getLength(); i++) {
-        final Node node = nodes.item(i);
-        if (node instanceof Element) {
-          final Element element = (Element) node;
-          if (element.getNodeName().equals("visitor")) {
-            visitorExtension.setVisitor(element.getAttribute("class"));
-            visitorExtension.setVisitorName(element.getAttribute("name"));
+    visitorExtensions = new HashMap<String, Collection<VisitorExtension>>();
+    for (final String extensionPoint : extensionPoints) {
+      final Collection<VisitorExtension> extPointExtensions = new ArrayList<VisitorExtension>();
+      visitorExtensions.put(extensionPoint, extPointExtensions);
+      final Collection<Extension> extensions = pluginManagerItf.getExtensions(
+          extensionPoint, context);
+      for (final Extension extension : extensions) {
+        final VisitorExtension visitorExtension = new VisitorExtension();
+        extPointExtensions.add(visitorExtension);
+        final NodeList nodes = ((Element) extension
+            .astGetDecoration("xml-element")).getChildNodes();
+        for (int i = 0; i < nodes.getLength(); i++) {
+          final Node node = nodes.item(i);
+          if (node instanceof Element) {
+            final Element element = (Element) node;
+            if (element.getNodeName().equals("visitor")) {
+              visitorExtension.setVisitor(element.getAttribute("class"));
+              visitorExtension.setVisitorName(element.getAttribute("name"));
+            }
           }
         }
       }
@@ -79,11 +85,10 @@ public final class DefinitionVisitorExtensionHelper {
   }
 
   protected static final class VisitorExtension {
-    private VoidVisitor<Definition>  visitor            = null;
-    private String                   visitorName        = null;
-    final private Collection<String> requiredInterfaces = new ArrayList<String>(); ;
+    private VoidVisitor<Definition> visitor     = null;
+    private String                  visitorName = null;
 
-    public VoidVisitor<Definition> getVisitor() {
+    public VoidVisitor<?> getVisitor() {
       return visitor;
     }
 
@@ -107,16 +112,8 @@ public final class DefinitionVisitorExtensionHelper {
       return visitorName;
     }
 
-    public Collection<String> getRequiredInterfaces() {
-      return requiredInterfaces;
-    }
-
     public void setVisitorName(final String visitorName) {
       this.visitorName = visitorName;
-    }
-
-    public void addRequiredInterface(final String itf) {
-      requiredInterfaces.add(itf);
     }
 
   }

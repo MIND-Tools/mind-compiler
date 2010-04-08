@@ -170,7 +170,7 @@ public class CompilerRunner {
         compilerWrapper, mppWrapper);
     graphCompiler = ADLBackendFactory.newGraphCompiler(inputResourceLocator,
         implementationLocator, outputFileLocator, compilerWrapper, mppWrapper,
-        definitionCompiler, stcLoader);
+        definitionCompiler, stcLoader, pluginManager, context);
 
     // compilation executor
     executor = ADLBackendFactory.newCompilationCommandExecutor();
