@@ -1,5 +1,6 @@
 import boot.Bootstrap;
 
+@Singleton
 composite helloworld.HelloworldApplication {
   contains Bootstrap as bootstrap;
   contains Helloworld as app;

@@ -28,7 +28,7 @@ import java.util.Map;
 
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.Definition;
-import org.ow2.mind.adl.ast.ImplementationContainer;
+import org.ow2.mind.adl.ast.ASTHelper;
 
 public class InstanceNameInstantiator extends AbstractInstantiator {
 
@@ -48,8 +48,7 @@ public class InstanceNameInstantiator extends AbstractInstantiator {
     String instanceName = (String) graph.getDecoration("instance-name");
     if (instanceName == null) {
       final Definition def = graph.getDefinition();
-      if (def instanceof ImplementationContainer
-          && ((ImplementationContainer) def).getData() == null) {
+      if (ASTHelper.isSingleton(def)) {
         // component is a singleton
         instanceName = "__component_" + toValidName(def.getName())
             + "_singleton_instance";

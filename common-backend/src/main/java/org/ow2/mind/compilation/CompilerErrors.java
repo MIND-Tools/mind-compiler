@@ -35,13 +35,16 @@ public enum CompilerErrors implements ErrorTemplate {
       "command"),
 
   /** */
-  COMPILER_ERROR("Error while compiling the file \"%s\"", "filename"),
+  PREPROCESSOR_ERROR("Error while preprocessing the file \"%s\" : \n%s",
+      "filename", "ouput"),
 
   /** */
-  LINKER_ERROR("Error while linking the file \"%s\"", "filename"),
+  COMPILER_ERROR("Error while compiling the file \"%s\" : \n%s", "filename",
+      "ouput"),
 
   /** */
-  ARCHIVER_ERROR("Error while creating archive the file \"%s\"", "filename");
+  LINKER_ERROR("Error while linking the file \"%s\" : \n%s", "filename",
+      "ouput");
 
   /** The groupId of ErrorTemplates defined in this enumeration. */
   public static final String GROUP_ID = "CPI";

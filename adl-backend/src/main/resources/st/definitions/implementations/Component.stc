@@ -30,12 +30,12 @@ ComponentDefinition(definition, interfaceDefinitions) ::= <<
 // Server method declaration
 
 ServerMethodsDeclaration(definition, interfaceDefinitions) ::= <<
-// Start declaration of server methods
+/* Start declaration of server methods */
 <definition.interfaces:ServerMethodDecls(definition=definition, interfaceDefinitions=interfaceDefinitions, itf=it); separator="\n">
 <if (definition.astNodeTypes.("internalInterface"))>
 <definition.internalInterfaces:ServerMethodDecls(definition=definition, interfaceDefinitions=interfaceDefinitions, itf=it); separator="\n">
 <endif>
-// End declaration of server methods
+/* End declaration of server methods */
 >>
 
 ServerMethodDecls(definition, interfaceDefinitions, itf) ::= <<
@@ -49,12 +49,8 @@ ServerMethodDecls(definition, interfaceDefinitions, itf) ::= <<
 >>
 
 ServerMethodDecls1(definition, interfaceDefinitions, itf, index) ::= <<
-<if(definition.astNodeTypes.("source"))>
-<if(definition.data)>
-<interfaceDefinitions.(itf.signature).methods:MultiServerMethodDecl(definition=definition, itf=itf, index=index, method=it);separator="\n">
-<else>
+<if (definition.astDecorations.("is-singleton"))>
 <interfaceDefinitions.(itf.signature).methods:SingletonServerMethodDecl(definition=definition, itf=itf, index=index, method=it);separator="\n">
-<endif>
 <else>
 <interfaceDefinitions.(itf.signature).methods:MultiServerMethodDecl(definition=definition, itf=itf, index=index, method=it);separator="\n">
 <endif>

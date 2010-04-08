@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.ow2.mind</groupId>
         <artifactId>mind-compiler</artifactId>
-        <version>0.2-alpha-1-SNAPSHOT</version>
+        <version>0.2-alpha-2-SNAPSHOT</version>
     </parent>
 
     <artifactId>adl-backend</artifactId>
@@ -54,10 +54,36 @@
                     <systemPropertyVariables>
                         <default.file.level>FINEST</default.file.level>
                         <loggers.outfile>${project.build.testOutputDirectory}/test-log.txt</loggers.outfile>
+                        <mind.test.cflags>-g -Wall -Werror -Wredundant-decls
+                            -Wunreachable-code -Wstrict-prototypes
+                            -Wwrite-strings</mind.test.cflags>
                     </systemPropertyVariables>
                 </configuration>
             </plugin>
-
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>stdc89</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <groups>${test.groups}</groups>
+                            <systemPropertyVariables>
+                                <default.file.level>FINEST</default.file.level>
+                                <loggers.outfile>${project.build.testOutputDirectory}/test-log.txt</loggers.outfile>
+                                <mind.test.cflags>-g -std=c89
+                                    -D__MIND_STRICT_C89 -Wall -Werror
+                                    -Wredundant-decls -Wunreachable-code
+                                    -Wstrict-prototypes -Wwrite-strings</mind.test.cflags>
+                            </systemPropertyVariables>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

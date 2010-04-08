@@ -18,9 +18,9 @@ ControllerDataFactoryDestroy(definition, controller) ::= ""
 
 ControllerImplementation(definition, controller, interfaceDefinitions) ::= <<
 
-// --------------------------------------------------------------------------
-// Implementation of the Component controller interface
-// --------------------------------------------------------------------------
+/* -----------------------------------------------------------------------------
+   Implementation of the Component controller interface
+----------------------------------------------------------------------------- */
 
 #include "fractal/internal/CIdelegate.h"
 
@@ -33,6 +33,8 @@ ControllerImplementation(definition, controller, interfaceDefinitions) ::= <<
 <listFcInterfaces(definition=definition)>
 
 <getFcInterfaceRole(definition=definition)>
+
+<getFcInterfaceSignature(definition=definition)>
 
 >>
 
@@ -54,14 +56,14 @@ static struct {
 
 initInterfaceDescriptor(definition, itf) ::= <<
 <if (isClient.(itf.role))>
-__COMPONENT_INIT_CLIENT_INTERFACE_DESCRIPTOR(<ComponentTypeName(definitionName=definition.name)>, <itf.name>)
+__COMPONENT_INIT_CLIENT_INTERFACE_DESCRIPTOR(<ComponentTypeName(definitionName=definition.name)>, <itf.name>, "<itf.signature>")
 <else>
-__COMPONENT_INIT_SERVER_INTERFACE_DESCRIPTOR(<ComponentTypeName(definitionName=definition.name)>, <itf.name>)
+__COMPONENT_INIT_SERVER_INTERFACE_DESCRIPTOR(<ComponentTypeName(definitionName=definition.name)>, <itf.name>, "<itf.signature>")
 <endif>
 >>
 
 getFcInterface(definition) ::= <<
-int METH(component, getFcInterface)(const char *interfaceName,
+int METH(component, getFcInterface)(__MIND_STRING_TYPEDEF interfaceName,
     void** interfaceReference) 
 {
   return __component_getFcInterface_delegate(interfaceName, interfaceReference,
@@ -80,7 +82,7 @@ int METH(component, getFcInterfaces)(void* interfaceReferences[])
 >>
 
 listFcInterfaces(definition) ::= <<
-int METH(component, listFcInterfaces)(const char* interfaceNames[]) 
+int METH(component, listFcInterfaces)(__MIND_STRING_TYPEDEF interfaceNames[]) 
 {
   return __component_listFcInterfaces_delegate(interfaceNames,
       <itfDescPointer(definition=definition)>);
@@ -88,29 +90,35 @@ int METH(component, listFcInterfaces)(const char* interfaceNames[])
 >>
 
 getFcInterfaceRole(definition) ::= <<
-int METH(component, getFcInterfaceRole)(const char* interfaceName) 
+int METH(component, getFcInterfaceRole)(__MIND_STRING_TYPEDEF interfaceName) 
 {
   return __component_getFcInterfaceRole_delegate(interfaceName,
       <itfDescPointer(definition=definition)>);
 }
 >>
 
+getFcInterfaceSignature(definition) ::= <<
+int METH(component, getFcInterfaceSignature)(__MIND_STRING_TYPEDEF interfaceName,
+  const char **signature) 
+{
+  return __component_getFcInterfaceSignature_delegate(interfaceName, signature,
+      <itfDescPointer(definition=definition)>);
+}
+>>
+
 
 itfDescPointer(definition) ::= <<
-((struct __component_InterfaceDescriptors *) &__component_<definition.name;format="toCName">_interface_descriptor)
+((void *) &__component_<definition.name;format="toCName">_interface_descriptor)
 >>
 
 componentPointer(definition) ::= <<
-<if (definition.astNodeTypes.("data"))>
-<if (definition.data)>
-CONTEXT_PTR_ACCESS
-<else>
+<if (definition.astDecorations.("is-singleton"))>
 (&__component_<definition.name;format="toCName">_singleton_instance)
-<endif>
 <else>
 CONTEXT_PTR_ACCESS
 <endif>
 >>
+
 
 }$$
 }

@@ -42,6 +42,27 @@ public final class ExecutionHelper {
   private ExecutionHelper() {
   }
 
+  public static class ExecutionResult {
+    final int    rValue;
+    final String output;
+
+    protected ExecutionResult(final int rValue, final StringBuilder output) {
+      this.rValue = rValue;
+      if (output.length() == 0)
+        this.output = null;
+      else
+        this.output = output.toString();
+    }
+
+    public int getExitValue() {
+      return rValue;
+    }
+
+    public String getOutput() {
+      return output;
+    }
+  }
+
   // The io logger
   protected static Logger logger = FractalADLLogManager.getLogger("io");
 
@@ -49,18 +70,19 @@ public final class ExecutionHelper {
    * Executes the given command line and returns the exit value. The given
    * command is splited on space character boundary (this method is equivalent
    * to <code>exec(execTitle, command.split("\\s"))</code>)<br>
-   * Note that the {@link #exec(String, List<String>)} method is safer since it
-   * while not split command line on space character boundary which may produce
-   * unexpected result if arguments may contains spaces.
+   * Note that the {@link #exec(String, List)} method is safer since it while
+   * not split command line on space character boundary which may produce
+   * unexpected result if arguments contains spaces.
    * 
    * @param command the command to execute.
-   * @return the exit value
+   * @return if its exit value is zero, return null, otherwise returns a string
+   *         that contains the process output.
    * @throws ADLException If an error occurs while running the command.
    * @throws InterruptedException if the calling thread has been interrupted
    *           while waiting for the process to finish.
-   * @see #exec(String, List<String>)
+   * @see #exec(String, List)
    */
-  public static int exec(final String command) throws ADLException,
+  public static ExecutionResult exec(final String command) throws ADLException,
       InterruptedException {
     return exec(null, command);
   }
@@ -69,21 +91,22 @@ public final class ExecutionHelper {
    * Executes the given command line and returns the exit value. The given
    * command is splited on space character boundary, unless the space is escaped
    * by a backslash.<br>
-   * Note that the {@link #exec(String, List<String>)} method is safer since it
-   * while not split command line on space character boundary which may produce
-   * unexpected result if arguments may contains spaces.
+   * Note that the {@link #exec(String, List)} method is safer since it while
+   * not split command line on space character boundary which may produce
+   * unexpected result if arguments contains spaces.
    * 
    * @param execTitle the message to be logged as a header of the execution. May
    *          be <code>null</code>.
    * @param command the command to execute.
-   * @return the exit value
+   * @return if its exit value is zero, return null, otherwise returns a string
+   *         that contains the process output.
    * @throws ADLException If an error occurs while running the command.
    * @throws InterruptedException if the calling thread has been interrupted
    *           while waiting for the process to finish.
-   * @see #exec(String, List<String>)
+   * @see #exec(String, List)
    */
-  public static int exec(final String execTitle, final String command)
-      throws ADLException, InterruptedException {
+  public static ExecutionResult exec(final String execTitle,
+      final String command) throws ADLException, InterruptedException {
     return exec(execTitle, DirectiveHelper.splitOptionString(command));
   }
 
@@ -92,29 +115,20 @@ public final class ExecutionHelper {
    * This method will issue some messages on the <code>io</code> logger. If the
    * {@link Level#FINE FINE} level is enabled, the full command line will be
    * logged. If the {@link Level#INFO INFO} level is enabled, the given
-   * <code>execTitle</code> will be logged. Finally, if the process produces
-   * output on its standard error stream. This output will be logged with the
-   * {@link Level#SEVERE SEVERE} level preceded by the <code>execTitle</code> if
-   * it has not been logged yet.
+   * <code>execTitle</code> will be logged.
    * 
    * @param execTitle the message to be logged as a header of the execution. May
    *          be <code>null</code>.
    * @param cmdList the command to execute.
-   * @return the exit value
+   * @return if its exit value is zero, return null, otherwise returns a string
+   *         that contains the process output.
    * @throws ADLException If an error occurs while running the command.
    * @throws InterruptedException if the calling thread has been interrupted
    *           while waiting for the process to finish.
    */
-  public static int exec(final String execTitle, final List<String> cmdList)
-      throws ADLException, InterruptedException {
-    final Process process;
-    try {
-      process = new ProcessBuilder(cmdList).redirectErrorStream(true).start();
-    } catch (final IOException e1) {
-      throw new ADLException(CompilerErrors.EXECUTION_ERROR, cmdList.get(0));
-    }
+  public static ExecutionResult exec(final String execTitle,
+      final List<String> cmdList) throws ADLException, InterruptedException {
     final boolean titleLogged;
-
     if (logger.isLoggable(Level.INFO) && execTitle != null) {
       logger.info(execTitle);
       titleLogged = true;
@@ -130,12 +144,20 @@ public final class ExecutionHelper {
       logger.fine(command);
     }
 
-    // Read output produced by process in a parallele thread in order to avoid
+    final Process process;
+    try {
+      process = new ProcessBuilder(cmdList).redirectErrorStream(true).start();
+    } catch (final IOException e1) {
+      throw new ADLException(CompilerErrors.EXECUTION_ERROR, cmdList.get(0));
+    }
+
+    final StringBuilder processOutput = new StringBuilder();
+    // Read output produced by process in a parallel thread in order to avoid
     // the process to block
     final Thread readerThread = new Thread() {
       @Override
       public void run() {
-        // output output and error stream on the logger.
+        // append output and error stream on the processOutput.
         final BufferedReader reader = new BufferedReader(new InputStreamReader(
             process.getInputStream()));
         try {
@@ -151,6 +173,7 @@ public final class ExecutionHelper {
             }
             do {
               logger.severe(line);
+              processOutput.append(line).append("\n");
               line = reader.readLine();
             } while (line != null);
           }
@@ -166,7 +189,7 @@ public final class ExecutionHelper {
     final int rValue = process.waitFor();
     readerThread.join();
 
-    return rValue;
+    return new ExecutionResult(rValue, processOutput);
   }
 
   /**
@@ -175,15 +198,16 @@ public final class ExecutionHelper {
    * @param execTitle the message to be logged as a header of the execution. May
    *          be <code>null</code>.
    * @param cmdArray the command to execute.
-   * @return the exit value
+   * @return if its exit value is zero, return null, otherwise returns a string
+   *         that contains the process output.
    * @throws ADLException If an error occurs while running the command.
    * @throws InterruptedException if the calling thread has been interrupted
    *           while waiting for the process to finish.
-   * @see #exec(String, List<String>)
+   * @see #exec(String, List)
    * @see Runtime#exec(String[])
    */
-  public static int exec(final String execTitle, final String[] cmdArray)
-      throws ADLException, InterruptedException {
+  public static ExecutionResult exec(final String execTitle,
+      final String[] cmdArray) throws ADLException, InterruptedException {
     return exec(execTitle, Arrays.asList(cmdArray));
   }
 }

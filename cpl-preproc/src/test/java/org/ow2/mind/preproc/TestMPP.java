@@ -37,6 +37,16 @@ public class TestMPP extends AbstractTestMPP {
   }
 
   @Test(groups = {"functional"})
+  public void testLineNumberSingleton() throws Exception {
+    compileSingleton("lineNumber", "lineNumber");
+  }
+
+  @Test(groups = {"functional"})
+  public void testLineNumberMulti() throws Exception {
+    compileMulti("lineNumber", "lineNumber");
+  }
+
+  @Test(groups = {"functional"})
   public void testAttributeSingleton() throws Exception {
     compileSingleton("attribute", "attribute");
   }

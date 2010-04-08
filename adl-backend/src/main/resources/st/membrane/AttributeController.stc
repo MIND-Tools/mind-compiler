@@ -18,9 +18,9 @@ ControllerDataFactoryDestroy(definition, controller) ::= ""
 
 ControllerImplementation(definition, controller, interfaceDefinitions) ::= <<
 
-// --------------------------------------------------------------------------
-// Implementation of the AttributeController interface
-// --------------------------------------------------------------------------
+/* -----------------------------------------------------------------------------
+   Implementation of the AttributeController interface
+----------------------------------------------------------------------------- */
 
 #include "fractal/internal/ACdelegate.h"
 
@@ -31,6 +31,8 @@ ControllerImplementation(definition, controller, interfaceDefinitions) ::= <<
 <getFcAttribute(definition=definition)>
 
 <getFcAttributeSize(definition=definition)>
+
+<getFcAttributeType(definition=definition)>
 
 <setFcAttribute(definition=definition)>
 
@@ -53,11 +55,11 @@ static struct {
 >>
 
 initAttributeDescriptor(definition, attribute) ::= <<
-__COMPONENT_INIT_ATTRIBUTE_DESCRIPTOR(<ComponentTypeName(definitionName=definition.name)>, <attribute.name>)
+__COMPONENT_INIT_ATTRIBUTE_DESCRIPTOR(<ComponentTypeName(definitionName=definition.name)>, <attribute.name>, <attribute.type;format="toUpper">_ATTR_TYPE)
 >>
 
 listFcAttributes(definition) ::= <<
-int METH(attributeController, listFcAttributes)(const char *attributeNames[]) 
+int METH(attributeController, listFcAttributes)(__MIND_STRING_TYPEDEF attributeNames[]) 
 {
   return __component_listFcAttributes_delegate(attributeNames,
       <attributeDescPointer(definition=definition)>);
@@ -65,7 +67,7 @@ int METH(attributeController, listFcAttributes)(const char *attributeNames[])
 >>
 
 getFcAttribute(definition) ::= <<
-int METH(attributeController, getFcAttribute)(const char *attributeName,
+int METH(attributeController, getFcAttribute)(__MIND_STRING_TYPEDEF attributeName,
     void **value) 
 {
   return __component_getFcAttribute_delegate(attributeName, value,
@@ -75,15 +77,24 @@ int METH(attributeController, getFcAttribute)(const char *attributeName,
 >>
 
 getFcAttributeSize(definition) ::= <<
-int METH(attributeController, getFcAttributeSize)(const char *attributeName) 
+int METH(attributeController, getFcAttributeSize)(__MIND_STRING_TYPEDEF attributeName) 
 {
   return __component_getFcAttributeSize_delegate(attributeName,
       <attributeDescPointer(definition=definition)>);
 }
 >>
 
+getFcAttributeType(definition) ::= <<
+int METH(attributeController, getFcAttributeType)(__MIND_STRING_TYPEDEF attributeName,
+  enum AttributeType *type) 
+{
+  return __component_getFcAttributeType_delegate(attributeName, type,
+      <attributeDescPointer(definition=definition)>);
+}
+>>
+
 setFcAttribute(definition) ::= <<
-int METH(attributeController, setFcAttribute)(const char *attributeName, 
+int METH(attributeController, setFcAttribute)(__MIND_STRING_TYPEDEF attributeName, 
     void *value) 
 {
   return __component_setFcAttribute_delegate(attributeName, value,
@@ -98,12 +109,8 @@ attributeDescPointer(definition) ::= <<
 >>
 
 componentPointer(definition) ::= <<
-<if (definition.astNodeTypes.("data"))>
-<if (definition.data)>
-CONTEXT_PTR_ACCESS
-<else>
+<if (definition.astDecorations.("is-singleton"))>
 (&__component_<definition.name;format="toCName">_singleton_instance)
-<endif>
 <else>
 CONTEXT_PTR_ACCESS
 <endif>

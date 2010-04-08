@@ -29,8 +29,6 @@ import org.objectweb.fractal.adl.Loader;
 import org.objectweb.fractal.adl.NodeFactory;
 import org.objectweb.fractal.adl.error.GenericErrors;
 import org.objectweb.fractal.adl.merger.NodeMerger;
-import org.objectweb.fractal.adl.merger.NodeMergerImpl;
-import org.objectweb.fractal.adl.xml.XMLNodeFactoryImpl;
 import org.objectweb.fractal.api.control.BindingController;
 import org.objectweb.fractal.cecilia.adl.plugin.JavaPluginManager;
 import org.objectweb.fractal.cecilia.adl.plugin.PluginManager;
@@ -38,9 +36,11 @@ import org.ow2.mind.BasicInputResourceLocator;
 import org.ow2.mind.adl.annotation.ADLLoaderPhase;
 import org.ow2.mind.adl.annotation.AnnotationLoader;
 import org.ow2.mind.adl.annotation.AnnotationProcessorLoader;
+import org.ow2.mind.adl.annotation.AnnotationProcessorTemplateInstantiator;
 import org.ow2.mind.adl.anonymous.AnonymousDefinitionExtractorImpl;
 import org.ow2.mind.adl.anonymous.AnonymousDefinitionLoader;
 import org.ow2.mind.adl.anonymous.ImportAnonymousDefinitionExtractor;
+import org.ow2.mind.adl.anonymous.InputResourceAnonymousDefinitionExtractor;
 import org.ow2.mind.adl.attribute.AttributeCheckerLoader;
 import org.ow2.mind.adl.attribute.AttributesNormalizerLoader;
 import org.ow2.mind.adl.binding.BasicBindingChecker;
@@ -57,6 +57,7 @@ import org.ow2.mind.adl.generic.ExtendsGenericDefinitionReferenceResolver;
 import org.ow2.mind.adl.generic.GenericAnonymousDefinitionExtractor;
 import org.ow2.mind.adl.generic.GenericDefinitionLoader;
 import org.ow2.mind.adl.generic.GenericDefinitionReferenceResolver;
+import org.ow2.mind.adl.generic.InputResourceTemplateInstantiator;
 import org.ow2.mind.adl.generic.NoAnySubComponentLoader;
 import org.ow2.mind.adl.generic.NoAnyTypeArgumentDefinitionReferenceResolver;
 import org.ow2.mind.adl.generic.TemplateInstanceLoader;
@@ -91,10 +92,10 @@ import org.ow2.mind.idl.IDLLoader;
 import org.ow2.mind.idl.IDLLoaderChainFactory;
 import org.ow2.mind.idl.IDLLocator;
 import org.ow2.mind.plugin.SimpleClassPluginFactory;
-import org.ow2.mind.st.BasicASTTransformer;
 import org.ow2.mind.st.STLoaderFactory;
 import org.ow2.mind.st.STNodeFactoryImpl;
-import org.ow2.mind.st.StringTemplateASTTransformer;
+import org.ow2.mind.st.STNodeMergerImpl;
+import org.ow2.mind.st.XMLSTNodeFactoryImpl;
 
 /**
  * This utility class can be used get an instance of the ADL Front-end.
@@ -163,9 +164,13 @@ public final class Factory {
 
     // node management components
     final STCFNodeMerger stcfNodeMerger = new STCFNodeMerger();
-    final XMLNodeFactoryImpl xmlNodeFactory = new XMLNodeFactoryImpl();
+    stcfNodeMerger.setClassLoader(Factory.class.getClassLoader());
+    final XMLSTNodeFactoryImpl xmlNodeFactory = new XMLSTNodeFactoryImpl();
+    // set my class loader as classloader used by XMLNodeFactory
+    xmlNodeFactory.setClassLoader(Factory.class.getClassLoader());
     final STNodeFactoryImpl nodeFactory = new STNodeFactoryImpl();
-    final NodeMergerImpl nodeMerger = new NodeMergerImpl();
+    final STNodeMergerImpl nodeMerger = new STNodeMergerImpl();
+    nodeMerger.setClassLoader(Factory.class.getClassLoader());
 
     // ADL Loader chain components
     Loader adlLoader;
@@ -192,14 +197,14 @@ public final class Factory {
     final AttributesNormalizerLoader attrnl = new AttributesNormalizerLoader();
     final AttributeCheckerLoader acl = new AttributeCheckerLoader();
     final AnnotationProcessorLoader apl4 = new AnnotationProcessorLoader();
-    final BinaryADLLoader bal = new BinaryADLLoader();
     final TemplateInstanceLoader gidl = new TemplateInstanceLoader();
+    final BinaryADLLoader bal = new BinaryADLLoader();
     final CacheLoader cl = new CacheLoader();
 
     adlLoader = cl;
-    cl.clientLoader = gidl;
-    gidl.clientLoader = bal;
-    bal.clientLoader = apl4;
+    cl.clientLoader = bal;
+    bal.clientLoader = gidl;
+    gidl.clientLoader = apl4;
     apl4.clientLoader = acl;
     acl.clientLoader = attrnl;
     attrnl.clientLoader = il;
@@ -324,24 +329,32 @@ public final class Factory {
 
     // template instantiator chain
     final TemplateInstantiatorImpl ti = new TemplateInstantiatorImpl();
+    final InputResourceTemplateInstantiator irti = new InputResourceTemplateInstantiator();
     final FactoryTemplateInstantiator fti = new FactoryTemplateInstantiator();
     final ParametricTemplateInstantiator pti = new ParametricTemplateInstantiator();
     final ParametricFactoryTemplateInstantiator pfti = new ParametricFactoryTemplateInstantiator();
+    final AnnotationProcessorTemplateInstantiator ati = new AnnotationProcessorTemplateInstantiator();
     final CachingTemplateInstantiator cti = new CachingTemplateInstantiator();
 
-    cti.clientInstantiatorItf = pfti;
+    cti.clientInstantiatorItf = ati;
+    ati.clientInstantiatorItf = pfti;
     pfti.clientInstantiatorItf = pti;
     pti.clientInstantiatorItf = fti;
-    fti.clientInstantiatorItf = ti;
+    fti.clientInstantiatorItf = irti;
+    irti.clientInstantiatorItf = ti;
 
     cti.definitionCacheItf = cl;
     cti.definitionReferenceResolverItf = cdrr;
+    ati.definitionReferenceResolverItf = cdrr;
+    ati.pluginManagerItf = pluginManager;
     pti.definitionReferenceResolverItf = cdrr;
     fti.definitionReferenceResolverItf = cdrr;
+    irti.definitionReferenceResolverItf = cdrr;
     ti.definitionReferenceResolverItf = cdrr;
     gidl.definitionReferenceResolverItf = cdrr;
 
     gdrr.templateInstantiatorItf = cti;
+    fti.loaderItf = adlLoader;
 
     pti.nodeFactoryItf = nodeFactory;
     pti.nodeMergerItf = nodeMerger;
@@ -353,10 +366,12 @@ public final class Factory {
     final ImportAnonymousDefinitionExtractor iadr = new ImportAnonymousDefinitionExtractor();
     final GenericAnonymousDefinitionExtractor gadr = new GenericAnonymousDefinitionExtractor();
     final ParametricAnonymousDefinitionExtractor padr = new ParametricAnonymousDefinitionExtractor();
+    final InputResourceAnonymousDefinitionExtractor iradr = new InputResourceAnonymousDefinitionExtractor();
 
     padr.clientExtractorItf = gadr;
     gadr.clientExtractorItf = iadr;
-    iadr.clientExtractorItf = adr;
+    iadr.clientExtractorItf = iradr;
+    iradr.clientExtractorItf = adr;
 
     adl.anonymousDefinitionExtractorItf = padr;
 
@@ -371,8 +386,6 @@ public final class Factory {
     padr.nodeFactoryItf = nodeFactory;
     padr.nodeMergerItf = nodeMerger;
 
-    final BasicASTTransformer bas = new BasicASTTransformer();
-    bas.nodeFactoryItf = nodeFactory;
     // configuration of plugin-manager
     try {
       ((BindingController) pluginManager).bindFc(NodeFactory.ITF_NAME,
@@ -389,8 +402,6 @@ public final class Factory {
       ((BindingController) pluginManager).bindFc(IDLLoader.ITF_NAME, idlLoader);
       ((BindingController) pluginManager).bindFc("template-loader",
           STLoaderFactory.newSTLoader());
-      ((BindingController) pluginManager).bindFc(
-          StringTemplateASTTransformer.ITF_NAME, bas);
     } catch (final Exception e) {
       throw new CompilerError(GenericErrors.INTERNAL_ERROR, e,
           "adl-frontend instantiation error");

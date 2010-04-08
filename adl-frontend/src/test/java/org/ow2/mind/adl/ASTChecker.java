@@ -23,6 +23,7 @@
 package org.ow2.mind.adl;
 
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertSame;
@@ -48,6 +49,7 @@ import org.objectweb.fractal.adl.interfaces.Interface;
 import org.objectweb.fractal.adl.interfaces.InterfaceContainer;
 import org.objectweb.fractal.adl.types.TypeInterface;
 import org.objectweb.fractal.adl.types.TypeInterfaceUtil;
+import org.ow2.mind.adl.ast.ASTHelper;
 import org.ow2.mind.adl.ast.Attribute;
 import org.ow2.mind.adl.ast.AttributeContainer;
 import org.ow2.mind.adl.ast.Component;
@@ -279,6 +281,22 @@ public class ASTChecker {
           names.length, ((AttributeContainer) def).getAttributes().length);
 
       return new AttributeCheckerIterator(list);
+    }
+
+    public DefinitionChecker isSingleton() {
+      assertTrue("Definition is not singleton", ASTHelper.isSingleton(def));
+      assertTrue("Definition does not contain the is-singleton decoration", def
+          .astGetDecoration(ASTHelper.SINGLETON_DECORATION_NAME) != null
+          && (Boolean) def
+              .astGetDecoration(ASTHelper.SINGLETON_DECORATION_NAME));
+      return this;
+    }
+
+    public DefinitionChecker isMultiton() {
+      assertFalse("Definition is singleton", ASTHelper.isSingleton(def));
+      assertTrue("Definition contains the is-singleton decoration", def
+          .astGetDecoration(ASTHelper.SINGLETON_DECORATION_NAME) == null);
+      return this;
     }
   }
 
@@ -564,10 +582,21 @@ public class ASTChecker {
       }
       assertNotNull("Component does not contains a definition reference",
           compDef);
-      assertEquals("Unexpected definition for component " + comp.getName(),
-          defName, compDef.getName());
+      if (defName != null)
+        assertEquals("Unexpected definition for component " + comp.getName(),
+            defName, compDef.getName());
 
       return new DefinitionChecker(compDef);
+    }
+
+    public ComponentChecker isAnInstanceOfSingleton() {
+      isAnInstanceOf(null).isSingleton();
+      return this;
+    }
+
+    public ComponentChecker isAnInstanceOfMultiton() {
+      isAnInstanceOf(null).isMultiton();
+      return this;
     }
 
     public FormalTypeParameterChecker referencesFormalTypeParameter(
@@ -607,6 +636,16 @@ public class ASTChecker {
 
     public ComponentCheckerIterator isAnInstanceOf(final String defName) {
       element.isAnInstanceOf(defName);
+      return this;
+    }
+
+    public ComponentCheckerIterator isAnInstanceOfSingleton() {
+      element.isAnInstanceOfSingleton();
+      return this;
+    }
+
+    public ComponentCheckerIterator isAnInstanceOfMultiton() {
+      element.isAnInstanceOfMultiton();
       return this;
     }
 

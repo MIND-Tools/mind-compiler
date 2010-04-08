@@ -1,0 +1,48 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.ow2.mind</groupId>
+		<artifactId>mind-compiler</artifactId>
+		<version>0.2-alpha-2-SNAPSHOT</version>
+	</parent>
+
+	<artifactId>fractal-adl-bundle</artifactId>
+	<packaging>bundle</packaging>
+	<name>org.ow2.mind.fractal-adl-bundle</name>
+	<build>
+		<finalName>${project.name}_${project.version}</finalName>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
+				<configuration>
+					<manifestLocation>META-INF</manifestLocation>
+					<instructions>
+						<Bundle-SymbolicName>${project.name};singleton:=true</Bundle-SymbolicName>
+						<Bundle-Name>${project.name}</Bundle-Name>
+						<Bundle-Description>${pom.description}</Bundle-Description>
+						<Private-Package>org.objectweb.fractal.adl*,org.objectweb.fractal.api*,
+							org.objectweb.fractal.util, org.objectweb.util.monolog.api,
+							com.wutka.dtd,
+							org.objectweb.fractal.task.core,org.objectweb.fractal.task.deployment.api,
+							org.objectweb.fractal.task.deployment.lib
+						</Private-Package>
+						<Import-Package>*</Import-Package>
+						<Export-Package>org.objectweb.fractal.adl*;version="2.6",
+							org.objectweb.fractal.api*;version="2.0.2"</Export-Package>
+						<_removeheaders>Bnd-LastModified, Include-Resource</_removeheaders>
+					</instructions>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+	<dependencies>
+		<dependency>
+			<groupId>org.objectweb.fractal.fractaladl</groupId>
+			<artifactId>fractal-adl</artifactId>
+		</dependency>
+	</dependencies>
+</project>

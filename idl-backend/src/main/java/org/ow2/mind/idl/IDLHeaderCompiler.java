@@ -29,11 +29,14 @@ import static org.ow2.mind.SourceFileWriter.writeToFile;
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.antlr.stringtemplate.StringTemplate;
 import org.antlr.stringtemplate.StringTemplateGroup;
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.CompilerError;
+import org.objectweb.fractal.adl.util.FractalADLLogManager;
 import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.ow2.mind.InputResourceLocator;
@@ -58,6 +61,9 @@ public class IDLHeaderCompiler extends AbstractStringTemplateProcessor
   protected static final String IDL2C_TEMPLATE_NAME = "st.interfaces.IDL2C";
   protected final static String IDT_FILE_EXT        = "idt.h";
   protected final static String ITF_FILE_EXT        = "itf.h";
+
+  protected static Logger       depLogger           = FractalADLLogManager
+                                                        .getLogger("dep");
 
   // ---------------------------------------------------------------------------
   // Client interfaces
@@ -97,8 +103,7 @@ public class IDLHeaderCompiler extends AbstractStringTemplateProcessor
 
     final File headerFile = outputFileLocatorItf.getCSourceOutputFile(
         headerFileName, context);
-    if (!inputResourceLocatorItf.isUpToDate(headerFile, InputResourcesHelper
-        .getInputResources(idl), context)) {
+    if (regenerate(headerFile, idl, context)) {
       final StringTemplate st = getInstanceOf("idlFile");
 
       st.setAttribute("idl", idl);
@@ -111,13 +116,47 @@ public class IDLHeaderCompiler extends AbstractStringTemplateProcessor
     }
   }
 
+  private boolean regenerate(final File outputFile, final IDL idl,
+      final Map<Object, Object> context) {
+    if (!outputFile.exists()) {
+      if (depLogger.isLoggable(Level.FINE)) {
+        depLogger.fine("Generated source file '" + outputFile
+            + "' does not exist, generate.");
+      }
+      return true;
+    }
+
+    if (!inputResourceLocatorItf.isUpToDate(outputFile, InputResourcesHelper
+        .getInputResources(idl), context)) {
+      if (depLogger.isLoggable(Level.FINE)) {
+        depLogger.fine("Generated source file '" + outputFile
+            + "' is out-of-date, regenerate.");
+      }
+      return true;
+    } else {
+      if (depLogger.isLoggable(Level.FINE)) {
+        depLogger.fine("Generated source file '" + outputFile
+            + "' is up-to-date, do not regenerate.");
+      }
+      return false;
+    }
+  }
+
   @Override
   protected void registerCustomRenderer(final StringTemplateGroup templateGroup) {
     templateGroup.registerRenderer(String.class, new BackendFormatRenderer() {
       @Override
       public String toString(final Object o, final String formatName) {
-        if (TO_C_PATH.equals(formatName) && o.toString().endsWith(".idt")) {
-          return toCPath(o.toString()) + ".h";
+        if ("toIncludePath".equals(formatName)) {
+          final String s = o.toString();
+          String path = s.substring(1, s.length() - 1);
+          if (path.endsWith(".idt")) {
+            path += ".h";
+          }
+          if (path.startsWith("/")) {
+            path = path.substring(1);
+          }
+          return s.substring(0, 1) + path + s.substring(s.length() - 1);
         } else {
           return super.toString(o, formatName);
         }

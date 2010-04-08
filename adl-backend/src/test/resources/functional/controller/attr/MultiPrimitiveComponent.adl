@@ -3,9 +3,9 @@
 @controller.AttributeController
 primitive controller.attr.MultiPrimitiveComponent extends ACTested {
   
-  nodata;
   source primitiveComponent.c;
 
   attribute int attr1=0;
   attribute int attr2=4;
+  attribute string attr3="toto";
 }

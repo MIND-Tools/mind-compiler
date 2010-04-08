@@ -1,6 +1,7 @@
 -- Use this file in branches to remember last merge from trunk --
 feb 5, 2010 -- 45 -- creation
 mar 10, 2010 -- svn merge -r45:142 ../../trunk
+mar 10, 2010 -- svn merge -r142:366 ../../trunk
 <DATE> -- svn merge -r<LAST_MERGE>:<CURRENT> ../../trunk
 -- do not commit this file on the trunk
 

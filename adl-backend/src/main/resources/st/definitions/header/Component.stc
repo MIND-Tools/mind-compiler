@@ -14,41 +14,43 @@ ComponentDefinitionHeader(definition) ::= <<
 #ifndef __COMPONENT_<definition.name;format="toUpperCName">_ADL_H
 #define __COMPONENT_<definition.name;format="toUpperCName">_ADL_H
 
-// Start including the interface descriptions 
+#include "mindcommon.h"
+
+/* Start including the interface descriptions */
 <definition.interfaces:{#include "<it.signature; format="nameToPath">.itf.h"}; separator="\n">
 <UsedInterfaceDefinitions(definition=definition)>
-// End including the interface descriptions 
+/* End including the interface descriptions */
 
 <if (definition.astNodeTypes.("component"))>
-// Start including the sub-component descriptions
+/* Start including the sub-component descriptions */
 <definition.components:{#include "<it.definitionReference.name;format="nameToPath">.adl.h"}; separator="\n">
-// End including the sub-component descriptions
+/* End including the sub-component descriptions */
 <endif>
 
 <ControllerGlobalDecls(definition=definition)>
 
-// Start definition of internal component data type
+/* Start definition of internal component data type */
 struct __component_<definition.name;format="toCName">_internal_data_t {
 <TypeStructures(definition=definition)>
 <SubComponentStructures(definition=definition)>
 <AttributeStructures(definition=definition)>
 <ControllerStructures(definition=definition)>
 };
-// End definition of internal component data type
+/* End definition of internal component data type */
 
-// Start definition of component type
+/* Start definition of component type */
 <ComponentTypeDef(definition=definition)> 
-// End  definition of component type
+/* End  definition of component type */
 
-// Start declaration of interface V-Tables.
+/* Start declaration of interface V-Tables. */
 <ComponentVTableDecl(definition=definition)>
-// End declaration of interface V-Tables.
+/* End declaration of interface V-Tables. */
 
-// Start declaration of factory macro
+/* Start declaration of factory macro */
 <FactoryDef(definition=definition)>
-// End declaration of factory macro
+/* End declaration of factory macro */
 
-#endif // __COMPONENT_<definition.name;format="toUpperCName">_ADL_H
+#endif /* __COMPONENT_<definition.name;format="toUpperCName">_ADL_H */
 
 >>
 
@@ -70,11 +72,11 @@ ControllerGlobalDecl(definition, ctrl) ::= <<
 // Used interface definitions
 
 UsedInterfaceDefinitions(definition) ::= <<
-<definition.astDecorations.("used-interface-definition").values:UsedInterfaceDefinition(usedItf=it.interfaceDefinition); separator="\n">
+<definition.astDecorations.("used-interface-definition").values:UsedInterfaceDefinition(usedItfName=it.interfaceName); separator="\n">
 >>
 
-UsedInterfaceDefinition(usedItf) ::= <<
-#include "<usedItf.name; format="nameToPath">.itf.h"
+UsedInterfaceDefinition(usedItfName) ::= <<
+#include "<usedItfName; format="nameToPath">.itf.h"
 >>
 
 // -----------------------------------------------------------------------------
@@ -95,8 +97,12 @@ TypeStructures(definition) ::= <<
 <endif>
 >>
 
-InterfaceDescriptorDecl(itf) ::= << 
+InterfaceDescriptorDecl(itf) ::= <<
+<if (isClient.(itf.role))>
+<InterfaceType(signature=itf.signature)> <itf.name><if (itf.numberOfElement)>[<itf.numberOfElement>]<endif>;
+<else>
 <InterfaceDescType(signature=itf.signature)> <itf.name><if (itf.numberOfElement)>[<itf.numberOfElement>]<endif>;
+<endif>
 >>
 
 SubComponentStructures(definition) ::= <<
@@ -156,6 +162,7 @@ ComponentTypeDef(definition) ::= <<
 #undef COMP_DATA
 #endif
 #define COMP_DATA struct __component_<definition.name;format="toCName">_internal_data_t __component_internal_data
+
 #ifdef PRIVATE_DATA_T
 #undef PRIVATE_DATA_T
 #endif
@@ -164,54 +171,59 @@ ComponentTypeDef(definition) ::= <<
 <if (definition.astNodeTypes.("data"))>
 <if (definition.data)>
 <if (definition.data.cCode)>
-// Start inlined data code
+/* Start inlined data code */
 <definition.data.astSource; format="sourceTo#line">
 <definition.data.cCode>
-// End inlined data code.
+/* End inlined data code. */
 <elseif (definition.data.path)>
-// Include data file
+/* Include data file */
 #include "<definition.data.path; format="toCPath">"
 <else>
-// No private data
+/* No private data */
 typedef struct {
   COMP_DATA;
 } PRIVATE_DATA_T;
 <endif>
 <else>
+/* No private data */
 typedef struct {
   COMP_DATA;
 } PRIVATE_DATA_T;
-// declaration of singleton instance as global variable.
+<endif>
+<else>
+/* No private data */
+typedef struct {
+  COMP_DATA;
+} PRIVATE_DATA_T;
+<endif>
+
+
+<if (definition.astDecorations.("is-singleton"))>
+/* declaration of singleton instance as global variable. */
 #define INSTANCE___component_<definition.name;format="toCName">_singleton_instance_DECLARED
 extern PRIVATE_DATA_T __component_<definition.name;format="toCName">_singleton_instance;
 <endif>
-<else>
-typedef struct {
-  COMP_DATA;
-} PRIVATE_DATA_T;
-<endif>
 
-
-#else // __COMPONENT_IN_<definition.name;format="toUpperCName">
+#else /* __COMPONENT_IN_<definition.name;format="toUpperCName"> */
 typedef struct {
   struct __component_<definition.name;format="toCName">_internal_data_t __component_internal_data;
 } <ComponentTypeName(definitionName=definition.name)>;
-#endif // __COMPONENT_IN_<definition.name;format="toUpperCName">
+#endif /* __COMPONENT_IN_<definition.name;format="toUpperCName"> */
 >>
 
 // -----------------------------------------------------------------------------
 // V-Table declaration
 
 ComponentVTableDecl(definition) ::= <<
-// Start declaration of server interface V-Tables.
+/* Start declaration of server interface V-Tables. */
 <definition.interfaces:ServerInterfaceVTableDecl(definition=definition, itf=it); separator="\n">
-// End declaration of server interface V-Tables.
+/* End declaration of server interface V-Tables. */
 
 <if (definition.astNodeTypes.("internalInterface"))>
 <if (definition.internalInterfaces)>
-// Start declaration of internal server interface V-Tables
+/* Start declaration of internal server interface V-Tables */
 <definition.internalInterfaces:ServerInterfaceVTableDecl(definition=definition, itf=it); separator="\n">
-// End declaration of internal server interface V-Tables
+/* End declaration of internal server interface V-Tables */
 <endif>
 <endif>
 >>
@@ -252,9 +264,9 @@ AddItfNames(definition) ::= <<
 AddItfName(itf) ::= <<
 <if (isClient.(itf.role))>
 <if (itf.numberOfElement)>
-<itf.astDecorations.("collectionIndexes"):{, <itf.name>_<it>_instance, <itf.name>_<it>_vTable}>
+<itf.astDecorations.("collectionIndexes"):{, <itf.name>_<it>_ptr, <itf.name>_<it>_instance, <itf.name>_<it>_vTable}>
 <else>
-, <itf.name>_instance, <itf.name>_vTable
+, <itf.name>_ptr, <itf.name>_instance, <itf.name>_vTable
 <endif>
 <endif>
 >>
@@ -288,17 +300,25 @@ InitializeInterface(definition, itf) ::= <<
 
 InitializeClientInterface(definition, itf) ::= <<
 <if (itf.numberOfElement)>
-{<itf.astDecorations.("collectionIndexes"):{ {<itf.name>_<it>_instance, <itf.name>_<it>_vTable}}; separator=", ">}
+{<itf.astDecorations.("collectionIndexes"):{ <itf.name>_<it>_ptr}; separator=", ">}
 <else>
-{<itf.name>_instance, <itf.name>_vTable}
+<itf.name>_ptr
 <endif>
 >>
 
 InitializeServerInterface(definition, itf) ::= <<
 <if (itf.numberOfElement)>
-{<itf.astDecorations.("collectionIndexes"):{ {&instance_name, &<vTableInstanceName(definition=definition,itf=itf, index=it)>}}; separator=", ">}
+{<itf.astDecorations.("collectionIndexes"):{ {&instance_name, &<vTableInstanceName(definition=definition,itf=itf, index=it)>, <isBoundValue(definition=definition, itf=itf, index=it)>}}; separator=", ">}
 <else>
-{&instance_name, &<vTableInstanceName(definition=definition,itf=itf)>}
+{&instance_name, &<vTableInstanceName(definition=definition,itf=itf)>, <isBoundValue(definition=definition, itf=itf)>}
+<endif>
+>>
+
+isBoundValue(definition, itf, index) ::= <<
+<if (itf.astDecorations.("delegated-interface"))>
+<itf.astDecorations.("delegated-interface").name><if (index)>_<index><endif>_ptr
+<else>
+&instance_name
 <endif>
 >>
 

@@ -27,13 +27,14 @@
 
 #include <stdint.h>
 
-/* Include ErrorCode.idt directly since it contains only pure C constructs. */
-#include "../api/ErrorCode.idt"
+#include "fractal/api/ErrorCode.idt.h"
+#include "fractal/api/BindingController.itf.h"
 
 struct __component_BindingDescriptor
 {
   const char *name;
   intptr_t offset;
+  intptr_t isBoundOffset;
 };
 
 struct __component_BindingDescriptors
@@ -43,7 +44,10 @@ struct __component_BindingDescriptors
 };
 
 #define __COMPONENT_INIT_BINDING_DESCRIPTOR(typeName, itfName) \
-  {#itfName, ((intptr_t) &(((typeName *) 0x0)->__component_internal_data.type.itfName))}
+  {#itfName, ((intptr_t) &(((typeName *) 0x0)->__component_internal_data.type.itfName)), 0}
+
+#define __COMPONENT_INIT_DELEGATE_BINDING_DESCRIPTOR(typeName, itfName, delegate_itfName) \
+  {#itfName, ((intptr_t) &(((typeName *) 0x0)->__component_internal_data.type.itfName)), ((intptr_t) &(((typeName *) 0x0)->__component_internal_data.inner_type.delegate_itfName.isBound))}
 
 int __component_listFc_delegate(const char *clientItfNames[],
     struct __component_BindingDescriptors *desc);

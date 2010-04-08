@@ -21,11 +21,11 @@ ComponentDefinition(definition, interfaceDefinitions) ::= <<
 <ComponentFactoryMethod(definition=definition)>
 
 <if (definition.astNodeTypes.("controller"))>
-// Start implementation of controllers
+/* Start implementation of controllers */
 
 <definition.controllers:ControllerImpl(definition=definition, controller=it, interfaceDefinitions=interfaceDefinitions)>
 
-// End implementation of controllers
+/* End implementation of controllers */
 <endif>
 
 <ServerInterfaceStubs(definition=definition, interfaceDefinitions=interfaceDefinitions)>
@@ -143,7 +143,7 @@ InitializeClientInterface(definition, itf, isInternal) ::= <<
 >>
 
 InitializeServerInterface(definition, itf, isInternal) ::= <<
-// initialization of <itf.name> <if (isInternal)>internal<else>external<endif> server interface
+/* initialization of <itf.name> <if (isInternal)>internal<else>external<endif> server interface */
 <if (itf.numberOfElement)>
 <itf.astDecorations.("collectionIndexes"):InitializeServerInterface1(definition=definition, itf=itf, index=it, isInternal=isInternal);separator="\n">
 <else>
@@ -183,7 +183,7 @@ InitializeComponents(definition) ::= <<
 >>
 
 InitializeComponent(definition, component) ::= <<
-  // initialization of <component.name> sub-component
+  /* initialization of <component.name> sub-component */
   err = __component_<component.definitionReference.name;format="toCName">_factory((void **) &(newInstance->__component_internal_data.components.<component.name>), allocItf);
   if (err != 0) goto error0;
 >>
@@ -195,11 +195,9 @@ InitializeBindings(definition) ::= <<
 >>
 
 InitializeBinding(definition, binding) ::= <<
-  // initialize binding from <binding.fromComponent>.<binding.fromInterface> to <binding.toComponent>.<binding.toInterface>
-  newInstance->__component_internal_data.<if (isThis.(binding.fromComponent))>inner_type<else>components.<binding.fromComponent>->__component_internal_data.type<endif>.<binding.fromInterface><if(binding.fromInterfaceNumber)>[<binding.fromInterfaceNumber>]<endif>.selfData = 
-    newInstance->__component_internal_data.<if (isThis.(binding.toComponent))>inner_type<else>components.<binding.toComponent>->__component_internal_data.type<endif>.<binding.toInterface><if(binding.toInterfaceNumber)>[<binding.toInterfaceNumber>]<endif>.selfData;
-  newInstance->__component_internal_data.<if (isThis.(binding.fromComponent))>inner_type<else>components.<binding.fromComponent>->__component_internal_data.type<endif>.<binding.fromInterface><if(binding.fromInterfaceNumber)>[<binding.fromInterfaceNumber>]<endif>.meths = 
-    newInstance->__component_internal_data.<if (isThis.(binding.toComponent))>inner_type<else>components.<binding.toComponent>->__component_internal_data.type<endif>.<binding.toInterface><if(binding.toInterfaceNumber)>[<binding.toInterfaceNumber>]<endif>.meths;
+  /* initialize binding from <binding.fromComponent>.<binding.fromInterface> to <binding.toComponent>.<binding.toInterface> */
+  newInstance->__component_internal_data.<if (isThis.(binding.fromComponent))>inner_type<else>components.<binding.fromComponent>->__component_internal_data.type<endif>.<binding.fromInterface><if(binding.fromInterfaceNumber)>[<binding.fromInterfaceNumber>]<endif> = 
+    & newInstance->__component_internal_data.<if (isThis.(binding.toComponent))>inner_type<else>components.<binding.toComponent>->__component_internal_data.type<endif>.<binding.toInterface><if(binding.toInterfaceNumber)>[<binding.toInterfaceNumber>]<endif>;
 >>
 
 InitializeControllersData(definition) ::= <<
@@ -224,7 +222,7 @@ DestroyComponents(definition) ::= <<
 >>
 
 DestroyComponent(definition, component) ::= <<
-  // destroy <component.name> sub-component
+  /* destroy <component.name> sub-component */
   err = __component_<component.definitionReference.name;format="toCName">_destroy(destroyInstance->__component_internal_data.components.<component.name>, allocItf);
   if (err != 0) goto error0;
 >>
@@ -245,11 +243,17 @@ DestroyControllerData(definition, controller) ::= <<
 // Server interface stubs
 
 ServerInterfaceStubs(definition, interfaceDefinitions) ::= <<
-<if (definition.astNodeTypes.("source"))>
-<if (!definition.data)>
-// Start definition of server stubs
+<if (definition.astDecorations.("is-singleton"))>
+/* Start definition of server stubs */
 <definition.interfaces:ServerInterfaceStub(definition=definition, interfaceDefinitions=interfaceDefinitions, itf=it); separator="\n">
-// End definition of server stubs
+/* End definition of server stubs */
+
+<if (definition.astNodeTypes.("internalInterface"))>
+<if (definition.internalInterfaces)>
+/* Start definition of internal server stubs */
+<definition.internalInterfaces:ServerInterfaceStub(definition=definition, interfaceDefinitions=interfaceDefinitions, itf=it); separator="\n">
+/* End definition of internal server stubs */
+<endif>
 <endif>
 <endif>
 >>
@@ -286,15 +290,15 @@ ServerMethodStub(definition, itf, index, method) ::= <<
 // V-Tables Initialization
 
 ComponentVTableInit(definition, interfaceDefinitions) ::= <<
-// Start initialization of server interface V-Tables.
+/* Start initialization of server interface V-Tables. */
 <definition.interfaces:ServerInterfaceVTableInit(definition=definition, interfaceDefinitions=interfaceDefinitions, itf=it); separator="\n">
-// End initialization of server interface V-Tables.
+/* End initialization of server interface V-Tables. */
 
 <if (definition.astNodeTypes.("internalInterface"))>
 <if (definition.internalInterfaces)>
-// Start initialization of internal server interface V-Tables
+/* Start initialization of internal server interface V-Tables */
 <definition.internalInterfaces:ServerInterfaceVTableInit(definition=definition, interfaceDefinitions=interfaceDefinitions, itf=it); separator="\n">
-// End initialization of internal server interface V-Tables
+/* End initialization of internal server interface V-Tables */
 <endif>
 <endif>
 
@@ -312,16 +316,11 @@ ServerInterfaceVTableInit(definition, interfaceDefinitions, itf) ::= <<
 
 ServerInterfaceVTableInit1(definition, interfaceDefinitions, itf, index) ::= <<
 <InterfaceVTableType(signature=itf.signature)> <vTableInstanceName(definition=definition, itf=itf, index=index)> = {
-<if(definition.astNodeTypes.("source"))>
-<if(definition.data)>
-  <interfaceDefinitions.(itf.signature).methods:VTableMethodInit(definition=definition, itf=itf, method=it, index=index);separator=",\n">
-<else>
+<if (definition.astDecorations.("is-singleton"))>
   <interfaceDefinitions.(itf.signature).methods:StubName(definition=definition, itfName=itf.name, index=index, methodName=it.name);separator=",\n">
-<endif>
 <else>
   <interfaceDefinitions.(itf.signature).methods:VTableMethodInit(definition=definition, itf=itf, method=it, index=index);separator=",\n">
 <endif>
-
 };
 >>
 

@@ -10,21 +10,27 @@ idlFile(idl) ::= <<
 #ifndef <idl.name;format="pathToUpperCName">_H
 #define <idl.name;format="pathToUpperCName">_H
 
-// This file is a generated file, do not edit.
+/* This file is a generated file, do not edit. */
+
+#include "mindcommon.h"
 
 <idl.includes:includeDirective(include=it); separator="\n">
 <idl.astDecorations.("referenced-interfaces").referencedInterfaces:includeReference(ref=it.IDL); separator="\n">
+
+<if (idl.astNodeTypes.("method"))>
+<idl.methods:{<if (vaArgsMap.(it.vaArgs))>#include \<stdarg.h> <endif>};separator="\n">
+<endif>
 
 <idl.types:{<(defTemplateMap.(it.astDecorations.kind))(it)>;}; separator="\n\n">
 
 <(defTemplateMap.(idl.astDecorations.kind))(idl)>
 
-#endif // <idl.name;format="pathToUpperCName">_H
+#endif /* <idl.name;format="pathToUpperCName">_H */
 
 >>
 
 includeDirective(include) ::= <<
-#include "<include.path;format="toCPath">"
+#include <include.path;format="toIncludePath">
 >>
 
 includeReference(ref) ::= <<
@@ -78,6 +84,35 @@ interfaceDef(itf) ::= <<
 <interfaceVTableDef(itf)>
 
 <interfaceTypeDef(itf)>
+
+#ifndef __COMPONENT_IS_BOUND_DEFINED
+#define __COMPONENT_IS_BOUND_DEFINED
+
+struct __component_generic_itf_desc {
+  void *selfData;
+  void *meth;
+  void *isBound;
+};
+
+__MIND_ATTRIBUTE_UNUSED
+static __MIND_INLINE int __component_is_bound(void *itfPtr) {
+  if (itfPtr == NULL) {
+    return 0;
+  }
+  while (((struct __component_generic_itf_desc *) itfPtr)->isBound != NULL
+     && ((struct __component_generic_itf_desc *) itfPtr)->isBound 
+        != ((struct __component_generic_itf_desc *) itfPtr)->selfData) {
+    itfPtr = ((struct __component_generic_itf_desc *) itfPtr)->isBound;
+  }
+  if (((struct __component_generic_itf_desc *) itfPtr)->isBound == NULL) {
+    return 0;
+  } else {
+    return 1;
+  }
+}
+
+#endif
+
 >>
 
 interfaceVTableDef(itf) ::= <<
@@ -90,16 +125,17 @@ interfaceTypeDef(itf) ::= <<
 struct __component_<itf.name; format="toCName">_itf_desc {
   void *selfData;
   struct __component_<itf.name; format="toCName">_vTable *meths;
+  void *isBound;
 };
 typedef struct __component_<itf.name; format="toCName">_itf_desc *<itf.name; format="toCName">;
 >>
 
 methodDef(method, methodName, withThisPtr) ::= <<
-<typeQualifier(qualifiers=method)><varDef(type=method.type, name=methodPrototype(name=methodName, parameters=method.parameters, withThisPtr=withThisPtr))>
+<typeQualifier(qualifiers=method)><varDef(type=method.type, name=methodPrototype(name=methodName, parameters=method.parameters, withThisPtr=withThisPtr, vaArgs=vaArgsMap.(method.vaArgs)))>
 >>
 
 methodPointerCast(method, withThisPtr) ::= <<
-(<varDef(type=method.type, name=methodPrototype(name="(*)", parameters=method.parameters, withThisPtr=withThisPtr))>)
+(<varDef(type=method.type, name=methodPrototype(name="(*)", parameters=method.parameters, withThisPtr=withThisPtr, vaArgs=vaArgsMap.(method.vaArgs)))>)
 >>
 
 
@@ -125,8 +161,20 @@ noParamVoid ::= [
   "false" : "void"
 ]
 
-methodPrototype(name, parameters, withThisPtr) ::= <<
-<name>(<thisPointerDef.(withThisPtr)>  <if(parameters)> <thisPointerComma.(withThisPtr)> <parameters:parameterDef(parameter=it); separator=", "> <else> <noParamVoid.(withThisPtr)> <endif>)
+vaArgsMap ::= [
+   "true" : "true",
+   default :
+]
+
+methodPrototype(name, parameters, withThisPtr, vaArgs) ::= <<
+<name>(<thisPointerDef.(withThisPtr)> <if(parameters)>
+<thisPointerComma.(withThisPtr)> <parameters:parameterDef(parameter=it); separator=", "> <if (vaArgs)>, ...<endif>
+<else> 
+<if (vaArgs)> <thisPointerComma.(withThisPtr)> ...
+<else>
+<noParamVoid.(withThisPtr)> 
+<endif>
+<endif>)
 >>
 
 parameterDef(parameter) ::= <<
@@ -199,7 +247,7 @@ varDefTemplateMap ::= [
 ]
 
 primitiveTypeNameMap ::= [
-  "string" : "char*"
+  "string" : "__MIND_STRING_TYPEDEF"
 ]
 
 typeQualifier(qualifiers) ::= <<

@@ -19,9 +19,9 @@ ControllerDataFactoryDestroy(definition, controller) ::= ""
 
 ControllerImplementation(definition, controller, interfaceDefinitions) ::= <<
 
-// --------------------------------------------------------------------------
-// Implementation of the Factory interface
-// --------------------------------------------------------------------------
+/* -------------------------------------------------------------------------- */
+/* Implementation of the Factory interface                                    */
+/* -------------------------------------------------------------------------- */
 
 <newFcInstance(definition=definition.astDecorations.("factory-definition").definition)>
 

@@ -25,6 +25,23 @@
 #include "ErrorCode.idt"
 
 /**
+ * Enumeration of the available attribute types.
+ */
+enum AttributeType {
+  INT_ATTR_TYPE,
+  STRING_ATTR_TYPE,
+  UINT8_ATTR_TYPE,
+  INT16_ATTR_TYPE,
+  UINT16_ATTR_TYPE,
+  INT32_ATTR_TYPE,
+  UINT32_ATTR_TYPE,
+  INT64_ATTR_TYPE,
+  UINT64_ATTR_TYPE,
+  INTPTR_ATTR_TYPE,
+  UINTPTR_ATTR_TYPE
+};
+
+/**
  * A component interface to control the attributes of the component to which it
  * belongs.
  */
@@ -43,7 +60,7 @@ interface fractal.api.AttributeController {
    *      {@link FRACTAL_API_OPERATION_NOT_SUPPORTED} if this operation is not
    *      supported.
    */
-  int listFcAttributes(in const string attributeNames[]);
+  int listFcAttributes(in string attributeNames[]);
 
   /**
    * Returns the value of an attribute.
@@ -53,7 +70,7 @@ interface fractal.api.AttributeController {
    * @return <code>0</code> if the operation succeed.
    *      {@link FRACTAL_API_NO_SUCH_ATTRIBUTE} if there is no such attribute.
    */
-  int getFcAttribute(in const string attributeName, out void *value);
+  int getFcAttribute(in string attributeName, out void *value);
 
   /**
    * Returns the size of an attribute (in byte).
@@ -62,7 +79,18 @@ interface fractal.api.AttributeController {
    * @return the size if the attribute or {@link FRACTAL_API_NO_SUCH_ATTRIBUTE}
    *       if there is no such attribute.
    */
-  int getFcAttributeSize(in const string attributeName);
+  int getFcAttributeSize(in string attributeName);
+
+  /**
+   * Returns the type of an attribute.
+   *
+   * @param attributeName the name of the attribute to return.
+   * @param type (out parameter) the type of the attribute.
+   * @return <code>0</code> if the operation succeed.
+   *      {@link FRACTAL_API_NO_SUCH_ATTRIBUTE} if there is no such attribute.
+   */
+  int getFcAttributeType(in string attributeName,
+      out enum AttributeType type);
 
   /**
    * Sets the value of an attribute.
@@ -75,5 +103,5 @@ interface fractal.api.AttributeController {
    *      {@link FRACTAL_API_OPERATION_NOT_SUPPORTED} if this operation is not
    *      supported.
    */
-  int setFcAttribute(in const string attributeName, in void *value);
+  int setFcAttribute(in string attributeName, in void *value);
 }

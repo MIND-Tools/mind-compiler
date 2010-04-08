@@ -144,7 +144,6 @@ TOKEN : {
 	<EXTENDS: "extends"> |
 	<IMPORT: "import"> |
 	<MANDATORY: "mandatory"> |
-	<NODATA: "nodata"> |
 	<NULL: "NULL" | "null"> |
 	<OPTIONAL: "optional"> |
 	<PRIMITIVE: "primitive"> |
@@ -342,7 +341,7 @@ void PrimitiveDefinitionElement() : {}
 {
   LOOKAHEAD( (Annotation())* (<PROVIDES>|<REQUIRES>) ) InterfaceDefinition()
   | LOOKAHEAD( (Annotation())* <ATTRIBUTE> ) AttributeDefinition()
-  | LOOKAHEAD( (Annotation())* (<DATA>|<NODATA>) ) DataDefinition()
+  | LOOKAHEAD( (Annotation())* <DATA> ) DataDefinition()
   | LOOKAHEAD( (Annotation())* <SOURCE> ) ImplementationDefinition()
 }
 
@@ -463,21 +462,8 @@ void AttributeValue() : {}
 void DataDefinition() : {}
 {
   Annotations()
-  (
-    DataFileDefinition()
-    | NoDataDefinition()
-  )
-  [ <SEMICOLON> ]
-}
-
-void DataFileDefinition() : {}
-{
   <DATA> ( Path() | <INLINED_CODE> )
-}
-
-void NoDataDefinition() : {}
-{
-  <NODATA>
+  [ <SEMICOLON> ]
 }
 
 /******************************************************************************/

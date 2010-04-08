@@ -38,11 +38,11 @@ interface fractal.api.Component {
    * @param interfaceReference (out parameter) the external interface of the
    *      component to which this interface belongs, whose name is equal to the
    *      given name.
-   * @return <code>0</code> if the interface exist and as been returned
+   * @return <code>0</code> if the interface exist and has been returned
    *      correctly or {@link FRACTAL_API_NO_SUCH_INTERFACE} if there is no such
    *      interface.
    */
-  int getFcInterface(in const string interfaceName, out void* interfaceReference);
+  int getFcInterface(in string interfaceName, out void* interfaceReference);
 
   /**
    * Returns the names of the external interfaces of the component to which this
@@ -58,7 +58,7 @@ interface fractal.api.Component {
    *      {@link FRACTAL_API_OPERATION_NOT_SUPPORTED} if this operation is not
    *      supported.
    */
-  int listFcInterfaces(in const string interfaceNames[]);
+  int listFcInterfaces(in string interfaceNames[]);
 
   /**
    * Returns the role of an external interface of the component to which this
@@ -70,7 +70,22 @@ interface fractal.api.Component {
    *      or {@link FRACTAL_API_NO_SUCH_INTERFACE} if there is no such
    *      interface.
    */
-  int getFcInterfaceRole(in const string interfaceName);
+  int getFcInterfaceRole(in string interfaceName);
+  
+  /**
+   * Returns the signature of an external interface of the component to which 
+   * this interface belongs.
+   *
+   * @param interfaceName the name of an external interface.
+   * @param signature (out parameter) the signature of the external interface of
+   *      the component to which this interface belongs, whose name is equal to
+   *      the given name.the signature of the external interface.
+   * @return <code>0</code> if the interface exist and its signature has been
+   *      returned correctly or {@link FRACTAL_API_NO_SUCH_INTERFACE} if there
+   *      is no such interface.
+   */
+  int getFcInterfaceSignature(in string interfaceName,
+      out string signature); 
 
   /**
    * Returns the external interfaces of the component to which this interface

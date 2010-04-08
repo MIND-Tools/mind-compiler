@@ -2,7 +2,9 @@
 composite controller.lcc.LCCTester<T conformsto LCCTested> 
     extends ApplicationType {
   
-  contains primitive as tester {
+  contains as tester
+  @Singleton 
+  primitive {
     provides Main as main;
     requires fractal.api.LifeCycleController as testedLCC;
     requires Main as testedMain;

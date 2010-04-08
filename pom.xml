@@ -10,7 +10,7 @@
     </parent>
 
     <artifactId>mind-compiler</artifactId>
-    <version>0.2-alpha-1-SNAPSHOT</version>
+    <version>0.2-alpha-2-SNAPSHOT</version>
     <name>Mind compiler</name>
     <packaging>pom</packaging>
 
@@ -40,6 +40,7 @@
         <module>cpl-preproc</module>
         <module>mindc</module>
         <module>fractal-runtime</module>
+        <module>fractal-adl-bundle</module>
     </modules>
 
     <developers>
@@ -71,7 +72,7 @@
             The version of the fractal-adl artifacts which this tool-set depends
             on
         -->
-        <fractaladl.dependencies.version>2.5-SNAPSHOT</fractaladl.dependencies.version>
+        <fractaladl.dependencies.version>2.6-SNAPSHOT</fractaladl.dependencies.version>
 
         <!-- By default run tests for groups "functional" and "checkin" -->
         <test.groups>functional, checkin</test.groups>

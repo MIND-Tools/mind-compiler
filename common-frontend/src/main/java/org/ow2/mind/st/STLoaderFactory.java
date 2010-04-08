@@ -24,7 +24,6 @@ package org.ow2.mind.st;
 
 import org.antlr.stringtemplate.StringTemplateGroupLoader;
 import org.objectweb.fractal.adl.xml.XMLNodeFactory;
-import org.objectweb.fractal.adl.xml.XMLNodeFactoryImpl;
 import org.ow2.mind.st.templates.parser.StringTemplateLoader;
 
 public final class STLoaderFactory {
@@ -34,7 +33,9 @@ public final class STLoaderFactory {
   public static StringTemplateGroupLoader newSTLoader() {
     final StringTemplateComponentLoader stcLoader = new StringTemplateComponentLoader();
     final StringTemplateLoader templateLoader = new StringTemplateLoader();
-    final XMLNodeFactory xmlNodeFactory = new XMLNodeFactoryImpl();
+    final XMLNodeFactory xmlNodeFactory = new XMLSTNodeFactoryImpl();
+    // set my class loader as classloader used by XMLNodeFactory
+    xmlNodeFactory.setClassLoader(STLoaderFactory.class.getClassLoader());
     templateLoader.nodeFactoryItf = xmlNodeFactory;
     stcLoader.loaderItf = templateLoader;
 

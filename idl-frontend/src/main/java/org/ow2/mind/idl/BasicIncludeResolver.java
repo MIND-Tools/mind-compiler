@@ -25,6 +25,7 @@ package org.ow2.mind.idl;
 import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
 import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
 import static org.ow2.mind.PathHelper.toAbsolute;
+import static org.ow2.mind.idl.ast.IDLASTHelper.getIncludedPath;
 
 import java.net.URL;
 import java.util.Map;
@@ -36,6 +37,7 @@ import org.objectweb.fractal.api.control.BindingController;
 import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.ow2.mind.PathHelper;
 import org.ow2.mind.idl.ast.IDL;
+import org.ow2.mind.idl.ast.IDLASTHelper;
 import org.ow2.mind.idl.ast.Include;
 
 public class BasicIncludeResolver implements IncludeResolver, BindingController {
@@ -57,7 +59,7 @@ public class BasicIncludeResolver implements IncludeResolver, BindingController 
   public IDL resolve(final Include include, final IDL encapsulatingIDL,
       final Map<Object, Object> context) throws ADLException {
 
-    String path = include.getPath();
+    String path = getIncludedPath(include);
     if (!PathHelper.isValid(path)) {
       throw new ADLException(IDLErrors.INVALID_INCLUDE, include, path);
     }
@@ -98,7 +100,7 @@ public class BasicIncludeResolver implements IncludeResolver, BindingController 
       }
     }
 
-    include.setPath(path);
+    IDLASTHelper.setIncludePathPreserveDelimiter(include, path);
 
     try {
       return recursiveIdlLoaderItf.load(encapsulatingIDL, path, context);

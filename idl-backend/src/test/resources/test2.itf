@@ -1,4 +1,5 @@
 
 interface test2 : test1 {
-  void* m3(struct s *s_ptr);
+  void* m3(struct s *s_ptr, string s);
+  void m4(int a ,...);
 };

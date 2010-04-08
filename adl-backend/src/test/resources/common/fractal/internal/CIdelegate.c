@@ -33,8 +33,8 @@ int __component_getFcInterface_delegate(const char *interfaceName,
 {
   unsigned int i;
 
-  /* check argument */
-  if (interfaceReference == NULL) {
+  /* check arguments */
+  if (interfaceReference == NULL || interfaceName == NULL) {
     return FRACTAL_API_INVALID_ARG;
   }
 
@@ -79,11 +79,37 @@ int __component_getFcInterfaceRole_delegate(const char* interfaceName,
 {
   unsigned int i;
 
+  /* check argument */
+  if (interfaceName == NULL) {
+    return FRACTAL_API_INVALID_ARG;
+  }
+
   /* search an interface with the correct name. */
   for (i = 0; i < desc->nbItfs; i++) {
     if (strcmp(desc->itfDesc[i].name, interfaceName) == 0) {
-      return desc->itfDesc[i].type;
+      return desc->itfDesc[i].role;
     }
   }
   return FRACTAL_API_NO_SUCH_INTERFACE;
 }
+
+int __component_getFcInterfaceSignature_delegate(const char* interfaceName,
+    const char **signature, struct __component_InterfaceDescriptors *desc) {
+  unsigned int i;
+
+  /* check argument */
+  if (interfaceName == NULL || signature == NULL) {
+    return FRACTAL_API_INVALID_ARG;
+  }
+
+
+  /* search an interface with the correct name. */
+  for (i = 0; i < desc->nbItfs; i++) {
+    if (strcmp(desc->itfDesc[i].name, interfaceName) == 0) {
+      *signature = desc->itfDesc[i].signature;
+      return FRACTAL_API_OK;
+    }
+  }
+  return FRACTAL_API_NO_SUCH_INTERFACE;
+}
+

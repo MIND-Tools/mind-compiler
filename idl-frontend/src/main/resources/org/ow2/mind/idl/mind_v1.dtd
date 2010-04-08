@@ -225,6 +225,7 @@
     | arrayOf | pointerOf), parameter*) >
 <!ATTLIST method
   name CDATA #REQUIRED
+  vaArgs (true|false) #IMPLIED
   isVolatile (true|false) #IMPLIED
   isConst (true|false) #IMPLIED
 >

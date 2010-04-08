@@ -48,7 +48,15 @@ public class BasicADLLocator implements ADLLocator {
     return getADLSourceName(definition.getName());
   }
 
-  public static String getADLSourceName(final String name) {
+  public static String getADLSourceName(String name) {
+    int i = name.indexOf('$');
+    if (i > 0) {
+      name = name.substring(0, i);
+    }
+    i = name.indexOf('<');
+    if (i > 0) {
+      name = name.substring(0, i);
+    }
     return fullyQualifiedNameToPath(name, SOURCE_EXTENSION);
   }
 

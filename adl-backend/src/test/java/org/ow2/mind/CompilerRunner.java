@@ -52,7 +52,6 @@ import org.ow2.mind.adl.graph.ComponentGraph;
 import org.ow2.mind.adl.graph.Instantiator;
 import org.ow2.mind.adl.implementation.BasicImplementationLocator;
 import org.ow2.mind.adl.implementation.ImplementationLocator;
-import org.ow2.mind.adl.st.ADLLoaderASTTransformer;
 import org.ow2.mind.annotation.AnnotationLocatorHelper;
 import org.ow2.mind.compilation.CompilationCommand;
 import org.ow2.mind.compilation.CompilationCommandExecutor;
@@ -66,38 +65,32 @@ import org.ow2.mind.idl.IDLLoaderChainFactory;
 import org.ow2.mind.idl.IDLLocator;
 import org.ow2.mind.idl.IDLVisitor;
 import org.ow2.mind.idl.OutputBinaryIDLLocator;
-import org.ow2.mind.idl.st.IDLLoaderASTTransformer;
 import org.ow2.mind.io.BasicOutputFileLocator;
 import org.ow2.mind.io.OutputFileLocator;
 import org.ow2.mind.plugin.SimpleClassPluginFactory;
 import org.ow2.mind.preproc.BasicMPPWrapper;
 import org.ow2.mind.preproc.MPPWrapper;
-import org.ow2.mind.st.BasicASTTransformer;
 import org.ow2.mind.st.STLoaderFactory;
-import org.ow2.mind.st.STNodeFactoryImpl;
-import org.ow2.mind.st.StringTemplateASTTransformer;
 import org.testng.Assert;
 
 public class CompilerRunner {
 
-  public static final String          DEFAULT_CFLAGS  = "-g -Wall -Werror -Wredundant-decls -Wunreachable-code -Wstrict-prototypes -Wwrite-strings";
-  public static final String          CFLAGS_PROPERTY = "mind.test.cflags";
+  public static final String        DEFAULT_CFLAGS  = "-g -Wall -Werror -Wredundant-decls -Wunreachable-code -Wstrict-prototypes -Wwrite-strings";
+  public static final String        CFLAGS_PROPERTY = "mind.test.cflags";
 
-  public Loader                       adlLoader;
-  public IDLLoader                    idlLoader;
+  public Loader                     adlLoader;
+  public IDLLoader                  idlLoader;
 
-  public Instantiator                 graphInstantiator;
+  public Instantiator               graphInstantiator;
 
-  private final OutputFileLocator     outputFileLocator;
-  public DefinitionCompiler           definitionCompiler;
-  public GraphCompiler                graphCompiler;
+  private final OutputFileLocator   outputFileLocator;
+  public DefinitionCompiler         definitionCompiler;
+  public GraphCompiler              graphCompiler;
 
-  public CompilationCommandExecutor   executor;
+  public CompilationCommandExecutor executor;
 
-  public StringTemplateASTTransformer astTransformer;
-
-  public File                         buildDir;
-  public Map<Object, Object>          context;
+  public File                       buildDir;
+  public Map<Object, Object>        context;
 
   public CompilerRunner() {
 
@@ -129,40 +122,29 @@ public class CompilerRunner {
     // String Template Component Loaders
     final StringTemplateGroupLoader stcLoader = STLoaderFactory.newSTLoader();
 
-    // AST Transformer;
-    final BasicASTTransformer basicASTTransformer = new BasicASTTransformer();
-    basicASTTransformer.nodeFactoryItf = new STNodeFactoryImpl();
-    astTransformer = basicASTTransformer;
-
     // loader chains
-    final IDLLoaderASTTransformer ilat = new IDLLoaderASTTransformer();
-    ilat.clientIDLLoaderItf = IDLLoaderChainFactory.newLoader(idlLocator,
+    idlLoader = IDLLoaderChainFactory.newLoader(idlLocator,
         inputResourceLocator);
-    ilat.astTransformerItf = astTransformer;
-    idlLoader = ilat;
 
-    final ADLLoaderASTTransformer alat = new ADLLoaderASTTransformer();
-    alat.clientLoader = Factory.newLoader(inputResourceLocator, adlLocator,
-        idlLocator, implementationLocator, idlLoader, pluginFactory);
-    alat.astTransformerItf = astTransformer;
-    adlLoader = alat;
+    adlLoader = Factory.newLoader(inputResourceLocator, adlLocator, idlLocator,
+        implementationLocator, idlLoader, pluginFactory);
+    ;
 
     // instantiator chain
     graphInstantiator = Factory.newInstantiator(adlLoader);
 
     // Backend
-    final IDLVisitor idlCompiler = IDLBackendFactory
-        .newIDLCompiler(idlLoader, inputResourceLocator, outputFileLocator,
-            basicASTTransformer, stcLoader);
+    final IDLVisitor idlCompiler = IDLBackendFactory.newIDLCompiler(idlLoader,
+        inputResourceLocator, outputFileLocator, stcLoader);
     final DefinitionSourceGenerator definitionSourceGenerator = ADLBackendFactory
         .newDefinitionSourceGenerator(inputResourceLocator, outputFileLocator,
-            idlLoader, idlCompiler, basicASTTransformer, stcLoader);
+            idlLoader, idlCompiler, stcLoader);
     definitionCompiler = ADLBackendFactory.newDefinitionCompiler(
         definitionSourceGenerator, implementationLocator, outputFileLocator,
         compilerWrapper, mppWrapper);
     graphCompiler = ADLBackendFactory.newGraphCompiler(inputResourceLocator,
         implementationLocator, outputFileLocator, compilerWrapper, mppWrapper,
-        definitionCompiler, stcLoader);
+        definitionCompiler, adlLoader, stcLoader);
 
     // compilation executor
     executor = ADLBackendFactory.newCompilationCommandExecutor();
@@ -191,8 +173,7 @@ public class CompilerRunner {
 
   public Collection<File> compileDefinition(final String adlName)
       throws ADLException, InterruptedException {
-    Definition d = load(adlName);
-    d = astTransformer.toStringTemplateAST(d);
+    final Definition d = load(adlName);
     final Collection<CompilationCommand> c = definitionCompiler.visit(d,
         context);
     executor.exec(c, context);
@@ -224,8 +205,7 @@ public class CompilerRunner {
     final File outputFile = outputFileLocator.getCExecutableOutputFile(
         outputPath, context);
 
-    Definition d = adlLoader.load(adlName, context);
-    d = astTransformer.toStringTemplateAST(d);
+    final Definition d = adlLoader.load(adlName, context);
     final ComponentGraph componentGraph = graphInstantiator.instantiate(d,
         context);
 

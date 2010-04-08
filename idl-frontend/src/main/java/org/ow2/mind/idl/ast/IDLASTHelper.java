@@ -42,6 +42,43 @@ public final class IDLASTHelper {
   private IDLASTHelper() {
   }
 
+  public static enum IncludeDelimiter {
+    QUOTE, LT_GT;
+  }
+
+  public static String getIncludedPath(final Include include) {
+    return include.getPath().substring(1, include.getPath().length() - 1);
+  }
+
+  public static IncludeDelimiter getIncludeDelimiter(final Include include) {
+    if (include.getPath().startsWith("\"")) {
+      return IncludeDelimiter.QUOTE;
+    } else {
+      if (!include.getPath().startsWith("<")) {
+        throw new IllegalArgumentException("Invalid include path: "
+            + include.getPath() + " Must start with '\"' of '<'");
+      }
+      return IncludeDelimiter.LT_GT;
+    }
+  }
+
+  public static void setIncludePath(final Include include, final String path,
+      final IncludeDelimiter delimiter) {
+    switch (delimiter) {
+      case QUOTE :
+        include.setPath("\"" + path + "\"");
+        break;
+      case LT_GT :
+        include.setPath("<" + path + ">");
+        break;
+    }
+  }
+
+  public static void setIncludePathPreserveDelimiter(final Include include,
+      final String path) {
+    setIncludePath(include, path, getIncludeDelimiter(include));
+  }
+
   public static final String INCLUDED_IDL_DECORATION_NAME = "included-idl";
 
   public static void setIncludedIDL(final Include include, final IDL idl) {

@@ -30,9 +30,9 @@ ControllerDataFactoryDestroy(definition, controller) ::= ""
 
 ControllerImplementation(definition, controller, interfaceDefinitions) ::= <<
 
-// --------------------------------------------------------------------------
-// Implementation of the AttributeController interface
-// --------------------------------------------------------------------------
+/* -----------------------------------------------------------------------------
+   Implementation of the LifeCycleController interface
+----------------------------------------------------------------------------- */
 
 #include "fractal/internal/LCCdelegate.h"
 
@@ -72,7 +72,7 @@ int INTERFACE_METHOD(lifeCycleController, startFc_override) NO_PARAM_DECL
 
   <startStopSubComponents(definition=definition, methName="startFc")>
   
-  err = INTERFACE_METHOD(lifeCycleController, startFc) (CONTEXT_PTR_ACCESS);
+  err = INTERFACE_METHOD(lifeCycleController, startFc) (CONTEXT_PTR_ACCESS_OR_VOID);
   if (err == FRACTAL_API_OK) {
     __component_startFc_delegate(<lccStatePointer(definition=definition)>);
   }
@@ -100,7 +100,7 @@ int INTERFACE_METHOD(lifeCycleController, stopFc_override) NO_PARAM_DECL
 
   <startStopSubComponents(definition=definition, methName="stopFc")>
   
-  err = INTERFACE_METHOD(lifeCycleController, stopFc) (CONTEXT_PTR_ACCESS);
+  err = INTERFACE_METHOD(lifeCycleController, stopFc) (CONTEXT_PTR_ACCESS_OR_VOID);
   if (err == FRACTAL_API_OK) {
     __component_stopFc_delegate(<lccStatePointer(definition=definition)>);
   }
@@ -128,12 +128,8 @@ startStopSubComponents(definition, methName) ::= <<
 
 startStopSubComponent(definition, component, methName) ::= <<
 <if (component.astDecorations.("hasLifeCycleController"))>
-<if (definition.astNodeTypes.("data"))>
-<if (definition.data)>
-err = CALL_PTR(&(CONTEXT_PTR_ACCESS->__component_internal_data.components.<component.name>->__component_internal_data.type.lifeCycleController), <methName>)();
-<else>
+<if (definition.astDecorations.("is-singleton"))>
 err = CALL_PTR(&(__component_<definition.name;format="toCName">_singleton_instance.__component_internal_data.components.<component.name>->__component_internal_data.type.lifeCycleController), <methName>)();
-<endif>
 <else>
 err = CALL_PTR(&(CONTEXT_PTR_ACCESS->__component_internal_data.components.<component.name>->__component_internal_data.type.lifeCycleController), <methName>)();
 <endif>
@@ -144,12 +140,8 @@ if (err != FRACTAL_API_OK) return err;
 
 
 lccStatePointer(definition) ::= <<
-<if (definition.astNodeTypes.("data"))>
-<if (definition.data)>
-((struct __component_LifeCycleState *) &(CONTEXT_PTR_ACCESS->__component_internal_data.lccState))
-<else>
+<if (definition.astDecorations.("is-singleton"))>
 ((struct __component_LifeCycleState *) (&__component_<definition.name;format="toCName">_singleton_instance.__component_internal_data.lccState))
-<endif>
 <else>
 ((struct __component_LifeCycleState *) &(CONTEXT_PTR_ACCESS->__component_internal_data.lccState))
 <endif>

@@ -32,9 +32,11 @@ import static org.ow2.mind.idl.jtb.ParserConstants.UNION;
 import static org.ow2.mind.idl.jtb.ParserConstants.VOLATILE;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.objectweb.fractal.adl.CompilerError;
 import org.objectweb.fractal.adl.Node;
@@ -71,6 +73,8 @@ import org.ow2.mind.idl.ast.TypeQualifier;
 import org.ow2.mind.idl.ast.UnionDefinition;
 import org.ow2.mind.idl.ast.UnionReference;
 import org.ow2.mind.idl.jtb.Parser;
+import org.ow2.mind.idl.jtb.syntaxtree.AbstractDeclarator;
+import org.ow2.mind.idl.jtb.syntaxtree.AbstractDirectDeclarator;
 import org.ow2.mind.idl.jtb.syntaxtree.AnnotationAnnotationValue;
 import org.ow2.mind.idl.jtb.syntaxtree.AnnotationParameters;
 import org.ow2.mind.idl.jtb.syntaxtree.AnnotationValue;
@@ -91,9 +95,12 @@ import org.ow2.mind.idl.jtb.syntaxtree.InterfaceInheritanceSpecification;
 import org.ow2.mind.idl.jtb.syntaxtree.Literal;
 import org.ow2.mind.idl.jtb.syntaxtree.MethodDefinition;
 import org.ow2.mind.idl.jtb.syntaxtree.NodeChoice;
+import org.ow2.mind.idl.jtb.syntaxtree.NodeList;
+import org.ow2.mind.idl.jtb.syntaxtree.NodeListOptional;
 import org.ow2.mind.idl.jtb.syntaxtree.NodeSequence;
 import org.ow2.mind.idl.jtb.syntaxtree.NodeToken;
 import org.ow2.mind.idl.jtb.syntaxtree.NullValue;
+import org.ow2.mind.idl.jtb.syntaxtree.ParameterList;
 import org.ow2.mind.idl.jtb.syntaxtree.ParameterQualifier;
 import org.ow2.mind.idl.jtb.syntaxtree.PointerSpecification;
 import org.ow2.mind.idl.jtb.syntaxtree.QualifiedTypeSpecification;
@@ -249,7 +256,7 @@ public class JTBProcessor extends GJDepthFirst<Object, Node> {
 
     final Include include = (Include) newNode("include", n.f0);
 
-    include.setPath(n.f2.tokenImage.substring(1, n.f2.tokenImage.length() - 1));
+    include.setPath(n.f2.tokenImage);
 
     container.addInclude(include);
 
@@ -602,6 +609,46 @@ public class JTBProcessor extends GJDepthFirst<Object, Node> {
   }
 
   @Override
+  public Object visit(final AbstractDeclarator n, Node argu) {
+    assert argu != null;
+
+    // process pointers
+    argu = (Node) n.f0.accept(this, argu);
+
+    // process abstract direct declarator
+    argu = (Node) n.f1.accept(this, argu);
+
+    return argu;
+  }
+
+  @Override
+  public Object visit(final AbstractDirectDeclarator n, Node argu) {
+    assert argu != null;
+    if (n.f0.which == 0) {
+      final AbstractDeclarator abstractDeclarator = (AbstractDeclarator) ((NodeSequence) n.f0.choice)
+          .elementAt(1);
+      final NodeListOptional arraySpecification = (NodeListOptional) ((NodeSequence) n.f0.choice)
+          .elementAt(3);
+
+      // process array specifications first in reverse order
+      for (int i = arraySpecification.size() - 1; i >= 0; i--) {
+        argu = (Node) arraySpecification.elementAt(i).accept(this, argu);
+      }
+
+      argu = (Node) abstractDeclarator.accept(this, argu);
+    } else {
+      final NodeList arraySpecification = (NodeList) n.f0.choice;
+
+      // process array specifications first in reverse order
+      for (int i = arraySpecification.size() - 1; i >= 0; i--) {
+        argu = (Node) arraySpecification.elementAt(i).accept(this, argu);
+      }
+    }
+
+    return argu;
+  }
+
+  @Override
   public Object visit(final ArraySpecification n, final Node argu) {
     assert argu != null;
     final TypeContainer typeContainer = castNodeError(argu, TypeContainer.class);
@@ -709,9 +756,51 @@ public class JTBProcessor extends GJDepthFirst<Object, Node> {
     // process parameters
     n.f4.accept(this, method);
 
+    // check parameter names
+    final Parameter[] parameters = method.getParameters();
+    final Set<String> usedParamNames = new HashSet<String>(parameters.length);
+    boolean hasNullParamName = false;
+    for (final Parameter param : parameters) {
+      final String paramName = param.getName();
+      if (paramName != null)
+        usedParamNames.add(paramName);
+      else
+        hasNullParamName = true;
+    }
+
+    if (hasNullParamName) {
+      int i = 0;
+      for (final Parameter param : parameters) {
+        String paramName = param.getName();
+        if (paramName == null) {
+          // find a paramName that is not already used.
+          do {
+            paramName = "p" + (i++);
+          } while (!usedParamNames.add(paramName));
+          param.setName(paramName);
+        }
+      }
+    }
+
     // add method in interface definition
     itfDef.addMethod(method);
 
+    return method;
+  }
+
+  @Override
+  public Object visit(final ParameterList n, final Node argu) {
+    assert argu != null;
+    final Method method = castNodeError(argu, Method.class);
+
+    // process parameters
+    n.f0.accept(this, argu);
+    n.f1.accept(this, argu);
+
+    // process ...
+    if (n.f2.present()) {
+      method.setVaArgs(Method.TRUE);
+    }
     return method;
   }
 

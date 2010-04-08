@@ -35,6 +35,7 @@ import java.util.Set;
 
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.Definition;
+import org.objectweb.fractal.adl.Loader;
 import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.fractal.api.control.BindingController;
 import org.objectweb.fractal.api.control.IllegalBindingException;
@@ -68,6 +69,12 @@ public class FactoryTemplateInstantiator
 
   /** The interface used to resolve referenced definitions. */
   public DefinitionReferenceResolver definitionReferenceResolverItf;
+
+  /** The name of the {@link #loaderItf} client interface. */
+  public static final String         LOADER_ITF_NAME              = "loader";
+
+  /** The Loader interface used to load referenced definitions. */
+  public Loader                      loaderItf;
 
   // ---------------------------------------------------------------------------
   // Implementation of the TemplateInstantiator interface
@@ -107,7 +114,7 @@ public class FactoryTemplateInstantiator
 
           // propagate the "shared-implementations"
           final Set<String> sharedImpls = new HashSet<String>();
-          findSharedImplementations(instantiatedDef, sharedImpls);
+          findSharedImplementations(instantiatedDef, sharedImpls, context);
           for (final String sharedImpl : sharedImpls) {
             SharedImplementationDecorationHelper.addSharedImplementation(
                 instantiatedTemplate, sharedImpl);
@@ -167,14 +174,15 @@ public class FactoryTemplateInstantiator
   }
 
   protected void findSharedImplementations(final Definition instantiatedDef,
-      final Set<String> sharedImpls) throws ADLException {
+      final Set<String> sharedImpls, final Map<Object, Object> context)
+      throws ADLException {
     sharedImpls.addAll(getSharedImplementation(instantiatedDef));
 
     if (instantiatedDef instanceof ComponentContainer) {
       for (final Component cmp : ((ComponentContainer) instantiatedDef)
           .getComponents()) {
-        findSharedImplementations(getResolvedComponentDefinition(cmp, null,
-            null), sharedImpls);
+        findSharedImplementations(getResolvedComponentDefinition(cmp,
+            loaderItf, context), sharedImpls, context);
       }
     }
   }
@@ -191,6 +199,8 @@ public class FactoryTemplateInstantiator
       definitionReferenceResolverItf = (DefinitionReferenceResolver) value;
     } else if (itfName.equals(CLIENT_INSTANTIATOR_ITF_NAME)) {
       clientInstantiatorItf = (TemplateInstantiator) value;
+    } else if (LOADER_ITF_NAME.equals(itfName)) {
+      loaderItf = (Loader) value;
     } else {
       throw new NoSuchInterfaceException("No client interface named '"
           + itfName + "' for binding the interface");
@@ -199,7 +209,7 @@ public class FactoryTemplateInstantiator
 
   public String[] listFc() {
     return listFcHelper(DefinitionReferenceResolver.ITF_NAME,
-        CLIENT_INSTANTIATOR_ITF_NAME);
+        CLIENT_INSTANTIATOR_ITF_NAME, LOADER_ITF_NAME);
   }
 
   public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
@@ -209,6 +219,8 @@ public class FactoryTemplateInstantiator
       return definitionReferenceResolverItf;
     } else if (itfName.equals(CLIENT_INSTANTIATOR_ITF_NAME)) {
       return clientInstantiatorItf;
+    } else if (LOADER_ITF_NAME.equals(itfName)) {
+      return loaderItf;
     } else {
       throw new NoSuchInterfaceException("No client interface named '"
           + itfName + "'");
@@ -223,6 +235,8 @@ public class FactoryTemplateInstantiator
       definitionReferenceResolverItf = null;
     } else if (itfName.equals(CLIENT_INSTANTIATOR_ITF_NAME)) {
       clientInstantiatorItf = null;
+    } else if (LOADER_ITF_NAME.equals(itfName)) {
+      loaderItf = null;
     } else {
       throw new NoSuchInterfaceException("No client interface named '"
           + itfName + "'");

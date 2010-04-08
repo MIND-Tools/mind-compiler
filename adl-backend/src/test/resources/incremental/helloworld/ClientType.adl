@@ -1,0 +1,5 @@
+
+type helloworld.ClientType {
+  provides Main as main;
+  requires Service as sa ;
+}

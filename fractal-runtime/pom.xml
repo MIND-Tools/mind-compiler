@@ -7,7 +7,7 @@
     <parent>
         <groupId>org.ow2.mind</groupId>
         <artifactId>mind-compiler</artifactId>
-        <version>0.2-alpha-1-SNAPSHOT</version>
+        <version>0.2-alpha-2-SNAPSHOT</version>
     </parent>
 
     <artifactId>fractal-runtime</artifactId>
@@ -17,7 +17,7 @@
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>idl-frontend</artifactId>
+            <artifactId>idl-backend</artifactId>
             <scope>test</scope>
         </dependency>
 

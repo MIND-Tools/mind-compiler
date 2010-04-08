@@ -25,6 +25,7 @@ package org.ow2.mind.idl;
 import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
 import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
 import static org.ow2.mind.PathHelper.getExtension;
+import static org.ow2.mind.idl.ast.IDLASTHelper.getIncludedPath;
 import static org.ow2.mind.idl.ast.Include.HEADER_EXTENSION;
 import static org.ow2.mind.idl.ast.Include.IDT_EXTENSION;
 
@@ -64,7 +65,7 @@ public class IncludeLoader extends AbstractIDLLoader {
   protected void checkIncludes(final IDL container,
       final Map<Object, Object> context) throws ADLException {
     for (final Include include : ((IncludeContainer) container).getIncludes()) {
-      final String path = include.getPath();
+      final String path = getIncludedPath(include);
 
       // do not enforce restriction on the name of the included file.
       // if (!isValid(path)) {
