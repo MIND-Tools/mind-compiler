@@ -39,6 +39,7 @@ import java.util.logging.Logger;
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.AbstractLoader;
 import org.objectweb.fractal.adl.Definition;
+import org.objectweb.fractal.adl.NodeFactory;
 import org.objectweb.fractal.adl.NodeUtil;
 import org.objectweb.fractal.adl.error.GenericErrors;
 import org.objectweb.fractal.adl.io.NodeInputStream;
@@ -74,6 +75,12 @@ public class BinaryADLLoader extends AbstractLoader {
    * timestamps of dependencies of ADL AST.
    */
   public InputResourceLocator inputResourceLocatorItf;
+
+  /**
+   * The {@link NodeFactory} client interface used to retrieve the class-loader
+   * to be used to load node classes.
+   */
+  public NodeFactory          nodeFactoryItf;
 
   // ---------------------------------------------------------------------------
   // Implementation of the Loader interface
@@ -172,7 +179,8 @@ public class BinaryADLLoader extends AbstractLoader {
       final Map<Object, Object> context) throws ADLException {
     try {
       final InputStream is = location.openStream();
-      final NodeInputStream nis = new NodeInputStream(is);
+      final NodeInputStream nis = new NodeInputStream(is, nodeFactoryItf
+          .getClassLoader());
       if (logger.isLoggable(Level.FINE))
         logger.log(Level.FINE, "Load ADL \"" + name + "\". Read ADL from "
             + location);
@@ -214,6 +222,8 @@ public class BinaryADLLoader extends AbstractLoader {
       adlLocatorItf = (ADLLocator) value;
     } else if (itfName.equals(InputResourceLocator.ITF_NAME)) {
       inputResourceLocatorItf = (InputResourceLocator) value;
+    } else if (itfName.equals(NodeFactory.ITF_NAME)) {
+      nodeFactoryItf = (NodeFactory) value;
     } else {
       super.bindFc(itfName, value);
     }
@@ -223,7 +233,7 @@ public class BinaryADLLoader extends AbstractLoader {
   @Override
   public String[] listFc() {
     return listFcHelper(super.listFc(), ADLLocator.ITF_NAME,
-        InputResourceLocator.ITF_NAME);
+        InputResourceLocator.ITF_NAME, NodeFactory.ITF_NAME);
   }
 
   @Override
@@ -234,6 +244,8 @@ public class BinaryADLLoader extends AbstractLoader {
       return adlLocatorItf;
     } else if (itfName.equals(InputResourceLocator.ITF_NAME)) {
       return inputResourceLocatorItf;
+    } else if (itfName.equals(NodeFactory.ITF_NAME)) {
+      return nodeFactoryItf;
     } else {
       return super.lookupFc(itfName);
     }
@@ -248,6 +260,8 @@ public class BinaryADLLoader extends AbstractLoader {
       adlLocatorItf = null;
     } else if (itfName.equals(InputResourceLocator.ITF_NAME)) {
       inputResourceLocatorItf = null;
+    } else if (itfName.equals(NodeFactory.ITF_NAME)) {
+      nodeFactoryItf = null;
     } else {
       super.unbindFc(itfName);
     }
