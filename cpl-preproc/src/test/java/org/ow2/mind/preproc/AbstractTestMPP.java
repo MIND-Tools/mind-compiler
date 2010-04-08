@@ -106,7 +106,7 @@ public class AbstractTestMPP {
 
   protected MPPCommand newMPPCommand(final String dirName,
       final String fileName, final boolean singleton) {
-    final MPPCommand command = mppWrapper.newMPPCommand(context);
+    final MPPCommand command = mppWrapper.newMPPCommand(null, context);
     command.setInputFile(newBuildFile(dirName, fileName, ".i"));
     command.setOutputFile(newBuildFile(dirName, fileName, singleton
         ? ".singleton-mpp.c"
