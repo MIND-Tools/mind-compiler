@@ -151,7 +151,7 @@ StaticBindingValue(bindingDesc) ::= <<
 <if (bindingDesc.binding)>
 &(<bindingDesc.serverComponent.decorations.("instance-name"); format="toCName">), &__component_<bindingDesc.serverComponent.definition.name; format="toCName">_<bindingDesc.binding.toInterface><if (bindingDesc.binding.toInterfaceNumber)>_<bindingDesc.binding.toInterfaceNumber><endif>_VTable
 <else>
-(void *) 0, (void *) 0
+0, 0
 <endif> 
 >>
 
@@ -159,7 +159,7 @@ StaticCollectionBindingValue(bindingDesc, index) ::= <<
 <if (bindingDesc.binding)>
 &(<bindingDesc.serverComponent.decorations.("instance-name"); format="toCName">), &__component_<bindingDesc.serverComponent.definition.name; format="toCName">_<bindingDesc.binding.toInterface>_<index>_VTable
 <else>
-(void *) 0, (void *) 0
+0, 0
 <endif> 
 >>
 
