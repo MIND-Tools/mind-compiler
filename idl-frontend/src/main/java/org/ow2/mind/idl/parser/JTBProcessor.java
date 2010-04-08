@@ -596,8 +596,8 @@ public class JTBProcessor extends GJDepthFirst<Object, Node>
   public Object visit(final PointerSpecification n, Node argu) {
     assert argu != null;
 
-    // process qualified pointer spec in reverse order
-    for (int i = n.f0.size() - 1; i >= 0; i--) {
+    // process qualified pointer spec
+    for (int i = 0; i < n.f0.size(); i++) {
       argu = (Node) n.f0.elementAt(i).accept(this, argu);
     }
 
@@ -1019,9 +1019,8 @@ public class JTBProcessor extends GJDepthFirst<Object, Node>
       ((NodeSequence) n.f0.choice).elementAt(2).accept(this, expr);
 
       // process inner cast expression
-      expr
-          .setConstantExpression((ConstantExpression) ((NodeSequence) n.f0.choice)
-              .elementAt(4).accept(this, expr));
+      expr.setConstantExpression((ConstantExpression) ((NodeSequence) n.f0.choice)
+          .elementAt(4).accept(this, expr));
       return expr;
     }
   }

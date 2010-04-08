@@ -15,7 +15,7 @@
 struct __component_test2_vTable {
   void (* (* m1)(void *_mind_this , const uint8_t a, int (*b) )) ;
   unsigned float (* m2)(void *_mind_this , float f1 ) ;
-  void (* (* m3)(void *_mind_this , struct s (* s_ptr), __MIND_STRING_TYPEDEF s )) ;
+  void (* (* m3)(void *_mind_this , struct s (* s_ptr), __MIND_STRING_TYPEDEF s, char (* const (* volatile (* p0))) )) ;
   void (* m4)(void *_mind_this , int a , ...) ;
 };
 
