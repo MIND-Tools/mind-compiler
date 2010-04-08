@@ -88,6 +88,44 @@ public class CPLChecker {
     }
   }
 
+  public void itfMethCall(final String itfName, final String methName)
+      throws Exception {
+
+    // Add this condition so that the testNG will
+    // not throw exceptions (stand-alone node)
+    if (this.definition != null) {
+      boolean foundItf = false;
+      boolean foundMeth = false;
+
+      for (final Interface itf : ((InterfaceContainer) definition)
+          .getInterfaces()) {
+        if (itf.getName().equals(itfName)) {
+
+          final InterfaceDefinition itfDef = InterfaceDefinitionDecorationHelper
+              .getResolvedInterfaceDefinition((TypeInterface) itf, null, null);
+          for (final Method meth : itfDef.getMethods()) {
+            if (meth.getName().equals(methName)) {
+              foundMeth = true;
+              break;
+            }
+          }
+          foundItf = true;
+          break;
+        }
+      }
+
+      if (!foundItf) {
+
+        throw new Exception(" Unknown interface \"" + itfName + "\" ");
+      }
+      if (!foundMeth) {
+        throw new Exception(" In interface \"" + itfName
+            + "\" unknown method \"" + methName + "\" ");
+      }
+    }
+
+  }
+
   public void attAccess(final String attributeName) throws Exception {
     if (this.definition != null) { // add this condition so that the testNG will
       // not throw exceptions

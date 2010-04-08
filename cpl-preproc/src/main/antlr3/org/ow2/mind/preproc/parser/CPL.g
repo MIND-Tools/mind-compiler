@@ -332,6 +332,15 @@ protected privateAccess returns [StringBuilder res = new StringBuilder()]
 protected itfMethCall returns [StringBuilder res = new StringBuilder()]
 	: CALL ws1=ws '(' ws2=ws itf=ID ws3=ws ',' ws4=ws meth=ID ws5=ws ')' ws6=ws params
       {
+	  try{
+    	cplChecker.itfMethCall($itf.text, $meth.text);
+    }catch (final Exception exception) {
+    //TODO the exception cause used to know if the exception is due to id  or meth to determined the line and the charPositionInLine of the error
+    	String msg = "In file "+ sourceFile + " "+ ($itf.line+ sourceLineShift) + ":" + $itf.pos 
+    	 + exception.getMessage() ;
+        errors.add(msg);
+      }
+ 
         if ($params.res == null)
           $res.append("CALL_INTERFACE_METHOD_WITHOUT_PARAM").append($ws1.text).append("(")
               .append($ws2.text).append($itf.text).append($ws3.text).append(",")
