@@ -29,8 +29,10 @@ import junit.framework.TestCase;
 import org.objectweb.fractal.adl.xml.XMLNodeFactory;
 import org.objectweb.fractal.adl.xml.XMLNodeFactoryImpl;
 import org.ow2.mind.idl.ASTChecker;
+import org.ow2.mind.idl.ASTChecker.IDLChecker;
 import org.ow2.mind.idl.ASTChecker.MethodCheckerIterator;
 import org.ow2.mind.idl.ASTChecker.ParameterCheckerIterator;
+import org.ow2.mind.idl.ASTChecker.TypeCheckerIterator;
 import org.ow2.mind.idl.ast.InterfaceDefinition;
 import org.ow2.mind.idl.jtb.Parser;
 import org.ow2.mind.idl.jtb.syntaxtree.ITFFile;
@@ -59,8 +61,22 @@ public class TestJTBProcessor extends TestCase {
     final ITFFile content = parser.ITFFile();
     final InterfaceDefinition idlFile = processor
         .toInterfaceDefinition(content);
-    final MethodCheckerIterator methodsChecker = new ASTChecker().assertIDL(
-        idlFile).containsMethods("m1", "m2", "m3", "m4", "m5");
+    final IDLChecker checker = new ASTChecker().assertIDL(idlFile);
+    final TypeCheckerIterator typeChecker = checker.definesType();
+
+    // check myint
+    typeChecker.whereFirst().isTypedefOf("myint").isPrimitiveType("int");
+
+    // check mypointer
+    typeChecker.andNext().isTypedefOf("mypointer").isPointerOf().isArrayOf()
+        .isPrimitiveType("int");
+
+    // check struct s
+    typeChecker.andNext().isStructDef("s").hasMembers("a", "b").whereFirst()
+        .hasType().isArrayOf().isPrimitiveType("int");
+
+    final MethodCheckerIterator methodsChecker = checker.containsMethods("m1",
+        "m2", "m3", "m4", "m5");
     ParameterCheckerIterator paramsChecker;
 
     // check m1;

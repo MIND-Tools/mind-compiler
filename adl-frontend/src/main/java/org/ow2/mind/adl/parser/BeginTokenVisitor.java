@@ -90,7 +90,7 @@ import org.ow2.mind.adl.jtb.syntaxtree.TypeDefinitionElement;
 import org.ow2.mind.adl.jtb.syntaxtree.TypeDefinitionReference;
 import org.ow2.mind.adl.jtb.visitor.GJNoArguDepthFirst;
 
-public class EndTokenVisitor extends GJNoArguDepthFirst<NodeToken> {
+public class BeginTokenVisitor extends GJNoArguDepthFirst<NodeToken> {
 
   // ---------------------------------------------------------------------------
   // Generic nodes
@@ -98,7 +98,7 @@ public class EndTokenVisitor extends GJNoArguDepthFirst<NodeToken> {
 
   @Override
   public NodeToken visit(final NodeList n) {
-    for (int i = n.size() - 1; i >= 0; i--) {
+    for (int i = 0; i < n.size(); i++) {
       final NodeToken t = n.elementAt(i).accept(this);
       if (t != null) return t;
     }
@@ -107,7 +107,7 @@ public class EndTokenVisitor extends GJNoArguDepthFirst<NodeToken> {
 
   @Override
   public NodeToken visit(final NodeSequence n) {
-    for (int i = n.size() - 1; i >= 0; i--) {
+    for (int i = 0; i < n.size(); i++) {
       final NodeToken t = n.elementAt(i).accept(this);
       if (t != null) return t;
     }
@@ -116,7 +116,7 @@ public class EndTokenVisitor extends GJNoArguDepthFirst<NodeToken> {
 
   @Override
   public NodeToken visit(final NodeListOptional n) {
-    for (int i = n.size() - 1; i >= 0; i--) {
+    for (int i = 0; i < n.size(); i++) {
       final NodeToken t = n.elementAt(i).accept(this);
       if (t != null) return t;
     }
@@ -142,9 +142,6 @@ public class EndTokenVisitor extends GJNoArguDepthFirst<NodeToken> {
 
   @Override
   public NodeToken visit(final FullyQualifiedName n) {
-    final NodeToken t = n.f1.accept(this);
-    if (t != null) return t;
-
     return n.f0;
   }
 
@@ -154,15 +151,15 @@ public class EndTokenVisitor extends GJNoArguDepthFirst<NodeToken> {
 
   @Override
   public NodeToken visit(final ADLFile n) {
-    return n.f2;
+    final NodeToken t = n.f0.accept(this);
+    if (t != null) return t;
+
+    return n.f1.accept(this);
   }
 
   @Override
   public NodeToken visit(final ImportDefinition n) {
-    final NodeToken t = n.f6.accept(this);
-    if (t != null) return t;
-
-    return n.f5.accept(this);
+    return n.f1;
   }
 
   @Override
@@ -176,17 +173,12 @@ public class EndTokenVisitor extends GJNoArguDepthFirst<NodeToken> {
 
   @Override
   public NodeToken visit(final TypeDefinition n) {
-    final NodeToken t = n.f3.accept(this);
-    if (t != null) return t;
-
-    return n.f2.accept(this);
+    return n.f1;
   }
 
   @Override
   public NodeToken visit(final ExtendedTypeDefinitions n) {
-    final NodeToken t = n.f2.accept(this);
-    if (t != null) return t;
-    return n.f1.accept(this);
+    return n.f0;
   }
 
   @Override
@@ -208,18 +200,15 @@ public class EndTokenVisitor extends GJNoArguDepthFirst<NodeToken> {
 
   @Override
   public NodeToken visit(final PrimitiveDefinition n) {
-    NodeToken t = n.f5.accept(this);
+    final NodeToken t = n.f1.accept(this);
     if (t != null) return t;
 
-    t = n.f4.accept(this);
-    if (t != null) return t;
-
-    return n.f3.accept(this);
+    return n.f2;
   }
 
   @Override
   public NodeToken visit(final FormalParameterDeclarationList n) {
-    return n.f2;
+    return n.f0;
   }
 
   @Override
@@ -229,28 +218,22 @@ public class EndTokenVisitor extends GJNoArguDepthFirst<NodeToken> {
 
   @Override
   public NodeToken visit(final ExtendedPrimitiveDefinitions n) {
-    final NodeToken t = n.f2.accept(this);
-    if (t != null) return t;
-
-    return n.f1.accept(this);
+    return n.f0;
   }
 
   @Override
   public NodeToken visit(final PrimitiveDefinitionReference n) {
-    final NodeToken t = n.f1.accept(this);
-    if (t != null) return t;
-
     return n.f0.accept(this);
   }
 
   @Override
   public NodeToken visit(final ArgumentList n) {
-    return n.f2;
+    return n.f0;
   }
 
   @Override
   public NodeToken visit(final ArgumentAssignement n) {
-    return n.f2.accept(this);
+    return n.f0;
   }
 
   @Override
@@ -272,47 +255,32 @@ public class EndTokenVisitor extends GJNoArguDepthFirst<NodeToken> {
 
   @Override
   public NodeToken visit(final CompositeDefinition n) {
-    NodeToken t = n.f5.accept(this);
-    if (t != null) return t;
-
-    t = n.f4.accept(this);
-    if (t != null) return t;
-
-    t = n.f3.accept(this);
-    if (t != null) return t;
-
-    return n.f2.accept(this);
+    return n.f1;
   }
 
   @Override
   public NodeToken visit(final FormalTypeParameterDeclarationList n) {
-    return n.f3;
+    return n.f0;
   }
 
   @Override
   public NodeToken visit(final FormalTypeParameterDeclaration n) {
-    return n.f2.accept(this);
+    return n.f0;
   }
 
   @Override
   public NodeToken visit(final CompositeDefinitionReference n) {
-    NodeToken t = n.f2.accept(this);
-    if (t != null) return t;
-
-    t = n.f1.accept(this);
-    if (t != null) return t;
-
     return n.f0.accept(this);
   }
 
   @Override
   public NodeToken visit(final TypeArgumentList n) {
-    return n.f2;
+    return n.f0;
   }
 
   @Override
   public NodeToken visit(final TypeArgumentAssignement n) {
-    return n.f2.accept(this);
+    return n.f0;
   }
 
   @Override
@@ -322,10 +290,7 @@ public class EndTokenVisitor extends GJNoArguDepthFirst<NodeToken> {
 
   @Override
   public NodeToken visit(final ExtendedCompositeDefinitions n) {
-    final NodeToken t = n.f2.accept(this);
-    if (t != null) return t;
-
-    return n.f1.accept(this);
+    return n.f0;
   }
 
   @Override
@@ -344,24 +309,12 @@ public class EndTokenVisitor extends GJNoArguDepthFirst<NodeToken> {
 
   @Override
   public NodeToken visit(final InterfaceDefinition n) {
-    NodeToken t = n.f7.accept(this);
-    if (t != null) return t;
-
-    t = n.f6.accept(this);
-    if (t != null) return t;
-
-    return n.f5;
+    return n.f1.accept(this);
   }
 
   @Override
   public NodeToken visit(final AttributeDefinition n) {
-    NodeToken t = n.f5.accept(this);
-    if (t != null) return t;
-
-    t = n.f4.accept(this);
-    if (t != null) return t;
-
-    return n.f3;
+    return n.f1;
   }
 
   @Override
@@ -376,34 +329,28 @@ public class EndTokenVisitor extends GJNoArguDepthFirst<NodeToken> {
 
   @Override
   public NodeToken visit(final DataDefinition n) {
-    final NodeToken t = n.f3.accept(this);
-    if (t != null) return t;
-
-    return n.f2.accept(this);
+    return n.f1;
   }
 
   @Override
   public NodeToken visit(final ImplementationDefinition n) {
-    final NodeToken t = n.f3.accept(this);
-    if (t != null) return t;
-
-    return n.f2.accept(this);
+    return n.f1;
   }
 
   @Override
   public NodeToken visit(final Path n) {
-    return n.f5;
+    NodeToken t = n.f0.accept(this);
+    if (t != null) return t;
+
+    t = n.f1.accept(this);
+    if (t != null) return t;
+
+    return n.f2;
   }
 
   @Override
   public NodeToken visit(final BindingDefinition n) {
-    NodeToken t = n.f11.accept(this);
-    if (t != null) return t;
-
-    t = n.f10.accept(this);
-    if (t != null) return t;
-
-    return n.f9;
+    return n.f1;
   }
 
   @Override
@@ -413,10 +360,7 @@ public class EndTokenVisitor extends GJNoArguDepthFirst<NodeToken> {
 
   @Override
   public NodeToken visit(final SubComponentDefinition n) {
-    final NodeToken t = n.f3.accept(this);
-    if (t != null) return t;
-
-    return n.f2.accept(this);
+    return n.f1;
   }
 
   @Override
@@ -426,27 +370,30 @@ public class EndTokenVisitor extends GJNoArguDepthFirst<NodeToken> {
 
   @Override
   public NodeToken visit(final CompositeSubComponentReference n) {
-    return n.f3;
+    return n.f0;
   }
 
   @Override
   public NodeToken visit(final CompositeInlinedDefinition n) {
-    return n.f2;
+    return n.f0;
   }
 
   @Override
   public NodeToken visit(final PrimitiveSubComponentReference n) {
-    return n.f3;
+    return n.f0;
   }
 
   @Override
   public NodeToken visit(final PrimitiveInlinedDefinition n) {
-    return n.f2;
+    return n.f0;
   }
 
   @Override
   public NodeToken visit(final SimpleSubComponentReference n) {
-    return n.f2;
+    final NodeToken t = n.f0.accept(this);
+    if (t != null) return t;
+
+    return n.f1;
   }
 
   @Override
@@ -480,28 +427,22 @@ public class EndTokenVisitor extends GJNoArguDepthFirst<NodeToken> {
 
   @Override
   public NodeToken visit(final org.ow2.mind.adl.jtb.syntaxtree.Annotation n) {
-    final NodeToken t = n.f2.accept(this);
-    if (t != null) return t;
-
-    return n.f1.accept(this);
+    return n.f0;
   }
 
   @Override
   public NodeToken visit(final AnnotationParameters n) {
-    return n.f2;
+    return n.f0;
   }
 
   @Override
   public NodeToken visit(final AnnotationValuePairs n) {
-    final NodeToken t = n.f1.accept(this);
-    if (t != null) return t;
-
     return n.f0.accept(this);
   }
 
   @Override
   public NodeToken visit(final AnnotationValuePair n) {
-    return n.f2.accept(this);
+    return n.f0;
   }
 
   @Override
@@ -516,7 +457,7 @@ public class EndTokenVisitor extends GJNoArguDepthFirst<NodeToken> {
 
   @Override
   public NodeToken visit(final ArrayAnnotationValue n) {
-    return n.f2;
+    return n.f0;
   }
 
   // ---------------------------------------------------------------------------
@@ -530,6 +471,9 @@ public class EndTokenVisitor extends GJNoArguDepthFirst<NodeToken> {
 
   @Override
   public NodeToken visit(final IntegerValue n) {
+    final NodeToken t = n.f0.accept(this);
+    if (t != null) return t;
+
     return n.f1;
   }
 

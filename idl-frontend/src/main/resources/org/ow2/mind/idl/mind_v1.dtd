@@ -84,13 +84,24 @@
 <?add ast="method"       itf="org.ow2.mind.idl.ast.Method" ?>
 <?add ast="parameter"    itf="org.ow2.mind.idl.ast.Parameter" ?>
 
+
 <!-- *********************************************************************** -->
 <!-- Constant expression AST structure                                       -->
 <!-- *********************************************************************** -->
 
 <!-- TODO change this -->
-<?add ast="constantExpression" itf="org.ow2.mind.idl.ast.ConstantExpression" ?>
-<?map ast="constantExpression" xml="expr" ?>
+<?add ast="binaryOperation"  itf="org.ow2.mind.idl.ast.BinaryOperation" ?>
+<?map ast="binaryOperation" type="constantExpression" ?>
+
+<?add ast="unaryOperation"  itf="org.ow2.mind.idl.ast.UnaryOperation" ?>
+<?map ast="unaryOperation"  type="constantExpression" ?>
+
+<?add ast="castOperation"   itf="org.ow2.mind.idl.ast.CastOperation" ?>
+<?map ast="castOperation"   type="constantExpression" ?>
+
+<?add ast="literal"         itf="org.ow2.mind.idl.ast.Literal" ?>
+<?map ast="literal"         type="constantExpression" ?>
+
 
 <!-- *********************************************************************** -->
 <!-- Include AST structure                                                   -->
@@ -145,8 +156,14 @@
 <!-- Node grammar                                                            -->
 <!-- *********************************************************************** -->
 
+<!ENTITY % typedefinition "enum|struct|structRef|union|unionRef|typedef">
+<!ENTITY % type "enum | enumRef | struct | structRef | union | unionRef 
+    | typedefRef | primitiveType | arrayOf | pointerOf">
+<!ENTITY % expr "binaryOperation | unaryOperation | castOperation | literal">
+
+
 <!ELEMENT itf ((include)*, annotation* ,
-               (enum|struct|structRef|union|unionRef|typedef)*,
+               (%typedefinition;)*,
                method*) >
 <!ATTLIST itf
   name CDATA #REQUIRED
@@ -155,7 +172,7 @@
 >
 
 <!ELEMENT idt ((include)*, 
-               (enum|struct|structRef|union|unionRef|typedef)*) >
+               (%typedefinition;)*) >
 <!ATTLIST idt
   name CDATA #REQUIRED
 >
@@ -195,8 +212,7 @@
   name CDATA #REQUIRED
 >
 
-<!ELEMENT typedef (enum | enumRef | struct | structRef | union | unionRef 
-    | typedefRef | primitiveType | arrayOf | pointerOf) >
+<!ELEMENT typedef (%type;) >
 <!ATTLIST typedef
   name CDATA #REQUIRED
   isVolatile (true|false) #IMPLIED
@@ -208,21 +224,19 @@
   name CDATA #REQUIRED
 >
 
-<!ELEMENT enumMember (annotation*, expr?) >
+<!ELEMENT enumMember (annotation*, (%expr;)?) >
 <!ATTLIST enumMember
   name CDATA #REQUIRED
 >
 
-<!ELEMENT member (annotation*, (enum | enumRef | struct | structRef | union | unionRef 
-    | typedefRef | primitiveType | arrayOf | pointerOf), expr?) >
+<!ELEMENT member (annotation*, (%type;), (%expr;)?) >
 <!ATTLIST member
   name CDATA #REQUIRED
   isVolatile (true|false) #IMPLIED
   isConst (true|false) #IMPLIED
 >
 
-<!ELEMENT method (annotation*, (enumRef | structRef | unionRef | typedefRef | primitiveType
-    | arrayOf | pointerOf), parameter*) >
+<!ELEMENT method (annotation*, (%type;), parameter*) >
 <!ATTLIST method
   name CDATA #REQUIRED
   vaArgs (true|false) #IMPLIED
@@ -230,8 +244,7 @@
   isConst (true|false) #IMPLIED
 >
 
-<!ELEMENT parameter (annotation*, (enumRef | structRef | unionRef | typedefRef | primitiveType
-    | arrayOf | pointerOf)) >
+<!ELEMENT parameter (annotation*, (%type;)) >
 <!ATTLIST parameter
   name CDATA #REQUIRED
   isIn (true|false) "false"
@@ -245,20 +258,32 @@
   name CDATA #REQUIRED
 >
 
-<!ELEMENT arrayOf ((enum | enumRef | struct | structRef | union | unionRef 
-    | typedefRef | primitiveType | arrayOf | pointerOf), expr?) >
+<!ELEMENT arrayOf ((%type;), (%expr;)?) >
 <!ATTLIST arrayOf
 >
 
-<!ELEMENT pointerOf ((enum | enumRef | struct | structRef | union | unionRef 
-    | typedefRef | primitiveType | arrayOf | pointerOf)) >
+<!ELEMENT pointerOf (%type;) >
 <!ATTLIST pointerOf
   isVolatile (true|false) #IMPLIED
   isConst (true|false) #IMPLIED
 >
 
-<!ELEMENT expr EMPTY >
-<!ATTLIST expr 
+<!ELEMENT binaryOperation ((%expr;)* ) >
+<!ATTLIST binaryOperation 
+  operation CDATA #REQUIRED
+>
+
+<!ELEMENT unaryOperation (%expr;) >
+<!ATTLIST unaryOperation 
+  operation CDATA #REQUIRED
+>
+
+<!ELEMENT castOperation ((%type;), (%expr;)) >
+<!ATTLIST unaryOperation 
+>
+
+<!ELEMENT literal EMPTY >
+<!ATTLIST literal 
   expr CDATA #REQUIRED
 >
 

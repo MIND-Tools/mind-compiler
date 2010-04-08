@@ -76,7 +76,7 @@ enum <type.name> {
 }
 >>
 
-enumMemberDef(member) ::= "<member.name><if (member.constantExpression)> = <member.constantExpression.expr><endif>"
+enumMemberDef(member) ::= "<member.name><if (member.constantExpression)> = <expression(expr=member.constantExpression)><endif>"
 
 constDef(const) ::= "#define <const.name> <const.value>"
 
@@ -219,7 +219,7 @@ pointerOfVarName(type, name) ::= "(* <typeQualifier(qualifiers=type)><name>)"
 
 arrayOfVarDef(type, name) ::= "<varDef(type=type.type, name=arrayOfVarName(type=type, name=name))>"
 
-arrayOfVarName(type, name) ::= "<name>[<if (type.constantExpression)><type.constantExpression.expr><endif>]"
+arrayOfVarName(type, name) ::= "<name>[<if (type.constantExpression)><expression(expr=type.constantExpression)><endif>]"
 
 simpleVarDef(type, name) ::= <<
 <if (primitiveTypeNameMap.(type.name))>
@@ -248,6 +248,33 @@ varDefTemplateMap ::= [
 
 primitiveTypeNameMap ::= [
   "string" : "__MIND_STRING_TYPEDEF"
+]
+
+expression(expr) ::= <<
+<(constantExpressionTemplateMap.(expr.astDecorations.kind))(expr=expr)>
+>>
+
+binaryOpertaionExpr(expr) ::= <<
+<expr.constantExpressions:{(<expression(expr=it)>)};separator=expr.operation>
+>>
+
+unaryOperationExpr(expr) ::= <<
+<expr.operation> (<expression(expr=expr.constantExpression)>)
+>>
+
+castOperationExpr(expr) ::= <<
+((<varDef(type=expr.type, name="")>) <expression(expr=expr.constantExpression)>)
+>>
+
+literalExpr(expr) ::= <<
+<expr.expr>
+>>
+
+constantExpressionTemplateMap ::= [
+  "binaryOperation" : "binaryOpertaionExpr",
+  "unaryOperation" :  "unaryOperationExpr",
+  "castOperation" :   "castOperationExpr",
+  "literal" :         "literalExpr"
 ]
 
 typeQualifier(qualifiers) ::= <<

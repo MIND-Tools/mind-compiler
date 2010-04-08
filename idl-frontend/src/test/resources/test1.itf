@@ -3,7 +3,7 @@
 typedef int myint, (* const mypointer)[];
 
 struct s {
-  int a, b;
+  int a[-2+5+((uint8_t) 0xff)], b;
 };
 
 interface test1 {

@@ -24,12 +24,6 @@ package org.ow2.mind.idl.parser;
 
 import static org.objectweb.fractal.adl.NodeUtil.castNodeError;
 import static org.objectweb.fractal.adl.NodeUtil.cloneTree;
-import static org.ow2.mind.idl.jtb.ParserConstants.CONST;
-import static org.ow2.mind.idl.jtb.ParserConstants.IN;
-import static org.ow2.mind.idl.jtb.ParserConstants.OUT;
-import static org.ow2.mind.idl.jtb.ParserConstants.STRUCT;
-import static org.ow2.mind.idl.jtb.ParserConstants.UNION;
-import static org.ow2.mind.idl.jtb.ParserConstants.VOLATILE;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -41,11 +35,14 @@ import java.util.Set;
 import org.objectweb.fractal.adl.CompilerError;
 import org.objectweb.fractal.adl.Node;
 import org.objectweb.fractal.adl.error.GenericErrors;
+import org.objectweb.fractal.adl.error.NodeErrorLocator;
 import org.objectweb.fractal.adl.xml.XMLNodeFactory;
 import org.ow2.mind.annotation.ast.AnnotationArgument;
 import org.ow2.mind.annotation.ast.AnnotationContainer;
 import org.ow2.mind.annotation.ast.AnnotationNode;
 import org.ow2.mind.idl.ast.ArrayOf;
+import org.ow2.mind.idl.ast.BinaryOperation;
+import org.ow2.mind.idl.ast.CastOperation;
 import org.ow2.mind.idl.ast.ConstantDefinition;
 import org.ow2.mind.idl.ast.ConstantExpression;
 import org.ow2.mind.idl.ast.ConstantExpressionContainer;
@@ -55,6 +52,7 @@ import org.ow2.mind.idl.ast.EnumReference;
 import org.ow2.mind.idl.ast.Include;
 import org.ow2.mind.idl.ast.IncludeContainer;
 import org.ow2.mind.idl.ast.InterfaceDefinition;
+import org.ow2.mind.idl.ast.Literal;
 import org.ow2.mind.idl.ast.Member;
 import org.ow2.mind.idl.ast.MemberContainer;
 import org.ow2.mind.idl.ast.Method;
@@ -70,11 +68,16 @@ import org.ow2.mind.idl.ast.TypeContainer;
 import org.ow2.mind.idl.ast.TypeDefReference;
 import org.ow2.mind.idl.ast.TypeDefinition;
 import org.ow2.mind.idl.ast.TypeQualifier;
+import org.ow2.mind.idl.ast.UnaryOperation;
 import org.ow2.mind.idl.ast.UnionDefinition;
 import org.ow2.mind.idl.ast.UnionReference;
 import org.ow2.mind.idl.jtb.Parser;
+import org.ow2.mind.idl.jtb.ParserConstants;
 import org.ow2.mind.idl.jtb.syntaxtree.AbstractDeclarator;
 import org.ow2.mind.idl.jtb.syntaxtree.AbstractDirectDeclarator;
+import org.ow2.mind.idl.jtb.syntaxtree.AdditiveExpression;
+import org.ow2.mind.idl.jtb.syntaxtree.AdditiveOperation;
+import org.ow2.mind.idl.jtb.syntaxtree.AndExpression;
 import org.ow2.mind.idl.jtb.syntaxtree.AnnotationAnnotationValue;
 import org.ow2.mind.idl.jtb.syntaxtree.AnnotationParameters;
 import org.ow2.mind.idl.jtb.syntaxtree.AnnotationValue;
@@ -82,6 +85,7 @@ import org.ow2.mind.idl.jtb.syntaxtree.AnnotationValuePair;
 import org.ow2.mind.idl.jtb.syntaxtree.ArrayAnnotationValue;
 import org.ow2.mind.idl.jtb.syntaxtree.ArraySpecification;
 import org.ow2.mind.idl.jtb.syntaxtree.BooleanValue;
+import org.ow2.mind.idl.jtb.syntaxtree.CastExpression;
 import org.ow2.mind.idl.jtb.syntaxtree.Declarator;
 import org.ow2.mind.idl.jtb.syntaxtree.Declarators;
 import org.ow2.mind.idl.jtb.syntaxtree.DirectDeclarator;
@@ -92,19 +96,26 @@ import org.ow2.mind.idl.jtb.syntaxtree.ITFFile;
 import org.ow2.mind.idl.jtb.syntaxtree.IncludeDirective;
 import org.ow2.mind.idl.jtb.syntaxtree.IntegerValue;
 import org.ow2.mind.idl.jtb.syntaxtree.InterfaceInheritanceSpecification;
-import org.ow2.mind.idl.jtb.syntaxtree.Literal;
+import org.ow2.mind.idl.jtb.syntaxtree.LogicalAndExpression;
+import org.ow2.mind.idl.jtb.syntaxtree.LogicalOrExpression;
 import org.ow2.mind.idl.jtb.syntaxtree.MethodDefinition;
+import org.ow2.mind.idl.jtb.syntaxtree.MulExpression;
+import org.ow2.mind.idl.jtb.syntaxtree.MulOperation;
 import org.ow2.mind.idl.jtb.syntaxtree.NodeChoice;
 import org.ow2.mind.idl.jtb.syntaxtree.NodeList;
 import org.ow2.mind.idl.jtb.syntaxtree.NodeListOptional;
 import org.ow2.mind.idl.jtb.syntaxtree.NodeSequence;
 import org.ow2.mind.idl.jtb.syntaxtree.NodeToken;
 import org.ow2.mind.idl.jtb.syntaxtree.NullValue;
+import org.ow2.mind.idl.jtb.syntaxtree.OrExpression;
 import org.ow2.mind.idl.jtb.syntaxtree.ParameterList;
 import org.ow2.mind.idl.jtb.syntaxtree.ParameterQualifier;
 import org.ow2.mind.idl.jtb.syntaxtree.PointerSpecification;
+import org.ow2.mind.idl.jtb.syntaxtree.PrimaryExpression;
 import org.ow2.mind.idl.jtb.syntaxtree.QualifiedTypeSpecification;
 import org.ow2.mind.idl.jtb.syntaxtree.QualifierPointerSpecification;
+import org.ow2.mind.idl.jtb.syntaxtree.ShiftExpression;
+import org.ow2.mind.idl.jtb.syntaxtree.ShiftOperation;
 import org.ow2.mind.idl.jtb.syntaxtree.StringValue;
 import org.ow2.mind.idl.jtb.syntaxtree.StructMember;
 import org.ow2.mind.idl.jtb.syntaxtree.StructOrUnionDefinition;
@@ -114,6 +125,8 @@ import org.ow2.mind.idl.jtb.syntaxtree.TypeDefName;
 import org.ow2.mind.idl.jtb.syntaxtree.TypeDefSpecification;
 import org.ow2.mind.idl.jtb.syntaxtree.TypeSpecification;
 import org.ow2.mind.idl.jtb.syntaxtree.TypeSpecifiers;
+import org.ow2.mind.idl.jtb.syntaxtree.UnaryExpression;
+import org.ow2.mind.idl.jtb.syntaxtree.XorExpression;
 import org.ow2.mind.idl.jtb.visitor.GJDepthFirst;
 import org.ow2.mind.value.ast.Array;
 import org.ow2.mind.value.ast.BooleanLiteral;
@@ -128,11 +141,15 @@ import org.xml.sax.SAXException;
 /**
  * Translate the JTB AST of an IDL file into a "fractal-adl like" AST.
  */
-public class JTBProcessor extends GJDepthFirst<Object, Node> {
+public class JTBProcessor extends GJDepthFirst<Object, Node>
+    implements
+      ParserConstants {
 
-  private final String         filename;
-  private final XMLNodeFactory nodeFactory;
-  private final String         idlDtd;
+  private final String            filename;
+  private final XMLNodeFactory    nodeFactory;
+  private final String            idlDtd;
+  private final BeginTokenVisitor beginTokenVisitor = new BeginTokenVisitor();
+  private final EndTokenVisitor   endTokenVisitor   = new EndTokenVisitor();
 
   /**
    * @param nodeFactory The node factory to be used for instantiating AST nodes.
@@ -179,6 +196,11 @@ public class JTBProcessor extends GJDepthFirst<Object, Node> {
   }
 
   private Node newNode(final String name, final NodeToken source) {
+    return newNode(name, source, source);
+  }
+
+  private Node newNode(final String name, final NodeToken beginToken,
+      final NodeToken endToken) {
     Node node;
     try {
       node = nodeFactory.newXMLNode(idlDtd, name);
@@ -186,17 +208,40 @@ public class JTBProcessor extends GJDepthFirst<Object, Node> {
       throw new CompilerError(GenericErrors.INTERNAL_ERROR, e,
           "Unable to create node");
     }
-    setSource(node, source);
+    setSource(node, beginToken, endToken);
 
     return node;
   }
 
+  private Node newNode(final String name,
+      final org.ow2.mind.idl.jtb.syntaxtree.Node syntaxNode) {
+    return newNode(name, syntaxNode.accept(beginTokenVisitor), syntaxNode
+        .accept(endTokenVisitor));
+  }
+
   private void setSource(final Node node, final NodeToken source) {
-    if (source == null)
+    setSource(node, source, source);
+  }
+
+  private void setSource(final Node node, final NodeToken beginToken,
+      final NodeToken endToken) {
+    if (beginToken == null)
       node.astSetSource(filename);
+    else if (endToken == null)
+      node.astSetSource(NodeErrorLocator.fullLocation(filename,
+          beginToken.beginLine, beginToken.endLine, beginToken.beginColumn,
+          beginToken.endColumn));
     else
-      node.astSetSource(filename + ":" + source.beginLine + "-"
-          + source.beginColumn);
+      node.astSetSource(NodeErrorLocator.fullLocation(filename,
+          beginToken.beginLine, endToken.endLine, beginToken.beginColumn,
+          endToken.endColumn));
+
+  }
+
+  private void setSource(final Node node,
+      final org.ow2.mind.idl.jtb.syntaxtree.Node syntaxNode) {
+    setSource(node, syntaxNode.accept(beginTokenVisitor), syntaxNode
+        .accept(endTokenVisitor));
   }
 
   private void copySource(final Node node, final Node from) {
@@ -220,7 +265,7 @@ public class JTBProcessor extends GJDepthFirst<Object, Node> {
   public Object visit(final ITFFile n, final Node argu) {
     assert argu == null;
 
-    final InterfaceDefinition itf = (InterfaceDefinition) newNode("itf");
+    final InterfaceDefinition itf = (InterfaceDefinition) newNode("itf", n);
 
     // process include directives
     n.f0.accept(this, itf);
@@ -238,7 +283,8 @@ public class JTBProcessor extends GJDepthFirst<Object, Node> {
   public Object visit(final IDTFile n, final Node argu) {
     assert argu == null;
 
-    final SharedTypeDefinition idtFile = (SharedTypeDefinition) newNode("idt");
+    final SharedTypeDefinition idtFile = (SharedTypeDefinition) newNode("idt",
+        n);
 
     // process include directives
     n.f8.accept(this, idtFile);
@@ -254,7 +300,7 @@ public class JTBProcessor extends GJDepthFirst<Object, Node> {
     final IncludeContainer container = castNodeError(argu,
         IncludeContainer.class);
 
-    final Include include = (Include) newNode("include", n.f0);
+    final Include include = (Include) newNode("include", n);
 
     include.setPath(n.f2.tokenImage);
 
@@ -276,7 +322,7 @@ public class JTBProcessor extends GJDepthFirst<Object, Node> {
 
     final Object def = n.f0.accept(this, argu);
 
-    if (def instanceof List) {
+    if (def instanceof List<?>) {
       for (final Object d : (List<?>) def) {
         assert d instanceof Type;
         container.addType((Type) d);
@@ -292,7 +338,7 @@ public class JTBProcessor extends GJDepthFirst<Object, Node> {
   @Override
   public Object visit(final TypeDefSpecification n, final Node argu) {
 
-    final TypeDefinition typedef = (TypeDefinition) newNode("typedef");
+    final TypeDefinition typedef = (TypeDefinition) newNode("typedef", n);
 
     // process qualified type specification
     n.f1.accept(this, typedef);
@@ -342,7 +388,7 @@ public class JTBProcessor extends GJDepthFirst<Object, Node> {
     final TypeContainer typeContainer = castNodeError(argu, TypeContainer.class);
 
     final TypeDefReference typeDefReference = (TypeDefReference) newNode(
-        "typedefRef", n.f0.f0);
+        "typedefRef", n);
     typeDefReference.setName(fullyQualifiedName(n.f0));
 
     typeContainer.setType(typeDefReference);
@@ -353,7 +399,7 @@ public class JTBProcessor extends GJDepthFirst<Object, Node> {
   public Object visit(final TypeSpecifiers n, final Node argu) {
 
     final PrimitiveType primitiveType = (PrimitiveType) newNode(
-        "primitiveType", (NodeToken) ((NodeChoice) n.f0.elementAt(0)).choice);
+        "primitiveType", n);
 
     final StringBuilder sb = new StringBuilder();
     final Iterator<org.ow2.mind.idl.jtb.syntaxtree.Node> iter = n.f0.nodes
@@ -381,14 +427,12 @@ public class JTBProcessor extends GJDepthFirst<Object, Node> {
     // process StructOrUnion and identifier
     final NodeToken structOrUnion = (NodeToken) n.f0.f0.choice;
     if (structOrUnion.kind == STRUCT) {
-      final StructDefinition struct = (StructDefinition) newNode("struct",
-          structOrUnion);
+      final StructDefinition struct = (StructDefinition) newNode("struct", n);
       if (n.f1.present()) struct.setName(((NodeToken) n.f1.node).tokenImage);
       type = struct;
     } else {
       assert structOrUnion.kind == UNION;
-      final UnionDefinition union = (UnionDefinition) newNode("union",
-          structOrUnion);
+      final UnionDefinition union = (UnionDefinition) newNode("union", n);
       if (n.f1.present()) union.setName(((NodeToken) n.f1.node).tokenImage);
       type = union;
     }
@@ -407,14 +451,12 @@ public class JTBProcessor extends GJDepthFirst<Object, Node> {
     // process StructOrUnion and identifier
     final NodeToken structOrUnion = (NodeToken) n.f0.f0.choice;
     if (structOrUnion.kind == STRUCT) {
-      final StructReference struct = (StructReference) newNode("structRef",
-          structOrUnion);
+      final StructReference struct = (StructReference) newNode("structRef", n);
       struct.setName(n.f1.tokenImage);
       type = struct;
     } else {
       assert structOrUnion.kind == UNION;
-      final UnionReference union = (UnionReference) newNode("unionRef",
-          structOrUnion);
+      final UnionReference union = (UnionReference) newNode("unionRef", n);
       union.setName(n.f1.tokenImage);
       type = union;
     }
@@ -428,7 +470,7 @@ public class JTBProcessor extends GJDepthFirst<Object, Node> {
     final MemberContainer memberContainer = castNodeError(argu,
         MemberContainer.class);
 
-    final Member member = (Member) newNode("member");
+    final Member member = (Member) newNode("member", n);
 
     // process annotations
     n.f0.accept(this, member);
@@ -463,7 +505,7 @@ public class JTBProcessor extends GJDepthFirst<Object, Node> {
       final Node argu) {
 
     // process StructOrUnion and identifier
-    final EnumDefinition enummeration = (EnumDefinition) newNode("enum", n.f0);
+    final EnumDefinition enummeration = (EnumDefinition) newNode("enum", n);
     if (n.f1.present())
       enummeration.setName(((NodeToken) n.f1.node).tokenImage);
     // process members
@@ -477,7 +519,7 @@ public class JTBProcessor extends GJDepthFirst<Object, Node> {
       final Node argu) {
 
     // process StructOrUnion and identifier
-    final EnumReference enummeration = (EnumReference) newNode("enumRef", n.f0);
+    final EnumReference enummeration = (EnumReference) newNode("enumRef", n);
     enummeration.setName(n.f1.tokenImage);
 
     return enummeration;
@@ -490,7 +532,7 @@ public class JTBProcessor extends GJDepthFirst<Object, Node> {
     final EnumDefinition enummeration = castNodeError(argu,
         EnumDefinition.class);
 
-    final EnumMember member = (EnumMember) newNode("enumMember", n.f1);
+    final EnumMember member = (EnumMember) newNode("enumMember", n);
 
     // process annotations
     n.f0.accept(this, member);
@@ -522,6 +564,7 @@ public class JTBProcessor extends GJDepthFirst<Object, Node> {
     TypeContainer n1 = cloneTree(container);
     n1.setType(cloneTypeSpecifier(typeSpecifier));
     n.f0.accept(this, n1);
+    setSource(n1, n.f0);
     result.add(n1);
 
     // visit other declarators (if any)
@@ -529,6 +572,7 @@ public class JTBProcessor extends GJDepthFirst<Object, Node> {
       n1 = cloneTree(container);
       n1.setType(cloneTypeSpecifier(typeSpecifier));
       syntaxNode.accept(this, n1);
+      setSource(n1, ((NodeSequence) syntaxNode).elementAt(1));
       result.add(n1);
     }
 
@@ -565,7 +609,7 @@ public class JTBProcessor extends GJDepthFirst<Object, Node> {
     assert argu != null;
     final TypeContainer typeContainer = castNodeError(argu, TypeContainer.class);
 
-    final PointerOf pointerOf = (PointerOf) newNode("pointerOf", n.f0);
+    final PointerOf pointerOf = (PointerOf) newNode("pointerOf", n);
 
     // process type qualifier
     n.f1.accept(this, pointerOf);
@@ -653,7 +697,7 @@ public class JTBProcessor extends GJDepthFirst<Object, Node> {
     assert argu != null;
     final TypeContainer typeContainer = castNodeError(argu, TypeContainer.class);
 
-    final ArrayOf arrayOf = (ArrayOf) newNode("arrayOf", n.f0);
+    final ArrayOf arrayOf = (ArrayOf) newNode("arrayOf", n);
 
     // process array size (if any)
     n.f1.accept(this, arrayOf);
@@ -678,7 +722,7 @@ public class JTBProcessor extends GJDepthFirst<Object, Node> {
         TypeCollectionContainer.class);
 
     final ConstantDefinition constDef = (ConstantDefinition) newNode(
-        "constant", n.f0);
+        "constant", n);
     constDef.setName(n.f2.tokenImage);
     constDef.setValue(n.f3.tokenImage);
 
@@ -702,7 +746,7 @@ public class JTBProcessor extends GJDepthFirst<Object, Node> {
     // process interface definition
     n.f0.accept(this, itfDef);
 
-    setSource(itfDef, n.f1);
+    setSource(itfDef, n);
 
     // process "unmanaged" qualifier
     if (n.f2.present()) {
@@ -738,7 +782,7 @@ public class JTBProcessor extends GJDepthFirst<Object, Node> {
     final InterfaceDefinition itfDef = castNodeError(argu,
         InterfaceDefinition.class);
 
-    final Method method = (Method) newNode("method", n.f3);
+    final Method method = (Method) newNode("method", n);
 
     // process annotations
     n.f0.accept(this, method);
@@ -810,7 +854,7 @@ public class JTBProcessor extends GJDepthFirst<Object, Node> {
     assert argu != null;
     final Method method = castNodeError(argu, Method.class);
 
-    final Parameter parameter = (Parameter) newNode("parameter");
+    final Parameter parameter = (Parameter) newNode("parameter", n);
 
     // process annotations
     n.f0.accept(this, parameter);
@@ -852,19 +896,242 @@ public class JTBProcessor extends GJDepthFirst<Object, Node> {
   // ---------------------------------------------------------------------------
 
   @Override
-  public Object visit(final Literal n, final Node argu) {
+  public Object visit(
+      final org.ow2.mind.idl.jtb.syntaxtree.ConstantExpression n,
+      final Node argu) {
     assert argu != null;
     final ConstantExpressionContainer container = castNodeError(argu,
         ConstantExpressionContainer.class);
 
-    final NodeToken literal = (NodeToken) n.f0.choice;
-    final ConstantExpression expr = (ConstantExpression) newNode(
-        "constantExpression", literal);
-
-    expr.setExpr(literal.tokenImage);
+    final ConstantExpression expr = (ConstantExpression) n.f0
+        .accept(this, argu);
 
     container.setConstantExpression(expr);
 
+    return expr;
+  }
+
+  @Override
+  public Object visit(final LogicalOrExpression n, final Node argu) {
+    if (n.f1.present()) {
+      return visitBinaryExpression(BinaryOperation.LOGICAL_OR, n.f0,
+          ((NodeSequence) n.f1.node).elementAt(1), n, argu);
+    } else {
+      return n.f0.accept(this, argu);
+    }
+  }
+
+  @Override
+  public Object visit(final LogicalAndExpression n, final Node argu) {
+    if (n.f1.present()) {
+      return visitBinaryExpression(BinaryOperation.LOGICAL_AND, n.f0,
+          ((NodeSequence) n.f1.node).elementAt(1), n, argu);
+    } else {
+      return n.f0.accept(this, argu);
+    }
+  }
+
+  @Override
+  public Object visit(final OrExpression n, final Node argu) {
+    if (n.f1.present()) {
+      return visitBinaryExpression(BinaryOperation.OR, n.f0,
+          ((NodeSequence) n.f1.node).elementAt(1), n, argu);
+    } else {
+      return n.f0.accept(this, argu);
+    }
+  }
+
+  @Override
+  public Object visit(final XorExpression n, final Node argu) {
+    if (n.f1.present()) {
+      return visitBinaryExpression(BinaryOperation.XOR, n.f0,
+          ((NodeSequence) n.f1.node).elementAt(1), n, argu);
+    } else {
+      return n.f0.accept(this, argu);
+    }
+  }
+
+  @Override
+  public Object visit(final AndExpression n, final Node argu) {
+    if (n.f1.present()) {
+      return visitBinaryExpression(BinaryOperation.AND, n.f0,
+          ((NodeSequence) n.f1.node).elementAt(1), n, argu);
+    } else {
+      return n.f0.accept(this, argu);
+    }
+  }
+
+  @Override
+  public Object visit(final ShiftExpression n, final Node argu) {
+    if (n.f1.present()) {
+      final BinaryOperation expr = visitBinaryExpression(null, n.f0,
+          ((NodeSequence) n.f1.node).elementAt(1), n, argu);
+
+      // process operand
+      ((NodeSequence) n.f1.node).elementAt(0).accept(this, expr);
+
+      return expr;
+    } else {
+      return n.f0.accept(this, argu);
+    }
+  }
+
+  @Override
+  public Object visit(final AdditiveExpression n, final Node argu) {
+    if (n.f1.present()) {
+      final BinaryOperation expr = visitBinaryExpression(null, n.f0,
+          ((NodeSequence) n.f1.node).elementAt(1), n, argu);
+
+      // process operand
+      ((NodeSequence) n.f1.node).elementAt(0).accept(this, expr);
+
+      return expr;
+    } else {
+      return n.f0.accept(this, argu);
+    }
+  }
+
+  @Override
+  public Object visit(final MulExpression n, final Node argu) {
+    if (n.f1.present()) {
+      final BinaryOperation expr = visitBinaryExpression(null, n.f0,
+          ((NodeSequence) n.f1.node).elementAt(1), n, argu);
+
+      // process operand
+      ((NodeSequence) n.f1.node).elementAt(0).accept(this, expr);
+
+      return expr;
+    } else {
+      return n.f0.accept(this, argu);
+    }
+  }
+
+  @Override
+  public Object visit(final CastExpression n, final Node argu) {
+    if (n.f0.choice instanceof UnaryExpression) {
+      return n.f0.accept(this, argu);
+    } else {
+      final CastOperation expr = (CastOperation) newNode("castOperation", n);
+
+      // process type specification
+      ((NodeSequence) n.f0.choice).elementAt(1).accept(this, expr);
+      // process declarator
+      ((NodeSequence) n.f0.choice).elementAt(2).accept(this, expr);
+
+      // process inner cast expression
+      expr
+          .setConstantExpression((ConstantExpression) ((NodeSequence) n.f0.choice)
+              .elementAt(4).accept(this, expr));
+      return expr;
+    }
+  }
+
+  @Override
+  public Object visit(final UnaryExpression n, final Node argu) {
+    if (n.f0.present()) {
+      final UnaryOperation expr = (UnaryOperation) newNode("unaryOperation", n);
+      n.f0.accept(this, expr);
+      expr.setConstantExpression((ConstantExpression) n.f1.accept(this, expr));
+      return expr;
+    } else {
+      return n.f1.accept(this, argu);
+    }
+  }
+
+  @Override
+  public Object visit(final PrimaryExpression n, final Node argu) {
+    if (n.f0.choice instanceof org.ow2.mind.idl.jtb.syntaxtree.Literal) {
+      return n.f0.accept(this, argu);
+    } else {
+      return ((NodeSequence) n.f0.choice).elementAt(1).accept(this, argu);
+    }
+  }
+
+  @Override
+  public Object visit(final org.ow2.mind.idl.jtb.syntaxtree.Literal n,
+      final Node argu) {
+
+    final NodeToken literal = (NodeToken) n.f0.choice;
+    final Literal expr = (Literal) newNode("literal", literal);
+
+    expr.setExpr(literal.tokenImage);
+
+    return expr;
+  }
+
+  @Override
+  public Object visit(final ShiftOperation n, final Node argu) {
+    assert argu != null;
+    final BinaryOperation expr = castNodeError(argu, BinaryOperation.class);
+    switch (((NodeToken) n.f0.choice).kind) {
+      case LSHIFT :
+        expr.setOperation(BinaryOperation.LEFT_SHIFT);
+        break;
+      case RSHIFT :
+        expr.setOperation(BinaryOperation.RIGHT_SHIFT);
+        break;
+    }
+    return expr;
+  }
+
+  @Override
+  public Object visit(final AdditiveOperation n, final Node argu) {
+    assert argu != null;
+    final BinaryOperation expr = castNodeError(argu, BinaryOperation.class);
+    switch (((NodeToken) n.f0.choice).kind) {
+      case PLUS :
+        expr.setOperation(BinaryOperation.ADD);
+        break;
+      case MINUS :
+        expr.setOperation(BinaryOperation.SUB);
+        break;
+    }
+    return expr;
+  }
+
+  @Override
+  public Object visit(final MulOperation n, final Node argu) {
+    assert argu != null;
+    final BinaryOperation expr = castNodeError(argu, BinaryOperation.class);
+    switch (((NodeToken) n.f0.choice).kind) {
+      case STAR :
+        expr.setOperation(BinaryOperation.MULL);
+        break;
+      case SLASH :
+        expr.setOperation(BinaryOperation.DIV);
+        break;
+      case PERCENT :
+        expr.setOperation(BinaryOperation.MOD);
+        break;
+    }
+    return expr;
+  }
+
+  @Override
+  public Object visit(final org.ow2.mind.idl.jtb.syntaxtree.UnaryOperation n,
+      final Node argu) {
+    assert argu != null;
+    final UnaryOperation expr = castNodeError(argu, UnaryOperation.class);
+    switch (((NodeToken) n.f0.choice).kind) {
+      case AMP :
+        expr.setOperation(UnaryOperation.AMP);
+        break;
+      case STAR :
+        expr.setOperation(UnaryOperation.STAR);
+        break;
+      case PLUS :
+        expr.setOperation(UnaryOperation.PLUS);
+        break;
+      case MINUS :
+        expr.setOperation(UnaryOperation.MINUS);
+        break;
+      case TILDE :
+        expr.setOperation(UnaryOperation.TILDE);
+        break;
+      case NOT :
+        expr.setOperation(UnaryOperation.NOT);
+        break;
+    }
     return expr;
   }
 
@@ -1100,5 +1367,19 @@ public class JTBProcessor extends GJDepthFirst<Object, Node> {
       // in other cases simply clone the type specifier
       return cloneTree(typeSpecifier);
     }
+  }
+
+  private BinaryOperation visitBinaryExpression(final String operator,
+      final org.ow2.mind.idl.jtb.syntaxtree.Node left,
+      final org.ow2.mind.idl.jtb.syntaxtree.Node right,
+      final org.ow2.mind.idl.jtb.syntaxtree.Node location, final Node argu) {
+    final BinaryOperation operation = (BinaryOperation) newNode(
+        "binaryOperation", location);
+    operation.setOperation(operator);
+    operation.addConstantExpression((ConstantExpression) left.accept(this,
+        operation));
+    operation.addConstantExpression((ConstantExpression) right.accept(this,
+        argu));
+    return operation;
   }
 }

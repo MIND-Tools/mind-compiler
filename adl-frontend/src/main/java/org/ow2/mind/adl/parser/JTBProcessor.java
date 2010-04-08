@@ -135,13 +135,14 @@ public class JTBProcessor extends GJDepthFirst<Node, Node>
     implements
       ParserConstants {
 
-  private final String          filename;
-  private final XMLNodeFactory  nodeFactory;
-  private final String          adlDtd;
+  private final String            filename;
+  private final XMLNodeFactory    nodeFactory;
+  private final String            adlDtd;
 
-  private final Set<String>     typeParameters  = new HashSet<String>();
-  private ADLException          exception;
-  private final EndTokenVisitor endTokenVisitor = new EndTokenVisitor();
+  private final Set<String>       typeParameters    = new HashSet<String>();
+  private ADLException            exception;
+  private final BeginTokenVisitor beginTokenVisitor = new BeginTokenVisitor();
+  private final EndTokenVisitor   endTokenVisitor   = new EndTokenVisitor();
 
   /**
    * @param nodeFactory The node factory to be used for instantiating AST nodes.
@@ -199,6 +200,12 @@ public class JTBProcessor extends GJDepthFirst<Node, Node>
     return node;
   }
 
+  private Node newNode(final String name,
+      final org.ow2.mind.adl.jtb.syntaxtree.Node syntaxNode) {
+    return newNode(name, syntaxNode.accept(beginTokenVisitor), syntaxNode
+        .accept(endTokenVisitor));
+  }
+
   private void setSource(final Node node, final NodeToken source) {
     setSource(node, source, source);
   }
@@ -212,6 +219,12 @@ public class JTBProcessor extends GJDepthFirst<Node, Node>
           beginToken.beginLine, endToken.endLine, beginToken.beginColumn,
           endToken.endColumn));
 
+  }
+
+  private void setSource(final Node node,
+      final org.ow2.mind.adl.jtb.syntaxtree.Node syntaxNode) {
+    setSource(node, syntaxNode.accept(beginTokenVisitor), syntaxNode
+        .accept(endTokenVisitor));
   }
 
   private void copySource(final Node node, final Node from) {
@@ -243,8 +256,7 @@ public class JTBProcessor extends GJDepthFirst<Node, Node>
     final ImportContainer container = castNodeError(argu, ImportContainer.class);
 
     String packageName;
-    final Import imp = (Import) newNode("import", n.f1, endTokenVisitor
-        .visit(n));
+    final Import imp = (Import) newNode("import", n);
 
     packageName = n.f2.tokenImage;
 
@@ -281,8 +293,7 @@ public class JTBProcessor extends GJDepthFirst<Node, Node>
   public Node visit(final TypeDefinition n, final Node argu) {
     assert argu == null;
 
-    final MindDefinition def = (MindDefinition) newNode("type", n.f1,
-        endTokenVisitor.visit(n));
+    final MindDefinition def = (MindDefinition) newNode("type", n);
 
     // process annotations
     n.f0.accept(this, def);
@@ -305,7 +316,7 @@ public class JTBProcessor extends GJDepthFirst<Node, Node>
     final MindDefinition def = castNodeError(argu, MindDefinition.class);
 
     final DefinitionReferenceContainer extend = (DefinitionReferenceContainer) newNode(
-        "extends", n.f0, endTokenVisitor.visit(n));
+        "extends", n);
 
     def.setExtends(extend);
 
@@ -319,7 +330,7 @@ public class JTBProcessor extends GJDepthFirst<Node, Node>
   public Node visit(final TypeDefinitionReference n, final Node argu) {
 
     final DefinitionReference defRef = (DefinitionReference) newNode(
-        "definition", n.f0.f0, endTokenVisitor.visit(n));
+        "definition", n);
     defRef.setName(fullyQualifiedName(n.f0));
 
     if (argu != null) {
@@ -336,8 +347,7 @@ public class JTBProcessor extends GJDepthFirst<Node, Node>
   public Node visit(final PrimitiveDefinition n, final Node argu) {
     assert argu == null;
 
-    final MindDefinition def = (MindDefinition) newNode("primitive", n.f2,
-        endTokenVisitor.visit(n));
+    final MindDefinition def = (MindDefinition) newNode("primitive", n);
 
     // process annotations
     n.f0.accept(this, def);
@@ -368,8 +378,7 @@ public class JTBProcessor extends GJDepthFirst<Node, Node>
     final FormalParameterContainer container = castNodeError(argu,
         FormalParameterContainer.class);
 
-    final FormalParameter param = (FormalParameter) newNode("parameter", n.f0,
-        endTokenVisitor.visit(n));
+    final FormalParameter param = (FormalParameter) newNode("parameter", n);
     param.setName(n.f0.tokenImage);
     container.addFormalParameter(param);
     return null;
@@ -381,7 +390,7 @@ public class JTBProcessor extends GJDepthFirst<Node, Node>
     final MindDefinition def = castNodeError(argu, MindDefinition.class);
 
     final DefinitionReferenceContainer extend = (DefinitionReferenceContainer) newNode(
-        "extends", n.f0, endTokenVisitor.visit(n));
+        "extends", n);
 
     def.setExtends(extend);
 
@@ -395,7 +404,7 @@ public class JTBProcessor extends GJDepthFirst<Node, Node>
   public Node visit(final PrimitiveDefinitionReference n, final Node argu) {
 
     final DefinitionReference defRef = (DefinitionReference) newNode(
-        "definition", n.f0.f0, endTokenVisitor.visit(n));
+        "definition", n);
     defRef.setName(fullyQualifiedName(n.f0));
 
     // process arguments
@@ -421,7 +430,7 @@ public class JTBProcessor extends GJDepthFirst<Node, Node>
       final Node argu) {
     assert argu != null;
 
-    final Argument arg = (Argument) newNode("argument");
+    final Argument arg = (Argument) newNode("argument", n);
 
     // process argument value
     n.f0.accept(this, arg);
@@ -439,8 +448,7 @@ public class JTBProcessor extends GJDepthFirst<Node, Node>
   public Node visit(final CompositeDefinition n, final Node argu) {
     assert argu == null;
 
-    final MindDefinition def = (MindDefinition) newNode("composite", n.f1,
-        endTokenVisitor.visit(n));
+    final MindDefinition def = (MindDefinition) newNode("composite", n);
 
     // process annotations
     n.f0.accept(this, def);
@@ -467,7 +475,7 @@ public class JTBProcessor extends GJDepthFirst<Node, Node>
   public Node visit(final FormalTypeParameterDeclaration n, final Node argu) {
     assert argu != null;
     final FormalTypeParameter typeParam = (FormalTypeParameter) newNode(
-        "typeParameter", n.f0, endTokenVisitor.visit(n));
+        "typeParameter", n);
     typeParam.setName(n.f0.tokenImage);
     typeParam.setDefinitionReference((DefinitionReference) n.f2.accept(this,
         null));
@@ -485,7 +493,7 @@ public class JTBProcessor extends GJDepthFirst<Node, Node>
   public Node visit(final CompositeDefinitionReference n, final Node argu) {
 
     final DefinitionReference defRef = (DefinitionReference) newNode(
-        "definition", n.f0.f0, endTokenVisitor.visit(n));
+        "definition", n);
     defRef.setName(fullyQualifiedName(n.f0));
 
     // process type arguments
@@ -514,7 +522,7 @@ public class JTBProcessor extends GJDepthFirst<Node, Node>
       final Node argu) {
     assert argu != null;
 
-    final TypeArgument typeArg = (TypeArgument) newNode("typeArgument");
+    final TypeArgument typeArg = (TypeArgument) newNode("typeArgument", n);
 
     if (n.f0.choice instanceof CompositeDefinitionReference) {
       final CompositeDefinitionReference cdr = (CompositeDefinitionReference) n.f0.choice;
@@ -552,7 +560,7 @@ public class JTBProcessor extends GJDepthFirst<Node, Node>
     final MindDefinition def = castNodeError(argu, MindDefinition.class);
 
     final DefinitionReferenceContainer extend = (DefinitionReferenceContainer) newNode(
-        "extends", n.f0, endTokenVisitor.visit(n));
+        "extends", n);
 
     def.setExtends(extend);
 
@@ -569,8 +577,7 @@ public class JTBProcessor extends GJDepthFirst<Node, Node>
   @Override
   public Node visit(final InterfaceDefinition n, final Node argu) {
     assert argu != null;
-    final MindInterface itf = (MindInterface) newNode("interface",
-        (NodeToken) n.f1.choice, endTokenVisitor.visit(n));
+    final MindInterface itf = (MindInterface) newNode("interface", n);
 
     // process annotations
     n.f0.accept(this, itf);
@@ -612,8 +619,7 @@ public class JTBProcessor extends GJDepthFirst<Node, Node>
   public Node visit(final AttributeDefinition n, final Node argu) {
     assert argu != null;
 
-    final Attribute attr = (Attribute) newNode("attribute", n.f1,
-        endTokenVisitor.visit(n));
+    final Attribute attr = (Attribute) newNode("attribute", n);
 
     // process annotations
     n.f0.accept(this, attr);
@@ -648,7 +654,7 @@ public class JTBProcessor extends GJDepthFirst<Node, Node>
   public Node visit(final DataDefinition n, final Node argu) {
     assert argu != null;
 
-    final Data data = (Data) newNode("data", n.f1, endTokenVisitor.visit(n));
+    final Data data = (Data) newNode("data", n);
 
     // process Path() | <CCode>
     if (n.f2.choice instanceof NodeToken) {
@@ -674,8 +680,7 @@ public class JTBProcessor extends GJDepthFirst<Node, Node>
   public Node visit(final ImplementationDefinition n, final Node argu) {
     assert argu != null;
 
-    final Source src = (Source) newNode("source", n.f1, endTokenVisitor
-        .visit(n));
+    final Source src = (Source) newNode("source", n);
 
     // process annotations
     n.f0.accept(this, src);
@@ -701,8 +706,7 @@ public class JTBProcessor extends GJDepthFirst<Node, Node>
   public Node visit(final BindingDefinition n, final Node argu) {
     assert argu != null;
 
-    final Binding bind = (Binding) newNode("binding", n.f1, endTokenVisitor
-        .visit(n));
+    final Binding bind = (Binding) newNode("binding", n);
 
     // process annotations
     n.f0.accept(this, bind);
@@ -740,8 +744,7 @@ public class JTBProcessor extends GJDepthFirst<Node, Node>
   public Node visit(final SubComponentDefinition n, final Node argu) {
     assert argu != null;
 
-    final Component comp = (Component) newNode("component", n.f1,
-        endTokenVisitor.visit(n));
+    final Component comp = (Component) newNode("component", n);
 
     // process annotations
     n.f0.accept(this, comp);
@@ -908,8 +911,7 @@ public class JTBProcessor extends GJDepthFirst<Node, Node>
     assert argu != null;
     final Component comp = (Component) argu;
 
-    final MindDefinition def = (MindDefinition) newNode("anonymousComposite",
-        n.f1, endTokenVisitor.visit(n));
+    final MindDefinition def = (MindDefinition) newNode("anonymousComposite", n);
     castNodeError(comp, AnonymousDefinitionContainer.class)
         .setAnonymousDefinition(def);
 
@@ -936,8 +938,7 @@ public class JTBProcessor extends GJDepthFirst<Node, Node>
     assert argu != null;
     final Component comp = (Component) argu;
 
-    final MindDefinition def = (MindDefinition) newNode("anonymousPrimitive",
-        n.f1, endTokenVisitor.visit(n));
+    final MindDefinition def = (MindDefinition) newNode("anonymousPrimitive", n);
     castNodeError(comp, AnonymousDefinitionContainer.class)
         .setAnonymousDefinition(def);
 
@@ -964,8 +965,7 @@ public class JTBProcessor extends GJDepthFirst<Node, Node>
     assert argu != null;
     final Component comp = (Component) argu;
 
-    final MindDefinition def = (MindDefinition) newNode("anonymousComposite",
-        n.f1);
+    final MindDefinition def = (MindDefinition) newNode("anonymousComposite", n);
     castNodeError(comp, AnonymousDefinitionContainer.class)
         .setAnonymousDefinition(def);
 
@@ -992,8 +992,7 @@ public class JTBProcessor extends GJDepthFirst<Node, Node>
     assert argu != null;
     final Component comp = (Component) argu;
 
-    final MindDefinition def = (MindDefinition) newNode("anonymousPrimitive",
-        n.f1);
+    final MindDefinition def = (MindDefinition) newNode("anonymousPrimitive", n);
     castNodeError(comp, AnonymousDefinitionContainer.class)
         .setAnonymousDefinition(def);
 
@@ -1024,8 +1023,7 @@ public class JTBProcessor extends GJDepthFirst<Node, Node>
       final Node argu) {
     assert argu != null;
 
-    final AnnotationNode annotation = (AnnotationNode) newNode("annotation",
-        n.f0, endTokenVisitor.visit(n));
+    final AnnotationNode annotation = (AnnotationNode) newNode("annotation", n);
 
     // process type
     annotation.setType(fullyQualifiedName(n.f1));
@@ -1046,7 +1044,7 @@ public class JTBProcessor extends GJDepthFirst<Node, Node>
     if (n.f1.present()) {
       if (((NodeChoice) n.f1.node).choice instanceof AnnotationValue) {
         final AnnotationArgument defaultParam = (AnnotationArgument) newNode(
-            "annotationArgument", n.f0, endTokenVisitor.visit(n));
+            "annotationArgument", n);
         defaultParam.setName(AnnotationArgument.DEFAULT_NAME);
         annotation.addAnnotationArgument(defaultParam);
 
@@ -1065,7 +1063,7 @@ public class JTBProcessor extends GJDepthFirst<Node, Node>
     final AnnotationNode annotation = (AnnotationNode) argu;
 
     final AnnotationArgument param = (AnnotationArgument) newNode(
-        "annotationArgument", n.f0, endTokenVisitor.visit(n));
+        "annotationArgument", n);
     annotation.addAnnotationArgument(param);
 
     // process name
@@ -1081,8 +1079,7 @@ public class JTBProcessor extends GJDepthFirst<Node, Node>
   public Node visit(final AnnotationAnnotationValue n, final Node argu) {
     assert argu != null;
 
-    final AnnotationNode value = (AnnotationNode) newNode("annotationValue",
-        n.f0.f0, endTokenVisitor.visit(n));
+    final AnnotationNode value = (AnnotationNode) newNode("annotationValue", n);
 
     // process type
     value.setType(fullyQualifiedName(n.f0.f1));
@@ -1104,7 +1101,7 @@ public class JTBProcessor extends GJDepthFirst<Node, Node>
   public Node visit(final ArrayAnnotationValue n, final Node argu) {
     assert argu != null;
 
-    final Array value = (Array) newNode("array", n.f0, endTokenVisitor.visit(n));
+    final Array value = (Array) newNode("array", n);
 
     // process sub values
     n.f1.accept(this, value);
@@ -1126,7 +1123,7 @@ public class JTBProcessor extends GJDepthFirst<Node, Node>
   public Node visit(final StringValue n, final Node argu) {
     assert argu != null;
 
-    final StringLiteral value = (StringLiteral) newNode("string", n.f0);
+    final StringLiteral value = (StringLiteral) newNode("string", n);
     value.setValue(n.f0.tokenImage.substring(1, n.f0.tokenImage.length() - 1));
 
     if (argu instanceof SingleValueContainer) {
@@ -1142,8 +1139,7 @@ public class JTBProcessor extends GJDepthFirst<Node, Node>
   public Node visit(final IntegerValue n, final Node argu) {
     assert argu != null;
 
-    final NumberLiteral value = (NumberLiteral) newNode("integer", n.f1,
-        endTokenVisitor.visit(n));
+    final NumberLiteral value = (NumberLiteral) newNode("integer", n);
     if (n.f0.present()) {
       value.setValue(((NodeToken) ((NodeChoice) n.f0.node).choice).tokenImage
           + n.f1.tokenImage);
@@ -1164,7 +1160,7 @@ public class JTBProcessor extends GJDepthFirst<Node, Node>
   public Node visit(final BooleanValue n, final Node argu) {
     assert argu != null;
 
-    final BooleanLiteral value = (BooleanLiteral) newNode("boolean", n.f0);
+    final BooleanLiteral value = (BooleanLiteral) newNode("boolean", n);
     if (n.f0.tokenImage.equals(BooleanLiteral.TRUE)) {
       value.setValue(BooleanLiteral.TRUE);
     } else {
@@ -1184,7 +1180,7 @@ public class JTBProcessor extends GJDepthFirst<Node, Node>
   public Node visit(final ReferenceValue n, final Node argu) {
     assert argu != null;
 
-    final Reference value = (Reference) newNode("reference", n.f0);
+    final Reference value = (Reference) newNode("reference", n);
     value.setRef(n.f0.tokenImage);
 
     if (argu instanceof SingleValueContainer) {
@@ -1200,7 +1196,7 @@ public class JTBProcessor extends GJDepthFirst<Node, Node>
   public Node visit(final NullValue n, final Node argu) {
     assert argu != null;
 
-    final NullLiteral value = (NullLiteral) newNode("null", n.f0);
+    final NullLiteral value = (NullLiteral) newNode("null", n);
 
     if (argu instanceof SingleValueContainer) {
       ((SingleValueContainer) argu).setValue(value);

@@ -19,7 +19,7 @@ struct s {
   myint b;
   int c[10][20];
   int d[10][20];
-  int (* e[30]);
+  int (* e[(- (2))+((5)+(((uint8_t ) 0xff)))]);
 };
 
 struct __component_test1_vTable {
