@@ -29,6 +29,7 @@ import java.util.Map;
 import org.antlr.stringtemplate.StringTemplateGroupLoader;
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.Definition;
+import org.objectweb.fractal.adl.bindings.BindingErrors;
 import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.fractal.api.control.BindingController;
 import org.objectweb.fractal.api.control.IllegalBindingException;
@@ -38,9 +39,12 @@ import org.ow2.mind.InputResourceLocator;
 import org.ow2.mind.VoidVisitor;
 import org.ow2.mind.adl.DefinitionVisitorExtensionHelper.VisitorExtension;
 import org.ow2.mind.adl.factory.FactoryGraphCompiler;
+import org.ow2.mind.adl.generic.GenericDefinitionNameSourceGenerator;
+import org.ow2.mind.adl.idl.IDLDefinitionSourceGenerator;
 import org.ow2.mind.adl.implementation.BasicImplementationLocator;
 import org.ow2.mind.adl.implementation.ImplementationLocator;
 import org.ow2.mind.adl.interfaces.CollectionInterfaceDefinitionSourceGenerator;
+import org.ow2.mind.adl.membrane.MembraneSourceGenerator;
 import org.ow2.mind.compilation.BasicCompilationCommandExecutor;
 import org.ow2.mind.compilation.CompilationCommandExecutor;
 import org.ow2.mind.compilation.CompilerWrapper;
@@ -119,25 +123,42 @@ public final class ADLBackendFactory {
     definitionSourceGenerator = cidsg;
     cidsg.clientSourceGeneratorItf = dsgd;
 
+    // Instantiate the default source generators
+    final DefinitionHeaderSourceGenerator dhsg = new DefinitionHeaderSourceGenerator();
+    final DefinitionIncSourceGenerator disg = new DefinitionIncSourceGenerator();
+    final ImplementationHeaderSourceGenerator ihsg = new ImplementationHeaderSourceGenerator();
+    final DefinitionMacroSourceGenerator dmsg = new DefinitionMacroSourceGenerator();
+    final MembraneSourceGenerator msg = new MembraneSourceGenerator();
+    final IDLDefinitionSourceGenerator idsg = new IDLDefinitionSourceGenerator();
+    final GenericDefinitionNameSourceGenerator gdnsg = new GenericDefinitionNameSourceGenerator();
+    final BinaryADLWriter baw = new BinaryADLWriter();
+    // Bind the default source generators to the dispatcher
+    dsgd.visitorsItf.put("header", dhsg);
+    dsgd.visitorsItf.put("include", disg);
+    dsgd.visitorsItf.put("impl", ihsg);
+    dsgd.visitorsItf.put("macro", dmsg);
+    dsgd.visitorsItf.put("membrane", msg);
+    dsgd.visitorsItf.put("idl", idsg);
+    dsgd.visitorsItf.put("generic-names", gdnsg);
+    dsgd.visitorsItf.put("binary-writer", baw);
+
+    // Bind the default source generator's client interfaces
+    for (final String visitorName : dsgd.visitorsItf.keySet()) {
+      final VoidVisitor<Definition> visitor = dsgd.visitorsItf.get(visitorName);
+      for (final String itfName : ((BindingController) visitor).listFc()) {
+        bindVisitor(serviceMap, visitorName, visitor, itfName);
+      }
+    }
+
+    // Instantiate and bind the visitor extensions
     final Collection<VisitorExtension> visitorExtensions = DefinitionVisitorExtensionHelper
         .getVisitorExtensions(pluginManagerItf, context);
     for (final VisitorExtension visitorExtension : visitorExtensions) {
       final VoidVisitor<Definition> visitor = visitorExtension.getVisitor();
       dsgd.visitorsItf.put(visitorExtension.getVisitorName(), visitor);
-      for (final String itfName : visitorExtension.getRequiredInterfaces()) {
-        try {
-          ((BindingController) visitor)
-              .bindFc(itfName, serviceMap.get(itfName));
-        } catch (final NoSuchInterfaceException e) {
-          // TODO Auto-generated catch block
-          e.printStackTrace();
-        } catch (final IllegalBindingException e) {
-          // TODO Auto-generated catch block
-          e.printStackTrace();
-        } catch (final IllegalLifeCycleException e) {
-          // TODO Auto-generated catch block
-          e.printStackTrace();
-        }
+      for (final String itfName : ((BindingController) visitor).listFc()) {
+        bindVisitor(serviceMap, visitorExtension.getVisitorName(), visitor,
+            itfName);
       }
     }
 
@@ -273,5 +294,21 @@ public final class ADLBackendFactory {
 
   public static CompilationCommandExecutor newCompilationCommandExecutor() {
     return new BasicCompilationCommandExecutor();
+  }
+
+  private static void bindVisitor(final Map<String, Object> serviceMap,
+      final String visitorName, final VoidVisitor<Definition> visitor,
+      final String itfName) throws ADLException {
+    try {
+      ((BindingController) visitor).bindFc(itfName, serviceMap.get(itfName));
+    } catch (final NoSuchInterfaceException e) {
+      throw new ADLException(BindingErrors.INVALID_ITF_NO_SUCH_INTERFACE, e);
+    } catch (final IllegalBindingException e) {
+      throw new ADLException("Illegal binding of the interface '" + itfName
+          + "' of the visitor '" + visitorName + "'.", e);
+    } catch (final IllegalLifeCycleException e) {
+      throw new ADLException("Cannot bind the interface '" + itfName
+          + "' of the visitor '" + visitorName + "'.", e);
+    }
   }
 }

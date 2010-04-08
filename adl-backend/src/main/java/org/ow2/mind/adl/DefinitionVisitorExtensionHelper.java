@@ -40,7 +40,7 @@ public final class DefinitionVisitorExtensionHelper {
   private DefinitionVisitorExtensionHelper() {
   }
 
-  public static final String                    DEFINITION_VISITOR_EXTENSION = "org.ow2.mind.adl.definition-visitors";
+  public static final String                    DEFINITION_VISITOR_EXTENSION = "org.ow2.mind.adl.definition-source-generators";
 
   protected static Collection<VisitorExtension> visitorExtensions            = null;
 
@@ -72,18 +72,6 @@ public final class DefinitionVisitorExtensionHelper {
           if (element.getNodeName().equals("visitor")) {
             visitorExtension.setVisitor(element.getAttribute("class"));
             visitorExtension.setVisitorName(element.getAttribute("name"));
-          } else if (element.getNodeName().equals("requires")) {
-            final NodeList requiresNodes = element.getChildNodes();
-            for (int k = 0; k < requiresNodes.getLength(); k++) {
-              final Node requiresNode = requiresNodes.item(k);
-              if (requiresNode instanceof Element) {
-                final Element requiresElement = (Element) requiresNode;
-                if (requiresElement.getNodeName().equals("interface")) {
-                  visitorExtension.addRequiredInterface(requiresElement
-                      .getAttribute("name"));
-                }
-              }
-            }
           }
         }
       }
