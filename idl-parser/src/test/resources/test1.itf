@@ -13,4 +13,8 @@ struct s {
 interface test1 {
   void foo(int a, int b);
   void* bar(u_int_t a, int b);
+  int add(int, int);
+  ong a64l(const char*);
+  void free(void * );
+  double erand48(unsigned short [3]);
 }

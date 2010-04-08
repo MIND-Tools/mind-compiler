@@ -29,6 +29,7 @@ import java.util.Map;
 import org.antlr.stringtemplate.StringTemplateGroupLoader;
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.Definition;
+import org.objectweb.fractal.adl.Loader;
 import org.objectweb.fractal.adl.bindings.BindingErrors;
 import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.fractal.api.control.BindingController;
@@ -59,10 +60,8 @@ import org.ow2.mind.plugin.BasicPluginManager;
 import org.ow2.mind.plugin.PluginManager;
 import org.ow2.mind.preproc.BasicMPPWrapper;
 import org.ow2.mind.preproc.MPPWrapper;
-import org.ow2.mind.st.BasicASTTransformer;
 import org.ow2.mind.st.STLoaderFactory;
 import org.ow2.mind.st.STNodeFactoryImpl;
-import org.ow2.mind.st.StringTemplateASTTransformer;
 import org.ow2.mind.st.StringTemplateComponentLoader;
 
 public final class ADLBackendFactory {
@@ -88,27 +87,22 @@ public final class ADLBackendFactory {
     final STNodeFactoryImpl nodeFactory = new STNodeFactoryImpl();
     pluginManager.nodeFactoryItf = nodeFactory;
 
-    final BasicASTTransformer astTransformer = new BasicASTTransformer();
-    astTransformer.nodeFactoryItf = new STNodeFactoryImpl();
-
     final StringTemplateGroupLoader stcLoader = STLoaderFactory.newSTLoader();
     final IDLVisitor idlCompiler = IDLBackendFactory.newIDLCompiler(idlLoader,
-        inputResourceLocator, outputFileLocator, astTransformer, stcLoader);
+        inputResourceLocator, outputFileLocator, stcLoader);
 
     return newDefinitionSourceGenerator(inputResourceLocator,
-        outputFileLocator, idlLoader, idlCompiler, astTransformer, stcLoader,
-        pluginManager, context);
+        outputFileLocator, idlLoader, idlCompiler, stcLoader, pluginManager,
+        context);
   }
 
   public static final DefinitionSourceGenerator newDefinitionSourceGenerator(
       final InputResourceLocator inputResourceLocator,
       final OutputFileLocator outputFileLocator, final IDLLoader idlLoader,
       final IDLVisitor idlCompiler,
-      final StringTemplateASTTransformer astTransformer,
       final StringTemplateGroupLoader templateGroupLoader,
       final PluginManager pluginManagerItf, final Map<Object, Object> context)
       throws ADLException {
-
     final Map<String, Object> serviceMap = new HashMap<String, Object>();
     serviceMap.put(INPUT_RESOURCE_LOCATOR_ITF_NAME, inputResourceLocator);
     serviceMap.put(OUTPUT_FILE_LOCATOR_ITF_NAME, outputFileLocator);
@@ -178,16 +172,13 @@ public final class ADLBackendFactory {
     final STNodeFactoryImpl nodeFactory = new STNodeFactoryImpl();
     pluginManager.nodeFactoryItf = nodeFactory;
 
-    final BasicASTTransformer astTransformer = new BasicASTTransformer();
-    astTransformer.nodeFactoryItf = new STNodeFactoryImpl();
-
     final StringTemplateGroupLoader stcLoader = STLoaderFactory.newSTLoader();
 
     final IDLVisitor idlCompiler = IDLBackendFactory.newIDLCompiler(idlLoader,
-        inputResourceLocator, outputFileLocator, astTransformer, stcLoader);
+        inputResourceLocator, outputFileLocator, stcLoader);
     final DefinitionSourceGenerator definitionSourceGenerator = newDefinitionSourceGenerator(
         inputResourceLocator, outputFileLocator, idlLoader, idlCompiler,
-        astTransformer, stcLoader, pluginManager, context);
+        stcLoader, pluginManager, context);
     final CompilerWrapper compilerWrapper = new GccCompilerWrapper();
     final MPPWrapper mppWrapper = new BasicMPPWrapper();
     return newDefinitionCompiler(definitionSourceGenerator,
@@ -218,7 +209,7 @@ public final class ADLBackendFactory {
       final ImplementationLocator implementationLocator,
       final OutputFileLocator outputFileLocator,
       final CompilerWrapper compilerWrapper, final MPPWrapper mppWrapper,
-      final DefinitionCompiler definitionCompiler,
+      final DefinitionCompiler definitionCompiler, final Loader adlLoader,
       final StringTemplateGroupLoader templateGroupLoader,
       final PluginManager pluginManagerItf, final Map<Object, Object> context)
       throws ADLException {
@@ -274,6 +265,7 @@ public final class ADLBackendFactory {
     fgc.clientCompilerItf = bgc;
 
     fgc.definitionCompilerItf = definitionCompiler;
+    fgc.loaderItf = adlLoader;
 
     bgl.compilerWrapperItf = compilerWrapper;
     bgl.outputFileLocatorItf = outputFileLocator;
@@ -286,6 +278,7 @@ public final class ADLBackendFactory {
 
   public static GraphCompiler newGraphCompiler(final Map<Object, Object> context)
       throws ADLException {
+    final Loader adlLoader = Factory.newLoader();
     final IDLLoader idlLoader = IDLLoaderChainFactory.newLoader();
     final BasicInputResourceLocator inputResourceLocator = new BasicInputResourceLocator();
     final BasicOutputFileLocator outputFileLocator = new BasicOutputFileLocator();
@@ -294,17 +287,14 @@ public final class ADLBackendFactory {
     final STNodeFactoryImpl nodeFactory = new STNodeFactoryImpl();
     pluginManager.nodeFactoryItf = nodeFactory;
 
-    final BasicASTTransformer astTransformer = new BasicASTTransformer();
-    astTransformer.nodeFactoryItf = new STNodeFactoryImpl();
-
     final StringTemplateGroupLoader stcLoader = STLoaderFactory.newSTLoader();
 
     final IDLVisitor idlCompiler = IDLBackendFactory.newIDLCompiler(idlLoader,
-        inputResourceLocator, outputFileLocator, astTransformer, stcLoader);
+        inputResourceLocator, outputFileLocator, stcLoader);
 
     final DefinitionSourceGenerator definitionSourceGenerator = newDefinitionSourceGenerator(
         inputResourceLocator, outputFileLocator, idlLoader, idlCompiler,
-        astTransformer, stcLoader, pluginManager, context);
+        stcLoader, pluginManager, context);
     final CompilerWrapper compilerWrapper = new GccCompilerWrapper();
     final MPPWrapper mppWrapper = new BasicMPPWrapper();
 
@@ -314,7 +304,7 @@ public final class ADLBackendFactory {
 
     return newGraphCompiler(inputResourceLocator, implementationLocator,
         outputFileLocator, compilerWrapper, mppWrapper, definitionCompiler,
-        stcLoader, pluginManager, context);
+        adlLoader, stcLoader, pluginManager, context);
   }
 
   public static CompilationCommandExecutor newCompilationCommandExecutor() {

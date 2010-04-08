@@ -27,17 +27,21 @@ import java.util.Map;
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.Node;
 import org.ow2.mind.idl.ast.ArrayOf;
+import org.ow2.mind.idl.ast.BinaryOperation;
+import org.ow2.mind.idl.ast.CastOperation;
 import org.ow2.mind.idl.ast.ConstantDefinition;
 import org.ow2.mind.idl.ast.EnumDefinition;
 import org.ow2.mind.idl.ast.EnumReference;
 import org.ow2.mind.idl.ast.IDL;
 import org.ow2.mind.idl.ast.InterfaceDefinition;
+import org.ow2.mind.idl.ast.Literal;
 import org.ow2.mind.idl.ast.PointerOf;
 import org.ow2.mind.idl.ast.PrimitiveType;
 import org.ow2.mind.idl.ast.StructDefinition;
 import org.ow2.mind.idl.ast.StructReference;
 import org.ow2.mind.idl.ast.TypeDefReference;
 import org.ow2.mind.idl.ast.TypeDefinition;
+import org.ow2.mind.idl.ast.UnaryOperation;
 import org.ow2.mind.idl.ast.UnionDefinition;
 import org.ow2.mind.idl.ast.UnionReference;
 
@@ -77,6 +81,13 @@ public class KindDecorationLoader extends AbstractIDLLoader {
       node.astSetDecoration("kind", "pointerOf");
     else if (node instanceof ConstantDefinition)
       node.astSetDecoration("kind", "constDef");
+    else if (node instanceof BinaryOperation)
+      node.astSetDecoration("kind", "binaryOperation");
+    else if (node instanceof UnaryOperation)
+      node.astSetDecoration("kind", "unaryOperation");
+    else if (node instanceof CastOperation)
+      node.astSetDecoration("kind", "castOperation");
+    else if (node instanceof Literal) node.astSetDecoration("kind", "literal");
 
     for (final String type : node.astGetNodeTypes()) {
       for (final Node n : node.astGetNodes(type)) {

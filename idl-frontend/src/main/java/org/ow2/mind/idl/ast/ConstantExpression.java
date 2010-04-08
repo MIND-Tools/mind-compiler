@@ -26,8 +26,4 @@ import org.objectweb.fractal.adl.Node;
 
 public interface ConstantExpression extends Node {
 
-  String getExpr();
-
-  void setExpr(String expr);
-
 }

@@ -25,7 +25,6 @@ package org.ow2.mind.idl;
 import static org.ow2.mind.idl.IDLLocator.IDT_RESOURCE_KIND;
 import static org.ow2.mind.idl.IDLLocator.ITF_RESOURCE_KIND;
 
-import org.objectweb.fractal.adl.xml.XMLNodeFactoryImpl;
 import org.ow2.mind.BasicInputResourceLocator;
 import org.ow2.mind.InputResourceLocator;
 import org.ow2.mind.annotation.AnnotationChainFactory;
@@ -34,6 +33,7 @@ import org.ow2.mind.idl.annotation.AnnotationProcessorLoader;
 import org.ow2.mind.idl.annotation.IDLLoaderPhase;
 import org.ow2.mind.idl.parser.IDLFileLoader;
 import org.ow2.mind.st.STNodeFactoryImpl;
+import org.ow2.mind.st.XMLSTNodeFactoryImpl;
 
 public final class IDLLoaderChainFactory {
 
@@ -130,7 +130,7 @@ public final class IDLLoaderChainFactory {
     bil.idlLocatorItf = idlLocator;
 
     // node factories
-    final XMLNodeFactoryImpl xnf = new XMLNodeFactoryImpl();
+    final XMLSTNodeFactoryImpl xnf = new XMLSTNodeFactoryImpl();
     // set my class loader as classloader used by XMLNodeFactory
     xnf.setClassLoader(IDLLoaderChainFactory.class.getClassLoader());
     final STNodeFactoryImpl nf = new STNodeFactoryImpl();

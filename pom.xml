@@ -73,7 +73,7 @@
             The version of the fractal-adl artifacts which this tool-set depends
             on
         -->
-        <fractaladl.dependencies.version>2.5</fractaladl.dependencies.version>
+        <fractaladl.dependencies.version>2.6-SNAPSHOT</fractaladl.dependencies.version>
 
         <!-- By default run tests for groups "functional" and "checkin" -->
         <test.groups>functional, checkin</test.groups>

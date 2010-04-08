@@ -64,11 +64,11 @@ public class CompositeInternalInterfaceLoader extends AbstractMembraneLoader {
 
   protected Definition addInternalInterfaces(Definition d,
       final Map<Object, Object> context) {
-    InternalInterfaceContainer itfContainer = turnToInternalInterfaceContainer(d);
-    d = (Definition) itfContainer;
+    InternalInterfaceContainer internalItfContainer = turnToInternalInterfaceContainer(d);
+    d = (Definition) internalItfContainer;
     final ControllerContainer ctrlContainer = turnToControllerContainer(d);
     d = (Definition) ctrlContainer;
-    itfContainer = (InternalInterfaceContainer) ctrlContainer;
+    internalItfContainer = (InternalInterfaceContainer) ctrlContainer;
 
     // find external interfaces that are already implemented by a controller
     final Set<String> implementedItfs = new HashSet<String>();
@@ -85,7 +85,12 @@ public class CompositeInternalInterfaceLoader extends AbstractMembraneLoader {
       if (implementedItfs.contains(itf.getName())) continue;
 
       // add dual internal interface
-      itfContainer.addInternalInterface(getInternalInterface(itf));
+      final Interface internalItf = getInternalInterface(itf);
+      internalItfContainer.addInternalInterface(internalItf);
+      ControllerInterfaceDecorationHelper.setDelegatedInterface(internalItf,
+          itf);
+      ControllerInterfaceDecorationHelper.setDelegatedInterface(itf,
+          internalItf);
 
       // add controller
       final Controller ctrl = newControllerNode();

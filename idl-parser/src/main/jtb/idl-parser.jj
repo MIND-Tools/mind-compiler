@@ -250,6 +250,12 @@ TOKEN :
 | <SLASH: "/">
 | <MINUS: "-">
 | <PLUS: "+">
+| <LSHIFT: "<<">
+| <RSHIFT: ">>">    
+| <PERCENT: "%"> 
+| <AMP: "&">
+| <TILDE: "~">
+| <NOT: "!">
 }
 
 
@@ -324,7 +330,7 @@ void QualifiedTypeSpecification() : {}
 void TypeQualifier() : {}
 {
   <CONST> 
-  | <VOLATILE>	
+  | <VOLATILE>  
 }
 
 void TypeSpecification() : {}
@@ -431,7 +437,7 @@ void EnumMember() : {}
 {
   Annotations()
   <IDENTIFIER>
-  [ EnumValue() ]  	
+  [ EnumValue() ]   
 }
 
 void EnumValue() : {}
@@ -477,6 +483,19 @@ void ArraySpecification() : {}
 {
   <LBRACKET> [ ConstantExpression() ] <RBRACKET>
 }
+
+void AbstractDeclarator() : {}
+{
+  PointerSpecification()
+  [ AbstractDirectDeclarator() ]
+}
+
+void AbstractDirectDeclarator() : {}
+{
+  <LPAREN> AbstractDeclarator() <RPAREN> ( ArraySpecification() )*
+  | ( ArraySpecification() )+
+}
+
 
 /*******************************************************************************
   Interface Definition grammar
@@ -528,7 +547,10 @@ void Parameter() : {}
   Annotations()
   ( ParameterQualifier() )*
   QualifiedTypeSpecification()
-  Declarator()
+  (
+    LOOKAHEAD(Declarator())
+    Declarator() | AbstractDeclarator()
+  )
 }
 
 void ParameterQualifier() : {}
@@ -598,7 +620,7 @@ void MulExpression() : {}
 void CastExpression() : {}
 { 
   LOOKAHEAD(3)
-  <LPAREN>  QualifiedTypeSpecification() <RPAREN> CastExpression()
+  <LPAREN>  QualifiedTypeSpecification() AbstractDeclarator() <RPAREN> CastExpression()
   | UnaryExpression() 
 }
 
@@ -626,31 +648,31 @@ void Literal() : {}
 
 void ShiftOperation() : {}
 {
-  "<<"
-  | ">>"    
+  <LSHIFT>
+  | <RSHIFT>    
 }
 
 void AdditiveOperation() : {}
 {
-  "+"
-  | "-" 
+  <PLUS>
+  | <MINUS> 
 }
 
 void MulOperation() : {}
 {
-  "*"
-  | "/"
-  | "%" 
+  <STAR>
+  | <SLASH>
+  | <PERCENT> 
 }
 
 void UnaryOperation() : {}
 {
-  "&"
-  | "*"
-  | "+"
-  | "-"
-  | "~"
-  | "!" 
+  <AMP>
+  | <STAR>
+  | <PLUS>
+  | <MINUS>
+  | <TILDE>
+  | <NOT>
 }
 
 

@@ -94,6 +94,8 @@ public class BackendFormatRenderer implements AttributeRenderer {
   }
 
   public static String sourceToLine(final String s) {
+    if (s == null) return "";
+
     final int i = s.lastIndexOf(':');
     if (i == -1) return "";
     final String inputFilePath = s.substring(0, i);

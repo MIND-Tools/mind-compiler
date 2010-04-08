@@ -17,7 +17,7 @@
  * Contact: mind@ow2.org
  *
  * Authors: Matthieu Leclercq
- * Contributors: 
+ * Contributors: Matthieu ANNE
  */
 
 package org.ow2.mind.preproc;
@@ -42,6 +42,7 @@ import org.antlr.runtime.Parser;
 import org.antlr.runtime.RecognitionException;
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.CompilerError;
+import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.error.GenericErrors;
 import org.objectweb.fractal.adl.util.FractalADLLogManager;
 import org.ow2.mind.plugin.PluginManager;
@@ -57,13 +58,15 @@ public class BasicMPPWrapper implements MPPWrapper {
   /** Plugin manager client interface **/
   public static PluginManager pluginManagerItf;
 
-  public MPPCommand newMPPCommand(final Map<Object, Object> context) {
-    return new BasicMPPCommand(context);
+  public MPPCommand newMPPCommand(final Definition definition,
+      final Map<Object, Object> context) {
+    return new BasicMPPCommand(definition, context);
   }
 
   protected static class BasicMPPCommand implements MPPCommand {
 
     protected final Map<Object, Object> context;
+    protected CPLChecker                cplChecker;
     protected boolean                   singletonMode = false;
     protected File                      inputFile;
     protected File                      outputFile;
@@ -72,7 +75,9 @@ public class BasicMPPWrapper implements MPPWrapper {
     private List<File>                  inputFiles;
     private List<File>                  outputFiles;
 
-    BasicMPPCommand(final Map<Object, Object> context) {
+    BasicMPPCommand(final Definition definition,
+        final Map<Object, Object> context) {
+      this.cplChecker = new CPLChecker(definition);
       this.context = context;
     }
 
@@ -136,6 +141,9 @@ public class BasicMPPWrapper implements MPPWrapper {
       final CommonTokenStream tokens = new CommonTokenStream(lex);
       final Parser mpp = ExtensionHelper.getParser(pluginManagerItf, tokens,
           context);
+
+      invokeMethod(mpp, "setCplChecker", new Class[]{CPLChecker.class},
+          new Object[]{this.cplChecker});
 
       PrintStream outPS = null;
       PrintStream headerOutPS = null;

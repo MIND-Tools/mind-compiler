@@ -29,15 +29,14 @@ import java.util.Map;
 import org.objectweb.fractal.adl.Node;
 import org.objectweb.fractal.adl.error.NodeErrorLocator;
 import org.objectweb.fractal.adl.merger.MergeException;
-import org.objectweb.fractal.adl.merger.NodeMergerImpl;
 import org.ow2.mind.adl.ast.Binding;
+import org.ow2.mind.st.STNodeMergerImpl;
 
 /**
  * Node merger component that implements the node merging algorithm that
  * respects the STCF ADL language.
  */
-// TODO check @Override annotations while merging nodes.
-public class STCFNodeMerger extends NodeMergerImpl {
+public class STCFNodeMerger extends STNodeMergerImpl {
 
   @Override
   protected void computeInhertedSubNodeMergeInfos(final Node inheritedSubNode,

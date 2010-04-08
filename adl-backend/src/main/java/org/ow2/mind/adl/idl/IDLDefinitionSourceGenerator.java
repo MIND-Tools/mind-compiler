@@ -36,7 +36,6 @@ import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.fractal.api.control.BindingController;
 import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.ow2.mind.adl.DefinitionSourceGenerator;
-import org.ow2.mind.adl.idl.InterfaceDefinitionDecorationHelper;
 import org.ow2.mind.idl.IDLLoader;
 import org.ow2.mind.idl.IDLVisitor;
 import org.ow2.mind.idl.ast.IDL;

@@ -79,6 +79,7 @@ public class IncrementalTest extends AbstractFunctionalTest {
     cleanBuildDir();
     final Map<String, Long> t1 = recompile("helloworld.HelloworldApplication");
 
+    pause();
     initContext(true);
     runner.compile("helloworld.HelloworldApplication");
     final Map<String, Long> t2 = getBuildTimestamps();
@@ -105,6 +106,18 @@ public class IncrementalTest extends AbstractFunctionalTest {
     pause();
     final Map<String, Long> t2 = recompile("GenericApplication<helloworld.HelloworldControlled>");
     assertChanged("GenericApplication.map", t1, t2);
+    assertUnchangedAll(".*", t1, t2);
+  }
+
+  @Test(groups = {"functional"})
+  public void incrementalTest16() throws Exception {
+    cleanBuildDir();
+    final Map<String, Long> t1 = recompile("GenericApplication<helloworld.HelloworldFactoryClient>");
+
+    pause();
+    final Map<String, Long> t2 = recompile("GenericApplication<helloworld.HelloworldFactoryClient>");
+    assertChanged("GenericApplication.map", t1, t2);
+    assertChanged("Factory.map", t1, t2);
     assertUnchangedAll(".*", t1, t2);
   }
 
@@ -215,6 +228,33 @@ public class IncrementalTest extends AbstractFunctionalTest {
     t1Copy = new HashMap<String, Long>(t1);
     t2Copy = new HashMap<String, Long>(t2);
     assertChanged("helloworld/ClientInlined.def", t1Copy, t2Copy);
+    assertUnchangedAll(".*", t1Copy, t2Copy);
+  }
+
+  @Test(groups = {"functional"})
+  public void incrementalTest31() throws Exception {
+    cleanBuildDir();
+    final Map<String, Long> t1 = recompile("GenericApplication<helloworld.HelloworldGeneric>");
+
+    pause();
+    Map<String, Long> t2 = recompile("GenericApplication<helloworld.HelloworldGeneric>");
+    Map<String, Long> t1Copy = new HashMap<String, Long>(t1);
+    Map<String, Long> t2Copy = new HashMap<String, Long>(t2);
+    assertChanged("GenericApplication.map", t1Copy, t2Copy);
+    assertChanged("helloworld/GenericComposite.map", t1Copy, t2Copy);
+    assertUnchangedAll(".*", t1Copy, t2Copy);
+
+    pause();
+    touchFile("helloworld/ClientType.adl");
+    pause();
+    t2 = recompile("GenericApplication<helloworld.HelloworldGeneric>");
+    t1Copy = new HashMap<String, Long>(t1);
+    t2Copy = new HashMap<String, Long>(t2);
+    assertChanged("helloworld/HelloworldGeneric.def", t1Copy, t2Copy);
+    assertChangedAll("helloworld/GenericComposite.*\\.def", t1Copy, t2Copy);
+    assertChangedAll("GenericApplication.*\\.def", t1Copy, t2Copy);
+    assertChanged("GenericApplication.map", t1Copy, t2Copy);
+    assertChanged("helloworld/GenericComposite.map", t1Copy, t2Copy);
     assertUnchangedAll(".*", t1Copy, t2Copy);
   }
 
@@ -330,6 +370,7 @@ public class IncrementalTest extends AbstractFunctionalTest {
     assertChangedAll("helloworld/ClientInlined_modified_ctrl_impl.*", t1Copy,
         t2Copy);
     assertChangedAll("Helloworld_modified(\\.exe)?", t1Copy, t2Copy);
+    assertChangedAll("GenericApplication.*\\.def", t1Copy, t2Copy);
     assertChanged("GenericApplication.map", t1Copy, t2Copy);
     assertUnchangedAll(
         "GenericApplication.*ClientInlined_modified_instances.c", t1Copy,
@@ -337,6 +378,68 @@ public class IncrementalTest extends AbstractFunctionalTest {
     assertChangedAll("GenericApplication.*ClientInlined_modified.*", t1Copy,
         t2Copy);
     assertUnchangedAll(".*", t1Copy, t2Copy);
+  }
+
+  @Test(groups = {"functional"})
+  public void incrementalTest6() throws Exception {
+    cleanBuildDir();
+
+    copyFile("helloworld/HelloworldAnonymous.adl",
+        "helloworld/HelloworldAnonymous_modified.adl", new String[]{
+            "helloworld\\.HelloworldAnonymous",
+            "helloworld.HelloworldAnonymous_modified"});
+    pause();
+
+    final Map<String, Long> t1 = recompile(
+        "GenericApplication<helloworld.HelloworldAnonymous_modified>",
+        "HelloworldAnonymous_modified");
+
+    pause();
+    Map<String, Long> t2 = recompile(
+        "GenericApplication<helloworld.HelloworldAnonymous_modified>",
+        "HelloworldAnonymous_modified");
+    Map<String, Long> t1Copy = new HashMap<String, Long>(t1);
+    Map<String, Long> t2Copy = new HashMap<String, Long>(t2);
+    assertChanged("GenericApplication.map", t1Copy, t2Copy);
+    assertUnchangedAll(".*", t1Copy, t2Copy);
+
+    copyFile("helloworld/HelloworldAnonymous.adl",
+        "helloworld/HelloworldAnonymous_modified.adl", new String[]{
+            "helloworld\\.HelloworldAnonymous",
+            "helloworld.HelloworldAnonymous_modified"}, new String[]{
+            "attribute int a", "attribute uint8_t a"});
+
+    pause();
+    t2 = recompile(
+        "GenericApplication<helloworld.HelloworldAnonymous_modified>",
+        "HelloworldAnonymous_modified");
+    t1Copy = new HashMap<String, Long>(t1);
+    t2Copy = new HashMap<String, Long>(t2);
+
+    assertChanged("helloworld/HelloworldAnonymous_modified.def", t1Copy, t2Copy);
+    assertChangedAll("helloworld/HelloworldAnonymous_modified_anon_0_impl0.*",
+        t1Copy, t2Copy);
+    assertUnchanged(
+        "helloworld/HelloworldAnonymous_modified_anon_0_ctrl_impl.c", t1Copy,
+        t2Copy);
+    assertChangedAll(
+        "helloworld/HelloworldAnonymous_modified_anon_0_ctrl_impl.*", t1Copy,
+        t2Copy);
+    assertUnchanged("helloworld/HelloworldAnonymous_modified_anon_0.inc",
+        t1Copy, t2Copy);
+    assertUnchanged("helloworld/HelloworldAnonymous_modified_anon_0.macro",
+        t1Copy, t2Copy);
+    assertChangedAll("helloworld/HelloworldAnonymous_modified_anon_0.*",
+        t1Copy, t2Copy);
+    assertChangedAll("GenericApplication.*\\.def", t1Copy, t2Copy);
+    assertChanged("GenericApplication.map", t1Copy, t2Copy);
+    assertUnchangedAll(
+        "GenericApplication.*HelloworldAnonymous_modified_anon_0_instances.c",
+        t1Copy, t2Copy);
+    assertChangedAll(
+        "GenericApplication.*HelloworldAnonymous_modified_anon_0.*", t1Copy,
+        t2Copy);
+    assertChangedAll("HelloworldAnonymous_modified(\\.exe)?", t1Copy, t2Copy);
   }
 
   private void pause() throws InterruptedException {

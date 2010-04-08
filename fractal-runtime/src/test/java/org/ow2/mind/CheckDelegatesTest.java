@@ -45,19 +45,16 @@ import org.ow2.mind.idl.IDLLoaderChainFactory;
 import org.ow2.mind.idl.IDLVisitor;
 import org.ow2.mind.idl.ast.IDL;
 import org.ow2.mind.io.BasicOutputFileLocator;
-import org.ow2.mind.st.BasicASTTransformer;
-import org.ow2.mind.st.STNodeFactoryImpl;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 public class CheckDelegatesTest {
 
-  public static final String DEFAULT_CFLAGS  = "-std=c89 -g -Wall -Werror -Wredundant-decls -Wunreachable-code -Wstrict-prototypes -Wwrite-strings";
+  public static final String DEFAULT_CFLAGS  = "-g -Wall -Werror -Wredundant-decls -Wunreachable-code -Wstrict-prototypes -Wwrite-strings";
   public static final String CFLAGS_PROPERTY = "mind.test.cflags";
 
   IDLLoader                  idlLoader;
   IDLVisitor                 idlCompiler;
-  BasicASTTransformer        astTransformer;
 
   CompilerWrapper            compilerWrapper;
   CompilationCommandExecutor commandExecutor;
@@ -68,8 +65,6 @@ public class CheckDelegatesTest {
   public void setUp() {
     idlLoader = IDLLoaderChainFactory.newLoader();
     idlCompiler = IDLBackendFactory.newIDLCompiler(idlLoader);
-    astTransformer = new BasicASTTransformer();
-    astTransformer.nodeFactoryItf = new STNodeFactoryImpl();
 
     compilerWrapper = new GccCompilerWrapper();
     commandExecutor = new BasicCompilationCommandExecutor();
@@ -110,8 +105,7 @@ public class CheckDelegatesTest {
   }
 
   private void compileIDL(final String idlName) throws ADLException {
-    IDL idl = idlLoader.load(idlName, context);
-    idl = astTransformer.toStringTemplateAST(idl);
+    final IDL idl = idlLoader.load(idlName, context);
     idlCompiler.visit(idl, context);
   }
 

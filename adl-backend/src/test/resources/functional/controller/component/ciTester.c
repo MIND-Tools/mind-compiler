@@ -1,17 +1,17 @@
 #include <assert.h>
 #include <string.h>
 
-// -----------------------------------------------------------------------------
-// Implementation of the main interface.
-// -----------------------------------------------------------------------------
-
 #define NB_ITF 2
 
 const char * expectedNames[NB_ITF] = {"component", "main"};
 const char * expectedSignatures[NB_ITF] = {"fractal.api.Component", "Main"};
 int expectedRoles[NB_ITF] = {FRACTAL_API_SERVER, FRACTAL_API_SERVER};
 
-// int main(int argc, string[] argv)
+/* -----------------------------------------------------------------------------
+   Implementation of the main interface.
+----------------------------------------------------------------------------- */
+
+/* int main(int argc, string[] argv) */
 int METH(main, main) (int argc, char *argv[]) {
   int nbItf, err, i;
   const char *itfNames[NB_ITF];

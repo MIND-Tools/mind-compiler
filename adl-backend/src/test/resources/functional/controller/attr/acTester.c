@@ -1,10 +1,6 @@
 #include <assert.h>
 #include <string.h>
 
-// -----------------------------------------------------------------------------
-// Implementation of the main interface.
-// -----------------------------------------------------------------------------
-
 #define NB_ATTR 3
 
 const char * expectedNames[NB_ATTR] = { "attr1", "attr2", "attr3" };
@@ -13,7 +9,11 @@ const char * expectedStringValues[NB_ATTR] = { "", "", "toto" };
 int expectedSizes[NB_ATTR] = { sizeof(int), sizeof(int), sizeof(char *) };
 enum AttributeType expectedTypes[NB_ATTR] = {INT_ATTR_TYPE, INT_ATTR_TYPE, STRING_ATTR_TYPE};
 
-// int main(int argc, string[] argv)
+/* -----------------------------------------------------------------------------
+   Implementation of the main interface.
+----------------------------------------------------------------------------- */
+
+/* int main(int argc, string[] argv) */
 int METH(main, main) (int argc, char *argv[]) {
   int nbAttr, err, i;
   const char *attrNames[NB_ATTR];
