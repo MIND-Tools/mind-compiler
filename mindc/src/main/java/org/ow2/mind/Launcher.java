@@ -224,7 +224,19 @@ public class Launcher extends AbstractLauncher {
       }
     }
 
-    addOptions();
+    /****** Initialization of the PluginManager Component *******/
+    // NodeFactory Component
+    final STNodeFactoryImpl stNodeFactory = new STNodeFactoryImpl();
+
+    final BasicPluginManager pluginManager = new BasicPluginManager();
+    pluginManager.nodeFactoryItf = stNodeFactory;
+
+    try {
+      addOptions(pluginManager, compilerContext);
+    } catch (final ADLException e) {
+      throw new CompilerInstantiationException(
+          "Cannot load command line option extensions.", e, 101);
+    }
 
     // parse arguments to a CommandLine.
     final CommandLine cmdLine = CommandLine.parseArgs(options, false, args);
@@ -383,13 +395,6 @@ public class Launcher extends AbstractLauncher {
       CompilerContextHelper.setLinkerScript(compilerContext, linkerScriptURL
           .getPath());
     }
-
-    /****** Initialization of the PluginManager Component *******/
-    // NodeFactory Component
-    final STNodeFactoryImpl stNodeFactory = new STNodeFactoryImpl();
-
-    final BasicPluginManager pluginManager = new BasicPluginManager();
-    pluginManager.nodeFactoryItf = stNodeFactory;
 
     AnnotationLocatorHelper.addDefaultAnnotationPackage(
         "org.ow2.mind.adl.annotation.predefined", compilerContext);
@@ -706,11 +711,18 @@ public class Launcher extends AbstractLauncher {
     }
   }
 
-  protected void addOptions() {
+  protected void addOptions(final PluginManager pluginManagerItf,
+      final Map<Object, Object> context) throws ADLException {
     options.addOptions(targetDescOpt, compilerCmdOpt, cFlagsOpt,
         includePathOpt, linkerCmdOpt, ldFlagsOpt, ldPathOpt, linkerScriptOpt,
         concurrentJobCmdOpt, printStackTraceOpt, checkADLModeOpt,
         generateDefSrcOpt, compileDefOpt, forceOpt, keepTempOpt, noBinASTOpt);
+
+    for (final CmdOption option : CommandLineOptionExtensionHelper
+        .getCommandOptions(pluginManagerItf, context)) {
+      options.addOption(option);
+    }
+
   }
 
   @Override
