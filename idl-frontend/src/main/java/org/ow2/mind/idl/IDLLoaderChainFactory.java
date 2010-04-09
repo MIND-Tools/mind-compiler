@@ -70,10 +70,12 @@ public final class IDLLoaderChainFactory {
     final KindDecorationLoader kdl = new KindDecorationLoader();
     final AnnotationProcessorLoader apl2 = new AnnotationProcessorLoader();
     final BinaryIDLLoader bil = new BinaryIDLLoader();
+    final HeaderLoader hl = new HeaderLoader();
     final CacheIDLLoader cil = new CacheIDLLoader();
 
     idlLoader = cil;
-    cil.clientIDLLoaderItf = bil;
+    cil.clientIDLLoaderItf = hl;
+    hl.clientIDLLoaderItf = bil;
     bil.clientIDLLoaderItf = apl2;
     apl2.clientIDLLoaderItf = kdl;
     kdl.clientIDLLoaderItf = tcl;
@@ -135,6 +137,7 @@ public final class IDLLoaderChainFactory {
     xnf.setClassLoader(IDLLoaderChainFactory.class.getClassLoader());
     final STNodeFactoryImpl nf = new STNodeFactoryImpl();
     ifl.nodeFactoryItf = xnf;
+    hl.nodeFactoryItf = nf;
     ihr.nodeFactoryItf = nf;
 
     bil.inputResourceLocatorItf = inputResourceLocator;
