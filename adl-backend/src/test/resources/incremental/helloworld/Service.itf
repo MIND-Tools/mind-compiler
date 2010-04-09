@@ -1,4 +1,6 @@
 
+#include <stddef.h>
+
 interface helloworld.Service {
 
   void print(const char *msg);
