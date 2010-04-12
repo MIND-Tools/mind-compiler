@@ -130,7 +130,7 @@ protected methDef returns [StringBuilder res]
 		
 protected serverMethDef returns [StringBuilder res = new StringBuilder()]
 @init{String tmp = ""; String itfIdx = null;}
-	: METH ws1=ws '(' ws2=ws id=ID ws3=ws ( '[' ws4=ws INT ws5=ws ']' ws6=ws { itfIdx=$INT.text; } )? ',' ws7=ws meth=ID ws8=ws ')'
+  : METH ws1=ws '(' ws2=ws id=ID ws3=ws ( '[' ws4=ws INT ws5=ws ']' ws6=ws { itfIdx=$INT.text; } )? ',' ws7=ws meth=ID ws8=ws ')' ws9=ws
       (
         e = WS { tmp += $e.text; }
         | ')'  { tmp += ")"; }
@@ -146,25 +146,25 @@ protected serverMethDef returns [StringBuilder res = new StringBuilder()]
       if (itfIdx == null) {
           $res.append("INTERFACE_METHOD").append($ws1.text).append("(")
               .append($ws2.text).append($id.text).append($ws3.text).append(",")
-              .append($ws7.text).append($meth.text).append($ws8.text).append(")")
+              .append($ws7.text).append($meth.text).append($ws8.text).append(")").append($ws9.text)
               .append(tmp);
       } else {
           $res.append("INTERFACE_COLLECTION_METHOD").append($ws1.text).append("(")
               .append($ws2.text).append($id.text).append($ws3.text).append(",")
               .append($ws4.text).append(itfIdx).append($ws5.text).append($ws6.text).append(",")
-              .append($ws7.text).append($meth.text).append($ws8.text).append(")")
+              .append($ws7.text).append($meth.text).append($ws8.text).append(")").append($ws9.text)
               .append(tmp);
       }
     }
     (
-      paramsDef { $res.append($paramsDef.res); }
+      paramsDef ws10=ws { $res.append($paramsDef.res).append($ws10.text); }
       (
-        ws9=ws '{'
+         '{'
           {
             if (!singletonMode) 
-              $res.append($ws9.text).append("{ CHECK_CONTEXT_PTR"); 
+              $res.append("{ CHECK_CONTEXT_PTR"); 
             else
-              $res.append($ws9.text).append("{");
+              $res.append("{");
             if (headerOut != null) headerOut.println("#define INTERFACE_METHOD_" + $id.text + "_" + $meth.text + "_IMPLEMENTED"); 
           }
       )?
