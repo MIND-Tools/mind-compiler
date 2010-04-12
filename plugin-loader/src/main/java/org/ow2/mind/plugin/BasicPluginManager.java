@@ -31,6 +31,8 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -41,6 +43,7 @@ import org.objectweb.fractal.adl.CompilerError;
 import org.objectweb.fractal.adl.Node;
 import org.objectweb.fractal.adl.NodeFactory;
 import org.objectweb.fractal.adl.error.GenericErrors;
+import org.objectweb.fractal.adl.util.FractalADLLogManager;
 import org.ow2.mind.plugin.ast.Extension;
 import org.ow2.mind.plugin.ast.ExtensionPoint;
 import org.ow2.mind.plugin.ast.Plugin;
@@ -56,6 +59,10 @@ public class BasicPluginManager implements PluginManager {
 	protected PluginRegistry pluginRegistry;
 	protected ClassLoader classLoader;
 	protected DocumentBuilder builder = null;
+	
+	  protected static Logger    pluginLogger                  = FractalADLLogManager
+      .getLogger("plugin");
+
 
 	// ---------------------------------------------------------------------------
 	// Client interfaces
@@ -122,7 +129,9 @@ public class BasicPluginManager implements PluginManager {
 
 		// bind extensions to extension points :
 		for (final Plugin plugin : registry.plugins.values()) {
-			System.out.println("Initing the plugin " + plugin.getId());
+		    if (pluginLogger.isLoggable(Level.FINE)){
+		    	pluginLogger.fine("Initializing the plugin " + plugin.getId());		    	  
+		    }
 			for (final Extension extension : plugin.getExtensions()) {
 				final ExtensionPoint point = registry.extensionPoints.get(extension
 						.getPoint());
