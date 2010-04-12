@@ -194,7 +194,7 @@ ConstructorCalls(definition, instances) ::= <<
 <if (definition.astDecorations.("is-singleton"))>
   void __component_<definition.name;format="toCName">_constructor(void);
 <else>
-  void __component_<definition.name;format="toCName">_constructor(void *instance);
+  void __component_<definition.name;format="toCName">_constructor(<ComponentTypeName(definitionName=definition.name)>  *instance);
 <endif>
 
 #endif
@@ -210,7 +210,7 @@ void __component_<definition.name;format="toCName">_constructor_calls(void) {
 <if (definition.astDecorations.("is-singleton"))>
   void __component_<definition.name;format="toCName">_destructor(void);
 <else>
-  void __component_<definition.name;format="toCName">_destructor(void *instance);
+  void __component_<definition.name;format="toCName">_destructor(<ComponentTypeName(definitionName=definition.name)> *instance);
 <endif>
 
 #endif
