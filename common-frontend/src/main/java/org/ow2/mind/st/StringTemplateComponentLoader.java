@@ -46,6 +46,11 @@ import org.ow2.mind.st.templates.ast.ServerInterface;
 import org.ow2.mind.st.templates.ast.TemplateComponent;
 
 public class StringTemplateComponentLoader implements StringTemplateGroupLoader {
+  // ---------------------------------------------------------------------------
+  // Server interface names
+  // ---------------------------------------------------------------------------
+
+  public static final String            ITF_NAME        = "template-group-loader";
 
   // ---------------------------------------------------------------------------
   // Client interfaces
@@ -62,8 +67,8 @@ public class StringTemplateComponentLoader implements StringTemplateGroupLoader 
   protected StringTemplateErrorListener errors          = null;
 
   public StringTemplateComponentLoader() {
-    errors = (new org.ow2.mind.st.StringTemplateGroup(
-        "DefaultGroup")).getErrorListener();
+    errors = (new org.ow2.mind.st.StringTemplateGroup("DefaultGroup"))
+        .getErrorListener();
   }
 
   /*
@@ -114,8 +119,8 @@ public class StringTemplateComponentLoader implements StringTemplateGroupLoader 
     }
 
     // FIXME: Here the down cast might be dangereous.
-    group = new org.ow2.mind.st.StringTemplateGroup(br, lexer,
-        errors, (org.ow2.mind.st.StringTemplateGroup) superGroup);
+    group = new org.ow2.mind.st.StringTemplateGroup(br, lexer, errors,
+        (org.ow2.mind.st.StringTemplateGroup) superGroup);
 
     if (superGroup == null) {
       superGroup = group;
@@ -138,18 +143,18 @@ public class StringTemplateComponentLoader implements StringTemplateGroupLoader 
     // Register maps for plugin interfaces
     for (final PluginInterface pluginInterface : stc.getPluginInterfaces()) {
       final PluginInterfaceMap map = new PluginInterfaceMap(
-          (org.ow2.mind.st.StringTemplateGroup) superGroup,
-          pluginInterface.getRepository(), loadInterface(
-              pluginInterface.getSignature()).getName(), this);
+          (org.ow2.mind.st.StringTemplateGroup) superGroup, pluginInterface
+              .getRepository(), loadInterface(pluginInterface.getSignature())
+              .getName(), this);
       group.defineMap(pluginInterface.getName(), map);
     }
 
     // Register maps for bound interfaces
     for (final BoundInterface boundInterface : stc.getBoundInterfaces()) {
       final BoundInterfaceMap map = new BoundInterfaceMap(
-          (org.ow2.mind.st.StringTemplateGroup) superGroup,
-          boundInterface.getBoundTo(), loadInterface(
-              boundInterface.getSignature()).getName(), this);
+          (org.ow2.mind.st.StringTemplateGroup) superGroup, boundInterface
+              .getBoundTo(), loadInterface(boundInterface.getSignature())
+              .getName(), this);
       group.defineMap(boundInterface.getName(), map);
     }
 

@@ -30,6 +30,10 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>cpl-preproc</artifactId>
         </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>plugin-loader</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>org.testng</groupId>
@@ -59,6 +63,17 @@
                             -Wwrite-strings</mind.test.cflags>
                     </systemPropertyVariables>
                 </configuration>
+            </plugin>
+            <plugin>
+            	<artifactId>maven-jar-plugin</artifactId>
+            	<executions>
+            		<execution>
+            			<phase>package</phase>
+            			<goals>
+            				<goal>test-jar</goal>
+            			</goals>
+            		</execution>
+            	</executions>
             </plugin>
         </plugins>
     </build>

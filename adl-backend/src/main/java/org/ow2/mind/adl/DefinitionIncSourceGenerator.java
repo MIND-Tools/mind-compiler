@@ -33,6 +33,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.antlr.stringtemplate.StringTemplate;
+import org.antlr.stringtemplate.StringTemplateGroupLoader;
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.CompilerError;
 import org.objectweb.fractal.adl.Definition;
@@ -46,6 +47,7 @@ import org.ow2.mind.adl.idl.InterfaceDefinitionDecorationHelper;
 import org.ow2.mind.idl.IDLLoader;
 import org.ow2.mind.idl.ast.InterfaceDefinition;
 import org.ow2.mind.io.IOErrors;
+import org.ow2.mind.st.StringTemplateComponentLoader;
 
 /**
  * {@link DefinitionSourceGenerator} component that generated {@value #FILE_EXT}
@@ -159,6 +161,8 @@ public class DefinitionIncSourceGenerator extends AbstractSourceGenerator
 
     if (itfName.equals(IDLLoader.ITF_NAME)) {
       idlLoaderItf = (IDLLoader) value;
+    } else if (itfName.equals(StringTemplateComponentLoader.ITF_NAME)) {
+      templateGroupLoaderItf = (StringTemplateGroupLoader) value;
     } else {
       super.bindFc(itfName, value);
     }
@@ -167,7 +171,8 @@ public class DefinitionIncSourceGenerator extends AbstractSourceGenerator
 
   @Override
   public String[] listFc() {
-    return listFcHelper(super.listFc(), IDLLoader.ITF_NAME);
+    return listFcHelper(super.listFc(), IDLLoader.ITF_NAME,
+        StringTemplateComponentLoader.ITF_NAME);
   }
 
   @Override
@@ -176,6 +181,8 @@ public class DefinitionIncSourceGenerator extends AbstractSourceGenerator
 
     if (itfName.equals(IDLLoader.ITF_NAME)) {
       return idlLoaderItf;
+    } else if (itfName.equals(StringTemplateComponentLoader.ITF_NAME)) {
+      return templateGroupLoaderItf;
     } else {
       return super.lookupFc(itfName);
     }
@@ -188,6 +195,8 @@ public class DefinitionIncSourceGenerator extends AbstractSourceGenerator
 
     if (itfName.equals(IDLLoader.ITF_NAME)) {
       idlLoaderItf = null;
+    } else if (itfName.equals(StringTemplateComponentLoader.ITF_NAME)) {
+      templateGroupLoaderItf = null;
     } else {
       super.unbindFc(itfName);
     }

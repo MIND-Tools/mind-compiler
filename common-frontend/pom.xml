@@ -29,6 +29,11 @@
         </dependency>
 
         <dependency>
+    	    <groupId>${parent.groupId}</groupId>
+	        <artifactId>plugin-loader</artifactId>
+        </dependency>
+
+        <dependency>
     	    <groupId>org.objectweb.fractal.cecilia.toolchain</groupId>
 	        <artifactId>plugin-framework</artifactId>
             <version>2.1.0</version>        

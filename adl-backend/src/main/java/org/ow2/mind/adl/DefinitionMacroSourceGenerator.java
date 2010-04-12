@@ -22,9 +22,15 @@
 
 package org.ow2.mind.adl;
 
+import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
+import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
 import static org.ow2.mind.PathHelper.fullyQualifiedNameToPath;
 
+import org.antlr.stringtemplate.StringTemplateGroupLoader;
 import org.objectweb.fractal.adl.Definition;
+import org.objectweb.fractal.api.NoSuchInterfaceException;
+import org.objectweb.fractal.api.control.IllegalBindingException;
+import org.ow2.mind.st.StringTemplateComponentLoader;
 
 /**
  * {@link DefinitionSourceGenerator} component that generated {@value #FILE_EXT}
@@ -79,4 +85,49 @@ public class DefinitionMacroSourceGenerator
   protected String getOutputFileName(final Definition definition) {
     return getMacroFileName(definition);
   }
+
+  // ---------------------------------------------------------------------------
+  // Implementation of the BindingController interface
+  // ---------------------------------------------------------------------------
+  @Override
+  public void bindFc(final String itfName, final Object value)
+      throws NoSuchInterfaceException, IllegalBindingException {
+    checkItfName(itfName);
+
+    if (itfName.equals(StringTemplateComponentLoader.ITF_NAME)) {
+      templateGroupLoaderItf = (StringTemplateGroupLoader) value;
+    } else {
+      super.bindFc(itfName, value);
+    }
+
+  }
+
+  @Override
+  public String[] listFc() {
+    return listFcHelper(super.listFc(), StringTemplateComponentLoader.ITF_NAME);
+  }
+
+  @Override
+  public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
+    checkItfName(itfName);
+
+    if (itfName.equals(StringTemplateComponentLoader.ITF_NAME)) {
+      return templateGroupLoaderItf;
+    } else {
+      return super.lookupFc(itfName);
+    }
+  }
+
+  @Override
+  public void unbindFc(final String itfName) throws NoSuchInterfaceException,
+      IllegalBindingException {
+    checkItfName(itfName);
+
+    if (itfName.equals(StringTemplateComponentLoader.ITF_NAME)) {
+      templateGroupLoaderItf = null;
+    } else {
+      super.unbindFc(itfName);
+    }
+  }
+
 }

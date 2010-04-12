@@ -39,6 +39,7 @@ import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.JavaFactory;
 import org.objectweb.fractal.adl.Loader;
+import org.objectweb.fractal.adl.NodeFactory;
 import org.objectweb.fractal.adl.error.GenericErrors;
 import org.objectweb.fractal.adl.util.FractalADLLogManager;
 import org.objectweb.fractal.cecilia.targetDescriptor.TargetDescriptorException;
@@ -60,6 +61,7 @@ import org.ow2.mind.adl.graph.Instantiator;
 import org.ow2.mind.adl.implementation.BasicImplementationLocator;
 import org.ow2.mind.adl.implementation.ImplementationLocator;
 import org.ow2.mind.annotation.AnnotationLocatorHelper;
+import org.ow2.mind.annotation.PredefinedAnnotationsHelper;
 import org.ow2.mind.compilation.CompilationCommand;
 import org.ow2.mind.compilation.CompilationCommandExecutor;
 import org.ow2.mind.compilation.CompilerCommand;
@@ -75,10 +77,12 @@ import org.ow2.mind.idl.IDLLocator;
 import org.ow2.mind.idl.IDLVisitor;
 import org.ow2.mind.idl.OutputBinaryIDLLocator;
 import org.ow2.mind.io.BasicOutputFileLocator;
+import org.ow2.mind.plugin.BasicPluginManager;
+import org.ow2.mind.plugin.PluginManager;
 import org.ow2.mind.plugin.SimpleClassPluginFactory;
 import org.ow2.mind.preproc.BasicMPPWrapper;
-import org.ow2.mind.preproc.MPPWrapper;
 import org.ow2.mind.st.STLoaderFactory;
+import org.ow2.mind.st.STNodeFactoryImpl;
 
 public class Launcher extends AbstractLauncher {
 
@@ -220,7 +224,19 @@ public class Launcher extends AbstractLauncher {
       }
     }
 
-    addOptions();
+    /****** Initialization of the PluginManager Component *******/
+    // NodeFactory Component
+    final STNodeFactoryImpl stNodeFactory = new STNodeFactoryImpl();
+
+    final BasicPluginManager pluginManager = new BasicPluginManager();
+    pluginManager.nodeFactoryItf = stNodeFactory;
+
+    try {
+      addOptions(pluginManager, compilerContext);
+    } catch (final ADLException e) {
+      throw new CompilerInstantiationException(
+          "Cannot load command line option extensions.", e, 101);
+    }
 
     // parse arguments to a CommandLine.
     final CommandLine cmdLine = CommandLine.parseArgs(options, false, args);
@@ -382,23 +398,34 @@ public class Launcher extends AbstractLauncher {
 
     AnnotationLocatorHelper.addDefaultAnnotationPackage(
         "org.ow2.mind.adl.annotation.predefined", compilerContext);
-
-    final String annotationPackages = System
-        .getProperty(MIND_ANNOTATION_PACKAGES);
-    if (annotationPackages != null) {
-      for (final String string : annotationPackages.split(File.pathSeparator)) {
-        AnnotationLocatorHelper.addDefaultAnnotationPackage(string,
-            compilerContext);
-      }
+    String[] annotationPackages;
+    try {
+      annotationPackages = PredefinedAnnotationsHelper
+          .getPredefinedAnnotations(pluginManager, compilerContext);
+    } catch (final ADLException e) {
+      throw new CompilerInstantiationException(
+          "Cannot load predefined annotations.", e, 101);
     }
+    for (final String annotationPackage : annotationPackages) {
+      AnnotationLocatorHelper.addDefaultAnnotationPackage(annotationPackage,
+          compilerContext);
+    }
+
     // initialize compiler
-    initCompiler(cmdLine);
+    try {
+      initCompiler(cmdLine, stNodeFactory, pluginManager, compilerContext);
+    } catch (final ADLException e) {
+      throw new CompilerInstantiationException(
+          "Cannot instantiate the compiler.", e, 101);
+    }
   }
 
   /**
    * @param cmdLine
    */
-  protected void initCompiler(final CommandLine cmdLine) {
+  protected void initCompiler(final CommandLine cmdLine,
+      final NodeFactory stNodeFactory, final PluginManager pluginManager,
+      final Map<Object, Object> compilerContext) throws ADLException {
     // input locators
     final BasicInputResourceLocator inputResourceLocator = new BasicInputResourceLocator();
     final OutputBinaryIDLLocator obil = new OutputBinaryIDLLocator();
@@ -418,14 +445,15 @@ public class Launcher extends AbstractLauncher {
     obal.outputFileLocatorItf = outputFileLocator;
     obil.outputFileLocatorItf = outputFileLocator;
 
-    // Plugin Manager Components
-    final org.objectweb.fractal.adl.Factory pluginFactory = new SimpleClassPluginFactory();
-
     // compilation task factory
     final GccCompilerWrapper gcw = new GccCompilerWrapper();
     gcw.outputFileLocatorItf = outputFileLocator;
     final CompilerWrapper compilerWrapper = gcw;
-    final MPPWrapper mppWrapper = new BasicMPPWrapper();
+    final BasicMPPWrapper mppWrapper = new BasicMPPWrapper();
+    mppWrapper.pluginManagerItf = pluginManager;
+
+    // Plugin Factory Component
+    final org.objectweb.fractal.adl.Factory pluginFactory = new SimpleClassPluginFactory();
 
     // String Template Component Loaders
     final StringTemplateGroupLoader stcLoader = STLoaderFactory.newSTLoader();
@@ -445,14 +473,15 @@ public class Launcher extends AbstractLauncher {
         inputResourceLocator, outputFileLocator, stcLoader);
     definitionSourceGenerator = ADLBackendFactory.newDefinitionSourceGenerator(
         inputResourceLocator, outputFileLocator, idlLoader, idlCompiler,
-        stcLoader);
+        stcLoader, pluginManager, compilerContext);
 
     definitionCompiler = ADLBackendFactory.newDefinitionCompiler(
         definitionSourceGenerator, implementationLocator, outputFileLocator,
         compilerWrapper, mppWrapper);
     graphCompiler = ADLBackendFactory.newGraphCompiler(inputResourceLocator,
         implementationLocator, outputFileLocator, compilerWrapper, mppWrapper,
-        definitionCompiler, adlLoader, stcLoader);
+        definitionCompiler, adlLoader, stcLoader, pluginManager,
+        compilerContext);
 
     executor = ADLBackendFactory.newCompilationCommandExecutor();
   }
@@ -682,11 +711,18 @@ public class Launcher extends AbstractLauncher {
     }
   }
 
-  protected void addOptions() {
+  protected void addOptions(final PluginManager pluginManagerItf,
+      final Map<Object, Object> context) throws ADLException {
     options.addOptions(targetDescOpt, compilerCmdOpt, cFlagsOpt,
         includePathOpt, linkerCmdOpt, ldFlagsOpt, ldPathOpt, linkerScriptOpt,
         concurrentJobCmdOpt, printStackTraceOpt, checkADLModeOpt,
         generateDefSrcOpt, compileDefOpt, forceOpt, keepTempOpt, noBinASTOpt);
+
+    for (final CmdOption option : CommandLineOptionExtensionHelper
+        .getCommandOptions(pluginManagerItf, context)) {
+      options.addOption(option);
+    }
+
   }
 
   @Override

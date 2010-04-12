@@ -1,4 +1,5 @@
-template st.instances.Component implements st.instances.ComponentInstances{
+template st.instances.Component : st.common.ComponentHelper
+implements st.instances.ComponentInstances{
 
 $${
 
@@ -153,7 +154,7 @@ StaticBindingValue(bindingDesc) ::= <<
 &(<bindingDesc.serverComponent.decorations.("instance-name"); format="toCName">), 
 &__component_<bindingDesc.serverComponent.definition.name; format="toCName">_<bindingDesc.binding.toInterface><if (bindingDesc.binding.toInterfaceNumber)>_<bindingDesc.binding.toInterfaceNumber><endif>_VTable
 <else>
-(void *) 0, (void *) 0, (void *) 0
+0, 0, 0
 <endif> 
 >>
 
@@ -163,7 +164,7 @@ StaticCollectionBindingValue(bindingDesc, index) ::= <<
 &(<bindingDesc.serverComponent.decorations.("instance-name"); format="toCName">),
 &__component_<bindingDesc.serverComponent.definition.name; format="toCName">_<bindingDesc.binding.toInterface>_<index>_VTable
 <else>
-(void *) 0, (void *) 0, (void *) 0
+0, 0, 0
 <endif> 
 >>
 
@@ -194,7 +195,7 @@ ConstructorCalls(definition, instances) ::= <<
 <if (definition.astDecorations.("is-singleton"))>
   void __component_<definition.name;format="toCName">_constructor(void);
 <else>
-  void __component_<definition.name;format="toCName">_constructor(void *instance);
+  void __component_<definition.name;format="toCName">_constructor(<ComponentTypeName(definitionName=definition.name)>  *instance);
 <endif>
 
 #endif
@@ -210,7 +211,7 @@ void __component_<definition.name;format="toCName">_constructor_calls(void) {
 <if (definition.astDecorations.("is-singleton"))>
   void __component_<definition.name;format="toCName">_destructor(void);
 <else>
-  void __component_<definition.name;format="toCName">_destructor(void *instance);
+  void __component_<definition.name;format="toCName">_destructor(<ComponentTypeName(definitionName=definition.name)> *instance);
 <endif>
 
 #endif

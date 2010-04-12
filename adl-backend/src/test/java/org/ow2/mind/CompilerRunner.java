@@ -53,6 +53,7 @@ import org.ow2.mind.adl.graph.Instantiator;
 import org.ow2.mind.adl.implementation.BasicImplementationLocator;
 import org.ow2.mind.adl.implementation.ImplementationLocator;
 import org.ow2.mind.annotation.AnnotationLocatorHelper;
+import org.ow2.mind.annotation.PredefinedAnnotationsHelper;
 import org.ow2.mind.compilation.CompilationCommand;
 import org.ow2.mind.compilation.CompilationCommandExecutor;
 import org.ow2.mind.compilation.CompilerCommand;
@@ -67,10 +68,11 @@ import org.ow2.mind.idl.IDLVisitor;
 import org.ow2.mind.idl.OutputBinaryIDLLocator;
 import org.ow2.mind.io.BasicOutputFileLocator;
 import org.ow2.mind.io.OutputFileLocator;
+import org.ow2.mind.plugin.BasicPluginManager;
 import org.ow2.mind.plugin.SimpleClassPluginFactory;
 import org.ow2.mind.preproc.BasicMPPWrapper;
-import org.ow2.mind.preproc.MPPWrapper;
 import org.ow2.mind.st.STLoaderFactory;
+import org.ow2.mind.st.STNodeFactoryImpl;
 import org.testng.Assert;
 
 public class CompilerRunner {
@@ -92,7 +94,7 @@ public class CompilerRunner {
   public File                       buildDir;
   public Map<Object, Object>        context;
 
-  public CompilerRunner() {
+  public CompilerRunner() throws ADLException {
 
     // input locators
     final BasicInputResourceLocator inputResourceLocator = new BasicInputResourceLocator();
@@ -106,8 +108,13 @@ public class CompilerRunner {
     obal.clientLocatorItf = Factory.newADLLocator(inputResourceLocator);
     final ADLLocator adlLocator = obal;
 
+    // NodeFactory Component
+    final STNodeFactoryImpl stNodeFactory = new STNodeFactoryImpl();
+
     // Plugin Manager Components
     final org.objectweb.fractal.adl.Factory pluginFactory = new SimpleClassPluginFactory();
+    final BasicPluginManager pluginManager = new BasicPluginManager();
+    pluginManager.nodeFactoryItf = stNodeFactory;
 
     outputFileLocator = new BasicOutputFileLocator();
     obal.outputFileLocatorItf = outputFileLocator;
@@ -117,7 +124,8 @@ public class CompilerRunner {
     final GccCompilerWrapper gcw = new GccCompilerWrapper();
     gcw.outputFileLocatorItf = outputFileLocator;
     final CompilerWrapper compilerWrapper = gcw;
-    final MPPWrapper mppWrapper = new BasicMPPWrapper();
+    final BasicMPPWrapper mppWrapper = new BasicMPPWrapper();
+    mppWrapper.pluginManagerItf = pluginManager;
 
     // String Template Component Loaders
     final StringTemplateGroupLoader stcLoader = STLoaderFactory.newSTLoader();
@@ -138,19 +146,27 @@ public class CompilerRunner {
         inputResourceLocator, outputFileLocator, stcLoader);
     final DefinitionSourceGenerator definitionSourceGenerator = ADLBackendFactory
         .newDefinitionSourceGenerator(inputResourceLocator, outputFileLocator,
-            idlLoader, idlCompiler, stcLoader);
+            idlLoader, idlCompiler, stcLoader, pluginManager, context);
     definitionCompiler = ADLBackendFactory.newDefinitionCompiler(
         definitionSourceGenerator, implementationLocator, outputFileLocator,
         compilerWrapper, mppWrapper);
     graphCompiler = ADLBackendFactory.newGraphCompiler(inputResourceLocator,
         implementationLocator, outputFileLocator, compilerWrapper, mppWrapper,
-        definitionCompiler, adlLoader, stcLoader);
+        definitionCompiler, adlLoader, stcLoader, pluginManager, context);
 
     // compilation executor
     executor = ADLBackendFactory.newCompilationCommandExecutor();
 
     // init context
     initContext();
+
+    // Add additional predefined annotation packages
+    for (final String annotationPackage : PredefinedAnnotationsHelper
+        .getPredefinedAnnotations(pluginManager, context)) {
+      AnnotationLocatorHelper.addDefaultAnnotationPackage(annotationPackage,
+          context);
+    }
+
   }
 
   public void initContext() {

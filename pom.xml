@@ -41,6 +41,7 @@
         <module>mindc</module>
         <module>fractal-runtime</module>
         <module>fractal-adl-bundle</module>
+        <module>plugin-loader</module>
     </modules>
 
     <developers>
@@ -161,6 +162,11 @@
                 <version>${project.version}</version>
             </dependency>
 
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>plugin-loader</artifactId>
+                <version>${project.version}</version>
+            </dependency>
             <!-- Other dependencies -->
             <dependency>
                 <groupId>org.objectweb.fractal.fractaladl</groupId>
