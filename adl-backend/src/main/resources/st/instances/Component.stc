@@ -1,4 +1,5 @@
-template st.instances.Component implements st.instances.ComponentInstances{
+template st.instances.Component : st.common.ComponentHelper
+implements st.instances.ComponentInstances{
 
 $${
 
