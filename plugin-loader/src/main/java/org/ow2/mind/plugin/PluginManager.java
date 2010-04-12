@@ -19,6 +19,7 @@
  * Authors: Matthieu Leclercq
  * Contributors: 
  */
+
 package org.ow2.mind.plugin;
 
 import java.util.Collection;
@@ -29,8 +30,8 @@ import org.ow2.mind.plugin.ast.Extension;
 
 public interface PluginManager {
 
-	  public void setClassLoader(ClassLoader cl);
+  public void setClassLoader(ClassLoader cl);
 
-	  public Collection<Extension> getExtensions(String extensionPoint,
-	      Map<Object, Object> context) throws ADLException;
+  public Collection<Extension> getExtensions(String extensionPoint,
+      Map<Object, Object> context) throws ADLException;
 }
