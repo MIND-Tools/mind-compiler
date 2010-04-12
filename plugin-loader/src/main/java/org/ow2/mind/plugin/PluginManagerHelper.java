@@ -57,7 +57,6 @@ public final class PluginManagerHelper {
    */
   public static Map<String, List<Plugin>> getContextMap(
       Map<Object, Object> context) {
-    @SuppressWarnings("unchecked")
     Map<String, List<Plugin>> pluginMap = (Map<String, List<Plugin>>) context
         .get(PLUGIN_MANAGER_CONTEXT_MAP);
     if (pluginMap == null) {
