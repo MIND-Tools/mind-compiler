@@ -22,6 +22,8 @@
 
 package org.ow2.mind.annotation;
 
+import static org.ow2.mind.plugin.ast.PluginASTHelper.getExtensionConfig;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -58,8 +60,7 @@ public final class PredefinedAnnotationsHelper {
 
   private static String getAnnotationPackage(final Extension extension)
       throws ADLException {
-    final NodeList nodes = ((Element) extension.astGetDecoration("xml-element"))
-        .getChildNodes();
+    final NodeList nodes = getExtensionConfig(extension).getChildNodes();
     for (int i = 0; i < nodes.getLength(); i++) {
       final Node node = nodes.item(i);
       if (node instanceof Element) {

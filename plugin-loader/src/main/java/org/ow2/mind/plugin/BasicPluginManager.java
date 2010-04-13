@@ -47,6 +47,7 @@ import org.objectweb.fractal.adl.util.FractalADLLogManager;
 import org.ow2.mind.plugin.ast.Extension;
 import org.ow2.mind.plugin.ast.ExtensionPoint;
 import org.ow2.mind.plugin.ast.Plugin;
+import org.ow2.mind.plugin.ast.PluginASTHelper;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -214,12 +215,11 @@ public class BasicPluginManager implements PluginManager {
         if (element.getNodeName().equals("extension")) {
           final Extension extension = newExtensionNode(element
               .getAttribute("point"));
-          extension.astSetDecoration("xml-element", element);
+          PluginASTHelper.setExtensionConfig(extension, element);
           plugin.addExtension(extension);
         } else if (element.getNodeName().equals("extension-point")) {
           final ExtensionPoint extensionPoint = newExtensionPointNode(element
               .getAttribute("id"), element.getAttribute("dtd"));
-          extensionPoint.astSetDecoration("xml-element", element);
           plugin.addExtensionPoint(extensionPoint);
         }
       }
