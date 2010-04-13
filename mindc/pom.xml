@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -137,7 +138,47 @@
                 </plugins>
             </build>
         </profile>
-        
+
+        <profile>
+            <id>local-install</id>
+            <activation>
+                <property>
+                    <name>local-install</name>
+                </property>
+            </activation>
+
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-dependency-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>install-local</id>
+                                <phase>install</phase>
+                                <goals>
+                                    <goal>unpack</goal>
+                                </goals>
+                                <configuration>
+                                    <artifactItems>
+                                        <artifactItem>
+                                            <groupId>${project.groupId}</groupId>
+                                            <artifactId>${project.artifactId}</artifactId>
+                                            <version>${project.version}</version>
+                                            <type>zip</type>
+                                            <classifier>bin</classifier>
+                                            <overWrite>true</overWrite>
+                                            <outputDirectory>${local-install}</outputDirectory>
+                                        </artifactItem>
+                                    </artifactItems>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
         <profile>
             <id>release</id>
             <activation>
@@ -161,14 +202,14 @@
                                 </goals>
                                 <configuration>
                                     <tasks>
-                                        <!--
-                                            This Ant task will deploy assembly
-                                            files on the OW2 forge in order to
-                                            release them on the "File" section
-                                            of the forge.
-                                        -->
-                                        <scp todir="${ow2.username}@${ow2.hostname}:${ow2.file.deploy.dir}" verbose="true" passphrase="" keyfile="${user.home}/.ssh/id_rsa">
-                                            <fileset dir="${project.build.directory}">
+                                        <!-- This Ant task will deploy assembly files 
+                                            on the OW2 forge in order to release them on the "File" section of the forge. -->
+                                        <scp
+                                            todir="${ow2.username}@${ow2.hostname}:${ow2.file.deploy.dir}"
+                                            verbose="true" passphrase=""
+                                            keyfile="${user.home}/.ssh/id_rsa">
+                                            <fileset
+                                                dir="${project.build.directory}">
                                                 <include name="*.tar.bz2" />
                                                 <include name="*.tar.gz" />
                                                 <include name="*.zip" />
