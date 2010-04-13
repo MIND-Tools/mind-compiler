@@ -100,8 +100,13 @@ public class BasicPluginManager implements PluginManager {
 
   public Collection<Extension> getExtensions(final String extensionPoint,
       final Map<Object, Object> context) throws ADLException {
-    return Collections.unmodifiableCollection(getRegistry(context).extensions
-        .get(extensionPoint));
+    Collection<Extension> oo = getRegistry(context).extensions
+        .get(extensionPoint);
+
+    if (oo != null)
+      return Collections.unmodifiableCollection(oo);
+    else
+      return Collections.emptySet();
   }
 
   // ---------------------------------------------------------------------------
