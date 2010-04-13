@@ -57,6 +57,18 @@
             <email>matthieu.leclercq@st.com</email>
             <organization>STMicroelectronics</organization>
         </developer>
+        <developer>
+            <id>annema</id>
+            <name>Matthieu Anne</name>
+            <email>matthieu.anne@orange-ftgroup.com</email>
+            <organization>Orange Labs</organization>
+        </developer>
+        <developer>
+            <id>chomats</id>
+            <name>Stephane Chomat</name>
+            <email>stephane.chomat@imag.fr</email>
+            <organization>LIG Adele</organization>
+        </developer>
     </developers>
 
     <contributors>
@@ -520,6 +532,12 @@
                             </exclude>
                         </excludes>
                     </configuration>
+                </plugin>
+                
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>exec-maven-plugin</artifactId>
+                    <version>1.1.1</version>
                 </plugin>
             </plugins>
         </pluginManagement>

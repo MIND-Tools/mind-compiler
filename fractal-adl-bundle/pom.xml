@@ -22,7 +22,7 @@
 					<instructions>
 						<Bundle-SymbolicName>${project.name};singleton:=true</Bundle-SymbolicName>
 						<Bundle-Name>${project.name}</Bundle-Name>
-						<Bundle-Description>${pom.description}</Bundle-Description>
+						<Bundle-Description>${project.description}</Bundle-Description>
 						<Private-Package>org.objectweb.fractal.adl*,org.objectweb.fractal.api*,
 							org.objectweb.fractal.util, org.objectweb.util.monolog.api,
 							com.wutka.dtd,
