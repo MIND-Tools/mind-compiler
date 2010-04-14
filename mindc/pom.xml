@@ -164,7 +164,7 @@
                                             <groupId>${project.groupId}</groupId>
                                             <artifactId>${project.artifactId}</artifactId>
                                             <version>${project.version}</version>
-                                            <type>zip</type>
+                                            <type>tar.gz</type>
                                             <classifier>bin</classifier>
                                             <overWrite>true</overWrite>
                                             <outputDirectory>${local-install}</outputDirectory>
