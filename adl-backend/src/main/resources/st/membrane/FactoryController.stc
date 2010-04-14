@@ -34,16 +34,21 @@ ControllerImplementation(definition, controller, interfaceDefinitions) ::= <<
 // -----------------------------------------------------------------------------
 
 newFcInstance(definition) ::= <<
-int __component_<definition.name;format="toCName">_factory(void **instance, memory_api_Allocator allocItf);
+#include "<definition.name;format="nameToPath">.adl.h"
 
 int METH(factory, newFcInstance)(void ** instance) {
-  return __component_<definition.name;format="toCName">_factory(instance, GET_MY_INTERFACE(allocator));
+  return __component_<definition.name;format="toCName">_factory(instance, GET_MY_INTERFACE(allocator)
+    <FactoryParameters(definition=definition)>);
 }
 >>
 
-destroyFcInstance(definition) ::= <<
-int __component_<definition.name;format="toCName">_destroy(void *instance, memory_api_Allocator allocItf);
+FactoryParameters(definition) ::= <<
+<if (definition.astNodeTypes.("formalParameter"))>
+<definition.formalParameters:{, ATTR(<it.name>)}>
+<endif>
+>>
 
+destroyFcInstance(definition) ::= <<
 int METH(factory, destroyFcInstance)(void * instance) {
   return __component_<definition.name;format="toCName">_destroy(instance, GET_MY_INTERFACE(allocator));
 }

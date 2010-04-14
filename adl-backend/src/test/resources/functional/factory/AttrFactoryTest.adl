@@ -1,0 +1,6 @@
+import attr.Attr1;
+
+@Run()
+composite factory.AttrFactoryTest 
+    extends GenericFactoryTest<Attr1> {
+}

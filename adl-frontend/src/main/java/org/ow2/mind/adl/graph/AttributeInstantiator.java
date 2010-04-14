@@ -88,7 +88,7 @@ public class AttributeInstantiator extends AbstractInstantiator {
           }
 
           if (valueNode instanceof StringLiteral) {
-            valueString = "\"" + ((StringLiteral) valueNode).getValue() + "\"";
+            valueString = ((StringLiteral) valueNode).getValue();
           } else if (valueNode instanceof NumberLiteral) {
             valueString = ((NumberLiteral) valueNode).getValue();
           } else if (valueNode instanceof NullLiteral) {

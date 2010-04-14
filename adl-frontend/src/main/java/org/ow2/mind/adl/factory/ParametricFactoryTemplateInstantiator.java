@@ -110,11 +110,10 @@ public class ParametricFactoryTemplateInstantiator
           reference.setRef(formalParameter.getName());
           attrNode.setValue(reference);
 
-          // TODO handle attribute type correctly
           final ParameterType inferredParameterType = ParameterASTHelper
               .getInferredParameterType(formalParameter);
           if (inferredParameterType != null)
-            attrNode.setType(inferredParameterType.toString());
+            attrNode.setType(inferredParameterType.getCType());
 
           attributeContainer.addAttribute(attrNode);
         }

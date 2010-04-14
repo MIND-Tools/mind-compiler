@@ -1,0 +1,4 @@
+
+@Run
+composite attr.ParametricAttr31 extends attr.ParametricAttr3(12, "toto") {
+}

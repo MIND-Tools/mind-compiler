@@ -82,15 +82,13 @@ public class AttributeCheckerLoader extends AbstractLoader {
         throw new ADLException(ADLErrors.INVALID_ATTRIBUTE_MISSING_TYPE, attr);
       }
 
-      final ParameterType type = typeName.equals("string")
-          ? ParameterType.STRING
-          : ParameterType.INTEGER;
+      final ParameterType type = ParameterType.fromCType(typeName);
 
       final Value value = attr.getValue();
 
       if (value != null) {
         if (value instanceof NumberLiteral) {
-          if (type == ParameterType.STRING)
+          if (!type.isCompatible(value))
             throw new ADLException(
                 ADLErrors.INVALID_ATTRIBUTE_VALUE_INCOMPATIBLE_TYPE, value);
 
@@ -102,10 +100,9 @@ public class AttributeCheckerLoader extends AbstractLoader {
           }
         } else if (value instanceof StringLiteral
             || value instanceof NullLiteral) {
-          if (type == ParameterType.INTEGER)
+          if (!type.isCompatible(value))
             throw new ADLException(
                 ADLErrors.INVALID_ATTRIBUTE_VALUE_INCOMPATIBLE_TYPE, value);
-
         } else {
           assert value instanceof Reference;
           final String refParamName = ((Reference) value).getRef();
@@ -130,17 +127,17 @@ public class AttributeCheckerLoader extends AbstractLoader {
           final ParameterType referencedType = getInferredParameterType(refParam);
           if (referencedType == null) {
             setInferredParameterType(refParam, type);
-          } else if (type != referencedType) {
+          } else if (!type.isCompatible(referencedType)) {
             throw new ADLException(ADLErrors.INCOMPATIBLE_ARGUMENT_TYPE, value,
                 refParamName);
           }
         }
       } else {
         // value is null, set a default value
-        if (type == ParameterType.INTEGER) {
-          attr.setValue(ValueASTHelper.newNumberLiteral(nodeFactoryItf, 0));
-        } else {
+        if (type == ParameterType.STRING) {
           attr.setValue(ValueASTHelper.newNullLiteral(nodeFactoryItf));
+        } else {
+          attr.setValue(ValueASTHelper.newNumberLiteral(nodeFactoryItf, 0));
         }
       }
     }

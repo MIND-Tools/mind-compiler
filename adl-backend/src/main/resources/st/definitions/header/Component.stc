@@ -46,9 +46,9 @@ struct __component_<definition.name;format="toCName">_internal_data_t {
 <ComponentVTableDecl(definition=definition)>
 /* End declaration of interface V-Tables. */
 
-/* Start declaration of factory macro */
+/* Start declaration of factory */
 <FactoryDef(definition=definition)>
-/* End declaration of factory macro */
+/* End declaration of factory */
 
 #endif /* __COMPONENT_<definition.name;format="toUpperCName">_ADL_H */
 
@@ -251,6 +251,9 @@ extern <ComponentTypeName(definitionName=definition.name)> instance_name;
   { /* __component_internal_data: */ \
 <InitializeInterfaces(definition=definition)><InitializeComponents(definition=definition)><InitializeAttributes(definition=definition)><InitializeControllerStructures(definition=definition)>  } \
 };
+
+int __component_<definition.name;format="toCName">_factory(void **instance, void *allocItf <ComponentFactoryParameters(definition=definition)>);
+int __component_<definition.name;format="toCName">_destroy(void *instance, void *allocItf);
 >>
 
 AddItfNames(definition) ::= <<
@@ -346,6 +349,12 @@ InitializeControllerData(definition, ctrl) ::= <<
 <ctrl.sources:{<(ctrlGenerator.(it.path).ControllerDataStaticInit)(definition=definition, controller=ctrl)>}>
 >>
 
+
+ComponentFactoryParameters(definition) ::= <<
+<if (definition.astNodeTypes.("formalParameter"))>
+<definition.formalParameters:{, <it.astDecorations.("inferred-type").cType> <it.name>}>
+<endif>
+>>
 
 }$$ 
 }

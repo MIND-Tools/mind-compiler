@@ -82,6 +82,7 @@ import org.ow2.mind.adl.imports.ImportInterfaceSignatureResolver;
 import org.ow2.mind.adl.membrane.CompositeInternalInterfaceLoader;
 import org.ow2.mind.adl.membrane.MembraneCheckerLoader;
 import org.ow2.mind.adl.parameter.ExtendsParametricDefinitionReferenceResolver;
+import org.ow2.mind.adl.parameter.ParameterNormalizerLoader;
 import org.ow2.mind.adl.parameter.ParametricAnonymousDefinitionExtractor;
 import org.ow2.mind.adl.parameter.ParametricDefinitionReferenceResolver;
 import org.ow2.mind.adl.parameter.ParametricGenericDefinitionReferenceResolver;
@@ -194,6 +195,7 @@ public final class Factory {
     final BindingCheckerLoader bcl = new BindingCheckerLoader();
     final UnboundInterfaceCheckerLoader uicl = new UnboundInterfaceCheckerLoader();
     final ImplementationLoader il = new ImplementationLoader();
+    final ParameterNormalizerLoader pnl = new ParameterNormalizerLoader();
     final AttributesNormalizerLoader attrnl = new AttributesNormalizerLoader();
     final AttributeCheckerLoader acl = new AttributeCheckerLoader();
     final AnnotationProcessorLoader apl4 = new AnnotationProcessorLoader();
@@ -207,7 +209,8 @@ public final class Factory {
     gidl.clientLoader = apl4;
     apl4.clientLoader = acl;
     acl.clientLoader = attrnl;
-    attrnl.clientLoader = il;
+    attrnl.clientLoader = pnl;
+    pnl.clientLoader = il;
     il.clientLoader = uicl;
     uicl.clientLoader = bcl;
     bcl.clientLoader = bnl;

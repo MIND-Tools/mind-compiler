@@ -28,6 +28,10 @@ import static org.ow2.mind.CommonASTHelper.turnsTo;
 import org.objectweb.fractal.adl.Node;
 import org.objectweb.fractal.adl.NodeFactory;
 import org.objectweb.fractal.adl.merger.NodeMerger;
+import org.ow2.mind.value.ast.NullLiteral;
+import org.ow2.mind.value.ast.NumberLiteral;
+import org.ow2.mind.value.ast.StringLiteral;
+import org.ow2.mind.value.ast.Value;
 
 /**
  * Helper methods for parameter AST nodes.
@@ -144,7 +148,68 @@ public final class ParameterASTHelper {
   }
 
   public static enum ParameterType {
-    INTEGER, STRING;
+    STRING("string"), INT("int"), INT8_T("int8_t"), UINT8_T("uint8_t"), INT16_T(
+        "int16_t"), UINT16_T("uint16_t"), INT32_T("int32_t"), UINT32_T(
+        "uint32_t"), INT64_T("int64_t"), UINT64_T("uint64_t"), INTPTR_T(
+        "intptr_t"), UINTPTR_T("uintptr_t");
+
+    private final String cType;
+
+    private ParameterType(final String cType) {
+      this.cType = cType;
+    }
+
+    public boolean isCompatible(final ParameterType type) {
+      if (type == this) return true;
+      switch (this) {
+        case STRING :
+          return type == STRING;
+        case INT :
+        case INT8_T :
+        case UINT8_T :
+        case INT16_T :
+        case UINT16_T :
+        case INT32_T :
+        case UINT32_T :
+        case INT64_T :
+        case UINT64_T :
+        case INTPTR_T :
+        case UINTPTR_T :
+          return type != STRING;
+      }
+      return false;
+    }
+
+    public boolean isCompatible(final Value value) {
+      switch (this) {
+        case STRING :
+          return value instanceof StringLiteral || value instanceof NullLiteral;
+        case INT :
+        case INT8_T :
+        case UINT8_T :
+        case INT16_T :
+        case UINT16_T :
+        case INT32_T :
+        case UINT32_T :
+        case INT64_T :
+        case UINT64_T :
+        case INTPTR_T :
+        case UINTPTR_T :
+          return value instanceof NumberLiteral;
+      }
+      return false;
+    }
+
+    public String getCType() {
+      return cType;
+    }
+
+    public static ParameterType fromCType(final String cType) {
+      for (final ParameterType type : ParameterType.values()) {
+        if (type.cType.equals(cType)) return type;
+      }
+      throw new IllegalArgumentException(cType);
+    }
   }
 
   public static final String INFERRED_ARGUMENT_TYPE_DECORATION_NAME = "inferred-type";

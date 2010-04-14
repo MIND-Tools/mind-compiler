@@ -314,9 +314,9 @@ void ArgumentList() : {}
 {
   <LPAREN>
   [ 
-    LOOKAHEAD(2) 
-    Argument() ( <COMMA> Argument() ) *
-    | ArgumentAssignement() ( <COMMA> ArgumentAssignement() ) *
+    LOOKAHEAD(<IDENTIFIER> <ASSIGN>) 
+    ArgumentAssignement() ( <COMMA> ArgumentAssignement() ) *
+    | Argument() ( <COMMA> Argument() ) *
   ]
   <RPAREN>
 }

@@ -58,20 +58,18 @@ ComponentFactoryMethod(definition) ::= <<
 
 #include "memory/api/Allocator.itf.h"
 
-<DeclareSubComponentFactoryMethods(definition=definition)>
-
 #ifdef CONSTRUCTOR_METHOD_IMPLEMENTED
 void __component_<definition.name;format="toCName">_constructor(PRIVATE_DATA_T* instance);
 #endif
 
-int __component_<definition.name;format="toCName">_factory(void **instance, memory_api_Allocator allocItf) {
+int __component_<definition.name;format="toCName">_factory(void **instance, void *allocItf <ComponentFactoryParameters(definition=definition)>) {
 <if (definition.astNodeTypes.("component"))>
 <if (definition.components)>
   int err = 0;
 <endif>
 <endif>
 
-  PRIVATE_DATA_T* newInstance = (PRIVATE_DATA_T*) CALL_PTR(allocItf, alloc)(sizeof(PRIVATE_DATA_T));
+  PRIVATE_DATA_T* newInstance = (PRIVATE_DATA_T*) CALL_PTR((memory_api_Allocator) allocItf, alloc)(sizeof(PRIVATE_DATA_T));
   if (newInstance == 0) return -1;
   
   <InitializeInterfaces(definition=definition)>
@@ -79,6 +77,8 @@ int __component_<definition.name;format="toCName">_factory(void **instance, memo
   <InitializeComponents(definition=definition)>
   
   <InitializeBindings(definition=definition)>
+
+  <InitializeAttributes(definition=definition)>
 
   <InitializeControllersData(definition=definition)>
   
@@ -93,13 +93,13 @@ int __component_<definition.name;format="toCName">_factory(void **instance, memo
 <if (definition.astNodeTypes.("component"))>
 <if (definition.components)>
 error0:
-  CALL_PTR(allocItf, free)(newInstance);
+  CALL_PTR((memory_api_Allocator) allocItf, free)(newInstance);
   return err;
 <endif>
 <endif>
 }
 
-int __component_<definition.name;format="toCName">_destroy(void *instance, memory_api_Allocator allocItf) {
+int __component_<definition.name;format="toCName">_destroy(void *instance, void *allocItf) {
 <if (definition.astNodeTypes.("component"))>
 <if (definition.components)>
   int err = 0;
@@ -111,7 +111,7 @@ int __component_<definition.name;format="toCName">_destroy(void *instance, memor
 
   <DestroyControllersData(definition=definition)>
 
-  CALL_PTR(allocItf, free)(destroyInstance);
+  CALL_PTR((memory_api_Allocator) allocItf, free)(destroyInstance);
   return 0;
 
 <if (definition.astNodeTypes.("component"))>
@@ -122,6 +122,12 @@ error0:
 <endif>
 }
 
+>>
+
+ComponentFactoryParameters(definition) ::= <<
+<if (definition.astNodeTypes.("formalParameter"))>
+<definition.formalParameters:{, <it.astDecorations.("inferred-type").cType> <it.name>}>
+<endif>
 >>
 
 InitializeInterfaces(definition) ::= <<
@@ -165,15 +171,6 @@ DeclareSubComponentFactoryMethods(definition) ::= <<
 <endif>
 >>
 
-DeclareSubComponentFactoryMethod(definition, component) ::= <<
-#ifndef __COMPONENT_<component.definitionReference.name;format="toUpperCName">_FACTORY_DECLARED
-#define __COMPONENT_<component.definitionReference.name;format="toUpperCName">_FACTORY_DECLARED
-int __component_<component.definitionReference.name;format="toCName">_factory(void **instance, memory_api_Allocator allocItf);
-int __component_<component.definitionReference.name;format="toCName">_destroy(void *instance, memory_api_Allocator allocItf);
-#endif
-
->>
-
 InitializeComponents(definition) ::= <<
 <if (definition.astNodeTypes.("component"))>
 <if (definition.components)>
@@ -184,8 +181,26 @@ InitializeComponents(definition) ::= <<
 
 InitializeComponent(definition, component) ::= <<
   /* initialization of <component.name> sub-component */
-  err = __component_<component.definitionReference.name;format="toCName">_factory((void **) &(newInstance->__component_internal_data.components.<component.name>), allocItf);
+  err = __component_<component.definitionReference.name;format="toCName">_factory(
+    (void **) &(newInstance->__component_internal_data.components.<component.name>), 
+    allocItf <InitializeComponentParameters(definition=definition, component=component)>);
   if (err != 0) goto error0;
+>>
+
+InitializeComponentParameters(definition, component) ::= <<
+<if (component.definitionReference.astNodeTypes.("argument"))>
+<component.definitionReference.arguments:InitializeComponentParameter(definition=definition, component=component, argument=it)>
+<endif>
+>>
+
+InitializeComponentParameter(definition, component, argument) ::= <<
+, <if (argument.value.astAttributes.("ref"))>
+  <argument.value.ref>
+<elseif (argument.value.astAttributes.("value"))>
+  <argument.value.value>
+<else>
+  NULL
+<endif>
 >>
 
 InitializeBindings(definition) ::= <<
@@ -198,6 +213,26 @@ InitializeBinding(definition, binding) ::= <<
   /* initialize binding from <binding.fromComponent>.<binding.fromInterface> to <binding.toComponent>.<binding.toInterface> */
   newInstance->__component_internal_data.<if (isThis.(binding.fromComponent))>inner_type<else>components.<binding.fromComponent>->__component_internal_data.type<endif>.<binding.fromInterface><if(binding.fromInterfaceNumber)>[<binding.fromInterfaceNumber>]<endif> = 
     & newInstance->__component_internal_data.<if (isThis.(binding.toComponent))>inner_type<else>components.<binding.toComponent>->__component_internal_data.type<endif>.<binding.toInterface><if(binding.toInterfaceNumber)>[<binding.toInterfaceNumber>]<endif>;
+>>
+
+InitializeAttributes(definition) ::= <<
+<if (definition.astNodeTypes.("attribute"))>
+<definition.attributes:InitializeAttribute(definition=definition, attribute=it);separator="\n\n">
+<endif>
+>>
+
+InitializeAttribute(definition, attribute) ::= <<
+<if (attribute.value)>
+newInstance->__component_internal_data.attributes.<attribute.name> = 
+<if (attribute.value.astAttributes.("ref"))>
+  <attribute.value.ref>
+<elseif (attribute.value.astAttributes.("value"))>
+  <attribute.value.value>
+<else>
+  NULL
+<endif>
+;
+<endif>
 >>
 
 InitializeControllersData(definition) ::= <<

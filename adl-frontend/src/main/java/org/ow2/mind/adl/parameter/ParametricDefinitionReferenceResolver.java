@@ -28,13 +28,13 @@ import static org.ow2.mind.adl.parameter.ast.ParameterASTHelper.setUsedFormalPar
 
 import java.util.HashMap;
 import java.util.IdentityHashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.CompilerError;
 import org.objectweb.fractal.adl.ContextLocal;
 import org.objectweb.fractal.adl.Definition;
-import org.objectweb.fractal.adl.Node;
 import org.objectweb.fractal.adl.error.GenericErrors;
 import org.objectweb.fractal.adl.error.NodeErrorLocator;
 import org.ow2.mind.adl.ADLErrors;
@@ -46,9 +46,7 @@ import org.ow2.mind.adl.parameter.ast.ArgumentContainer;
 import org.ow2.mind.adl.parameter.ast.FormalParameter;
 import org.ow2.mind.adl.parameter.ast.FormalParameterContainer;
 import org.ow2.mind.adl.parameter.ast.ParameterASTHelper.ParameterType;
-import org.ow2.mind.value.ast.NumberLiteral;
 import org.ow2.mind.value.ast.Reference;
-import org.ow2.mind.value.ast.StringLiteral;
 import org.ow2.mind.value.ast.Value;
 
 /**
@@ -87,23 +85,16 @@ public class ParametricDefinitionReferenceResolver
     final Definition d = clientResolverItf.resolve(reference,
         encapsulatingDefinition, context);
 
-    final Argument[] argumentValues = (reference instanceof ArgumentContainer)
-        ? ((ArgumentContainer) reference).getArguments()
-        : null;
-    final FormalParameter[] refFormalParameters = (d instanceof FormalParameterContainer)
-        ? ((FormalParameterContainer) d).getFormalParameters()
-        : null;
-
     // Map argument values to formal parameters.
     // argumentMap associates formal parameter names to actual arguments;
-    final Map<String, Argument> argumentMap = mapArguments(refFormalParameters,
-        argumentValues, reference);
+    final Map<String, Argument> argumentMap = mapArguments(reference, d);
 
     if (argumentMap != null) {
       // referenced definition has formal parameters.
 
       // Check argument values
-      for (final FormalParameter parameter : refFormalParameters) {
+      for (final FormalParameter parameter : ((FormalParameterContainer) d)
+          .getFormalParameters()) {
         final ParameterType type = getInferredParameterType(parameter);
         final Argument argumentValue = argumentMap.get(parameter.getName());
         final Value value = argumentValue.getValue();
@@ -124,16 +115,9 @@ public class ParametricDefinitionReferenceResolver
             throw new ADLException(ADLErrors.INCOMPATIBLE_ARGUMENT_TYPE, value,
                 ref);
           }
-        } else if (value instanceof StringLiteral) {
-          if (type != null && type != ParameterType.STRING) {
-            throw new ADLException(ADLErrors.INCOMPATIBLE_ARGUMENT_VALUE,
-                value, parameter.getName());
-          }
-        } else if (value instanceof NumberLiteral) {
-          if (type != null && type != ParameterType.INTEGER) {
-            throw new ADLException(ADLErrors.INCOMPATIBLE_ARGUMENT_VALUE,
-                value, parameter.getName());
-          }
+        } else if (type != null && !type.isCompatible(value)) {
+          throw new ADLException(ADLErrors.INCOMPATIBLE_ARGUMENT_VALUE, value,
+              parameter.getName());
         }
       }
     }
@@ -142,12 +126,19 @@ public class ParametricDefinitionReferenceResolver
   }
 
   protected Map<String, Argument> mapArguments(
-      final FormalParameter[] parameters, final Argument[] arguments,
-      final Node location) throws ADLException {
+      final DefinitionReference reference, final Definition definition)
+      throws ADLException {
+    final Argument[] arguments = (reference instanceof ArgumentContainer)
+        ? ((ArgumentContainer) reference).getArguments()
+        : null;
+    final FormalParameter[] parameters = (definition instanceof FormalParameterContainer)
+        ? ((FormalParameterContainer) definition).getFormalParameters()
+        : null;
+
     if (parameters == null || parameters.length == 0) {
       if (arguments != null && arguments.length > 0) {
         throw new ADLException(ADLErrors.INVALID_REFERENCE_NO_PARAMETER,
-            location);
+            reference);
       } else {
         return null;
       }
@@ -156,7 +147,7 @@ public class ParametricDefinitionReferenceResolver
       // there are parameters
       if (arguments == null || arguments.length == 0)
         throw new ADLException(ADLErrors.INVALID_REFERENCE_MISSING_ARGUMENT,
-            location);
+            reference);
 
       if (arguments.length > 0 && arguments[0].getName() == null) {
         // argument values are specified by ordinal position.
@@ -164,12 +155,12 @@ public class ParametricDefinitionReferenceResolver
         if (parameters.length > arguments.length) {
           // missing template values
           throw new ADLException(ADLErrors.INVALID_REFERENCE_MISSING_ARGUMENT,
-              location);
+              reference);
         }
 
         if (parameters.length < arguments.length) {
           throw new ADLException(ADLErrors.INVALID_REFERENCE_TOO_MANY_ARGUMENT,
-              location);
+              reference);
         }
 
         final Map<String, Argument> result = new HashMap<String, Argument>(
@@ -204,6 +195,9 @@ public class ParametricDefinitionReferenceResolver
                 new NodeErrorLocator(value),
                 "Cannot mix ordinal and name-based argument values.");
           }
+          // remove argument and re-add them latter in the formal parameter
+          // declaration order.
+          ((ArgumentContainer) reference).removeArgument(value);
 
           valuesByName.put(value.getName(), value);
         }
@@ -214,10 +208,11 @@ public class ParametricDefinitionReferenceResolver
           if (value == null) {
             // missing template values
             throw new ADLException(
-                ADLErrors.INVALID_REFERENCE_MISSING_ARGUMENT, location,
+                ADLErrors.INVALID_REFERENCE_MISSING_ARGUMENT, reference,
                 variable.getName());
           }
           result.put(variable.getName(), value);
+          ((ArgumentContainer) reference).addArgument(value);
         }
         if (!valuesByName.isEmpty()) {
           // too many template values
@@ -247,21 +242,13 @@ public class ParametricDefinitionReferenceResolver
     Map<String, FormalParameter> result = parameters.get(d);
 
     if (result == null) {
-      result = new HashMap<String, FormalParameter>();
+      result = new LinkedHashMap<String, FormalParameter>();
       if (d instanceof FormalParameterContainer) {
         final FormalParameter[] formalParameters = ((FormalParameterContainer) d)
             .getFormalParameters();
         if (formalParameters.length > 0) {
           for (final FormalParameter parameter : formalParameters) {
-            if (result.put(parameter.getName(), parameter) != null) {
-              /*
-               * TODO strange ADLErrors, and why checking for duplicated
-               * parameters here ?
-               */
-              throw new ADLException(
-                  ADLErrors.DUPLICATED_TEMPALTE_VARIABLE_NAME, parameter,
-                  parameter.getName());
-            }
+            result.put(parameter.getName(), parameter);
           }
         }
       }
