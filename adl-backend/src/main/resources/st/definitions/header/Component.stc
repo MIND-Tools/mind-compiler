@@ -352,7 +352,16 @@ InitializeControllerData(definition, ctrl) ::= <<
 
 ComponentFactoryParameters(definition) ::= <<
 <if (definition.astNodeTypes.("formalParameter"))>
-<definition.formalParameters:{, <it.astDecorations.("inferred-type").cType> <it.name>}>
+<definition.formalParameters:ComponentFactoryParameter(definition=definition, parameter=it)>
+<endif>
+>>
+
+ComponentFactoryParameter(definition, parameter) ::= <<
+, 
+<if (parameter.astDecorations.("inferred-type"))>
+<parameter.astDecorations.("inferred-type").cType> <it.name>
+<else>
+int <it.name>
 <endif>
 >>
 

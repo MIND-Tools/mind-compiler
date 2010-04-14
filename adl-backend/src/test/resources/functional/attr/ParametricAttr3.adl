@@ -1,5 +1,6 @@
 
-composite attr.ParametricAttr3(a, b)  extends ApplicationType {
+composite attr.ParametricAttr3(a, b, c /* 'c' parameter is not used*/)  
+  extends ApplicationType {
     contains attr.ParametricAttr1(b=b, a=a) as subComp; 
     
     binds this.main to subComp.main;

@@ -1,4 +1,8 @@
 
 @Run
-composite attr.ParametricAttr31 extends attr.ParametricAttr3(12, "toto") {
+composite attr.ParametricAttr31   
+  extends ApplicationType {
+    contains attr.ParametricAttr3(12, "toto", 10) as subComp; 
+    
+    binds this.main to subComp.main;
 }
