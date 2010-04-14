@@ -1,11 +1,10 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
 		<groupId>org.ow2.mind</groupId>
 		<artifactId>mind-compiler</artifactId>
-		<version>0.2-alpha-2-SNAPSHOT</version>
+		<version>0.2-beta-1-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>fractal-adl-bundle</artifactId>
@@ -23,7 +22,7 @@
 					<instructions>
 						<Bundle-SymbolicName>${project.name};singleton:=true</Bundle-SymbolicName>
 						<Bundle-Name>${project.name}</Bundle-Name>
-						<Bundle-Description>${pom.description}</Bundle-Description>
+						<Bundle-Description>${project.description}</Bundle-Description>
 						<Private-Package>org.objectweb.fractal.adl*,org.objectweb.fractal.api*,
 							org.objectweb.fractal.util, org.objectweb.util.monolog.api,
 							com.wutka.dtd,

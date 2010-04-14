@@ -10,7 +10,7 @@
     </parent>
 
     <artifactId>mind-compiler</artifactId>
-    <version>0.2-alpha-2-SNAPSHOT</version>
+    <version>0.2-beta-1-SNAPSHOT</version>
     <name>Mind compiler</name>
     <packaging>pom</packaging>
 
@@ -57,6 +57,18 @@
             <email>matthieu.leclercq@st.com</email>
             <organization>STMicroelectronics</organization>
         </developer>
+        <developer>
+            <id>annema</id>
+            <name>Matthieu Anne</name>
+            <email>matthieu.anne@orange-ftgroup.com</email>
+            <organization>Orange Labs</organization>
+        </developer>
+        <developer>
+            <id>chomats</id>
+            <name>Stephane Chomat</name>
+            <email>stephane.chomat@imag.fr</email>
+            <organization>LIG Adele</organization>
+        </developer>
     </developers>
 
     <contributors>
@@ -73,7 +85,7 @@
             The version of the fractal-adl artifacts which this tool-set depends
             on
         -->
-        <fractaladl.dependencies.version>2.6-SNAPSHOT</fractaladl.dependencies.version>
+        <fractaladl.dependencies.version>2.6</fractaladl.dependencies.version>
 
         <!-- By default run tests for groups "functional" and "checkin" -->
         <test.groups>functional, checkin</test.groups>
@@ -520,6 +532,12 @@
                             </exclude>
                         </excludes>
                     </configuration>
+                </plugin>
+                
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>exec-maven-plugin</artifactId>
+                    <version>1.1.1</version>
                 </plugin>
             </plugins>
         </pluginManagement>

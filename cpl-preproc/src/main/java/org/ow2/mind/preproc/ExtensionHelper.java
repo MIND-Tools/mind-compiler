@@ -22,6 +22,8 @@
 
 package org.ow2.mind.preproc;
 
+import static org.ow2.mind.plugin.ast.PluginASTHelper.getExtensionConfig;
+
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Map;
@@ -88,8 +90,7 @@ public final class ExtensionHelper {
       final String extensionName, final Class<? extends T> expectedType)
       throws ADLException {
     String className;
-    final NodeList nodes = ((Element) extension.astGetDecoration("xml-element"))
-        .getChildNodes();
+    final NodeList nodes = getExtensionConfig(extension).getChildNodes();
     for (int i = 0; i < nodes.getLength(); i++) {
       final Node node = nodes.item(i);
       if (node instanceof Element) {

@@ -1,0 +1,6 @@
+import attr.ParametricAttr1;
+
+@Run()
+composite factory.ParametricFactoryTest 
+    extends GenericFactoryTest<ParametricAttr1(12, "toto")> {
+}

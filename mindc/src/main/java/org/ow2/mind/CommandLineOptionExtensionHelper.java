@@ -1,6 +1,8 @@
 
 package org.ow2.mind;
 
+import static org.ow2.mind.plugin.ast.PluginASTHelper.getExtensionConfig;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
@@ -37,8 +39,7 @@ public final class CommandLineOptionExtensionHelper {
     final Collection<Extension> extensions = pluginManagerItf.getExtensions(
         COMMAND_LINE_OPTIONS_EXTENSION, context);
     for (final Extension extension : extensions) {
-      final NodeList nodes = ((Element) extension
-          .astGetDecoration("xml-element")).getChildNodes();
+      final NodeList nodes = getExtensionConfig(extension).getChildNodes();
       for (int i = 0; i < nodes.getLength(); i++) {
         final Node node = nodes.item(i);
         if (node instanceof Element) {

@@ -91,6 +91,8 @@ public class BasicValueEvaluator implements ValueEvaluator, BindingController {
       }
     } else if (value instanceof StringLiteral) {
       String s = ((StringLiteral) value).getValue();
+      s = s.substring(1, s.length() - 1);
+      // TODO un-escape every escaped characters
       s = s.replaceAll("\\\\\"", "\"");
       try {
         return expectedType.cast(s);

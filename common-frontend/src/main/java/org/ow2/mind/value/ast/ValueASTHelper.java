@@ -69,7 +69,7 @@ public final class ValueASTHelper {
       final String value) {
     final StringLiteral literal = newNode(nodeFactory, "value",
         StringLiteral.class);
-    literal.setValue(value);
+    literal.setValue("\"" + value + "\"");
     return literal;
   }
 

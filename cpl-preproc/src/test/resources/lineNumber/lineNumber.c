@@ -103,3 +103,8 @@ METH
 #if (__LINE__ != 103)
 #error bad line number
 #endif
+
+int METH(myOtherPrivateMethod)(int a){return a;}
+#if (__LINE__ != 108)
+#error bad line number
+#endif

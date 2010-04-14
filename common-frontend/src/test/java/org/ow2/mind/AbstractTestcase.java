@@ -81,7 +81,7 @@ public class AbstractTestcase {
 
   protected StringLiteral newStringLiteral(final String value) {
     final StringLiteral n = newNode("value", StringLiteral.class);
-    n.setValue(value);
+    n.setValue("\"" + value + "\"");
     return n;
   }
 

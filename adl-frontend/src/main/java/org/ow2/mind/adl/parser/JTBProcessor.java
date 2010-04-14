@@ -1124,7 +1124,7 @@ public class JTBProcessor extends GJDepthFirst<Node, Node>
     assert argu != null;
 
     final StringLiteral value = (StringLiteral) newNode("string", n);
-    value.setValue(n.f0.tokenImage.substring(1, n.f0.tokenImage.length() - 1));
+    value.setValue(n.f0.tokenImage);
 
     if (argu instanceof SingleValueContainer) {
       ((SingleValueContainer) argu).setValue(value);

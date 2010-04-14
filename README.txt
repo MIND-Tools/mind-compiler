@@ -49,6 +49,11 @@ $ mvn install
 
 Binary distributions can then be found in the 'mindc/target' sub directory.
 
+To build and install the Mind compiler in a local directory perform the 
+following command:
+
+$ mvn install -Dlocal-install=<installation directory>
+
 ################################################################################
 
 To deploy new artifacts on the OW2 maven repository perform the following 

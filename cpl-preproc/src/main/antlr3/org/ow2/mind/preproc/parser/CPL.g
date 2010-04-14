@@ -162,7 +162,7 @@ protected serverMethDef returns [StringBuilder res = new StringBuilder()]
          '{'
           {
             if (!singletonMode) 
-              $res.append("{ CHECK_CONTEXT_PTR"); 
+              $res.append("{ CHECK_CONTEXT_PTR "); 
             else
               $res.append("{");
             if (headerOut != null) headerOut.println("#define INTERFACE_METHOD_" + $id.text + "_" + $meth.text + "_IMPLEMENTED"); 
@@ -188,7 +188,7 @@ protected privateMethDef returns [StringBuilder res = new StringBuilder()]
           ws4=ws '{'
             {
               if (!singletonMode) 
-                $res.append($ws4.text).append("{ CHECK_CONTEXT_PTR"); 
+                $res.append($ws4.text).append("{ CHECK_CONTEXT_PTR "); 
               else
                 $res.append($ws4.text).append("{");
             }
@@ -206,7 +206,7 @@ protected constructorDef returns [StringBuilder res = new StringBuilder()]
             if (singletonMode) 
               $res.append($ws4.text).append("{"); 
             else 
-              $res.append($ws4.text).append("{ CHECK_CONTEXT_PTR");
+              $res.append($ws4.text).append("{ CHECK_CONTEXT_PTR ");
             if (headerOut != null) headerOut.println("#define CONSTRUCTOR_METHOD_IMPLEMENTED"); 
           }
       )?
@@ -222,7 +222,7 @@ protected destructorDef returns [StringBuilder res = new StringBuilder()]
             if (singletonMode) 
               $res.append($ws4.text).append("{"); 
             else 
-              $res.append($ws4.text).append("{ CHECK_CONTEXT_PTR");
+              $res.append($ws4.text).append("{ CHECK_CONTEXT_PTR ");
             if (headerOut != null) headerOut.println("#define DESTRUCTOR_METHOD_IMPLEMENTED"); 
           }
       )?

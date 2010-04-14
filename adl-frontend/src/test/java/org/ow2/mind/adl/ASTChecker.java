@@ -50,13 +50,13 @@ import org.objectweb.fractal.adl.interfaces.InterfaceContainer;
 import org.objectweb.fractal.adl.types.TypeInterface;
 import org.objectweb.fractal.adl.types.TypeInterfaceUtil;
 import org.ow2.mind.adl.ast.ASTHelper;
+import org.ow2.mind.adl.ast.ASTHelper.DefinitionDecoration;
 import org.ow2.mind.adl.ast.Attribute;
 import org.ow2.mind.adl.ast.AttributeContainer;
 import org.ow2.mind.adl.ast.Component;
 import org.ow2.mind.adl.ast.ComponentContainer;
 import org.ow2.mind.adl.ast.DefinitionReference;
 import org.ow2.mind.adl.ast.MindDefinition;
-import org.ow2.mind.adl.ast.ASTHelper.DefinitionDecoration;
 import org.ow2.mind.adl.generic.ast.FormalTypeParameter;
 import org.ow2.mind.adl.generic.ast.FormalTypeParameterContainer;
 import org.ow2.mind.adl.generic.ast.FormalTypeParameterReference;
@@ -1069,8 +1069,9 @@ public class ASTChecker {
     public void is(final String v) {
       assertTrue("Value is not an StringLiteral",
           value instanceof StringLiteral);
-      assertEquals("Unexpected string value", v, ((StringLiteral) value)
-          .getValue());
+      final String strValue = ((StringLiteral) value).getValue();
+      assertEquals("Unexpected string value", v, strValue.substring(1, strValue
+          .length() - 1));
     }
 
     public void references(final String ref) {
