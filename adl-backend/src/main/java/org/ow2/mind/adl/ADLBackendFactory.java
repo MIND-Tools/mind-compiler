@@ -222,39 +222,37 @@ public final class ADLBackendFactory {
     serviceMap.put("mpp-wrapper", mppWrapper);
     serviceMap.put("definition-compiler", definitionCompiler);
 
-    // Instance source generator
-    InstanceSourceGenerator instanceSourceGenerator = null;
-    // Check if there is an extension overriding the default one
-    for (final VisitorExtension visitorExtension : VisitorExtensionHelper
-        .getVisitorExtensions(VisitorExtensionHelper.INSTANCE_SOURCE_GENERATOR,
-            pluginManagerItf, context)) {
-      if (visitorExtension.getVisitorName().equals("instance")) {
-        instanceSourceGenerator = (InstanceSourceGenerator) visitorExtension
-            .getVisitor();
-      }
-    }
-    // If the instance-source-generator is not overriden,
-    // then use the default one.
-    if (instanceSourceGenerator == null) {
-      instanceSourceGenerator = new BasicInstanceSourceGenerator();
-    }
-
-    for (final String itfName : ((BindingController) instanceSourceGenerator)
-        .listFc()) {
-      bindVisitor(serviceMap, "instance", instanceSourceGenerator, itfName);
-    }
-
     // Instance compiler
     InstanceCompiler instanceCompiler;
     final BasicInstanceCompiler bic = new BasicInstanceCompiler();
+    final InstanceSourceGeneratorDispatcher isgd = new InstanceSourceGeneratorDispatcher();
 
     instanceCompiler = bic;
-    bic.instanceSourceGeneratorItf = instanceSourceGenerator;
+    bic.instanceSourceGeneratorItf = isgd;
 
     bic.inputResourceLocatorItf = inputResourceLocator;
     bic.compilerWrapperItf = compilerWrapper;
     bic.mppWrapperItf = mppWrapper;
     bic.outputFileLocatorItf = outputFileLocator;
+    // Create and bind the default instance source generator
+    final InstanceSourceGenerator instanceSourceGenerator = new BasicInstanceSourceGenerator();
+    for (final String itfName : ((BindingController) instanceSourceGenerator)
+        .listFc()) {
+      bindVisitor(serviceMap, "instance", instanceSourceGenerator, itfName);
+    }
+    bindVisitorToDispatcher(isgd, instanceSourceGenerator, "instance");
+
+    // Instance source generators
+    for (final VisitorExtension visitorExtension : VisitorExtensionHelper
+        .getVisitorExtensions(VisitorExtensionHelper.INSTANCE_SOURCE_GENERATOR,
+            pluginManagerItf, context)) {
+      final VoidVisitor<?> visitor = visitorExtension.getVisitor();
+      bindVisitorToDispatcher(isgd, visitor, visitorExtension.getVisitorName());
+      for (final String itfName : ((BindingController) visitor).listFc()) {
+        bindVisitor(serviceMap, visitorExtension.getVisitorName(), visitor,
+            itfName);
+      }
+    }
 
     // graph compiler
     final BasicGraphCompiler bgc = new BasicGraphCompiler();
@@ -325,5 +323,25 @@ public final class ADLBackendFactory {
       throw new ADLException("Cannot bind the interface '" + itfName
           + "' of the visitor '" + visitorName + "'.", e);
     }
+  }
+
+  private static void bindVisitorToDispatcher(
+      final InstanceSourceGeneratorDispatcher dispatcher,
+      final VoidVisitor<?> visitor, final String visitorName)
+      throws ADLException {
+    final String itfName = InstanceSourceGeneratorDispatcher.CLIENT_VISITOR
+        + "-" + visitorName;
+    try {
+      dispatcher.bindFc(itfName, visitor);
+    } catch (final NoSuchInterfaceException e) {
+      throw new ADLException(BindingErrors.INVALID_ITF_NO_SUCH_INTERFACE, e);
+    } catch (final IllegalBindingException e) {
+      throw new ADLException("Illegal binding of the interface '" + itfName
+          + "' to the visitor '" + visitorName + "'.", e);
+    } catch (final IllegalLifeCycleException e) {
+      throw new ADLException("Cannot bind the interface '" + itfName
+          + "' to the visitor '" + visitorName + "'.", e);
+    }
+
   }
 }

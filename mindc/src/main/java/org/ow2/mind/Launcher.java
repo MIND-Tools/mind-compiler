@@ -721,6 +721,9 @@ public class Launcher extends AbstractLauncher {
     for (final CmdOption option : CommandLineOptionExtensionHelper
         .getCommandOptions(pluginManagerItf, context)) {
       options.addOption(option);
+      final CommandOptionHandler handler = CommandLineOptionExtensionHelper
+          .getHandler(option);
+      handler.processCommandOption(option, context);
     }
 
   }

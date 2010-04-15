@@ -77,6 +77,10 @@ public class ComponentGraph {
     return name;
   }
 
+  public Map<ComponentGraph, String> getNameInParentMap() {
+    return parents;
+  }
+
   public ComponentGraph[] getParents() {
     if (parent == null) {
       assert parents == null;
