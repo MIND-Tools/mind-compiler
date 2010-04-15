@@ -949,4 +949,76 @@
     </section>
     
   </section>
+  
+    <section id="api-memapi-pkg">
+    <title>The <classname>memory.api</classname> package</title>
+    
+    <section id="api-memapi-Allocator">
+      <title>The <classname>memory.api.Allocator</classname> interface</title>
+      
+      
+      <para>A common interface to allocate and free memory space.</para>
+      
+      <para>This interface defines the following methods:</para>
+      
+      <informaltable border="all" width="100%">
+        <tr>
+          <td>
+            <programlisting language="idl"> void *alloc(int size);</programlisting>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <para>This method allocates <varname>size</varname> bytes and returns a pointer 
+              to the allocated memory. The memory is not cleared. The value 
+              returned is a pointer to the allocated memory, which is suitably 
+              aligned for any kind of variable, or <code>NULL</code> if the 
+              request fails.</para>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <variablelist>
+              <varlistentry>
+                <term><varname>size</varname></term>
+                <listitem><para>the amount of memory requested (in byte).</para></listitem>
+              </varlistentry>
+              <varlistentry>
+                <term>return</term>
+                <listitem><para>pointer to the allocated memory.</para></listitem>
+              </varlistentry>
+            </variablelist>
+          </td>
+        </tr>
+      </informaltable>
+      
+      <informaltable border="all" width="100%">
+        <tr>
+          <td>
+            <programlisting language="idl"> void free(void *addr);</programlisting>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <para>This method frees the memory space pointed to by 
+              <varname>addr</varname>, which must have been returned by a 
+              previous call to <varname>alloc</varname>. Otherwise, or if free 
+              has already been called before with the same <varname>addr</varname>,
+              the behavior is undefined.</para>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <variablelist>
+              <varlistentry>
+                <term><varname>addr</varname></term>
+                <listitem><para>the pointer to be freed. May be <code>NULL</code>,
+                  in which case this operation does nothing.</para></listitem>
+              </varlistentry>
+            </variablelist>
+          </td>
+        </tr>
+      </informaltable>
+  	</section>
+  </section>
 </chapter>
