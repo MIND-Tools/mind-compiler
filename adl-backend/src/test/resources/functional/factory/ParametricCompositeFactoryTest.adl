@@ -2,5 +2,5 @@ import attr.ParametricAttr3;
 
 @Run()
 composite factory.ParametricCompositeFactoryTest 
-    extends GenericFactoryTest<ParametricAttr3(12, "toto")> {
+    extends GenericFactoryTest<ParametricAttr3(12, "toto", 10)> {
 }

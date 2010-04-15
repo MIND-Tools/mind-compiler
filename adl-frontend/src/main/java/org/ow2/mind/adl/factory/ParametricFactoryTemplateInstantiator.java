@@ -114,6 +114,8 @@ public class ParametricFactoryTemplateInstantiator
               .getInferredParameterType(formalParameter);
           if (inferredParameterType != null)
             attrNode.setType(inferredParameterType.getCType());
+          else
+            attrNode.setType("int");
 
           attributeContainer.addAttribute(attrNode);
         }
