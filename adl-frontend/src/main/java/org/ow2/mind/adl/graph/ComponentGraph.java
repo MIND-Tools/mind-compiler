@@ -78,7 +78,13 @@ public class ComponentGraph {
   }
 
   public Map<ComponentGraph, String> getNameInParentMap() {
-    return parents;
+    if (parents == null) {
+      final Map<ComponentGraph, String> parMap = new HashMap<ComponentGraph, String>();
+      parMap.put(parent, nameInParent);
+      return parMap;
+    } else {
+      return parents;
+    }
   }
 
   public ComponentGraph[] getParents() {
