@@ -6,7 +6,8 @@
 
 		<artifact:pom id="mypom" file="pom.xml" />
 		<artifact:dependencies sourcesFilesetId="sources.dependency.fileset">
-			<dependency groupId="org.objectweb.fractal.fractaladl" artifactId="fractal-adl" version="2.6-SNAPSHOT" scope="compile" type="java-source" />
+			<dependency groupId="org.objectweb.fractal.fractaladl" artifactId="fractal-adl" 
+			version="${mypom.properties.fractaladl.dependencies.version}" scope="compile" type="java-source" />
 		</artifact:dependencies>
 		<delete dir="target/src-dep" />
 		<mkdir dir="target/src-dep" />
