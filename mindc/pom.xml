@@ -32,6 +32,11 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>plugin-loader</artifactId>
         </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>fractal-adl-bundle</artifactId>
+            <type>bundle</type>
+        </dependency>
 
         <dependency>
             <groupId>org.objectweb.fractal.cecilia.toolchain</groupId>
