@@ -1,8 +1,8 @@
 //# SemanticError GroupId=BDG ErrorId=DUPLICATED_BINDING line=7
 composite bindings.binding4 {
-  contains primitive primitiveServer as server1 ;
-  contains primitive primitiveServer as server2 ;
-  contains primitive primitiveClient as client1 ;
+  contains primitiveServer as server1 ;
+  contains primitiveServer as server2 ;
+  contains primitiveClient as client1 ;
   binds client1.clientItf to server1.serverItf;
   binds client1.clientItf to server2.serverItf;
 }

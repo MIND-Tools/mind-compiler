@@ -6,7 +6,7 @@ composite collection.HelloworldCollection2 {
   provides Main as main;
 
   contains ClientCollection as client;
-  contains composite as server {
+  contains as server composite {
     provides Service as s[2];
     contains Server as subServer;
 

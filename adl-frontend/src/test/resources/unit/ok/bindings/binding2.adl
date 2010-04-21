@@ -1,9 +1,9 @@
 composite bindings.binding2 {
-  contains primitive primitiveNull as client {
+  contains primitiveNull as client primitive {
     requires api.Call as client_itf;
   source {{ }};
   };
-  contains primitive primitiveNull as server {
+  contains primitiveNull as server primitive {
     provides api.Call as server_itf;
   source {{ }};
   };

@@ -5,7 +5,7 @@ import helloworld.Server;
 composite collection.HelloworldCollection4 {
   provides Main as main;
 
-  contains composite as client {
+  contains as client composite {
     provides Main as main;
     requires Service as sa[2];
     

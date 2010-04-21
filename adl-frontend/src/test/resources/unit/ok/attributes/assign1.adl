@@ -3,7 +3,7 @@
 
 composite attributes.assign1{
 
- contains primitive attributes.attr1 as A1 {
+ contains attributes.attr1 as A1 primitive {
   source {{ }};
   attribute string			attr_string = "hello" ;
   attribute int8_t			attr_int8_t = 5;
@@ -18,7 +18,7 @@ composite attributes.assign1{
   attribute uintptr_t		attr_uintptr_t = 0x7000;
  } ;
 
- contains primitive attributes.attr3 as A3 {
+ contains attributes.attr3 as A3 primitive {
   source {{ }};
   attribute int8_t			attr_int8_t = - 5;
   attribute int16_t			attr_int16_t = + 5;
