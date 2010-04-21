@@ -166,7 +166,7 @@ public enum ADLErrors implements ErrorTemplate {
       "<location>"),
 
   // ---------------------------------------------------------------------------
-  // Attribute errors (60-69)
+  // Attribute errors (60-64)
   // ---------------------------------------------------------------------------
 
   /** */
@@ -182,17 +182,17 @@ public enum ADLErrors implements ErrorTemplate {
       "<name>", "<location>"),
 
   // ---------------------------------------------------------------------------
-  // Implementation errors (60-69)
+  // Implementation errors (65-69)
   // ---------------------------------------------------------------------------
 
   /** */
-  INVALID_PATH(60, "Invalid Path \"%s\"", "<path>"),
+  INVALID_PATH(65, "Invalid Path \"%s\"", "<path>"),
 
   /** */
-  SOURCE_NOT_FOUND(61, "Can't find source file \"%s\"", "<path>"),
+  SOURCE_NOT_FOUND(66, "Can't find source file \"%s\"", "<path>"),
 
   /** */
-  MISSING_SOURCE(62, "Primitive component must have source"),
+  MISSING_SOURCE(67, "Primitive component must have source"),
 
   // ---------------------------------------------------------------------------
   // Parameter errors (70-89)
