@@ -231,14 +231,21 @@ public class Launcher extends AbstractLauncher {
     final BasicPluginManager pluginManager = new BasicPluginManager();
     pluginManager.nodeFactoryItf = stNodeFactory;
 
+    try {
+      addOptions(pluginManager, compilerContext);
+    } catch (final ADLException e) {
+      throw new CompilerInstantiationException(
+          "Cannot load command line option extensions.", e, 101);
+    }
+
     // parse arguments to a CommandLine.
     final CommandLine cmdLine = CommandLine.parseArgs(options, false, args);
 
     try {
-      addOptions(pluginManager, cmdLine, compilerContext);
+      invokeOptionHandlers(pluginManager, cmdLine, compilerContext);
     } catch (final ADLException e) {
       throw new CompilerInstantiationException(
-          "Cannot load command line option extensions.", e, 101);
+          "Cannot invoke command line option handlers.", e, 101);
     }
 
     // If help is asked, print it and exit.
@@ -712,8 +719,7 @@ public class Launcher extends AbstractLauncher {
   }
 
   protected void addOptions(final PluginManager pluginManagerItf,
-      final CommandLine cmdLine, final Map<Object, Object> context)
-      throws ADLException {
+      final Map<Object, Object> context) throws ADLException {
     options.addOptions(targetDescOpt, compilerCmdOpt, cFlagsOpt,
         includePathOpt, linkerCmdOpt, ldFlagsOpt, ldPathOpt, linkerScriptOpt,
         concurrentJobCmdOpt, printStackTraceOpt, checkADLModeOpt,
@@ -722,13 +728,21 @@ public class Launcher extends AbstractLauncher {
     for (final CmdOption option : CommandLineOptionExtensionHelper
         .getCommandOptions(pluginManagerItf, context)) {
       options.addOption(option);
-      final CommandOptionHandler handler = CommandLineOptionExtensionHelper
-          .getHandler(option);
+    }
+
+  }
+
+  protected void invokeOptionHandlers(final PluginManager pluginManagerItf,
+      final CommandLine cmdLine, final Map<Object, Object> context)
+      throws ADLException {
+    for (final CmdOption option : CommandLineOptionExtensionHelper
+        .getCommandOptions(pluginManagerItf, context)) {
       if (option.isPresent(cmdLine)) {
+        final CommandOptionHandler handler = CommandLineOptionExtensionHelper
+            .getHandler(option);
         handler.processCommandOption(option, context);
       }
     }
-
   }
 
   @Override
