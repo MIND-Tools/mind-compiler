@@ -26,11 +26,16 @@ import static org.objectweb.fractal.adl.error.ErrorTemplateValidator.validErrorT
 
 import org.objectweb.fractal.adl.error.ErrorTemplate;
 
+/**
+ * {@link ErrorTemplate} for MIND pre-processor.
+ */
 public enum MPPErrors implements ErrorTemplate {
 
-  INPUT_FILE_NOT_FOUND("Can't open input file %s", "<input file>"),
+  /** */
+  INPUT_FILE_NOT_FOUND(0, "Can't open input file %s", "<input file>"),
 
-  PARSE_ERROR("Parse error %s %s", "<input file>", "<parse error>"), ;
+  /** */
+  PARSE_ERROR(1, "Parse error %s %s", "<input file>", "<parse error>"), ;
 
   /** The groupId of ErrorTemplates defined in this enumeration. */
   public static final String GROUP_ID = "MPP";
@@ -38,8 +43,8 @@ public enum MPPErrors implements ErrorTemplate {
   private int                id;
   private String             format;
 
-  private MPPErrors(final String format, final Object... args) {
-    this.id = ordinal();
+  private MPPErrors(final int id, final String format, final Object... args) {
+    this.id = id;
     this.format = format;
 
     assert validErrorTemplate(this, args);

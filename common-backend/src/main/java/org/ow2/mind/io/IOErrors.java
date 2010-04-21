@@ -26,12 +26,17 @@ import static org.objectweb.fractal.adl.error.ErrorTemplateValidator.validErrorT
 
 import org.objectweb.fractal.adl.error.ErrorTemplate;
 
+/**
+ * {@link ErrorTemplate} for generic IO errors.
+ */
 public enum IOErrors implements ErrorTemplate {
 
-  INVALID_OUTPUT_DIR("Invalid output directory \"%s\", not a direcory",
+  /** */
+  INVALID_OUTPUT_DIR(0, "Invalid output directory \"%s\", not a direcory",
       "<dirname>"),
 
-  WRITE_ERROR("An error occurs while writting to file \"%s\".", "<file>")
+  /** */
+  WRITE_ERROR(1, "An error occurs while writting to file \"%s\".", "<file>")
 
   ;
 
@@ -41,8 +46,8 @@ public enum IOErrors implements ErrorTemplate {
   private int                id;
   private String             format;
 
-  private IOErrors(final String format, final Object... args) {
-    this.id = ordinal();
+  private IOErrors(final int id, final String format, final Object... args) {
+    this.id = id;
     this.format = format;
 
     assert validErrorTemplate(this, args);

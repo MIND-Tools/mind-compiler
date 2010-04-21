@@ -31,19 +31,20 @@ public enum CompilerErrors implements ErrorTemplate {
 
   /** */
   EXECUTION_ERROR(
+      0,
       "Unable to execute \"%s\" command. Checks that the command exist and is in the path",
       "command"),
 
   /** */
-  PREPROCESSOR_ERROR("Error while preprocessing the file \"%s\" : \n%s",
+  PREPROCESSOR_ERROR(1, "Error while preprocessing the file \"%s\" : \n%s",
       "filename", "ouput"),
 
   /** */
-  COMPILER_ERROR("Error while compiling the file \"%s\" : \n%s", "filename",
+  COMPILER_ERROR(2, "Error while compiling the file \"%s\" : \n%s", "filename",
       "ouput"),
 
   /** */
-  LINKER_ERROR("Error while linking the file \"%s\" : \n%s", "filename",
+  LINKER_ERROR(3, "Error while linking the file \"%s\" : \n%s", "filename",
       "ouput");
 
   /** The groupId of ErrorTemplates defined in this enumeration. */
@@ -52,8 +53,9 @@ public enum CompilerErrors implements ErrorTemplate {
   private int                id;
   private String             format;
 
-  private CompilerErrors(final String format, final Object... args) {
-    this.id = ordinal();
+  private CompilerErrors(final int id, final String format,
+      final Object... args) {
+    this.id = id;
     this.format = format;
 
     assert validErrorTemplate(this, args);
