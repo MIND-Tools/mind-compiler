@@ -231,15 +231,15 @@ public class Launcher extends AbstractLauncher {
     final BasicPluginManager pluginManager = new BasicPluginManager();
     pluginManager.nodeFactoryItf = stNodeFactory;
 
+    // parse arguments to a CommandLine.
+    final CommandLine cmdLine = CommandLine.parseArgs(options, false, args);
+
     try {
-      addOptions(pluginManager, compilerContext);
+      addOptions(pluginManager, cmdLine, compilerContext);
     } catch (final ADLException e) {
       throw new CompilerInstantiationException(
           "Cannot load command line option extensions.", e, 101);
     }
-
-    // parse arguments to a CommandLine.
-    final CommandLine cmdLine = CommandLine.parseArgs(options, false, args);
 
     // If help is asked, print it and exit.
     if (helpOpt.isPresent(cmdLine)) {
@@ -712,7 +712,8 @@ public class Launcher extends AbstractLauncher {
   }
 
   protected void addOptions(final PluginManager pluginManagerItf,
-      final Map<Object, Object> context) throws ADLException {
+      final CommandLine cmdLine, final Map<Object, Object> context)
+      throws ADLException {
     options.addOptions(targetDescOpt, compilerCmdOpt, cFlagsOpt,
         includePathOpt, linkerCmdOpt, ldFlagsOpt, ldPathOpt, linkerScriptOpt,
         concurrentJobCmdOpt, printStackTraceOpt, checkADLModeOpt,
@@ -723,7 +724,9 @@ public class Launcher extends AbstractLauncher {
       options.addOption(option);
       final CommandOptionHandler handler = CommandLineOptionExtensionHelper
           .getHandler(option);
-      handler.processCommandOption(option, context);
+      if (option.isPresent(cmdLine)) {
+        handler.processCommandOption(option, context);
+      }
     }
 
   }
