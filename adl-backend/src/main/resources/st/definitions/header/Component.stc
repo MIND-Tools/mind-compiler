@@ -247,7 +247,7 @@ FactoryDef(definition) ::= <<
 extern <ComponentTypeName(definitionName=definition.name)> instance_name;
 
 #define <definition.name;format="toUpperCName">_INIT_INSTANCE(instance_name<AddItfNames(definition=definition)><AddSubComponentNames(definition=definition)><AddAttributeNames(definition=definition)>) \
-<ComponentTypeName(definitionName=definition.name)> instance_name = { \
+<InitializeGlobalControllerStructures(definition=definition)><ComponentTypeName(definitionName=definition.name)> instance_name = { \
   { /* __component_internal_data: */ \
 <InitializeInterfaces(definition=definition)><InitializeComponents(definition=definition)><InitializeAttributes(definition=definition)><InitializeControllerStructures(definition=definition)>  } \
 };
@@ -337,6 +337,16 @@ InitializeAttributes(definition) ::= <<
     <definition.attributes:{/* <it.name> : */ (<it.name>)};separator=", \\\n      "> \
     }, \
 <endif><endif>
+>>
+
+InitializeGlobalControllerStructures(definition) ::= <<
+<if (definition.astNodeTypes.("controller"))>
+<definition.controllers:InitializeGlobalControllerStructure(definition=definition, ctrl=it)>
+<endif>
+>>
+
+InitializeGlobalControllerStructure(definition, ctrl) ::= <<
+<ctrl.sources:{<(ctrlGenerator.(it.path).ControllerGlobalDataStaticInit)(definition=definition, controller=ctrl)>}>
 >>
 
 InitializeControllerStructures(definition) ::= <<

@@ -122,8 +122,8 @@ interface fractal.api.ContentController {
    *      supported.
    */
   int addFcSubBinding(in fractal.api.Component clientComponent,
-      in const string clientItfName, in fractal.api.Component serverComponent,
-      in const string serverItfName);
+      in string clientItfName, in fractal.api.Component serverComponent,
+      in string serverItfName);
 
   /**
    * Removes a binding inside this component.
@@ -148,5 +148,5 @@ interface fractal.api.ContentController {
    *      supported.
    */
   int removeFcSubBinding(in fractal.api.Component clientComponent,
-      in const string clientItfName);
+      in string clientItfName);
 }

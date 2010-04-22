@@ -3,6 +3,7 @@ interface ControllerGenerator;
 ControllerGlobalDecl(definition, controller);
 
 ControllerData(definition, controller);
+ControllerGlobalDataStaticInit(definition, controller);
 ControllerDataStaticInit(definition, controller);
 ControllerDataFactoryNew(definition, controller);
 ControllerDataFactoryDestroy(definition, controller);

@@ -1,0 +1,8 @@
+
+@controller.ContentController
+composite controller.content.MultiCompositeComponent extends CCTested {
+
+  contains PrimitiveComponent as subComp1;
+  
+  binds this.main to subComp1.main;
+}

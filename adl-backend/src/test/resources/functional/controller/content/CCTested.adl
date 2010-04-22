@@ -1,0 +1,4 @@
+
+type controller.content.CCTested extends ApplicationType {
+  provides fractal.api.ContentController as contentController;
+}

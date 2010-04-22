@@ -1,0 +1,17 @@
+
+composite controller.content.CCTester<T conformsto CCTested> extends ApplicationType {
+
+  contains as tester 
+  @Singleton
+  primitive {
+    provides Main as main;
+    
+    requires fractal.api.ContentController as testedCC;
+    source ccTester.c;
+  }
+  
+  contains T as tested;
+  
+  binds this.main to tester.main;
+  binds tester.testedCC to tested.contentController;
+}
