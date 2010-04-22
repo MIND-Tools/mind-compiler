@@ -185,12 +185,12 @@ protected privateMethDef returns [StringBuilder res = new StringBuilder()]
       }
       ( paramsDef ws5=ws { $res.append($paramsDef.res).append($ws5.text); } 
         (
-          ws6=ws '{'
+          '{'
             {
               if (!singletonMode) 
-                $res.append($ws6.text).append("{ CHECK_CONTEXT_PTR "); 
+                $res.append("{ CHECK_CONTEXT_PTR "); 
               else
-                $res.append($ws6.text).append("{");
+                $res.append("{");
             }
         )?
       )?
