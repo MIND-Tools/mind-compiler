@@ -10,7 +10,7 @@
     </parent>
 
     <artifactId>mind-compiler</artifactId>
-    <version>0.2-beta-1-SNAPSHOT</version>
+    <version>0.2-beta-2-SNAPSHOT</version>
     <name>Mind compiler</name>
     <packaging>pom</packaging>
 
@@ -179,6 +179,14 @@
                 <artifactId>plugin-loader</artifactId>
                 <version>${project.version}</version>
             </dependency>
+
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>fractal-adl-bundle</artifactId>
+                <version>${project.version}</version>
+                <type>bundle</type>
+            </dependency>
+
             <!-- Other dependencies -->
             <dependency>
                 <groupId>org.objectweb.fractal.fractaladl</groupId>

@@ -38,6 +38,7 @@ import org.ow2.mind.adl.ADLErrors;
 import org.ow2.mind.adl.anonymous.ast.AnonymousDefinitionContainer;
 import org.ow2.mind.adl.ast.Component;
 import org.ow2.mind.adl.ast.ComponentContainer;
+import org.ow2.mind.adl.generic.ast.FormalTypeParameterReference;
 
 /**
  * Delegating loader that {@link AnonymousDefinitionExtractor resolves}
@@ -99,7 +100,9 @@ public class AnonymousDefinitionLoader extends AbstractLoader {
         // The sub-component is defined as an instance of an anonymous
         // definition.
 
-        if (subComp.getDefinitionReference() != null) {
+        if (subComp.getDefinitionReference() != null
+            || (subComp instanceof FormalTypeParameterReference && ((FormalTypeParameterReference) subComp)
+                .getTypeParameterReference() != null)) {
           // this cannot happen if input definition has been read from
           // STCFParser. but it may happen if it has been read from an XML
           // parser.

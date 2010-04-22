@@ -31,209 +31,254 @@ import org.objectweb.fractal.adl.error.ErrorTemplate;
  */
 public enum ADLErrors implements ErrorTemplate {
 
-  /** */
-  INVALID_DEFINITION_NAME("\"%s\" is not a valid definition name",
-      "<definition name>"),
+  // ---------------------------------------------------------------------------
+  // References Errors (000-009)
+  // ---------------------------------------------------------------------------
 
   /** */
-  INVALID_REFERENCE_NOT_A_TYPE(
+  INVALID_REFERENCE_NOT_A_TYPE(0,
       "Invalid reference: %s does not refer to a type definition.",
       "<adl name>"),
 
   /** */
-  INVALID_REFERENCE_NOT_A_COMPOSITE(
+  INVALID_REFERENCE_NOT_A_COMPOSITE(1,
       "Invalid reference: %s does not refer to a composite.", "<adl name>"),
 
   /** */
-  INVALID_REFERENCE_NOT_A_PRIMITIVE(
+  INVALID_REFERENCE_NOT_A_PRIMITIVE(2,
       "Invalid reference: %s does not refer to a primitive.", "<adl name>"),
 
   /** */
-  INVALID_REFERENCE_FOR_SUB_COMPONENT(
+  INVALID_REFERENCE_FOR_SUB_COMPONENT(3,
       "Invalid reference: %s refer to a type or an abstract definition.",
       "<adl name>"),
 
+  // ---------------------------------------------------------------------------
+  // Sub component errors (010-019)
+  // ---------------------------------------------------------------------------
+
   /** */
-  INVALID_SUB_COMPONENT("Invalid sub-component."),
+  INVALID_SUB_COMPONENT(10, "Invalid sub-component."),
 
   /** */
   INVALID_SUB_COMPONENT_DUPLICATE_SINGLETON(
+      11,
       "Invalid sub-component \"%s\" : duplicates singleton definition \"%s\". Previous use of singleton definition at %s",
       "<sub-comp>", "<singleton def>", "<previous location>"),
 
+  // ---------------------------------------------------------------------------
+  // template errors (020-049)
+  // ---------------------------------------------------------------------------
+
   /** */
-  INVALID_REFERENCE_MISSING_TEMPLATE_VALUE(
+  INVALID_REFERENCE_MISSING_TEMPLATE_VALUE(20,
       "Invalid reference: missing type arguments."),
 
   /** */
-  INVALID_REFERENCE_TOO_MANY_TEMPLATE_VALUE(
+  INVALID_REFERENCE_TOO_MANY_TEMPLATE_VALUE(21,
       "Invalid reference: too many type arguments."),
 
   /** */
-  INVALID_REFERENCE_ANY_TEMPLATE_VALUE(
+  INVALID_REFERENCE_ANY_TEMPLATE_VALUE(22,
       "Invalid reference: \"any\" type argument is not allowed here."),
 
   /** */
   INVALID_ANY_TEMPLATE_VALUE(
+      23,
       "Invalid reference: sub-component \"%s\" must be overridden or \"any\" type argument is not allowed here.",
       "<sub-comp name>"),
 
   /** */
-  INVALID_REFERENCE_NO_SUCH_TEMPLATE_VARIABLE(
+  INVALID_REFERENCE_NO_SUCH_TEMPLATE_VARIABLE(24,
       "Invalid reference: no such type parameter \"%s\".", "<var name>"),
 
   /** */
-  INVALID_REFERENCE_NO_TEMPLATE_VARIABLE(
+  INVALID_REFERENCE_NO_TEMPLATE_VARIABLE(25,
       "Invalid reference: %s has no type parameter.", "<def name>"),
 
   /** */
-  UNDEFINED_TEMPALTE_VARIABLE(
+  UNDEFINED_TEMPALTE_VARIABLE(26,
       "Type parameter \"%s\" is not defined in current definition",
       "<var name>"),
 
   /** */
-  DUPLICATED_TEMPALTE_VARIABLE_NAME("Duplicated type parameter \"%s\"",
+  DUPLICATED_TEMPALTE_VARIABLE_NAME(27, "Duplicated type parameter \"%s\"",
       "<name>"),
 
   /** */
-  INVALID_TEMPLATE_VALUE_TYPE_DEFINITON(
+  INVALID_TEMPLATE_VALUE_TYPE_DEFINITON(28,
       "Invalid type argument: %s is a type or abstract definition.",
       "<template value>"),
 
   /** */
-  INVALID_TEMPLATE_VALUE_MISSING_SERVER_INTERFACE(
+  INVALID_TEMPLATE_VALUE_MISSING_SERVER_INTERFACE(29,
       "Invalid type argument: %s must provide a \"%s\" interface.",
       "<template value>", "<server itf name>"),
 
   /** */
-  INVALID_TEMPLATE_VALUE_MISSING_CLIENT_INTERFACE(
+  INVALID_TEMPLATE_VALUE_MISSING_CLIENT_INTERFACE(30,
       "Invalid type argument: %s must require a \"%s\" interface.",
       "<template value>", "<client itf name>"),
 
   /** */
   INVALID_TEMPLATE_VALUE_CLIENT_INTERFACE_MUST_BE_OPTIONAL(
+      31,
       "Invalid type argument: required interface \"%s\" must be optional. Interface declared at %s",
       "<client itf name>", "<client itf locator>"),
 
+  // ---------------------------------------------------------------------------
+  // Inheritance errors (50-59)
+  // ---------------------------------------------------------------------------
+
   /** */
-  DO_NOT_OVERRIDE("Declaration does not override an inherited declaration."),
+  INVALID_EXTENDS_TYPE_EXTENDS_PRIMITIVE(50,
+      "Type definition cannot extends the primitive defintion \"%s\"",
+      "<primitive def>"),
+
+  /** */
+  INVALID_EXTENDS_TYPE_EXTENDS_COMPOSITE(51,
+      "Type definition cannot extends the composite defintion \"%s\"",
+      "<composite def>"),
+
+  /** */
+  INVALID_EXTENDS_PRIMITIVE_EXTENDS_COMPOSITE(52,
+      "Primitive definition cannot extends the composite defintion \"%s\"",
+      "<composite def>"),
+
+  /** */
+  INVALID_EXTENDS_COMPOSITE_EXTENDS_PRIMITIVE(53,
+      "Composite definition cannot extends the primitive defintion \"%s\"",
+      "<primitive def>"),
+
+  /** */
+  DO_NOT_OVERRIDE(54, "Declaration does not override an inherited declaration."),
 
   /** */
   INVALID_INTERFACE_NAME_OVERRIDE_INHERITED_INTERFACE(
+      55,
       "Invalid interface name, an interface with the same name already exist in inherited definition at %s",
       "<location>"),
 
   /** */
   INVALID_ATTRIBUTE_OVERRIDE_INHERITED_ATTRIBUTE_TYPE(
+      56,
       "Invalid attribute type, an attribute with the same name already exist in inherited definition with a different type at %s",
       "<location>"),
 
-  /** */
-  INVALID_ATTRIBUTE_MISSING_TYPE("Invalid attribute, missing type"),
+  // ---------------------------------------------------------------------------
+  // Attribute errors (60-64)
+  // ---------------------------------------------------------------------------
 
   /** */
-  INVALID_ATTRIBUTE_VALUE_INCOMPATIBLE_TYPE(
+  INVALID_ATTRIBUTE_MISSING_TYPE(60, "Invalid attribute, missing type"),
+
+  /** */
+  INVALID_ATTRIBUTE_VALUE_INCOMPATIBLE_TYPE(61,
       "Invalid attribute, incompatible type"),
 
   /** */
-  DUPLICATED_ATTRIBUTE_NAME(
+  DUPLICATED_ATTRIBUTE_NAME(62,
       "Redefinition of attribute \"%s\" (previously defined at \"%s\").",
       "<name>", "<location>"),
 
-  /** */
-  INVALID_PATH("Invalid Path \"%s\"", "<path>"),
+  // ---------------------------------------------------------------------------
+  // Implementation errors (65-69)
+  // ---------------------------------------------------------------------------
 
   /** */
-  SOURCE_NOT_FOUND("Can't find source file \"%s\"", "<path>"),
+  INVALID_PATH(65, "Invalid Path \"%s\"", "<path>"),
 
   /** */
-  MISSING_SOURCE("Primitive component must have source"),
+  SOURCE_NOT_FOUND(66, "Can't find source file \"%s\"", "<path>"),
 
   /** */
-  INVALID_REFERENCE_NO_PARAMETER(
+  MISSING_SOURCE(67, "Primitive component must have source"),
+
+  // ---------------------------------------------------------------------------
+  // Parameter errors (70-89)
+  // ---------------------------------------------------------------------------
+
+  /** */
+  INVALID_REFERENCE_NO_PARAMETER(70,
       "Invalid reference: referenced definition has no parameter."),
 
   /** */
-  INVALID_REFERENCE_MISSING_ARGUMENT("Invalid reference: missing argument."),
+  INVALID_REFERENCE_MISSING_ARGUMENT(71, "Invalid reference: missing argument."),
 
   /** */
-  INVALID_REFERENCE_TOO_MANY_ARGUMENT("Invalid reference: too many argument."),
+  INVALID_REFERENCE_TOO_MANY_ARGUMENT(72,
+      "Invalid reference: too many argument."),
 
   /** */
-  INVALID_REFERENCE_NO_SUCH_PARAMETER(
+  INVALID_REFERENCE_NO_SUCH_PARAMETER(73,
       "Invalid reference: no such parameter \"%s\".", "<param name>"),
 
   /** */
-  UNDEFINED_PARAMETER("Parameter \"%s\" is not defined in current definition.",
+  UNDEFINED_PARAMETER(74,
+      "Parameter \"%s\" is not defined in current definition.", "<var name>"),
+
+  /** */
+  DUPLICATED_ARGUMENT_VARIABLE_NAME(75, "Duplicated argument \"%s\"", "<name>"),
+
+  /** */
+  INCOMPATIBLE_ARGUMENT_TYPE(76, "Incompatible type for argument \"%s\".",
       "<var name>"),
 
   /** */
-  DUPLICATED_ARGUMENT_VARIABLE_NAME("Duplicated argument \"%s\"", "<name>"),
-
-  /** */
-  INCOMPATIBLE_ARGUMENT_TYPE("Incompatible type for argument \"%s\".",
+  INCOMPATIBLE_ARGUMENT_VALUE(77, "Incompatible type for argument \"%s\".",
       "<var name>"),
 
   /** */
-  INCOMPATIBLE_ARGUMENT_VALUE("Incompatible type for argument \"%s\".",
-      "<var name>"),
+  INCOMPATIBLE_ATTRIBUTE_VALUE(78,
+      "Incompatible type value for attribute \"%s\".", "<attr name>"),
+
+  // ---------------------------------------------------------------------------
+  // Factory errors (90-99)
+  // ---------------------------------------------------------------------------
 
   /** */
-  INCOMPATIBLE_ATTRIBUTE_VALUE("Incompatible type value for attribute \"%s\".",
-      "<attr name>"),
-
-  /** */
-  INVALID_EXTENDS_TYPE_EXTENDS_PRIMITIVE(
-      "Type definition cannot extends the primitive defintion \"%s\"",
-      "<primitive def>"),
-
-  /** */
-  INVALID_EXTENDS_TYPE_EXTENDS_COMPOSITE(
-      "Type definition cannot extends the composite defintion \"%s\"",
-      "<composite def>"),
-
-  /** */
-  INVALID_EXTENDS_PRIMITIVE_EXTENDS_COMPOSITE(
-      "Primitive definition cannot extends the composite defintion \"%s\"",
-      "<composite def>"),
-
-  /** */
-  INVALID_EXTENDS_COMPOSITE_EXTENDS_PRIMITIVE(
-      "Composite definition cannot extends the primitive defintion \"%s\"",
-      "<primitive def>"),
-
-  /** */
-  INVALID_FACTORY_OF_SINGLETON(
+  INVALID_FACTORY_OF_SINGLETON(90,
       "Cannot make a factory of a singleton definition"),
 
   /** */
-  INVALID_FACTORY_OF_ABSTRACT("Cannot make a factory of an abstract definition"),
+  INVALID_FACTORY_OF_ABSTRACT(91,
+      "Cannot make a factory of an abstract definition"),
 
   /** */
   INVALID_FACTORY_OF_REFERENCED_SINGLETON(
+      92,
       "Cannot make a factory of this definition. Definition references the singleton definition \"%s\"",
       "<singleton-def>"),
 
   /** */
-  SINGLETON_WITH_DIFFERENT_NAME(
+  SINGLETON_WITH_DIFFERENT_NAME(93,
       "Singleton definition must always be instantiated with the same name"),
 
+  // ---------------------------------------------------------------------------
+  // Graph errors (100-109)
+  // ---------------------------------------------------------------------------
+
   /** */
-  INSTANTIATE_TYPE_DEFINIITON("Can't instantiate type definition \"%s\".",
+  INSTANTIATE_TYPE_DEFINIITON(100, "Can't instantiate type definition \"%s\".",
       "<def name>"),
 
   /** */
   INSTANTIATE_TEMPLATE_DEFINIITON(
+      101,
       "Can't instantiate definition \"%s\", definition contains template variables.",
       "<def name>"),
 
   /** */
-  INSTANTIATE_ARGUMENT_DEFINIITON(
+  INSTANTIATE_ARGUMENT_DEFINIITON(102,
       "Can't instantiate definition \"%s\", definition contains arguments.",
       "<def name>"),
 
+  // ---------------------------------------------------------------------------
+  // Import errors (110-119)
+  // ---------------------------------------------------------------------------
+
   /** */
-  UNKNOWN_IMPORT("Unknown import."),
+  UNKNOWN_IMPORT(110, "Unknown import."),
 
   ;
 
@@ -243,8 +288,8 @@ public enum ADLErrors implements ErrorTemplate {
   private int                id;
   private String             format;
 
-  private ADLErrors(final String format, final Object... args) {
-    this.id = ordinal();
+  private ADLErrors(final int id, final String format, final Object... args) {
+    this.id = id;
     this.format = format;
 
     assert validErrorTemplate(this, args);

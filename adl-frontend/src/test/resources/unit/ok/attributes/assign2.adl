@@ -3,7 +3,7 @@
 
 composite attributes.assign2 extends attributes.assign1 {
 
- contains primitive attributes.attr1 as A1 {
+ contains attributes.attr1 as A1 primitive {
   source {{ }};
   attribute string			attr_string = "foo" ;
  } ;

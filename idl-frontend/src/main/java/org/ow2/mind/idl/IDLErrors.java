@@ -26,31 +26,35 @@ import static org.objectweb.fractal.adl.error.ErrorTemplateValidator.validErrorT
 
 import org.objectweb.fractal.adl.error.ErrorTemplate;
 
+/**
+ * {@link ErrorTemplate} for IDL.
+ */
 public enum IDLErrors implements ErrorTemplate {
 
   /** */
-  IDL_NOT_FOUND("IDL not found \"%s\"", "<idlname>"),
+  IDL_NOT_FOUND(0, "IDL not found \"%s\"", "<idlname>"),
 
   /** */
-  UNEXPECTED_ITF_NAME(
+  UNEXPECTED_ITF_NAME(1,
       "Invalid interface name. Found \"%s\", where \"%s\" was expected.",
       "<found>", "<expected>"),
 
   /** */
-  INVALID_INCLUDE("Invalid include path \"%s\"", "<includedPath>"),
+  INVALID_INCLUDE(2, "Invalid include path \"%s\"", "<includedPath>"),
 
   /** */
-  PARSE_ERROR("Parse error: %s", "<detail>"),
+  PARSE_ERROR(3, "Parse error: %s", "<detail>"),
 
   /** */
-  IO_ERROR("Can't read file \"%s\"", "<filename>"),
+  IO_ERROR(4, "Can't read file \"%s\"", "<filename>"),
 
   /** */
-  TYPE_REDEFINITION("Redefinition of type \"%s\" previously defined at \"%s\"",
-      "<typename>", "<location>"),
+  TYPE_REDEFINITION(5,
+      "Redefinition of type \"%s\" previously defined at \"%s\"", "<typename>",
+      "<location>"),
 
   /** */
-  UNDEFINED_TYPE("Undefined type \"%s\"", "<typename>"),
+  UNDEFINED_TYPE(6, "Undefined type \"%s\"", "<typename>"),
 
   ;
 
@@ -60,8 +64,8 @@ public enum IDLErrors implements ErrorTemplate {
   private int                id;
   private String             format;
 
-  private IDLErrors(final String format, final Object... args) {
-    this.id = ordinal();
+  private IDLErrors(final int id, final String format, final Object... args) {
+    this.id = id;
     this.format = format;
 
     assert validErrorTemplate(this, args);

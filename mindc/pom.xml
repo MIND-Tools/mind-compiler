@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.ow2.mind</groupId>
         <artifactId>mind-compiler</artifactId>
-        <version>0.2-beta-1-SNAPSHOT</version>
+        <version>0.2-beta-2-SNAPSHOT</version>
     </parent>
 
     <artifactId>mindc</artifactId>
@@ -31,6 +31,11 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>plugin-loader</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>fractal-adl-bundle</artifactId>
+            <type>bundle</type>
         </dependency>
 
         <dependency>

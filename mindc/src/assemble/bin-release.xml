@@ -12,7 +12,16 @@
             <outputDirectory>lib</outputDirectory>
             <excludes>
                 <exclude>${project.groupId}:fractal-runtime</exclude>
+                <exclude>${project.groupId}:fractal-adl-bundle</exclude>
             </excludes>
+        </dependencySet>
+
+        <dependencySet>
+            <outputDirectory>bundle</outputDirectory>
+            <includes>
+                <include>${project.groupId}:fractal-adl-bundle</include>
+            </includes>
+            <outputFileNameMapping>${artifact.groupId}.${artifact.artifactId}_${artifact.version}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
         </dependencySet>
 
         <dependencySet>

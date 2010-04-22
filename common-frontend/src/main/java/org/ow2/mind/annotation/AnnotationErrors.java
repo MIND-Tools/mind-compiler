@@ -26,14 +26,20 @@ import static org.objectweb.fractal.adl.error.ErrorTemplateValidator.validErrorT
 
 import org.objectweb.fractal.adl.error.ErrorTemplate;
 
+/**
+ * {@link ErrorTemplate} for annotation support.
+ */
 public enum AnnotationErrors implements ErrorTemplate {
 
-  INVALID_ANNOTATION("Invalid annotation: %s", "<cause>"),
+  /** */
+  INVALID_ANNOTATION(0, "Invalid annotation: %s", "<cause>"),
 
-  INVALID_ANNOTATION_TARGET(
+  /** */
+  INVALID_ANNOTATION_TARGET(1,
       "Invalid annotation: this annotation is not valid on this kind of element"),
 
-  DUPLICATED_ANNOTATION(
+  /** */
+  DUPLICATED_ANNOTATION(2,
       "Can't specify the same annotation several time on a given element")
 
   ;
@@ -44,8 +50,9 @@ public enum AnnotationErrors implements ErrorTemplate {
   private int                id;
   private String             format;
 
-  private AnnotationErrors(final String format, final Object... args) {
-    this.id = ordinal();
+  private AnnotationErrors(final int id, final String format,
+      final Object... args) {
+    this.id = id;
     this.format = format;
 
     assert validErrorTemplate(this, args);
