@@ -241,6 +241,13 @@ public class Launcher extends AbstractLauncher {
     // parse arguments to a CommandLine.
     final CommandLine cmdLine = CommandLine.parseArgs(options, false, args);
 
+    try {
+      invokeOptionHandlers(pluginManager, cmdLine, compilerContext);
+    } catch (final ADLException e) {
+      throw new CompilerInstantiationException(
+          "Cannot invoke command line option handlers.", e, 101);
+    }
+
     // If help is asked, print it and exit.
     if (helpOpt.isPresent(cmdLine)) {
       printHelp(System.out);
@@ -721,11 +728,21 @@ public class Launcher extends AbstractLauncher {
     for (final CmdOption option : CommandLineOptionExtensionHelper
         .getCommandOptions(pluginManagerItf, context)) {
       options.addOption(option);
-      final CommandOptionHandler handler = CommandLineOptionExtensionHelper
-          .getHandler(option);
-      handler.processCommandOption(option, context);
     }
 
+  }
+
+  protected void invokeOptionHandlers(final PluginManager pluginManagerItf,
+      final CommandLine cmdLine, final Map<Object, Object> context)
+      throws ADLException {
+    for (final CmdOption option : CommandLineOptionExtensionHelper
+        .getCommandOptions(pluginManagerItf, context)) {
+      if (option.isPresent(cmdLine)) {
+        final CommandOptionHandler handler = CommandLineOptionExtensionHelper
+            .getHandler(option);
+        handler.processCommandOption(option, context);
+      }
+    }
   }
 
   @Override
