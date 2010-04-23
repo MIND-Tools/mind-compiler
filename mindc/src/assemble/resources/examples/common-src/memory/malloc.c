@@ -21,19 +21,17 @@
  *
  * Authors: Matthieu Leclercq
  */
+#include <stdlib.h>
 
-// -----------------------------------------------------------------------------
-// Implementation of the entryPoint interface with signature boot.Main.
-// -----------------------------------------------------------------------------
+/* -----------------------------------------------------------------------------
+ * Implementation of the allocator interface.
+ * -------------------------------------------------------------------------- */
 
-// int main(int argc, string[] argv)
-int METH(entryPoint, main) (int argc, char *argv[]) {
-
-  // call the 'print' method of the 's' client interface.
-  CALL(s, print)("hello world !");
-
-  // call again the same interface to look at invocation count
-  CALL(s, println)("goodbye world");
-
-  return 0;
+void *METH(allocator, alloc)(int size) {
+  return malloc(size);
 }
+
+void METH(allocator, free)(void *addr) {
+  free(addr);
+}
+

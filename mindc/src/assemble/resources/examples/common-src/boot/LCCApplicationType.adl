@@ -22,18 +22,12 @@
  * Authors: Matthieu Leclercq
  */
 
-// -----------------------------------------------------------------------------
-// Implementation of the entryPoint interface with signature boot.Main.
-// -----------------------------------------------------------------------------
+import fractal.api.LifeCycleController;
 
-// int main(int argc, string[] argv)
-int METH(entryPoint, main) (int argc, char *argv[]) {
-
-  // call the 'print' method of the 's' client interface.
-  CALL(s, print)("hello world !");
-
-  // call again the same interface to look at invocation count
-  CALL(s, println)("goodbye world");
-
-  return 0;
+/**
+ * The ADL type that can be extended by application components that also have a
+ * lifeCycleController interface.
+ */
+type boot.LCCApplicationType extends ApplicationType{
+  provides LifeCycleController as lifeCycleController;
 }

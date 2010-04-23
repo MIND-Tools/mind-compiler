@@ -95,7 +95,7 @@
                 <configuration>
                     <executable>make</executable>
                     <workingDirectory>
-                        ${project.build.directory}/${project.build.finalName}-bin/${project.build.finalName}/examples/helloworld
+                        ${project.build.directory}/${project.build.finalName}-bin/${project.build.finalName}/examples
 					</workingDirectory>
                     <arguments>
                         <argument>MIND_ROOT=../../</argument>

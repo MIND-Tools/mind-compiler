@@ -49,21 +49,21 @@ import org.ow2.mind.plugin.PluginManager;
 
 public class BasicMPPWrapper implements MPPWrapper {
 
-  protected static Logger     logger             = FractalADLLogManager
-                                                     .getLogger("io");
+  protected static Logger    logger             = FractalADLLogManager
+                                                    .getLogger("io");
 
   /** Plugin manager client interface name **/
-  public static final String  PLUGIN_MANAGER_ITF = "plugin-manager";
+  public static final String PLUGIN_MANAGER_ITF = "plugin-manager";
 
   /** Plugin manager client interface **/
-  public static PluginManager pluginManagerItf;
+  public PluginManager       pluginManagerItf;
 
   public MPPCommand newMPPCommand(final Definition definition,
       final Map<Object, Object> context) {
     return new BasicMPPCommand(definition, context);
   }
 
-  protected static class BasicMPPCommand implements MPPCommand {
+  protected class BasicMPPCommand implements MPPCommand {
 
     protected final Map<Object, Object> context;
     protected CPLChecker                cplChecker;
