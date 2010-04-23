@@ -99,6 +99,11 @@ error0:
 <endif>
 }
 
+#ifdef DESTRUCTOR_METHOD_IMPLEMENTED
+void __component_<definition.name;format="toCName">_destructor(PRIVATE_DATA_T* instance);
+#endif
+
+
 int __component_<definition.name;format="toCName">_destroy(void *instance, void *allocItf) {
 <if (definition.astNodeTypes.("component"))>
 <if (definition.components)>
@@ -107,6 +112,11 @@ int __component_<definition.name;format="toCName">_destroy(void *instance, void 
 <endif>
 
   PRIVATE_DATA_T* destroyInstance = (PRIVATE_DATA_T*) instance;
+
+#ifdef DESTRUCTOR_METHOD_IMPLEMENTED
+  __component_<definition.name;format="toCName">_destructor(destroyInstance);
+#endif
+
   <DestroyComponents(definition=definition)>
 
   <DestroyControllersData(definition=definition)>
