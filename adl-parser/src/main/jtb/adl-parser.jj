@@ -497,41 +497,8 @@ void BindingComponentName() : {}
 void SubComponentDefinition() : {}
 {
   Annotations()
-  <CONTAINS> SubComponentReference()
+  <CONTAINS> SimpleSubComponentReference()
   [ <SEMICOLON> ]
-}
-
-void SubComponentReference() : {}
-{
-  LOOKAHEAD(2) CompositeSubComponentReference()
-  | CompositeInlinedDefinition()
-  | LOOKAHEAD(2) PrimitiveSubComponentReference()
-  | PrimitiveInlinedDefinition()
-  | SimpleSubComponentReference()
-}
-
-void CompositeSubComponentReference() : {}
-{
-  <COMPOSITE> CompositeDefinitionReference() 
-  <AS> <IDENTIFIER>  
-  [ LOOKAHEAD( (Annotation())* <LBRACE> ) CompositeAnonymousExtension() ]
-}
-
-void CompositeInlinedDefinition() : {}
-{
-  <COMPOSITE> <AS> <IDENTIFIER> CompositeAnonymousExtension()
-}
-
-void PrimitiveSubComponentReference() : {}
-{
-  <PRIMITIVE> PrimitiveDefinitionReference() 
-  <AS> <IDENTIFIER> 
-  [ LOOKAHEAD( (Annotation())* <LBRACE> ) PrimitiveAnonymousExtension() ]
-}
-
-void PrimitiveInlinedDefinition() : {}
-{
-  <PRIMITIVE> <AS> <IDENTIFIER> PrimitiveAnonymousExtension()
 }
 
 void SimpleSubComponentReference() : {}

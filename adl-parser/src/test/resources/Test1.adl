@@ -9,14 +9,14 @@ composite fuu.Bop<T conformsto Toto>(arg1, arg2) extends Bar<T, Bar> {
   provides Allocator as alloc;
   requires FooItf as cItf[10];
   
-  contains primitive Tutu(a=arg1) as tutu;
+  contains Tutu(a=arg1) as tutu;
 
   @Override
-  contains composite Bar<a> as bar {
-    contains primitive Tutu as tutu;
+  contains Bar<a> as bar composite {
+    contains Tutu as tutu;
   }
  
-  contains primitive as p1 {
+  contains as p1 primitive {
     provides Allocator as allocator;
     
     attribute int attr1 = 20;
