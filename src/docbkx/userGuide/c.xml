@@ -16,8 +16,8 @@
   <section id="c-prvdecl">
     <title>Component's private-data declaration</title>
 
-    <para>Component's private-data must be declared in a separated header file that 
-      is referenced in the ADL using the <code>"data"</code> construct (see 
+    <para>Component's private-data can be declared in a separated header file, 
+      or directly inline in the ADL using the <code>"data"</code> construct (see 
       <xref linkend="adl-impl-data"/> for more details).</para>
 
     <para>The declaration of private-data takes the form of a declaration of a 

@@ -309,7 +309,7 @@
         <programlisting linenumbering="numbered" language="adl"> data myComponentData.h;</programlisting>
         
         <para>The above code excerpt specifies that the component's private-data 
-          is defined in the file called <filename>myComponentData.h</filename>.</para>
+          are defined in the file called <filename>myComponentData.h</filename>.</para>
 
         <programlisting linenumbering="numbered" language="adl"> data {{
    struct {
@@ -319,6 +319,9 @@
 
         <para>The above code excerpt makes an inlined definition of private-data structure
           directly in the ADL file.</para>
+         
+        <para>See <xref linkend="c-prvdecl"/> for details on the syntax to be 
+          used to define component's private data.</para>
       </example>
     </section>
     
