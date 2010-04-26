@@ -54,21 +54,28 @@ echo.
 goto error
 
 :OkJHomeExe
-@REM ==== CHECK MIND_ROOT ===
-if not "%MIND_ROOT%" == "" goto endInit
+@REM ==== CHECK MIND_HOME ===
+@REM use the batch path to determine MIND_HOME if not defined.
+pushd %~dp0..\
+set MINDC_ROOT=%cd%
+popd
+
+if "%MIND_HOME%" == "" set MIND_HOME=%MINDC_ROOT%
+
+@REM MIND_HOME defined and different from batch path, use it but warn the user
+if /i "%MIND_HOME%" == "%MINDC_ROOT%" goto endInit
 echo.
-echo ERROR: MIND_ROOT not found in your environment.
-echo Please set the MIND_ROOT variable in your environment to match the
-echo location of your MIND installation
+echo WARNING: Using environment variable MIND_HOME which is different from mindc.bat location
+echo MIND_HOME          = %MIND_HOME% 
+echo mindc.bat location = %MINDC_ROOT%
 echo.
-goto error
 
 :endInit
 
 setlocal
 set MIND_CMD_LINE_ARGS=%*
-set MIND_RUNTIME=%MIND_ROOt%/runtime
-set MIND_LIB=%MIND_ROOT%/lib
+set MIND_RUNTIME=%MIND_HOME%/runtime
+set MIND_LIB=%MIND_HOME%/lib
 set LAUNCHER=org.ow2.mind.Launcher
 set MIND_JAVA_EXE="%JAVA_HOME%\bin\java.exe"
 if not "%MIND_CLASSPATH%" == "" set MIND_CLASSPATH=%MIND_CLASSPATH%;

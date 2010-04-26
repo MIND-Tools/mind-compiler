@@ -10,7 +10,7 @@
     </parent>
 
     <artifactId>mind-compiler</artifactId>
-    <version>0.2-beta-2-SNAPSHOT</version>
+    <version>0.2-SNAPSHOT</version>
     <name>Mind compiler</name>
     <packaging>pom</packaging>
 
@@ -85,7 +85,7 @@
             The version of the fractal-adl artifacts which this tool-set depends
             on
         -->
-        <fractaladl.dependencies.version>2.6</fractaladl.dependencies.version>
+        <fractaladl.dependencies.version>2.6.1</fractaladl.dependencies.version>
 
         <!-- By default run tests for groups "functional" and "checkin" -->
         <test.groups>functional, checkin</test.groups>
@@ -460,6 +460,17 @@
                     <xincludeSupported>true</xincludeSupported>
                 </configuration>
             </plugin>
+        
+            <!-- Add this plugin in parent POM to ensure that 
+                 "factal-adl-bundle" artifact of type "bundle" is correctly
+                 handled. -->
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <version>2.0.1</version>
+                <extensions>true</extensions>
+            </plugin>
+            
         </plugins>
 
         <pluginManagement>

@@ -22,18 +22,13 @@
  * Authors: Matthieu Leclercq
  */
 
-// -----------------------------------------------------------------------------
-// Implementation of the entryPoint interface with signature boot.Main.
-// -----------------------------------------------------------------------------
+import memory.api.AllocatorType;
 
-// int main(int argc, string[] argv)
-int METH(entryPoint, main) (int argc, char *argv[]) {
-
-  // call the 'print' method of the 's' client interface.
-  CALL(s, print)("hello world !");
-
-  // call again the same interface to look at invocation count
-  CALL(s, println)("goodbye world");
-
-  return 0;
+/**
+ * A simple memory allocator component that use <code>malloc</code> and 
+ * <code>free</code> system calls to allocate/free memory
+ */
+primitive memory.unix.Malloc extends AllocatorType {
+  
+  source malloc.c;
 }

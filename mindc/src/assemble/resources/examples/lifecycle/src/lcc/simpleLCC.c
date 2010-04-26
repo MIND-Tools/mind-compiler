@@ -22,6 +22,20 @@
  * Authors: Matthieu Leclercq
  */
 
+#include <stdio.h>
+
+// -----------------------------------------------------------------------------
+// Constructor implementation
+// -----------------------------------------------------------------------------
+
+CONSTRUCTOR() {
+  printf("In CONSTRUCTOR\n");
+}
+
+DESTRUCTOR() {
+  printf("In DESTRUCTOR\n");
+}
+
 // -----------------------------------------------------------------------------
 // Implementation of the entryPoint interface with signature boot.Main.
 // -----------------------------------------------------------------------------
@@ -29,11 +43,22 @@
 // int main(int argc, string[] argv)
 int METH(entryPoint, main) (int argc, char *argv[]) {
 
-  // call the 'print' method of the 's' client interface.
-  CALL(s, print)("hello world !");
-
-  // call again the same interface to look at invocation count
-  CALL(s, println)("goodbye world");
+  printf("In entryPoint.main\n");
 
   return 0;
+}
+
+// -----------------------------------------------------------------------------
+// Implementation of the lifeCycleController interface with signature boot.Main.
+// -----------------------------------------------------------------------------
+
+
+int METH(lifeCycleController, startFc) (void) {
+  printf("In lifeCycleController.startFc\n");
+  return FRACTAL_API_OK;
+}
+
+int METH(lifeCycleController, stopFc) (void) {
+  printf("In lifeCycleController.stopFc\n");
+  return FRACTAL_API_OK;
 }

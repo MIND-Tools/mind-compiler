@@ -46,8 +46,6 @@ import org.ow2.mind.adl.jtb.syntaxtree.CompositeDefinition;
 import org.ow2.mind.adl.jtb.syntaxtree.CompositeDefinitionBody;
 import org.ow2.mind.adl.jtb.syntaxtree.CompositeDefinitionElement;
 import org.ow2.mind.adl.jtb.syntaxtree.CompositeDefinitionReference;
-import org.ow2.mind.adl.jtb.syntaxtree.CompositeInlinedDefinition;
-import org.ow2.mind.adl.jtb.syntaxtree.CompositeSubComponentReference;
 import org.ow2.mind.adl.jtb.syntaxtree.DataDefinition;
 import org.ow2.mind.adl.jtb.syntaxtree.ExtendedCompositeDefinitions;
 import org.ow2.mind.adl.jtb.syntaxtree.ExtendedPrimitiveDefinitions;
@@ -74,13 +72,10 @@ import org.ow2.mind.adl.jtb.syntaxtree.PrimitiveDefinition;
 import org.ow2.mind.adl.jtb.syntaxtree.PrimitiveDefinitionBody;
 import org.ow2.mind.adl.jtb.syntaxtree.PrimitiveDefinitionElement;
 import org.ow2.mind.adl.jtb.syntaxtree.PrimitiveDefinitionReference;
-import org.ow2.mind.adl.jtb.syntaxtree.PrimitiveInlinedDefinition;
-import org.ow2.mind.adl.jtb.syntaxtree.PrimitiveSubComponentReference;
 import org.ow2.mind.adl.jtb.syntaxtree.ReferenceValue;
 import org.ow2.mind.adl.jtb.syntaxtree.SimpleSubComponentReference;
 import org.ow2.mind.adl.jtb.syntaxtree.StringValue;
 import org.ow2.mind.adl.jtb.syntaxtree.SubComponentDefinition;
-import org.ow2.mind.adl.jtb.syntaxtree.SubComponentReference;
 import org.ow2.mind.adl.jtb.syntaxtree.TypeArgument;
 import org.ow2.mind.adl.jtb.syntaxtree.TypeArgumentAssignement;
 import org.ow2.mind.adl.jtb.syntaxtree.TypeArgumentList;
@@ -361,31 +356,6 @@ public class BeginTokenVisitor extends GJNoArguDepthFirst<NodeToken> {
   @Override
   public NodeToken visit(final SubComponentDefinition n) {
     return n.f1;
-  }
-
-  @Override
-  public NodeToken visit(final SubComponentReference n) {
-    return n.f0.accept(this);
-  }
-
-  @Override
-  public NodeToken visit(final CompositeSubComponentReference n) {
-    return n.f0;
-  }
-
-  @Override
-  public NodeToken visit(final CompositeInlinedDefinition n) {
-    return n.f0;
-  }
-
-  @Override
-  public NodeToken visit(final PrimitiveSubComponentReference n) {
-    return n.f0;
-  }
-
-  @Override
-  public NodeToken visit(final PrimitiveInlinedDefinition n) {
-    return n.f0;
   }
 
   @Override

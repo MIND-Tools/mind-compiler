@@ -1,11 +1,77 @@
+/**
+ * mindc examples
+ *
+ * Copyright (C) 2010 STMicroelectronics
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
+ *
+ * Contact: mind@ow2.org
+ *
+ * Authors: Matthieu Leclercq
+ */
+
+// import the "boot.Main" IDL.
 import boot.Main;
 
+/**
+ * The "helloworld.Helloworld" composite provides an interface whose signature 
+ * (i.e. its type) is defined in the "boot.Main" IDL and whose name is 
+ * "entryPoint". This interface is the entry point of the application; it will 
+ * be called by the bootstrap component when the application is launched.
+ *
+ * This composite also contains two sub-components called "clientSubComp" and 
+ * "serverSubComp" that are defines respectively in ADLs called 
+ * "helloworld.Client" and "helloworld.Server".
+ */
 composite helloworld.Helloworld {
-  provides Main as main;
 
-  contains Client as client;
-  contains Server as server;
+  /**
+   * Declares an interface provided by this "helloworld.Helloworld" composite 
+   * component. The name of this interface is "entryPoint" and its signature is
+   * defined in the "boot.Main" IDL.
+   *
+   * Note that the signature "boot.Main" has been imported at line 26. So this
+   * IDL can be referenced with "Main".
+   */
+  provides Main as entryPoint;
+
+  /**
+   * Declares a sub-component of this composite component. This sub-component 
+   * is called "clientSubComp" and is defined in the "helloworld.Client" ADL.
+   *
+   * Note that the "helloworld.Client" ADL can be referenced with "Client" since
+   * it belong to the same package as this ADL (i.e. the "helloworld" package).
+   */
+  contains Client as clientSubComp;
   
-  binds this.main to client.main;
-  binds client.sa to server.s;
+  /**
+   * Declares another sub-component called "serverSubComp" that is defined in
+   * the "helloworld.Server" ADL.
+   */
+  contains Server as serverSubComp;
+  
+  /**
+   * Binds the "entryPoint" interface of this composite component (i.e. the 
+   * interface that is declared ate line 48) to the interface called 
+   * "entryPoint" of the "clientSubComp" sub-component.
+   */
+  binds this.entryPoint to clientSubComp.entryPoint;
+  
+  /**
+   * Binds an interface of the "clientSubComp" sub-component to another 
+   * interface of the "serverSubComp" sub-component.
+   */
+  binds clientSubComp.s to serverSubComp.s;
 }

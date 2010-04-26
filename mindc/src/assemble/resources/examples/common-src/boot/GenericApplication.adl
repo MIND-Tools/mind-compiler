@@ -22,18 +22,14 @@
  * Authors: Matthieu Leclercq
  */
 
-// -----------------------------------------------------------------------------
-// Implementation of the entryPoint interface with signature boot.Main.
-// -----------------------------------------------------------------------------
-
-// int main(int argc, string[] argv)
-int METH(entryPoint, main) (int argc, char *argv[]) {
-
-  // call the 'print' method of the 's' client interface.
-  CALL(s, print)("hello world !");
-
-  // call again the same interface to look at invocation count
-  CALL(s, println)("goodbye world");
-
-  return 0;
+/**
+ * This template ADL defines a generic top-level architecture made of a 
+ * bootstrap component and a generic "App" component bound together.
+ */
+@Singleton
+composite boot.GenericApplication<App conformsto ApplicationType> {
+  contains App as app;
+  contains Bootstrap as bootstrap;
+  
+  binds bootstrap.entryPoint to app.entryPoint;
 }

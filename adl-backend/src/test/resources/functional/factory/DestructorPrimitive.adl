@@ -1,0 +1,13 @@
+
+primitive factory.DestructorPrimitive extends EmptyPrimitive {
+  
+  source {{
+    int sharedInt = 0;
+    CONSTRUCTOR() {
+      sharedInt = 1;
+    }
+    DESTRUCTOR() {
+      sharedInt = 0;
+    }
+  }}
+}

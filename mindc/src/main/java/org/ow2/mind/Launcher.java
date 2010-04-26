@@ -23,11 +23,15 @@
 package org.ow2.mind;
 
 import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.LineNumberReader;
 import java.io.PrintStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +44,9 @@ import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.JavaFactory;
 import org.objectweb.fractal.adl.Loader;
 import org.objectweb.fractal.adl.NodeFactory;
+import org.objectweb.fractal.adl.error.ChainedErrorLocator;
+import org.objectweb.fractal.adl.error.Error;
+import org.objectweb.fractal.adl.error.ErrorLocator;
 import org.objectweb.fractal.adl.error.GenericErrors;
 import org.objectweb.fractal.adl.util.FractalADLLogManager;
 import org.objectweb.fractal.cecilia.targetDescriptor.TargetDescriptorException;
@@ -752,8 +759,7 @@ public class Launcher extends AbstractLauncher {
     ps.println("Usage: " + prgName + " [OPTIONS] (<definition>[:<execname>])+");
     ps.println("  where <definition> is the name of the component to"
         + " be compiled, ");
-    ps
-        .println("  and <execname> is the name of the output file to be created.");
+    ps.println("  and <execname> is the name of the output file to be created.");
   }
 
   protected void handleException(final InvalidCommandLineException e) {
@@ -778,14 +784,83 @@ public class Launcher extends AbstractLauncher {
     if (printStackTrace) {
       e.printStackTrace();
     } else {
+      final Error error = e.getError();
+      ErrorLocator locator = error.getLocator();
+      if (locator instanceof ChainedErrorLocator) {
+        locator = ((ChainedErrorLocator) locator).getRootLocator();
+        if (locator == null) {
+          final Iterator<ErrorLocator> iter = ((ChainedErrorLocator) error
+              .getLocator()).getChainedLocations().iterator();
+          while (iter.hasNext() && locator == null) {
+            locator = iter.next();
+          }
+        }
+      }
+      // cwd is the current working dir.
+      String cwd = new File("foo").getAbsolutePath();
+      cwd = cwd.substring(0, cwd.length() - 3);
+
+      String fileLocation = null;
+
+      if (locator != null && locator.getInputFilePath() != null) {
+        fileLocation = locator.getInputFilePath();
+        if (fileLocation.startsWith(cwd)) {
+          fileLocation = fileLocation.substring(cwd.length());
+        }
+      }
+
       final StringBuffer sb = new StringBuffer();
-      sb.append(e.getMessage()).append('\n');
+      if (locator != null && fileLocation != null) {
+        sb.append("At ").append(fileLocation);
+
+        if (locator.getBeginLine() >= 0) {
+          sb.append(":").append(locator.getBeginLine());
+          if (locator.getBeginColumn() >= 0) {
+            sb.append(",").append(locator.getBeginColumn());
+          }
+        }
+        sb.append(":\n |--> ");
+        if (locator.getBeginLine() >= 0) {
+          final File inputFile = new File(locator.getInputFilePath());
+          if (inputFile.exists()) {
+            try {
+              final LineNumberReader reader = new LineNumberReader(
+                  new FileReader(inputFile));
+              for (int i = 0; i < locator.getBeginLine() - 1; i++) {
+                reader.readLine();
+              }
+              final String line = reader.readLine().replace("\t", "    ");
+              sb.append("  ").append(line).append("\n |-->   ");
+              if (locator.getBeginColumn() >= 0) {
+                for (int i = 0; i < locator.getBeginColumn() - 1; i++) {
+                  sb.append(" ");
+                }
+                int end = line.length();
+                if (locator.getEndColumn() >= 0
+                    && locator.getBeginLine() == locator.getEndLine()) {
+                  end = locator.getEndColumn();
+                }
+                for (int i = locator.getBeginColumn(); i < end + 1; i++) {
+                  sb.append("-");
+                }
+                sb.append("\n |--> ");
+
+              }
+            } catch (final IOException e1) {
+              // ignore
+              e.printStackTrace();
+            }
+          }
+        }
+      }
+      sb.append(error.getMessage()).append("\n");
       Throwable cause = e.getCause();
       while (cause != null) {
         sb.append("caused by : ");
         sb.append(cause.getMessage()).append('\n');
         cause = cause.getCause();
       }
+
       System.err.println(sb);
     }
     System.exit(1);

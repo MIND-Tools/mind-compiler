@@ -64,7 +64,7 @@ if [ -z "$JAVA_HOME" ] ; then
   fi
 fi
 if [ -z "$MIND_HOME" ] ; then
-  ## resolve links - $0 may be a link to cecilia's home
+  ## resolve links - $0 may be a link to mind's home
   PRG="$0"
 
   # need this for relative symlinks
