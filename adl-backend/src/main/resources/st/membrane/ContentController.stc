@@ -5,7 +5,11 @@ template st.membrane.ContentController : st.common.ComponentHelper implements st
 // -----------------------------------------------------------------------------
 
 ControllerGlobalDecl(definition, controller) ::= <<
-#include "fractal/internal/CCDelegate.h"
+#include "fractal/internal/CCdelegate.h"
+
+// declare internal interfaces descriptor. This structure is defined in the 
+// membrane implementation (i.e. in 'ctrl_impl.c' file)
+struct __component_InternalItfsDescriptor <definition.name;format="toCName">_internalItfs_descriptor;
 >>
 
 ControllerData(definition, controller) ::= <<
@@ -21,7 +25,8 @@ struct __component_ContentDescriptor instance_name##_contentDesc = { \
   sizeof(instance_name##_dynamicSubComponent)/sizeof(fractal_api_Component), \
   instance_name##_dynamicSubComponent, \
   sizeof(instance_name##_contentBindingDesc)/sizeof(struct __component_ContentBindingDescriptor), \
-  instance_name##_contentBindingDesc \
+  instance_name##_contentBindingDesc, \
+  & <definition.name;format="toCName">_internalItfs_descriptor \
 };
 >>
 
@@ -109,6 +114,8 @@ ControllerImplementation(definition, controller, interfaceDefinitions) ::= <<
    Implementation of the ContentController interface
 ----------------------------------------------------------------------------- */
 
+<initInternalItfsDescriptor(definition=definition)>
+
 <getFcSubComponents(definition=definition)>
 
 <addFcSubComponent(definition=definition)>
@@ -125,6 +132,88 @@ ControllerImplementation(definition, controller, interfaceDefinitions) ::= <<
 // Internal templates
 // -----------------------------------------------------------------------------
 
+initInternalItfsDescriptor(definition) ::= <<
+struct __component_InternalClientItfDescriptor <definition.name;format="toCName">_internalClientItf_descriptor[<internalClientInterfaceCount(definition=definition)>] = {
+<if (definition.astNodeTypes.("internalInterface"))>
+  <definition.internalInterfaces:initInternalClientItfDescriptor(definition=definition, itf=it)>
+<endif>
+};
+
+struct __component_InternalServerItfDescriptor <definition.name;format="toCName">_internalServerItf_descriptor[<internalServerInterfaceCount(definition=definition)>] = {
+<if (definition.astNodeTypes.("internalInterface"))>
+  <definition.internalInterfaces:initInternalServerItfDescriptor(definition=definition, itf=it)>
+<endif>
+};
+
+struct __component_InternalItfsDescriptor <definition.name;format="toCName">_internalItfs_descriptor = {
+  sizeof(<definition.name;format="toCName">_internalClientItf_descriptor)/sizeof(struct __component_InternalClientItfDescriptor),
+  <definition.name;format="toCName">_internalClientItf_descriptor,
+  sizeof(<definition.name;format="toCName">_internalServerItf_descriptor)/sizeof(struct __component_InternalServerItfDescriptor),
+  <definition.name;format="toCName">_internalServerItf_descriptor
+};
+>>
+
+internalClientInterfaceCount(definition) ::= <<
+<if (definition.astNodeTypes.("internalInterface"))>
+  <definition.internalInterfaces:countClientInterfaces(itf=it)>
+<endif>
+0
+>>
+
+countClientInterfaces(itf) ::= <<
+<if (isClient.(itf.role))>
+<if (itf.numberOfElement)>
+<itf.numberOfElement> + 
+<else>
+1 +
+<endif>
+<endif>
+>>
+
+internalServerInterfaceCount(definition) ::= <<
+<if (definition.astNodeTypes.("internalInterface"))>
+  <definition.internalInterfaces:countServerInterfaces(itf=it)>
+<endif>
+0
+>>
+
+countServerInterfaces(itf) ::= <<
+<if (isServer.(itf.role))>
+<if (itf.numberOfElement)>
+<itf.numberOfElement> + 
+<else>
+1 +
+<endif>
+<endif>
+>>
+
+initInternalClientItfDescriptor(definition, itf) ::= <<
+<if (isClient.(itf.role))>
+<if (itf.numberOfElement)>
+<itf.astDecorations.("collectionIndexes"):initInternalClientItfDescriptor1(definition=definition, itf=itf, index=it);separator=",\n">,
+<else>
+<initInternalClientItfDescriptor1(definition=definition, itf=itf)>,
+<endif>
+<endif>
+>>
+
+initInternalClientItfDescriptor1(definition, itf, index) ::= <<
+__COMPONENT_INIT_INTERNAL_CLIENT_ITF_DESCRIPTOR(<ComponentTypeName(definitionName=definition.name)>, <itf.name><if (index)>[<index>]<endif>, <itf.astDecorations.("delegated-interface").name><if (index)>[<index>]<endif>)
+>>
+
+initInternalServerItfDescriptor(definition, itf) ::= <<
+<if (isServer.(itf.role))>
+<if (itf.numberOfElement)>
+<itf.astDecorations.("collectionIndexes"):initInternalserverItfDescriptor1(definition=definition, itf=itf, index=it);separator=",\n">,
+<else>
+<initInternalServerItfDescriptor1(definition=definition, itf=itf)>,
+<endif>
+<endif>
+>>
+
+initInternalServerItfDescriptor1(definition, itf, index) ::= <<
+__COMPONENT_INIT_INTERNAL_SERVER_ITF_DESCRIPTOR(<ComponentTypeName(definitionName=definition.name)>, <itf.name><if (index)>[<index>]<endif>)
+>>
 
 getFcSubComponents(definition) ::= <<
 int METH(contentController, getFcSubComponents)(fractal_api_Component subComponents[]) 
@@ -156,7 +245,7 @@ int METH(contentController, addFcSubBinding)(fractal_api_Component clientCompone
       __MIND_STRING_TYPEDEF serverItfName) 
 {
   return __component_addFcSubBinding(clientComponent, clientItfName, serverComponent, serverItfName,
-      <contentDescPointer(definition=definition)>);
+      <contentDescPointer(definition=definition)>, CONTEXT_PTR_ACCESS);
 }
 >>
 
@@ -165,7 +254,7 @@ int METH(contentController, removeFcSubBinding)(fractal_api_Component clientComp
       __MIND_STRING_TYPEDEF clientItfName) 
 {
   return __component_removeFcSubBinding(clientComponent, clientItfName,
-      <contentDescPointer(definition=definition)>);
+      <contentDescPointer(definition=definition)>, CONTEXT_PTR_ACCESS);
 }
 >>
 

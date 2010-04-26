@@ -180,6 +180,7 @@ InitializeServerInterface(definition, itf, isInternal) ::= <<
 InitializeServerInterface1(definition, itf, index, isInternal) ::= <<
 newInstance->__component_internal_data.<if (isInternal)>inner_type<else>type<endif>.<itf.name><if (index)>[<index>]<endif>.selfData = newInstance;
 newInstance->__component_internal_data.<if (isInternal)>inner_type<else>type<endif>.<itf.name><if (index)>[<index>]<endif>.meths = &<vTableInstanceName(definition=definition,itf=itf,index=index)>;
+newInstance->__component_internal_data.<if (isInternal)>inner_type<else>type<endif>.<itf.name><if (index)>[<index>]<endif>.isBound = newInstance;
 >>
 
 

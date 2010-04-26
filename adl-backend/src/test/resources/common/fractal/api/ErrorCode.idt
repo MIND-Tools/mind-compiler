@@ -17,4 +17,6 @@
 #define FRACTAL_API_STOPPED                  0
 #define FRACTAL_API_STARTED                  1
 
+#define FRACTAL_API_ILLEGAL_CONTENT        -50
+#define FRACTAL_API_NO_SUCH_SUB_COMPONENT  -51
 #endif

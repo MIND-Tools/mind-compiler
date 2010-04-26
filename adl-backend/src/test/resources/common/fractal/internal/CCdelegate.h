@@ -35,6 +35,31 @@ struct __component_ContentBindingDescriptor {
   const char* serverItfName;
 };
 
+struct __component_InternalClientItfDescriptor {
+  const char *name;
+  intptr_t offset;
+  intptr_t isBoundOffset;
+};
+
+#define __COMPONENT_INIT_INTERNAL_CLIENT_ITF_DESCRIPTOR(typeName, itfName, delegate_itfName) \
+  {#itfName, ((intptr_t) &(((typeName *) 0x0)->__component_internal_data.inner_type.itfName)), ((intptr_t) &(((typeName *) 0x0)->__component_internal_data.type.delegate_itfName.isBound))}
+
+
+struct __component_InternalServerItfDescriptor {
+  const char *name;
+  intptr_t offset;
+};
+
+#define __COMPONENT_INIT_INTERNAL_SERVER_ITF_DESCRIPTOR(typeName, itfName) \
+  {#itfName, ((intptr_t) &(((typeName *) 0x0)->__component_internal_data.inner_type.itfName))}
+
+struct __component_InternalItfsDescriptor {
+  int nbClientInterface;
+  struct __component_InternalClientItfDescriptor *clientInterfaces;
+  int nbServerInterface;
+  struct __component_InternalServerItfDescriptor *serverInterfaces;
+};
+
 struct __component_ContentDescriptor
 {
   int nbStaticSubComponent;
@@ -43,6 +68,7 @@ struct __component_ContentDescriptor
   fractal_api_Component *dynamicSubComponents;
   int nbBindingDescriptor;
   struct __component_ContentBindingDescriptor *bindingDesc;
+  struct __component_InternalItfsDescriptor *internalItfsDesc;
 };
 
 #define __COMPONENT_STRINGIFY_ITF_NAME(itfName) #itfName
@@ -59,10 +85,12 @@ int __component_removeFcSubComponents(fractal_api_Component subComponent,
 int __component_addFcSubBinding(fractal_api_Component clientComponent,
       const char *clientItfName, fractal_api_Component serverComponent,
       const char *serverItfName,
-      struct __component_ContentDescriptor *desc);
+      struct __component_ContentDescriptor *desc,
+      void* component_ptr);
 
 int __component_removeFcSubBinding(fractal_api_Component clientComponent,
       const char *clientItfName,
-      struct __component_ContentDescriptor *desc);
+      struct __component_ContentDescriptor *desc,
+      void* component_ptr);
 
 #endif

@@ -6,12 +6,20 @@ composite controller.content.CCTester<T conformsto CCTested> extends Application
   primitive {
     provides Main as main;
     
+    requires Main as testedMain;
     requires fractal.api.ContentController as testedCC;
+    requires fractal.api.Factory as delegatorFactory;
+    
     source ccTester.c;
   }
   
   contains T as tested;
+  contains Factory<MainDelegator> as delegatorFactory;
+  contains UnixAllocator as allocator;
   
   binds this.main to tester.main;
+  binds tester.testedMain to tested.main;
   binds tester.testedCC to tested.contentController;
+  binds tester.delegatorFactory to delegatorFactory.factory;
+  binds delegatorFactory.allocator to allocator.allocator;
 }
