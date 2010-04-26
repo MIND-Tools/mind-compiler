@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.ow2.mind</groupId>
         <artifactId>mind-compiler</artifactId>
-        <version>0.2-beta-2-SNAPSHOT</version>
+        <version>0.2-SNAPSHOT</version>
     </parent>
 
     <artifactId>mindc</artifactId>
@@ -42,6 +42,13 @@
             <groupId>org.objectweb.fractal.cecilia.toolchain</groupId>
             <artifactId>target-descriptor</artifactId>
         </dependency>
+
+        <dependency>
+			<groupId>org.testng</groupId>
+			<artifactId>testng</artifactId>
+			<classifier>jdk15</classifier>
+		</dependency>
+        
     </dependencies>
 
     <build>
@@ -88,7 +95,7 @@
                 <configuration>
                     <executable>make</executable>
                     <workingDirectory>
-                        ${project.build.directory}/${project.build.finalName}-bin/${project.build.finalName}/examples/helloworld
+                        ${project.build.directory}/${project.build.finalName}-bin/${project.build.finalName}/examples
 					</workingDirectory>
                     <arguments>
                         <argument>MIND_ROOT=../../</argument>

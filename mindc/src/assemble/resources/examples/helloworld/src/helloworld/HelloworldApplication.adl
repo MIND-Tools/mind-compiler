@@ -1,9 +1,43 @@
+/**
+ * mindc examples
+ *
+ * Copyright (C) 2010 STMicroelectronics
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
+ *
+ * Contact: mind@ow2.org
+ *
+ * Authors: Matthieu Leclercq
+ */
+
+// import the boot.Bootstrap ADL
 import boot.Bootstrap;
 
+/**
+ * The "helloworld.HelloworldApplication" composite is the top-level ADL of the
+ * helloworld example. It does not have interface. It simply contains the 
+ * application component (that is defined in helloworld.Helloworld ADL) and the
+ * bootstrap component (defined in boot.Bootstrap ADL).
+ *
+ * This composite is declared as a singleton component since it contains a 
+ * sub-component that is itself a singleton (the bootstrap sub-component).
+ */
 @Singleton
 composite helloworld.HelloworldApplication {
   contains Bootstrap as bootstrap;
   contains Helloworld as app;
   
-  binds bootstrap.entryPoint to app.main;
+  binds bootstrap.entryPoint to app.entryPoint;
 }

@@ -1,0 +1,10 @@
+@Run()
+composite factory.DestructorFactoryTest 
+    extends GenericFactoryTest<DestructorPrimitive> {
+  
+  @Override
+  contains ApplicationType as tester primitive {
+    requires fractal.api.Factory as factory;
+    source destructorFactoryTester.c;
+  }
+}

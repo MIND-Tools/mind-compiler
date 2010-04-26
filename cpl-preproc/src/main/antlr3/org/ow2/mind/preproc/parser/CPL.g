@@ -173,24 +173,24 @@ protected serverMethDef returns [StringBuilder res = new StringBuilder()]
 
 protected privateMethDef returns [StringBuilder res = new StringBuilder()]
 @init{String tmp = "";}
-    : METH ws1=ws '(' ws2=ws id=ID ws3=ws ')' 
+    : METH ws1=ws '(' ws2=ws id=ID ws3=ws ')' ws4=ws
       (
         e = WS { tmp += $e.text; }
         | ')'  { tmp += ")"; }
 	  )* // handle case of (((... PRV(foo) )))(...
       {
         $res.append("PRIVATE_METHOD").append($ws1.text).append("(")
-            .append($ws2.text).append($id.text).append($ws3.text).append(")")
+            .append($ws2.text).append($id.text).append($ws3.text).append(")").append($ws4.text)
             .append(tmp);
       }
-      ( paramsDef { $res.append($paramsDef.res); } 
+      ( paramsDef ws5=ws { $res.append($paramsDef.res).append($ws5.text); } 
         (
-          ws4=ws '{'
+          '{'
             {
               if (!singletonMode) 
-                $res.append($ws4.text).append("{ CHECK_CONTEXT_PTR "); 
+                $res.append("{ CHECK_CONTEXT_PTR "); 
               else
-                $res.append($ws4.text).append("{");
+                $res.append("{");
             }
         )?
       )?

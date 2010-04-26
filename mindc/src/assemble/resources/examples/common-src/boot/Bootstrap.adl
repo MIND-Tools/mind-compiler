@@ -1,0 +1,50 @@
+/**
+ * mindc examples
+ *
+ * Copyright (C) 2010 STMicroelectronics
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
+ *
+ * Contact: mind@ow2.org
+ *
+ * Authors: Matthieu Leclercq
+ */
+
+import fractal.api.LifeCycleController;
+
+/**
+ * The "boot.Bootstrap" primitive component is used to initialize and launch a 
+ * component-based application.
+ * 
+ * It requires an "entryPoint" interface that is intended to be bound to the 
+ * Main interface of the component-based application. It also requires a 
+ * optional "appLCC" interface. This interface can be bound to the 
+ * LifeCycleController interface of the application, if this latter provides it.
+ * 
+ * This component is implemented in the "bootstrap.c" file. This file contains 
+ * the definition of the traditional "main" C function that is executed when the
+ * application is launched.
+ *  
+ * This component is declared as a singleton. This allows to call the required
+ * interfaces from the main C function.
+ */
+@Singleton
+primitive boot.Bootstrap {
+
+  requires Main as entryPoint;
+  requires optional LifeCycleController as appLCC;
+  
+  source bootstrap.c
+}

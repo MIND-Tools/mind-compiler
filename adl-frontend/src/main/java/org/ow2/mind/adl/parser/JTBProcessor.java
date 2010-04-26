@@ -77,8 +77,6 @@ import org.ow2.mind.adl.jtb.syntaxtree.CompositeAnonymousDefinition;
 import org.ow2.mind.adl.jtb.syntaxtree.CompositeAnonymousExtension;
 import org.ow2.mind.adl.jtb.syntaxtree.CompositeDefinition;
 import org.ow2.mind.adl.jtb.syntaxtree.CompositeDefinitionReference;
-import org.ow2.mind.adl.jtb.syntaxtree.CompositeInlinedDefinition;
-import org.ow2.mind.adl.jtb.syntaxtree.CompositeSubComponentReference;
 import org.ow2.mind.adl.jtb.syntaxtree.DataDefinition;
 import org.ow2.mind.adl.jtb.syntaxtree.ExtendedCompositeDefinitions;
 import org.ow2.mind.adl.jtb.syntaxtree.ExtendedPrimitiveDefinitions;
@@ -100,8 +98,6 @@ import org.ow2.mind.adl.jtb.syntaxtree.PrimitiveAnonymousDefinition;
 import org.ow2.mind.adl.jtb.syntaxtree.PrimitiveAnonymousExtension;
 import org.ow2.mind.adl.jtb.syntaxtree.PrimitiveDefinition;
 import org.ow2.mind.adl.jtb.syntaxtree.PrimitiveDefinitionReference;
-import org.ow2.mind.adl.jtb.syntaxtree.PrimitiveInlinedDefinition;
-import org.ow2.mind.adl.jtb.syntaxtree.PrimitiveSubComponentReference;
 import org.ow2.mind.adl.jtb.syntaxtree.ReferenceValue;
 import org.ow2.mind.adl.jtb.syntaxtree.SimpleSubComponentReference;
 import org.ow2.mind.adl.jtb.syntaxtree.StringValue;
@@ -753,112 +749,6 @@ public class JTBProcessor extends GJDepthFirst<Node, Node>
     n.f2.accept(this, comp);
 
     castNodeError(argu, ComponentContainer.class).addComponent(comp);
-
-    return comp;
-  }
-
-  @Override
-  public Node visit(final CompositeSubComponentReference n, final Node argu) {
-    assert argu != null;
-    final Component comp = (Component) argu;
-
-    // process definition reference
-    final DefinitionReference defRef = (DefinitionReference) n.f1.accept(this,
-        null);
-    defRef.setExpectedKind(DefinitionReference.COMPOSITE_KIND);
-    comp.setDefinitionReference(defRef);
-
-    // process name
-    comp.setName(n.f3.tokenImage);
-
-    // process anonymous extension
-    if (n.f4.present()) {
-      // TODO use a specific way to raise Warnings
-      System.out.println("WARNING at " + comp.astGetSource()
-          + ": This \"contains\" construct is deprecated. "
-          + "The \"composite\" keyword should be moved just before the "
-          + "openning brace.");
-      // remove expected kind if an anonymous extension is present
-      defRef.setExpectedKind(null);
-      n.f4.accept(this, comp);
-    } else {
-      // TODO use a specific way to raise Warnings
-      System.out.println("WARNING at " + comp.astGetSource()
-          + ": This \"contains\" construct is deprecated. "
-          + "Remove the \"composite\" keyword.");
-    }
-
-    return comp;
-  }
-
-  @Override
-  public Node visit(final CompositeInlinedDefinition n, final Node argu) {
-    assert argu != null;
-    final Component comp = (Component) argu;
-    // TODO use a specific way to raise Warnings
-    System.out.println("WARNING at " + comp.astGetSource()
-        + ": This \"contains\" construct is deprecated. "
-        + "The \"composite\" keyword should be moved just before the "
-        + "openning brace.");
-
-    // process name
-    comp.setName(n.f2.tokenImage);
-
-    // process anonymous extension
-    n.f3.accept(this, comp);
-
-    return comp;
-  }
-
-  @Override
-  public Node visit(final PrimitiveSubComponentReference n, final Node argu) {
-    assert argu != null;
-    final Component comp = (Component) argu;
-
-    // process definition reference
-    final DefinitionReference defRef = (DefinitionReference) n.f1.accept(this,
-        null);
-    defRef.setExpectedKind(DefinitionReference.PRIMITIVE_KIND);
-    comp.setDefinitionReference(defRef);
-
-    // process name
-    comp.setName(n.f3.tokenImage);
-
-    // process anonymous extension
-    if (n.f4.present()) {
-      // TODO use a specific way to raise Warnings
-      System.out.println("WARNING at " + comp.astGetSource()
-          + ": This \"contains\" construct is deprecated. "
-          + "The \"primitive\" keyword should be moved just before the "
-          + "openning brace.");
-      // remove expected kind if an anonymous extension is present
-      defRef.setExpectedKind(null);
-      n.f4.accept(this, comp);
-    } else {
-      // TODO use a specific way to raise Warnings
-      System.out.println("WARNING at " + comp.astGetSource()
-          + ": This \"contains\" construct is deprecated. "
-          + "Remove the \"composite\" keyword.");
-    }
-
-    return comp;
-  }
-
-  @Override
-  public Node visit(final PrimitiveInlinedDefinition n, final Node argu) {
-    assert argu != null;
-    final Component comp = (Component) argu;
-    // TODO use a specific way to raise Warnings
-    System.out.println("WARNING at " + comp.astGetSource()
-        + ": This \"contains\" construct is deprecated. "
-        + "The \"primitive\" keyword should be moved just before the "
-        + "openning brace.");
-
-    // process name
-    comp.setName(n.f2.tokenImage);
-
-    // process anonymous extension
-    n.f3.accept(this, comp);
 
     return comp;
   }
