@@ -36,6 +36,7 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>fractal-adl-bundle</artifactId>
             <type>bundle</type>
+            <scope>test</scope>
         </dependency>
 
         <dependency>
