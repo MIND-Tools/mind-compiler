@@ -664,8 +664,13 @@ public class JTBProcessor extends GJDepthFirst<Node, Node>
     // process annotations
     n.f0.accept(this, data);
 
-    // TODO check unicity
-    castNodeError(argu, ImplementationContainer.class).setData(data);
+    final ImplementationContainer implContainer = castNodeError(argu,
+        ImplementationContainer.class);
+    if (implContainer.getData() != null) {
+      exception = new ADLException(org.ow2.mind.adl.ADLErrors.MULTIPLE_DATA,
+          data);
+    }
+    implContainer.setData(data);
 
     return data;
   }
@@ -785,6 +790,13 @@ public class JTBProcessor extends GJDepthFirst<Node, Node>
 
     // process anonymous definition
     if (n.f3.present()) {
+      if (comp instanceof FormalTypeParameterReference
+          && ((FormalTypeParameterReference) comp).getTypeParameterReference() != null) {
+        // both reference to template parameter and anonymous definition
+        exception = new ADLException(ADLErrors.PARSE_ERROR, comp,
+            "The contains construct cannot reference a template parameter and "
+                + "have an anonymous definition.");
+      }
       n.f3.accept(this, comp);
     } else if (!hasDefRef) {
       // neither defRef nor anonymous definition

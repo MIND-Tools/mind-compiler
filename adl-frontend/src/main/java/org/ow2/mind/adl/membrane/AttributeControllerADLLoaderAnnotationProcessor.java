@@ -27,7 +27,7 @@ import java.util.Map;
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.Node;
-import org.objectweb.fractal.adl.error.GenericErrors;
+import org.ow2.mind.adl.ADLErrors;
 import org.ow2.mind.adl.annotation.ADLLoaderAnnotationProcessor;
 import org.ow2.mind.adl.annotation.ADLLoaderPhase;
 import org.ow2.mind.adl.annotation.predefined.controller.AttributeController;
@@ -54,9 +54,8 @@ public class AttributeControllerADLLoaderAnnotationProcessor
     if (!((AttributeController) annotation).allowNoAttr
         && (!(definition instanceof AttributeContainer) || ((AttributeContainer) definition)
             .getAttributes().length == 0))
-    // TODO use a specific error
-      throw new ADLException(GenericErrors.GENERIC_ERROR, node,
-          "Invalid AttributeController annotation, definition has no attribute");
+      throw new ADLException(
+          ADLErrors.INVALID_ATTRIBUTE_CONTROLLER_NO_ATTRIBUTE, node);
 
     return addControllerInterfae(definition, AC,
         ATTRIBUTE_CONTROLLER_SIGNATURE, "AttributeController",

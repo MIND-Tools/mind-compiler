@@ -35,7 +35,25 @@ public enum MPPErrors implements ErrorTemplate {
   INPUT_FILE_NOT_FOUND(0, "Can't open input file %s", "<input file>"),
 
   /** */
-  PARSE_ERROR(1, "Parse error %s %s", "<input file>", "<parse error>"), ;
+  PARSE_ERROR(1, "Parse error : %s", "<parse error>"),
+
+  /** */
+  UNKNOWN_INTERFACE(2, "Unknown interface \"%s\".", "<itfName>"),
+
+  /** */
+  UNKNOWN_METHOD(3, "In interface \"%s\" unkown method \"%s\".", "<itfName>",
+      "<methName>"),
+
+  /** */
+  INVALID_CLIENT_INTERFACE(
+      4,
+      "Interface \"%s\" is a client interface, method \"%s\" cannot be defined here.",
+      "<itf name>", "<meth name>"),
+
+  /** */
+  UNKNOWN_ATTRIBUTE(5, "Unknown attribute \"%s\".", "<attName>"),
+
+  ;
 
   /** The groupId of ErrorTemplates defined in this enumeration. */
   public static final String GROUP_ID = "MPP";

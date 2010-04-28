@@ -74,8 +74,6 @@ public class BasicOutputFileLocator implements OutputFileLocator {
 
   public File getCExecutableOutputFile(String path,
       final Map<Object, Object> context) throws ADLException {
-    if (isRelative(path))
-      throw new IllegalArgumentException("path must be absolute");
     final File outDir = getOutputDir(context);
 
     // ensure that executable path on Windows ends with ".exe".

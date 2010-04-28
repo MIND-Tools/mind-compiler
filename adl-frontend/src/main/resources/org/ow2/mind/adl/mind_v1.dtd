@@ -203,7 +203,6 @@
 <!ELEMENT definition (typeArgument*, argument*) >
 <!ATTLIST definition
   name CDATA #REQUIRED
-  expectedKind (type|primitive|composite) #IMPLIED
 >
 
 <!ELEMENT parameter EMPTY >

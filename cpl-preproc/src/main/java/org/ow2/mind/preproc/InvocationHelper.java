@@ -4,6 +4,9 @@ package org.ow2.mind.preproc;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+import org.objectweb.fractal.adl.CompilerError;
+import org.objectweb.fractal.adl.error.GenericErrors;
+
 public final class InvocationHelper {
 
   private InvocationHelper() {
@@ -16,19 +19,20 @@ public final class InvocationHelper {
       final Method method = object.getClass().getMethod(methodName, argClasses);
       res = method.invoke(object, args);
     } catch (final SecurityException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+      throw new CompilerError(GenericErrors.INTERNAL_ERROR, e,
+          "Cannot invoke MPP");
     } catch (final NoSuchMethodException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+      throw new CompilerError(GenericErrors.INTERNAL_ERROR, e,
+          "Cannot invoke MPP");
     } catch (final IllegalArgumentException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+      throw new CompilerError(GenericErrors.INTERNAL_ERROR, e,
+          "Cannot invoke MPP");
     } catch (final IllegalAccessException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+      throw new CompilerError(GenericErrors.INTERNAL_ERROR, e,
+          "Cannot invoke MPP");
     } catch (final InvocationTargetException e) {
-      e.printStackTrace();
+      throw new CompilerError(GenericErrors.INTERNAL_ERROR, e,
+          "Cannot invoke MPP");
     }
     return res;
   }
@@ -41,19 +45,19 @@ public final class InvocationHelper {
       final Method method = object.getClass().getMethod(methodName, argClasses);
       res = method.invoke(object, args);
     } catch (final SecurityException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+      throw new CompilerError(GenericErrors.INTERNAL_ERROR, e,
+          "Cannot invoke MPP");
     } catch (final NoSuchMethodException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+      throw new CompilerError(GenericErrors.INTERNAL_ERROR, e,
+          "Cannot invoke MPP");
     } catch (final IllegalArgumentException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+      throw new CompilerError(GenericErrors.INTERNAL_ERROR, e,
+          "Cannot invoke MPP");
     } catch (final IllegalAccessException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+      throw new CompilerError(GenericErrors.INTERNAL_ERROR, e,
+          "Cannot invoke MPP");
     } catch (final InvocationTargetException e) {
-      throw (T) e.getTargetException();
+      throw ex.cast(e.getTargetException());
     }
     return res;
   }

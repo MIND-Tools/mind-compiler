@@ -35,50 +35,41 @@ public class StringTemplateGroup
   public StringTemplateGroup(final Reader arg0, final Class arg1,
       final StringTemplateErrorListener arg2, final StringTemplateGroup arg3) {
     super(arg0, arg1, arg2, arg3);
-    // TODO Auto-generated constructor stub
   }
 
   public StringTemplateGroup(final Reader arg0, final Class arg1,
       final StringTemplateErrorListener arg2) {
     super(arg0, arg1, arg2);
-    // TODO Auto-generated constructor stub
   }
 
   public StringTemplateGroup(final Reader arg0, final Class arg1) {
     super(arg0, arg1);
-    // TODO Auto-generated constructor stub
   }
 
   public StringTemplateGroup(final Reader arg0,
       final StringTemplateErrorListener arg1) {
     super(arg0, arg1);
-    // TODO Auto-generated constructor stub
   }
 
   public StringTemplateGroup(final Reader arg0) {
     super(arg0);
-    // TODO Auto-generated constructor stub
   }
 
   public StringTemplateGroup(final String arg0, final Class arg1) {
     super(arg0, arg1);
-    // TODO Auto-generated constructor stub
   }
 
   public StringTemplateGroup(final String arg0, final String arg1,
       final Class arg2) {
     super(arg0, arg1, arg2);
-    // TODO Auto-generated constructor stub
   }
 
   public StringTemplateGroup(final String arg0, final String arg1) {
     super(arg0, arg1);
-    // TODO Auto-generated constructor stub
   }
 
   public StringTemplateGroup(final String arg0) {
     super(arg0);
-    // TODO Auto-generated constructor stub
   }
 
   public boolean implementsInterface(final String name) {

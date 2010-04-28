@@ -48,7 +48,11 @@ tokens{
     import java.io.*;
     import java.util.List;
     import java.util.ArrayList;
+    import org.objectweb.fractal.adl.ADLException;
+    import org.objectweb.fractal.adl.error.BasicErrorLocator;
+    import org.objectweb.fractal.adl.error.Error;
     import org.ow2.mind.preproc.CPLChecker;
+    import org.ow2.mind.preproc.MPPErrors;
 }
 
 @lexer::header {
@@ -65,7 +69,7 @@ tokens{
 	private String sourceFile = null;
 	private int sourceLineShift = 0;
 	
-	private List<String> errors = new ArrayList<String>();
+	private List<Error> errors = new ArrayList<Error>();
 
 	public void setOutputStream(PrintStream out) { this.out = out;}
 	public void setHeaderOutputStream(PrintStream out) { this.headerOut = out;}
@@ -75,11 +79,14 @@ tokens{
 	public void displayRecognitionError(String[] tokenNames,
                                         			RecognitionException e) {
 		if (sourceFile == null) sourceFile = e.input.getSourceName();
-		String msg = "\nIn file " + sourceFile + " at line " + (e.line + sourceLineShift) + ":" + e.charPositionInLine + " " + super.getErrorMessage(e, tokenNames);
-		errors.add(msg);			
+		
+		Error err = new Error(MPPErrors.PARSE_ERROR, new BasicErrorLocator(sourceFile,
+		  (e.line + sourceLineShift), e.charPositionInLine),  
+		  super.getErrorMessage(e, tokenNames));
+		errors.add(err);			
 	}
 	
-	public List<String> getErrors() {
+	public List<Error> getErrors() {
         		return errors;
     	}
 }
@@ -135,13 +142,17 @@ protected serverMethDef returns [StringBuilder res = new StringBuilder()]
         e = WS { tmp += $e.text; }
         | ')'  { tmp += ")"; }
       )* // handle case of (((... METH(foo) )))(...
-    { try{
-    	cplChecker.serverMethDef($id.text, $meth.text);
-    }catch (final Exception exception) {
-    //TODO the exception cause used to know if the exception is due to id  or meth to determined the line and the charPositionInLine of the error
-    	String msg = "In file "+ sourceFile + " "+ ($id.line+ sourceLineShift) + ":" + $id.pos 
-    	 + exception.getMessage() ;
-        errors.add(msg);
+    {
+      try{
+        cplChecker.serverMethDef($id.text, $meth.text);
+      } catch (final ADLException exception) {
+        Error err = exception.getError();
+        if (err.getTemplate() == MPPErrors.UNKNOWN_METHOD) {
+          err.setLocator(new BasicErrorLocator(sourceFile, $meth.line+ sourceLineShift, $meth.pos));
+        } else {
+          err.setLocator(new BasicErrorLocator(sourceFile, $id.line+ sourceLineShift, $id.pos));
+        }
+        errors.add(err);
       }
       if (itfIdx == null) {
           $res.append("INTERFACE_METHOD").append($ws1.text).append("(")
@@ -257,14 +268,14 @@ protected methCall returns [StringBuilder res ]
 
 protected attAccess returns [StringBuilder res = new StringBuilder()]
     : ATTR ws1=ws '(' ws2=ws att=ID ws3=ws ')' 
-      { try{
-    	cplChecker.attAccess($att.text);
-    	}catch (final Exception exception) {
-    //TODO the exception cause used to know if the exception is due to id  or meth to determined the line and the charPositionInLine of the error
-    	String msg = "In file "+ sourceFile + " "+ ($att.line+ sourceLineShift) + ":" + $att.pos 
-    	 + exception.getMessage() ;
-        errors.add(msg);
-      }
+      { 
+        try{
+    	    cplChecker.attAccess($att.text);
+    	  } catch (final ADLException exception) {
+          Error err = exception.getError();
+          err.setLocator(new BasicErrorLocator(sourceFile, $att.line+ sourceLineShift, $att.pos));
+          errors.add(err);
+        }
         $res.append("ATTRIBUTE_ACCESS").append($ws1.text).append("(")
             .append($ws2.text).append($att.text).append($ws3.text).append(")");
       }
@@ -280,9 +291,6 @@ protected structDecl returns [StringBuilder res = new StringBuilder()]
               (
                 ws2=ws PRIVATE { isPrivate=true; } 
                 ( t = ~('='|';'|',') { str.append($t.text); } )* 
-	 // TODO see how to handle private data initializer
-                 // if private data initialization need to be suported
-//                ('=' ws3=ws si = structinitializer)?
               ) ws4=ws 
               | ( t = ~(';'| PRIVATE) {str.append($t.text); } ) * 
             ) ';'
@@ -295,20 +303,6 @@ protected structDecl returns [StringBuilder res = new StringBuilder()]
                 $res.append($structfield.text.substring(1)); // (NB: removes first '{'
                 $res.append($ws2.text).append(" PRIVATE_DATA_T");
                 $res.append(str);
-               
-                // TODO see how to handle struct initializer
-                //$res += "; PRIVATE_DATA_T COMP_DESC ";
-                //if ($si.text != null) {
-                //  $res += " = { ";
-                //  $res += "  COMP_DATA_INIT, ";
-                //  $res += $si.text.substring(1); // (NB: removes first '{'
-                //  $res += "; ";
-                //}  else {
-                //  $res += " = { ";
-                //  $res += "  COMP_DATA_INIT ";
-                //  $res += "}; ";
-                //}
-
                 $res.append(";");
               } else {
                 $res.append("struct ").append($ws1.text).append($structfield.text)
@@ -340,14 +334,17 @@ protected privateAccess returns [StringBuilder res = new StringBuilder()]
 protected itfMethCall returns [StringBuilder res = new StringBuilder()]
 	: CALL ws1=ws '(' ws2=ws itf=ID ws3=ws ',' ws4=ws meth=ID ws5=ws ')' ws6=ws params
       {
-	  try{
-    	cplChecker.itfMethCall($itf.text, $meth.text);
-    }catch (final Exception exception) {
-    //TODO the exception cause used to know if the exception is due to id  or meth to determined the line and the charPositionInLine of the error
-    	String msg = "In file "+ sourceFile + " "+ ($itf.line+ sourceLineShift) + ":" + $itf.pos 
-    	 + exception.getMessage() ;
-        errors.add(msg);
-      }
+	    try{
+    	  cplChecker.itfMethCall($itf.text, $meth.text);
+        } catch (final ADLException exception) {
+          Error err = exception.getError();
+          if (err.getTemplate() == MPPErrors.UNKNOWN_METHOD) {
+            err.setLocator(new BasicErrorLocator(sourceFile, $meth.line+ sourceLineShift, $meth.pos));
+          } else {
+            err.setLocator(new BasicErrorLocator(sourceFile, $itf.line+ sourceLineShift, $itf.pos));
+          }
+          errors.add(err);
+        }
  
         if ($params.res == null)
           $res.append("CALL_INTERFACE_METHOD_WITHOUT_PARAM").append($ws1.text).append("(")

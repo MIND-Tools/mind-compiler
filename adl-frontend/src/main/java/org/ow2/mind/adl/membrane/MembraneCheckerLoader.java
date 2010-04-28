@@ -36,9 +36,9 @@ import java.util.Set;
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.AbstractLoader;
 import org.objectweb.fractal.adl.Definition;
-import org.objectweb.fractal.adl.error.GenericErrors;
 import org.objectweb.fractal.adl.interfaces.Interface;
 import org.objectweb.fractal.adl.interfaces.InterfaceContainer;
+import org.ow2.mind.adl.ADLErrors;
 import org.ow2.mind.adl.ast.ASTHelper;
 import org.ow2.mind.adl.ast.ImplementationContainer;
 import org.ow2.mind.adl.membrane.ast.Controller;
@@ -102,17 +102,17 @@ public class MembraneCheckerLoader extends AbstractLoader
           if (isInternalInterface(ctrlItf)) {
             itf = internalInterfaces.get(ctrlItf.getName());
             if (itf == null) {
-              // TODO throw a specific error
-              throw new ADLException(GenericErrors.GENERIC_ERROR, ctrlItf,
-                  "Invalid controller interface : " + ctrlItf.getName());
+              throw new ADLException(
+                  ADLErrors.INVALID_CONTROLLER_INTERFACE_NO_SUCH_INTERFACE,
+                  ctrlItf, ctrlItf.getName());
             }
             unusedInternalInterfaces.remove(itf);
           } else {
             itf = externalInterfaces.get(ctrlItf.getName());
             if (itf == null) {
-              // TODO throw a specific error
-              throw new ADLException(GenericErrors.GENERIC_ERROR, ctrlItf,
-                  "Invalid controller interface : " + ctrlItf.getName());
+              throw new ADLException(
+                  ADLErrors.INVALID_CONTROLLER_INTERFACE_NO_SUCH_INTERFACE,
+                  ctrlItf, ctrlItf.getName());
             }
             unusedExternalInterfaces.remove(itf);
           }
@@ -122,11 +122,12 @@ public class MembraneCheckerLoader extends AbstractLoader
     }
 
     if (!unusedInternalInterfaces.isEmpty()) {
-      final Interface itf = unusedInternalInterfaces.iterator().next();
-      // TODO throw a specific error
-      throw new ADLException(GenericErrors.GENERIC_ERROR, itf,
-          "Internal interface : " + itf.getName()
-              + " is not used by the membrane");
+      final Iterator<Interface> iter = unusedInternalInterfaces.iterator();
+      String itfNames = "\"" + iter.next().getName() + "\"";
+      while (iter.hasNext())
+        itfNames += ", \"" + iter.next().getName() + "\"";
+      throw new ADLException(ADLErrors.INVALID_MEMBRANE_MISSING_CONTROLLER,
+          definition, itfNames);
     }
 
     if ((!unusedExternalInterfaces.isEmpty())
@@ -140,10 +141,9 @@ public class MembraneCheckerLoader extends AbstractLoader
       String itfNames = "\"" + iter.next().getName() + "\"";
       while (iter.hasNext())
         itfNames += ", \"" + iter.next().getName() + "\"";
-      // TODO throw a specific error
-      throw new ADLException(GenericErrors.GENERIC_ERROR, definition,
-          "Interfaces : " + itfNames
-              + " are not implemented. Add a source file or a controller.");
+      throw new ADLException(
+          ADLErrors.INVALID_MEMBRANE_UNIMPLEMENTED_INTERFACE, definition,
+          itfNames);
     }
 
     final Interface compItf = externalInterfaces.get(CI);
