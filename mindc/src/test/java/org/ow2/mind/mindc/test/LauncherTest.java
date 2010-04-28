@@ -1,6 +1,12 @@
 
 package org.ow2.mind.mindc.test;
 
+import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.ow2.mind.Launcher;
@@ -9,6 +15,7 @@ import org.ow2.mind.AbstractLauncher.CmdOption;
 import org.ow2.mind.AbstractLauncher.CmdProperties;
 import org.ow2.mind.AbstractLauncher.InvalidCommandLineException;
 import org.ow2.mind.AbstractLauncher.Options;
+import org.ow2.mind.plugin.BasicPluginManager;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -32,7 +39,9 @@ public class LauncherTest {
 
   @BeforeMethod(alwaysRun = true)
   void setup() throws Exception {
-    tester = new LauncherTester();
+    final List<String> pathList = new ArrayList<String>();
+    pathList.add("src/test/resources/test");
+    tester = new LauncherTester(pathList);
   }
 
   @Test
@@ -60,6 +69,11 @@ public class LauncherTest {
   }
 
   protected class LauncherTester extends Launcher {
+    protected LauncherTester(final List<String> pathList) {
+      BasicPluginManager.setPluginClassLoader(compilerContext,
+          getPluginClassLoader(pathList));
+    }
+
     public Map<Object, Object> getContext() {
       return compilerContext;
     }
@@ -67,5 +81,39 @@ public class LauncherTest {
     public Options getOptions() {
       return options;
     }
+  }
+
+  protected ClassLoader getPluginClassLoader(final List<String> pathList) {
+    final List<String> validatedPaths = new ArrayList<String>(pathList.size());
+
+    // check source paths
+    for (final String path : pathList) {
+      final File f = new File(path);
+      if (!f.exists()) {
+        System.out.println("Warning '" + f.getAbsolutePath()
+            + "' source path can't be found ");
+      } else if (!f.isDirectory()) {
+        System.out.println("Warning: \"" + path
+            + "\" is not a directory, path ignored.");
+      } else {
+        validatedPaths.add(path);
+      }
+    }
+
+    // build URL array of source path
+    final URL[] urls = new URL[validatedPaths.size()];
+    for (int i = 0; i < urls.length; i++) {
+      final String path = validatedPaths.get(i);
+      final File f = new File(path);
+      try {
+        urls[i] = f.toURI().toURL();
+      } catch (final MalformedURLException e) {
+        // never append
+        throw new Error(e);
+      }
+    }
+
+    return new URLClassLoader(urls, getClass().getClassLoader());
+
   }
 }

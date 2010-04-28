@@ -109,6 +109,16 @@ public class BasicPluginManager implements PluginManager {
       return Collections.emptySet();
   }
 
+  public Collection<String> getExtensionPointNames(Map<Object, Object> context)
+      throws ADLException {
+    Collection<String> oo = getRegistry(context).extensionPoints.keySet();
+
+    if (oo != null)
+      return Collections.unmodifiableCollection(oo);
+    else
+      return Collections.emptySet();
+  }
+
   // ---------------------------------------------------------------------------
   // Utility classes and methods
   // ---------------------------------------------------------------------------
@@ -305,6 +315,17 @@ public class BasicPluginManager implements PluginManager {
       throw new CompilerError(GenericErrors.INTERNAL_ERROR, e,
           "Unexpected error.");
     }
+  }
+
+  public final static String PLUGIN_CLASS_LOADER = "plugin-class-loader";
+
+  public static ClassLoader getPluginClassLoader(Map<Object, Object> context) {
+    return (ClassLoader) context.get(PLUGIN_CLASS_LOADER);
+  }
+
+  public static void setPluginClassLoader(Map<Object, Object> context,
+      ClassLoader classLoader) {
+    context.put(context, classLoader);
   }
 
 }
