@@ -89,7 +89,7 @@ int __component_<definition.name;format="toCName">_factory(void **instance, void
   return 0;
 
 error0:
-  <ClearControllerData(definition=definition)>
+  <ClearControllersData(definition=definition)>
 
   <ClearComponents(definition=definition)>
 

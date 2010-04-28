@@ -62,6 +62,8 @@ ControllerDataStaticInit(definition, controller) ::= <<
 ControllerDataFactoryNew(definition, controller) ::= <<
   newInstance->__component_internal_data.contentDesc = 
     (struct __component_ContentDescriptor*) CALL_PTR((memory_api_Allocator) allocItf, alloc)(sizeof(struct __component_ContentDescriptor));
+  if (newInstance->__component_internal_data.contentDesc == NULL)
+    goto error_contentDesc;
   
   newInstance->__component_internal_data.contentDesc->nbStaticSubComponent = 
     sizeof(newInstance->__component_internal_data.components)/sizeof(fractal_api_Component);
@@ -71,10 +73,14 @@ ControllerDataFactoryNew(definition, controller) ::= <<
   newInstance->__component_internal_data.contentDesc->nbDynamicSubComponent = 10;
   newInstance->__component_internal_data.contentDesc->dynamicSubComponents = 
     (fractal_api_Component*) CALL_PTR((memory_api_Allocator) allocItf, alloc)(sizeof(fractal_api_Component) * newInstance->__component_internal_data.contentDesc->nbDynamicSubComponent);
+  if (newInstance->__component_internal_data.contentDesc->dynamicSubComponents == NULL)
+    goto error_content_dynamicSubComponents;
   
   newInstance->__component_internal_data.contentDesc->nbBindingDescriptor = <bindingCount(definition=definition)> + 10;
   newInstance->__component_internal_data.contentDesc->bindingDesc =
     (struct __component_ContentBindingDescriptor *) CALL_PTR((memory_api_Allocator) allocItf, alloc)(sizeof(struct __component_ContentBindingDescriptor *) * newInstance->__component_internal_data.contentDesc->nbBindingDescriptor);
+  if (newInstance->__component_internal_data.contentDesc->bindingDesc == NULL)
+    goto error_content_bindingDesc;
   
   <if (definition.astNodeTypes.("binding"))><if (definition.bindings)>
   {
@@ -102,6 +108,14 @@ subComponentPointer(subComponentName) ::= <<
 <endif>
 >>
 
+ControllerDataFactoryNewClear(definition, controller) ::= <<
+  CALL_PTR((memory_api_Allocator) allocItf, free)(newInstance->__component_internal_data.contentDesc->bindingDesc);
+error_content_bindingDesc :
+  CALL_PTR((memory_api_Allocator) allocItf, free)(newInstance->__component_internal_data.contentDesc->dynamicSubComponents);
+error_content_dynamicSubComponents :
+  CALL_PTR((memory_api_Allocator) allocItf, free)(newInstance->__component_internal_data.contentDesc);
+error_contentDesc :
+>>
 
 ControllerDataFactoryDestroy(definition, controller) ::= <<
   CALL_PTR((memory_api_Allocator) allocItf, free)(destroyInstance->__component_internal_data.contentDesc->bindingDesc);
