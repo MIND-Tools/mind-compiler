@@ -181,6 +181,11 @@ public enum ADLErrors implements ErrorTemplate {
       "Redefinition of attribute \"%s\" (previously defined at \"%s\").",
       "<name>", "<location>"),
 
+  /** */
+  INVALID_ATTRIBUTE_CONTROLLER_NO_ATTRIBUTE(
+      63,
+      "Invalid @controller.AttributeController annotation, definition has no attribute"),
+
   // ---------------------------------------------------------------------------
   // Implementation errors (65-69)
   // ---------------------------------------------------------------------------
@@ -193,6 +198,9 @@ public enum ADLErrors implements ErrorTemplate {
 
   /** */
   MISSING_SOURCE(67, "Primitive component must have source"),
+
+  /** */
+  MULTIPLE_DATA(68, "\"data\" declaration can only appear at most once."),
 
   // ---------------------------------------------------------------------------
   // Parameter errors (70-89)
@@ -279,6 +287,43 @@ public enum ADLErrors implements ErrorTemplate {
 
   /** */
   UNKNOWN_IMPORT(110, "Unknown import."),
+
+  // ---------------------------------------------------------------------------
+  // Bindings errors (120-149)
+  // ---------------------------------------------------------------------------
+
+  /** */
+  INVALID_BINDING_CARDINALITY(120,
+      "Invalid binding between a singleton interface and a collection interface."),
+
+  /** */
+  INVALID_BINDING_COLLECTION_SIZE(
+      121,
+      "Invalid binding, incompatible collection sizes. Size of \"%s\" (%d) is greater that size of \"%s\" (%d). Change size of \"%1$s\" or mark it optional.",
+      "<fromName>", /* fromSize */1, "<toName>", /* toSize */2),
+
+  /** */
+  INVALID_BINDING_CONTROLLER_NO_BINDING(
+      122,
+      "Invalid @controller.BindingController annotation, definition has no client interface. You should set the 'allowNoRequiredItf' annotation field to true"),
+
+  // ---------------------------------------------------------------------------
+  // Membrane errors (150-159)
+  // ---------------------------------------------------------------------------
+
+  /** */
+  INVALID_CONTROLLER_INTERFACE_NO_SUCH_INTERFACE(150,
+      "Invalid controller interface \"%s\", no such interface", "<itfName>"),
+
+  /** */
+  INVALID_MEMBRANE_MISSING_CONTROLLER(151,
+      "Invalid membrane. Missing controller for interfaces : %s", "<itfs list>"),
+
+  /** */
+  INVALID_MEMBRANE_UNIMPLEMENTED_INTERFACE(
+      152,
+      "Invalid membrane. interfaces %s are not implemented. Add a source file or a controller.",
+      "<itfs list>"),
 
   ;
 

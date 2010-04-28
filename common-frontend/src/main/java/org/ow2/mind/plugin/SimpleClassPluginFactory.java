@@ -62,7 +62,6 @@ public class SimpleClassPluginFactory implements Factory {
 
   public Object newComponentType(final String name, final Map context)
       throws ADLException {
-    // TODO Auto-generated method stub
-    return null;
+    throw new UnsupportedOperationException();
   }
 }

@@ -72,7 +72,6 @@ public class JTBProcessor extends GJDepthFirst<Node, Node> {
     }
   }
 
-  // TODO
   public TemplateComponent toTemplateComponent(
       final TemplateComponentDefinition tcd) {
     return (TemplateComponent) visit(tcd, null);
@@ -139,9 +138,8 @@ public class JTBProcessor extends GJDepthFirst<Node, Node> {
     for (final org.ow2.mind.st.templates.jtb.syntaxtree.Node node : n.f2.nodes) {
       final ServerInterface sitf = (ServerInterface) newNode("serverInterface",
           n.f0);
-      sitf
-          .setSignature(fullyQualifiedName((FullyQualifiedName) ((NodeSequence) node)
-              .elementAt(1)));
+      sitf.setSignature(fullyQualifiedName((FullyQualifiedName) ((NodeSequence) node)
+          .elementAt(1)));
       template.addServerInterface(sitf);
     }
     return template;
@@ -174,8 +172,7 @@ public class JTBProcessor extends GJDepthFirst<Node, Node> {
             (NodeToken) sequence.elementAt(1));
         itf.setSignature(signature);
         itf.setName(name);
-        itf
-            .setBoundTo(fullyQualifiedName((FullyQualifiedName) itfChoice.choice));
+        itf.setBoundTo(fullyQualifiedName((FullyQualifiedName) itfChoice.choice));
         template.addBoundInterface(itf);
       }
     }

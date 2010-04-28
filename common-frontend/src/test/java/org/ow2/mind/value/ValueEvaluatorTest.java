@@ -32,9 +32,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.ow2.mind.AbstractTestcase;
-import org.ow2.mind.value.BasicValueEvaluator;
-import org.ow2.mind.value.ValueEvaluationException;
-import org.ow2.mind.value.ValueEvaluator;
 import org.ow2.mind.value.ast.Array;
 import org.ow2.mind.value.ast.NumberLiteral;
 import org.ow2.mind.value.ast.StringLiteral;
@@ -138,6 +135,41 @@ public class ValueEvaluatorTest extends AbstractTestcase {
     final Object s = evaluator.evaluate(v, Object.class, context);
     assertNotNull(s);
     assertEquals("foo", s);
+  }
+
+  @Test(groups = {"functional"})
+  public void testStringLiteral3() throws Exception {
+    checkStringEvaluator("foo\\n", "foo\n");
+    checkStringEvaluator("foo\\t", "foo\t");
+    checkStringEvaluator("foo\\b", "foo\b");
+    checkStringEvaluator("foo\\r", "foo\r");
+    checkStringEvaluator("foo\\f", "foo\f");
+    checkStringEvaluator("foo\\\\", "foo\\");
+    checkStringEvaluator("foo\\\"", "foo\"");
+    checkStringEvaluator("foo\\\'", "foo\'");
+
+    checkStringEvaluator("foo\\\n", "foo\n");
+    checkStringEvaluator("foo\\\r", "foo\r");
+    checkStringEvaluator("foo\\\r\n", "foo\r\n");
+    checkStringEvaluator("foo\\r\\n", "foo\r\n");
+
+    checkStringEvaluator("foo\\6", "foo\006");
+    checkStringEvaluator("foo\\06", "foo\006");
+    checkStringEvaluator("foo\\006", "foo\006");
+
+    checkStringEvaluator("foo\\66", "foo\066");
+    checkStringEvaluator("foo\\066", "foo\066");
+
+    checkStringEvaluator("foo\\166", "foo\166");
+  }
+
+  private void checkStringEvaluator(final String value, final String expected)
+      throws ValueEvaluationException {
+    final StringLiteral v = newStringLiteral(value);
+
+    final Object s = evaluator.evaluate(v, Object.class, context);
+    assertNotNull(s);
+    assertEquals(s, expected);
   }
 
   @Test(groups = {"functional"})

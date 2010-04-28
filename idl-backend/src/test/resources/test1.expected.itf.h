@@ -10,6 +10,7 @@
 
 
 
+
 typedef const int myint;
 
 typedef const int (* const mypointer)[];
@@ -22,9 +23,15 @@ struct s {
   int (* e[(- (2))+((5)+(((uint8_t ) 0xff)))]);
 };
 
+typedef struct  {
+  long long a;
+  long long b;
+} lldiv_t;
+
 struct __component_test1_vTable {
   void (* (* m1)(void *_mind_this , const uint8_t a, int (*b) )) ;
   unsigned float (* m2)(void *_mind_this , float f1 ) ;
+  lldiv_t (* lldiv)(void *_mind_this , long long p0, long long p1 ) ;
 };
 
 struct __component_test1_itf_desc {

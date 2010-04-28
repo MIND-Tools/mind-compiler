@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -40,9 +41,11 @@ import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.Lexer;
 import org.antlr.runtime.Parser;
 import org.antlr.runtime.RecognitionException;
+import org.objectweb.fractal.adl.ADLErrors;
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.CompilerError;
 import org.objectweb.fractal.adl.Definition;
+import org.objectweb.fractal.adl.error.Error;
 import org.objectweb.fractal.adl.error.GenericErrors;
 import org.objectweb.fractal.adl.util.FractalADLLogManager;
 import org.ow2.mind.plugin.PluginManager;
@@ -133,9 +136,7 @@ public class BasicMPPWrapper implements MPPWrapper {
         lex = ExtensionHelper.getLexer(pluginManagerItf, inputFile.getPath(),
             context);
       } catch (final IOException e) {
-        // TODO use a specific error
-        throw new ADLException(GenericErrors.GENERIC_ERROR, e,
-            "Can't open file \"" + inputFile.getPath() + "\".");
+        throw new ADLException(ADLErrors.IO_ERROR, e, inputFile.getPath());
       }
 
       final CommonTokenStream tokens = new CommonTokenStream(lex);
@@ -188,22 +189,18 @@ public class BasicMPPWrapper implements MPPWrapper {
               "MPP parse error.");
         }
 
-        final List<String> errors = (List<String>) invokeMethod(mpp,
-            "getErrors", new Class[]{}, new Object[]{});
+        final List<Error> errors = (List<Error>) invokeMethod(mpp, "getErrors",
+            new Class[]{}, new Object[]{});
         if (errors != null && errors.size() > 0) {
-          String errorMsg;
-          if (errors.size() == 1) {
-            errorMsg = errors.get(0);
-          } else {
-            final StringBuilder msg = new StringBuilder();
-            for (final String error : errors) {
-              msg.append("\n    ").append(error);
-            }
-            errorMsg = msg.toString();
+          final StringBuilder msg = new StringBuilder();
+          final Iterator<Error> iter = errors.iterator();
+          while (iter.hasNext()) {
+            final Error e = iter.next();
+            msg.append(e);
+            if (iter.hasNext()) msg.append("\n    ");
           }
 
-          throw new ADLException(MPPErrors.PARSE_ERROR, inputFile.getPath(),
-              errorMsg.toString());
+          throw new ADLException(MPPErrors.PARSE_ERROR, msg.toString());
         }
       } finally {
         if (outPS != null) outPS.close();

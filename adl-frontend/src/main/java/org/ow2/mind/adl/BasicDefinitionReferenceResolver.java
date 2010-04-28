@@ -24,9 +24,6 @@ package org.ow2.mind.adl;
 
 import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
 import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
-import static org.ow2.mind.adl.ast.ASTHelper.isComposite;
-import static org.ow2.mind.adl.ast.ASTHelper.isPrimitive;
-import static org.ow2.mind.adl.ast.ASTHelper.isType;
 
 import java.util.Map;
 
@@ -78,21 +75,6 @@ public class BasicDefinitionReferenceResolver
       throw e;
     }
 
-    // check that resolved definition matches expected kind (if any)
-    final String expectedKind = reference.getExpectedKind();
-    if (expectedKind != null) {
-      if (DefinitionReference.TYPE_KIND.equals(expectedKind) && !isType(d))
-        throw new ADLException(ADLErrors.INVALID_REFERENCE_NOT_A_TYPE,
-            reference, reference.getName());
-      if (DefinitionReference.PRIMITIVE_KIND.equals(expectedKind)
-          && !isPrimitive(d))
-        throw new ADLException(ADLErrors.INVALID_REFERENCE_NOT_A_PRIMITIVE,
-            reference, reference.getName());
-      if (DefinitionReference.COMPOSITE_KIND.equals(expectedKind)
-          && !isComposite(d))
-        throw new ADLException(ADLErrors.INVALID_REFERENCE_NOT_A_COMPOSITE,
-            reference, reference.getName());
-    }
     return d;
   }
 

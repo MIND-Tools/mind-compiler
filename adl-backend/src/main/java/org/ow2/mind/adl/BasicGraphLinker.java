@@ -25,8 +25,6 @@ package org.ow2.mind.adl;
 import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
 import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
 import static org.ow2.mind.PathHelper.fullyQualifiedNameToPath;
-import static org.ow2.mind.PathHelper.isRelative;
-import static org.ow2.mind.PathHelper.isValid;
 import static org.ow2.mind.PathHelper.replaceExtension;
 import static org.ow2.mind.compilation.DirectiveHelper.splitOptionString;
 
@@ -56,6 +54,7 @@ import org.ow2.mind.adl.implementation.SharedImplementationDecorationHelper;
 import org.ow2.mind.annotation.AnnotationHelper;
 import org.ow2.mind.compilation.CompilationCommand;
 import org.ow2.mind.compilation.CompilerCommand;
+import org.ow2.mind.compilation.CompilerContextHelper;
 import org.ow2.mind.compilation.CompilerWrapper;
 import org.ow2.mind.compilation.LinkerCommand;
 import org.ow2.mind.io.OutputFileLocator;
@@ -88,17 +87,8 @@ public class BasicGraphLinker implements GraphCompiler, BindingController {
 
     compileSharedImplementation(graph, compilationTasks, context);
 
-    String outputPath = (String) context.get("executable-name");
-    if (outputPath != null) {
-      if (!isValid(outputPath)) {
-        // TODO define a specific error
-        throw new ADLException(GenericErrors.GENERIC_ERROR,
-            "Invalid executable name \"" + outputPath + "\".");
-      }
-      if (isRelative(outputPath)) {
-        outputPath = "/" + outputPath;
-      }
-    } else {
+    String outputPath = CompilerContextHelper.getExecutableName(context);
+    if (outputPath == null) {
       outputPath = fullyQualifiedNameToPath(graph.getDefinition().getName(),
           null);
     }

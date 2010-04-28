@@ -33,6 +33,8 @@ public final class CompilerContextHelper {
   public static final String DEFAULT_COMPILER_COMMAND     = "gcc";
   public static final String DEFAULT_LINKER_COMMAND       = "gcc";
 
+  public static final String EXECUTABLE_NAME_CONTEXT_KEY  = "executable-name";
+
   public static final String C_FLAGS_CONTEXT_KEY          = "c-flags";
   public static final String LD_FLAGS_CONTEXT_KEY         = "ld-flags";
   public static final String LINKER_SCRIPT_CONTEXT_KEY    = "linker-script";
@@ -95,5 +97,14 @@ public final class CompilerContextHelper {
 
   public static String getLinkerScript(final Map<Object, Object> context) {
     return (String) context.get(LINKER_SCRIPT_CONTEXT_KEY);
+  }
+
+  public static void setExecutableName(final Map<Object, Object> context,
+      final String executableName) {
+    context.put(EXECUTABLE_NAME_CONTEXT_KEY, executableName);
+  }
+
+  public static String getExecutableName(final Map<Object, Object> context) {
+    return (String) context.get(EXECUTABLE_NAME_CONTEXT_KEY);
   }
 }

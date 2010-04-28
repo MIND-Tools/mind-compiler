@@ -42,6 +42,7 @@
 		<dependency>
 			<groupId>org.objectweb.fractal.fractaladl</groupId>
 			<artifactId>fractal-adl</artifactId>
+            <scope>provided</scope>
 		</dependency>
 	</dependencies>
 </project>

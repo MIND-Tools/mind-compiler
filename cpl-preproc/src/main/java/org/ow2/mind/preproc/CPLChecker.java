@@ -22,6 +22,7 @@
 
 package org.ow2.mind.preproc;
 
+import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.interfaces.Interface;
 import org.objectweb.fractal.adl.interfaces.InterfaceContainer;
@@ -41,7 +42,7 @@ public class CPLChecker {
   }
 
   public void serverMethDef(final String itfName, final String methName)
-      throws Exception {
+      throws ADLException {
 
     // Add this condition so that the testNG will
     // not throw exceptions (stand-alone node)
@@ -72,24 +73,21 @@ public class CPLChecker {
       }
 
       if (!foundItf) {
-
-        throw new Exception(" Unknown interface \"" + itfName + "\" ");
+        throw new ADLException(MPPErrors.UNKNOWN_INTERFACE, itfName);
       }
       if (isServer) {
         if (!foundMeth) {
-          throw new Exception(" In interface \"" + itfName
-              + "\" unknown method \"" + methName + "\" ");
+          throw new ADLException(MPPErrors.UNKNOWN_METHOD, itfName, methName);
         }
       } else {
-        throw new Exception(" Interface \"" + itfName
-            + "\" is a client interface, method \"" + methName
-            + "\" cannot be defined here");
+        throw new ADLException(MPPErrors.INVALID_CLIENT_INTERFACE, itfName,
+            methName);
       }
     }
   }
 
   public void itfMethCall(final String itfName, final String methName)
-      throws Exception {
+      throws ADLException {
 
     // Add this condition so that the testNG will
     // not throw exceptions (stand-alone node)
@@ -115,18 +113,16 @@ public class CPLChecker {
       }
 
       if (!foundItf) {
-
-        throw new Exception(" Unknown interface \"" + itfName + "\" ");
+        throw new ADLException(MPPErrors.UNKNOWN_INTERFACE, itfName);
       }
       if (!foundMeth) {
-        throw new Exception(" In interface \"" + itfName
-            + "\" unknown method \"" + methName + "\" ");
+        throw new ADLException(MPPErrors.UNKNOWN_METHOD, itfName, methName);
       }
     }
 
   }
 
-  public void attAccess(final String attributeName) throws Exception {
+  public void attAccess(final String attributeName) throws ADLException {
     if (this.definition != null) { // add this condition so that the testNG will
       // not throw exceptions
       boolean foundAtt = false;
@@ -140,7 +136,7 @@ public class CPLChecker {
       }
 
       if (!foundAtt) {
-        throw new Exception(" Unknown attribute \"" + attributeName + "\" ");
+        throw new ADLException(MPPErrors.UNKNOWN_INTERFACE, attributeName);
       }
     }
   }

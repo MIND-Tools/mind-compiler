@@ -29,10 +29,10 @@ import java.util.Map;
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.Node;
-import org.objectweb.fractal.adl.error.GenericErrors;
 import org.objectweb.fractal.adl.interfaces.Interface;
 import org.objectweb.fractal.adl.interfaces.InterfaceContainer;
 import org.objectweb.fractal.adl.types.TypeInterfaceUtil;
+import org.ow2.mind.adl.ADLErrors;
 import org.ow2.mind.adl.annotation.ADLLoaderAnnotationProcessor;
 import org.ow2.mind.adl.annotation.ADLLoaderPhase;
 import org.ow2.mind.adl.annotation.predefined.controller.BindingController;
@@ -66,12 +66,8 @@ public class BindingControllerADLLoaderAnnotationProcessor
       }
 
       // definition has no client interface
-      // TODO use a specific error
-      throw new ADLException(
-          GenericErrors.GENERIC_ERROR,
-          node,
-          "Invalid BindingController annotation, definition has no client interface. "
-              + "You should set the allowNoRequiredItf annotation field to true");
+      throw new ADLException(ADLErrors.INVALID_BINDING_CONTROLLER_NO_BINDING,
+          node);
     }
   }
 }
