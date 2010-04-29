@@ -5,6 +5,7 @@ ControllerGlobalDecl(definition, controller);
 ControllerData(definition, controller);
 ControllerDataStaticInit(definition, controller);
 ControllerDataFactoryNew(definition, controller);
+ControllerDataFactoryNewClear(definition, controller);
 ControllerDataFactoryDestroy(definition, controller);
 
 ControllerImplementation(definition, controller, interfaceDefinitions);

@@ -92,8 +92,71 @@ public class BasicValueEvaluator implements ValueEvaluator, BindingController {
     } else if (value instanceof StringLiteral) {
       String s = ((StringLiteral) value).getValue();
       s = s.substring(1, s.length() - 1);
-      // TODO un-escape every escaped characters
-      s = s.replaceAll("\\\\\"", "\"");
+      if (s.contains("\\")) {
+        // un-escape characters
+        String unescaped = "";
+        for (int i = 0; i < s.length(); i++) {
+          final char c = s.charAt(i);
+          if (c == '\\') {
+            final char c1 = s.charAt(++i);
+            if (c1 == 'n')
+              unescaped += '\n';
+
+            else if (c1 == 't')
+              unescaped += '\t';
+
+            else if (c1 == 'b')
+              unescaped += '\b';
+
+            else if (c1 == 'r')
+              unescaped += '\r';
+
+            else if (c1 == 'f')
+              unescaped += '\f';
+
+            else if (c1 == '\\')
+              unescaped += '\\';
+
+            else if (c1 == '\'')
+              unescaped += '\'';
+
+            else if (c1 == '\"')
+              unescaped += '\"';
+
+            else if (c1 == '\n')
+              unescaped += '\n';
+
+            else if (c1 == '\r') {
+              unescaped += '\r';
+              if (i < s.length() - 1 && s.charAt(i + 1) == '\n') {
+                unescaped += '\n';
+                i++;
+              }
+            } else if (c1 >= '0' && c1 <= '7') {
+              int charCode = c1 - '0';
+              // read second octal (if any)
+              if (i < s.length() - 1 && s.charAt(i + 1) >= '0'
+                  && s.charAt(i + 1) <= '7') {
+                charCode = (charCode * 8) + (s.charAt(i + 1) - '0');
+                i++;
+              }
+              // read third octal (if any)
+              if (i < s.length() - 1 && s.charAt(i + 1) >= '0'
+                  && s.charAt(i + 1) <= '7') {
+                charCode = (charCode * 8) + (s.charAt(i + 1) - '0');
+                i++;
+              }
+              unescaped += Character.toString((char) charCode);
+            } else {
+              unescaped += c1;
+            }
+
+          } else {
+            unescaped += c;
+          }
+        }
+        s = unescaped;
+      }
       try {
         return expectedType.cast(s);
       } catch (final ClassCastException e) {

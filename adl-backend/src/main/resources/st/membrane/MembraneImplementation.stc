@@ -63,14 +63,10 @@ void __component_<definition.name;format="toCName">_constructor(PRIVATE_DATA_T* 
 #endif
 
 int __component_<definition.name;format="toCName">_factory(void **instance, void *allocItf <ComponentFactoryParameters(definition=definition)>) {
-<if (definition.astNodeTypes.("component"))>
-<if (definition.components)>
   int err = 0;
-<endif>
-<endif>
 
   PRIVATE_DATA_T* newInstance = (PRIVATE_DATA_T*) CALL_PTR((memory_api_Allocator) allocItf, alloc)(sizeof(PRIVATE_DATA_T));
-  if (newInstance == 0) return -1;
+  if (newInstance == NULL) return -1;
   
   <InitializeInterfaces(definition=definition)>
   
@@ -86,17 +82,19 @@ int __component_<definition.name;format="toCName">_factory(void **instance, void
   __component_<definition.name;format="toCName">_constructor(newInstance);
 #endif
   
+  if (err != 0)
+    goto error0;
   
   *instance = newInstance;
   return 0;
 
-<if (definition.astNodeTypes.("component"))>
-<if (definition.components)>
 error0:
+  <ClearControllersData(definition=definition)>
+
+  <ClearComponents(definition=definition)>
+
   CALL_PTR((memory_api_Allocator) allocItf, free)(newInstance);
   return err;
-<endif>
-<endif>
 }
 
 #ifdef DESTRUCTOR_METHOD_IMPLEMENTED
@@ -180,6 +178,7 @@ InitializeServerInterface(definition, itf, isInternal) ::= <<
 InitializeServerInterface1(definition, itf, index, isInternal) ::= <<
 newInstance->__component_internal_data.<if (isInternal)>inner_type<else>type<endif>.<itf.name><if (index)>[<index>]<endif>.selfData = newInstance;
 newInstance->__component_internal_data.<if (isInternal)>inner_type<else>type<endif>.<itf.name><if (index)>[<index>]<endif>.meths = &<vTableInstanceName(definition=definition,itf=itf,index=index)>;
+newInstance->__component_internal_data.<if (isInternal)>inner_type<else>type<endif>.<itf.name><if (index)>[<index>]<endif>.isBound = newInstance;
 >>
 
 
@@ -192,9 +191,7 @@ DeclareSubComponentFactoryMethods(definition) ::= <<
 
 InitializeComponents(definition) ::= <<
 <if (definition.astNodeTypes.("component"))>
-<if (definition.components)>
 <definition.components:InitializeComponent(definition=definition, component=it)>
-<endif>
 <endif>
 >>
 
@@ -203,7 +200,8 @@ InitializeComponent(definition, component) ::= <<
   err = __component_<component.definitionReference.name;format="toCName">_factory(
     (void **) &(newInstance->__component_internal_data.components.<component.name>), 
     allocItf <InitializeComponentParameters(definition=definition, component=component)>);
-  if (err != 0) goto error0;
+  if (err != 0) goto error_<component.name>;
+
 >>
 
 InitializeComponentParameters(definition, component) ::= <<
@@ -221,6 +219,27 @@ InitializeComponentParameter(definition, component, argument) ::= <<
   NULL
 <endif>
 >>
+
+ClearComponents(definition) ::= <<
+<if (definition.astNodeTypes.("component"))>
+<ClearComponentsRevers(definition=definition, components=definition.components)>
+<endif>
+>>
+
+ClearComponentsRevers(definition, components) ::= <<
+<if (components)>
+<ClearComponentsRevers(definition=definition, components=rest(components))>
+<ClearComponent(definition=definition, component=first(components))>
+<endif>
+>>
+
+ClearComponent(definition, component) ::= <<
+/* destroy <component.name> sub-component */
+__component_<component.definitionReference.name;format="toCName">_destroy(newInstance->__component_internal_data.components.<component.name>, allocItf);
+
+error_<component.name> :
+>>
+
 
 InitializeBindings(definition) ::= <<
 <if (definition.astNodeTypes.("binding"))>
@@ -265,6 +284,22 @@ InitializeControllerData(definition, controller) ::= <<
 <controller.sources:{<(ctrlGenerator.(it.path).ControllerDataFactoryNew)(definition=definition, controller=controller)>}>
 >>
 
+ClearControllersData(definition) ::= <<
+<if (definition.astNodeTypes.("controller"))>
+<ClearControllersDataRevers(definition=definition, controllers=definition.controllers)>
+<endif>
+>>
+
+ClearControllersDataRevers(definition, controllers) ::= <<
+<if (controllers)>
+<ClearControllersDataRevers(definition=definition, controllers=rest(controllers))>
+<ClearControllerData(definition=definition, controller=first(controllers))>
+<endif>
+>>
+
+ClearControllerData(definition, controller) ::= <<
+<controller.sources:{<(ctrlGenerator.(it.path).ControllerDataFactoryNewClear)(definition=definition, controller=controller)>}>
+>>
 
 DestroyComponents(definition) ::= <<
 <if (definition.astNodeTypes.("component"))>

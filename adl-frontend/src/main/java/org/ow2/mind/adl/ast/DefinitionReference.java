@@ -33,9 +33,4 @@ public interface DefinitionReference extends Node {
   String getName();
 
   void setName(String name);
-
-  // TODO use an annotation.
-  String getExpectedKind();
-
-  void setExpectedKind(String kind);
 }

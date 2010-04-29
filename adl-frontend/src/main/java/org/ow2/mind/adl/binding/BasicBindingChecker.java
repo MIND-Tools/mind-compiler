@@ -35,6 +35,7 @@ import org.objectweb.fractal.adl.bindings.BindingErrors;
 import org.objectweb.fractal.adl.error.NodeErrorLocator;
 import org.objectweb.fractal.adl.interfaces.Interface;
 import org.objectweb.fractal.adl.types.TypeInterfaceUtil;
+import org.ow2.mind.adl.ADLErrors;
 import org.ow2.mind.adl.ast.Binding;
 
 public class BasicBindingChecker implements BindingChecker {
@@ -64,9 +65,7 @@ public class BasicBindingChecker implements BindingChecker {
 
     // only single-to-single or multi-to-multi is allowed.
     if (singleFromInterface != singleToInterface)
-    // TODO use a specific error
-      throw new ADLException(BindingErrors.INVALID_FROM_SYNTAX, locator,
-          fromInterface.getName());
+      throw new ADLException(ADLErrors.INVALID_BINDING_CARDINALITY, locator);
 
     if (!singleFromInterface) {
       // multi-to-multi binding
@@ -76,13 +75,11 @@ public class BasicBindingChecker implements BindingChecker {
       if (fromSize > toSize) {
         // if there are more client interfaces than server interfaces
         if (isMandatory(fromInterface))
-        // TODO use a specific error
-          throw new ADLException(BindingErrors.INVALID_FROM_SYNTAX, locator,
-              fromInterface.getName());
+          throw new ADLException(ADLErrors.INVALID_BINDING_COLLECTION_SIZE,
+              locator, fromInterface.getName(), fromSize,
+              toInterface.getName(), toSize);
       }
     }
-
-    // TODO check IDL compatibility
   }
 
   public void checkFromCompositeToSubcomponentBinding(
@@ -118,9 +115,7 @@ public class BasicBindingChecker implements BindingChecker {
 
       // only single-to-single or multi-to-multi is allowed.
       if (singleFromInterface != singleToInterface)
-      // TODO use a specific error
-        throw new ADLException(BindingErrors.INVALID_FROM_SYNTAX, locator,
-            compositeInterface.getName());
+        throw new ADLException(ADLErrors.INVALID_BINDING_CARDINALITY, locator);
 
       if (!singleFromInterface) {
         assert !singleToInterface;
@@ -131,15 +126,13 @@ public class BasicBindingChecker implements BindingChecker {
           // sub-component side, so some of the interfaces of the composite side
           // can't be bound to the sub-component.
           if (isMandatory(compositeInterface))
-          // TODO use a specific error
-            throw new ADLException(BindingErrors.INVALID_FROM_SYNTAX, locator,
-                compositeInterface.getName());
+            throw new ADLException(ADLErrors.INVALID_BINDING_COLLECTION_SIZE,
+                locator, compositeInterface.getName(), compositeSize,
+                subComponentInterface.getName(), subCompSize);
 
         }
       }
     }
-
-    // TODO check IDL compatibility
   }
 
   public void checkFromSubcomponentToCompositeBinding(
@@ -176,8 +169,7 @@ public class BasicBindingChecker implements BindingChecker {
 
       // only single-to-single or multi-to-multi is allowed.
       if (singleFromInterface != singleToInterface)
-        throw new ADLException(BindingErrors.INVALID_TO_SYNTAX, locator,
-            compositeInterface.getName());
+        throw new ADLException(ADLErrors.INVALID_BINDING_CARDINALITY, locator);
 
       if (!singleFromInterface) {
         assert !singleToInterface;
@@ -188,15 +180,13 @@ public class BasicBindingChecker implements BindingChecker {
           // composite side, so some of the interfaces of the sub-component side
           // can't be bound to the composite.
           if (isMandatory(subComponentInterface))
-          // TODO use a specific error
-            throw new ADLException(BindingErrors.INVALID_FROM_SYNTAX, locator,
-                subComponentInterface.getName());
+            throw new ADLException(ADLErrors.INVALID_BINDING_COLLECTION_SIZE,
+                locator, subComponentInterface.getName(), subCompSize,
+                compositeInterface.getName(), compositeSize);
 
         }
       }
     }
-
-    // TODO check IDL compatibility
   }
 
 }

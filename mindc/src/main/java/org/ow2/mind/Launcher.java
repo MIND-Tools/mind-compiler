@@ -95,9 +95,6 @@ public class Launcher extends AbstractLauncher {
 
   protected static final String        PROGRAM_NAME_PROPERTY_NAME = "cecilia.launcher.name";
 
-  // TODO use helper methods for this context entry
-  public static final String           EXEC_NAME                  = "executable-name";
-
   // System property name for external mind annotation packages
   protected static final String        MIND_ANNOTATION_PACKAGES   = "mind.annotation.packages";
 
@@ -679,12 +676,12 @@ public class Launcher extends AbstractLauncher {
       if (mapping == null) return inputADL;
 
       if (mapping.getOutputName() != null) {
-        final String outputName = ((String) context.get(EXEC_NAME)).replace(
+        final String outputName = mapping.getOutputName().replace(
             "${inputADL}", inputADL);
         if (logger.isLoggable(Level.FINE)) {
           logger.log(Level.FINE, "Compiling ADL : " + outputName);
         }
-        context.put(EXEC_NAME, outputName);
+        CompilerContextHelper.setExecutableName(context, outputName);
       }
 
       return mapping.getMapping().replace("${inputADL}", inputADL);
@@ -713,12 +710,12 @@ public class Launcher extends AbstractLauncher {
     return result;
   }
 
-  // TODO change visibility of this method to 'protected' in cecilia Launcher
   protected void compile(String adlName, final String execName,
       final List<Object> result) throws ADLException, InterruptedException {
     final HashMap<Object, Object> contextMap = new HashMap<Object, Object>(
         compilerContext);
-    if (execName != null) contextMap.put(EXEC_NAME, execName);
+    if (execName != null)
+      CompilerContextHelper.setExecutableName(contextMap, execName);
 
     adlName = processContext(targetDescriptor, adlName, contextMap);
 

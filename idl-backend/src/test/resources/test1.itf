@@ -11,7 +11,13 @@ struct s {
   int* e[-2+5+((uint8_t) 0xff)];
 };
 
+typedef struct {
+  long long a; 
+  long long b;
+} lldiv_t;
+
 interface test1 {
   void* m1(const uint8_t a, out int b);
   unsigned float m2(float f1);
+  lldiv_t lldiv(long long, long long);
 };
