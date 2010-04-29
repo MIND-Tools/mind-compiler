@@ -15,6 +15,7 @@
     <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="devGuide/common-backend.xml" />
     <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="devGuide/mpp.xml" />
     <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="devGuide/adl-backend.xml" />
+    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="devGuide/plugin-loader.xml" />
     <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="devGuide/fractaladl-intro.xml" />
     <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="devGuide/code-convention.xml" />
 </book>

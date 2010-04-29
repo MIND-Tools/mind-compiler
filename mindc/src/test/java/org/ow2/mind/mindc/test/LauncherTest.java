@@ -1,15 +1,27 @@
 
 package org.ow2.mind.mindc.test;
 
+import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
+import org.objectweb.fractal.adl.ADLException;
 import org.ow2.mind.Launcher;
+import org.ow2.mind.AbstractLauncher.CmdAppendOption;
+import org.ow2.mind.AbstractLauncher.CmdArgument;
 import org.ow2.mind.AbstractLauncher.CmdFlag;
 import org.ow2.mind.AbstractLauncher.CmdOption;
+import org.ow2.mind.AbstractLauncher.CmdPathOption;
 import org.ow2.mind.AbstractLauncher.CmdProperties;
 import org.ow2.mind.AbstractLauncher.InvalidCommandLineException;
 import org.ow2.mind.AbstractLauncher.Options;
+import org.ow2.mind.plugin.BasicPluginManager;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 /**
@@ -32,26 +44,36 @@ public class LauncherTest {
 
   @BeforeMethod(alwaysRun = true)
   void setup() throws Exception {
-    tester = new LauncherTester();
+    final List<String> pathList = new ArrayList<String>();
+    pathList.add("src/test/resources/test");
+    tester = new LauncherTester(pathList);
   }
 
-  @Test
-  public void test1() throws Exception {
-    try {
-      tester.nonExitMain();
-    } catch (final InvalidCommandLineException e) {
+  @DataProvider(name = "options-list")
+  public Object[][] OptionsDataProvider() {
+    return new Object[][]{{CmdFlag.class, "X"}, {CmdProperties.class, "Y"},
+        {CmdArgument.class, "Z"}, {CmdAppendOption.class, "W"},
+        {CmdPathOption.class, "Q"}};
+  }
 
+  @Test(dataProvider = "options-list")
+  public void testOptions(final Class<? extends CmdOption> optionClass,
+      final String shortName) throws Exception {
+    try {
+      tester.testMain();
+    } catch (final InvalidCommandLineException e) {
+      // We expect to catch this exeption since we don't give a valid command
+      // line.
     }
     final Options options = tester.getOptions();
-    checkOption(options, CmdFlag.class, "X");
-    checkOption(options, CmdProperties.class, "Y");
+    checkOption(options, optionClass, shortName);
   }
 
   private <T extends CmdOption> void checkOption(final Options options,
       final Class<T> optClass, final String shortName) throws Exception {
     for (final CmdOption option : options.getOptions()) {
       if (optClass.isInstance(option)) {
-        if (option.getShortName().equals(shortName)) {
+        if (shortName.equals(option.getShortName())) {
           return;
         }
       }
@@ -60,6 +82,12 @@ public class LauncherTest {
   }
 
   protected class LauncherTester extends Launcher {
+    protected LauncherTester(final List<String> pathList) {
+      super();
+      BasicPluginManager.setPluginClassLoader(compilerContext,
+          getPluginClassLoader(pathList));
+    }
+
     public Map<Object, Object> getContext() {
       return compilerContext;
     }
@@ -67,5 +95,46 @@ public class LauncherTest {
     public Options getOptions() {
       return options;
     }
+
+    public void testMain(final String... args)
+        throws InvalidCommandLineException, CompilerInstantiationException,
+        ADLException {
+      init(args);
+      compile();
+    }
+  }
+
+  protected ClassLoader getPluginClassLoader(final List<String> pathList) {
+    final List<String> validatedPaths = new ArrayList<String>(pathList.size());
+
+    // check source paths
+    for (final String path : pathList) {
+      final File f = new File(path);
+      if (!f.exists()) {
+        System.out.println("Warning '" + f.getAbsolutePath()
+            + "' source path can't be found ");
+      } else if (!f.isDirectory()) {
+        System.out.println("Warning: \"" + path
+            + "\" is not a directory, path ignored.");
+      } else {
+        validatedPaths.add(path);
+      }
+    }
+
+    // build URL array of source path
+    final URL[] urls = new URL[validatedPaths.size()];
+    for (int i = 0; i < urls.length; i++) {
+      final String path = validatedPaths.get(i);
+      final File f = new File(path);
+      try {
+        urls[i] = f.toURI().toURL();
+      } catch (final MalformedURLException e) {
+        // never append
+        throw new Error(e);
+      }
+    }
+
+    return new URLClassLoader(urls, getClass().getClassLoader());
+
   }
 }
