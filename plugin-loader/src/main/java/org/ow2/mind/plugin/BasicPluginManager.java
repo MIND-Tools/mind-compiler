@@ -325,7 +325,7 @@ public class BasicPluginManager implements PluginManager {
 
   public static void setPluginClassLoader(Map<Object, Object> context,
       ClassLoader classLoader) {
-    context.put(context, classLoader);
+    context.put(PLUGIN_CLASS_LOADER, classLoader);
   }
 
 }

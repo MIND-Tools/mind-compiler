@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.objectweb.fractal.adl.ADLException;
 import org.ow2.mind.Launcher;
 import org.ow2.mind.AbstractLauncher.CmdFlag;
 import org.ow2.mind.AbstractLauncher.CmdOption;
@@ -47,7 +48,7 @@ public class LauncherTest {
   @Test
   public void test1() throws Exception {
     try {
-      tester.nonExitMain();
+      tester.testMain();
     } catch (final InvalidCommandLineException e) {
 
     }
@@ -56,11 +57,18 @@ public class LauncherTest {
     checkOption(options, CmdProperties.class, "Y");
   }
 
+  @Test
+  public void testExtensionPointList() throws Exception {
+    final List<String> args = new ArrayList<String>();
+    args.add("--extension-points");
+    tester.nonExitMain(args.toArray(new String[0]));
+  }
+
   private <T extends CmdOption> void checkOption(final Options options,
       final Class<T> optClass, final String shortName) throws Exception {
     for (final CmdOption option : options.getOptions()) {
       if (optClass.isInstance(option)) {
-        if (option.getShortName().equals(shortName)) {
+        if (shortName.equals(option.getShortName())) {
           return;
         }
       }
@@ -70,6 +78,7 @@ public class LauncherTest {
 
   protected class LauncherTester extends Launcher {
     protected LauncherTester(final List<String> pathList) {
+      super();
       BasicPluginManager.setPluginClassLoader(compilerContext,
           getPluginClassLoader(pathList));
     }
@@ -80,6 +89,13 @@ public class LauncherTest {
 
     public Options getOptions() {
       return options;
+    }
+
+    public void testMain(final String... args)
+        throws InvalidCommandLineException, CompilerInstantiationException,
+        ADLException {
+      init(args);
+      compile();
     }
   }
 
