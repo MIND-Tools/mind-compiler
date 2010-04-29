@@ -11,5 +11,27 @@
 			argValueDesc="argValueDesc"
 			handler="org.ow2.mind.mindc.test.cli.CmdPropertiesHandler" />
 	</extension>
-
+	<extension point="org.ow2.mind.mindc.command-line-options">
+		<cmdArgument shortName="Z" longName="cmdArgument"
+			description="Desc for cmdArgument"
+			arrgDesc="argDesc"
+			deaultValue="defaultValue"
+			allowMultiple="false"
+			handler="org.ow2.mind.mindc.test.cli.CmdArgumentHandler" />	
+	</extension>
+	<extension point="org.ow2.mind.mindc.command-line-options">
+		<cmdAppendOption shortName="W" longName="cmdAppendOption"
+			description="Desc for cmdAppendOption"
+			argNameDesc="argNameDesc"
+			deaultValue="defaultValue"
+			separator=";"
+			handler="org.ow2.mind.mindc.test.cli.CmdAppendOptionHandler" />	
+	</extension>
+	<extension point="org.ow2.mind.mindc.command-line-options">
+		<cmdPathOption shortName="Q" longName="cmdPathOption"
+			description="Desc for cmdAppendOption"
+			argDesc="argDesc"
+			handler="org.ow2.mind.mindc.test.cli.CmdPathOptionHandler" />	
+	</extension>
+	
 </plugin>

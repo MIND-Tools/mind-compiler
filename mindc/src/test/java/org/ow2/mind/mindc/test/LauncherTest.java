@@ -11,13 +11,17 @@ import java.util.Map;
 
 import org.objectweb.fractal.adl.ADLException;
 import org.ow2.mind.Launcher;
+import org.ow2.mind.AbstractLauncher.CmdAppendOption;
+import org.ow2.mind.AbstractLauncher.CmdArgument;
 import org.ow2.mind.AbstractLauncher.CmdFlag;
 import org.ow2.mind.AbstractLauncher.CmdOption;
+import org.ow2.mind.AbstractLauncher.CmdPathOption;
 import org.ow2.mind.AbstractLauncher.CmdProperties;
 import org.ow2.mind.AbstractLauncher.InvalidCommandLineException;
 import org.ow2.mind.AbstractLauncher.Options;
 import org.ow2.mind.plugin.BasicPluginManager;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 /**
@@ -45,23 +49,24 @@ public class LauncherTest {
     tester = new LauncherTester(pathList);
   }
 
-  @Test
-  public void test1() throws Exception {
+  @DataProvider(name = "options-list")
+  public Object[][] OptionsDataProvider() {
+    return new Object[][]{{CmdFlag.class, "X"}, {CmdProperties.class, "Y"},
+        {CmdArgument.class, "Z"}, {CmdAppendOption.class, "W"},
+        {CmdPathOption.class, "Q"}};
+  }
+
+  @Test(dataProvider = "options-list")
+  public void testOptions(final Class<? extends CmdOption> optionClass,
+      final String shortName) throws Exception {
     try {
       tester.testMain();
     } catch (final InvalidCommandLineException e) {
-
+      // We expect to catch this exeption since we don't give a valid command
+      // line.
     }
     final Options options = tester.getOptions();
-    checkOption(options, CmdFlag.class, "X");
-    checkOption(options, CmdProperties.class, "Y");
-  }
-
-  @Test
-  public void testExtensionPointList() throws Exception {
-    final List<String> args = new ArrayList<String>();
-    args.add("--extension-points");
-    tester.nonExitMain(args.toArray(new String[0]));
+    checkOption(options, optionClass, shortName);
   }
 
   private <T extends CmdOption> void checkOption(final Options options,
