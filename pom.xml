@@ -10,7 +10,7 @@
     </parent>
 
     <artifactId>mind-compiler</artifactId>
-    <version>0.2</version>
+    <version>0.3-alpha-1-SNAPSHOT</version>
     <name>Mind compiler</name>
     <packaging>pom</packaging>
 
@@ -92,9 +92,9 @@
     </properties>
 
     <scm>
-        <connection>scm:svn:svn://svn.forge.objectweb.org/svnroot/mind/mindc/tags/mind-compiler-0.2</connection>
-        <developerConnection>scm:svn:svn+ssh://svn.forge.objectweb.org/svnroot/mind/mindc/tags/mind-compiler-0.2</developerConnection>
-        <url>http://fisheye.ow2.org/browse/MIND/mindc/tags/mind-compiler-0.2</url>
+        <connection>scm:svn:svn://svn.forge.objectweb.org/svnroot/mind/mindc/trunk</connection>
+        <developerConnection>scm:svn:svn+ssh://svn.forge.objectweb.org/svnroot/mind/mindc/trunk</developerConnection>
+        <url>http://fisheye.ow2.org/browse/MIND/mindc/trunk</url>
     </scm>
 
     <dependencyManagement>
