@@ -5,13 +5,13 @@
 ]>
 <chapter id="plugin-loader">
   <title>
-    Writing Plugins fot the MIND Compiler
+    Writing Plugins for the MIND Compiler
     </title>
 
   <para>
-  The Mind Compiler supports a plugin insfrasturcture that allows third parties 
+  The Mind Compiler supports a plugin infrastructure that allows third parties 
   to implement extensions without necessarily modifying the mainstream compiler.
-  This chapter introduces this plugin infrasturcture and explains how one write a new plugin.
+  This chapter introduces this plugin infrastructure and explains how one write a new plugin.
   </para>
 
   <section id="ana-plugin">
@@ -26,11 +26,11 @@
 	of the compiler.
 	</para>
 	<para>
-	The syntax of mind-plugin files is pretty simple. As illusterated in 
+	The syntax of mind-plugin files is pretty simple. As illustrated in 
 	<xref linkend="ex:basic-plugin"/>, the root tag, called plugin, 
 	has two arguments. The argument called <code>id</code> assigns an identifier to the plugin. This identifier 
 	must be unique amongst all plugins loaded by the compiler.
-	The argument called <code>name</code> specifices the name of the plugin. 
+	The argument called <code>name</code> specifies the name of the plugin. 
 	The <code>name</code> of a plugin can be any string literal including spaces.
 	</para>
 	
@@ -57,7 +57,7 @@
     Definition of extension points enables the implementation of plugins that are 
     extensible. That is, a plug-in may define an extension point which can be seen
     as a slot where extensions defined by other plugins may be plugged in to. Indeed,
-    the MIND compiler itself is desigend as a set of plugins which define the default
+    the MIND compiler itself is designed as a set of plugins which define the default
     extension-points which are hosted by the mainstream implementation. Those default 
     extension points are described in <xref linkend="def-ext"/>.
     </para>
@@ -100,7 +100,7 @@
 
     <section id="def-ext-cli">
       <title>Command Line Options</title>
-      <para>One can add new comand line options to the mindc launcher by defining extensions
+      <para>One can add new command line options to the mindc launcher by defining extensions
       to the point called <code>org.ow2.mind.mindc.command-line-options</code>. There are
       different types of command options which are supported. <xref linkend="ex:cli"/> gives an example
       including an extension for each kind of options that are supported.</para>
@@ -193,7 +193,7 @@ public interface CommandOptionHandler {
     <section id="def-cpl">
       <title>CPL parser</title>
   
-      <para>It is possible the substitue the default CPL parser that is used by the MIND
+      <para>It is possible to substitute the default CPL parser that is used by the MIND
       compiler. This can be pretty useful if the implementation of some extensions to the
       C programming language are needed. The <xref linkend="ex:cpl"/> depicts an example for such an extension. 
        </para>
