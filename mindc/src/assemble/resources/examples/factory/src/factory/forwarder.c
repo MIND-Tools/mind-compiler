@@ -22,11 +22,21 @@
  * Authors: Matthieu Leclercq
  */
 
-import memory.api.Allocator;
+#include <stdio.h>
 
-/**
- * A Type definition for memory allocator components.
- */
-type memory.AllocatorType {
-  provides Allocator as allocator;
+CONSTRUCTOR() {
+  printf("In forwarder constructor\n");
+}
+
+// -----------------------------------------------------------------------------
+// Implementation of the entryPoint interface with signature boot.Main.
+// -----------------------------------------------------------------------------
+
+// int main(int argc, string[] argv)
+int METH(entryPoint, main) (int argc, char *argv[]) {
+  int r;
+  printf("In forwarder: Call forwarded.main\n");
+  r = CALL(forwarded, main)(argc, argv);
+  printf("In forwarder: forwarded.main retruned %d\n", r);
+  return r;
 }

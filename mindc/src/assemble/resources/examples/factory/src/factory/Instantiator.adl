@@ -22,11 +22,24 @@
  * Authors: Matthieu Leclercq
  */
 
-import memory.api.Allocator;
+import boot.ApplicationType;
+import boot.Main;
+import fractal.api.Factory;
 
 /**
- * A Type definition for memory allocator components.
+ * Instantiator component uses a component Factory to introduce a dynamically
+ * instantiated component in the application architecture.
+ *
+ * The implementation code of this component uses the fractal.api.Component and
+ * the fractal.api.BindingController IDLs, but these IDLs are not referenced by
+ * the provided/required interfaces. So these IDLs must be explicitly referenced
+ * using the @UsedIDL annotation.
  */
-type memory.AllocatorType {
-  provides Allocator as allocator;
+@UseIDL({"fractal.api.Component", "fractal.api.BindingController"})
+primitive factory.Instantiator extends ApplicationType {
+ 
+  requires Main as applicationEntryPoint;
+  requires Factory as forwarderFactory;
+  
+  source instantiator.c;
 }
