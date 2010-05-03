@@ -22,13 +22,13 @@
  * Authors: Matthieu Leclercq
  */
 
-import memory.api.AllocatorType;
+import memory.AllocatorType;
 
 /**
  * A simple memory allocator component that use <code>malloc</code> and 
  * <code>free</code> system calls to allocate/free memory
  */
-primitive memory.unix.Malloc extends AllocatorType {
+primitive memory.Malloc extends AllocatorType {
   
   source malloc.c;
 }
