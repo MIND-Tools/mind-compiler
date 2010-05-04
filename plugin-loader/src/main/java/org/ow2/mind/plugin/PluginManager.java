@@ -34,4 +34,7 @@ public interface PluginManager {
 
   public Collection<Extension> getExtensions(String extensionPoint,
       Map<Object, Object> context) throws ADLException;
+
+  public Collection<String> getExtensionPointNames(Map<Object, Object> context)
+      throws ADLException;
 }

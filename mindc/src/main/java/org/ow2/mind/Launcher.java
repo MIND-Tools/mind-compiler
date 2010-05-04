@@ -194,6 +194,11 @@ public class Launcher extends AbstractLauncher {
                                                                       "no-bin",
                                                                       "Do not generate binary ADL/IDL ('.def', '.itfdef' and '.idtdef' files).");
 
+  protected final CmdFlag              extensionPointsListOpt     = new CmdFlag(
+                                                                      null,
+                                                                      "extension-points",
+                                                                      "Print the list of available extension points and exit.");
+
   protected boolean                    generateSrc;
   protected boolean                    compileDef;
 
@@ -233,6 +238,11 @@ public class Launcher extends AbstractLauncher {
     final STNodeFactoryImpl stNodeFactory = new STNodeFactoryImpl();
 
     final BasicPluginManager pluginManager = new BasicPluginManager();
+    final ClassLoader pluginClassLoader = BasicPluginManager
+        .getPluginClassLoader(compilerContext);
+    if (pluginClassLoader != null) {
+      pluginManager.setClassLoader(pluginClassLoader);
+    }
     pluginManager.nodeFactoryItf = stNodeFactory;
 
     try {
@@ -255,6 +265,18 @@ public class Launcher extends AbstractLauncher {
     // If help is asked, print it and exit.
     if (helpOpt.isPresent(cmdLine)) {
       printHelp(System.out);
+      System.exit(0);
+    }
+
+    // If the extension points list is asked, print it and exit.
+    if (extensionPointsListOpt.isPresent(cmdLine)) {
+      try {
+        printExtensionPoints(pluginManager, compilerContext, System.out);
+      } catch (final ADLException e) {
+        throw new CompilerInstantiationException(
+            "Cannot invoke command line option '"
+                + extensionPointsListOpt.longName + "'.", e, 101);
+      }
       System.exit(0);
     }
 
@@ -428,6 +450,17 @@ public class Launcher extends AbstractLauncher {
     } catch (final ADLException e) {
       throw new CompilerInstantiationException(
           "Cannot instantiate the compiler.", e, 101);
+    }
+  }
+
+  private void printExtensionPoints(final PluginManager pluginManager,
+      final Map<Object, Object> context, final PrintStream out)
+      throws ADLException {
+    final Collection<String> extensionPoints = pluginManager
+        .getExtensionPointNames(context);
+    System.out.println("Supported extension points are : ");
+    for (final String extensionPoint : extensionPoints) {
+      System.out.println("\t'" + extensionPoint + "'");
     }
   }
 
@@ -727,7 +760,8 @@ public class Launcher extends AbstractLauncher {
     options.addOptions(targetDescOpt, compilerCmdOpt, cFlagsOpt,
         includePathOpt, linkerCmdOpt, ldFlagsOpt, ldPathOpt, linkerScriptOpt,
         concurrentJobCmdOpt, printStackTraceOpt, checkADLModeOpt,
-        generateDefSrcOpt, compileDefOpt, forceOpt, keepTempOpt, noBinASTOpt);
+        generateDefSrcOpt, compileDefOpt, forceOpt, keepTempOpt, noBinASTOpt,
+        extensionPointsListOpt);
 
     for (final CmdOption option : CommandLineOptionExtensionHelper
         .getCommandOptions(pluginManagerItf, context)) {
@@ -756,7 +790,8 @@ public class Launcher extends AbstractLauncher {
     ps.println("Usage: " + prgName + " [OPTIONS] (<definition>[:<execname>])+");
     ps.println("  where <definition> is the name of the component to"
         + " be compiled, ");
-    ps.println("  and <execname> is the name of the output file to be created.");
+    ps
+        .println("  and <execname> is the name of the output file to be created.");
   }
 
   protected void handleException(final InvalidCommandLineException e) {

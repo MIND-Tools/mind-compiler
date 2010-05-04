@@ -22,11 +22,22 @@
  * Authors: Matthieu Leclercq
  */
 
-import memory.api.Allocator;
+import boot.ApplicationType;
+import boot.Main;
 
 /**
- * A Type definition for memory allocator components.
+ * Very simple component that forward invocations from its "entryPoint" provided
+ * interface to its "forwarded" required interface.
+ *
+ * This component provides two controllers : the component-controller and the
+ * binding-controller. These two controllers allows the Instantiator component
+ * to introspect this component dynamically.
  */
-type memory.AllocatorType {
-  provides Allocator as allocator;
+@controller.Component
+@controller.BindingController
+primitive factory.Forwarder extends ApplicationType {
+
+  requires Main as forwarded;
+  
+  source forwarder.c;
 }

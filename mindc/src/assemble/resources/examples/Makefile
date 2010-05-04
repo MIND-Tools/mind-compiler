@@ -1,4 +1,4 @@
-EXAMPLES = helloworld lifecycle
+EXAMPLES = helloworld lifecycle factory
 
 all: $(EXAMPLES:%=%.all)
 clean: $(EXAMPLES:%=%.clean)

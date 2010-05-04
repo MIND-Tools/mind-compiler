@@ -7,10 +7,10 @@ else
   MINDC = mindc
 endif
 
-all: simpleLCC
+all: factoryExample
 
-# Compile "lcc.SimpleLCC" application component wrapped in the 
-# "boot.GenericLCCApplication" ADL template.
+# Compile "factory.FactoryExample" application component wrapped in the 
+# "boot.GenericApplication" ADL template.
 # Notes:
 #  - It is highly recommended to specify an executable name when using a 
 #    template as top-level ADL (i.e. add ":<exec name>" on the command line
@@ -21,8 +21,8 @@ all: simpleLCC
 #  - The argument boot.GenericLCCApplication<lcc.SimpleLCC>:simpleLCC must be 
 #    surrounded by double quote in the command-line to avoid shell 
 #    interpretation issue of '<' and '>'.
-simpleLCC: build
-	$(MINDC) -src-path=src -src-path=../common-src -o=build "boot.GenericLCCApplication<lcc.SimpleLCC>:simpleLCC"
+factoryExample: build
+	$(MINDC) -src-path=src -src-path=../common-src -o=build "boot.GenericApplication<factory.FactoryExample>:factoryExample"
 
 build:
 	mkdir -p build
@@ -30,4 +30,4 @@ build:
 clean:
 	rm -Rf build
 
-.PHONY: all simpleLCC clean
+.PHONY: all factoryExample clean

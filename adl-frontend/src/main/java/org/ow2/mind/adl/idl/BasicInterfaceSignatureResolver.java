@@ -64,7 +64,7 @@ public class BasicInterfaceSignatureResolver
     try {
       itfDefinition = idlLoaderItf.load(itf.getSignature(), context);
     } catch (final ADLException e) {
-      ChainedErrorLocator.chainLocator(e, encapsulatingDefinition);
+      ChainedErrorLocator.chainLocator(e, itf);
       throw e;
     }
     if (!(itfDefinition instanceof InterfaceDefinition)) {

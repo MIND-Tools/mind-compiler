@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter SYSTEM "../dtd/minddoc.dtd" [
+<!ENTITY % myents SYSTEM "../shared.ent" >
+%myents;
+]>
+<chapter id="plugin-loader">
+  <title>
+    Writing Plugins for the MIND Compiler
+    </title>
+
+  <para>
+  The Mind Compiler supports a plugin infrastructure that allows third parties 
+  to implement extensions without necessarily modifying the mainstream compiler.
+  This chapter introduces this plugin infrastructure and explains how one write a new plugin.
+  </para>
+
+  <section id="ana-plugin">
+    <title>Anatomy of a plugin</title>
+	<para>
+	A plugin is described in an XML manifest file, called mind-plugin.xml.
+	 Currently, the MIND compiler doesn't support any
+	specific control features for enabling or disabling plugins. It basically discovers all 
+	manifest files called mind-plugin.xml residing in the class path and activates them
+	in a non-specified order. Therefore, the user who wants to enable a plugin should set 
+	the MIND_CLASSPATH environment variable so that the plugin is included in the classpath 
+	of the compiler.
+	</para>
+	<para>
+	The syntax of mind-plugin files is pretty simple. As illustrated in 
+	<xref linkend="ex:basic-plugin"/>, the root tag, called plugin, 
+	has two arguments. The argument called <code>id</code> assigns an identifier to the plugin. This identifier 
+	must be unique amongst all plugins loaded by the compiler.
+	The argument called <code>name</code> specifies the name of the plugin. 
+	The <code>name</code> of a plugin can be any string literal including spaces.
+	</para>
+	
+	<example id="ex:basic-plugin">
+	<title>Description of a simple plugin.</title>
+	<programlisting linenumbering="numbered" role="xml">
+	<![CDATA[
+	<plugin id="com.example.myPlugin" name="My Plugin">
+	   <extension-point id="myNewExtensionPoint"/>
+	   <extension point="org.ow2.mind.mindc.command-line-options">
+	     ...
+	   </extension>
+	</plugin>
+	]]>
+	</programlisting>
+	</example>
+    
+    <para>
+    Plugins may define two types of elements: <emphasis>extension-points</emphasis> 
+    and <emphasis>extensions</emphasis>.
+    </para>
+    
+    <para>
+    Definition of extension points enables the implementation of plugins that are 
+    extensible. That is, a plug-in may define an extension point which can be seen
+    as a slot where extensions defined by other plugins may be plugged in to. Indeed,
+    the MIND compiler itself is designed as a set of plugins which define the default
+    extension-points which are hosted by the mainstream implementation. Those default 
+    extension points are described in <xref linkend="def-ext"/>.
+    </para>
+    
+    <para>
+    The <code>extension-point</code> element has only one argument, its identifier
+    (i.e. <code>id</code>). The <code>id</code> argument defines a name for the extension. Plugins 
+    may define multiple extension points.
+    Note that the <code>id</code> of an extension point specifies a local name which is unique inside the plugin. 
+    </para>
+    
+    <para>
+    The second type of element which may be found in a plugin description is <code>extension</code>.
+    The <code>extension</code> element 
+    has only one argument, namely <code>point</code>, which specifies the extension
+    point where this extension will be plugged into. The value of the <code>point</code> 
+    element must refer to the qualified name of an extension point which is
+    obtained by the aggregation of the plugin id defining the extension point and the local
+    name of the extension point. 
+    </para>
+    
+    <para>
+    Each extension point may have an internal syntax which is defined specifically
+    for the requirements of the extension point. 
+    Currently, no grammar definition language is supported for specifying such an
+    internal syntax. That is, the programmer of an extension point may implement a
+    DOM parser and document the internal syntax apart from the implementation code.
+    </para>
+ 
+  </section>
+  
+ 
+
+  <section id="def-ext">
+    <title>Default Extension Points</title>
+
+    <para>This section describes the extension points that are supported 
+    by the mainstream MIND compiler. 
+    </para>
+
+    <section id="def-ext-cli">
+      <title>Command Line Options</title>
+      <para>One can add new command line options to the mindc launcher by defining extensions
+      to the point called <code>org.ow2.mind.mindc.command-line-options</code>. There are
+      different types of command options which are supported. <xref linkend="ex:cli"/> gives an example
+      including an extension for each kind of options that are supported.</para>
+      
+      <example id="ex:cli">
+        <title>Command-line option extensions</title>
+        <programlisting  linenumbering="numbered" role="xml">
+        <![CDATA[
+<plugin id="com.examples.cli" name="Examples of command-line extensions.">
+	<extension point="org.ow2.mind.mindc.command-line-options">
+		<cmdFlag shortName="X" longName="FLAG"
+			description="Description for cmdFlag"
+			handler="org.ow2.mind.mindc.test.cli.CmdFlagHandler" />
+	</extension>
+	<extension point="org.ow2.mind.mindc.command-line-options">
+		<cmdProperties shortName="Y" 
+			description="Desc for cmdProperties"
+			argNameDesc="argNameDesc"
+			argValueDesc="argValueDesc"
+			handler="org.ow2.mind.mindc.test.cli.CmdPropertiesHandler" />
+	</extension>
+	<extension point="org.ow2.mind.mindc.command-line-options">
+		<cmdArgument shortName="Z" longName="cmdArgument"
+			description="Desc for cmdArgument"
+			arrgDesc="argDesc"
+			deaultValue="defaultValue"
+			allowMultiple="false"
+			handler="org.ow2.mind.mindc.test.cli.CmdArgumentHandler" />	
+	</extension>
+	<extension point="org.ow2.mind.mindc.command-line-options">
+		<cmdAppendOption shortName="W" longName="cmdAppendOption"
+			description="Desc for cmdAppendOption"
+			argNameDesc="argNameDesc"
+			deaultValue="defaultValue"
+			separator=";"
+			handler="org.ow2.mind.mindc.test.cli.CmdAppendOptionHandler" />	
+	</extension>
+	<extension point="org.ow2.mind.mindc.command-line-options">
+		<cmdPathOption shortName="Q" longName="cmdPathOption"
+			description="Desc for cmdAppendOption"
+			argDesc="argDesc"
+			handler="org.ow2.mind.mindc.test.cli.CmdPathOptionHandler" />	
+	</extension>
+	
+</plugin>
+        ]]>
+        </programlisting>
+      </example>
+      
+      <para>
+      Each command-line option extension must  provide an handler which will be invoked 
+      if the option is found on the command line. Such handlers must implement the interface 
+      depicted in <xref linkend="ex:cli-handler"/>.
+      </para>
+      
+      	<example id="ex:cli-handler">
+	<title>The CommandOptionHandler interface.</title>
+	<programlisting linenumbering="numbered" role="java">
+	<![CDATA[
+public interface CommandOptionHandler {
+  void processCommandOption(CmdOption cmdOption, Map<Object, Object> context)
+      throws ADLException;
+}
+	]]>
+	</programlisting>
+	</example>
+  
+    </section>
+
+	<section id="def-pa">
+	  <title>Predefined annotations</title>
+	  <para>
+	  One can specify new predefined annotation packages, so that the annotations defined
+	  in those packages are accessible with their local names. The extension point that is
+	  defined for that purpose is called <code>org.ow2.mind.predefined-annotations</code>.
+	  The <xref linkend="ex:pa"/> depicts an example for such an extension. 
+	  </para>
+      <example id="ex:pa">
+	  <title>Definition of a new predefined annotation package.</title>
+	  	<programlisting linenumbering="numbered" role="xml">
+	<![CDATA[
+  <extension point="org.ow2.mind.predefined-annotations">
+  	<annotation package="com.examples.myAnnotations"/>
+  </extension>
+	]]>
+	</programlisting>
+	  </example>
+	</section>
+
+    <section id="def-cpl">
+      <title>CPL parser</title>
+  
+      <para>It is possible to substitute the default CPL parser that is used by the MIND
+      compiler. This can be pretty useful if the implementation of some extensions to the
+      C programming language are needed. The <xref linkend="ex:cpl"/> depicts an example for such an extension. 
+       </para>
+       <example id="ex:cpl">
+	  <title>Definition of a new predefined annotation package.</title>
+	  	<programlisting linenumbering="numbered" role="xml">
+	<![CDATA[
+  <extension point="org.ow2.mind.preproc.cpl-parser">
+    <factory class="com.examples.MyCPLPreprocessorFactory"/>
+  </extension>
+	]]>
+	</programlisting>
+	  </example>
+      <para>
+      Each CPL extension must provide a Factory class which will be used for instantiating the parser and lexer. 
+      Such factory classes must implement the CPLPreprocessorFactory interface depicted in <xref linkend="ex:cpl-factory"/>. 
+      </para>
+      <example id="ex:cpl-factory">
+	  <title>Definition of a new predefined annotation package.</title>
+	  	<programlisting linenumbering="numbered" role="java">
+	<![CDATA[
+package org.ow2.mind.preproc;
+
+public interface CPLPreprocessorFactory {
+  Lexer getLexer(CharStream cs);
+
+  Parser getParser(TokenStream ts);
+}
+	]]>
+	</programlisting>
+	  </example>
+      
+    </section>
+
+    <section id="def-ext-back-def">
+      <title>Definition Source Generators</title>
+  
+  	  <para>
+  	  The extension point for adding new definition source generators is called 
+  	  <code>org.ow2.mind.adl.definition-source-generators</code>.
+  	  </para>
+  
+      <para>To be completed.</para>
+    </section>
+
+    <section id="def-ext-back-inst">
+      <title>Instance Source Generators</title>
+  
+      <para>
+  	  The extension point for adding new instance source generators is called 
+  	  <code>org.ow2.mind.adl.instance-source-generators</code>.
+  	  </para>
+  
+      <para>To be completed.</para>
+    </section>
+
+  </section>
+</chapter>
