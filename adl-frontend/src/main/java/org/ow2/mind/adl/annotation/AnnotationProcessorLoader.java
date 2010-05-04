@@ -95,18 +95,16 @@ public class AnnotationProcessorLoader extends AbstractLoader
 
     // Process this node
     final Annotation[] annotations = AnnotationHelper.getAnnotations(node);
-    if (annotations != null) {
-      for (final Annotation annotation : annotations) {
-        final ADLLoaderProcessor processorAnnotation = annotation.getClass()
-            .getAnnotation(ADLLoaderProcessor.class);
-        if (processorAnnotation != null) {
-          final ADLLoaderPhase[] processPhases = processorAnnotation.phases();
-          for (final ADLLoaderPhase processPhase : processPhases) {
-            if (phase == processPhase) {
-              compositeDef = executeProcessor(processorAnnotation, annotation,
-                  subComp, compositeDef, context);
-              break;
-            }
+    for (final Annotation annotation : annotations) {
+      final ADLLoaderProcessor processorAnnotation = annotation.getClass()
+          .getAnnotation(ADLLoaderProcessor.class);
+      if (processorAnnotation != null) {
+        final ADLLoaderPhase[] processPhases = processorAnnotation.phases();
+        for (final ADLLoaderPhase processPhase : processPhases) {
+          if (phase == processPhase) {
+            compositeDef = executeProcessor(processorAnnotation, annotation,
+                subComp, compositeDef, context);
+            break;
           }
         }
       }
@@ -132,18 +130,16 @@ public class AnnotationProcessorLoader extends AbstractLoader
 
     // Process this node
     final Annotation[] annotations = AnnotationHelper.getAnnotations(node);
-    if (annotations != null) {
-      for (final Annotation annotation : annotations) {
-        final ADLLoaderProcessor processorAnnotation = annotation.getClass()
-            .getAnnotation(ADLLoaderProcessor.class);
-        if (processorAnnotation != null) {
-          final ADLLoaderPhase[] processPhases = processorAnnotation.phases();
-          for (final ADLLoaderPhase processPhase : processPhases) {
-            if (phase == processPhase) {
-              def = executeProcessor(processorAnnotation, annotation, node,
-                  def, context);
-              break;
-            }
+    for (final Annotation annotation : annotations) {
+      final ADLLoaderProcessor processorAnnotation = annotation.getClass()
+          .getAnnotation(ADLLoaderProcessor.class);
+      if (processorAnnotation != null) {
+        final ADLLoaderPhase[] processPhases = processorAnnotation.phases();
+        for (final ADLLoaderPhase processPhase : processPhases) {
+          if (phase == processPhase) {
+            def = executeProcessor(processorAnnotation, annotation, node, def,
+                context);
+            break;
           }
         }
       }

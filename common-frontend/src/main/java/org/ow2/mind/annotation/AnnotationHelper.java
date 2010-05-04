@@ -64,7 +64,7 @@ public final class AnnotationHelper {
   public static Annotation[] getAnnotations(final Node container) {
     final AnnotationDecoration decoration = getDecoration(container);
     if (decoration == null)
-      return null;
+      return new Annotation[0];
     else
       return decoration.getAnnotations();
   }
