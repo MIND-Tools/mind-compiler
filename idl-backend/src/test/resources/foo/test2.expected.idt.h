@@ -6,6 +6,7 @@
 #include "mindcommon.h"
 
 #include "test3.idt.h"
+#include "foo/foo.h"
 #include "test2.itf.h"
 
 typedef enum  {

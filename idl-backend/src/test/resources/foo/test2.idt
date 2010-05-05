@@ -2,6 +2,7 @@
 #define TEST2_IDT
 
 #include "../test3.idt"
+#include "foo.h"
 
 typedef enum {
   A =0,

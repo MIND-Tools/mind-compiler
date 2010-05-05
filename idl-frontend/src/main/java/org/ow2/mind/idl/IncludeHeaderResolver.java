@@ -25,9 +25,11 @@ package org.ow2.mind.idl;
 import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
 import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
 import static org.ow2.mind.PathHelper.getExtension;
+import static org.ow2.mind.PathHelper.toAbsolute;
 import static org.ow2.mind.idl.ast.IDLASTHelper.getIncludedPath;
 import static org.ow2.mind.idl.ast.Include.HEADER_EXTENSION;
 
+import java.net.URL;
 import java.util.Map;
 
 import org.objectweb.fractal.adl.ADLException;
@@ -35,8 +37,10 @@ import org.objectweb.fractal.adl.NodeFactory;
 import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.ow2.mind.CommonASTHelper;
+import org.ow2.mind.PathHelper;
 import org.ow2.mind.idl.ast.Header;
 import org.ow2.mind.idl.ast.IDL;
+import org.ow2.mind.idl.ast.IDLASTHelper;
 import org.ow2.mind.idl.ast.Include;
 
 public class IncludeHeaderResolver extends AbstractIncludeResolver {
@@ -47,23 +51,61 @@ public class IncludeHeaderResolver extends AbstractIncludeResolver {
 
   public NodeFactory nodeFactoryItf;
 
+  /** The {@link IDLLocator} client interface used by this component. */
+  public IDLLocator  idlLocatorItf;
+
   // ---------------------------------------------------------------------------
   // Implementation of the UsedIDLResolver interface
   // ---------------------------------------------------------------------------
 
-  public IDL resolve(final Include include, final IDL encapsulatingContainer,
+  public IDL resolve(final Include include, final IDL encapsulatingIDL,
       final Map<Object, Object> context) throws ADLException {
-    final String includedPath = getIncludedPath(include);
-    if (getExtension(includedPath).equals(HEADER_EXTENSION)) {
+    String path = getIncludedPath(include);
+    if (getExtension(path).equals(HEADER_EXTENSION)) {
       // include node references a header C file.
+
+      if (IDLASTHelper.getIncludeDelimiter(include) == IDLASTHelper.IncludeDelimiter.QUOTE) {
+        // try to find header file and update the path if needed
+
+        final String encapsulatingIDLName = encapsulatingIDL.getName();
+        final String encapsulatingDir;
+        if (encapsulatingIDLName.startsWith("/")) {
+          encapsulatingDir = PathHelper.getParent(encapsulatingIDLName);
+        } else {
+          encapsulatingDir = PathHelper
+              .fullyQualifiedNameToDirName(encapsulatingIDLName);
+        }
+
+        if (!path.startsWith("/")) {
+          // look-for header relatively to encapsulatingDir
+          final String relPath = toAbsolute(encapsulatingDir, path);
+          URL url = idlLocatorItf.findSourceHeader(relPath, context);
+          if (url != null) {
+            // IDL found with relPath
+            path = relPath;
+            IDLASTHelper.setIncludePathPreserveDelimiter(include, path);
+          } else if (path.startsWith("./") || path.startsWith("../")) {
+            // the path starts with "./" or "../" which force a resolution
+            // relatively to encapsulatingDir. the file has not been found.
+            throw new ADLException(IDLErrors.IDL_NOT_FOUND, path);
+          } else {
+            // look-for header relatively to source-path
+            path = "/" + path;
+            url = idlLocatorItf.findSourceHeader(path, context);
+            if (url != null) {
+              IDLASTHelper.setIncludePathPreserveDelimiter(include, path);
+            }
+          }
+        }
+      }
+
       // create a new Header AST node
       final Header header = CommonASTHelper.newNode(nodeFactoryItf, "header",
           Header.class);
-      header.setName(includedPath);
+      header.setName(path);
       return header;
     } else {
-      return clientResolverItf
-          .resolve(include, encapsulatingContainer, context);
+      return clientResolverItf.resolve(include, encapsulatingIDL, context);
     }
   }
 
@@ -78,6 +120,8 @@ public class IncludeHeaderResolver extends AbstractIncludeResolver {
 
     if (itfName.equals(NodeFactory.ITF_NAME)) {
       nodeFactoryItf = (NodeFactory) value;
+    } else if (itfName.equals(IDLLocator.ITF_NAME)) {
+      idlLocatorItf = (IDLLocator) value;
     } else {
       super.bindFc(itfName, value);
     }
@@ -86,7 +130,8 @@ public class IncludeHeaderResolver extends AbstractIncludeResolver {
 
   @Override
   public String[] listFc() {
-    return listFcHelper(super.listFc(), NodeFactory.ITF_NAME);
+    return listFcHelper(super.listFc(), NodeFactory.ITF_NAME,
+        IDLLocator.ITF_NAME);
   }
 
   @Override
@@ -95,6 +140,8 @@ public class IncludeHeaderResolver extends AbstractIncludeResolver {
 
     if (itfName.equals(NodeFactory.ITF_NAME)) {
       return nodeFactoryItf;
+    } else if (itfName.equals(IDLLocator.ITF_NAME)) {
+      return idlLocatorItf;
     } else {
       return super.lookupFc(itfName);
     }
@@ -107,6 +154,8 @@ public class IncludeHeaderResolver extends AbstractIncludeResolver {
 
     if (itfName.equals(NodeFactory.ITF_NAME)) {
       nodeFactoryItf = null;
+    } else if (itfName.equals(IDLLocator.ITF_NAME)) {
+      idlLocatorItf = null;
     } else {
       super.unbindFc(itfName);
     }
