@@ -279,9 +279,8 @@
     <section id="adl-impl-data">
       <title>Private data definition</title>
 
-      <para>The specification of component's private-data is only required for the
-        components that may be instantiated multiple times. This specification may be done
-        under two different forms using the ADL:</para>
+      <para>The specification of component's private-data may be done under two
+        different forms using the ADL:</para>
       <orderedlist>
         <listitem>
           <para>The private-data structure definition can be put in a separate header file,
@@ -304,24 +303,47 @@
       <para>A primitive component definition may have a maximum of one private-data definition.
         On the other hand, composite and type definitions cannot specify private-data.</para>
       
+      <para>When the private-data structure is defined in a separate header file, 
+        the latter should contains only the definition of the private-data structure. It is
+        not necessary to include it in the implememtation files (this is done automatically 
+        by the generated code). Moreorver it must not be included by implementations of 
+        other components.</para>
+      
+      <para>See <xref linkend="c-prvdecl"/> for details on the syntax to be 
+        used to define component's private data.</para>
+
       <example>
-        <title>Private data definition</title>
+        <title>Private data definition in a separate header file</title>
         <programlisting linenumbering="numbered" language="adl"> data myComponentData.h;</programlisting>
         
         <para>The above code excerpt specifies that the component's private-data 
-          are defined in the file called <filename>myComponentData.h</filename>.</para>
+          are defined in the file called <filename>myComponentData.h</filename>. 
+          The latter file should look-like :</para>
+          
+        <programlisting language="cpl" linenumbering="numbered"> #ifndef MY_COMPONENT_DATA_H
+ #define MY_COMPONENT_DATA_H
+
+ struct {
+   int a, b;
+   char c[10];
+ } PRIVATE;
+ 
+ #endif</programlisting>
+        
+      </example>
+      
+      <example>
+        <title>Private data definition inlined in the ADL</title>
 
         <programlisting linenumbering="numbered" language="adl"> data {{
    struct {
      int a, b;
+     char c[10];
    } PRIVATE;
  }};</programlisting>
 
         <para>The above code excerpt makes an inlined definition of private-data structure
           directly in the ADL file.</para>
-         
-        <para>See <xref linkend="c-prvdecl"/> for details on the syntax to be 
-          used to define component's private data.</para>
       </example>
     </section>
     
@@ -341,14 +363,29 @@
         and <code>"}}"</code>) following the <code>"source"</code> keyword.</para>
         
       <example>
-        <title>Component implementation file declaration</title>
+        <title>Component implementation in a separate C file</title>
         <programlisting linenumbering="numbered" language="adl"> source myComponentImpl.c;</programlisting>
 
         <para>In the above code excerpt, specifies that implementation of the 
-          component is located in the <filename>myComponentImpl.c</filename> file.</para>
+          component is located in the <filename>myComponentImpl.c</filename> file. 
+          The latter file should look-like :</para>
         
+        <programlisting language="cpl" linenumbering="numbered"> #include &lt;stdio.h&gt;
+
+ int METH(adderItf, add) (int a, int b) {
+   printf("in adderItf.add\n");
+   return a + b;
+ }</programlisting>
+        
+      </example>
+      
+      <example>
+        <title>Component implementation inlined in the ADL</title>
         <programlisting linenumbering="numbered" language="adl"> source {{
+   #include &lt;stdio.h&gt;
+
    int METH(adderItf, add) (int a, int b) {
+     printf("in adderItf.add\n");
      return a + b;
    }
  }};</programlisting>
