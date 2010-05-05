@@ -109,7 +109,7 @@ int __component_removeFcSubComponents(fractal_api_Component subComponent,
     return FRACTAL_API_INVALID_ARG;
   }
 
-  slot = findSubComponentSlot(subComponent, desc);
+  slot = findSubComponentSlot(subComponent, desc);y
   if (slot == NULL) {
     // 'subComponent' is not a known sub-component.
     return FRACTAL_API_NO_SUCH_SUB_COMPONENT;
@@ -127,7 +127,6 @@ int __component_addFcSubBinding(fractal_api_Component clientComponent,
       struct __component_ContentDescriptor *desc,
       void* component_ptr) {
   void *serverItf = NULL;
-  void *clientBC;
   int i, err;
 
   if ( clientItfName == NULL || serverItfName == NULL) {
@@ -183,10 +182,24 @@ int __component_addFcSubBinding(fractal_api_Component clientComponent,
     *ITF_PTR(clientItf->isBoundOffset) = serverItf;
 
   } else {
+    void *clientBC;
+    void *clientLCC;
     // client interface is an interface of a sub-component
 
+    // try to retrieve the life cycle controller of the client component and
+    // check if it is stopped.
+    err = clientComponent->meths->getFcInterface(clientComponent->selfData,
+        "lifeCycleController", &clientLCC);
+    if (err == FRACTAL_API_OK) {
+      // LCC found
+      if (((fractal_api_LifeCycleController) clientLCC)->meths->getFcState(
+        ((fractal_api_LifeCycleController) clientLCC)->selfData) != FRACTA_API_STOPPED) {
+        return FRACTAL_API_ILLEGAL_LIFE_CYCLE;
+      }
+    }
+
     // retreive client binding controller
-    clientComponent->meths->getFcInterface(clientComponent->selfData,
+    err = clientComponent->meths->getFcInterface(clientComponent->selfData,
           "bindingController", &clientBC);
     if (err != FRACTAL_API_OK) {
       return FRACTAL_API_ILLEGAL_BINDING;
@@ -208,7 +221,6 @@ int __component_removeFcSubBinding(fractal_api_Component clientComponent,
       const char *clientItfName,
       struct __component_ContentDescriptor *desc,
       void* component_ptr) {
-  void *clientBC;
   int err, i;
 
   if (clientItfName == NULL) {
@@ -234,14 +246,29 @@ int __component_removeFcSubBinding(fractal_api_Component clientComponent,
     *ITF_PTR(clientItf->isBoundOffset) = NULL;
 
   } else {
+    void *clientBC;
+    void *clientLCC;
+
     // client interface is an interface of a sub-component
     if (findSubComponentSlot(clientComponent, desc) == NULL) {
       // 'subComponent' is not a known sub-component.
       return FRACTAL_API_NO_SUCH_SUB_COMPONENT;
     }
 
+    // try to retrieve the life cycle controller of the client component and
+    // check if it is stopped.
+    err = clientComponent->meths->getFcInterface(clientComponent->selfData,
+        "lifeCycleController", &clientLCC);
+    if (err == FRACTAL_API_OK) {
+      // LCC found
+      if (((fractal_api_LifeCycleController) clientLCC)->meths->getFcState(
+        ((fractal_api_LifeCycleController) clientLCC)->selfData) != FRACTA_API_STOPPED) {
+        return FRACTAL_API_ILLEGAL_LIFE_CYCLE;
+      }
+    }
+
     // retreive client binding controller
-    clientComponent->meths->getFcInterface(clientComponent->selfData,
+    err = clientComponent->meths->getFcInterface(clientComponent->selfData,
           "bindingController", &clientBC);
     if (err != FRACTAL_API_OK) {
       return FRACTAL_API_ILLEGAL_BINDING;
