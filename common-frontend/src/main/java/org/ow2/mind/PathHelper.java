@@ -154,8 +154,7 @@ public final class PathHelper {
       return (dirName.startsWith("/")) ? "/" + path.substring(3) : path
           .substring(3);
     }
-    return toAbsolute(dirName.substring(0, lastSlash - 1), "./"
-        + path.substring(3));
+    return toAbsolute(dirName.substring(0, lastSlash), "./" + path.substring(3));
   }
 
   /**
