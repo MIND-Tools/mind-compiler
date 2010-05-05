@@ -13,6 +13,7 @@
 
 
 <xsl:param name="draft.watermark.image" select="''"/>
+<xsl:param name="root.path"/>
 
 
 <xsl:template match="d:codelink">
@@ -52,7 +53,13 @@
   <meta name="Robots" content="index, follow" />
   <meta content="MIND team" name="author" />
   <meta content="mind@ow2.org" name="email" />
-  <link rel="shortcut icon" type="image/x-icon" href="images/favicon.ico" />
+  <xsl:if test="$root.path">
+    <link rel="shortcut icon" type="image/x-icon">
+      <xsl:attribute name="href">
+        <xsl:value-of select="concat($root.path, '/images/favicon.ico')" />
+      </xsl:attribute>
+    </link>
+  </xsl:if>
 </xsl:template>
 
 </xsl:stylesheet>
