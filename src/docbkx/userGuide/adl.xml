@@ -409,7 +409,7 @@
       <emphasis>attribute-controller</emphasis> interface (see <xref linkend="adv-ctrl-ac"/> for more detail),
       the attributes may also be read and modified at runtime by other components.</para>
     
-    <para>Attribute declarations are done using the <code>"attributes"</code> keyword followed 
+    <para>Attribute declarations are done using the <code>"attribute"</code> keyword followed 
       by a type, a name and optionnaly an initial value.</para>
     <note><para>Currently only type <code>"int"</code> is supported in the &productName; 
       toolchain.</para></note>
@@ -420,9 +420,9 @@
     
     <example>
       <title>Attribute declarations</title>
-      <programlisting linenumbering="numbered" language="adl"> attributes int attr1 = -2;
- attributes int attr2 = 0xff43dc5;
- attributes int attr3 = myDefinitionParam;</programlisting>
+      <programlisting linenumbering="numbered" language="adl"> attribute int attr1 = -2;
+ attribute int attr2 = 0xff43dc5;
+ attribute int attr3 = myDefinitionParam;</programlisting>
       
       <para>
         In the above code excerpt: 
@@ -727,7 +727,7 @@
    
    source aPrimitiveImpl.c;
    
-   attributes int attr1 = 2; 
+   attribute int attr1 = 2; 
  }</programlisting>
       <programlisting linenumbering="numbered" language="adl" startinglinenumber="40"> primitive foo.bar.AnotherPrimitive 
      extends MyType, APrimitive {
@@ -735,7 +735,7 @@
    source anotherPrimitiveImpl.c;
    
    @Override
-   attributes int attr1 = 4;
+   attribute int attr1 = 4;
  }</programlisting>
       <para>The previous definition is equivalent to : </para>
       <programlisting linenumbering="numbered" language="adl" startinglinenumber="60"> primitive foo.bar.AnotherPrimitive {
@@ -746,7 +746,7 @@
    source aPrimitiveImpl.c;
    source anotherPrimitiveImpl.c;
    
-   attributes int attr1 = 4;
+   attribute int attr1 = 4;
  }</programlisting>
 
       <para>
@@ -798,8 +798,8 @@
       
       <programlisting linenumbering="numbered" language="adl"> primitive foo.bar.APrimitive(a, b) {
    ...
-   attributes int attr1 = a;
-   attributes int attr2 = b;
+   attribute int attr1 = a;
+   attribute int attr2 = b;
  }</programlisting>
       <programlisting linenumbering="numbered" language="adl" startinglinenumber="10"> primitive foo.bar.AnotherPrimitive(c) extends APrimitive(c, c) {
    ...
@@ -1128,7 +1128,7 @@
    contains primitive MyType as subComp1 
      primitive {
        source myImplementation.c;
-       attributes int attr1 = a;
+       attribute int attr1 = a;
      }
    ...
  }</programlisting>
@@ -1175,7 +1175,7 @@
    provides Itf1 as itf1;
    
    @Override
-   attributes attr1 = 2; 
+   attribute attr1 = 2; 
    
  }</programlisting>
  
@@ -1624,7 +1624,7 @@
         <lhs>AttrDef</lhs>
         <rhs>
           <nonterminal def="#adlgrammar-Annotations" /> <sbr />
-          'attributes' <nonterminal def="#adlgrammar-AttrType" /> <sbr/>
+          'attribute' <nonterminal def="#adlgrammar-AttrType" /> <sbr/>
           &lt;ID&gt; [ '='  <nonterminal def="#adlgrammar-AttrValue" /> ] [ ';' ] <sbr />
         </rhs>
       </production>
