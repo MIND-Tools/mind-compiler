@@ -624,6 +624,6 @@ void FullyQualifiedName() : {}
 
 void Path() : {}
 {
-  [ <DOT> <SLASH> ] ( <DOTDOT> <SLASH> )* 
+  [ <SLASH> ] [ <DOT> <SLASH> ] ( <DOTDOT> <SLASH> )* 
   <IDENTIFIER> ( <SLASH> <IDENTIFIER> )* <DOT> <IDENTIFIER>
 }
