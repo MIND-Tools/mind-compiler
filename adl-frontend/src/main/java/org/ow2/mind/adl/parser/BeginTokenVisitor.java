@@ -340,7 +340,10 @@ public class BeginTokenVisitor extends GJNoArguDepthFirst<NodeToken> {
     t = n.f1.accept(this);
     if (t != null) return t;
 
-    return n.f2;
+    t = n.f2.accept(this);
+    if (t != null) return t;
+
+    return n.f3;
   }
 
   @Override
