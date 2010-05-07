@@ -571,7 +571,7 @@ public abstract class AbstractLauncher {
      * @param defaultValue the default value of this option. May be
      *          <code>null</code>.
      * @param allowMultiple if <code>true</code>, this option can be specified
-     *          several time on a command-line. This that case, the last
+     *          several time on a command-line. In that case, the last
      *          occurrence is used.
      */
     public CmdArgument(final String shortName, final String longName,

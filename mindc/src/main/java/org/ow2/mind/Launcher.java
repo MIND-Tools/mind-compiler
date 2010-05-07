@@ -778,7 +778,7 @@ public class Launcher extends AbstractLauncher {
       if (option.isPresent(cmdLine)) {
         final CommandOptionHandler handler = CommandLineOptionExtensionHelper
             .getHandler(option);
-        handler.processCommandOption(option, context);
+        handler.processCommandOption(option, cmdLine, context);
       }
     }
   }
