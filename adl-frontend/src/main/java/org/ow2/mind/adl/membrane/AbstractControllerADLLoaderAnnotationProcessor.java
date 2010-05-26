@@ -49,7 +49,7 @@ public abstract class AbstractControllerADLLoaderAnnotationProcessor
   // Utility method
   // ---------------------------------------------------------------------------
 
-  protected Definition addControllerInterfae(final Definition definition,
+  protected Definition addControllerInterface(final Definition definition,
       final String controllerItfName, final String controllerSignature,
       final String controllerName, final String controllerImpl)
       throws ADLException {

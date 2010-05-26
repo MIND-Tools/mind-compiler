@@ -45,7 +45,7 @@ public class ContentControllerADLLoaderAnnotationProcessor
   public Definition processAnnotation(final Annotation annotation,
       final Node node, final Definition definition, final ADLLoaderPhase phase,
       final Map<Object, Object> context) throws ADLException {
-    return addControllerInterfae(definition, CC, CONTENT_CONTROLLER_SIGNATURE,
+    return addControllerInterface(definition, CC, CONTENT_CONTROLLER_SIGNATURE,
         "ContentController", "/fractal/internal/CCdelegate.c");
   }
 }

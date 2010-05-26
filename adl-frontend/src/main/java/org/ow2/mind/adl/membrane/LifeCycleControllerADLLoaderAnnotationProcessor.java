@@ -51,7 +51,7 @@ public class LifeCycleControllerADLLoaderAnnotationProcessor
       node.astSetDecoration("hasLifeCycleController", Boolean.TRUE);
     }
 
-    return addControllerInterfae(definition, LCC,
+    return addControllerInterface(definition, LCC,
         LIFECYCLE_CONTROLLER_SIGNATURE, "LifeCycleController",
         "/fractal/internal/LCCdelegate.c");
   }

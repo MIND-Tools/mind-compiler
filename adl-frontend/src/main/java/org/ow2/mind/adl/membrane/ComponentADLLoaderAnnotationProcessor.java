@@ -45,7 +45,7 @@ public class ComponentADLLoaderAnnotationProcessor
   public Definition processAnnotation(final Annotation annotation,
       final Node node, final Definition definition, final ADLLoaderPhase phase,
       final Map<Object, Object> context) throws ADLException {
-    return addControllerInterfae(definition, CI, COMPONENT_SIGNATURE,
+    return addControllerInterface(definition, CI, COMPONENT_SIGNATURE,
         "ComponentController", "/fractal/internal/CIdelegate.c");
   }
 }
