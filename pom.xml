@@ -491,6 +491,20 @@
 
         <pluginManagement>
             <plugins>
+                <plugin>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>2.3</version>
+                    <configuration>
+                        <archive>
+                            <manifest>
+                                <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                                <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                            </manifest>
+                        </archive>
+                    </configuration>
+                    
+                </plugin>
+            
                 <!-- By default run tests for groups "functional" and "checkin" -->
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>

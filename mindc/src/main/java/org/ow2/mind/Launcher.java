@@ -93,126 +93,122 @@ import org.ow2.mind.st.STNodeFactoryImpl;
 
 public class Launcher extends AbstractLauncher {
 
-  protected static final String        PROGRAM_NAME_PROPERTY_NAME = "cecilia.launcher.name";
-
   // System property name for external mind annotation packages
-  protected static final String        MIND_ANNOTATION_PACKAGES   = "mind.annotation.packages";
+  protected static final String        MIND_ANNOTATION_PACKAGES = "mind.annotation.packages";
 
-  protected final CmdArgument          targetDescOpt              = new CmdArgument(
-                                                                      "t",
-                                                                      "target-descriptor",
-                                                                      "Specify the target descriptor",
-                                                                      "<name>");
+  protected final CmdArgument          targetDescOpt            = new CmdArgument(
+                                                                    "t",
+                                                                    "target-descriptor",
+                                                                    "Specify the target descriptor",
+                                                                    "<name>");
 
-  protected final CmdArgument          compilerCmdOpt             = new CmdArgument(
-                                                                      null,
-                                                                      "compiler-command",
-                                                                      "the command of the C compiler",
-                                                                      "<path>",
-                                                                      "gcc",
-                                                                      false);
+  protected final CmdArgument          compilerCmdOpt           = new CmdArgument(
+                                                                    null,
+                                                                    "compiler-command",
+                                                                    "the command of the C compiler",
+                                                                    "<path>",
+                                                                    "gcc",
+                                                                    false);
 
-  protected final CmdAppendOption      cFlagsOpt                  = new CmdAppendOption(
-                                                                      "c",
-                                                                      "c-flags",
-                                                                      "the c-flags compiler directives",
-                                                                      "<flags>");
+  protected final CmdAppendOption      cFlagsOpt                = new CmdAppendOption(
+                                                                    "c",
+                                                                    "c-flags",
+                                                                    "the c-flags compiler directives",
+                                                                    "<flags>");
 
-  protected final CmdPathOption        includePathOpt             = new CmdPathOption(
-                                                                      "I",
-                                                                      "inc-path",
-                                                                      "the list of path to be added in compiler include paths",
-                                                                      "<path list>");
+  protected final CmdPathOption        includePathOpt           = new CmdPathOption(
+                                                                    "I",
+                                                                    "inc-path",
+                                                                    "the list of path to be added in compiler include paths",
+                                                                    "<path list>");
 
-  protected final CmdArgument          linkerCmdOpt               = new CmdArgument(
-                                                                      null,
-                                                                      "linker-command",
-                                                                      "the command of the linker",
-                                                                      "<path>",
-                                                                      "gcc",
-                                                                      false);
+  protected final CmdArgument          linkerCmdOpt             = new CmdArgument(
+                                                                    null,
+                                                                    "linker-command",
+                                                                    "the command of the linker",
+                                                                    "<path>",
+                                                                    "gcc",
+                                                                    false);
 
-  protected final CmdAppendOption      ldFlagsOpt                 = new CmdAppendOption(
-                                                                      "l",
-                                                                      "ld-flags",
-                                                                      "the ld-flags compiler directives",
-                                                                      "<flags>");
+  protected final CmdAppendOption      ldFlagsOpt               = new CmdAppendOption(
+                                                                    "l",
+                                                                    "ld-flags",
+                                                                    "the ld-flags compiler directives",
+                                                                    "<flags>");
 
-  protected final CmdPathOption        ldPathOpt                  = new CmdPathOption(
-                                                                      "L",
-                                                                      "ld-path",
-                                                                      "the list of path to be added to linker library search path",
-                                                                      "<path list>");
+  protected final CmdPathOption        ldPathOpt                = new CmdPathOption(
+                                                                    "L",
+                                                                    "ld-path",
+                                                                    "the list of path to be added to linker library search path",
+                                                                    "<path list>");
 
-  protected final CmdArgument          linkerScriptOpt            = new CmdArgument(
-                                                                      "T",
-                                                                      "linker-script",
-                                                                      "linker script to use (given path is resolved in source path)",
-                                                                      "<path>");
+  protected final CmdArgument          linkerScriptOpt          = new CmdArgument(
+                                                                    "T",
+                                                                    "linker-script",
+                                                                    "linker script to use (given path is resolved in source path)",
+                                                                    "<path>");
 
-  protected final CmdArgument          concurrentJobCmdOpt        = new CmdArgument(
-                                                                      "j",
-                                                                      "jobs",
-                                                                      "The number of concurrent compilation jobs",
-                                                                      "<number>",
-                                                                      "1",
-                                                                      false);
+  protected final CmdArgument          concurrentJobCmdOpt      = new CmdArgument(
+                                                                    "j",
+                                                                    "jobs",
+                                                                    "The number of concurrent compilation jobs",
+                                                                    "<number>",
+                                                                    "1", false);
 
-  protected final CmdFlag              printStackTraceOpt         = new CmdFlag(
-                                                                      "e",
-                                                                      null,
-                                                                      "Print error stack traces");
+  protected final CmdFlag              printStackTraceOpt       = new CmdFlag(
+                                                                    "e", null,
+                                                                    "Print error stack traces");
 
-  protected final CmdFlag              checkADLModeOpt            = new CmdFlag(
-                                                                      null,
-                                                                      "check-adl",
-                                                                      "Only check input ADL(s), do not compile");
+  protected final CmdFlag              checkADLModeOpt          = new CmdFlag(
+                                                                    null,
+                                                                    "check-adl",
+                                                                    "Only check input ADL(s), do not compile");
 
   // command line options
-  protected final CmdFlag              generateDefSrcOpt          = new CmdFlag(
-                                                                      "d",
-                                                                      "def2c",
-                                                                      "Only generate source code of the given definitions");                                               ;
+  protected final CmdFlag              generateDefSrcOpt        = new CmdFlag(
+                                                                    "d",
+                                                                    "def2c",
+                                                                    "Only generate source code of the given definitions");                                               ;
 
-  protected final CmdFlag              compileDefOpt              = new CmdFlag(
-                                                                      "D",
-                                                                      "def2o",
-                                                                      "Generate and compile source code of the given definitions, do not link an executable application");
+  protected final CmdFlag              compileDefOpt            = new CmdFlag(
+                                                                    "D",
+                                                                    "def2o",
+                                                                    "Generate and compile source code of the given definitions, do not link an executable application");
 
-  protected final CmdFlag              forceOpt                   = new CmdFlag(
-                                                                      "F",
-                                                                      "force",
-                                                                      "Force the regeneration and the recompilation of every output files");
+  protected final CmdFlag              forceOpt                 = new CmdFlag(
+                                                                    "F",
+                                                                    "force",
+                                                                    "Force the regeneration and the recompilation of every output files");
 
-  protected final CmdFlag              keepTempOpt                = new CmdFlag(
-                                                                      "K",
-                                                                      "keep",
-                                                                      "Keep temporary output files in default output directory");
+  protected final CmdFlag              keepTempOpt              = new CmdFlag(
+                                                                    "K",
+                                                                    "keep",
+                                                                    "Keep temporary output files in default output directory");
 
-  protected final CmdFlag              noBinASTOpt                = new CmdFlag(
-                                                                      "B",
-                                                                      "no-bin",
-                                                                      "Do not generate binary ADL/IDL ('.def', '.itfdef' and '.idtdef' files).");
+  protected final CmdFlag              noBinASTOpt              = new CmdFlag(
+                                                                    "B",
+                                                                    "no-bin",
+                                                                    "Do not generate binary ADL/IDL ('.def', '.itfdef' and '.idtdef' files).");
 
-  protected final CmdFlag              extensionPointsListOpt     = new CmdFlag(
-                                                                      null,
-                                                                      "extension-points",
-                                                                      "Print the list of available extension points and exit.");
+  protected final CmdFlag              extensionPointsListOpt   = new CmdFlag(
+                                                                    null,
+                                                                    "extension-points",
+                                                                    "Print the list of available extension points and exit.");
 
   protected boolean                    generateSrc;
   protected boolean                    compileDef;
 
-  protected static Logger              logger                     = FractalADLLogManager
-                                                                      .getLogger("launcher");
+  protected static Logger              logger                   = FractalADLLogManager
+                                                                    .getLogger("launcher");
 
   protected Map<String, String>        adlToExecName;
-  protected Map<Object, Object>        compilerContext            = new HashMap<Object, Object>();
+  protected Map<Object, Object>        compilerContext          = new HashMap<Object, Object>();
 
   protected Target                     targetDescriptor;
 
-  protected boolean                    printStackTrace            = false;
+  protected boolean                    printStackTrace          = false;
 
-  protected boolean                    checkADLMode               = false;
+  protected boolean                    checkADLMode             = false;
 
   protected File                       buildDir;
 
@@ -265,6 +261,12 @@ public class Launcher extends AbstractLauncher {
     // If help is asked, print it and exit.
     if (helpOpt.isPresent(cmdLine)) {
       printHelp(System.out);
+      System.exit(0);
+    }
+
+    // If version is asked, print it and exit.
+    if (versionOpt.isPresent(cmdLine)) {
+      printVersion(System.out);
       System.exit(0);
     }
 
@@ -785,13 +787,11 @@ public class Launcher extends AbstractLauncher {
 
   @Override
   protected void printUsage(final PrintStream ps) {
-    final String prgName = System.getProperty(PROGRAM_NAME_PROPERTY_NAME,
-        getClass().getName());
-    ps.println("Usage: " + prgName + " [OPTIONS] (<definition>[:<execname>])+");
+    ps.println("Usage: " + getProgramName()
+        + " [OPTIONS] (<definition>[:<execname>])+");
     ps.println("  where <definition> is the name of the component to"
         + " be compiled, ");
-    ps
-        .println("  and <execname> is the name of the output file to be created.");
+    ps.println("  and <execname> is the name of the output file to be created.");
   }
 
   protected void handleException(final InvalidCommandLineException e) {

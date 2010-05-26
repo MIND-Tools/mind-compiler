@@ -37,29 +37,38 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Abstract Cecilia compiler Launcher.
+ * Abstract compiler Launcher.
  */
 public abstract class AbstractLauncher {
 
-  protected final CmdPathOption srcPathOpt = new CmdPathOption(
-                                               "S",
-                                               "src-path",
-                                               "the search path of ADL,IDL and implementation files (list of path separated by '"
-                                                   + File.pathSeparator + "')",
-                                               "<path list>");
+  protected static final String PROGRAM_NAME_PROPERTY_NAME = "cecilia.launcher.name";
 
-  protected final CmdArgument   outDirOpt  = new CmdArgument(
-                                               "o",
-                                               "out-path",
-                                               "the path where generated files will be put",
-                                               "<output path>", ".", false);
+  protected final CmdPathOption srcPathOpt                 = new CmdPathOption(
+                                                               "S",
+                                                               "src-path",
+                                                               "the search path of ADL,IDL and implementation files (list of path separated by '"
+                                                                   + File.pathSeparator
+                                                                   + "')",
+                                                               "<path list>");
 
-  protected final CmdFlag       helpOpt    = new CmdFlag("h", "help",
-                                               "Print this help and exit");
+  protected final CmdArgument   outDirOpt                  = new CmdArgument(
+                                                               "o",
+                                                               "out-path",
+                                                               "the path where generated files will be put",
+                                                               "<output path>",
+                                                               ".", false);
 
-  protected final Options       options    = new Options();
+  protected final CmdFlag       helpOpt                    = new CmdFlag("h",
+                                                               "help",
+                                                               "Print this help and exit");
+
+  protected final CmdFlag       versionOpt                 = new CmdFlag("v",
+                                                               "version",
+                                                               "Print version number and exit");
+
+  protected final Options       options                    = new Options();
   {
-    options.addOptions(helpOpt, srcPathOpt, outDirOpt);
+    options.addOptions(helpOpt, versionOpt, srcPathOpt, outDirOpt);
   }
 
   // ---------------------------------------------------------------------------
@@ -191,7 +200,21 @@ public abstract class AbstractLauncher {
     return map;
   }
 
+  protected String getVersion() {
+    final String pkgVersion = this.getClass().getPackage()
+        .getImplementationVersion();
+    return (pkgVersion == null) ? "unknown" : pkgVersion;
+  }
+
+  protected String getProgramName() {
+    return System.getProperty(PROGRAM_NAME_PROPERTY_NAME, getClass().getName());
+  }
+
   protected abstract void printUsage(PrintStream ps);
+
+  protected void printVersion(final PrintStream ps) {
+    ps.println(getProgramName() + " version " + getVersion());
+  }
 
   protected void printHelp(final PrintStream ps) {
     printUsage(ps);
