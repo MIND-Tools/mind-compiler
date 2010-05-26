@@ -24,6 +24,8 @@ package org.ow2.mind;
 
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.testng.annotations.BeforeMethod;
 
@@ -44,13 +46,25 @@ public abstract class AbstractFunctionalTest {
 
   protected void initSourcePath(final CompilerRunner runner,
       final String... rootDirs) {
+    initSourcePath(runner, null, rootDirs);
+  }
+
+  protected void initSourcePath(final ClassLoader parent,
+      final String... rootDirs) {
+    initSourcePath(runner, parent, rootDirs);
+  }
+
+  protected void initSourcePath(final CompilerRunner runner,
+      final ClassLoader parent, final String... rootDirs) {
+    final List<URL> rootDirList = new ArrayList<URL>();
+    rootDirList.add(getClass().getClassLoader().getResource(COMMON_ROOT_DIR));
     for (String rootDir : rootDirs) {
       if (!rootDir.endsWith("/")) rootDir += "/";
-      final ClassLoader srcLoader = new URLClassLoader(new URL[]{
-          getClass().getClassLoader().getResource(COMMON_ROOT_DIR),
-          getClass().getClassLoader().getResource(rootDir)}, null);
-      runner.context.put("classloader", srcLoader);
+      rootDirList.add(getClass().getClassLoader().getResource(rootDir));
     }
+    final ClassLoader srcLoader = new URLClassLoader(rootDirList
+        .toArray(new URL[0]), parent);
+    runner.context.put("classloader", srcLoader);
   }
 
   protected boolean isRunningOnWindows() {
