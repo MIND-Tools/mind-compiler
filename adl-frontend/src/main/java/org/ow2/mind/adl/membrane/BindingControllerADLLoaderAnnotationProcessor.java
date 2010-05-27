@@ -53,14 +53,14 @@ public class BindingControllerADLLoaderAnnotationProcessor
       final Map<Object, Object> context) throws ADLException {
     assert annotation instanceof BindingController;
     if (((BindingController) annotation).allowNoRequiredItf) {
-      return addControllerInterfae(definition, BC,
+      return addControllerInterface(definition, BC,
           BINDING_CONTROLLER_SIGNATURE, "BindingController",
           "/fractal/internal/BCdelegate.c");
     } else {
       for (final Interface itf : castNodeError(definition,
           InterfaceContainer.class).getInterfaces()) {
         if (TypeInterfaceUtil.isClient(itf))
-          return addControllerInterfae(definition, BC,
+          return addControllerInterface(definition, BC,
               BINDING_CONTROLLER_SIGNATURE, "BindingController",
               "/fractal/internal/BCdelegate.c");
       }

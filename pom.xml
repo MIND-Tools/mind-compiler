@@ -349,6 +349,10 @@
                             <htmlStylesheet>css/docbook.css</htmlStylesheet>
                             <customizationParameters>
                                 <parameter>
+                                    <name>root.path</name>
+                                    <value>.</value>
+                                </parameter>
+                                <parameter>
                                     <name>pdf.link</name>
                                     <value>mindc-user-guide.pdf</value>
                                 </parameter>
@@ -379,6 +383,10 @@
                             <htmlStylesheet>../css/docbook-chunk.css</htmlStylesheet>
                             <customizationParameters>
                                 <parameter>
+                                    <name>root.path</name>
+                                    <value>..</value>
+                                </parameter>
+                                <parameter>
                                     <name>pdf.link</name>
                                     <value>../mindc-user-guide.pdf</value>
                                 </parameter>
@@ -407,6 +415,10 @@
                             <htmlCustomization>${basedir}/src/docbkx/xsl/minddoc-html.xsl</htmlCustomization>
                             <htmlStylesheet>css/docbook.css</htmlStylesheet>
                             <customizationParameters>
+                                <parameter>
+                                    <name>root.path</name>
+                                    <value>.</value>
+                                </parameter>
                                 <parameter>
                                     <name>pdf.link</name>
                                     <value>mindc-dev-guide.pdf</value>
@@ -437,6 +449,10 @@
                             <htmlCustomization>${basedir}/src/docbkx/xsl/minddoc-chunk.xsl</htmlCustomization>
                             <htmlStylesheet>../css/docbook-chunk.css</htmlStylesheet>
                             <customizationParameters>
+                                <parameter>
+                                    <name>root.path</name>
+                                    <value>..</value>
+                                </parameter>
                                 <parameter>
                                     <name>pdf.link</name>
                                     <value>../mindc-dev-guide.pdf</value>
@@ -475,6 +491,20 @@
 
         <pluginManagement>
             <plugins>
+                <plugin>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>2.3</version>
+                    <configuration>
+                        <archive>
+                            <manifest>
+                                <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                                <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                            </manifest>
+                        </archive>
+                    </configuration>
+                    
+                </plugin>
+            
                 <!-- By default run tests for groups "functional" and "checkin" -->
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>

@@ -14,8 +14,8 @@
 	<extension point="org.ow2.mind.mindc.command-line-options">
 		<cmdArgument shortName="Z" longName="cmdArgument"
 			description="Desc for cmdArgument"
-			arrgDesc="argDesc"
-			deaultValue="defaultValue"
+			argDesc="argDesc"
+			defaultValue="defaultValue"
 			allowMultiple="false"
 			handler="org.ow2.mind.mindc.test.cli.CmdArgumentHandler" />	
 	</extension>
@@ -23,7 +23,7 @@
 		<cmdAppendOption shortName="W" longName="cmdAppendOption"
 			description="Desc for cmdAppendOption"
 			argNameDesc="argNameDesc"
-			deaultValue="defaultValue"
+			defaultValue="defaultValue"
 			separator=";"
 			handler="org.ow2.mind.mindc.test.cli.CmdAppendOptionHandler" />	
 	</extension>

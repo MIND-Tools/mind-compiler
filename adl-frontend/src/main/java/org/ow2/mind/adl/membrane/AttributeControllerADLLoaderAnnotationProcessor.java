@@ -57,7 +57,7 @@ public class AttributeControllerADLLoaderAnnotationProcessor
       throw new ADLException(
           ADLErrors.INVALID_ATTRIBUTE_CONTROLLER_NO_ATTRIBUTE, node);
 
-    return addControllerInterfae(definition, AC,
+    return addControllerInterface(definition, AC,
         ATTRIBUTE_CONTROLLER_SIGNATURE, "AttributeController",
         "/fractal/internal/ACdelegate.c");
   }

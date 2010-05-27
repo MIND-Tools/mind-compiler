@@ -67,11 +67,6 @@ public class IncludeLoader extends AbstractIDLLoader {
     for (final Include include : ((IncludeContainer) container).getIncludes()) {
       final String path = getIncludedPath(include);
 
-      // do not enforce restriction on the name of the included file.
-      // if (!isValid(path)) {
-      // throw new ADLException(IDLErrors.INVALID_INCLUDE, include, path);
-      // }
-
       final String extension = getExtension(path);
       if (extension == null
           || !(extension.equals(IDT_EXTENSION) || extension

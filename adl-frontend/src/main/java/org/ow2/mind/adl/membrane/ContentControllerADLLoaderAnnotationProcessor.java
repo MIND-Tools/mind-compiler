@@ -86,7 +86,7 @@ public class ContentControllerADLLoaderAnnotationProcessor
     addUsedIDL(definition, LIFECYCLE_CONTROLLER_SIGNATURE, context);
     addUsedIDL(definition, COMPONENT_SIGNATURE, context);
 
-    return addControllerInterfae(definition, CC, CONTENT_CONTROLLER_SIGNATURE,
+    return addControllerInterface(definition, CC, CONTENT_CONTROLLER_SIGNATURE,
         "ContentController", "/fractal/internal/CCdelegate.c");
   }
 

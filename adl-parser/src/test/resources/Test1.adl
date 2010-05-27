@@ -20,6 +20,11 @@ composite fuu.Bop<T conformsto Toto>(arg1, arg2) extends Bar<T, Bar> {
     provides Allocator as allocator;
     
     attribute int attr1 = 20;
+    
+    source foo.c;
+    source /foo.c;
+    source ../bar/foo.c;
+    source ./../bar/foo.c;
   }
 
   @Override contains A as a

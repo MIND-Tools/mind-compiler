@@ -57,18 +57,16 @@ public class AnnotationProcessorLoader extends AbstractIDLLoader
 
     // Process this node
     final Annotation[] annotations = AnnotationHelper.getAnnotations(node);
-    if (annotations != null) {
-      for (final Annotation annotation : annotations) {
-        final IDLLoaderProcessor processorAnnotation = annotation.getClass()
-            .getAnnotation(IDLLoaderProcessor.class);
-        if (processorAnnotation != null) {
-          final IDLLoaderPhase[] processPhases = processorAnnotation.phases();
-          for (final IDLLoaderPhase processPhase : processPhases) {
-            if (phase == processPhase) {
-              executeProcessor(processorAnnotation.processor(), annotation,
-                  node, idl, context);
-              break;
-            }
+    for (final Annotation annotation : annotations) {
+      final IDLLoaderProcessor processorAnnotation = annotation.getClass()
+          .getAnnotation(IDLLoaderProcessor.class);
+      if (processorAnnotation != null) {
+        final IDLLoaderPhase[] processPhases = processorAnnotation.phases();
+        for (final IDLLoaderPhase processPhase : processPhases) {
+          if (phase == processPhase) {
+            executeProcessor(processorAnnotation.processor(), annotation, node,
+                idl, context);
+            break;
           }
         }
       }
