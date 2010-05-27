@@ -28,6 +28,7 @@ import org.ow2.mind.adl.annotation.ADLLoaderPhase;
 import org.ow2.mind.adl.annotation.ADLLoaderProcessor;
 import org.ow2.mind.adl.membrane.ContentControllerADLLoaderAnnotationProcessor;
 import org.ow2.mind.annotation.Annotation;
+import org.ow2.mind.annotation.AnnotationElement;
 import org.ow2.mind.annotation.AnnotationTarget;
 
 /**
@@ -38,7 +39,13 @@ import org.ow2.mind.annotation.AnnotationTarget;
 @ADLLoaderProcessor(processor = ContentControllerADLLoaderAnnotationProcessor.class, phases = {ADLLoaderPhase.AFTER_EXTENDS})
 public class ContentController implements Annotation {
 
-  private static final AnnotationTarget[] ANNOTATION_TARGETS = {DEFINITION};
+  private static final AnnotationTarget[] ANNOTATION_TARGETS    = {DEFINITION};
+
+  /**
+   * The number of dynamic sub component that this composite can manage.
+   */
+  @AnnotationElement(hasDefaultValue = true)
+  public int                              nbDynamicSubComponent = 10;
 
   public AnnotationTarget[] getAnnotationTargets() {
     return ANNOTATION_TARGETS;

@@ -26,6 +26,7 @@ import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
 
@@ -87,8 +88,8 @@ public final class AnnotationHelper {
     final Map<Class<? extends Annotation>, Annotation> annotations = new IdentityHashMap<Class<? extends Annotation>, Annotation>();
 
     void addAnnotation(final Annotation annotation) throws ADLException {
-      final Annotation previousAnnotation = annotations.put(annotation
-          .getClass(), annotation);
+      final Annotation previousAnnotation = annotations.put(
+          annotation.getClass(), annotation);
       if (previousAnnotation != null) {
         throw new ADLException(AnnotationErrors.DUPLICATED_ANNOTATION,
             previousAnnotation);
@@ -97,6 +98,19 @@ public final class AnnotationHelper {
 
     Annotation getAnnotation(final Class<? extends Annotation> annotationClass) {
       return annotations.get(annotationClass);
+    }
+
+    /**
+     * To by used from string template
+     */
+    public Map<String, Annotation> getAnnotationMap() {
+      final Map<String, Annotation> map = new HashMap<String, Annotation>(
+          annotations.size());
+      for (final Map.Entry<Class<? extends Annotation>, Annotation> e : annotations
+          .entrySet()) {
+        map.put(e.getKey().getName(), e.getValue());
+      }
+      return map;
     }
 
     Annotation[] getAnnotations() {

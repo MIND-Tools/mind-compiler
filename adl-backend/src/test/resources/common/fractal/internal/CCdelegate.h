@@ -28,13 +28,6 @@
 #include "fractal/api/ErrorCode.idt.h"
 #include "fractal/api/ContentController.itf.h"
 
-struct __component_ContentBindingDescriptor {
-  fractal_api_Component clientComponent;
-  const char* clientItfName;
-  fractal_api_Component serverComponent;
-  const char* serverItfName;
-};
-
 struct __component_InternalClientItfDescriptor {
   const char *name;
   intptr_t offset;
@@ -66,8 +59,6 @@ struct __component_ContentDescriptor
   fractal_api_Component *staticSubComponents;
   int nbDynamicSubComponent;
   fractal_api_Component *dynamicSubComponents;
-  int nbBindingDescriptor;
-  struct __component_ContentBindingDescriptor *bindingDesc;
   struct __component_InternalItfsDescriptor *internalItfsDesc;
 };
 

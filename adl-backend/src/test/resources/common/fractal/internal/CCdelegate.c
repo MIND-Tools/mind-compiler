@@ -24,6 +24,7 @@
 
 #include "CCdelegate.h"
 #include "fractal/api/BindingController.itf.h"
+#include "fractal/api/LifeCycleController.itf.h"
 #include <string.h>
 
 #define ITF_PTR(offset) ((void **) (((intptr_t)component_ptr) + offset))
@@ -109,7 +110,7 @@ int __component_removeFcSubComponents(fractal_api_Component subComponent,
     return FRACTAL_API_INVALID_ARG;
   }
 
-  slot = findSubComponentSlot(subComponent, desc);y
+  slot = findSubComponentSlot(subComponent, desc);
   if (slot == NULL) {
     // 'subComponent' is not a known sub-component.
     return FRACTAL_API_NO_SUCH_SUB_COMPONENT;
@@ -193,7 +194,7 @@ int __component_addFcSubBinding(fractal_api_Component clientComponent,
     if (err == FRACTAL_API_OK) {
       // LCC found
       if (((fractal_api_LifeCycleController) clientLCC)->meths->getFcState(
-        ((fractal_api_LifeCycleController) clientLCC)->selfData) != FRACTA_API_STOPPED) {
+        ((fractal_api_LifeCycleController) clientLCC)->selfData) != FRACTAL_API_STOPPED) {
         return FRACTAL_API_ILLEGAL_LIFE_CYCLE;
       }
     }
@@ -262,7 +263,7 @@ int __component_removeFcSubBinding(fractal_api_Component clientComponent,
     if (err == FRACTAL_API_OK) {
       // LCC found
       if (((fractal_api_LifeCycleController) clientLCC)->meths->getFcState(
-        ((fractal_api_LifeCycleController) clientLCC)->selfData) != FRACTA_API_STOPPED) {
+        ((fractal_api_LifeCycleController) clientLCC)->selfData) != FRACTAL_API_STOPPED) {
         return FRACTAL_API_ILLEGAL_LIFE_CYCLE;
       }
     }

@@ -16,43 +16,19 @@ ControllerData(definition, controller) ::= <<
 struct __component_ContentDescriptor *contentDesc;
 >>
 
+nbDynamicSubComponent(definition) ::= <<
+<definition.astDecorations.("annotations").annotationMap.("org.ow2.mind.adl.annotation.predefined.controller.ContentController").nbDynamicSubComponent>
+>>
+
 ControllerGlobalDataStaticInit(definition, controller) ::= <<
-<staticInitContentBindingDescriptor(definition=definition, controller=controller)> \
-fractal_api_Component instance_name##_dynamicSubComponent[10]; \
+fractal_api_Component instance_name##_dynamicSubComponent[<nbDynamicSubComponent(definition=definition)>]; \
 struct __component_ContentDescriptor instance_name##_contentDesc = { \
   sizeof(instance_name.__component_internal_data.components)/sizeof(fractal_api_Component), \
   (fractal_api_Component *) & instance_name.__component_internal_data.components, \
   sizeof(instance_name##_dynamicSubComponent)/sizeof(fractal_api_Component), \
   instance_name##_dynamicSubComponent, \
-  sizeof(instance_name##_contentBindingDesc)/sizeof(struct __component_ContentBindingDescriptor), \
-  instance_name##_contentBindingDesc, \
   & <definition.name;format="toCName">_internalItfs_descriptor \
 };
->>
-
-staticInitContentBindingDescriptor(definition, controller) ::= <<
-struct __component_ContentBindingDescriptor instance_name##_contentBindingDesc[<bindingCount(definition=definition)> + 10] = { <if (definition.astNodeTypes.("binding"))><definition.bindings:staticInitContentBinding(definition=definition, controller=controller, binding=it);separator="\\\n"><endif> };
->>
-
-staticInitContentBinding(definition, controller, binding) ::= <<
-  { (fractal_api_Component) <staticSubComponentPointer(subComponentName=binding.fromComponent)>, \
-    __COMPONENT_STRINGIFY_ITF_NAME(<binding.fromInterface><if (binding.fromInterfaceNumber)>[<binding.fromInterfaceNumber>]<endif>), \
-    (fractal_api_Component) <staticSubComponentPointer(subComponentName=binding.toComponent)>, \
-    __COMPONENT_STRINGIFY_ITF_NAME(<binding.toInterface><if (binding.toInterfaceNumber)>[<binding.toInterfaceNumber>]<endif>) }
->>
-
-staticSubComponentPointer(subComponentName) ::= <<
-<if (isThis.(subComponentName))> &instance_name
-<else> &<subComponentName>
-<endif>
->>
-
-bindingCount(definition) ::= <<
-<if (definition.astNodeTypes.("binding"))>
-<length(definition.bindings)>
-<else>
-0
-<endif>
 >>
 
 ControllerDataStaticInit(definition, controller) ::= <<
@@ -70,24 +46,12 @@ ControllerDataFactoryNew(definition, controller) ::= <<
   newInstance->__component_internal_data.contentDesc->staticSubComponents = 
     (fractal_api_Component*) & newInstance->__component_internal_data.components;
   
-  newInstance->__component_internal_data.contentDesc->nbDynamicSubComponent = 10;
+  newInstance->__component_internal_data.contentDesc->nbDynamicSubComponent = <nbDynamicSubComponent(definition=definition)>;
   newInstance->__component_internal_data.contentDesc->dynamicSubComponents = 
     (fractal_api_Component*) CALL_PTR((memory_api_Allocator) allocItf, alloc)(sizeof(fractal_api_Component) * newInstance->__component_internal_data.contentDesc->nbDynamicSubComponent);
   if (newInstance->__component_internal_data.contentDesc->dynamicSubComponents == NULL)
     goto error_content_dynamicSubComponents;
-  
-  newInstance->__component_internal_data.contentDesc->nbBindingDescriptor = <bindingCount(definition=definition)> + 10;
-  newInstance->__component_internal_data.contentDesc->bindingDesc =
-    (struct __component_ContentBindingDescriptor *) CALL_PTR((memory_api_Allocator) allocItf, alloc)(sizeof(struct __component_ContentBindingDescriptor *) * newInstance->__component_internal_data.contentDesc->nbBindingDescriptor);
-  if (newInstance->__component_internal_data.contentDesc->bindingDesc == NULL)
-    goto error_content_bindingDesc;
-  
-  <if (definition.astNodeTypes.("binding"))><if (definition.bindings)>
-  {
-    int i = 0;
-    <definition.bindings:factoryInitBinding(definition=definition, binding=it);separator="\n">
-  }
-  <endif><endif>
+
 >>
 
 factoryInitBinding(definition, binding) ::= <<
@@ -109,8 +73,6 @@ subComponentPointer(subComponentName) ::= <<
 >>
 
 ControllerDataFactoryNewClear(definition, controller) ::= <<
-  CALL_PTR((memory_api_Allocator) allocItf, free)(newInstance->__component_internal_data.contentDesc->bindingDesc);
-error_content_bindingDesc :
   CALL_PTR((memory_api_Allocator) allocItf, free)(newInstance->__component_internal_data.contentDesc->dynamicSubComponents);
 error_content_dynamicSubComponents :
   CALL_PTR((memory_api_Allocator) allocItf, free)(newInstance->__component_internal_data.contentDesc);
@@ -118,7 +80,7 @@ error_contentDesc :
 >>
 
 ControllerDataFactoryDestroy(definition, controller) ::= <<
-  CALL_PTR((memory_api_Allocator) allocItf, free)(destroyInstance->__component_internal_data.contentDesc->bindingDesc);
+  CALL_PTR((memory_api_Allocator) allocItf, free)(destroyInstance->__component_internal_data.contentDesc->dynamicSubComponents);
   CALL_PTR((memory_api_Allocator) allocItf, free)(destroyInstance->__component_internal_data.contentDesc);
 >>
 

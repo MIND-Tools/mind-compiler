@@ -1,5 +1,5 @@
 
-@controller.ContentController
+@controller.ContentController(nbDynamicSubComponent=20)
 composite controller.content.MultiCompositeComponent extends CCTested {
 
   contains PrimitiveComponent as subComp1;
