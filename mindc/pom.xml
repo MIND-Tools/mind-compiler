@@ -50,6 +50,12 @@
 			<classifier>jdk15</classifier>
 		</dependency>
         
+        <dependency>
+        	<groupId>org.ow2.mind</groupId>
+        	<artifactId>annotations</artifactId>
+        	<version>0.3-alpha-1-SNAPSHOT</version>
+        	<scope>compile</scope>
+        </dependency>
     </dependencies>
 
     <build>

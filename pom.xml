@@ -42,7 +42,8 @@
         <module>fractal-runtime</module>
         <module>fractal-adl-bundle</module>
         <module>plugin-loader</module>
-    </modules>
+        <module>annotations</module>
+  </modules>
 
     <developers>
         <developer>
@@ -177,6 +178,12 @@
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>plugin-loader</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>annotations</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
@@ -624,7 +631,7 @@
                                             synbolic link to point to the new
                                             version.
                                         -->
-                                        <sshexec host="${ow2.hostname}" username="${ow2.username}" passphrase="" keyfile="${user.home}/.ssh/id_rsa" command="cd ${ow2.site.deploy.dir}; ln -nfs mindc-${project.version} mindc" />
+                                        <sshexec host="${ow2.hostname}" username="${ow2.username}" passphrase="" keyfile="${user.home}/.ssh/id_rsa" command="cd ${ow2.site.deploy.dir}; ln -nfs mindc-${project.version} mindc"/>
                                     </tasks>
                                 </configuration>
                             </execution>

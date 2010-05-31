@@ -1,0 +1,87 @@
+template st.interfaceWrapping.IDL2CPLWRAPPER : st.interfaces.IDL2C{
+  $${
+
+/**
+ * Copyright (C) 2010 France Telecom
+ *
+ * This file is part of "Mind Compiler" is free software: you can redistribute 
+ * it and/or modify it under the terms of the GNU Lesser General Public License 
+ * as published by the Free Software Foundation, either version 3 of the 
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT 
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Contact: mind@ow2.org
+ *
+ * Authors: Matthieu ANNE
+ * Contributors:
+ */  
+
+/** 
+ * Generates a ".c" wrapper file.
+ */
+ 
+cplFile(idl,itfName,dualMeths) ::= <<
+/* This file is a generated file, do not edit. */
+
+<idl.methods:{<externPrototype(method=it, dualMeths=dualMeths)>};separator="\n">
+ 
+<idl.methods:{<wrapMethod(itfName=itfName, method=it, dualMeths=dualMeths)>};separator="\n\n">
+>>
+
+externPrototype(method, dualMeths) ::= <<
+<if(dualMeths.(method.name))>
+extern <dualMethPrototype(name=dualMeths.(method.name) , parameters=method.parameters)>;
+<else>
+extern <methodPrototype(name=method.name , parameters=method.parameters , withThisPtr="false", vaArgs=vaArgsMap.(method.vaArgs))>;
+<endif>
+>>
+
+dualMethPrototype(name, parameters) ::= <<
+<name>(<parameters:parameterDef(parameter=it); separator=", ">, va_list param_list)
+>>
+
+wrapMethod(itfName, method, dualMeths) ::= <<
+<if(dualMeths.(method.name))>
+<methDef(itfName=itfName, method=method, vaArgs="false")>{
+<if (! isVoidMap.(method.type.name))><varDef(type=method.type, name="ret")>;<endif>
+va_list paramList;
+va_start(paramList, <first(method.parameters).name>);
+<if (! isVoidMap.(method.type.name))>ret = <endif><dualMeths.(method.name)>(<method.parameters:parameterName(parameter=it); separator=", ">, paramList);
+va_end(paramList);
+<if (! isVoidMap.(method.type.name))>return <endif>ret;
+<else>
+<methDef(itfName=itfName, method=method, vaArgs=vaArgsMap.(method.vaArgs))>{
+<if (! isVoidMap.(method.type.name))>
+return <endif><fctCall(method=method)>;
+<endif>
+}
+>>
+
+methDef(itfName, method, vaArgs) ::= <<
+<typeQualifier(qualifiers=method)><varDef(type=method.type, name=methodSignature(itfName = itfName, name=method.name, parameters=method.parameters, vaArgs=vaArgs))>
+>>
+
+methodSignature(itfName, name, parameters, vaArgs) ::= <<
+METH(<itfName>, <name>)(<if(parameters)>
+<parameters:parameterDef(parameter=it); separator=", "> <if (vaArgs)>, ...<endif>
+<else>
+<if (vaArgs)> ...
+<else>
+void
+<endif>
+<endif>)
+>>
+
+fctCall(method) ::= <<
+<method.name>(<method.parameters:parameterName(parameter=it); separator=", ">)
+>>
+
+  }$$
+}
