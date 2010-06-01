@@ -564,6 +564,263 @@
     
     </section>
     
+    <section id="api-fapi-CC">
+      <title>The <classname>fractal.api.ContentController</classname> interface</title>
+
+      <para>This interface use constants defined in 
+        <link linkend="api-fapi-EC"><filename>fractal/api/ErrorConst.idt</filename></link>.</para>
+      
+      <para>A component interface to control the content of the component to which it
+        belongs. This content is supposed to be made of an unordered, unstructured
+        set of components and bindings.</para>
+      
+      <para>This interface defines the following methods:</para>
+
+      <informaltable border="all" width="100%">
+        <tr>
+          <td>
+            <programlisting language="idl"> int getFcSubComponents(in fractal.api.Component subComponents[]);</programlisting>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <para>The <varname>getFcSubComponents</varname> method returns the sub-components
+               of the component to which this interface belongs. More precisely,
+               if the given <code>subComponents</code> is <code>null</code>, this
+               method returns the number of sub components. If it is not 
+               <code>null</code>, this method assumes that the given array is big
+               enough to contain all the references to the <code>Component</code>
+               interfaces of the sub components.</para>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <variablelist>
+              <varlistentry>
+                <term><varname>subComponents</varname></term>
+                <listitem><para>an array into which the references to the
+                  <link linkend="api-fapi-C"><classname>fractal.api.Component</classname></link>
+                  interfaces of the sub components are copied. Can be
+                  <code>null</code>.</para></listitem>
+              </varlistentry>
+              <varlistentry>
+                <term>return</term>
+                <listitem><para>the number of sub components; or
+                  <code>FRACTAL_API_OPERATION_NOT_SUPPORTED</code> if this operation is not
+                  supported.</para></listitem>
+              </varlistentry>
+            </variablelist>
+          </td>
+        </tr>
+      </informaltable>
+    
+      <informaltable border="all" width="100%">
+        <tr>
+          <td>
+            <programlisting language="idl"> int addFcSubComponent(in fractal.api.Component subComponent);</programlisting>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <para>The <varname>addFcSubComponent</varname> method adds a sub-component 
+            to this component. More precisely adds the component whose reference
+            is given as a sub-component of the component to which this interface
+            belongs. If <varname>C</varname> is the sub-component set returned
+            by <varname>getFcSubComponents</varname> just before a call to this
+            method, and <varname>C'</varname> is the sub-component set just 
+            after this call, then <code>subComponent</code> is guaranteed to be
+            in <varname>C'</varname>, but <varname>C'</varname> is 
+            <emphasis>not</emphasis> guaranteed to be the union of 
+            <varname>C</varname> and <code>{subComponent}</code>, nor to contain
+            all the elements of <varname>C</varname>.</para>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <variablelist>
+              <varlistentry>
+                <term><varname>subComponent</varname></term>
+                <listitem><para>the component to be added inside this component.</para></listitem>
+              </varlistentry>
+              <varlistentry>
+                <term>return</term>
+                <listitem><para><code>0</code> if the component is added 
+                  correctly. <code>FRACTAL_API_ILLEGAL_CONTENT</code> if the 
+                  component cannot be added. 
+                  <code>FRACTAL_API_ILLEGAL_LIFE_CYCLE</code> if this component
+                  has a 
+                  interface, but it is not in an appropriate state to perform 
+                  this operation. <code>FRACTAL_API_OPERATION_NOT_SUPPORTED</code>
+                  if this operation is not supported.</para></listitem>
+              </varlistentry>
+            </variablelist>
+          </td>
+        </tr>
+      </informaltable>
+    
+      <informaltable border="all" width="100%">
+        <tr>
+          <td>
+            <programlisting language="idl"> int removeFcSubComponent(in fractal.api.Component subComponent);</programlisting>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <para>The <varname>removeFcSubComponent</varname> method removes a
+              sub-component from this component. More precisely removes the
+              sub-component whose reference is given from the component to which
+              this interface belongs. If <varname>C</varname> is the sub-component
+              set returned by <code>getFcSubComponents</code> just before a call
+              to this method, and <varname>C''</varname> is the sub-component set
+              just after this call, then <code>subComponent</code> is guaranteed
+              not to be in <varname>C''</varname>, but <varname>C''</varname> is
+              <emphasis>not</emphasis> guaranteed to be the difference of 
+              <varname>C</varname> and <code>{subComponent}</code>, nor to 
+              contain all the elements of <varname>C</varname> distinct from 
+              <code>subComponent</code>.</para>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <variablelist>
+              <varlistentry>
+                <term><varname>subComponent</varname></term>
+                <listitem><para>the component to be removed from this component.</para></listitem>
+              </varlistentry>
+              <varlistentry>
+                <term><varname>serverItf</varname></term>
+                <listitem><para>a server interface.</para></listitem>
+              </varlistentry>
+              <varlistentry>
+                <term>return</term>
+                <listitem><para><code>0</code> if the component has been removed correctly.
+                  <code>FRACTAL_API_ILLEGAL_CONTENT</code> if the component 
+                  cannot be removed. <code>FRACTAL_API_NO_SUCH_SUB_COMPONENT</code>
+                  if the given <code>subComponent</code> is not a sub component.
+                  <code>FRACTAL_API_ILLEGAL_LIFE_CYCLE</code> if this component
+                  has a <link linkend="api-fapi-LCC">LifeCycleController</link>
+                  interface, but it is not in an appropriate state to perform 
+                  this operation. <code>FRACTAL_API_OPERATION_NOT_SUPPORTED</code>
+                  if this operation is not supported.</para></listitem>
+              </varlistentry>
+            </variablelist>
+          </td>
+        </tr>
+      </informaltable>
+    
+      <informaltable border="all" width="100%">
+        <tr>
+          <td>
+            <programlisting language="idl"> int addFcSubBinding(in fractal.api.Component clientComponent,
+   in string clientItfName, in fractal.api.Component serverComponent,
+   in string serverItfName);</programlisting>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <para>The <varname>addFcSubBinding</varname> method creates a binding
+              inside this component.</para>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <variablelist>
+              <varlistentry>
+                <term><varname>clientComponent</varname></term>
+                <listitem><para>the component that contains the client interface
+                  that has to be bound. If <code>null</code> the client component is
+                  assumed to be the component this interface belongs.</para></listitem>
+              </varlistentry>
+              <varlistentry>
+                <term><varname>clientItfName</varname></term>
+                <listitem><para>the name of the interface at the client side of the
+                  binding. If the given <code>clientComponent</code> is a sub component;
+                  this name must refer to a client interface. If the given
+                  <code>clientComponent</code> refers to the component this interface
+                  belongs; this name must refer to a server interface.</para></listitem>
+              </varlistentry>
+              <varlistentry>
+                <term><varname>serverComponent</varname></term>
+                <listitem><para>the component that contains the server interface
+                  that has to be bound. If <code>null</code> the server component is
+                  assumed to be the component this interface belongs.</para></listitem>
+              </varlistentry>
+              <varlistentry>
+                <term><varname>serverItfName</varname></term>
+                <listitem><para>the name of the interface at the server side of the
+                  binding. If the given <code>serverComponent</code> is a sub component;
+                  this name must refer to a server interface. If the given
+                  <code>serverComponent</code> refers to the component this interface
+                  belongs; this name must refer to a client interface.</para></listitem>
+              </varlistentry>
+              <varlistentry>
+                <term>return</term>
+                <listitem><para><code>0</code> if the binding has been added correctly.
+                  <code>FRACTAL_API_ILLEGAL_BINDING</code> if the binding cannot
+                  be created. <code>FRACTAL_API_NO_SUCH_SUB_COMPONENT</code> if
+                  the <code>clientComponent</code> or the <code>serverComponent</code> is
+                  neither a sub component nor the component this interface belongs.
+                  <code>FRACTAL_API_ILLEGAL_LIFE_CYCLE</code> if this component has a
+                  <link linkend="api-fapi-LCC">LifeCycleController</link> 
+                  interface, but it is not in an appropriate state to perform 
+                  this operation. <code>FRACTAL_API_OPERATION_NOT_SUPPORTED</code>
+                  if this operation is not supported.</para></listitem>
+              </varlistentry>
+            </variablelist>
+          </td>
+        </tr>
+      </informaltable>
+    
+      <informaltable border="all" width="100%">
+        <tr>
+          <td>
+            <programlisting language="idl"> int removeFcSubBinding(in fractal.api.Component clientComponent,
+   in string clientItfName);</programlisting>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <para>The <varname>removeFcSubBinding</varname> method removes a binding
+              inside this component.</para>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <variablelist>
+              <varlistentry>
+                <term><varname>clientComponent</varname></term>
+                <listitem><para>the component that contains the client interface
+                  that has to be unbound. If <code>null</code> the client component is
+                  assumed to be the component this interface belongs.</para></listitem>
+              </varlistentry>
+              <varlistentry>
+                <term><varname>clientItfName</varname></term>
+                <listitem><para>the name of the interface that has to be unbound.
+                  If the given <code>clientComponent</code> is a sub component;
+                  this name must refer to a client interface. If the given
+                  <code>clientComponent</code> refers to the component this interface
+                  belongs; this name must refer to a server interface.</para></listitem>
+              </varlistentry>
+              <varlistentry>
+                <term>return</term>
+                <listitem><para><code>0</code> if the binding has been removed correctly.
+                  <code>FRACTAL_API_ILLEGAL_BINDING</code> if the binding cannot
+                  be removed. <code>FRACTAL_API_NO_SUCH_SUB_COMPONENT</code> if
+                  the <code>clientComponent</code> is neither a sub component 
+                  nor the component this interface belongs.
+                  <code>FRACTAL_API_ILLEGAL_LIFE_CYCLE</code> if this component has a
+                  <link linkend="api-fapi-LCC">LifeCycleController</link> 
+                  interface, but it is not in an appropriate state to perform 
+                  this operation. <code>FRACTAL_API_OPERATION_NOT_SUPPORTED</code>
+                  if this operation is not supported.</para></listitem>
+              </varlistentry>
+            </variablelist>
+          </td>
+        </tr>
+      </informaltable>
+    
+    </section>
+    
     <section id="api-fapi-AC">
       <title>The <classname>fractal.api.AttributeController</classname> interface</title>
 
