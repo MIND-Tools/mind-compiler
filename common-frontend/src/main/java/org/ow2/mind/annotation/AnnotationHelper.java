@@ -101,7 +101,9 @@ public final class AnnotationHelper {
     }
 
     /**
-     * To by used from string template
+     * To be used from string template
+     * 
+     * @return a map associating annotation class names to annotation objects.
      */
     public Map<String, Annotation> getAnnotationMap() {
       final Map<String, Annotation> map = new HashMap<String, Annotation>(
