@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2009 STMicroelectronics
+ * Copyright (C) 2010 STMicroelectronics
  *
  * This file is part of "Mind Compiler" is free software: you can redistribute 
  * it and/or modify it under the terms of the GNU Lesser General Public License 
@@ -20,16 +20,32 @@
  * Contributors: 
  */
 
-package org.ow2.mind;
+package org.ow2.mind.adl.annotations;
+
+import java.io.File;
 
 import org.testng.annotations.Test;
 
-public class TestHelloworld extends AbstractFunctionalTest {
+public class FunctionalTest extends org.ow2.mind.FunctionalTest {
 
-  @Test(groups = {"checkin"})
-  public void testHelloworld() throws Exception {
-    initSourcePath("common", "functional");
-    runner.compileRunAndCheck("helloworld.HelloworldApplication", null);
+  protected String DEFAULT_TEST_DEPS = "../fractal-runtime/src/main/resources"
+                                         + File.pathSeparator
+                                         + "../adl-backend/src/test/resources/common";
+
+  @Override
+  @Test(dataProvider = "functional-test", groups = {"functional"})
+  public void functionalTest(final String rootDir, final String adlName)
+      throws Exception {
+    super.functionalTest(rootDir, adlName);
   }
 
+  @Override
+  protected String getDefaultTestDeps() {
+    return super.getDefaultTestDeps();
+  }
+
+  @Override
+  protected void initPath(final String rootDir) {
+    initSourcePath(rootDir);
+  }
 }

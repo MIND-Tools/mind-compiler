@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -9,30 +9,23 @@
         <version>0.3-alpha-1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>adl-backend</artifactId>
+    <artifactId>annotations</artifactId>
     <packaging>jar</packaging>
-    <name>ADL backend module</name>
-
+    <name>Common Annotations</name>
+    
+    <description>
+        Common ADL and IDL annotations of the Mind programming model.
+    </description>
+    
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>adl-frontend</artifactId>
+            <artifactId>adl-backend</artifactId>
         </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>common-backend</artifactId>
-        </dependency>
+
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>idl-backend</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>cpl-preproc</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>plugin-loader</artifactId>
         </dependency>
 
         <dependency>
@@ -49,13 +42,20 @@
 
         <dependency>
             <groupId>${project.groupId}</groupId>
+            <artifactId>adl-backend</artifactId>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>${project.groupId}</groupId>
             <artifactId>common-frontend</artifactId>
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
     </dependencies>
-
-    <build>
+    
+        <build>
         <plugins>
             <plugin>
                 <artifactId>maven-dependency-plugin</artifactId>
@@ -72,6 +72,20 @@
                             <includes>**/*.c,**/*.h,**/*.adl,**/*.itf,**/*.idt</includes>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>unpack-adl-backend-test</id>
+                        <phase>generate-test-resources</phase>
+                        <goals>
+                            <goal>unpack-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <includeArtifactIds>adl-backend</includeArtifactIds>
+                            <classifier>tests</classifier>
+                            <type>test-jar</type>
+                            <outputDirectory>${project.build.directory}/test-deps/adl-backend</outputDirectory>
+                            <includes>common/**/*.c,common/**/*.h,common/**/*.adl,common/**/*.itf,common/**/*.idt</includes>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
             <plugin>
@@ -84,45 +98,10 @@
                         <mind.test.cflags>-g -Wall -Werror -Wredundant-decls
                             -Wunreachable-code -Wstrict-prototypes
                             -Wwrite-strings</mind.test.cflags>
-                        <test.deps>${project.build.directory}/test-deps/fractal-runtime</test.deps>
+                        <test.deps>${project.build.directory}/test-deps/fractal-runtime${path.separator}${project.build.directory}/test-deps/adl-backend/common</test.deps>
                     </systemPropertyVariables>
                 </configuration>
             </plugin>
-            <plugin>
-                <artifactId>maven-jar-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>test-jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
         </plugins>
     </build>
-
-    <profiles>
-        <profile>
-            <id>stdc89</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <artifactId>maven-surefire-plugin</artifactId>
-                        <configuration>
-                            <groups>${test.groups}</groups>
-                            <systemPropertyVariables>
-                                <default.file.level>FINEST</default.file.level>
-                                <loggers.outfile>${project.build.testOutputDirectory}/test-log.txt</loggers.outfile>
-                                <mind.test.cflags>-g -std=c89
-                                    -D__MIND_STRICT_C89 -Wall -Werror
-                                    -Wredundant-decls -Wunreachable-code
-                                    -Wstrict-prototypes -Wwrite-strings</mind.test.cflags>
-                            </systemPropertyVariables>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
 </project>

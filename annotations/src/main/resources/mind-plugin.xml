@@ -1,0 +1,8 @@
+<plugin id="org.ow2.mind.additional_annotations" name="Annotations plug-in.">
+ <extension point="org.ow2.mind.predefined-annotations">
+  	<annotation package="org.ow2.mind.adl.annotations"/>
+  </extension>
+ <extension point="org.ow2.mind.predefined-annotations">
+  	<annotation package="org.ow2.mind.idl.annotations"/>
+  </extension>
+</plugin>

@@ -43,7 +43,7 @@ public class FunctionalTest extends AbstractFunctionalTest {
   @Test(dataProvider = "functional-test", groups = {"functional"})
   public void functionalTest(final String rootDir, final String adlName)
       throws Exception {
-    initSourcePath(rootDir);
+    initPath(rootDir);
     final Definition d = runner.load(adlName);
     final CompileDef compileDefAnno = AnnotationHelper.getAnnotation(d,
         CompileDef.class);
@@ -71,5 +71,9 @@ public class FunctionalTest extends AbstractFunctionalTest {
           runAnno.params);
       assertEquals(r, runAnno.expectedResult, "Unexpected return value");
     }
+  }
+
+  protected void initPath(final String rootDir) {
+    initSourcePath("common", rootDir);
   }
 }

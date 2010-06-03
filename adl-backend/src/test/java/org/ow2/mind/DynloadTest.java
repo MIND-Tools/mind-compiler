@@ -44,19 +44,19 @@ public class DynloadTest extends AbstractFunctionalTest {
     if (isRunningOnWindows()) return;
 
     super.setup();
-    initSourcePath(runner, "functional", "dynload");
+    initSourcePath(runner, "common", "functional", "dynload");
 
     dynloadRunner = new CompilerRunner();
-    final List<String> cFlags = new ArrayList<String>(CompilerContextHelper
-        .getCFlags(dynloadRunner.context));
+    final List<String> cFlags = new ArrayList<String>(
+        CompilerContextHelper.getCFlags(dynloadRunner.context));
     cFlags.add("-fpic");
     CompilerContextHelper.setCFlags(dynloadRunner.context, cFlags);
 
-    final List<String> ldFlags = new ArrayList<String>(CompilerContextHelper
-        .getLDFlags(dynloadRunner.context));
+    final List<String> ldFlags = new ArrayList<String>(
+        CompilerContextHelper.getLDFlags(dynloadRunner.context));
     ldFlags.add("--shared");
     CompilerContextHelper.setLDFlags(dynloadRunner.context, ldFlags);
-    initSourcePath(dynloadRunner, "functional", "dynload");
+    initSourcePath(dynloadRunner, "common", "functional", "dynload");
 
     tester = new File(runner.buildDir, "dynloadTester");
     if (!tester.exists()) {
@@ -133,9 +133,9 @@ public class DynloadTest extends AbstractFunctionalTest {
     // this test is not supported on windows.
     if (isRunningOnWindows()) return;
 
-    runTester(dynloadRunner
-        .compile("FactoryWithCtrl<EmptyControlledMultiPrimitive>"), true, true,
-        true);
+    runTester(
+        dynloadRunner.compile("FactoryWithCtrl<EmptyControlledMultiPrimitive>"),
+        true, true, true);
   }
 
   protected void runTester(final File lib, final boolean controlled,

@@ -191,11 +191,14 @@ InitializeComponents(definition) ::= <<
 
 InitializeComponent(definition, component) ::= <<
   /* initialization of <component.name> sub-component */
-  err = __component_<component.definitionReference.name;format="toCName">_factory(
-    (void **) &(newInstance->__component_internal_data.components.<component.name>), 
-    allocItf <InitializeComponentParameters(definition=definition, component=component)>);
-  if (err != 0) goto error_<component.name>;
-
+  {
+    void *<component.name>;
+    err = __component_<component.definitionReference.name;format="toCName">_factory(
+      &<component.name>, 
+      allocItf <InitializeComponentParameters(definition=definition, component=component)>);
+    if (err != 0) goto error_<component.name>;
+    newInstance->__component_internal_data.components.<component.name> = <component.name>;
+  }
 >>
 
 InitializeComponentParameters(definition, component) ::= <<

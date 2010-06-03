@@ -1380,6 +1380,42 @@
           cast pointers to interface types that are not directly accessible
           through the IDL of the provided or required interfaces.</para>
       </section>
+            
+      <section id="adl-annot-wrap">
+        <title><classname>@Wrap</classname></title>
+        
+        <formalpara>
+          <title>Annotation fields</title>
+          <para>No fields</para>
+        </formalpara>
+        
+        <formalpara>
+          <title>Annotation targets</title>
+          <para>
+            <simplelist type="inline">
+              <member>Server interface</member>
+            </simplelist>
+          </para>
+        </formalpara>
+
+        <para>The <classname>Wrap</classname> annotation allows to specify 
+          that the implementation of a provided interface will be automatically 
+          generated wrapping each corresponding C functions into interface methods. 
+          Wrapping a function corresponds in defining a method that makes the call 
+          this function. The generated method returns the same type as the C 
+          function and generally takes the same parameters. This approach is 
+          close to the ld <varname>--wrap</varname> option.</para>
+          
+        <note><para>Wrapping a varadic function needs complementary information 
+        to know the name of the dual function. Actually, as the number of 
+        parameters of a variadic function can't be determined apriori, the call 
+        to this function can't be done directly but through a function assuring
+        the same functionality having a <varname>va_list</varname> and a 
+        <varname>format</varname> as parameters. This specification will be done 
+        using the <varname>@VarArgsDual</varname> annotation (see 
+        <xref linkend="idl-annot-varargsdual"/>) in the corresponding IDL.</para></note>
+      </section>
+      
     </section>
   </section>
   

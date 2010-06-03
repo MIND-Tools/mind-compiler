@@ -22,6 +22,11 @@
 
 package org.ow2.mind;
 
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
+
+import java.io.File;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
@@ -31,7 +36,13 @@ import org.testng.annotations.BeforeMethod;
 
 public abstract class AbstractFunctionalTest {
 
-  protected static final String COMMON_ROOT_DIR = "common/";
+  protected static final String TEST_DEPS         = "test.deps";
+
+  // This default test.deps value is intended to be used only while running test
+  // from Eclipse.
+  // When tests are run with Maven, the test.deps property is set to a directory
+  // that contains an unpacked version of fractal-runtime.
+  protected static final String DEFAULT_TEST_DEPS = "../fractal-runtime/src/main/resources";
 
   protected CompilerRunner      runner;
 
@@ -46,25 +57,35 @@ public abstract class AbstractFunctionalTest {
 
   protected void initSourcePath(final CompilerRunner runner,
       final String... rootDirs) {
-    initSourcePath(runner, null, rootDirs);
-  }
-
-  protected void initSourcePath(final ClassLoader parent,
-      final String... rootDirs) {
-    initSourcePath(runner, parent, rootDirs);
-  }
-
-  protected void initSourcePath(final CompilerRunner runner,
-      final ClassLoader parent, final String... rootDirs) {
     final List<URL> rootDirList = new ArrayList<URL>();
-    rootDirList.add(getClass().getClassLoader().getResource(COMMON_ROOT_DIR));
     for (String rootDir : rootDirs) {
       if (!rootDir.endsWith("/")) rootDir += "/";
       rootDirList.add(getClass().getClassLoader().getResource(rootDir));
     }
-    final ClassLoader srcLoader = new URLClassLoader(rootDirList
-        .toArray(new URL[0]), parent);
+
+    String testDeps = System.getProperty(TEST_DEPS);
+    if (testDeps == null) {
+      testDeps = getDefaultTestDeps();
+    }
+    for (final String testDep : testDeps.split(File.pathSeparator)) {
+      final File testDepsDir = new File(testDep);
+      assertTrue(testDepsDir.isDirectory(), "Invalid " + TEST_DEPS
+          + " property : " + testDep);
+      try {
+        rootDirList.add(testDepsDir.toURI().toURL());
+      } catch (final MalformedURLException e) {
+        fail("Invalid test.deps property : " + testDep, e);
+      }
+    }
+
+    final ClassLoader srcLoader = new URLClassLoader(
+        rootDirList.toArray(new URL[0]), null);
+
     runner.context.put("classloader", srcLoader);
+  }
+
+  protected String getDefaultTestDeps() {
+    return DEFAULT_TEST_DEPS;
   }
 
   protected boolean isRunningOnWindows() {

@@ -1,0 +1,8 @@
+
+interface wrap.System {
+  void *malloc(size_t size);
+  void free(void *ptr);
+  
+  @VarArgsDual("vprintf")
+  int printf(const char *format, ...);
+}
