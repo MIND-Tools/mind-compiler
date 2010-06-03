@@ -35,17 +35,17 @@ import org.ow2.mind.annotation.AnnotationTarget;
  * 
  * @author Matthieu ANNE
  */
-@ADLLoaderProcessor(processor = WrapAnnotationProcessor.class, phases = { ADLLoaderPhase.AFTER_CHECKING })
+@ADLLoaderProcessor(processor = WrapAnnotationProcessor.class, phases = {ADLLoaderPhase.AFTER_EXTENDS})
 public class Wrap implements Annotation {
 
-    private static final AnnotationTarget[] ANNOTATION_TARGETS = { ADLAnnotationTarget.INTERFACE };
+  private static final AnnotationTarget[] ANNOTATION_TARGETS = {ADLAnnotationTarget.INTERFACE};
 
-    public AnnotationTarget[] getAnnotationTargets() {
-	return ANNOTATION_TARGETS;
-    }
+  public AnnotationTarget[] getAnnotationTargets() {
+    return ANNOTATION_TARGETS;
+  }
 
-    public boolean isInherited() {
-	return true;
-    }
+  public boolean isInherited() {
+    return true;
+  }
 
 }

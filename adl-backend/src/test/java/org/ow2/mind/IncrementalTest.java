@@ -582,7 +582,7 @@ public class IncrementalTest extends AbstractFunctionalTest {
     }
 
     runner.initContext();
-    initSourcePath(SRC_ROOT);
+    initSourcePath("common", SRC_ROOT);
 
     if (!buildDir.exists()) {
       buildDir.mkdirs();

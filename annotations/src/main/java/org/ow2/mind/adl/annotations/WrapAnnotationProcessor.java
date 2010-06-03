@@ -38,7 +38,6 @@ import org.ow2.mind.adl.annotation.AbstractADLLoaderAnnotationProcessor;
 import org.ow2.mind.adl.ast.ASTHelper;
 import org.ow2.mind.adl.ast.ImplementationContainer;
 import org.ow2.mind.adl.ast.Source;
-import org.ow2.mind.adl.idl.InterfaceDefinitionDecorationHelper;
 import org.ow2.mind.annotation.Annotation;
 import org.ow2.mind.annotation.AnnotationErrors;
 import org.ow2.mind.annotation.AnnotationHelper;
@@ -63,9 +62,8 @@ public class WrapAnnotationProcessor
     if (ASTHelper.isPrimitive(definition)) {
       final Interface itf = (Interface) node;
       if (TypeInterfaceUtil.isServer(itf)) {
-        final InterfaceDefinition itfDef = InterfaceDefinitionDecorationHelper
-            .getResolvedInterfaceDefinition((TypeInterface) itf, idlLoaderItf,
-                context);
+        final InterfaceDefinition itfDef = itfSignatureResolverItf.resolve(
+            (TypeInterface) itf, definition, context);
 
         final Map<String, String> dualMeths = new HashMap<String, String>();
 

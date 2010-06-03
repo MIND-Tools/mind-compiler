@@ -34,5 +34,74 @@
             <classifier>jdk15</classifier>
         </dependency>
 
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>fractal-runtime</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>adl-backend</artifactId>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>common-frontend</artifactId>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
+    
+        <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>unpack-fractal-runtime</id>
+                        <phase>generate-test-resources</phase>
+                        <goals>
+                            <goal>unpack-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <includeArtifactIds>fractal-runtime</includeArtifactIds>
+                            <outputDirectory>${project.build.directory}/test-deps/fractal-runtime</outputDirectory>
+                            <includes>**/*.c,**/*.h,**/*.adl,**/*.itf,**/*.idt</includes>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>unpack-adl-backend-test</id>
+                        <phase>generate-test-resources</phase>
+                        <goals>
+                            <goal>unpack-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <includeArtifactIds>adl-backend</includeArtifactIds>
+                            <classifier>tests</classifier>
+                            <type>test-jar</type>
+                            <outputDirectory>${project.build.directory}/test-deps/adl-backend</outputDirectory>
+                            <includes>common/**/*.c,common/**/*.h,common/**/*.adl,common/**/*.itf,common/**/*.idt</includes>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <groups>${test.groups}</groups>
+                    <systemPropertyVariables>
+                        <default.file.level>FINEST</default.file.level>
+                        <loggers.outfile>${project.build.testOutputDirectory}/test-log.txt</loggers.outfile>
+                        <mind.test.cflags>-g -Wall -Werror -Wredundant-decls
+                            -Wunreachable-code -Wstrict-prototypes
+                            -Wwrite-strings</mind.test.cflags>
+                        <test.deps>${project.build.directory}/test-deps/fractal-runtime${path.separator}${project.build.directory}/test-deps/adl-backend/common</test.deps>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>

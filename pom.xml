@@ -140,6 +140,13 @@
 
             <dependency>
                 <groupId>${project.groupId}</groupId>
+                <artifactId>adl-backend</artifactId>
+                <version>${project.version}</version>
+                <type>test-jar</type>
+            </dependency>
+
+            <dependency>
+                <groupId>${project.groupId}</groupId>
                 <artifactId>common-frontend</artifactId>
                 <version>${project.version}</version>
             </dependency>

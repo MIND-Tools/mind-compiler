@@ -1,0 +1,30 @@
+
+@Run
+composite wrap.TestSystemWrapper extends ApplicationType {
+
+  contains SystemWrapper as system;
+  contains ApplicationType as tester 
+    primitive {
+    
+    requires System as system;
+    
+    source {{
+      #include <assert.h>
+    
+      /* int main(int argc, string[] argv) */
+      int METH(main, main) (int argc, char *argv[]){
+      
+        void *ptr = CALL(system, malloc)(4);
+        assert(ptr != NULL);
+        CALL(system, free)(ptr);
+        
+        CALL(system, printf)("helloworld %s, %d\n", "foo", 3);
+        
+        return 0;
+      }
+    }}
+  }
+  
+  binds this.main to tester.main;
+  binds tester.system to system.system;
+}
