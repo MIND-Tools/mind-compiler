@@ -12,11 +12,6 @@ isVoid   ::= [ "void"   : "true" ]
 // Implementation of the ControllerGenerator interface
 // -----------------------------------------------------------------------------
 
-ControllerData(definition, controller) ::= ""
-ControllerDataStaticInit(definition, controller) ::= ""
-ControllerDataFactoryNew(definition, controller) ::= ""
-ControllerDataFactoryDestroy(definition, controller) ::= ""
-
 ControllerImplementation(definition, controller, interfaceDefinitions) ::= <<
 
 /* -------------------------------------------------------------------------- */

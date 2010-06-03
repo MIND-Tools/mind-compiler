@@ -183,12 +183,6 @@ newInstance->__component_internal_data.<if (isInternal)>inner_type<else>type<end
 
 
 
-DeclareSubComponentFactoryMethods(definition) ::= <<
-<if (definition.astNodeTypes.("component"))>
-<definition.components:DeclareSubComponentFactoryMethod(definition=definition, component=it)>
-<endif>
->>
-
 InitializeComponents(definition) ::= <<
 <if (definition.astNodeTypes.("component"))>
 <definition.components:InitializeComponent(definition=definition, component=it)>

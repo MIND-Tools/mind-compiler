@@ -1,0 +1,6 @@
+
+@controller.Component
+primitive controller.content.PrimitiveComponent extends ApplicationType {
+  
+  source primitiveComponent.c;
+}

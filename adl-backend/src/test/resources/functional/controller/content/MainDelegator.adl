@@ -1,0 +1,11 @@
+@controller.Component
+@controller.BindingController
+primitive controller.content.MainDelegator extends ApplicationType {
+  requires Main as delegator;
+  
+  source {{
+    int METH(main, main)(int argc, char *argv[]) {
+      return CALL(delegator, main)(argc, argv);
+    }
+  }}
+}

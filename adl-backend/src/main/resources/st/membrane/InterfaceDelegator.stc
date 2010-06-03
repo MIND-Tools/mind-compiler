@@ -10,8 +10,6 @@ $${
 // Implementation of the ControllerGenerator interface
 // -----------------------------------------------------------------------------
 
-ControllerData(definition, controller) ::= ""
-
 ControllerImplementation(definition, controller, interfaceDefinitions) ::= <<
 <ItfDelegator(itf=first(controller.controllerInterfaces).astDecorations.("referenced-interface"), interfaceDefinitions=interfaceDefinitions)>
 >>
