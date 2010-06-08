@@ -28,7 +28,8 @@ public class TestHelloworld extends AbstractFunctionalTest {
 
   @Test(groups = {"checkin"})
   public void testHelloworld() throws Exception {
-    initSourcePath("common", "functional");
+    initSourcePath(getDepsDir("fractal/api/Component.itf").getAbsolutePath(),
+        "common", "functional");
     runner.compileRunAndCheck("helloworld.HelloworldApplication", null);
   }
 

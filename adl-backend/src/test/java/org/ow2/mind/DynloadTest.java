@@ -44,7 +44,8 @@ public class DynloadTest extends AbstractFunctionalTest {
     if (isRunningOnWindows()) return;
 
     super.setup();
-    initSourcePath(runner, "common", "functional", "dynload");
+    initSourcePath(runner, getDepsDir("fractal/api/Component.itf")
+        .getAbsolutePath(), "common", "functional", "dynload");
 
     dynloadRunner = new CompilerRunner();
     final List<String> cFlags = new ArrayList<String>(
@@ -56,7 +57,8 @@ public class DynloadTest extends AbstractFunctionalTest {
         CompilerContextHelper.getLDFlags(dynloadRunner.context));
     ldFlags.add("--shared");
     CompilerContextHelper.setLDFlags(dynloadRunner.context, ldFlags);
-    initSourcePath(dynloadRunner, "common", "functional", "dynload");
+    initSourcePath(dynloadRunner, getDepsDir("fractal/api/Component.itf")
+        .getAbsolutePath(), "common", "functional", "dynload");
 
     tester = new File(runner.buildDir, "dynloadTester");
     if (!tester.exists()) {

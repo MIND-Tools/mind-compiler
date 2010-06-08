@@ -93,6 +93,12 @@ public class CheckDelegatesTest {
   }
 
   @Test(groups = {"checkin", "functional"})
+  public void compileCCdelegate() throws Exception {
+    compileIDL("fractal.api.ContentController");
+    compileDelegate("CCdelegate");
+  }
+
+  @Test(groups = {"checkin", "functional"})
   public void compileACdelegate() throws Exception {
     compileIDL("fractal.api.AttributeController");
     compileDelegate("ACdelegate");
@@ -113,8 +119,8 @@ public class CheckDelegatesTest {
       throws URISyntaxException, IOException, ADLException,
       InterruptedException {
     final CompilerCommand command = compilerWrapper.newCompilerCommand(context);
-    final File src = new File(getClass().getClassLoader().getResource(
-        "fractal/internal/" + delegateName + ".c").toURI());
+    final File src = new File(getClass().getClassLoader()
+        .getResource("fractal/internal/" + delegateName + ".c").toURI());
     final File outputFile = new File(buildDir, delegateName + ".o");
     command.setInputFile(src).setOutputFile(outputFile);
     command.addIncludeDir(buildDir);

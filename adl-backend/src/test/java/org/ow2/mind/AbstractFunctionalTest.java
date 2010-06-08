@@ -22,29 +22,23 @@
 
 package org.ow2.mind;
 
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.fail;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
 
 import org.testng.annotations.BeforeMethod;
 
 public abstract class AbstractFunctionalTest {
 
-  protected static final String TEST_DEPS         = "test.deps";
-
-  // This default test.deps value is intended to be used only while running test
-  // from Eclipse.
-  // When tests are run with Maven, the test.deps property is set to a directory
-  // that contains an unpacked version of fractal-runtime.
-  protected static final String DEFAULT_TEST_DEPS = "../fractal-runtime/src/main/resources";
-
-  protected CompilerRunner      runner;
+  protected CompilerRunner runner;
 
   @BeforeMethod(alwaysRun = true)
   protected void setup() throws Exception {
@@ -57,35 +51,65 @@ public abstract class AbstractFunctionalTest {
 
   protected void initSourcePath(final CompilerRunner runner,
       final String... rootDirs) {
+    initSourcePath(runner, null, rootDirs);
+  }
+
+  protected void initSourcePath(final ClassLoader parent,
+      final String... rootDirs) {
+    initSourcePath(runner, parent, rootDirs);
+  }
+
+  protected void initSourcePath(final CompilerRunner runner,
+      final ClassLoader parent, final String... rootDirs) {
     final List<URL> rootDirList = new ArrayList<URL>();
     for (String rootDir : rootDirs) {
-      if (!rootDir.endsWith("/")) rootDir += "/";
-      rootDirList.add(getClass().getClassLoader().getResource(rootDir));
-    }
-
-    String testDeps = System.getProperty(TEST_DEPS);
-    if (testDeps == null) {
-      testDeps = getDefaultTestDeps();
-    }
-    for (final String testDep : testDeps.split(File.pathSeparator)) {
-      final File testDepsDir = new File(testDep);
-      assertTrue(testDepsDir.isDirectory(), "Invalid " + TEST_DEPS
-          + " property : " + testDep);
-      try {
-        rootDirList.add(testDepsDir.toURI().toURL());
-      } catch (final MalformedURLException e) {
-        fail("Invalid test.deps property : " + testDep, e);
+      if (rootDir.startsWith("/")) {
+        final File rootFile = new File(rootDir);
+        if (!rootFile.isDirectory()) {
+          fail(rootDir + " is not a valid source directory");
+        }
+        try {
+          rootDirList.add(rootFile.toURI().toURL());
+        } catch (final MalformedURLException e) {
+          fail(rootDir + " is not a valid source directory", e);
+        }
+      } else {
+        if (!rootDir.endsWith("/")) rootDir += "/";
+        Enumeration<URL> resources;
+        try {
+          resources = getClass().getClassLoader().getResources(rootDir);
+        } catch (final IOException e) {
+          fail("Fail to lookup " + rootDir + "in classpath", e);
+          return;
+        }
+        URL rootDirURL = null;
+        while (resources.hasMoreElements()) {
+          final URL resource = resources.nextElement();
+          if (resource.getProtocol().equals("file")) {
+            rootDirURL = resource;
+            break;
+          }
+        }
+        assertNotNull(rootDirURL, "Can't find directory " + rootDir
+            + " in the classpath");
+        rootDirList.add(rootDirURL);
       }
     }
 
+    System.out.println("Init src path : " + rootDirList);
     final ClassLoader srcLoader = new URLClassLoader(
         rootDirList.toArray(new URL[0]), null);
 
     runner.context.put("classloader", srcLoader);
   }
 
-  protected String getDefaultTestDeps() {
-    return DEFAULT_TEST_DEPS;
+  protected File getDepsDir(final String resource) {
+    try {
+      return DepsHelper.unpackDeps(resource, this.getClass().getClassLoader());
+    } catch (final Exception e) {
+      fail("Can't unpack dependency containing " + resource, e);
+      return null;
+    }
   }
 
   protected boolean isRunningOnWindows() {

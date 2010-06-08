@@ -582,7 +582,8 @@ public class IncrementalTest extends AbstractFunctionalTest {
     }
 
     runner.initContext();
-    initSourcePath("common", SRC_ROOT);
+    initSourcePath(getDepsDir("fractal/api/Component.itf").getAbsolutePath(),
+        "common", SRC_ROOT);
 
     if (!buildDir.exists()) {
       buildDir.mkdirs();

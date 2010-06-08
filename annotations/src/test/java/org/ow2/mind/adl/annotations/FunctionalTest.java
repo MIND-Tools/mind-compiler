@@ -36,16 +36,9 @@ public class FunctionalTest extends org.ow2.mind.FunctionalTest {
   @Test(dataProvider = "functional-test", groups = {"functional"})
   public void functionalTest(final String rootDir, final String adlName)
       throws Exception {
-    super.functionalTest(rootDir, adlName);
-  }
-
-  @Override
-  protected String getDefaultTestDeps() {
-    return super.getDefaultTestDeps();
-  }
-
-  @Override
-  protected void initPath(final String rootDir) {
-    initSourcePath(rootDir);
+    initSourcePath(getDepsDir("fractal/api/Component.itf").getAbsolutePath(),
+        getDepsDir("common/ApplicationType.adl").getAbsolutePath() + "/common",
+        rootDir);
+    processFunctionanTest(adlName);
   }
 }
