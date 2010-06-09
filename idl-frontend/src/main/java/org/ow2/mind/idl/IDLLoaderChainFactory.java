@@ -110,6 +110,7 @@ public final class IDLLoaderChainFactory {
 
     bir.recursiveIdlLoaderItf = recursiveIDLLoader;
     bir.idlLocatorItf = idlLocator;
+    ihr.idlLocatorItf = idlLocator;
     cir.idlLoaderItf = idlLoader;
 
     uil.idlResolverItf = includeResolver;

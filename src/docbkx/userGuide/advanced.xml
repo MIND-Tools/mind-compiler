@@ -218,7 +218,7 @@
     <section id="adv-ctrl-bc">
       <title>The <classname>binding-controller</classname></title>
       
-      <para>The  <classname>binding-controller</classname> controller allows to introspect
+      <para>The  <classname>binding-controller</classname> allows to introspect
         and reconfigure the bindings of the required interfaces of the component. 
         To add a  <classname>binding-controller</classname>
         on a component, the <classname>@controller.BindingController</classname>
@@ -244,9 +244,59 @@
         <classname>fractal.api.BindingController</classname> interface signature.</para>
     </section>
 
+    <section id="adv-ctrl-cc">
+      <title>The <classname>content-controller</classname></title>
+      
+      <para>The  <classname>content-controller</classname> allows to introspect
+        and reconfigure the sub-components and internal bindings of a composite component. 
+        To add a <classname>content-controller</classname>
+        on a component, the <classname>@controller.ContentController</classname>
+        annotation must be attached to the ADL definition.</para>
+      
+      <example>
+        <title>Declaration of the <classname>content-controller</classname> in ADL</title>
+        <programlisting linenumbering="numbered" language="adl"> @controller.ContentController
+ primitive foo.bar.MyControlledComponent {
+   ...
+ }</programlisting>
+        <para>Line 1 specifies that a <classname>content-controller</classname> 
+          must be added to the component <classname>foo.bar.MyControlledComponent</classname>.</para> 
+      </example>
+      
+      <para>When the <classname>@controller.ContentContrller</classname> annotation is
+        attached to an ADL definition, a control interface called 
+        <varname>contentController</varname> is automatically added. The signature of this 
+        interface is defined in the <classname>fractal.api.ContentController</classname>
+        IDL.</para>
+        
+      <para>See <xref linkend="api-fapi-CC"/> for details on the
+        <classname>fractal.api.ContentController</classname> interface signature.</para>
+      
+      <para>The <classname>@controller.ContentController</classname> annotation imposes
+        various limitations on the content of the composite component to which it is
+        attached. Indeed, each sub-component of the composite must have a 
+        <link linkend="adv-ctrl-cmp"><classname>component</classname> controller</link>
+        and if it has at least one client interface, a 
+        <link linkend="adv-ctrl-bc"><classname>binding-controller</classname></link>.</para>
+      
+      <para>The current implementation of the <classname>content-controller</classname>
+        can manage only a fixed number on sub-components. This number is controlled by the
+        <varname>nbDynamicSubComponent</varname> field of the 
+        <classname>@controller.ContentController</classname> annotation. This 
+        annotation field control the number of additional sub components that can be 
+        managed by the composite. So at runtime, the composite may contain at most 
+        <code>nbDynamicSubComponent + nbInitialSubComponent</code> sub-components
+        (where <code>nbInitialSubComponent</code> is the number of sub-component
+        described in the ADL of the composite). The default value of this field is 10.</para>
+      
+      <para>Moreover, the current implementation of the <varname>removeFcSubComponent</varname>
+        method does not check that the removed sub-component is no more bound to another
+        sub component inside the composite.</para>
+    </section>
+
     <section id="adv-ctrl-lcc">
       <title>The <classname>life-cycle-controller</classname></title>
-      <para>The  <classname>life-cycle-controller</classname> controller allows to introspect
+      <para>The  <classname>life-cycle-controller</classname> allows to introspect
         and change the state (started/stopped) of the component. To add a <classname>life-cycle-controller</classname>
         on a component, the <classname>@controller.Component</classname>
         annotation must be attached to the ADL definition.</para>

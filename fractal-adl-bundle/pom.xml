@@ -9,9 +9,13 @@
 
 	<artifactId>fractal-adl-bundle</artifactId>
 	<packaging>bundle</packaging>
-	<name>org.ow2.mind.fractal-adl-bundle</name>
+	<name>Fractal ADL bundle</name>
+	<description>Builds an OSGi bundle containning Fractal ADL classes.</description>
+    <properties>
+        <bundle.name>${project.groupId}.${project.artifactId}</bundle.name>
+    </properties>
 	<build>
-		<finalName>${project.name}_${project.version}</finalName>
+		<finalName>${bundle.name}_${project.version}</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.felix</groupId>
@@ -20,8 +24,8 @@
 				<configuration>
 					<manifestLocation>META-INF</manifestLocation>
 					<instructions>
-						<Bundle-SymbolicName>${project.name};singleton:=true</Bundle-SymbolicName>
-						<Bundle-Name>${project.name}</Bundle-Name>
+						<Bundle-SymbolicName>${bundle.name};singleton:=true</Bundle-SymbolicName>
+						<Bundle-Name>${bundle.name}</Bundle-Name>
 						<Bundle-Description>${project.description}</Bundle-Description>
 						<Private-Package>org.objectweb.fractal.adl*,org.objectweb.fractal.api*,
 							org.objectweb.fractal.util, org.objectweb.util.monolog.api,

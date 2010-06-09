@@ -40,7 +40,6 @@ import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
-import org.ow2.mind.PathHelper;
 import org.testng.annotations.Test;
 
 public class PathHelperTest {
@@ -144,6 +143,7 @@ public class PathHelperTest {
     assertEquals("foo/toto/bar.txt", toAbsolute("foo", "./toto/bar.txt"));
     assertEquals("foo/toto/bar.txt", toAbsolute("foo/toto", "bar.txt"));
     assertEquals("foo/toto/bar.txt", toAbsolute("foo/toto", "./bar.txt"));
+    assertEquals("foo/titi/bar.txt", toAbsolute("foo/toto", "../titi/bar.txt"));
 
     assertEquals("bar.txt", toAbsolute("foo/", "../bar.txt"));
     assertEquals("bar.txt", toAbsolute("foo/", "./../bar.txt"));
@@ -193,6 +193,8 @@ public class PathHelperTest {
         "./titi/bar.txt"));
     assertEquals("/bar.txt", fullyQualifiedNameToAbsolute("foo.toto",
         "../bar.txt"));
+    assertEquals("/hello/cli_src/client.c", fullyQualifiedNameToAbsolute(
+        "hello.client.Client", "../cli_src/client.c"));
   }
 
   /**

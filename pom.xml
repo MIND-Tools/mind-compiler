@@ -42,7 +42,8 @@
         <module>fractal-runtime</module>
         <module>fractal-adl-bundle</module>
         <module>plugin-loader</module>
-    </modules>
+        <module>annotations</module>
+  </modules>
 
     <developers>
         <developer>
@@ -133,8 +134,22 @@
 
             <dependency>
                 <groupId>${project.groupId}</groupId>
+                <artifactId>adl-frontend</artifactId>
+                <version>${project.version}</version>
+                <type>test-jar</type>
+            </dependency>
+
+            <dependency>
+                <groupId>${project.groupId}</groupId>
                 <artifactId>adl-backend</artifactId>
                 <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>adl-backend</artifactId>
+                <version>${project.version}</version>
+                <type>test-jar</type>
             </dependency>
 
             <dependency>
@@ -177,6 +192,12 @@
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>plugin-loader</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>annotations</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
@@ -349,6 +370,10 @@
                             <htmlStylesheet>css/docbook.css</htmlStylesheet>
                             <customizationParameters>
                                 <parameter>
+                                    <name>root.path</name>
+                                    <value>.</value>
+                                </parameter>
+                                <parameter>
                                     <name>pdf.link</name>
                                     <value>mindc-user-guide.pdf</value>
                                 </parameter>
@@ -379,6 +404,10 @@
                             <htmlStylesheet>../css/docbook-chunk.css</htmlStylesheet>
                             <customizationParameters>
                                 <parameter>
+                                    <name>root.path</name>
+                                    <value>..</value>
+                                </parameter>
+                                <parameter>
                                     <name>pdf.link</name>
                                     <value>../mindc-user-guide.pdf</value>
                                 </parameter>
@@ -407,6 +436,10 @@
                             <htmlCustomization>${basedir}/src/docbkx/xsl/minddoc-html.xsl</htmlCustomization>
                             <htmlStylesheet>css/docbook.css</htmlStylesheet>
                             <customizationParameters>
+                                <parameter>
+                                    <name>root.path</name>
+                                    <value>.</value>
+                                </parameter>
                                 <parameter>
                                     <name>pdf.link</name>
                                     <value>mindc-dev-guide.pdf</value>
@@ -437,6 +470,10 @@
                             <htmlCustomization>${basedir}/src/docbkx/xsl/minddoc-chunk.xsl</htmlCustomization>
                             <htmlStylesheet>../css/docbook-chunk.css</htmlStylesheet>
                             <customizationParameters>
+                                <parameter>
+                                    <name>root.path</name>
+                                    <value>..</value>
+                                </parameter>
                                 <parameter>
                                     <name>pdf.link</name>
                                     <value>../mindc-dev-guide.pdf</value>
@@ -475,6 +512,20 @@
 
         <pluginManagement>
             <plugins>
+                <plugin>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>2.3</version>
+                    <configuration>
+                        <archive>
+                            <manifest>
+                                <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                                <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                            </manifest>
+                        </archive>
+                    </configuration>
+                    
+                </plugin>
+            
                 <!-- By default run tests for groups "functional" and "checkin" -->
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
@@ -594,7 +645,7 @@
                                             synbolic link to point to the new
                                             version.
                                         -->
-                                        <sshexec host="${ow2.hostname}" username="${ow2.username}" passphrase="" keyfile="${user.home}/.ssh/id_rsa" command="cd ${ow2.site.deploy.dir}; ln -nfs mindc-${project.version} mindc" />
+                                        <sshexec host="${ow2.hostname}" username="${ow2.username}" passphrase="" keyfile="${user.home}/.ssh/id_rsa" command="cd ${ow2.site.deploy.dir}; ln -nfs mindc-${project.version} mindc"/>
                                     </tasks>
                                 </configuration>
                             </execution>

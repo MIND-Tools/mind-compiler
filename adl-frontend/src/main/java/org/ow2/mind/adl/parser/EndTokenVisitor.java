@@ -387,7 +387,7 @@ public class EndTokenVisitor extends GJNoArguDepthFirst<NodeToken> {
 
   @Override
   public NodeToken visit(final Path n) {
-    return n.f5;
+    return n.f6;
   }
 
   @Override

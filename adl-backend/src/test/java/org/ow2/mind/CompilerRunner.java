@@ -69,6 +69,7 @@ import org.ow2.mind.idl.OutputBinaryIDLLocator;
 import org.ow2.mind.io.BasicOutputFileLocator;
 import org.ow2.mind.io.OutputFileLocator;
 import org.ow2.mind.plugin.BasicPluginManager;
+import org.ow2.mind.plugin.PluginManager;
 import org.ow2.mind.plugin.SimpleClassPluginFactory;
 import org.ow2.mind.preproc.BasicMPPWrapper;
 import org.ow2.mind.st.STLoaderFactory;
@@ -90,6 +91,8 @@ public class CompilerRunner {
   public GraphCompiler              graphCompiler;
 
   public CompilationCommandExecutor executor;
+
+  final PluginManager               pluginManager;
 
   public File                       buildDir;
   public Map<Object, Object>        context;
@@ -113,8 +116,9 @@ public class CompilerRunner {
 
     // Plugin Manager Components
     final org.objectweb.fractal.adl.Factory pluginFactory = new SimpleClassPluginFactory();
-    final BasicPluginManager pluginManager = new BasicPluginManager();
-    pluginManager.nodeFactoryItf = stNodeFactory;
+    final BasicPluginManager bpm = new BasicPluginManager();
+    bpm.nodeFactoryItf = stNodeFactory;
+    pluginManager = bpm;
 
     outputFileLocator = new BasicOutputFileLocator();
     obal.outputFileLocatorItf = outputFileLocator;
@@ -160,16 +164,9 @@ public class CompilerRunner {
     // init context
     initContext();
 
-    // Add additional predefined annotation packages
-    for (final String annotationPackage : PredefinedAnnotationsHelper
-        .getPredefinedAnnotations(pluginManager, context)) {
-      AnnotationLocatorHelper.addDefaultAnnotationPackage(annotationPackage,
-          context);
-    }
-
   }
 
-  public void initContext() {
+  public void initContext() throws ADLException {
     context = new HashMap<Object, Object>();
     buildDir = new File("target/build");
     if (!buildDir.exists()) {
@@ -181,6 +178,14 @@ public class CompilerRunner {
 
     final String cFlags = System.getProperty(CFLAGS_PROPERTY, DEFAULT_CFLAGS);
     CompilerContextHelper.setCFlags(context, splitOptionString(cFlags));
+
+    // Add additional predefined annotation packages
+    for (final String annotationPackage : PredefinedAnnotationsHelper
+        .getPredefinedAnnotations(pluginManager, context)) {
+      AnnotationLocatorHelper.addDefaultAnnotationPackage(annotationPackage,
+          context);
+    }
+
   }
 
   public Definition load(final String adlName) throws ADLException {

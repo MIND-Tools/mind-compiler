@@ -22,16 +22,23 @@
 
 package org.ow2.mind;
 
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.fail;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.List;
 
 import org.testng.annotations.BeforeMethod;
 
 public abstract class AbstractFunctionalTest {
 
-  protected static final String COMMON_ROOT_DIR = "common/";
-
-  protected CompilerRunner      runner;
+  protected CompilerRunner runner;
 
   @BeforeMethod(alwaysRun = true)
   protected void setup() throws Exception {
@@ -44,12 +51,64 @@ public abstract class AbstractFunctionalTest {
 
   protected void initSourcePath(final CompilerRunner runner,
       final String... rootDirs) {
+    initSourcePath(runner, null, rootDirs);
+  }
+
+  protected void initSourcePath(final ClassLoader parent,
+      final String... rootDirs) {
+    initSourcePath(runner, parent, rootDirs);
+  }
+
+  protected void initSourcePath(final CompilerRunner runner,
+      final ClassLoader parent, final String... rootDirs) {
+    final List<URL> rootDirList = new ArrayList<URL>();
     for (String rootDir : rootDirs) {
-      if (!rootDir.endsWith("/")) rootDir += "/";
-      final ClassLoader srcLoader = new URLClassLoader(new URL[]{
-          getClass().getClassLoader().getResource(COMMON_ROOT_DIR),
-          getClass().getClassLoader().getResource(rootDir)}, null);
-      runner.context.put("classloader", srcLoader);
+      if (rootDir.startsWith("/")) {
+        final File rootFile = new File(rootDir);
+        if (!rootFile.isDirectory()) {
+          fail(rootDir + " is not a valid source directory");
+        }
+        try {
+          rootDirList.add(rootFile.toURI().toURL());
+        } catch (final MalformedURLException e) {
+          fail(rootDir + " is not a valid source directory", e);
+        }
+      } else {
+        if (!rootDir.endsWith("/")) rootDir += "/";
+        Enumeration<URL> resources;
+        try {
+          resources = getClass().getClassLoader().getResources(rootDir);
+        } catch (final IOException e) {
+          fail("Fail to lookup " + rootDir + "in classpath", e);
+          return;
+        }
+        URL rootDirURL = null;
+        while (resources.hasMoreElements()) {
+          final URL resource = resources.nextElement();
+          if (resource.getProtocol().equals("file")) {
+            rootDirURL = resource;
+            break;
+          }
+        }
+        assertNotNull(rootDirURL, "Can't find directory " + rootDir
+            + " in the classpath");
+        rootDirList.add(rootDirURL);
+      }
+    }
+
+    System.out.println("Init src path : " + rootDirList);
+    final ClassLoader srcLoader = new URLClassLoader(
+        rootDirList.toArray(new URL[0]), null);
+
+    runner.context.put("classloader", srcLoader);
+  }
+
+  protected File getDepsDir(final String resource) {
+    try {
+      return DepsHelper.unpackDeps(resource, this.getClass().getClassLoader());
+    } catch (final Exception e) {
+      fail("Can't unpack dependency containing " + resource, e);
+      return null;
     }
   }
 

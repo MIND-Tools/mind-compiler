@@ -1124,22 +1124,25 @@ public class JTBProcessor extends GJDepthFirst<Node, Node>
   private String path(final Path n) {
     String s;
     if (n.f0.present()) {
-      s = "./";
+      s = "/";
     } else {
       s = "";
     }
+    if (n.f1.present()) {
+      s += "./";
+    }
 
-    for (int i = 0; i < n.f1.size(); i++)
+    for (int i = 0; i < n.f2.size(); i++)
       s += "../";
 
-    s += n.f2.tokenImage;
+    s += n.f3.tokenImage;
 
-    for (final org.ow2.mind.adl.jtb.syntaxtree.Node pathElem : n.f3.nodes) {
+    for (final org.ow2.mind.adl.jtb.syntaxtree.Node pathElem : n.f4.nodes) {
       s += "/"
           + ((NodeToken) ((NodeSequence) pathElem).elementAt(1)).tokenImage;
     }
 
-    s += "." + n.f5.tokenImage;
+    s += "." + n.f6.tokenImage;
 
     return s;
   }

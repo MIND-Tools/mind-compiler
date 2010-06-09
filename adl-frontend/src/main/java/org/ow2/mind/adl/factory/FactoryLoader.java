@@ -28,26 +28,29 @@ import java.util.Map;
 
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.AbstractLoader;
-import org.objectweb.fractal.adl.CompilerError;
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.NodeFactory;
-import org.objectweb.fractal.adl.error.GenericErrors;
 import org.objectweb.fractal.adl.interfaces.InterfaceContainer;
 import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.ow2.mind.BindingControllerImplHelper;
-import org.ow2.mind.adl.annotation.predefined.controller.BindingController;
-import org.ow2.mind.adl.annotation.predefined.controller.Component;
+import org.ow2.mind.CommonASTHelper;
+import org.ow2.mind.adl.ast.ASTHelper;
 import org.ow2.mind.adl.ast.Data;
 import org.ow2.mind.adl.ast.ImplementationContainer;
 import org.ow2.mind.adl.ast.MindInterface;
 import org.ow2.mind.adl.ast.Source;
 import org.ow2.mind.adl.generic.ast.FormalTypeParameter;
 import org.ow2.mind.adl.generic.ast.FormalTypeParameterContainer;
+import org.ow2.mind.adl.generic.ast.GenericASTHelper;
 import org.ow2.mind.adl.membrane.ast.Controller;
 import org.ow2.mind.adl.membrane.ast.ControllerContainer;
 import org.ow2.mind.adl.membrane.ast.ControllerInterface;
-import org.ow2.mind.annotation.AnnotationHelper;
+import org.ow2.mind.adl.membrane.ast.MembraneASTHelper;
+import org.ow2.mind.adl.parser.ADLParserContextHelper;
+import org.ow2.mind.annotation.ast.AnnotationASTHelper;
+import org.ow2.mind.annotation.ast.AnnotationContainer;
+import org.ow2.mind.annotation.ast.AnnotationNode;
 
 /**
  * This loader component creates the AST of the special "Factory" definition.
@@ -77,82 +80,70 @@ public class FactoryLoader extends AbstractLoader {
   public Definition load(final String name, final Map<Object, Object> context)
       throws ADLException {
     if (FACTORY_DEFINITION_NAME.equals(name)) {
-      try {
-        return createFactory(context);
-      } catch (final ClassNotFoundException e) {
-        throw new CompilerError(GenericErrors.INTERNAL_ERROR, e,
-            "Node factory error");
-      }
+      ADLParserContextHelper.registerADL(createFactory(context), context);
     } else if (FACTORY_CONTROLLED_DEFINITION_NAME.equals(name)) {
-      try {
-        final Definition factoryDef = createFactory(context);
-        factoryDef.setName(FACTORY_CONTROLLED_DEFINITION_NAME);
-        AnnotationHelper.addAnnotation(factoryDef, new Component());
-        AnnotationHelper.addAnnotation(factoryDef, new BindingController());
-        return factoryDef;
-      } catch (final ClassNotFoundException e) {
-        throw new CompilerError(GenericErrors.INTERNAL_ERROR, e,
-            "Node factory error");
-      }
-    } else {
-      return clientLoader.load(name, context);
+      ADLParserContextHelper.registerADL(createFactoryWithCtrl(context),
+          context);
     }
+    return clientLoader.load(name, context);
   }
 
   // ---------------------------------------------------------------------------
   // Utility methods
   // ---------------------------------------------------------------------------
 
-  protected Definition createFactory(final Map<Object, Object> context)
-      throws ClassNotFoundException {
-    final Definition d = (Definition) nodeFactoryItf.newNode("definition",
-        Definition.class.getName(), FormalTypeParameterContainer.class
-            .getName(), InterfaceContainer.class.getName(),
-        ImplementationContainer.class.getName(), ControllerContainer.class
-            .getName());
+  protected Definition createFactory(final Map<Object, Object> context) {
+    final Definition d = CommonASTHelper.newNode(nodeFactoryItf, "definition",
+        Definition.class, FormalTypeParameterContainer.class,
+        InterfaceContainer.class, ImplementationContainer.class,
+        ControllerContainer.class, AnnotationContainer.class);
     d.setName(FACTORY_DEFINITION_NAME);
 
-    final FormalTypeParameter typeParameter = (FormalTypeParameter) nodeFactoryItf
-        .newNode("formalTypeParameter", FormalTypeParameter.class.getName());
+    final FormalTypeParameter typeParameter = GenericASTHelper
+        .newFormalTypeParameter(nodeFactoryItf, FORMAL_TYPE_PARAMETER_NAME,
+            null);
     typeParameter.setName(FORMAL_TYPE_PARAMETER_NAME);
     ((FormalTypeParameterContainer) d).addFormalTypeParameter(typeParameter);
 
-    final MindInterface factoryItf = (MindInterface) nodeFactoryItf.newNode(
-        "interface", MindInterface.class.getName());
-    factoryItf.setName(FACTORY_ITF_NAME);
-    factoryItf.setRole(MindInterface.SERVER_ROLE);
-    factoryItf.setSignature(FACTORY_SIGNATURE);
+    final MindInterface factoryItf = ASTHelper.newServerInterfaceNode(
+        nodeFactoryItf, FACTORY_ITF_NAME, FACTORY_SIGNATURE);
     ((InterfaceContainer) d).addInterface(factoryItf);
 
-    final MindInterface allocatorItf = (MindInterface) nodeFactoryItf.newNode(
-        "interface", MindInterface.class.getName());
-    allocatorItf.setName(ALLOCATOR_ITF_NAME);
-    allocatorItf.setRole(MindInterface.CLIENT_ROLE);
-    allocatorItf.setSignature(ALLOCATOR_SIGNATURE);
+    final MindInterface allocatorItf = ASTHelper.newClientInterfaceNode(
+        nodeFactoryItf, ALLOCATOR_ITF_NAME, ALLOCATOR_SIGNATURE);
     ((InterfaceContainer) d).addInterface(allocatorItf);
 
-    final Source factoryCtrlSrc = (Source) nodeFactoryItf.newNode("source",
-        Source.class.getName());
+    final Source factoryCtrlSrc = ASTHelper.newSource(nodeFactoryItf);
     factoryCtrlSrc.setPath(FACTORY_CONTROLLER);
 
-    final ControllerInterface factoryCtrlItf = (ControllerInterface) nodeFactoryItf
-        .newNode("controllerInterface", ControllerInterface.class.getName());
-    factoryCtrlItf.setName(FACTORY_ITF_NAME);
-    final ControllerInterface allocatorCtrlItf = (ControllerInterface) nodeFactoryItf
-        .newNode("controllerInterface", ControllerInterface.class.getName());
-    allocatorCtrlItf.setName(ALLOCATOR_ITF_NAME);
+    final ControllerInterface factoryCtrlItf = MembraneASTHelper
+        .newControllerInterfaceNode(nodeFactoryItf, FACTORY_ITF_NAME, false);
+    final ControllerInterface allocatorCtrlItf = MembraneASTHelper
+        .newControllerInterfaceNode(nodeFactoryItf, ALLOCATOR_ITF_NAME, false);
 
-    final Controller factoryCtrl = (Controller) nodeFactoryItf.newNode(
-        "controller", Controller.class.getName());
+    final Controller factoryCtrl = MembraneASTHelper
+        .newControllerNode(nodeFactoryItf);
     factoryCtrl.addSource(factoryCtrlSrc);
     factoryCtrl.addControllerInterface(factoryCtrlItf);
     factoryCtrl.addControllerInterface(allocatorCtrlItf);
     ((ControllerContainer) d).addController(factoryCtrl);
 
     // add a "nodata" node.
-    final Data data = (Data) nodeFactoryItf.newNode("data", Data.class
-        .getName());
+    final Data data = ASTHelper.newData(nodeFactoryItf);
     ((ImplementationContainer) d).setData(data);
+
+    return d;
+  }
+
+  protected Definition createFactoryWithCtrl(final Map<Object, Object> context) {
+    final Definition d = createFactory(context);
+    d.setName(FACTORY_CONTROLLED_DEFINITION_NAME);
+    final AnnotationNode componentCtrl = AnnotationASTHelper.newAnnotationNode(
+        nodeFactoryItf, "controller.Component");
+    ((AnnotationContainer) d).addAnnotation(componentCtrl);
+    final AnnotationNode bcCtrl = AnnotationASTHelper.newAnnotationNode(
+        nodeFactoryItf, "controller.BindingController");
+    ((AnnotationContainer) d).addAnnotation(bcCtrl);
 
     return d;
   }

@@ -1,0 +1,44 @@
+template st.membrane.CloneableController
+  : st.common.ComponentHelper
+  implements st.membrane.ControllerGenerator {
+
+st.interfaces.IDLDefinition idl2c = st.interfaces.IDL2C; 
+
+$${
+
+isVoid   ::= [ "void"   : "true" ]
+
+// -----------------------------------------------------------------------------
+// Implementation of the ControllerGenerator interface
+// -----------------------------------------------------------------------------
+
+ControllerImplementation(definition, controller, interfaceDefinitions) ::= <<
+
+/* -----------------------------------------------------------------------------
+   Implementation of the Factory interface
+----------------------------------------------------------------------------- */
+
+<newFcInstance(definition=definition)>
+
+<destroyFcInstance(definition=definition)>
+
+>>
+
+// -----------------------------------------------------------------------------
+// Internal templates
+// -----------------------------------------------------------------------------
+
+newFcInstance(definition) ::= <<
+int METH(factory, newFcInstance)(void ** instance) {
+  return __component_<definition.name;format="toCName">_factory(instance, GET_MY_INTERFACE(allocator));
+}
+>>
+
+destroyFcInstance(definition) ::= <<
+int METH(factory, destroyFcInstance)(void * instance) {
+  return __component_<definition.name;format="toCName">_destroy(instance, GET_MY_INTERFACE(allocator));
+}
+>>
+
+}$$
+}

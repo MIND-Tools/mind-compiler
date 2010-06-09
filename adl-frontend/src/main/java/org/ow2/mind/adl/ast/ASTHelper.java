@@ -490,8 +490,8 @@ public class ASTHelper {
    */
   public static Component newComponent(final NodeFactory nodeFactory,
       final String name, final String definitionName) {
-    return newComponent(nodeFactory, name, newDefinitionReference(nodeFactory,
-        definitionName));
+    return newComponent(nodeFactory, name,
+        newDefinitionReference(nodeFactory, definitionName));
   }
 
   // ---------------------------------------------------------------------------
@@ -544,6 +544,30 @@ public class ASTHelper {
    */
   public static Binding newBinding(final NodeFactory nodeFactory) {
     return newNode(nodeFactory, "binding", Binding.class);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Implementation helper methods
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Create a new {@link Source} node using the given {@link NodeFactory}
+   * 
+   * @param nodeFactory the {@link NodeFactory} to use to create the node.
+   * @return a new {@link Source} node.
+   */
+  public static Source newSource(final NodeFactory nodeFactory) {
+    return newNode(nodeFactory, "source", Source.class);
+  }
+
+  /**
+   * Create a new {@link Data} node using the given {@link NodeFactory}
+   * 
+   * @param nodeFactory the {@link NodeFactory} to use to create the node.
+   * @return a new {@link Data} node.
+   */
+  public static Data newData(final NodeFactory nodeFactory) {
+    return newNode(nodeFactory, "data", Data.class);
   }
 
   // ---------------------------------------------------------------------------

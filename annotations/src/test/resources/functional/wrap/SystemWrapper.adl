@@ -1,0 +1,7 @@
+
+@CompileDef
+primitive wrap.SystemWrapper {
+
+  @Wrap
+  provides System as system;
+}

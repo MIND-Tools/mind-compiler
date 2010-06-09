@@ -6,4 +6,4 @@ methodPrototype(name, parameters, withThisPtr, vaArgs);
 methodDef(method, methodName, withThisPtr);
 methodPointerDef(method, withThisPtr);
 methodPointerName(name);
-isNonVoidMethod(method);
+isVoidMethod(method);

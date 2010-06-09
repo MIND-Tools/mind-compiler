@@ -22,6 +22,8 @@
  * Authors: Matthieu Leclercq
  */
 
+#include "ErrorCode.idt"
+
 /**
  * A component interface to control the content of the component to which it
  * belongs. This content is supposed to be made of an unordered, unstructured
@@ -41,7 +43,7 @@ interface fractal.api.ContentController {
    *      {@link Component} interfaces of the sub components are copied. Can be
    *      <code>null</code>.
    * @return the number of sub components; or
-   *      {@link ErrorConst#OPERATION_NOT_SUPPORTED} if this operation is not
+   *      {@link FRACTAL_API_OPERATION_NOT_SUPPORTED} if this operation is not
    *      supported.
    */
   int getFcSubComponents(in fractal.api.Component subComponents[]);
@@ -58,11 +60,11 @@ interface fractal.api.ContentController {
    *
    * @param subComponent the component to be added inside this component.
    * @return <code>0</code> if the component is added correctly.
-   *      {@link ErrorConst#ILLEGAL_CONTENT} if the component cannot be added.
-   *      {@link ErrorConst#ILLEGAL_LIFE_CYCLE} if this component has a
+   *      {@link FRACTAL_API_ILLEGAL_CONTENT} if the component cannot be added.
+   *      {@link FRACTAL_API_ILLEGAL_LIFE_CYCLE} if this component has a
    *      {@link LifeCycleController} interface, but it is not in an appropriate
    *      state to perform this operation.
-   *      {@link ErrorConst#OPERATION_NOT_SUPPORTED} if this operation is not
+   *      {@link FRACTAL_API_OPERATION_NOT_SUPPORTED} if this operation is not
    *      supported.
    */
   int addFcSubComponent(in fractal.api.Component subComponent);
@@ -80,13 +82,13 @@ interface fractal.api.ContentController {
    *
    * @param subComponent the component to be removed from this component.
    * @return <code>0</code> if the component has been removed correctly.
-   *      {@link ErrorConst#ILLEGAL_CONTENT} if the component cannot be removed.
-   *      {@link ErrorConst#NO_SUCH_SUB_COMPONENT} if the given
+   *      {@link FRACTAL_API_ILLEGAL_CONTENT} if the component cannot be removed.
+   *      {@link FRACTAL_API_NO_SUCH_SUB_COMPONENT} if the given
    *      <code>subComponent</code> is not a sub component.
-   *      {@link ErrorConst#ILLEGAL_LIFE_CYCLE} if this component has a
+   *      {@link FRACTAL_API_ILLEGAL_LIFE_CYCLE} if this component has a
    *      {@link LifeCycleController} interface, but it is not in an appropriate
    *      state to perform this operation.
-   *      {@link ErrorConst#OPERATION_NOT_SUPPORTED} if this operation is not
+   *      {@link FRACTAL_API_OPERATION_NOT_SUPPORTED} if this operation is not
    *      supported.
    */
   int removeFcSubComponent(in fractal.api.Component subComponent);
@@ -111,19 +113,19 @@ interface fractal.api.ContentController {
    *      <code>serverComponent</code> refers to the component this interface
    *      belongs; this name must refer to a client interface.
    * @return <code>0</code> if the binding has been added correctly.
-   *      {@link ErrorConst#ILLEGAL_BINDING} if the binding cannot be created.
-   *      {@link ErrorConst#NO_SUCH_SUB_COMPONENT} if the
+   *      {@link FRACTAL_API_ILLEGAL_BINDING} if the binding cannot be created.
+   *      {@link FRACTAL_API_NO_SUCH_SUB_COMPONENT} if the
    *      <code>clientComponent</code> or the <code>serverComponent</code> is
    *      neither a sub component nor the component this interface belongs.
-   *      {@link ErrorConst#ILLEGAL_LIFE_CYCLE} if this component has a
+   *      {@link FRACTAL_API_ILLEGAL_LIFE_CYCLE} if this component has a
    *      {@link LifeCycleController} interface, but it is not in an appropriate
    *      state to perform this operation.
-   *      {@link ErrorConst#OPERATION_NOT_SUPPORTED} if this operation is not
+   *      {@link FRACTAL_API_OPERATION_NOT_SUPPORTED} if this operation is not
    *      supported.
    */
   int addFcSubBinding(in fractal.api.Component clientComponent,
-      in const string clientItfName, in fractal.api.Component serverComponent,
-      in const string serverItfName);
+      in string clientItfName, in fractal.api.Component serverComponent,
+      in string serverItfName);
 
   /**
    * Removes a binding inside this component.
@@ -137,16 +139,16 @@ interface fractal.api.ContentController {
    *      <code>clientComponent</code> refers to the component this interface
    *      belongs; this name must refer to a server interface.
    * @return <code>0</code> if the binding has been removed correctly.
-   *      {@link ErrorConst#ILLEGAL_BINDING} if the binding cannot be removed.
-   *      {@link ErrorConst#NO_SUCH_SUB_COMPONENT} if the given
+   *      {@link FRACTAL_API_ILLEGAL_BINDING} if the binding cannot be removed.
+   *      {@link FRACTAL_API_NO_SUCH_SUB_COMPONENT} if the given
    *      <code>clientComponent</code> is neither a sub component nor the
    *      component this interface belongs.
-   *      {@link ErrorConst#ILLEGAL_LIFE_CYCLE} if this component has a
+   *      {@link FRACTAL_API_ILLEGAL_LIFE_CYCLE} if this component has a
    *      {@link LifeCycleController} interface, but it is not in an appropriate
    *      state to perform this operation.
-   *      {@link ErrorConst#OPERATION_NOT_SUPPORTED} if this operation is not
+   *      {@link FRACTAL_API_OPERATION_NOT_SUPPORTED} if this operation is not
    *      supported.
    */
   int removeFcSubBinding(in fractal.api.Component clientComponent,
-      in const string clientItfName);
+      in string clientItfName);
 }

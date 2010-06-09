@@ -66,6 +66,23 @@ public enum ADLErrors implements ErrorTemplate {
       "Invalid sub-component \"%s\" : duplicates singleton definition \"%s\". Previous use of singleton definition at %s",
       "<sub-comp>", "<singleton def>", "<previous location>"),
 
+  /** */
+  INVALID_CONTENT_CONTROLLER_NOT_A_COMPOSITE(
+      12,
+      "Invalid @controller.ContentController annotation, definition is not a composite"),
+
+  /** */
+  INVALID_CONTENT_CONTROLLER_MISSING_COMPONENT_CONTROLLER_ON_SUB_COMPONENT(
+      13,
+      "Invalid @controller.ContentController annotation, sub-component %s must have a \"component\" controller interface",
+      "<sub comp name>"),
+
+  /** */
+  INVALID_CONTENT_CONTROLLER_MISSING_BINDING_CONTROLLER_ON_SUB_COMPONENT(
+      14,
+      "Invalid @controller.ContentController annotation, sub-component %s must have a \"bindingController\" interface",
+      "<sub comp name>"),
+
   // ---------------------------------------------------------------------------
   // template errors (020-049)
   // ---------------------------------------------------------------------------

@@ -279,9 +279,8 @@
     <section id="adl-impl-data">
       <title>Private data definition</title>
 
-      <para>The specification of component's private-data is only required for the
-        components that may be instantiated multiple times. This specification may be done
-        under two different forms using the ADL:</para>
+      <para>The specification of component's private-data may be done under two
+        different forms using the ADL:</para>
       <orderedlist>
         <listitem>
           <para>The private-data structure definition can be put in a separate header file,
@@ -304,24 +303,47 @@
       <para>A primitive component definition may have a maximum of one private-data definition.
         On the other hand, composite and type definitions cannot specify private-data.</para>
       
+      <para>When the private-data structure is defined in a separate header file, 
+        the latter should contains only the definition of the private-data structure. It is
+        not necessary to include it in the implememtation files (this is done automatically 
+        by the generated code). Moreorver it must not be included by implementations of 
+        other components.</para>
+      
+      <para>See <xref linkend="c-prvdecl"/> for details on the syntax to be 
+        used to define component's private data.</para>
+
       <example>
-        <title>Private data definition</title>
+        <title>Private data definition in a separate header file</title>
         <programlisting linenumbering="numbered" language="adl"> data myComponentData.h;</programlisting>
         
         <para>The above code excerpt specifies that the component's private-data 
-          are defined in the file called <filename>myComponentData.h</filename>.</para>
+          are defined in the file called <filename>myComponentData.h</filename>. 
+          The latter file should look-like :</para>
+          
+        <programlisting language="cpl" linenumbering="numbered"> #ifndef MY_COMPONENT_DATA_H
+ #define MY_COMPONENT_DATA_H
+
+ struct {
+   int a, b;
+   char c[10];
+ } PRIVATE;
+ 
+ #endif</programlisting>
+        
+      </example>
+      
+      <example>
+        <title>Private data definition inlined in the ADL</title>
 
         <programlisting linenumbering="numbered" language="adl"> data {{
    struct {
      int a, b;
+     char c[10];
    } PRIVATE;
  }};</programlisting>
 
         <para>The above code excerpt makes an inlined definition of private-data structure
           directly in the ADL file.</para>
-         
-        <para>See <xref linkend="c-prvdecl"/> for details on the syntax to be 
-          used to define component's private data.</para>
       </example>
     </section>
     
@@ -341,14 +363,29 @@
         and <code>"}}"</code>) following the <code>"source"</code> keyword.</para>
         
       <example>
-        <title>Component implementation file declaration</title>
+        <title>Component implementation in a separate C file</title>
         <programlisting linenumbering="numbered" language="adl"> source myComponentImpl.c;</programlisting>
 
         <para>In the above code excerpt, specifies that implementation of the 
-          component is located in the <filename>myComponentImpl.c</filename> file.</para>
+          component is located in the <filename>myComponentImpl.c</filename> file. 
+          The latter file should look-like :</para>
         
+        <programlisting language="cpl" linenumbering="numbered"> #include &lt;stdio.h&gt;
+
+ int METH(adderItf, add) (int a, int b) {
+   printf("in adderItf.add\n");
+   return a + b;
+ }</programlisting>
+        
+      </example>
+      
+      <example>
+        <title>Component implementation inlined in the ADL</title>
         <programlisting linenumbering="numbered" language="adl"> source {{
+   #include &lt;stdio.h&gt;
+
    int METH(adderItf, add) (int a, int b) {
+     printf("in adderItf.add\n");
      return a + b;
    }
  }};</programlisting>
@@ -372,7 +409,7 @@
       <emphasis>attribute-controller</emphasis> interface (see <xref linkend="adv-ctrl-ac"/> for more detail),
       the attributes may also be read and modified at runtime by other components.</para>
     
-    <para>Attribute declarations are done using the <code>"attributes"</code> keyword followed 
+    <para>Attribute declarations are done using the <code>"attribute"</code> keyword followed 
       by a type, a name and optionnaly an initial value.</para>
     <note><para>Currently only type <code>"int"</code> is supported in the &productName; 
       toolchain.</para></note>
@@ -383,9 +420,9 @@
     
     <example>
       <title>Attribute declarations</title>
-      <programlisting linenumbering="numbered" language="adl"> attributes int attr1 = -2;
- attributes int attr2 = 0xff43dc5;
- attributes int attr3 = myDefinitionParam;</programlisting>
+      <programlisting linenumbering="numbered" language="adl"> attribute int attr1 = -2;
+ attribute int attr2 = 0xff43dc5;
+ attribute int attr3 = myDefinitionParam;</programlisting>
       
       <para>
         In the above code excerpt: 
@@ -690,7 +727,7 @@
    
    source aPrimitiveImpl.c;
    
-   attributes int attr1 = 2; 
+   attribute int attr1 = 2; 
  }</programlisting>
       <programlisting linenumbering="numbered" language="adl" startinglinenumber="40"> primitive foo.bar.AnotherPrimitive 
      extends MyType, APrimitive {
@@ -698,7 +735,7 @@
    source anotherPrimitiveImpl.c;
    
    @Override
-   attributes int attr1 = 4;
+   attribute int attr1 = 4;
  }</programlisting>
       <para>The previous definition is equivalent to : </para>
       <programlisting linenumbering="numbered" language="adl" startinglinenumber="60"> primitive foo.bar.AnotherPrimitive {
@@ -709,7 +746,7 @@
    source aPrimitiveImpl.c;
    source anotherPrimitiveImpl.c;
    
-   attributes int attr1 = 4;
+   attribute int attr1 = 4;
  }</programlisting>
 
       <para>
@@ -761,8 +798,8 @@
       
       <programlisting linenumbering="numbered" language="adl"> primitive foo.bar.APrimitive(a, b) {
    ...
-   attributes int attr1 = a;
-   attributes int attr2 = b;
+   attribute int attr1 = a;
+   attribute int attr2 = b;
  }</programlisting>
       <programlisting linenumbering="numbered" language="adl" startinglinenumber="10"> primitive foo.bar.AnotherPrimitive(c) extends APrimitive(c, c) {
    ...
@@ -1091,7 +1128,7 @@
    contains primitive MyType as subComp1 
      primitive {
        source myImplementation.c;
-       attributes int attr1 = a;
+       attribute int attr1 = a;
      }
    ...
  }</programlisting>
@@ -1138,7 +1175,7 @@
    provides Itf1 as itf1;
    
    @Override
-   attributes attr1 = 2; 
+   attribute attr1 = 2; 
    
  }</programlisting>
  
@@ -1343,6 +1380,42 @@
           cast pointers to interface types that are not directly accessible
           through the IDL of the provided or required interfaces.</para>
       </section>
+            
+      <section id="adl-annot-wrap">
+        <title><classname>@Wrap</classname></title>
+        
+        <formalpara>
+          <title>Annotation fields</title>
+          <para>No fields</para>
+        </formalpara>
+        
+        <formalpara>
+          <title>Annotation targets</title>
+          <para>
+            <simplelist type="inline">
+              <member>Server interface</member>
+            </simplelist>
+          </para>
+        </formalpara>
+
+        <para>The <classname>Wrap</classname> annotation allows to specify 
+          that the implementation of a provided interface will be automatically 
+          generated wrapping each corresponding C functions into interface methods. 
+          Wrapping a function corresponds in defining a method that makes the call 
+          this function. The generated method returns the same type as the C 
+          function and generally takes the same parameters. This approach is 
+          close to the ld <varname>--wrap</varname> option.</para>
+          
+        <note><para>Wrapping a varadic function needs complementary information 
+        to know the name of the dual function. Actually, as the number of 
+        parameters of a variadic function can't be determined apriori, the call 
+        to this function can't be done directly but through a function assuring
+        the same functionality having a <varname>va_list</varname> and a 
+        <varname>format</varname> as parameters. This specification will be done 
+        using the <varname>@VarArgsDual</varname> annotation (see 
+        <xref linkend="idl-annot-varargsdual"/>) in the corresponding IDL.</para></note>
+      </section>
+      
     </section>
   </section>
   
@@ -1587,7 +1660,7 @@
         <lhs>AttrDef</lhs>
         <rhs>
           <nonterminal def="#adlgrammar-Annotations" /> <sbr />
-          'attributes' <nonterminal def="#adlgrammar-AttrType" /> <sbr/>
+          'attribute' <nonterminal def="#adlgrammar-AttrType" /> <sbr/>
           &lt;ID&gt; [ '='  <nonterminal def="#adlgrammar-AttrValue" /> ] [ ';' ] <sbr />
         </rhs>
       </production>

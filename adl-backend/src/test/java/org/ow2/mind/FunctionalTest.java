@@ -24,6 +24,7 @@ package org.ow2.mind;
 
 import static org.testng.Assert.assertEquals;
 
+import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.Definition;
 import org.ow2.mind.adl.annotation.predefined.Compile;
 import org.ow2.mind.adl.annotation.predefined.CompileDef;
@@ -43,7 +44,13 @@ public class FunctionalTest extends AbstractFunctionalTest {
   @Test(dataProvider = "functional-test", groups = {"functional"})
   public void functionalTest(final String rootDir, final String adlName)
       throws Exception {
-    initSourcePath(rootDir);
+    initSourcePath(getDepsDir("fractal/api/Component.itf").getAbsolutePath(),
+        "common", rootDir);
+    processFunctionanTest(adlName);
+  }
+
+  protected void processFunctionanTest(final String adlName)
+      throws ADLException, InterruptedException, Exception {
     final Definition d = runner.load(adlName);
     final CompileDef compileDefAnno = AnnotationHelper.getAnnotation(d,
         CompileDef.class);
@@ -72,4 +79,5 @@ public class FunctionalTest extends AbstractFunctionalTest {
       assertEquals(r, runAnno.expectedResult, "Unexpected return value");
     }
   }
+
 }
