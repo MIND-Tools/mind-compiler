@@ -20,19 +20,30 @@
  * Contributors: 
  */
 
-package org.ow2.mind.adl.annotations;
+package org.ow2.mind.annotation.ast;
 
-import org.testng.annotations.Test;
+import static org.ow2.mind.CommonASTHelper.newNode;
 
-public class FunctionalTest extends org.ow2.mind.FunctionalTest {
+import org.objectweb.fractal.adl.NodeFactory;
 
-  @Override
-  @Test(dataProvider = "functional-test", groups = {"functional"})
-  public void functionalTest(final String rootDir, final String adlName)
-      throws Exception {
-    initSourcePath(getDepsDir("fractal/api/Component.itf").getAbsolutePath(),
-        getDepsDir("common/ApplicationType.adl").getAbsolutePath() + "/common",
-        rootDir);
-    processFunctionanTest(adlName);
+public final class AnnotationASTHelper {
+  private AnnotationASTHelper() {
   }
+
+  public static AnnotationNode newAnnotationNode(final NodeFactory nodeFactory,
+      final String annotationClass) {
+    final AnnotationNode node = newNode(nodeFactory, "annotation",
+        AnnotationNode.class);
+    node.setType(annotationClass);
+    return node;
+  }
+
+  public static AnnotationArgument newAnnotationArgument(
+      final NodeFactory nodeFactory, final String name) {
+    final AnnotationArgument node = newNode(nodeFactory, "annotationArgument",
+        AnnotationArgument.class);
+    node.setName(name);
+    return node;
+  }
+
 }

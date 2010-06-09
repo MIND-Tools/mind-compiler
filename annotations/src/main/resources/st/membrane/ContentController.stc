@@ -17,7 +17,7 @@ struct __component_ContentDescriptor *contentDesc;
 >>
 
 nbDynamicSubComponent(definition) ::= <<
-<definition.astDecorations.("annotations").annotationMap.("org.ow2.mind.adl.annotation.predefined.controller.ContentController").nbDynamicSubComponent>
+<definition.astDecorations.("annotations").annotationMap.("org.ow2.mind.adl.annotations.controller.ContentController").nbDynamicSubComponent>
 >>
 
 ControllerGlobalDataStaticInit(definition, controller) ::= <<

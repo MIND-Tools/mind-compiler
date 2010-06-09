@@ -44,8 +44,7 @@ public class DynloadTest extends AbstractFunctionalTest {
     if (isRunningOnWindows()) return;
 
     super.setup();
-    initSourcePath(runner, getDepsDir("fractal/api/Component.itf")
-        .getAbsolutePath(), "common", "functional", "dynload");
+    initSourcePath(runner);
 
     dynloadRunner = new CompilerRunner();
     final List<String> cFlags = new ArrayList<String>(
@@ -57,15 +56,18 @@ public class DynloadTest extends AbstractFunctionalTest {
         CompilerContextHelper.getLDFlags(dynloadRunner.context));
     ldFlags.add("--shared");
     CompilerContextHelper.setLDFlags(dynloadRunner.context, ldFlags);
-    initSourcePath(dynloadRunner, getDepsDir("fractal/api/Component.itf")
-        .getAbsolutePath(), "common", "functional", "dynload");
+    initSourcePath(dynloadRunner);
 
     tester = new File(runner.buildDir, "dynloadTester");
     if (!tester.exists()) {
       tester = runner.compile("GenericApplication<DynloadTester>",
           "dynloadTester");
     }
+  }
 
+  protected void initSourcePath(final CompilerRunner runner) {
+    initSourcePath(runner, getDepsDir("fractal/api/Component.itf")
+        .getAbsolutePath(), "common", "functional", "dynload");
   }
 
   @Test(groups = {"functional"})
@@ -86,58 +88,12 @@ public class DynloadTest extends AbstractFunctionalTest {
   }
 
   @Test(groups = {"functional"})
-  public void testControlledPrimitiveSingleton() throws Exception {
-    // this test is not supported on windows.
-    if (isRunningOnWindows()) return;
-
-    runTester(dynloadRunner.compile("EmptyControlledSingletonPrimitive"), true,
-        false, false);
-  }
-
-  @Test(groups = {"functional"})
-  public void testControlledPrimitiveMulti() throws Exception {
-    // this test is not supported on windows.
-    if (isRunningOnWindows()) return;
-
-    runTester(dynloadRunner.compile("EmptyControlledMultiPrimitive"), true,
-        false, false);
-  }
-
-  @Test(groups = {"functional"})
   public void testFactoryPrimitiveMulti() throws Exception {
     // this test is not supported on windows.
     if (isRunningOnWindows()) return;
 
     runTester(dynloadRunner.compile("Factory<EmptyMultiPrimitive>"), false,
         true, false);
-  }
-
-  @Test(groups = {"functional"})
-  public void testFactoryControlledPrimitiveMulti() throws Exception {
-    // this test is not supported on windows.
-    if (isRunningOnWindows()) return;
-
-    runTester(dynloadRunner.compile("Factory<EmptyControlledMultiPrimitive>"),
-        false, true, true);
-  }
-
-  @Test(groups = {"functional"})
-  public void testControlledFactoryPrimitiveMulti() throws Exception {
-    // this test is not supported on windows.
-    if (isRunningOnWindows()) return;
-
-    runTester(dynloadRunner.compile("FactoryWithCtrl<EmptyMultiPrimitive>"),
-        true, true, false);
-  }
-
-  @Test(groups = {"functional"})
-  public void testControlledFactoryControlledPrimitiveMulti() throws Exception {
-    // this test is not supported on windows.
-    if (isRunningOnWindows()) return;
-
-    runTester(
-        dynloadRunner.compile("FactoryWithCtrl<EmptyControlledMultiPrimitive>"),
-        true, true, true);
   }
 
   protected void runTester(final File lib, final boolean controlled,

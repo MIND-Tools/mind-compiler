@@ -34,7 +34,7 @@ import org.objectweb.fractal.adl.types.TypeInterfaceUtil;
 import org.ow2.mind.adl.ADLErrors;
 import org.ow2.mind.adl.annotation.ADLLoaderAnnotationProcessor;
 import org.ow2.mind.adl.annotation.ADLLoaderPhase;
-import org.ow2.mind.adl.annotation.predefined.controller.ContentController;
+import org.ow2.mind.adl.annotations.controller.ContentController;
 import org.ow2.mind.adl.ast.ASTHelper;
 import org.ow2.mind.adl.ast.Component;
 import org.ow2.mind.adl.ast.ComponentContainer;

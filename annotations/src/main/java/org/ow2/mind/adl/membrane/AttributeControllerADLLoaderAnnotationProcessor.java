@@ -27,16 +27,18 @@ import java.util.Map;
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.Node;
+import org.ow2.mind.adl.ADLErrors;
 import org.ow2.mind.adl.annotation.ADLLoaderAnnotationProcessor;
 import org.ow2.mind.adl.annotation.ADLLoaderPhase;
-import org.ow2.mind.adl.annotation.predefined.controller.Component;
+import org.ow2.mind.adl.annotations.controller.AttributeController;
+import org.ow2.mind.adl.ast.AttributeContainer;
 import org.ow2.mind.annotation.Annotation;
 
 /**
  * {@link ADLLoaderAnnotationProcessor annotation processor} for the
- * {@link Component} annotation.
+ * {@link AttributeController} annotation.
  */
-public class ComponentADLLoaderAnnotationProcessor
+public class AttributeControllerADLLoaderAnnotationProcessor
     extends
       AbstractControllerADLLoaderAnnotationProcessor
     implements
@@ -45,7 +47,18 @@ public class ComponentADLLoaderAnnotationProcessor
   public Definition processAnnotation(final Annotation annotation,
       final Node node, final Definition definition, final ADLLoaderPhase phase,
       final Map<Object, Object> context) throws ADLException {
-    return addControllerInterface(definition, CI, COMPONENT_SIGNATURE,
-        "ComponentController", "/fractal/internal/CIdelegate.c");
+    assert annotation instanceof AttributeController;
+    if (((AttributeController) annotation).allowNoAttr) {
+
+    }
+    if (!((AttributeController) annotation).allowNoAttr
+        && (!(definition instanceof AttributeContainer) || ((AttributeContainer) definition)
+            .getAttributes().length == 0))
+      throw new ADLException(
+          ADLErrors.INVALID_ATTRIBUTE_CONTROLLER_NO_ATTRIBUTE, node);
+
+    return addControllerInterface(definition, AC,
+        ATTRIBUTE_CONTROLLER_SIGNATURE, "AttributeController",
+        "/fractal/internal/ACdelegate.c");
   }
 }

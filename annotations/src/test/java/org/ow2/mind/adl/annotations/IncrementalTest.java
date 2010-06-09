@@ -22,17 +22,29 @@
 
 package org.ow2.mind.adl.annotations;
 
+import java.util.Map;
+
+import org.ow2.mind.AbstractIncrementalTest;
 import org.testng.annotations.Test;
 
-public class FunctionalTest extends org.ow2.mind.FunctionalTest {
+public class IncrementalTest extends AbstractIncrementalTest {
+
+  @Test(groups = {"functional"})
+  public void incrementalTestHelloworldControlled() throws Exception {
+    cleanBuildDir();
+    final Map<String, Long> t1 = recompile("GenericApplication<helloworld.HelloworldControlled>");
+
+    pause();
+    final Map<String, Long> t2 = recompile("GenericApplication<helloworld.HelloworldControlled>");
+    assertChanged("GenericApplication.map", t1, t2);
+    assertUnchangedAll(".*", t1, t2);
+  }
 
   @Override
-  @Test(dataProvider = "functional-test", groups = {"functional"})
-  public void functionalTest(final String rootDir, final String adlName)
-      throws Exception {
+  protected void initPath() {
     initSourcePath(getDepsDir("fractal/api/Component.itf").getAbsolutePath(),
         getDepsDir("common/ApplicationType.adl").getAbsolutePath() + "/common",
-        rootDir);
-    processFunctionanTest(adlName);
+        getDepsDir("incremental/helloworld/Client.adl").getAbsolutePath()
+            + "/incremental", "incremental");
   }
 }

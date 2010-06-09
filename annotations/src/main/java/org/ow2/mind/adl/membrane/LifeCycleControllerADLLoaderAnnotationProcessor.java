@@ -27,18 +27,17 @@ import java.util.Map;
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.Node;
-import org.ow2.mind.adl.ADLErrors;
 import org.ow2.mind.adl.annotation.ADLLoaderAnnotationProcessor;
 import org.ow2.mind.adl.annotation.ADLLoaderPhase;
-import org.ow2.mind.adl.annotation.predefined.controller.AttributeController;
-import org.ow2.mind.adl.ast.AttributeContainer;
+import org.ow2.mind.adl.annotations.controller.LifeCycleController;
+import org.ow2.mind.adl.ast.Component;
 import org.ow2.mind.annotation.Annotation;
 
 /**
  * {@link ADLLoaderAnnotationProcessor annotation processor} for the
- * {@link AttributeController} annotation.
+ * {@link LifeCycleController} annotation.
  */
-public class AttributeControllerADLLoaderAnnotationProcessor
+public class LifeCycleControllerADLLoaderAnnotationProcessor
     extends
       AbstractControllerADLLoaderAnnotationProcessor
     implements
@@ -47,18 +46,13 @@ public class AttributeControllerADLLoaderAnnotationProcessor
   public Definition processAnnotation(final Annotation annotation,
       final Node node, final Definition definition, final ADLLoaderPhase phase,
       final Map<Object, Object> context) throws ADLException {
-    assert annotation instanceof AttributeController;
-    if (((AttributeController) annotation).allowNoAttr) {
-
+    if (phase == ADLLoaderPhase.ON_SUB_COMPONENT) {
+      assert node instanceof Component;
+      node.astSetDecoration("hasLifeCycleController", Boolean.TRUE);
     }
-    if (!((AttributeController) annotation).allowNoAttr
-        && (!(definition instanceof AttributeContainer) || ((AttributeContainer) definition)
-            .getAttributes().length == 0))
-      throw new ADLException(
-          ADLErrors.INVALID_ATTRIBUTE_CONTROLLER_NO_ATTRIBUTE, node);
 
-    return addControllerInterface(definition, AC,
-        ATTRIBUTE_CONTROLLER_SIGNATURE, "AttributeController",
-        "/fractal/internal/ACdelegate.c");
+    return addControllerInterface(definition, LCC,
+        LIFECYCLE_CONTROLLER_SIGNATURE, "LifeCycleController",
+        "/fractal/internal/LCCdelegate.c");
   }
 }

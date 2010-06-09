@@ -20,33 +20,26 @@
  * Contributors: 
  */
 
-package org.ow2.mind.adl.annotation.predefined.controller;
+package org.ow2.mind.adl.annotations.controller;
 
 import static org.ow2.mind.adl.annotation.ADLAnnotationTarget.DEFINITION;
 
 import org.ow2.mind.adl.annotation.ADLLoaderPhase;
 import org.ow2.mind.adl.annotation.ADLLoaderProcessor;
-import org.ow2.mind.adl.membrane.BindingControllerADLLoaderAnnotationProcessor;
+import org.ow2.mind.adl.membrane.LifeCycleControllerADLLoaderAnnotationProcessor;
 import org.ow2.mind.annotation.Annotation;
-import org.ow2.mind.annotation.AnnotationElement;
 import org.ow2.mind.annotation.AnnotationTarget;
 
 /**
- * The BindingController annotation is used to specify that component must have
- * a <code>"binding-controller"</code> controller interface that can be used to
- * control bindings of client interfaces.
+ * The LifeCycleController annotation is used to specify that component must
+ * have a <code>"lifecycle-controller"</code> controller interface that can be
+ * used to start and stop the component.
  */
-@ADLLoaderProcessor(processor = BindingControllerADLLoaderAnnotationProcessor.class, phases = {ADLLoaderPhase.AFTER_EXTENDS})
-public class BindingController implements Annotation {
+@ADLLoaderProcessor(processor = LifeCycleControllerADLLoaderAnnotationProcessor.class, phases = {
+    ADLLoaderPhase.AFTER_EXTENDS, ADLLoaderPhase.ON_SUB_COMPONENT})
+public class LifeCycleController implements Annotation {
 
   private static final AnnotationTarget[] ANNOTATION_TARGETS = {DEFINITION};
-
-  /**
-   * Annotation field that specifies if this annotation can be attached to a
-   * definition that has no client interface. (<code>false</code> by default).
-   */
-  @AnnotationElement(hasDefaultValue = true)
-  public boolean                          allowNoRequiredItf = false;
 
   public AnnotationTarget[] getAnnotationTargets() {
     return ANNOTATION_TARGETS;

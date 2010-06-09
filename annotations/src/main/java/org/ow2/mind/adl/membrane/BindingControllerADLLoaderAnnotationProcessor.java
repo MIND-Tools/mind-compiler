@@ -22,22 +22,27 @@
 
 package org.ow2.mind.adl.membrane;
 
+import static org.objectweb.fractal.adl.NodeUtil.castNodeError;
+
 import java.util.Map;
 
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.Node;
+import org.objectweb.fractal.adl.interfaces.Interface;
+import org.objectweb.fractal.adl.interfaces.InterfaceContainer;
+import org.objectweb.fractal.adl.types.TypeInterfaceUtil;
+import org.ow2.mind.adl.ADLErrors;
 import org.ow2.mind.adl.annotation.ADLLoaderAnnotationProcessor;
 import org.ow2.mind.adl.annotation.ADLLoaderPhase;
-import org.ow2.mind.adl.annotation.predefined.controller.LifeCycleController;
-import org.ow2.mind.adl.ast.Component;
+import org.ow2.mind.adl.annotations.controller.BindingController;
 import org.ow2.mind.annotation.Annotation;
 
 /**
  * {@link ADLLoaderAnnotationProcessor annotation processor} for the
- * {@link LifeCycleController} annotation.
+ * {@link BindingController} annotation.
  */
-public class LifeCycleControllerADLLoaderAnnotationProcessor
+public class BindingControllerADLLoaderAnnotationProcessor
     extends
       AbstractControllerADLLoaderAnnotationProcessor
     implements
@@ -46,13 +51,23 @@ public class LifeCycleControllerADLLoaderAnnotationProcessor
   public Definition processAnnotation(final Annotation annotation,
       final Node node, final Definition definition, final ADLLoaderPhase phase,
       final Map<Object, Object> context) throws ADLException {
-    if (phase == ADLLoaderPhase.ON_SUB_COMPONENT) {
-      assert node instanceof Component;
-      node.astSetDecoration("hasLifeCycleController", Boolean.TRUE);
-    }
+    assert annotation instanceof BindingController;
+    if (((BindingController) annotation).allowNoRequiredItf) {
+      return addControllerInterface(definition, BC,
+          BINDING_CONTROLLER_SIGNATURE, "BindingController",
+          "/fractal/internal/BCdelegate.c");
+    } else {
+      for (final Interface itf : castNodeError(definition,
+          InterfaceContainer.class).getInterfaces()) {
+        if (TypeInterfaceUtil.isClient(itf))
+          return addControllerInterface(definition, BC,
+              BINDING_CONTROLLER_SIGNATURE, "BindingController",
+              "/fractal/internal/BCdelegate.c");
+      }
 
-    return addControllerInterface(definition, LCC,
-        LIFECYCLE_CONTROLLER_SIGNATURE, "LifeCycleController",
-        "/fractal/internal/LCCdelegate.c");
+      // definition has no client interface
+      throw new ADLException(ADLErrors.INVALID_BINDING_CONTROLLER_NO_BINDING,
+          node);
+    }
   }
 }

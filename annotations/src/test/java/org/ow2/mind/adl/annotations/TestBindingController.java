@@ -20,7 +20,7 @@
  * Contributors: 
  */
 
-package org.ow2.mind.adl.controller.binding;
+package org.ow2.mind.adl.annotations;
 
 import static org.ow2.mind.adl.membrane.DefaultControllerInterfaceConstants.BINDING_CONTROLLER;
 import static org.ow2.mind.adl.membrane.DefaultControllerInterfaceConstants.BINDING_CONTROLLER_SIGNATURE;
@@ -39,7 +39,7 @@ import org.ow2.mind.BasicInputResourceLocator;
 import org.ow2.mind.adl.ADLLocator;
 import org.ow2.mind.adl.ASTChecker;
 import org.ow2.mind.adl.Factory;
-import org.ow2.mind.adl.annotation.predefined.controller.BindingController;
+import org.ow2.mind.adl.annotations.controller.BindingController;
 import org.ow2.mind.adl.ast.ASTHelper;
 import org.ow2.mind.adl.implementation.ImplementationLocator;
 import org.ow2.mind.adl.membrane.ControllerInterfaceDecorationHelper;
@@ -85,6 +85,8 @@ public class TestBindingController {
     context = new HashMap<Object, Object>();
     AnnotationLocatorHelper.addDefaultAnnotationPackage(
         "org.ow2.mind.adl.annotation.predefined", context);
+    AnnotationLocatorHelper.addDefaultAnnotationPackage(
+        "org.ow2.mind.adl.annotations", context);
 
     astChecker = new ASTChecker();
   }
@@ -132,9 +134,9 @@ public class TestBindingController {
     assertNotNull(ctrlItf);
     assertEquals(ctrlItf.getName(), BINDING_CONTROLLER);
     assertNull(ctrlItf.getIsInternal());
-    assertSame(ControllerInterfaceDecorationHelper
-        .getReferencedInterface(ctrlItf), ASTHelper.getInterface(d,
-        BINDING_CONTROLLER));
+    assertSame(
+        ControllerInterfaceDecorationHelper.getReferencedInterface(ctrlItf),
+        ASTHelper.getInterface(d, BINDING_CONTROLLER));
   }
 
 }

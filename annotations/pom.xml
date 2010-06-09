@@ -42,7 +42,7 @@
 
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>adl-backend</artifactId>
+            <artifactId>adl-frontend</artifactId>
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
@@ -50,6 +50,13 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>common-frontend</artifactId>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>adl-backend</artifactId>
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>

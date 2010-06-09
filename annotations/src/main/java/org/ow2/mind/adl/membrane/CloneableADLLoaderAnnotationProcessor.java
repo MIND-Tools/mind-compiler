@@ -32,7 +32,7 @@ import org.objectweb.fractal.adl.types.TypeInterface;
 import org.ow2.mind.adl.annotation.ADLLoaderAnnotationProcessor;
 import org.ow2.mind.adl.annotation.ADLLoaderPhase;
 import org.ow2.mind.adl.annotation.AbstractADLLoaderAnnotationProcessor;
-import org.ow2.mind.adl.annotation.predefined.controller.Cloneable;
+import org.ow2.mind.adl.annotations.controller.Cloneable;
 import org.ow2.mind.adl.ast.ASTHelper;
 import org.ow2.mind.adl.ast.MindInterface;
 import org.ow2.mind.adl.membrane.ast.Controller;

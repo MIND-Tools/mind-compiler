@@ -20,7 +20,7 @@
  * Contributors: 
  */
 
-package org.ow2.mind.adl.annotation.predefined.controller;
+package org.ow2.mind.adl.annotations.controller;
 
 import static org.ow2.mind.adl.annotation.ADLAnnotationTarget.DEFINITION;
 
