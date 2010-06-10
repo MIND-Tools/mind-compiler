@@ -86,7 +86,7 @@ public class BasicBindingChecker implements BindingChecker {
       final Interface compositeInterface,
       final Interface subComponentInterface, final Binding binding,
       final Node locator) throws ADLException {
-    if (!isServer(compositeInterface)) {
+    if (!isClient(compositeInterface)) {
       throw new ADLException(BindingErrors.INVALID_FROM_INTERNAL, locator,
           compositeInterface.getName(),
           new NodeErrorLocator(compositeInterface));
@@ -101,36 +101,34 @@ public class BasicBindingChecker implements BindingChecker {
     if (TypeInterfaceUtil.isMandatory(compositeInterface)
         && TypeInterfaceUtil.isOptional(subComponentInterface)) {
       throw new ADLException(BindingErrors.INVALID_MANDATORY_TO_OPTIONAL,
-          locator, compositeInterface.getName(), subComponentInterface
-              .getName());
+          locator, compositeInterface.getName(),
+          subComponentInterface.getName());
     }
 
-    if (binding != null) {
-      final boolean singleFromInterface = isSingleton(compositeInterface)
-          || (isCollection(compositeInterface) && binding
-              .getFromInterfaceNumber() != null);
-      final boolean singleToInterface = isSingleton(subComponentInterface)
-          || (isCollection(subComponentInterface) && binding
-              .getToInterfaceNumber() != null);
+    final boolean singleFromInterface = isSingleton(compositeInterface)
+        || (isCollection(compositeInterface) && binding
+            .getFromInterfaceNumber() != null);
+    final boolean singleToInterface = isSingleton(subComponentInterface)
+        || (isCollection(subComponentInterface) && binding
+            .getToInterfaceNumber() != null);
 
-      // only single-to-single or multi-to-multi is allowed.
-      if (singleFromInterface != singleToInterface)
-        throw new ADLException(ADLErrors.INVALID_BINDING_CARDINALITY, locator);
+    // only single-to-single or multi-to-multi is allowed.
+    if (singleFromInterface != singleToInterface)
+      throw new ADLException(ADLErrors.INVALID_BINDING_CARDINALITY, locator);
 
-      if (!singleFromInterface) {
-        assert !singleToInterface;
-        final int compositeSize = getNumberOfElement(compositeInterface);
-        final int subCompSize = getNumberOfElement(subComponentInterface);
-        if (compositeSize > subCompSize) {
-          // if there are more interfaces on composite side than in
-          // sub-component side, so some of the interfaces of the composite side
-          // can't be bound to the sub-component.
-          if (isMandatory(compositeInterface))
-            throw new ADLException(ADLErrors.INVALID_BINDING_COLLECTION_SIZE,
-                locator, compositeInterface.getName(), compositeSize,
-                subComponentInterface.getName(), subCompSize);
+    if (!singleFromInterface) {
+      assert !singleToInterface;
+      final int compositeSize = getNumberOfElement(compositeInterface);
+      final int subCompSize = getNumberOfElement(subComponentInterface);
+      if (compositeSize > subCompSize) {
+        // if there are more interfaces on composite side than in
+        // sub-component side, so some of the interfaces of the composite side
+        // can't be bound to the sub-component.
+        if (isMandatory(compositeInterface))
+          throw new ADLException(ADLErrors.INVALID_BINDING_COLLECTION_SIZE,
+              locator, compositeInterface.getName(), compositeSize,
+              subComponentInterface.getName(), subCompSize);
 
-        }
       }
     }
   }
@@ -146,7 +144,7 @@ public class BasicBindingChecker implements BindingChecker {
               subComponentInterface));
     }
 
-    if (!isClient(compositeInterface)) {
+    if (!isServer(compositeInterface)) {
       throw new ADLException(BindingErrors.INVALID_TO_INTERNAL, locator,
           compositeInterface.getName(),
           new NodeErrorLocator(compositeInterface));
@@ -155,38 +153,64 @@ public class BasicBindingChecker implements BindingChecker {
     if (TypeInterfaceUtil.isMandatory(subComponentInterface)
         && TypeInterfaceUtil.isOptional(compositeInterface)) {
       throw new ADLException(BindingErrors.INVALID_MANDATORY_TO_OPTIONAL,
-          locator, subComponentInterface.getName(), compositeInterface
-              .getName());
+          locator, subComponentInterface.getName(),
+          compositeInterface.getName());
     }
 
-    if (binding != null) {
-      final boolean singleFromInterface = isSingleton(subComponentInterface)
-          || (isCollection(subComponentInterface) && binding
-              .getFromInterfaceNumber() != null);
-      final boolean singleToInterface = isSingleton(compositeInterface)
-          || (isCollection(compositeInterface) && binding
-              .getToInterfaceNumber() != null);
+    final boolean singleFromInterface = isSingleton(subComponentInterface)
+        || (isCollection(subComponentInterface) && binding
+            .getFromInterfaceNumber() != null);
+    final boolean singleToInterface = isSingleton(compositeInterface)
+        || (isCollection(compositeInterface) && binding.getToInterfaceNumber() != null);
 
-      // only single-to-single or multi-to-multi is allowed.
-      if (singleFromInterface != singleToInterface)
-        throw new ADLException(ADLErrors.INVALID_BINDING_CARDINALITY, locator);
+    // only single-to-single or multi-to-multi is allowed.
+    if (singleFromInterface != singleToInterface)
+      throw new ADLException(ADLErrors.INVALID_BINDING_CARDINALITY, locator);
 
-      if (!singleFromInterface) {
-        assert !singleToInterface;
-        final int compositeSize = getNumberOfElement(compositeInterface);
-        final int subCompSize = getNumberOfElement(subComponentInterface);
-        if (subCompSize > compositeSize) {
-          // if there are more interfaces on sub-component side than in
-          // composite side, so some of the interfaces of the sub-component side
-          // can't be bound to the composite.
-          if (isMandatory(subComponentInterface))
-            throw new ADLException(ADLErrors.INVALID_BINDING_COLLECTION_SIZE,
-                locator, subComponentInterface.getName(), subCompSize,
-                compositeInterface.getName(), compositeSize);
+    if (!singleFromInterface) {
+      assert !singleToInterface;
+      final int compositeSize = getNumberOfElement(compositeInterface);
+      final int subCompSize = getNumberOfElement(subComponentInterface);
+      if (subCompSize > compositeSize) {
+        // if there are more interfaces on sub-component side than in
+        // composite side, so some of the interfaces of the sub-component side
+        // can't be bound to the composite.
+        if (isMandatory(subComponentInterface))
+          throw new ADLException(ADLErrors.INVALID_BINDING_COLLECTION_SIZE,
+              locator, subComponentInterface.getName(), subCompSize,
+              compositeInterface.getName(), compositeSize);
 
-        }
       }
     }
+  }
+
+  public void checkCompatibility(final Interface from, final Interface to,
+      final Node locator) throws ADLException {
+    if (TypeInterfaceUtil.isMandatory(from) && TypeInterfaceUtil.isOptional(to)) {
+      throw new ADLException(BindingErrors.INVALID_MANDATORY_TO_OPTIONAL,
+          locator, from.getName(), to.getName());
+    }
+
+    final boolean singleFromInterface = isSingleton(from);
+    final boolean singleToInterface = isSingleton(to);
+
+    // only single-to-single or multi-to-multi is allowed.
+    if (singleFromInterface != singleToInterface)
+      throw new ADLException(ADLErrors.INVALID_BINDING_CARDINALITY, locator);
+
+    if (!singleFromInterface) {
+      // multi-to-multi binding
+      assert !singleToInterface;
+      final int fromSize = getNumberOfElement(from);
+      final int toSize = getNumberOfElement(to);
+      if (fromSize > toSize) {
+        // if there are more client interfaces than server interfaces
+        if (isMandatory(from))
+          throw new ADLException(ADLErrors.INVALID_BINDING_COLLECTION_SIZE,
+              locator, from.getName(), fromSize, to.getName(), toSize);
+      }
+    }
+
   }
 
 }

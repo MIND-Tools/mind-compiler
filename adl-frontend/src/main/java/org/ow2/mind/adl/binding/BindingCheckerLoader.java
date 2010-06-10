@@ -40,10 +40,16 @@ import org.objectweb.fractal.adl.interfaces.Interface;
 import org.objectweb.fractal.adl.interfaces.InterfaceContainer;
 import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.fractal.api.control.IllegalBindingException;
+import org.ow2.mind.adl.ast.ASTHelper;
 import org.ow2.mind.adl.ast.Binding;
 import org.ow2.mind.adl.ast.BindingContainer;
 import org.ow2.mind.adl.ast.Component;
 import org.ow2.mind.adl.ast.ComponentContainer;
+import org.ow2.mind.adl.membrane.ast.Controller;
+import org.ow2.mind.adl.membrane.ast.ControllerContainer;
+import org.ow2.mind.adl.membrane.ast.ControllerInterface;
+import org.ow2.mind.adl.membrane.ast.InternalInterfaceContainer;
+import org.ow2.mind.adl.membrane.ast.MembraneASTHelper;
 
 public class BindingCheckerLoader extends AbstractLoader {
 
@@ -93,14 +99,31 @@ public class BindingCheckerLoader extends AbstractLoader {
       subComponentInterfaces.put(subComponent.getName(), subComponentItfs);
     }
 
+    // add composite interfaces
+    final Map<String, Interface> componentItfs = new HashMap<String, Interface>();
+    subComponentInterfaces.put(null, componentItfs);
+    // first add internal interfaces
     final Interface[] interfaces = castNodeError(container,
-        InterfaceContainer.class).getInterfaces();
-    final Map<String, Interface> componentItfs = new HashMap<String, Interface>(
-        interfaces.length);
+        InternalInterfaceContainer.class).getInternalInterfaces();
     for (final Interface itf : interfaces) {
       componentItfs.put(itf.getName(), itf);
     }
-    subComponentInterfaces.put(null, componentItfs);
+    // then add server interfaces of controllers
+    final Controller[] controllers = castNodeError(container,
+        ControllerContainer.class).getControllers();
+    for (final Controller controller : controllers) {
+      for (final ControllerInterface ctrlItf : controller
+          .getControllerInterfaces()) {
+        if (!componentItfs.containsKey(ctrlItf.getName())
+            && !MembraneASTHelper.isInternalInterface(ctrlItf)) {
+          final Interface itf = ASTHelper.getInterface(container,
+              ctrlItf.getName());
+          if (itf != null) {
+            componentItfs.put(ctrlItf.getName(), itf);
+          }
+        }
+      }
+    }
 
     for (final Binding binding : bindings) {
 

@@ -79,6 +79,12 @@ public class IDLBindingChecker implements BindingChecker, BindingController {
     checkSignature(subComponentInterface, compositeInterface, locator);
   }
 
+  public void checkCompatibility(final Interface from, final Interface to,
+      final Node locator) throws ADLException {
+    clientBindingCheckerItf.checkCompatibility(from, to, locator);
+    checkSignature(from, to, locator);
+  }
+
   // ---------------------------------------------------------------------------
   // Utility methods
   // ---------------------------------------------------------------------------

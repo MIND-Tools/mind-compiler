@@ -1,25 +1,51 @@
 
 composite controller.content.CCTester<T conformsto CCTested> extends ApplicationType {
 
-  contains as tester 
-  @Singleton
-  primitive {
-    provides Main as main;
+  contains as testerComposite 
+  
+    @Singleton
+    @controller.ContentController
+    composite {
     
-    requires Main as testedMain;
-    requires fractal.api.ContentController as testedCC;
-    requires fractal.api.Factory as delegatorFactory;
-    
-    source ccTester.c;
-  }
+      provides Main as main;
+        
+      requires Main as testedMain;
+      requires fractal.api.ContentController as testedCC;
+      requires fractal.api.Factory as delegatorFactory;
+
+      contains as tester 
+      @Singleton
+      @controller.Component
+      @controller.BindingController
+      primitive {
+        provides Main as main;
+        
+        requires Main as testedMain;
+        requires fractal.api.ContentController as testedCC;
+        
+        // this interface is added to test MIND-91
+        requires fractal.api.ContentController as superCC;
+        requires fractal.api.Factory as delegatorFactory;
+        
+        source ccTester.c;
+      }
+      
+      binds this.main to tester.main;
+      binds tester.testedMain to this.testedMain;
+      binds tester.testedCC to this.testedCC;
+      binds tester.delegatorFactory to this.delegatorFactory;
+      
+      // test MIND-91
+      binds tester.superCC to this.contentController;
+    }
   
   contains T as tested;
   contains Factory<MainDelegator> as delegatorFactory;
   contains UnixAllocator as allocator;
   
-  binds this.main to tester.main;
-  binds tester.testedMain to tested.main;
-  binds tester.testedCC to tested.contentController;
-  binds tester.delegatorFactory to delegatorFactory.factory;
+  binds this.main to testerComposite.main;
+  binds testerComposite.testedMain to tested.main;
+  binds testerComposite.testedCC to tested.contentController;
+  binds testerComposite.delegatorFactory to delegatorFactory.factory;
   binds delegatorFactory.allocator to allocator.allocator;
 }
