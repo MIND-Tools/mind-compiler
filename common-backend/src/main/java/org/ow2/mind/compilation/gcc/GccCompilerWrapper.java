@@ -56,9 +56,9 @@ import org.ow2.mind.compilation.CompilerErrors;
 import org.ow2.mind.compilation.CompilerWrapper;
 import org.ow2.mind.compilation.DependencyHelper;
 import org.ow2.mind.compilation.ExecutionHelper;
+import org.ow2.mind.compilation.ExecutionHelper.ExecutionResult;
 import org.ow2.mind.compilation.LinkerCommand;
 import org.ow2.mind.compilation.PreprocessorCommand;
-import org.ow2.mind.compilation.ExecutionHelper.ExecutionResult;
 import org.ow2.mind.io.OutputFileLocator;
 
 public class GccCompilerWrapper implements CompilerWrapper, BindingController {
@@ -155,8 +155,8 @@ public class GccCompilerWrapper implements CompilerWrapper, BindingController {
       }
 
       if (result.getExitValue() != 0) {
-        throw new ADLException(CompilerErrors.COMPILER_ERROR, outputFile
-            .getPath(), result.getOutput());
+        throw new ADLException(CompilerErrors.COMPILER_ERROR,
+            outputFile.getPath(), result.getOutput());
       }
       if (result.getOutput() != null) {
         // command returns 0 and generates an output (warning)
@@ -235,8 +235,8 @@ public class GccCompilerWrapper implements CompilerWrapper, BindingController {
       }
 
       if (result.getExitValue() != 0) {
-        throw new ADLException(CompilerErrors.COMPILER_ERROR, outputFile
-            .getPath(), result.getOutput());
+        throw new ADLException(CompilerErrors.COMPILER_ERROR,
+            outputFile.getPath(), result.getOutput());
       }
       if (result.getOutput() != null) {
         // command returns 0 and generates an output (warning)
@@ -269,8 +269,22 @@ public class GccCompilerWrapper implements CompilerWrapper, BindingController {
       cmd.add("-o");
       cmd.add(outputFile.getPath());
 
+      // archive files (i.e. '.a' files) are added at the end of the command
+      // line.
+      List<String> archiveFiles = null;
       for (final File inputFile : inputFiles) {
-        cmd.add(inputFile.getPath());
+        final String path = inputFile.getPath();
+        if (path.endsWith(".a")) {
+          if (archiveFiles == null) archiveFiles = new ArrayList<String>();
+          archiveFiles.add(path);
+        } else {
+          cmd.add(path);
+        }
+      }
+      if (archiveFiles != null) {
+        for (final String path : archiveFiles) {
+          cmd.add(path);
+        }
       }
 
       final String linkerScript = getLinkerScript(context);
@@ -287,8 +301,8 @@ public class GccCompilerWrapper implements CompilerWrapper, BindingController {
       final ExecutionResult result = ExecutionHelper
           .exec(getDescription(), cmd);
       if (result.getExitValue() != 0) {
-        throw new ADLException(CompilerErrors.LINKER_ERROR, outputFile
-            .getPath(), result.getOutput());
+        throw new ADLException(CompilerErrors.LINKER_ERROR,
+            outputFile.getPath(), result.getOutput());
       }
       if (result.getOutput() != null) {
         // command returns 0 and generates an output (warning)

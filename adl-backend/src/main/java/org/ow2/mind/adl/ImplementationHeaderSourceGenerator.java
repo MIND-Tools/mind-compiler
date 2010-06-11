@@ -33,6 +33,7 @@ import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.CompilerError;
 import org.objectweb.fractal.adl.Definition;
 import org.ow2.mind.SourceFileWriter;
+import org.ow2.mind.adl.ast.ASTHelper;
 import org.ow2.mind.adl.ast.ImplementationContainer;
 import org.ow2.mind.adl.ast.Source;
 import org.ow2.mind.io.IOErrors;
@@ -103,8 +104,8 @@ public class ImplementationHeaderSourceGenerator
       try {
         SourceFileWriter.writeToFile(headerFile, getFileContent(definition));
       } catch (final IOException e) {
-        throw new CompilerError(IOErrors.WRITE_ERROR, e, headerFile
-            .getAbsolutePath());
+        throw new CompilerError(IOErrors.WRITE_ERROR, e,
+            headerFile.getAbsolutePath());
       }
     }
   }
@@ -113,20 +114,23 @@ public class ImplementationHeaderSourceGenerator
     final StringBuilder sb = new StringBuilder();
     sb.append("/* Generated file: ").append(getImplHeaderFileName(definition))
         .append("*/\n");
-    sb.append("#ifndef ").append(toUpperCName(definition.getName())).append(
-        "_IMPL_H\n");
-    sb.append("#define ").append(toUpperCName(definition.getName())).append(
-        "_IMPL_H\n");
+    sb.append("#ifndef ").append(toUpperCName(definition.getName()))
+        .append("_IMPL_H\n");
+    sb.append("#define ").append(toUpperCName(definition.getName()))
+        .append("_IMPL_H\n");
 
     final Source[] sources = ((ImplementationContainer) definition)
         .getSources();
     for (int i = 0; i < sources.length; i++) {
-      sb.append("#include \"").append(
-          toCPath(getImplHeaderFileName(definition, i))).append("\"\n");
+      if (!ASTHelper.isPreCompiled(sources[i])) {
+        sb.append("#include \"")
+            .append(toCPath(getImplHeaderFileName(definition, i)))
+            .append("\"\n");
+      }
     }
 
-    sb.append("#endif /* ").append(toUpperCName(definition.getName())).append(
-        "_IMPL_H */\n");
+    sb.append("#endif /* ").append(toUpperCName(definition.getName()))
+        .append("_IMPL_H */\n");
 
     return sb.toString();
   }
