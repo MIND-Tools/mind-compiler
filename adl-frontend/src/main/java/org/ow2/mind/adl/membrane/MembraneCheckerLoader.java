@@ -23,6 +23,8 @@
 package org.ow2.mind.adl.membrane;
 
 import static org.objectweb.fractal.adl.NodeUtil.castNodeError;
+import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
+import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
 import static org.ow2.mind.adl.membrane.ControllerInterfaceDecorationHelper.setReferencedInterface;
 import static org.ow2.mind.adl.membrane.ast.MembraneASTHelper.isInternalInterface;
 
@@ -38,6 +40,8 @@ import org.objectweb.fractal.adl.AbstractLoader;
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.interfaces.Interface;
 import org.objectweb.fractal.adl.interfaces.InterfaceContainer;
+import org.objectweb.fractal.api.NoSuchInterfaceException;
+import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.ow2.mind.adl.ADLErrors;
 import org.ow2.mind.adl.ast.ASTHelper;
 import org.ow2.mind.adl.ast.ImplementationContainer;
@@ -45,10 +49,18 @@ import org.ow2.mind.adl.membrane.ast.Controller;
 import org.ow2.mind.adl.membrane.ast.ControllerContainer;
 import org.ow2.mind.adl.membrane.ast.ControllerInterface;
 import org.ow2.mind.adl.membrane.ast.InternalInterfaceContainer;
+import org.ow2.mind.error.ErrorManager;
 
 public class MembraneCheckerLoader extends AbstractLoader
     implements
       DefaultControllerInterfaceConstants {
+
+  // ---------------------------------------------------------------------------
+  // Client interfaces
+  // ---------------------------------------------------------------------------
+
+  /** The {@link ErrorManager} client interface used to log errors. */
+  public ErrorManager errorManagerItf;
 
   // ---------------------------------------------------------------------------
   // Implementation of the Loader interface
@@ -102,19 +114,21 @@ public class MembraneCheckerLoader extends AbstractLoader
           if (isInternalInterface(ctrlItf)) {
             itf = internalInterfaces.get(ctrlItf.getName());
             if (itf == null) {
-              throw new ADLException(
+              errorManagerItf.logError(
                   ADLErrors.INVALID_CONTROLLER_INTERFACE_NO_SUCH_INTERFACE,
                   ctrlItf, ctrlItf.getName());
+            } else {
+              unusedInternalInterfaces.remove(itf);
             }
-            unusedInternalInterfaces.remove(itf);
           } else {
             itf = externalInterfaces.get(ctrlItf.getName());
             if (itf == null) {
-              throw new ADLException(
+              errorManagerItf.logError(
                   ADLErrors.INVALID_CONTROLLER_INTERFACE_NO_SUCH_INTERFACE,
                   ctrlItf, ctrlItf.getName());
+            } else {
+              unusedExternalInterfaces.remove(itf);
             }
-            unusedExternalInterfaces.remove(itf);
           }
           setReferencedInterface(ctrlItf, itf);
         }
@@ -126,7 +140,7 @@ public class MembraneCheckerLoader extends AbstractLoader
       String itfNames = "\"" + iter.next().getName() + "\"";
       while (iter.hasNext())
         itfNames += ", \"" + iter.next().getName() + "\"";
-      throw new ADLException(ADLErrors.INVALID_MEMBRANE_MISSING_CONTROLLER,
+      errorManagerItf.logError(ADLErrors.INVALID_MEMBRANE_MISSING_CONTROLLER,
           definition, itfNames);
     }
 
@@ -141,7 +155,7 @@ public class MembraneCheckerLoader extends AbstractLoader
       String itfNames = "\"" + iter.next().getName() + "\"";
       while (iter.hasNext())
         itfNames += ", \"" + iter.next().getName() + "\"";
-      throw new ADLException(
+      errorManagerItf.logError(
           ADLErrors.INVALID_MEMBRANE_UNIMPLEMENTED_INTERFACE, definition,
           itfNames);
     }
@@ -158,6 +172,51 @@ public class MembraneCheckerLoader extends AbstractLoader
       for (final Interface itf : externalItfArray) {
         if (itf != compItf) itfContainer.addInterface(itf);
       }
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Overridden BindingController methods
+  // ---------------------------------------------------------------------------
+
+  @Override
+  public void bindFc(final String itfName, final Object value)
+      throws NoSuchInterfaceException, IllegalBindingException {
+    checkItfName(itfName);
+
+    if (itfName.equals(ErrorManager.ITF_NAME)) {
+      errorManagerItf = (ErrorManager) value;
+    } else {
+      super.bindFc(itfName, value);
+    }
+
+  }
+
+  @Override
+  public String[] listFc() {
+    return listFcHelper(super.listFc(), ErrorManager.ITF_NAME);
+  }
+
+  @Override
+  public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
+    checkItfName(itfName);
+
+    if (itfName.equals(ErrorManager.ITF_NAME)) {
+      return errorManagerItf;
+    } else {
+      return super.lookupFc(itfName);
+    }
+  }
+
+  @Override
+  public void unbindFc(final String itfName) throws NoSuchInterfaceException,
+      IllegalBindingException {
+    checkItfName(itfName);
+
+    if (itfName.equals(ErrorManager.ITF_NAME)) {
+      errorManagerItf = null;
+    } else {
+      super.unbindFc(itfName);
     }
   }
 }

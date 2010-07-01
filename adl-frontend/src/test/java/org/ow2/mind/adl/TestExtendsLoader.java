@@ -31,10 +31,13 @@ import java.util.Map;
 
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.Loader;
+import org.objectweb.fractal.adl.NodeFactoryImpl;
 import org.objectweb.fractal.adl.xml.XMLNodeFactoryImpl;
 import org.ow2.mind.adl.ast.ASTHelper;
 import org.ow2.mind.adl.imports.ImportDefinitionReferenceResolver;
 import org.ow2.mind.adl.parser.ADLParser;
+import org.ow2.mind.error.ErrorManager;
+import org.ow2.mind.error.ErrorManagerFactory;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -48,13 +51,22 @@ public class TestExtendsLoader {
 
   @BeforeMethod(alwaysRun = true)
   protected void setUp() throws Exception {
+    final ErrorManager errorManager = ErrorManagerFactory
+        .newSimpleErrorManager();
     // Loader chain components
     final ADLParser adlLoader = new ADLParser();
     final ExtendsLoader el = new ExtendsLoader();
     final CacheLoader cl = new CacheLoader();
+    final ErrorLoader errl = new ErrorLoader();
 
+    loader = errl;
+    errl.clientLoader = cl;
     cl.clientLoader = el;
     el.clientLoader = adlLoader;
+
+    adlLoader.errorManagerItf = errorManager;
+    el.errorManagerItf = errorManager;
+    errl.errorManagerItf = errorManager;
 
     // definition reference resolver chain
     final BasicDefinitionReferenceResolver bdrr = new BasicDefinitionReferenceResolver();
@@ -68,17 +80,19 @@ public class TestExtendsLoader {
 
     el.definitionReferenceResolverItf = cdrr;
 
+    bdrr.errorManagerItf = errorManager;
+
     // additional components
     final STCFNodeMerger stcfNodeMerger = new STCFNodeMerger();
     final BasicADLLocator adlLocator = new BasicADLLocator();
     final XMLNodeFactoryImpl xmlNodeFactory = new XMLNodeFactoryImpl();
+    final NodeFactoryImpl nodeFactory = new NodeFactoryImpl();
 
     el.nodeMergerItf = stcfNodeMerger;
     idrr.adlLocatorItf = adlLocator;
     adlLoader.adlLocatorItf = adlLocator;
     adlLoader.nodeFactoryItf = xmlNodeFactory;
-
-    loader = cl;
+    bdrr.nodeFactoryItf = nodeFactory;
 
     context = new HashMap<Object, Object>();
 

@@ -33,18 +33,16 @@ import org.objectweb.fractal.adl.NodeFactoryImpl;
 import org.objectweb.fractal.adl.merger.NodeMergerImpl;
 import org.objectweb.fractal.adl.xml.XMLNodeFactoryImpl;
 import org.ow2.mind.adl.ASTChecker;
+import org.ow2.mind.adl.ASTChecker.ComponentChecker;
 import org.ow2.mind.adl.BasicADLLocator;
 import org.ow2.mind.adl.BasicDefinitionReferenceResolver;
 import org.ow2.mind.adl.CacheLoader;
 import org.ow2.mind.adl.CachingDefinitionReferenceResolver;
+import org.ow2.mind.adl.ErrorLoader;
 import org.ow2.mind.adl.ExtendsLoader;
 import org.ow2.mind.adl.STCFNodeMerger;
 import org.ow2.mind.adl.SubComponentResolverLoader;
-import org.ow2.mind.adl.ASTChecker.ComponentChecker;
 import org.ow2.mind.adl.binding.BasicBindingChecker;
-import org.ow2.mind.adl.factory.FactoryLoader;
-import org.ow2.mind.adl.factory.FactoryTemplateInstantiator;
-import org.ow2.mind.adl.factory.ParametricFactoryTemplateInstantiator;
 import org.ow2.mind.adl.generic.CachingTemplateInstantiator;
 import org.ow2.mind.adl.generic.ExtendsGenericDefinitionReferenceResolver;
 import org.ow2.mind.adl.generic.GenericDefinitionLoader;
@@ -55,6 +53,8 @@ import org.ow2.mind.adl.parameter.ParametricDefinitionReferenceResolver;
 import org.ow2.mind.adl.parameter.ParametricGenericDefinitionReferenceResolver;
 import org.ow2.mind.adl.parameter.ParametricTemplateInstantiator;
 import org.ow2.mind.adl.parser.ADLParser;
+import org.ow2.mind.error.ErrorManager;
+import org.ow2.mind.error.ErrorManagerFactory;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -68,6 +68,9 @@ public class TestParameterFactory {
 
   @BeforeMethod(alwaysRun = true)
   protected void setUp() throws Exception {
+    final ErrorManager errorManager = ErrorManagerFactory
+        .newSimpleErrorManager();
+
     // Loader chain components
     final ADLParser adlLoader = new ADLParser();
     final FactoryLoader fl = new FactoryLoader();
@@ -75,12 +78,21 @@ public class TestParameterFactory {
     final SubComponentResolverLoader scrl = new SubComponentResolverLoader();
     final ExtendsLoader el = new ExtendsLoader();
     final CacheLoader cl = new CacheLoader();
+    final ErrorLoader errl = new ErrorLoader();
 
+    errl.clientLoader = cl;
     cl.clientLoader = el;
     el.clientLoader = scrl;
     scrl.clientLoader = gdl;
     gdl.clientLoader = fl;
     fl.clientLoader = adlLoader;
+
+    errl.errorManagerItf = errorManager;
+    cl.errorManagerItf = errorManager;
+    el.errorManagerItf = errorManager;
+    scrl.errorManagerItf = errorManager;
+    gdl.errorManagerItf = errorManager;
+    adlLoader.errorManagerItf = errorManager;
 
     // definition reference resolver chain
     final BasicDefinitionReferenceResolver bdrr = new BasicDefinitionReferenceResolver();
@@ -99,6 +111,10 @@ public class TestParameterFactory {
     cdrr.loaderItf = cl;
 
     scrl.definitionReferenceResolverItf = cdrr;
+
+    bdrr.errorManagerItf = errorManager;
+    pdrr.errorManagerItf = errorManager;
+    gdrr.errorManagerItf = errorManager;
 
     final ExtendsGenericDefinitionReferenceResolver egdrr = new ExtendsGenericDefinitionReferenceResolver();
 
@@ -141,13 +157,14 @@ public class TestParameterFactory {
     adlLoader.adlLocatorItf = adlLocator;
     adlLoader.nodeFactoryItf = xmlNodeFactory;
     gdrr.bindingCheckerItf = bindingChecker;
+    bdrr.nodeFactoryItf = nodeFactory;
     fl.nodeFactoryItf = nodeFactory;
     pti.nodeFactoryItf = nodeFactory;
     pti.nodeMergerItf = nodeMerger;
     pfti.nodeFactoryItf = nodeFactory;
     pfti.nodeMergerItf = nodeMerger;
 
-    loader = cl;
+    loader = errl;
 
     context = new HashMap<Object, Object>();
 
@@ -169,16 +186,19 @@ public class TestParameterFactory {
         .containsArguments("InstantiatedDefinition$a").whereFirst().valueIs(10);
 
     component.isAnInstanceOf("Factory<pkg1.parameter.Parameter1>").that()
-        .containsAttributes("a").whereFirst().valueReferences(
-            "InstantiatedDefinition$a");
+        .containsAttributes("a").whereFirst()
+        .valueReferences("InstantiatedDefinition$a");
   }
 
   @Test(groups = {"functional"})
   public void test2() throws Exception {
     final Definition d = loader.load(
         "pkg1.parametricFactory.ParametricFactory2", context);
-    final ComponentChecker component = checker.assertDefinition(d)
-        .containsComponent("subComp").that().isAnInstanceOf(
+    final ComponentChecker component = checker
+        .assertDefinition(d)
+        .containsComponent("subComp")
+        .that()
+        .isAnInstanceOf(
             "pkg1.factory.GenericFactory1<pkg1.parameter.Parameter1>")
         .containsComponent("factory");
 
@@ -187,8 +207,8 @@ public class TestParameterFactory {
         .valueReferences("T$a");
 
     component.isAnInstanceOf("Factory<pkg1.parameter.Parameter1>").that()
-        .containsAttributes("a").whereFirst().valueReferences(
-            "InstantiatedDefinition$a");
+        .containsAttributes("a").whereFirst()
+        .valueReferences("InstantiatedDefinition$a");
   }
 
 }

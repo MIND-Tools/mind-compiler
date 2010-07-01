@@ -48,6 +48,7 @@ import org.ow2.mind.adl.DefinitionCache;
 import org.ow2.mind.adl.DefinitionReferenceResolver;
 import org.ow2.mind.adl.idl.InterfaceSignatureResolver;
 import org.ow2.mind.adl.parser.ADLParserContextHelper;
+import org.ow2.mind.error.ErrorManager;
 import org.ow2.mind.idl.IDLLoader;
 
 /**
@@ -65,6 +66,9 @@ public abstract class AbstractADLLoaderAnnotationProcessor
   // ---------------------------------------------------------------------------
   // Client interfaces
   // ---------------------------------------------------------------------------
+
+  /** The {@link ErrorManager} client interface used to log errors. */
+  public ErrorManager                errorManagerItf;
 
   /** The client interface used to create new AST nodes. */
   public NodeFactory                 nodeFactoryItf;
@@ -144,8 +148,8 @@ public abstract class AbstractADLLoaderAnnotationProcessor
 
         // update the error locator to point to the temporary file.
         final ErrorLocator l = e.getError().getLocator();
-        final ErrorLocator l1 = new BasicErrorLocator(f.getPath(), l
-            .getBeginLine(), l.getBeginColumn());
+        final ErrorLocator l1 = new BasicErrorLocator(f.getPath(),
+            l.getBeginLine(), l.getBeginColumn());
         e.getError().setLocator(l1);
       } catch (final IOException e1) {
         // ignore
@@ -198,16 +202,18 @@ public abstract class AbstractADLLoaderAnnotationProcessor
   // ---------------------------------------------------------------------------
 
   public String[] listFc() {
-    return listFcHelper(NodeFactory.ITF_NAME, NodeMerger.ITF_NAME,
-        DefinitionCache.ITF_NAME, "loader", IDLLoader.ITF_NAME,
-        DefinitionReferenceResolver.ITF_NAME,
+    return listFcHelper(ErrorManager.ITF_NAME, NodeFactory.ITF_NAME,
+        NodeMerger.ITF_NAME, DefinitionCache.ITF_NAME, "loader",
+        IDLLoader.ITF_NAME, DefinitionReferenceResolver.ITF_NAME,
         InterfaceSignatureResolver.ITF_NAME, "template-loader");
   }
 
   public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
     checkItfName(itfName);
 
-    if (itfName.equals(NodeFactory.ITF_NAME)) {
+    if (itfName.equals(ErrorManager.ITF_NAME)) {
+      return errorManagerItf;
+    } else if (itfName.equals(NodeFactory.ITF_NAME)) {
       return nodeFactoryItf;
     } else if (itfName.equals(NodeMerger.ITF_NAME)) {
       return nodeMergerItf;
@@ -233,7 +239,9 @@ public abstract class AbstractADLLoaderAnnotationProcessor
       throws NoSuchInterfaceException, IllegalBindingException {
     checkItfName(itfName);
 
-    if (itfName.equals(NodeFactory.ITF_NAME)) {
+    if (itfName.equals(ErrorManager.ITF_NAME)) {
+      errorManagerItf = (ErrorManager) serverItf;
+    } else if (itfName.equals(NodeFactory.ITF_NAME)) {
       nodeFactoryItf = (NodeFactory) serverItf;
     } else if (itfName.equals(NodeMerger.ITF_NAME)) {
       nodeMergerItf = (NodeMerger) serverItf;
@@ -259,7 +267,9 @@ public abstract class AbstractADLLoaderAnnotationProcessor
       NoSuchInterfaceException {
     checkItfName(itfName);
 
-    if (itfName.equals(NodeFactory.ITF_NAME)) {
+    if (itfName.equals(ErrorManager.ITF_NAME)) {
+      errorManagerItf = null;
+    } else if (itfName.equals(NodeFactory.ITF_NAME)) {
       nodeFactoryItf = null;
     } else if (itfName.equals(NodeMerger.ITF_NAME)) {
       nodeMergerItf = null;

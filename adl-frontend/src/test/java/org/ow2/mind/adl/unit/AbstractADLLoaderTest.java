@@ -22,6 +22,8 @@
 
 package org.ow2.mind.adl.unit;
 
+import static org.testng.Assert.assertNotNull;
+
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
@@ -33,8 +35,11 @@ import java.util.Map;
 import org.objectweb.fractal.adl.Loader;
 import org.ow2.mind.BasicInputResourceLocator;
 import org.ow2.mind.adl.ADLLocator;
+import org.ow2.mind.adl.ErrorLoader;
 import org.ow2.mind.adl.Factory;
 import org.ow2.mind.adl.implementation.ImplementationLocator;
+import org.ow2.mind.error.ErrorManager;
+import org.ow2.mind.error.ErrorManagerFactory;
 import org.ow2.mind.idl.IDLLoader;
 import org.ow2.mind.idl.IDLLoaderChainFactory;
 import org.ow2.mind.idl.IDLLocator;
@@ -45,6 +50,7 @@ public abstract class AbstractADLLoaderTest {
 
   private static final String   COMMON_ROOT_DIR = "unit/common/";
 
+  protected ErrorManager        errorManager;
   protected ADLLocator          adlLocator;
   protected Loader              loader;
 
@@ -52,6 +58,9 @@ public abstract class AbstractADLLoaderTest {
 
   @BeforeMethod(alwaysRun = true)
   public void setUp() {
+    // error manager component
+    errorManager = ErrorManagerFactory.newSimpleErrorManager();
+
     // input locators
     final BasicInputResourceLocator inputResourceLocator = new BasicInputResourceLocator();
     final IDLLocator idlLocator = IDLLoaderChainFactory
@@ -66,11 +75,14 @@ public abstract class AbstractADLLoaderTest {
     // loader chains
     final IDLLoader idlLoader = IDLLoaderChainFactory.newLoader(idlLocator,
         inputResourceLocator);
-    final Loader adlLoader = Factory
-        .newLoader(inputResourceLocator, adlLocator, idlLocator,
-            implementationLocator, idlLoader, pluginFactory);
+    final Loader adlLoader = Factory.newLoader(errorManager,
+        inputResourceLocator, adlLocator, idlLocator, implementationLocator,
+        idlLoader, pluginFactory);
+    final ErrorLoader errLoader = new ErrorLoader();
+    errLoader.clientLoader = adlLoader;
+    errLoader.errorManagerItf = errorManager;
 
-    loader = adlLoader;
+    loader = errLoader;
 
     context = new HashMap<Object, Object>();
   }
@@ -83,12 +95,9 @@ public abstract class AbstractADLLoaderTest {
     context.put("classloader", srcLoader);
   }
 
-  protected String readFirstLine(final String adlName) throws IOException {
+  protected LineNumberReader readADL(final String adlName) throws IOException {
     final URL adl = adlLocator.findSourceADL(adlName, context);
-    final LineNumberReader reader = new LineNumberReader(new InputStreamReader(
-        adl.openStream()));
-    final String line = reader.readLine();
-    reader.close();
-    return line;
+    assertNotNull(adl, "Can't find ADL " + adlName);
+    return new LineNumberReader(new InputStreamReader(adl.openStream()));
   }
 }

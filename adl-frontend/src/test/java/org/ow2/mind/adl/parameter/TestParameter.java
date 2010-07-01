@@ -29,21 +29,21 @@ import java.util.Map;
 
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.Loader;
+import org.objectweb.fractal.adl.NodeFactoryImpl;
 import org.objectweb.fractal.adl.xml.XMLNodeFactoryImpl;
 import org.ow2.mind.adl.ASTChecker;
 import org.ow2.mind.adl.BasicADLLocator;
 import org.ow2.mind.adl.BasicDefinitionReferenceResolver;
 import org.ow2.mind.adl.CacheLoader;
 import org.ow2.mind.adl.CachingDefinitionReferenceResolver;
+import org.ow2.mind.adl.ErrorLoader;
 import org.ow2.mind.adl.ExtendsLoader;
 import org.ow2.mind.adl.STCFNodeMerger;
 import org.ow2.mind.adl.SubComponentResolverLoader;
 import org.ow2.mind.adl.imports.ImportDefinitionReferenceResolver;
-import org.ow2.mind.adl.parameter.ExtendsParametricDefinitionReferenceResolver;
-import org.ow2.mind.adl.parameter.ParametricAnonymousDefinitionExtractor;
-import org.ow2.mind.adl.parameter.ParametricDefinitionReferenceResolver;
-import org.ow2.mind.adl.parameter.ParametricTemplateInstantiator;
 import org.ow2.mind.adl.parser.ADLParser;
+import org.ow2.mind.error.ErrorManager;
+import org.ow2.mind.error.ErrorManagerFactory;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -57,15 +57,26 @@ public class TestParameter {
 
   @BeforeMethod(alwaysRun = true)
   protected void setUp() throws Exception {
+    final ErrorManager errorManager = ErrorManagerFactory
+        .newSimpleErrorManager();
+
     // Loader chain components
     final ADLParser adlLoader = new ADLParser();
     final SubComponentResolverLoader scrl = new SubComponentResolverLoader();
     final ExtendsLoader el = new ExtendsLoader();
     final CacheLoader cl = new CacheLoader();
+    final ErrorLoader errl = new ErrorLoader();
 
+    errl.clientLoader = cl;
     cl.clientLoader = el;
     el.clientLoader = scrl;
     scrl.clientLoader = adlLoader;
+
+    errl.errorManagerItf = errorManager;
+    cl.errorManagerItf = errorManager;
+    el.errorManagerItf = errorManager;
+    scrl.errorManagerItf = errorManager;
+    adlLoader.errorManagerItf = errorManager;
 
     // definition reference resolver chain
     final BasicDefinitionReferenceResolver bdrr = new BasicDefinitionReferenceResolver();
@@ -81,6 +92,9 @@ public class TestParameter {
 
     scrl.definitionReferenceResolverItf = cdrr;
 
+    bdrr.errorManagerItf = errorManager;
+    pdrr.errorManagerItf = errorManager;
+
     final ExtendsParametricDefinitionReferenceResolver epdrr = new ExtendsParametricDefinitionReferenceResolver();
 
     epdrr.clientResolverItf = cdrr;
@@ -89,14 +103,16 @@ public class TestParameter {
     // additional components
     final STCFNodeMerger stcfNodeMerger = new STCFNodeMerger();
     final BasicADLLocator adlLocator = new BasicADLLocator();
-    final XMLNodeFactoryImpl nodeFactory = new XMLNodeFactoryImpl();
+    final XMLNodeFactoryImpl xmlNodeFactory = new XMLNodeFactoryImpl();
+    final NodeFactoryImpl nodeFactory = new NodeFactoryImpl();
 
     el.nodeMergerItf = stcfNodeMerger;
     idrr.adlLocatorItf = adlLocator;
     adlLoader.adlLocatorItf = adlLocator;
-    adlLoader.nodeFactoryItf = nodeFactory;
+    adlLoader.nodeFactoryItf = xmlNodeFactory;
+    bdrr.nodeFactoryItf = nodeFactory;
 
-    loader = cl;
+    loader = errl;
 
     context = new HashMap<Object, Object>();
 

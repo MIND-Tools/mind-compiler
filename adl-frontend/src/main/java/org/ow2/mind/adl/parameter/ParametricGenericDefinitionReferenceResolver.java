@@ -38,7 +38,7 @@ import org.ow2.mind.adl.parameter.ast.ArgumentContainer;
 
 /**
  * This delegating {@link DefinitionReferenceResolver} extracts {@link Argument}
- * nodes of the {@link TypeArgument type arguments} contains by the definition
+ * nodes of the {@link TypeArgument type arguments} contained by the definition
  * reference to resolve, and adds them to the definition reference to resolve. <br>
  * i.e. transforms
  * 

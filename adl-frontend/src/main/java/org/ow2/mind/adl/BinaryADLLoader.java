@@ -50,6 +50,7 @@ import org.ow2.mind.ForceRegenContextHelper;
 import org.ow2.mind.InputResource;
 import org.ow2.mind.InputResourceLocator;
 import org.ow2.mind.InputResourcesHelper;
+import org.ow2.mind.error.ErrorManager;
 
 /**
  * Delegating loader that tries to load ADL definition from binary files (if
@@ -63,6 +64,9 @@ public class BinaryADLLoader extends AbstractLoader {
   // ---------------------------------------------------------------------------
   // Client interfaces
   // ---------------------------------------------------------------------------
+
+  /** The {@link ErrorManager} client interface used to log errors. */
+  public ErrorManager         errorManagerItf;
 
   /**
    * The {@link ADLLocator} client interface used to locate binary and source
@@ -179,8 +183,8 @@ public class BinaryADLLoader extends AbstractLoader {
       final Map<Object, Object> context) throws ADLException {
     try {
       final InputStream is = location.openStream();
-      final NodeInputStream nis = new NodeInputStream(is, nodeFactoryItf
-          .getClassLoader());
+      final NodeInputStream nis = new NodeInputStream(is,
+          nodeFactoryItf.getClassLoader());
       if (logger.isLoggable(Level.FINE))
         logger.log(Level.FINE, "Load ADL \"" + name + "\". Read ADL from "
             + location);
@@ -201,11 +205,13 @@ public class BinaryADLLoader extends AbstractLoader {
 
       return d;
     } catch (final IOException e) {
-      throw new ADLException(GenericErrors.INTERNAL_ERROR, e,
+      errorManagerItf.logFatal(GenericErrors.INTERNAL_ERROR, e,
           "Can't read binary ADL " + location);
+      return null;
     } catch (final ClassNotFoundException e) {
-      throw new ADLException(GenericErrors.INTERNAL_ERROR, e,
+      errorManagerItf.logFatal(GenericErrors.INTERNAL_ERROR, e,
           "Can't read binary ADL " + location);
+      return null;
     }
   }
 
@@ -218,7 +224,9 @@ public class BinaryADLLoader extends AbstractLoader {
       throws NoSuchInterfaceException, IllegalBindingException {
     checkItfName(itfName);
 
-    if (itfName.equals(ADLLocator.ITF_NAME)) {
+    if (itfName.equals(ErrorManager.ITF_NAME)) {
+      errorManagerItf = (ErrorManager) value;
+    } else if (itfName.equals(ADLLocator.ITF_NAME)) {
       adlLocatorItf = (ADLLocator) value;
     } else if (itfName.equals(InputResourceLocator.ITF_NAME)) {
       inputResourceLocatorItf = (InputResourceLocator) value;
@@ -232,15 +240,18 @@ public class BinaryADLLoader extends AbstractLoader {
 
   @Override
   public String[] listFc() {
-    return listFcHelper(super.listFc(), ADLLocator.ITF_NAME,
-        InputResourceLocator.ITF_NAME, NodeFactory.ITF_NAME);
+    return listFcHelper(super.listFc(), ErrorManager.ITF_NAME,
+        ADLLocator.ITF_NAME, InputResourceLocator.ITF_NAME,
+        NodeFactory.ITF_NAME);
   }
 
   @Override
   public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
     checkItfName(itfName);
 
-    if (itfName.equals(ADLLocator.ITF_NAME)) {
+    if (itfName.equals(ErrorManager.ITF_NAME)) {
+      return errorManagerItf;
+    } else if (itfName.equals(ADLLocator.ITF_NAME)) {
       return adlLocatorItf;
     } else if (itfName.equals(InputResourceLocator.ITF_NAME)) {
       return inputResourceLocatorItf;
@@ -256,7 +267,9 @@ public class BinaryADLLoader extends AbstractLoader {
       IllegalBindingException {
     checkItfName(itfName);
 
-    if (itfName.equals(ADLLocator.ITF_NAME)) {
+    if (itfName.equals(ErrorManager.ITF_NAME)) {
+      errorManagerItf = null;
+    } else if (itfName.equals(ADLLocator.ITF_NAME)) {
       adlLocatorItf = null;
     } else if (itfName.equals(InputResourceLocator.ITF_NAME)) {
       inputResourceLocatorItf = null;

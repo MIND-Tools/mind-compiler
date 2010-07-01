@@ -22,6 +22,8 @@
 
 package org.ow2.mind.adl.imports;
 
+import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
+import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
 import static org.ow2.mind.adl.imports.ast.ImportASTHelper.isOnDemandImport;
 
 import java.util.Map;
@@ -32,6 +34,7 @@ import org.objectweb.fractal.api.control.BindingController;
 import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.ow2.mind.adl.ADLErrors;
 import org.ow2.mind.adl.imports.ast.Import;
+import org.ow2.mind.error.ErrorManager;
 
 public abstract class AbstractDelegatingImportChecker
     implements
@@ -41,6 +44,9 @@ public abstract class AbstractDelegatingImportChecker
   // ---------------------------------------------------------------------------
   // Client interfaces
   // ---------------------------------------------------------------------------
+
+  /** The {@link ErrorManager} client interface used to log errors. */
+  public ErrorManager        errorManagerItf;
 
   public static final String CLIENT_CHECKER_ITF_NAME = "client-validator";
 
@@ -63,7 +69,7 @@ public abstract class AbstractDelegatingImportChecker
       if (clientCheckerOptItf != null) {
         clientCheckerOptItf.checkImport(imp, context);
       } else {
-        throw new ADLException(ADLErrors.UNKNOWN_IMPORT, imp);
+        errorManagerItf.logError(ADLErrors.UNKNOWN_IMPORT, imp);
       }
     }
   }
@@ -73,13 +79,13 @@ public abstract class AbstractDelegatingImportChecker
     if (!isOnDemandImport(imp)) {
       throw new IllegalArgumentException("imp is not an on-demand import");
     }
-    final boolean isValid = isValidName(imp.getPackageName(), imp
-        .getSimpleName(), context);
+    final boolean isValid = isValidName(imp.getPackageName(),
+        imp.getSimpleName(), context);
     if (!isValid) {
       if (clientCheckerOptItf != null) {
         clientCheckerOptItf.checkImport(imp, context);
       } else {
-        throw new ADLException(ADLErrors.UNKNOWN_IMPORT, imp);
+        errorManagerItf.logError(ADLErrors.UNKNOWN_IMPORT, imp);
       }
     }
   }
@@ -99,15 +105,15 @@ public abstract class AbstractDelegatingImportChecker
   // ---------------------------------------------------------------------------
 
   public String[] listFc() {
-    return new String[]{CLIENT_CHECKER_ITF_NAME};
+    return listFcHelper(ErrorManager.ITF_NAME, CLIENT_CHECKER_ITF_NAME);
   }
 
   public Object lookupFc(final String s) throws NoSuchInterfaceException {
-    if (s == null) {
-      throw new IllegalArgumentException("Interface name can't be null");
-    }
+    checkItfName(s);
 
-    if (CLIENT_CHECKER_ITF_NAME.equals(s)) {
+    if (s.equals(ErrorManager.ITF_NAME)) {
+      return errorManagerItf;
+    } else if (CLIENT_CHECKER_ITF_NAME.equals(s)) {
       return clientCheckerOptItf;
     } else {
       throw new NoSuchInterfaceException("No client interface named '" + s
@@ -117,11 +123,11 @@ public abstract class AbstractDelegatingImportChecker
 
   public void bindFc(final String s, final Object o)
       throws NoSuchInterfaceException, IllegalBindingException {
-    if (s == null) {
-      throw new IllegalArgumentException("Interface name can't be null");
-    }
+    checkItfName(s);
 
-    if (CLIENT_CHECKER_ITF_NAME.equals(s)) {
+    if (s.equals(ErrorManager.ITF_NAME)) {
+      errorManagerItf = (ErrorManager) o;
+    } else if (CLIENT_CHECKER_ITF_NAME.equals(s)) {
       clientCheckerOptItf = (ImportChecker) o;
     } else {
       throw new NoSuchInterfaceException("No client interface named '" + s
@@ -131,11 +137,11 @@ public abstract class AbstractDelegatingImportChecker
 
   public void unbindFc(final String s) throws IllegalBindingException,
       NoSuchInterfaceException {
-    if (s == null) {
-      throw new IllegalArgumentException("Interface name can't be null");
-    }
+    checkItfName(s);
 
-    if (CLIENT_CHECKER_ITF_NAME.equals(s)) {
+    if (s.equals(ErrorManager.ITF_NAME)) {
+      errorManagerItf = null;
+    } else if (CLIENT_CHECKER_ITF_NAME.equals(s)) {
       clientCheckerOptItf = null;
     } else {
       throw new NoSuchInterfaceException("No client interface named '" + s

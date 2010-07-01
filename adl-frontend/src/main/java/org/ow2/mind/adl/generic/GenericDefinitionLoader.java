@@ -22,6 +22,8 @@
 
 package org.ow2.mind.adl.generic;
 
+import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
+import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
 import static org.ow2.mind.adl.ast.ASTHelper.isType;
 import static org.ow2.mind.adl.ast.ASTHelper.setResolvedComponentDefinition;
 
@@ -31,11 +33,12 @@ import java.util.Map;
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.AbstractLoader;
 import org.objectweb.fractal.adl.Definition;
-import org.objectweb.fractal.adl.error.ChainedErrorLocator;
+import org.objectweb.fractal.adl.NodeFactory;
 import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.ow2.mind.adl.ADLErrors;
 import org.ow2.mind.adl.DefinitionReferenceResolver;
+import org.ow2.mind.adl.ast.ASTHelper;
 import org.ow2.mind.adl.ast.Component;
 import org.ow2.mind.adl.ast.ComponentContainer;
 import org.ow2.mind.adl.generic.ast.FormalTypeParameter;
@@ -43,6 +46,7 @@ import org.ow2.mind.adl.generic.ast.FormalTypeParameterContainer;
 import org.ow2.mind.adl.generic.ast.FormalTypeParameterReference;
 import org.ow2.mind.adl.imports.ast.Import;
 import org.ow2.mind.adl.imports.ast.ImportContainer;
+import org.ow2.mind.error.ErrorManager;
 
 /**
  * This delegating Loader checks that types of formal type arguments are
@@ -53,6 +57,12 @@ public class GenericDefinitionLoader extends AbstractLoader {
   // ---------------------------------------------------------------------------
   // Client interfaces
   // ---------------------------------------------------------------------------
+
+  /** The {@link ErrorManager} client interface used to log errors. */
+  public ErrorManager                errorManagerItf;
+
+  /** The {@link NodeFactory} interface used by this component. */
+  public NodeFactory                 nodeFactoryItf;
 
   /** The interface used to resolve type of formal type parameters. */
   public DefinitionReferenceResolver definitionReferenceResolverItf;
@@ -84,10 +94,9 @@ public class GenericDefinitionLoader extends AbstractLoader {
           if (imports != null) {
             for (final Import imp : imports) {
               if (typeParameter.getName().equals(imp.getSimpleName())) {
-                // TODO use dedicated method to print warning
-                System.out.println("At " + typeParameter.astGetSource()
-                    + ": WARNING template variable hides import at "
-                    + imp.astGetSource());
+                errorManagerItf.logWarning(
+                    ADLErrors.WARNING_TEMPLATE_VARIABLE_HIDE, typeParameter,
+                    typeParameter.getName(), imp.astGetSource());
               }
             }
           }
@@ -99,23 +108,20 @@ public class GenericDefinitionLoader extends AbstractLoader {
             continue;
           }
 
-          final Definition typeParameterTypeDefinition;
-          try {
-            typeParameterTypeDefinition = definitionReferenceResolverItf
-                .resolve(typeParameter.getDefinitionReference(), d, context);
-          } catch (final ADLException e) {
-            ChainedErrorLocator.chainLocator(e, typeParameter);
-            throw e;
-          }
+          final Definition typeParameterTypeDefinition = definitionReferenceResolverItf
+              .resolve(typeParameter.getDefinitionReference(), d, context);
 
           if (!isType(typeParameterTypeDefinition))
-            throw new ADLException(ADLErrors.INVALID_REFERENCE_NOT_A_TYPE,
-                typeParameter, typeParameter.getDefinitionReference().getName());
+            errorManagerItf
+                .logError(ADLErrors.INVALID_REFERENCE_NOT_A_TYPE,
+                    typeParameter, typeParameter.getDefinitionReference()
+                        .getName());
 
           if (typeParameterTypes.put(typeParameter.getName(),
               typeParameterTypeDefinition) != null) {
-            throw new ADLException(ADLErrors.DUPLICATED_TEMPALTE_VARIABLE_NAME,
-                typeParameter, typeParameter.getName());
+            errorManagerItf.logError(
+                ADLErrors.DUPLICATED_TEMPALTE_VARIABLE_NAME, typeParameter,
+                typeParameter.getName());
           }
         }
 
@@ -128,11 +134,12 @@ public class GenericDefinitionLoader extends AbstractLoader {
                   .getTypeParameterReference();
 
               if (ref != null) {
-                final Definition typeParameterType = typeParameterTypes
-                    .get(ref);
+                Definition typeParameterType = typeParameterTypes.get(ref);
                 if (typeParameterType == null) {
-                  throw new ADLException(ADLErrors.UNDEFINED_TEMPALTE_VARIABLE,
-                      subComp, ref);
+                  errorManagerItf.logError(
+                      ADLErrors.UNDEFINED_TEMPALTE_VARIABLE, subComp, ref);
+                  typeParameterType = ASTHelper.newUnresolvedDefinitionNode(
+                      nodeFactoryItf, null);
                 }
                 setResolvedComponentDefinition(subComp, typeParameterType);
               }
@@ -151,12 +158,13 @@ public class GenericDefinitionLoader extends AbstractLoader {
   @Override
   public void bindFc(final String itfName, final Object value)
       throws NoSuchInterfaceException, IllegalBindingException {
+    checkItfName(itfName);
 
-    if (itfName == null) {
-      throw new IllegalArgumentException("Interface name can't be null");
-    }
-
-    if (itfName.equals(DefinitionReferenceResolver.ITF_NAME)) {
+    if (itfName.equals(ErrorManager.ITF_NAME)) {
+      errorManagerItf = (ErrorManager) value;
+    } else if (itfName.equals(NodeFactory.ITF_NAME)) {
+      nodeFactoryItf = (NodeFactory) value;
+    } else if (itfName.equals(DefinitionReferenceResolver.ITF_NAME)) {
       definitionReferenceResolverItf = (DefinitionReferenceResolver) value;
     } else {
       super.bindFc(itfName, value);
@@ -166,21 +174,19 @@ public class GenericDefinitionLoader extends AbstractLoader {
 
   @Override
   public String[] listFc() {
-    final String[] superList = super.listFc();
-    final String[] list = new String[superList.length + 1];
-    list[0] = DefinitionReferenceResolver.ITF_NAME;
-    System.arraycopy(superList, 0, list, 1, superList.length);
-    return list;
+    return listFcHelper(super.listFc(), ErrorManager.ITF_NAME,
+        NodeFactory.ITF_NAME, DefinitionReferenceResolver.ITF_NAME);
   }
 
   @Override
   public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
+    checkItfName(itfName);
 
-    if (itfName == null) {
-      throw new IllegalArgumentException("Interface name can't be null");
-    }
-
-    if (itfName.equals(DefinitionReferenceResolver.ITF_NAME)) {
+    if (itfName.equals(ErrorManager.ITF_NAME)) {
+      return errorManagerItf;
+    } else if (itfName.equals(NodeFactory.ITF_NAME)) {
+      return nodeFactoryItf;
+    } else if (itfName.equals(DefinitionReferenceResolver.ITF_NAME)) {
       return definitionReferenceResolverItf;
     } else {
       return super.lookupFc(itfName);
@@ -190,12 +196,13 @@ public class GenericDefinitionLoader extends AbstractLoader {
   @Override
   public void unbindFc(final String itfName) throws NoSuchInterfaceException,
       IllegalBindingException {
+    checkItfName(itfName);
 
-    if (itfName == null) {
-      throw new IllegalArgumentException("Interface name can't be null");
-    }
-
-    if (itfName.equals(DefinitionReferenceResolver.ITF_NAME)) {
+    if (itfName.equals(ErrorManager.ITF_NAME)) {
+      errorManagerItf = null;
+    } else if (itfName.equals(NodeFactory.ITF_NAME)) {
+      nodeFactoryItf = null;
+    } else if (itfName.equals(DefinitionReferenceResolver.ITF_NAME)) {
       definitionReferenceResolverItf = null;
     } else {
       super.unbindFc(itfName);

@@ -41,6 +41,7 @@ import org.antlr.stringtemplate.StringTemplateGroupLoader;
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.Loader;
+import org.objectweb.fractal.adl.error.Error;
 import org.ow2.mind.adl.ADLBackendFactory;
 import org.ow2.mind.adl.ADLLocator;
 import org.ow2.mind.adl.DefinitionCompiler;
@@ -60,6 +61,9 @@ import org.ow2.mind.compilation.CompilerCommand;
 import org.ow2.mind.compilation.CompilerContextHelper;
 import org.ow2.mind.compilation.CompilerWrapper;
 import org.ow2.mind.compilation.gcc.GccCompilerWrapper;
+import org.ow2.mind.error.ErrorCollection;
+import org.ow2.mind.error.ErrorManager;
+import org.ow2.mind.error.ErrorManagerFactory;
 import org.ow2.mind.idl.IDLBackendFactory;
 import org.ow2.mind.idl.IDLLoader;
 import org.ow2.mind.idl.IDLLoaderChainFactory;
@@ -81,6 +85,7 @@ public class CompilerRunner {
   public static final String        DEFAULT_CFLAGS  = "-g -Wall -Werror -Wredundant-decls -Wunreachable-code -Wstrict-prototypes -Wwrite-strings";
   public static final String        CFLAGS_PROPERTY = "mind.test.cflags";
 
+  public ErrorManager               errorManager;
   public Loader                     adlLoader;
   public IDLLoader                  idlLoader;
 
@@ -98,6 +103,7 @@ public class CompilerRunner {
   public Map<Object, Object>        context;
 
   public CompilerRunner() throws ADLException {
+    errorManager = ErrorManagerFactory.newStreamErrorManager();
 
     // input locators
     final BasicInputResourceLocator inputResourceLocator = new BasicInputResourceLocator();
@@ -138,9 +144,9 @@ public class CompilerRunner {
     idlLoader = IDLLoaderChainFactory.newLoader(idlLocator,
         inputResourceLocator);
 
-    adlLoader = Factory.newLoader(inputResourceLocator, adlLocator, idlLocator,
-        implementationLocator, idlLoader, pluginFactory);
-    ;
+    adlLoader = Factory
+        .newLoader(errorManager, inputResourceLocator, adlLocator, idlLocator,
+            implementationLocator, idlLoader, pluginFactory);
 
     // instantiator chain
     graphInstantiator = Factory.newInstantiator(adlLoader);
@@ -189,7 +195,13 @@ public class CompilerRunner {
   }
 
   public Definition load(final String adlName) throws ADLException {
-    return adlLoader.load(adlName, context);
+    errorManager.clear();
+    final Definition d = adlLoader.load(adlName, context);
+    final List<Error> errors = errorManager.getErrors();
+    if (!errors.isEmpty()) {
+      throw new ADLException(new ErrorCollection(errors));
+    }
+    return d;
   }
 
   public Collection<File> compileDefinition(final String adlName)
@@ -226,7 +238,12 @@ public class CompilerRunner {
     final File outputFile = outputFileLocator.getCExecutableOutputFile(
         outputPath, context);
 
+    errorManager.clear();
     final Definition d = adlLoader.load(adlName, context);
+    final List<Error> errors = errorManager.getErrors();
+    if (!errors.isEmpty()) {
+      throw new ADLException(new ErrorCollection(errors));
+    }
     final ComponentGraph componentGraph = graphInstantiator.instantiate(d,
         context);
 
@@ -265,7 +282,7 @@ public class CompilerRunner {
           }
           reader.close();
         } catch (final IOException e) {
-          throw new Error("Can't read error stream of process", e);
+          throw new java.lang.Error("Can't read error stream of process", e);
         }
       }
     };

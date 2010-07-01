@@ -22,6 +22,8 @@
 
 package org.ow2.mind.annotation;
 
+import org.ow2.mind.error.ErrorManager;
+import org.ow2.mind.error.ErrorManagerFactory;
 import org.ow2.mind.value.BasicValueEvaluator;
 import org.ow2.mind.value.ValueEvaluator;
 
@@ -55,16 +57,23 @@ public final class AnnotationChainFactory {
     return annotationFactory;
   }
 
+  public static AnnotationChecker newAnnotationChecker(
+      final ErrorManager errorManager) {
+    return newAnnotationChecker(newAnnotationFactory(), errorManager);
+  }
+
   public static AnnotationChecker newAnnotationChecker() {
-    return newAnnotationChecker(newAnnotationFactory());
+    return newAnnotationChecker(newAnnotationFactory(),
+        ErrorManagerFactory.newStreamErrorManager());
   }
 
   public static AnnotationChecker newAnnotationChecker(
-      final AnnotationFactory annotationFactory) {
+      final AnnotationFactory annotationFactory, final ErrorManager errorManager) {
     AnnotationChecker annotationChecker;
     final BasicAnnotationChecker bac = new BasicAnnotationChecker();
     annotationChecker = bac;
     bac.annotationFactoryItf = annotationFactory;
+    bac.errorManagerItf = errorManager;
 
     return annotationChecker;
   }

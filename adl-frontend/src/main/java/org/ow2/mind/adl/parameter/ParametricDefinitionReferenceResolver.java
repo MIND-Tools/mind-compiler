@@ -22,6 +22,8 @@
 
 package org.ow2.mind.adl.parameter;
 
+import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
+import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
 import static org.ow2.mind.adl.parameter.ast.ParameterASTHelper.getInferredParameterType;
 import static org.ow2.mind.adl.parameter.ast.ParameterASTHelper.setInferredParameterType;
 import static org.ow2.mind.adl.parameter.ast.ParameterASTHelper.setUsedFormalParameter;
@@ -37,15 +39,19 @@ import org.objectweb.fractal.adl.ContextLocal;
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.error.GenericErrors;
 import org.objectweb.fractal.adl.error.NodeErrorLocator;
+import org.objectweb.fractal.api.NoSuchInterfaceException;
+import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.ow2.mind.adl.ADLErrors;
 import org.ow2.mind.adl.AbstractDefinitionReferenceResolver;
 import org.ow2.mind.adl.DefinitionReferenceResolver;
+import org.ow2.mind.adl.ast.ASTHelper;
 import org.ow2.mind.adl.ast.DefinitionReference;
 import org.ow2.mind.adl.parameter.ast.Argument;
 import org.ow2.mind.adl.parameter.ast.ArgumentContainer;
 import org.ow2.mind.adl.parameter.ast.FormalParameter;
 import org.ow2.mind.adl.parameter.ast.FormalParameterContainer;
 import org.ow2.mind.adl.parameter.ast.ParameterASTHelper.ParameterType;
+import org.ow2.mind.error.ErrorManager;
 import org.ow2.mind.value.ast.Reference;
 import org.ow2.mind.value.ast.Value;
 
@@ -62,6 +68,13 @@ public class ParametricDefinitionReferenceResolver
   protected final ContextLocal<Map<Definition, Map<String, FormalParameter>>> contextualParameters = new ContextLocal<Map<Definition, Map<String, FormalParameter>>>();
 
   // ---------------------------------------------------------------------------
+  // Client interfaces
+  // ---------------------------------------------------------------------------
+
+  /** The {@link ErrorManager} client interface used to log errors. */
+  public ErrorManager                                                         errorManagerItf;
+
+  // ---------------------------------------------------------------------------
   // Implementation of the DefinitionReferenceResolver interface
   // ---------------------------------------------------------------------------
 
@@ -69,8 +82,8 @@ public class ParametricDefinitionReferenceResolver
       final Definition encapsulatingDefinition,
       final Map<Object, Object> context) throws ADLException {
 
-    return resolve(reference, encapsulatingDefinition, getParameters(
-        encapsulatingDefinition, context), context);
+    return resolve(reference, encapsulatingDefinition,
+        getParameters(encapsulatingDefinition, context), context);
   }
 
   // ---------------------------------------------------------------------------
@@ -104,7 +117,8 @@ public class ParametricDefinitionReferenceResolver
           final String ref = ((Reference) value).getRef();
           final FormalParameter referencedParameter = formalParameters.get(ref);
           if (referencedParameter == null) {
-            throw new ADLException(ADLErrors.UNDEFINED_PARAMETER, value, ref);
+            errorManagerItf.logError(ADLErrors.UNDEFINED_PARAMETER, value, ref);
+            continue;
           }
           setUsedFormalParameter(referencedParameter);
 
@@ -112,12 +126,12 @@ public class ParametricDefinitionReferenceResolver
           if (referencedType == null) {
             setInferredParameterType(referencedParameter, type);
           } else if (type != null && type != referencedType) {
-            throw new ADLException(ADLErrors.INCOMPATIBLE_ARGUMENT_TYPE, value,
-                ref);
+            errorManagerItf.logError(ADLErrors.INCOMPATIBLE_ARGUMENT_TYPE,
+                value, ref);
           }
         } else if (type != null && !type.isCompatible(value)) {
-          throw new ADLException(ADLErrors.INCOMPATIBLE_ARGUMENT_VALUE, value,
-              parameter.getName());
+          errorManagerItf.logError(ADLErrors.INCOMPATIBLE_ARGUMENT_VALUE,
+              value, parameter.getName());
         }
       }
     }
@@ -136,31 +150,36 @@ public class ParametricDefinitionReferenceResolver
         : null;
 
     if (parameters == null || parameters.length == 0) {
-      if (arguments != null && arguments.length > 0) {
-        throw new ADLException(ADLErrors.INVALID_REFERENCE_NO_PARAMETER,
+      if (arguments != null && arguments.length > 0
+          && !ASTHelper.isUnresolvedDefinitionNode(definition)) {
+        errorManagerItf.logError(ADLErrors.INVALID_REFERENCE_NO_PARAMETER,
             reference);
-      } else {
-        return null;
       }
+      return null;
 
     } else {
       // there are parameters
-      if (arguments == null || arguments.length == 0)
-        throw new ADLException(ADLErrors.INVALID_REFERENCE_MISSING_ARGUMENT,
+      if (arguments == null || arguments.length == 0) {
+        errorManagerItf.logError(ADLErrors.INVALID_REFERENCE_MISSING_ARGUMENT,
             reference);
+        return null;
+      }
 
       if (arguments.length > 0 && arguments[0].getName() == null) {
         // argument values are specified by ordinal position.
 
         if (parameters.length > arguments.length) {
-          // missing template values
-          throw new ADLException(ADLErrors.INVALID_REFERENCE_MISSING_ARGUMENT,
-              reference);
+          // missing parameter values
+          errorManagerItf.logError(
+              ADLErrors.INVALID_REFERENCE_MISSING_ARGUMENT, reference);
+          return null;
         }
 
-        if (parameters.length < arguments.length) {
-          throw new ADLException(ADLErrors.INVALID_REFERENCE_TOO_MANY_ARGUMENT,
-              reference);
+        if (parameters.length < arguments.length
+            && !ASTHelper.isUnresolvedDefinitionNode(definition)) {
+          errorManagerItf.logError(
+              ADLErrors.INVALID_REFERENCE_TOO_MANY_ARGUMENT, reference);
+          return null;
         }
 
         final Map<String, Argument> result = new HashMap<String, Argument>(
@@ -206,23 +225,27 @@ public class ParametricDefinitionReferenceResolver
         for (final FormalParameter variable : parameters) {
           final Argument value = valuesByName.remove(variable.getName());
           if (value == null) {
-            // missing template values
-            throw new ADLException(
+            // missing parameter values
+            errorManagerItf.logError(
                 ADLErrors.INVALID_REFERENCE_MISSING_ARGUMENT, reference,
                 variable.getName());
+            return null;
           }
           result.put(variable.getName(), value);
           ((ArgumentContainer) reference).addArgument(value);
         }
         if (!valuesByName.isEmpty()) {
-          // too many template values
+          // too many parameter values
 
-          // get the first one
-          final Map.Entry<String, Argument> value = valuesByName.entrySet()
-              .iterator().next();
-
-          throw new ADLException(ADLErrors.INVALID_REFERENCE_NO_SUCH_PARAMETER,
-              value.getValue(), value.getKey());
+          if (!ASTHelper.isUnresolvedDefinitionNode(definition)) {
+            for (final Map.Entry<String, Argument> value : valuesByName
+                .entrySet()) {
+              errorManagerItf.logError(
+                  ADLErrors.INVALID_REFERENCE_NO_SUCH_PARAMETER,
+                  value.getValue(), value.getKey());
+            }
+          }
+          return null;
         }
 
         return result;
@@ -256,5 +279,50 @@ public class ParametricDefinitionReferenceResolver
     }
 
     return result;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Overridden BindingController methods
+  // ---------------------------------------------------------------------------
+
+  @Override
+  public void bindFc(final String itfName, final Object value)
+      throws NoSuchInterfaceException, IllegalBindingException {
+    checkItfName(itfName);
+
+    if (itfName.equals(ErrorManager.ITF_NAME)) {
+      errorManagerItf = (ErrorManager) value;
+    } else {
+      super.bindFc(itfName, value);
+    }
+
+  }
+
+  @Override
+  public String[] listFc() {
+    return listFcHelper(super.listFc(), ErrorManager.ITF_NAME);
+  }
+
+  @Override
+  public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
+    checkItfName(itfName);
+
+    if (itfName.equals(ErrorManager.ITF_NAME)) {
+      return errorManagerItf;
+    } else {
+      return super.lookupFc(itfName);
+    }
+  }
+
+  @Override
+  public void unbindFc(final String itfName) throws NoSuchInterfaceException,
+      IllegalBindingException {
+    checkItfName(itfName);
+
+    if (itfName.equals(ErrorManager.ITF_NAME)) {
+      errorManagerItf = null;
+    } else {
+      super.unbindFc(itfName);
+    }
   }
 }

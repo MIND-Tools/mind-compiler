@@ -23,6 +23,7 @@
 package org.ow2.mind.adl.unit;
 
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 import org.objectweb.fractal.adl.Definition;
 import org.ow2.mind.unit.UnitTestDataProvider;
@@ -41,6 +42,8 @@ public class OKTest extends AbstractADLLoaderTest {
       throws Exception {
     initSourcePath(rootDir);
     final Definition d = loader.load(adlName, context);
+    assertTrue(errorManager.getErrors().isEmpty());
+    assertTrue(errorManager.getWarnings().isEmpty());
     assertNotNull(d);
   }
 }

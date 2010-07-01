@@ -50,7 +50,6 @@ public class SyntacticErrorTest extends AbstractADLLoaderTest {
       final Error error = e.getError();
       assertNotNull(error);
       assertEquals(ADLErrors.PARSE_ERROR, error.getTemplate());
-      assertEquals(ADLErrors.GROUP_ID, error.getTemplate().getGroupId());
       return;
     }
     fail("Successful loading of erroneous adl file.");

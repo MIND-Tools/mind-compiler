@@ -11,12 +11,15 @@ import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.Loader;
 import org.ow2.mind.BasicInputResourceLocator;
 import org.ow2.mind.adl.ADLLocator;
+import org.ow2.mind.adl.ErrorLoader;
 import org.ow2.mind.adl.Factory;
 import org.ow2.mind.adl.annotation.AnnotationLoader;
 import org.ow2.mind.adl.ast.ImplementationContainer;
 import org.ow2.mind.adl.ast.Source;
 import org.ow2.mind.adl.implementation.ImplementationLocator;
 import org.ow2.mind.annotation.AnnotationHelper;
+import org.ow2.mind.error.ErrorManager;
+import org.ow2.mind.error.ErrorManagerFactory;
 import org.ow2.mind.idl.IDLLoader;
 import org.ow2.mind.idl.IDLLoaderChainFactory;
 import org.ow2.mind.idl.IDLLocator;
@@ -29,6 +32,9 @@ public class TestAnnotations {
 
   @BeforeMethod(alwaysRun = true)
   public void setUp() {
+    final ErrorManager errorManager = ErrorManagerFactory
+        .newSimpleErrorManager();
+
     // input locators
     final BasicInputResourceLocator inputResourceLocator = new BasicInputResourceLocator();
     final IDLLocator idlLocator = IDLLoaderChainFactory
@@ -43,10 +49,13 @@ public class TestAnnotations {
     // loader chains
     final IDLLoader idlLoader = IDLLoaderChainFactory.newLoader(idlLocator,
         inputResourceLocator);
-    final Loader adlLoader = Factory
-        .newLoader(inputResourceLocator, adlLocator, idlLocator,
-            implementationLocator, idlLoader, pluginFactory);
-    loader = adlLoader;
+    final Loader adlLoader = Factory.newLoader(errorManager,
+        inputResourceLocator, adlLocator, idlLocator, implementationLocator,
+        idlLoader, pluginFactory);
+    final ErrorLoader errorLoader = new ErrorLoader();
+    errorLoader.clientLoader = adlLoader;
+    errorLoader.errorManagerItf = errorManager;
+    loader = errorLoader;
   }
 
   @Test(groups = {"functional", "checkin"})

@@ -30,12 +30,11 @@ import java.util.Map;
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.Loader;
 import org.ow2.mind.adl.ASTChecker;
+import org.ow2.mind.adl.ErrorLoader;
 import org.ow2.mind.adl.Factory;
 import org.ow2.mind.adl.GraphChecker;
-import org.ow2.mind.adl.graph.AttributeInstantiator;
-import org.ow2.mind.adl.graph.BasicInstantiator;
-import org.ow2.mind.adl.graph.ComponentGraph;
-import org.ow2.mind.adl.graph.Instantiator;
+import org.ow2.mind.error.ErrorManager;
+import org.ow2.mind.error.ErrorManagerFactory;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -52,7 +51,13 @@ public class TestGraph {
 
   @BeforeMethod(alwaysRun = true)
   protected void setUp() throws Exception {
-    loader = Factory.newLoader();
+    final ErrorManager errorManager = ErrorManagerFactory
+        .newSimpleErrorManager();
+
+    final ErrorLoader errL = new ErrorLoader();
+    errL.errorManagerItf = errorManager;
+    errL.clientLoader = Factory.newLoader(errorManager);
+    loader = errL;
 
     final BasicInstantiator bi = new BasicInstantiator();
     final AttributeInstantiator ai = new AttributeInstantiator();

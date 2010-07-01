@@ -38,8 +38,6 @@ import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.Node;
 import org.objectweb.fractal.adl.components.ComponentErrors;
 import org.objectweb.fractal.adl.components.ComponentLoaderAttributes;
-import org.objectweb.fractal.adl.error.ChainedErrorLocator;
-import org.objectweb.fractal.adl.error.Error;
 import org.objectweb.fractal.adl.error.GenericErrors;
 import org.objectweb.fractal.adl.error.NodeErrorLocator;
 import org.objectweb.fractal.adl.merger.MergeException;
@@ -50,6 +48,7 @@ import org.ow2.mind.adl.ast.ASTHelper;
 import org.ow2.mind.adl.ast.AbstractDefinition;
 import org.ow2.mind.adl.ast.DefinitionReference;
 import org.ow2.mind.adl.ast.MindDefinition;
+import org.ow2.mind.error.ErrorManager;
 
 /**
  * This delegating loader merges a definitions with the definitions it extends.
@@ -61,6 +60,9 @@ public class ExtendsLoader extends AbstractLoader
   // ---------------------------------------------------------------------------
   // Client interfaces
   // ---------------------------------------------------------------------------
+
+  /** The {@link ErrorManager} client interface used to log errors. */
+  public ErrorManager                 errorManagerItf;
 
   /** The interface used to resolve referenced definitions. */
   public DefinitionReferenceResolver  definitionReferenceResolverItf;
@@ -161,38 +163,42 @@ public class ExtendsLoader extends AbstractLoader
       // first resolve extended list
       Definition superDef = null;
       for (final DefinitionReference extend : extendedDefs) {
-        Definition extendedDefinition;
-        try {
-          extendedDefinition = definitionReferenceResolverItf.resolve(extend,
-              d, context);
-        } catch (final ADLException e) {
-          ChainedErrorLocator.chainLocator(e, extend);
-          throw e;
-        }
+        final Definition extendedDefinition = definitionReferenceResolverItf
+            .resolve(extend, d, context);
+
+        // if the definition has not been resolved correctly, ignore it.
+        if (ASTHelper.isUnresolvedDefinitionNode(extendedDefinition)) continue;
 
         final Kind extendedKind = Kind.fromDefinition(extendedDefinition);
         switch (kind) {
           case TYPE :
-            if (extendedKind == Kind.PRIMITIVE)
-              throw new ADLException(
-                  ADLErrors.INVALID_EXTENDS_TYPE_EXTENDS_PRIMITIVE, extend
-                      .getName());
-            else if (extendedKind == Kind.COMPOSITE)
-              throw new ADLException(
-                  ADLErrors.INVALID_EXTENDS_TYPE_EXTENDS_COMPOSITE, extend
-                      .getName());
+            if (extendedKind == Kind.PRIMITIVE) {
+              errorManagerItf.logError(
+                  ADLErrors.INVALID_EXTENDS_TYPE_EXTENDS_PRIMITIVE,
+                  extend.getName());
+              continue;
+            } else if (extendedKind == Kind.COMPOSITE) {
+              errorManagerItf.logError(
+                  ADLErrors.INVALID_EXTENDS_TYPE_EXTENDS_COMPOSITE,
+                  extend.getName());
+              continue;
+            }
             break;
           case PRIMITIVE :
-            if (extendedKind == Kind.COMPOSITE)
-              throw new ADLException(
-                  ADLErrors.INVALID_EXTENDS_PRIMITIVE_EXTENDS_COMPOSITE, extend
-                      .getName());
+            if (extendedKind == Kind.COMPOSITE) {
+              errorManagerItf.logError(
+                  ADLErrors.INVALID_EXTENDS_PRIMITIVE_EXTENDS_COMPOSITE,
+                  extend.getName());
+              continue;
+            }
             break;
           case COMPOSITE :
-            if (extendedKind == Kind.PRIMITIVE)
-              throw new ADLException(
-                  ADLErrors.INVALID_EXTENDS_COMPOSITE_EXTENDS_PRIMITIVE, extend
-                      .getName());
+            if (extendedKind == Kind.PRIMITIVE) {
+              errorManagerItf.logError(
+                  ADLErrors.INVALID_EXTENDS_COMPOSITE_EXTENDS_PRIMITIVE,
+                  extend.getName());
+              continue;
+            }
             break;
         }
 
@@ -202,9 +208,12 @@ public class ExtendsLoader extends AbstractLoader
           superDef = mergeDef(extendedDefinition, superDef, extend);
       }
 
-      // second merge d with superDef
-      d = (MindDefinition) mergeDef(d, superDef,
-          extendedDefs[extendedDefs.length - 1]);
+      if (superDef != null) {
+        // second merge d with superDef only if superDef has been correctly
+        // resolved.
+        d = (MindDefinition) mergeDef(d, superDef,
+            extendedDefs[extendedDefs.length - 1]);
+      }
 
       // restore the "abstract" attribute
       if (d instanceof AbstractDefinition) {
@@ -242,9 +251,7 @@ public class ExtendsLoader extends AbstractLoader
           .merge(def, superDef, nameAttributes);
     } catch (final MergeException e) {
       if (e instanceof InvalidMergeException) {
-        final Error error = ((InvalidMergeException) e).getError();
-        ChainedErrorLocator.chainLocator(error, new NodeErrorLocator(locator));
-        throw new ADLException(error);
+        errorManagerItf.logError(((InvalidMergeException) e).getError());
       } else {
         throw new CompilerError(ComponentErrors.MERGE_ERROR,
             new NodeErrorLocator(def), e, def.getName());
@@ -262,7 +269,9 @@ public class ExtendsLoader extends AbstractLoader
       throws NoSuchInterfaceException, IllegalBindingException {
     checkItfName(itfName);
 
-    if (itfName.equals(DefinitionReferenceResolver.ITF_NAME)) {
+    if (itfName.equals(ErrorManager.ITF_NAME)) {
+      errorManagerItf = (ErrorManager) value;
+    } else if (itfName.equals(DefinitionReferenceResolver.ITF_NAME)) {
       definitionReferenceResolverItf = (DefinitionReferenceResolver) value;
     } else if (itfName.equals(NodeMerger.ITF_NAME)) {
       nodeMergerItf = (NodeMerger) value;
@@ -274,15 +283,17 @@ public class ExtendsLoader extends AbstractLoader
 
   @Override
   public String[] listFc() {
-    return listFcHelper(super.listFc(), DefinitionReferenceResolver.ITF_NAME,
-        NodeMerger.ITF_NAME);
+    return listFcHelper(super.listFc(), ErrorManager.ITF_NAME,
+        DefinitionReferenceResolver.ITF_NAME, NodeMerger.ITF_NAME);
   }
 
   @Override
   public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
     checkItfName(itfName);
 
-    if (itfName.equals(DefinitionReferenceResolver.ITF_NAME)) {
+    if (itfName.equals(ErrorManager.ITF_NAME)) {
+      return errorManagerItf;
+    } else if (itfName.equals(DefinitionReferenceResolver.ITF_NAME)) {
       return definitionReferenceResolverItf;
     } else if (itfName.equals(NodeMerger.ITF_NAME)) {
       return nodeMergerItf;
@@ -296,7 +307,9 @@ public class ExtendsLoader extends AbstractLoader
       IllegalBindingException {
     checkItfName(itfName);
 
-    if (itfName.equals(DefinitionReferenceResolver.ITF_NAME)) {
+    if (itfName.equals(ErrorManager.ITF_NAME)) {
+      errorManagerItf = null;
+    } else if (itfName.equals(DefinitionReferenceResolver.ITF_NAME)) {
       definitionReferenceResolverItf = null;
     } else if (itfName.equals(NodeMerger.ITF_NAME)) {
       nodeMergerItf = null;

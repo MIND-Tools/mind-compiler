@@ -56,7 +56,12 @@ public class AttributesNormalizerLoader
   @Override
   protected void handleNameClash(final Attribute previousDeclaration,
       final Attribute subNode) throws ADLException {
-    throw new ADLException(ADLErrors.DUPLICATED_ATTRIBUTE_NAME, subNode
-        .getName(), new NodeErrorLocator(previousDeclaration));
+    errorManagerItf.logError(ADLErrors.DUPLICATED_ATTRIBUTE_NAME,
+        subNode.getName(), new NodeErrorLocator(previousDeclaration));
+  }
+
+  @Override
+  protected void removeSubNode(final Node node, final Attribute subNode) {
+    ((AttributeContainer) node).removeAttribute(subNode);
   }
 }

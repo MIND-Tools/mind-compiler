@@ -22,35 +22,30 @@
 
 package org.ow2.mind.error;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.LineNumberReader;
 import java.io.PrintStream;
-import java.util.Iterator;
 
 import org.objectweb.fractal.adl.ADLException;
-import org.objectweb.fractal.adl.error.ChainedErrorLocator;
 import org.objectweb.fractal.adl.error.Error;
-import org.objectweb.fractal.adl.error.ErrorLocator;
 
 /**
  * This error manager log errors and warnings on {@link PrintStream} (
  * <code>System.err</code> by default).
  */
-public class StreamErrorManager extends AbstractErrorManager {
+public class StreamErrorManager extends SimpleErrorManager {
 
   protected PrintStream errorStream      = System.err;
   protected PrintStream warningStream    = System.err;
   protected boolean     printStackTraces = false;
 
   @Override
-  protected void processError(final Error error) throws ADLException {
+  public void logError(final Error error) throws ADLException {
+    super.logError(error);
     print(errorStream, error);
   }
 
   @Override
-  protected void processWarning(final Error warning) {
+  public void logWarning(final Error warning) {
+    super.logWarning(warning);
     print(warningStream, warning);
   }
 
@@ -62,80 +57,7 @@ public class StreamErrorManager extends AbstractErrorManager {
         e.printStackTrace(stream);
       }
     } else {
-      ErrorLocator locator = error.getLocator();
-      if (locator instanceof ChainedErrorLocator) {
-        locator = ((ChainedErrorLocator) locator).getRootLocator();
-        if (locator == null) {
-          final Iterator<ErrorLocator> iter = ((ChainedErrorLocator) error
-              .getLocator()).getChainedLocations().iterator();
-          while (iter.hasNext() && locator == null) {
-            locator = iter.next();
-          }
-        }
-      }
-      final String cwd = System.getProperty("user.dir") + File.separator;
-
-      String fileLocation = null;
-
-      if (locator != null && locator.getInputFilePath() != null) {
-        fileLocation = locator.getInputFilePath();
-        if (fileLocation.startsWith(cwd)) {
-          fileLocation = fileLocation.substring(cwd.length());
-        }
-      }
-
-      final StringBuffer sb = new StringBuffer();
-      if (locator != null && fileLocation != null) {
-        sb.append("At ").append(fileLocation);
-
-        if (locator.getBeginLine() >= 0) {
-          sb.append(":").append(locator.getBeginLine());
-          if (locator.getBeginColumn() >= 0) {
-            sb.append(",").append(locator.getBeginColumn());
-          }
-        }
-        sb.append(":\n |--> ");
-        if (locator.getBeginLine() >= 0) {
-          final File inputFile = new File(locator.getInputFilePath());
-          if (inputFile.exists()) {
-            try {
-              final LineNumberReader reader = new LineNumberReader(
-                  new FileReader(inputFile));
-              for (int i = 0; i < locator.getBeginLine() - 1; i++) {
-                reader.readLine();
-              }
-              final String line = reader.readLine().replace("\t", "    ");
-              sb.append("  ").append(line).append("\n |-->   ");
-              if (locator.getBeginColumn() >= 0) {
-                for (int i = 0; i < locator.getBeginColumn() - 1; i++) {
-                  sb.append(" ");
-                }
-                int end = line.length();
-                if (locator.getEndColumn() >= 0
-                    && locator.getBeginLine() == locator.getEndLine()) {
-                  end = locator.getEndColumn();
-                }
-                for (int i = locator.getBeginColumn(); i < end + 1; i++) {
-                  sb.append("-");
-                }
-                sb.append("\n |--> ");
-
-              }
-            } catch (final IOException e1) {
-              // ignore
-            }
-          }
-        }
-      }
-      sb.append(error.getMessage()).append("\n");
-      Throwable cause = error.getCause();
-      while (cause != null) {
-        sb.append("caused by : ");
-        sb.append(cause.getMessage()).append('\n');
-        cause = cause.getCause();
-      }
-
-      stream.println(sb);
+      stream.println(ErrorHelper.formatError(error));
     }
   }
 

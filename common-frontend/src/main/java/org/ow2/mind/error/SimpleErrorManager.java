@@ -24,6 +24,8 @@ package org.ow2.mind.error;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.Node;
@@ -31,37 +33,54 @@ import org.objectweb.fractal.adl.error.Error;
 import org.objectweb.fractal.adl.error.ErrorLocator;
 import org.objectweb.fractal.adl.error.ErrorTemplate;
 import org.objectweb.fractal.adl.error.NodeErrorLocator;
+import org.objectweb.fractal.adl.util.FractalADLLogManager;
 
 /**
- * Abstract implementation of {@link ErrorManager} interface. Every methods
+ * Simple implementation of {@link ErrorManager} interface. Every methods
  * implemented by this class calls {@link ErrorManager#logError(Error)} or
  * {@link ErrorManager#logWarning(Error)}.
  */
-public abstract class AbstractErrorManager implements ErrorManager {
+public class SimpleErrorManager implements ErrorManager {
+
+  protected static Logger     logger   = FractalADLLogManager
+                                           .getLogger("error");
 
   protected final List<Error> errors   = new ArrayList<Error>();
   protected final List<Error> warnings = new ArrayList<Error>();
 
-  protected abstract void processError(Error error) throws ADLException;
-
-  protected abstract void processWarning(Error warning);
-
   public void logError(final Error error) throws ADLException {
     errors.add(error);
     if (error.getLocator() instanceof NodeErrorLocator) {
-      ErrorASTHelper.addError(
-          ((NodeErrorLocator) error.getLocator()).getNode(), error);
+      ErrorHelper.addError(((NodeErrorLocator) error.getLocator()).getNode(),
+          error);
     }
-    processError(error);
-  }
+    if (logger.isLoggable(Level.FINER)) {
+      String errorId;
+      if (error.getTemplate() instanceof Enum<?>) {
+        errorId = ((Enum<?>) error.getTemplate()).name();
+      } else {
+        errorId = Integer.toString(error.getTemplate().getErrorId());
+      }
+      logger.fine("Error " + error.getTemplate().getGroupId() + ":" + errorId);
+      logger.fine(ErrorHelper.formatError(error));
 
-  public void logWarning(final Error warning) {
-    warnings.add(warning);
-    if (warning.getLocator() instanceof NodeErrorLocator) {
-      ErrorASTHelper.addError(
-          ((NodeErrorLocator) warning.getLocator()).getNode(), warning);
+      logger.fine("Stack trace : ");
+      // capture the current stack-trace
+      StackTraceElement[] stackTrace;
+      try {
+        throw new ADLException(error);
+      } catch (final ADLException e) {
+        stackTrace = e.getStackTrace();
+      }
+      // pass traces with "logError" method names
+      int i = 0;
+      for (i = 0; i < stackTrace.length; i++) {
+        if (!stackTrace[i].getMethodName().equals("logError")) break;
+      }
+      for (; i < stackTrace.length; i++) {
+        logger.fine("  " + stackTrace[i].toString());
+      }
     }
-    processWarning(warning);
   }
 
   public void logError(final ErrorTemplate template, final Object... args)
@@ -88,6 +107,65 @@ public abstract class AbstractErrorManager implements ErrorManager {
       final ErrorLocator locator, final Throwable cause, final Object... args)
       throws ADLException {
     logError(new Error(template, locator, cause, args));
+  }
+
+  public void logFatal(final Error error) throws ADLException {
+    logError(error);
+    throw new ADLException(error);
+  }
+
+  public void logFatal(final ErrorTemplate template, final Object... args)
+      throws ADLException {
+    logFatal(template, null, null, args);
+  }
+
+  public void logFatal(final ErrorTemplate template, final Node node,
+      final Object... args) throws ADLException {
+    logFatal(template, new NodeErrorLocator(node), null, args);
+  }
+
+  public void logFatal(final ErrorTemplate template,
+      final ErrorLocator locator, final Object... args) throws ADLException {
+    logFatal(template, locator, null, args);
+  }
+
+  public void logFatal(final ErrorTemplate template, final Throwable cause,
+      final Object... args) throws ADLException {
+    logFatal(template, null, cause, args);
+  }
+
+  public void logFatal(final ErrorTemplate template,
+      final ErrorLocator locator, final Throwable cause, final Object... args)
+      throws ADLException {
+    logFatal(new Error(template, locator, cause, args));
+  }
+
+  public void logWarning(final Error warning) {
+    warnings.add(warning);
+    if (warning.getLocator() instanceof NodeErrorLocator) {
+      ErrorHelper.addError(((NodeErrorLocator) warning.getLocator()).getNode(),
+          warning);
+    }
+    if (logger.isLoggable(Level.FINER)) {
+      logger.fine(ErrorHelper.formatError(warning));
+
+      logger.fine("Stack trace : ");
+      // capture the current stack-trace
+      StackTraceElement[] stackTrace;
+      try {
+        throw new ADLException(warning);
+      } catch (final ADLException e) {
+        stackTrace = e.getStackTrace();
+      }
+      // pass traces with "logError" method names
+      int i = 0;
+      for (i = 0; i < stackTrace.length; i++) {
+        if (!stackTrace[i].getMethodName().equals("logWarning")) break;
+      }
+      for (; i < stackTrace.length; i++) {
+        logger.fine("  " + stackTrace[i].toString());
+      }
+    }
   }
 
   public void logWarning(final ErrorTemplate template, final Object... args) {

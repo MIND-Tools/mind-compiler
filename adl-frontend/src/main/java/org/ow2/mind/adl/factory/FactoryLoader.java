@@ -23,6 +23,7 @@
 package org.ow2.mind.adl.factory;
 
 import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
+import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
 
 import java.util.Map;
 
@@ -33,7 +34,6 @@ import org.objectweb.fractal.adl.NodeFactory;
 import org.objectweb.fractal.adl.interfaces.InterfaceContainer;
 import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.fractal.api.control.IllegalBindingException;
-import org.ow2.mind.BindingControllerImplHelper;
 import org.ow2.mind.CommonASTHelper;
 import org.ow2.mind.adl.ast.ASTHelper;
 import org.ow2.mind.adl.ast.Data;
@@ -167,8 +167,7 @@ public class FactoryLoader extends AbstractLoader {
 
   @Override
   public String[] listFc() {
-    return BindingControllerImplHelper.listFcHelper(super.listFc(),
-        NodeFactory.ITF_NAME);
+    return listFcHelper(super.listFc(), NodeFactory.ITF_NAME);
   }
 
   @Override

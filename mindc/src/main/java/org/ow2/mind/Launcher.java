@@ -77,6 +77,8 @@ import org.ow2.mind.compilation.CompilerWrapper;
 import org.ow2.mind.compilation.DirectiveHelper;
 import org.ow2.mind.compilation.LinkerCommand;
 import org.ow2.mind.compilation.gcc.GccCompilerWrapper;
+import org.ow2.mind.error.ErrorManager;
+import org.ow2.mind.error.ErrorManagerFactory;
 import org.ow2.mind.idl.IDLBackendFactory;
 import org.ow2.mind.idl.IDLLoader;
 import org.ow2.mind.idl.IDLLoaderChainFactory;
@@ -213,6 +215,7 @@ public class Launcher extends AbstractLauncher {
   protected File                       buildDir;
 
   // compiler components :
+  protected ErrorManager               errorManager;
   protected Loader                     adlLoader;
   protected IDLLoader                  idlLoader;
   protected Instantiator               graphInstantiator;
@@ -346,12 +349,12 @@ public class Launcher extends AbstractLauncher {
         .put(BasicOutputFileLocator.OUTPUT_DIR_CONTEXT_KEY, buildDir);
 
     // force mode
-    ForceRegenContextHelper.setForceRegen(compilerContext, forceOpt
-        .isPresent(cmdLine));
-    ForceRegenContextHelper.setKeepTemp(compilerContext, keepTempOpt
-        .isPresent(cmdLine));
-    ForceRegenContextHelper.setNoBinaryAST(compilerContext, noBinASTOpt
-        .isPresent(cmdLine));
+    ForceRegenContextHelper.setForceRegen(compilerContext,
+        forceOpt.isPresent(cmdLine));
+    ForceRegenContextHelper.setKeepTemp(compilerContext,
+        keepTempOpt.isPresent(cmdLine));
+    ForceRegenContextHelper.setNoBinaryAST(compilerContext,
+        noBinASTOpt.isPresent(cmdLine));
 
     // build c-flags
     final List<String> cFlagsList = new ArrayList<String>();
@@ -427,8 +430,8 @@ public class Launcher extends AbstractLauncher {
             + linkerScript + "'. Cannot find file in the source path", 1);
       }
 
-      CompilerContextHelper.setLinkerScript(compilerContext, linkerScriptURL
-          .getPath());
+      CompilerContextHelper.setLinkerScript(compilerContext,
+          linkerScriptURL.getPath());
     }
 
     AnnotationLocatorHelper.addDefaultAnnotationPackage(
@@ -472,6 +475,10 @@ public class Launcher extends AbstractLauncher {
   protected void initCompiler(final CommandLine cmdLine,
       final NodeFactory stNodeFactory, final PluginManager pluginManager,
       final Map<Object, Object> compilerContext) throws ADLException {
+    // error manager
+    errorManager = ErrorManagerFactory.newStreamErrorManager(System.err,
+        printStackTrace);
+
     // input locators
     final BasicInputResourceLocator inputResourceLocator = new BasicInputResourceLocator();
     final OutputBinaryIDLLocator obil = new OutputBinaryIDLLocator();
@@ -508,8 +515,9 @@ public class Launcher extends AbstractLauncher {
     idlLoader = IDLLoaderChainFactory.newLoader(idlLocator,
         inputResourceLocator);
 
-    adlLoader = Factory.newLoader(inputResourceLocator, adlLocator, idlLocator,
-        implementationLocator, idlLoader, pluginFactory);
+    adlLoader = Factory
+        .newLoader(errorManager, inputResourceLocator, adlLocator, idlLocator,
+            implementationLocator, idlLoader, pluginFactory);
 
     // instantiator chain
     graphInstantiator = Factory.newInstantiator(adlLoader);
@@ -632,8 +640,8 @@ public class Launcher extends AbstractLauncher {
         CompilerContextHelper.setCompilerCommand(context, target.getCompiler()
             .getPath());
       } else {
-        CompilerContextHelper.setCompilerCommand(context, compilerCmdOpt
-            .getDefaultValue());
+        CompilerContextHelper.setCompilerCommand(context,
+            compilerCmdOpt.getDefaultValue());
       }
     }
   }
@@ -650,8 +658,8 @@ public class Launcher extends AbstractLauncher {
         CompilerContextHelper.setLinkerCommand(context, target.getLinker()
             .getPath());
       } else {
-        CompilerContextHelper.setLinkerCommand(context, linkerCmdOpt
-            .getDefaultValue());
+        CompilerContextHelper.setLinkerCommand(context,
+            linkerCmdOpt.getDefaultValue());
       }
     }
   }

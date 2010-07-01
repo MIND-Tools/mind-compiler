@@ -55,7 +55,12 @@ public class SubComponentNormalizerLoader
   @Override
   protected void handleNameClash(final Component previousDeclaration,
       final Component subNode) throws ADLException {
-    throw new ADLException(ComponentErrors.DUPLICATED_COMPONENT_NAME, subNode
-        .getName(), new NodeErrorLocator(previousDeclaration));
+    throw new ADLException(ComponentErrors.DUPLICATED_COMPONENT_NAME,
+        subNode.getName(), new NodeErrorLocator(previousDeclaration));
+  }
+
+  @Override
+  protected void removeSubNode(final Node node, final Component subNode) {
+    ((ComponentContainer) node).getComponents();
   }
 }

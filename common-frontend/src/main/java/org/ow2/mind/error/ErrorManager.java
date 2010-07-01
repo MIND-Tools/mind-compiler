@@ -119,6 +119,92 @@ public interface ErrorManager {
   void logError(final Error error) throws ADLException;
 
   /**
+   * Log a fatal error. The difference between errors and fatal error is that
+   * this method <b>will</b> throw an ADLException.
+   * 
+   * @param template the error templates.
+   * @param args the arguments for the formated message (see
+   *          {@link ErrorTemplate#getFormatedMessage(Object...)}).
+   * @throws ADLException the ErrorManager will throw an {@link ADLException}
+   *           that contains the given error to interrupt the execution of the
+   *           front-end.
+   */
+  void logFatal(final ErrorTemplate template, final Object... args)
+      throws ADLException;
+
+  /**
+   * Log a fatal error. The difference between errors and fatal error is that
+   * this method <b>will</b> throw an ADLException.
+   * 
+   * @param template the error templates.
+   * @param node the error location.
+   * @param args the arguments for the formated message (see
+   *          {@link ErrorTemplate#getFormatedMessage(Object...)}).
+   * @throws ADLException the ErrorManager will throw an {@link ADLException}
+   *           that contains the given error to interrupt the execution of the
+   *           front-end.
+   */
+  void logFatal(final ErrorTemplate template, final Node node,
+      final Object... args) throws ADLException;
+
+  /**
+   * Log a fatal error. The difference between errors and fatal error is that
+   * this method <b>will</b> throw an ADLException.
+   * 
+   * @param template the error templates.
+   * @param locator the error location. May be <code>null</code>.
+   * @param args the arguments for the formated message (see
+   *          {@link ErrorTemplate#getFormatedMessage(Object...)}).
+   * @throws ADLException the ErrorManager will throw an {@link ADLException}
+   *           that contains the given error to interrupt the execution of the
+   *           front-end.
+   */
+  void logFatal(final ErrorTemplate template, final ErrorLocator locator,
+      final Object... args) throws ADLException;
+
+  /**
+   * Log a fatal error. The difference between errors and fatal error is that
+   * this method <b>will</b> throw an ADLException.
+   * 
+   * @param template the error templates.
+   * @param cause the cause of this error. May be <code>null</code>.
+   * @param args the arguments for the formated message (see
+   *          {@link ErrorTemplate#getFormatedMessage(Object...)}).
+   * @throws ADLException the ErrorManager will throw an {@link ADLException}
+   *           that contains the given error to interrupt the execution of the
+   *           front-end.
+   */
+  void logFatal(final ErrorTemplate template, final Throwable cause,
+      final Object... args) throws ADLException;
+
+  /**
+   * Log a fatal error. The difference between errors and fatal error is that
+   * this method <b>will</b> throw an ADLException.
+   * 
+   * @param template the error templates.
+   * @param locator the error location. May be <code>null</code>.
+   * @param cause the cause of this error. May be <code>null</code>.
+   * @param args the arguments for the formated message (see
+   *          {@link ErrorTemplate#getFormatedMessage(Object...)}).
+   * @throws ADLException the ErrorManager will throw an {@link ADLException}
+   *           that contains the given error to interrupt the execution of the
+   *           front-end.
+   */
+  void logFatal(final ErrorTemplate template, final ErrorLocator locator,
+      final Throwable cause, final Object... args) throws ADLException;
+
+  /**
+   * Log a fatal error. The difference between errors and fatal error is that
+   * this method <b>will</b> throw an ADLException.
+   * 
+   * @param error the reported error
+   * @throws ADLException the ErrorManager will throw an {@link ADLException}
+   *           that contains the given error to interrupt the execution of the
+   *           front-end.
+   */
+  void logFatal(final Error error) throws ADLException;
+
+  /**
    * Log a warning.
    * 
    * @param template the error templates.

@@ -22,6 +22,9 @@
 
 package org.ow2.mind.adl;
 
+import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
+import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,6 +33,9 @@ import org.objectweb.fractal.adl.AbstractLoader;
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.Loader;
 import org.objectweb.fractal.adl.Node;
+import org.objectweb.fractal.api.NoSuchInterfaceException;
+import org.objectweb.fractal.api.control.IllegalBindingException;
+import org.ow2.mind.error.ErrorManager;
 
 /**
  * Generic abstract class that ease the implementation of {@link Loader} that
@@ -40,6 +46,13 @@ import org.objectweb.fractal.adl.Node;
 public abstract class AbstractNormalizerLoader<T extends Node>
     extends
       AbstractLoader {
+
+  // ---------------------------------------------------------------------------
+  // Client interfaces
+  // ---------------------------------------------------------------------------
+
+  /** The {@link ErrorManager} client interface used to log errors. */
+  public ErrorManager errorManagerItf;
 
   // ---------------------------------------------------------------------------
   // Implementation of the Loader interface
@@ -63,6 +76,7 @@ public abstract class AbstractNormalizerLoader<T extends Node>
       final T previousDeclaration = nodeByIds.put(id, subNode);
       if (previousDeclaration != null) {
         handleNameClash(previousDeclaration, subNode);
+        removeSubNode(d, subNode);
       }
     }
   }
@@ -76,6 +90,15 @@ public abstract class AbstractNormalizerLoader<T extends Node>
    */
   protected abstract void handleNameClash(T previousDeclaration, T subNode)
       throws ADLException;
+
+  /**
+   * Method to remove a sub-node. This method is called when two sub-nodes with
+   * the same Id are found.
+   * 
+   * @param node the parent node.
+   * @param subNode the node to remove.
+   */
+  protected abstract void removeSubNode(Node node, T subNode);
 
   /**
    * Returns the array of sub nodes to check. May return <code>null</code>.
@@ -94,4 +117,48 @@ public abstract class AbstractNormalizerLoader<T extends Node>
    */
   protected abstract Object getId(T node) throws ADLException;
 
+  // ---------------------------------------------------------------------------
+  // Overridden BindingController methods
+  // ---------------------------------------------------------------------------
+
+  @Override
+  public void bindFc(final String itfName, final Object value)
+      throws NoSuchInterfaceException, IllegalBindingException {
+    checkItfName(itfName);
+
+    if (itfName.equals(ErrorManager.ITF_NAME)) {
+      errorManagerItf = (ErrorManager) value;
+    } else {
+      super.bindFc(itfName, value);
+    }
+
+  }
+
+  @Override
+  public String[] listFc() {
+    return listFcHelper(super.listFc(), ErrorManager.ITF_NAME);
+  }
+
+  @Override
+  public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
+    checkItfName(itfName);
+
+    if (itfName.equals(ErrorManager.ITF_NAME)) {
+      return errorManagerItf;
+    } else {
+      return super.lookupFc(itfName);
+    }
+  }
+
+  @Override
+  public void unbindFc(final String itfName) throws NoSuchInterfaceException,
+      IllegalBindingException {
+    checkItfName(itfName);
+
+    if (itfName.equals(ErrorManager.ITF_NAME)) {
+      errorManagerItf = null;
+    } else {
+      super.unbindFc(itfName);
+    }
+  }
 }

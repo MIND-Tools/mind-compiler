@@ -25,8 +25,11 @@ package org.ow2.mind.adl.generic;
 import static org.objectweb.fractal.adl.NodeUtil.castNodeError;
 import static org.objectweb.fractal.adl.types.TypeInterfaceUtil.isClient;
 import static org.objectweb.fractal.adl.types.TypeInterfaceUtil.isServer;
+import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
+import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
 import static org.ow2.mind.adl.ast.ASTHelper.isAbstract;
 import static org.ow2.mind.adl.ast.ASTHelper.isType;
+import static org.ow2.mind.adl.ast.ASTHelper.isUnresolvedDefinitionNode;
 import static org.ow2.mind.adl.generic.ast.GenericASTHelper.setUsedTypeParameter;
 
 import java.util.HashMap;
@@ -38,6 +41,7 @@ import org.objectweb.fractal.adl.CompilerError;
 import org.objectweb.fractal.adl.ContextLocal;
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.Node;
+import org.objectweb.fractal.adl.NodeFactory;
 import org.objectweb.fractal.adl.error.GenericErrors;
 import org.objectweb.fractal.adl.error.NodeErrorLocator;
 import org.objectweb.fractal.adl.interfaces.Interface;
@@ -48,6 +52,7 @@ import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.ow2.mind.adl.ADLErrors;
 import org.ow2.mind.adl.AbstractDefinitionReferenceResolver;
 import org.ow2.mind.adl.DefinitionReferenceResolver;
+import org.ow2.mind.adl.ast.ASTHelper;
 import org.ow2.mind.adl.ast.DefinitionReference;
 import org.ow2.mind.adl.ast.MindInterface;
 import org.ow2.mind.adl.binding.BindingChecker;
@@ -55,8 +60,7 @@ import org.ow2.mind.adl.generic.ast.FormalTypeParameter;
 import org.ow2.mind.adl.generic.ast.FormalTypeParameterContainer;
 import org.ow2.mind.adl.generic.ast.TypeArgument;
 import org.ow2.mind.adl.generic.ast.TypeArgumentContainer;
-import org.ow2.mind.adl.imports.ast.Import;
-import org.ow2.mind.adl.imports.ast.ImportContainer;
+import org.ow2.mind.error.ErrorManager;
 
 /**
  * Delegating {@link DefinitionReferenceResolver} component that instantiates
@@ -78,6 +82,12 @@ public class GenericDefinitionReferenceResolver
   // ---------------------------------------------------------------------------
   // Client interfaces
   // ---------------------------------------------------------------------------
+
+  /** The {@link ErrorManager} client interface used to log errors. */
+  public ErrorManager                                                             errorManagerItf;
+
+  /** The {@link NodeFactory} client interface used by this component. */
+  public NodeFactory                                                              nodeFactoryItf;
 
   /** The name of the {@link #recursiveResolverItf} client interface. */
   public static final String                                                      RECURSIVE_RESOLVER_ITF_NAME = "rescursive-resolver";
@@ -104,8 +114,8 @@ public class GenericDefinitionReferenceResolver
   public Definition resolve(final DefinitionReference reference,
       final Definition encapsulatingDefinition,
       final Map<Object, Object> context) throws ADLException {
-    return resolve(reference, encapsulatingDefinition, getTypeParameters(
-        encapsulatingDefinition, context), context);
+    return resolve(reference, encapsulatingDefinition,
+        getTypeParameters(encapsulatingDefinition, context), context);
   }
 
   // ---------------------------------------------------------------------------
@@ -133,9 +143,15 @@ public class GenericDefinitionReferenceResolver
 
     if (formalTypeParameters == null || formalTypeParameters.length == 0) {
       if (typeArguments != null && typeArguments.length > 0) {
-        throw new ADLException(
-            ADLErrors.INVALID_REFERENCE_NO_TEMPLATE_VARIABLE, reference, d
-                .getName());
+        if (!ASTHelper.isUnresolvedDefinitionNode(d)) {
+          errorManagerItf.logError(
+              ADLErrors.INVALID_REFERENCE_NO_TEMPLATE_VARIABLE, reference,
+              d.getName());
+          return ASTHelper.newUnresolvedDefinitionNode(nodeFactoryItf,
+              reference.getName());
+        } else {
+          return d;
+        }
       }
     } else {
       // referenced definition has type parameter
@@ -145,6 +161,15 @@ public class GenericDefinitionReferenceResolver
       // arguments;
       final Map<String, TypeArgument> typeArgumentMap = mapTypeArguments(
           reference, formalTypeParameters, typeArguments);
+
+      // If mapTypeArguments returns null, the type argument list contains error
+      // returns an unresolved definition node.
+      if (typeArgumentMap == null) {
+        return ASTHelper.newUnresolvedDefinitionNode(nodeFactoryItf,
+            reference.getName());
+      }
+
+      boolean containErrors = false;
 
       // typeArgumentValues associates formal type parameter names to type
       // argument values (either a TypeArgument, or a referenced
@@ -177,8 +202,10 @@ public class GenericDefinitionReferenceResolver
           final FormalTypeParameter referencedParameter = topLevelTypeParameters
               .get(ref);
           if (referencedParameter == null) {
-            throw new ADLException(ADLErrors.UNDEFINED_TEMPALTE_VARIABLE,
+            errorManagerItf.logError(ADLErrors.UNDEFINED_TEMPALTE_VARIABLE,
                 typeArgument, ref);
+            containErrors = true;
+            continue;
           }
 
           setUsedTypeParameter(referencedParameter);
@@ -198,11 +225,13 @@ public class GenericDefinitionReferenceResolver
             typeArgumentDefinition = recursiveResolverItf.resolve(
                 typeArgumentDefRef, encapsulatingDefinition, context);
 
-            if ((isType(typeArgumentDefinition) || isAbstract(typeArgumentDefinition))
+            if (!isUnresolvedDefinitionNode(typeArgumentDefinition)
+                && (isType(typeArgumentDefinition) || isAbstract(typeArgumentDefinition))
                 && encapsulatingDefinition != null) {
-              throw new ADLException(
+              errorManagerItf.logError(
                   ADLErrors.INVALID_TEMPLATE_VALUE_TYPE_DEFINITON,
                   typeArgument, typeArgumentDefRef.getName());
+              containErrors = true;
             }
 
           } else {
@@ -212,11 +241,21 @@ public class GenericDefinitionReferenceResolver
         }
 
         // check compatibility of typeArgumentDefinition against type of formal
-        // type parameter
-        if (typeArgumentDefinition != null && formalTypeParamterType != null)
+        // type parameter (only if typeArgumentDefinition is valid)
+        if (typeArgumentDefinition != null
+            && isUnresolvedDefinitionNode(typeArgumentDefinition)) {
+          containErrors = true;
+        } else if (typeArgumentDefinition != null
+            && formalTypeParamterType != null) {
           checkTypeCompatibility(formalTypeParamterType,
               typeArgumentDefinition, typeArgument);
+        }
+      }
 
+      if (containErrors) {
+        // the definition reference contains errors, return an unresolved node
+        return ASTHelper.newUnresolvedDefinitionNode(nodeFactoryItf,
+            reference.getName());
       }
 
       // Finally instantiate template
@@ -253,11 +292,10 @@ public class GenericDefinitionReferenceResolver
       final TypeArgument[] typeArguments) throws ADLException {
     if (typeArguments == null || typeArguments.length == 0) {
       if (formalTypeParameters.length > 0) {
-        throw new ADLException(
+        errorManagerItf.logError(
             ADLErrors.INVALID_REFERENCE_MISSING_TEMPLATE_VALUE, reference);
-      } else {
-        return new HashMap<String, TypeArgument>();
       }
+      return null;
     }
 
     if (typeArguments[0].getTypeParameterName() == null) {
@@ -265,13 +303,15 @@ public class GenericDefinitionReferenceResolver
 
       if (formalTypeParameters.length > typeArguments.length) {
         // missing template values
-        throw new ADLException(
+        errorManagerItf.logError(
             ADLErrors.INVALID_REFERENCE_MISSING_TEMPLATE_VALUE, reference);
+        return null;
       }
 
       if (formalTypeParameters.length < typeArguments.length) {
-        throw new ADLException(
+        errorManagerItf.logError(
             ADLErrors.INVALID_REFERENCE_TOO_MANY_TEMPLATE_VALUE, reference);
+        return null;
       }
 
       final Map<String, TypeArgument> result = new HashMap<String, TypeArgument>(
@@ -313,9 +353,10 @@ public class GenericDefinitionReferenceResolver
         final TypeArgument value = valuesByName.remove(tmpl.getName());
         if (value == null) {
           // missing template values
-          throw new ADLException(
+          errorManagerItf.logError(
               ADLErrors.INVALID_REFERENCE_MISSING_TEMPLATE_VALUE, reference,
               tmpl.getName());
+          return null;
         }
         result.put(tmpl.getName(), value);
       }
@@ -326,9 +367,10 @@ public class GenericDefinitionReferenceResolver
         final Map.Entry<String, TypeArgument> value = valuesByName.entrySet()
             .iterator().next();
 
-        throw new ADLException(
-            ADLErrors.INVALID_REFERENCE_NO_SUCH_TEMPLATE_VARIABLE, value
-                .getValue(), value.getKey());
+        errorManagerItf.logError(
+            ADLErrors.INVALID_REFERENCE_NO_SUCH_TEMPLATE_VARIABLE,
+            value.getValue(), value.getKey());
+        return null;
       }
 
       return result;
@@ -344,8 +386,8 @@ public class GenericDefinitionReferenceResolver
     for (final Interface itf : castNodeError(typeValue,
         InterfaceContainer.class).getInterfaces()) {
       if (isServer(itf)) {
-        valueServerInterfaces.put(itf.getName(), castNodeError(itf,
-            MindInterface.class));
+        valueServerInterfaces.put(itf.getName(),
+            castNodeError(itf, MindInterface.class));
       }
     }
 
@@ -355,9 +397,10 @@ public class GenericDefinitionReferenceResolver
 
       final MindInterface valueItf = valueServerInterfaces.get(itf.getName());
       if (valueItf == null) {
-        throw new ADLException(
+        errorManagerItf.logError(
             ADLErrors.INVALID_TEMPLATE_VALUE_MISSING_SERVER_INTERFACE, locator,
             typeValue.getName(), itf.getName());
+        continue;
       }
       bindingCheckerItf.checkFromCompositeToSubcomponentBinding(itf, valueItf,
           null, locator);
@@ -369,8 +412,8 @@ public class GenericDefinitionReferenceResolver
     for (final Interface itf : castNodeError(templateType,
         InterfaceContainer.class).getInterfaces()) {
       if (isClient(itf)) {
-        templateClientInterfaces.put(itf.getName(), castNodeError(itf,
-            MindInterface.class));
+        templateClientInterfaces.put(itf.getName(),
+            castNodeError(itf, MindInterface.class));
       }
     }
 
@@ -382,9 +425,11 @@ public class GenericDefinitionReferenceResolver
           .getName());
       if (itf == null) {
         if (!TypeInterfaceUtil.isOptional(valueItf)) {
-          throw new ADLException(
-              ADLErrors.INVALID_TEMPLATE_VALUE_CLIENT_INTERFACE_MUST_BE_OPTIONAL,
-              locator, valueItf.getName(), new NodeErrorLocator(valueItf));
+          errorManagerItf
+              .logError(
+                  ADLErrors.INVALID_TEMPLATE_VALUE_CLIENT_INTERFACE_MUST_BE_OPTIONAL,
+                  locator, valueItf.getName(), new NodeErrorLocator(valueItf));
+          continue;
         }
       } else {
         bindingCheckerItf.checkFromSubcomponentToCompositeBinding(valueItf,
@@ -392,11 +437,11 @@ public class GenericDefinitionReferenceResolver
       }
     }
     if (!templateClientInterfaces.isEmpty()) {
-      final MindInterface missingItf = templateClientInterfaces.values()
-          .iterator().next();
-      throw new ADLException(
-          ADLErrors.INVALID_TEMPLATE_VALUE_MISSING_CLIENT_INTERFACE, locator,
-          typeValue.getName(), missingItf.getName());
+      for (final MindInterface missingItf : templateClientInterfaces.values()) {
+        errorManagerItf.logError(
+            ADLErrors.INVALID_TEMPLATE_VALUE_MISSING_CLIENT_INTERFACE, locator,
+            typeValue.getName(), missingItf.getName());
+      }
     }
   }
 
@@ -417,31 +462,10 @@ public class GenericDefinitionReferenceResolver
         final FormalTypeParameter[] formalTypeParameters = ((FormalTypeParameterContainer) d)
             .getFormalTypeParameters();
         if (formalTypeParameters.length > 0) {
-          final Import[] imports = (d instanceof ImportContainer)
-              ? ((ImportContainer) d).getImports()
-              : null;
-
           result = new HashMap<String, FormalTypeParameter>(
               formalTypeParameters.length);
           for (final FormalTypeParameter typeParameter : formalTypeParameters) {
-
-            // checks that formal type parameter do not hide an import.
-            if (imports != null) {
-              for (final Import imp : imports) {
-                if (typeParameter.getName().equals(imp.getSimpleName())) {
-                  // TODO use dedicated method to print warning
-                  System.out.println("At " + typeParameter.astGetSource()
-                      + ": WARNING template variable hides import at "
-                      + imp.astGetSource());
-                }
-              }
-            }
-
-            if (result.put(typeParameter.getName(), typeParameter) != null) {
-              throw new ADLException(
-                  ADLErrors.DUPLICATED_TEMPALTE_VARIABLE_NAME, typeParameter,
-                  typeParameter.getName());
-            }
+            result.put(typeParameter.getName(), typeParameter);
           }
         }
       }
@@ -458,12 +482,13 @@ public class GenericDefinitionReferenceResolver
   @Override
   public void bindFc(final String itfName, final Object value)
       throws NoSuchInterfaceException, IllegalBindingException {
+    checkItfName(itfName);
 
-    if (itfName == null) {
-      throw new IllegalArgumentException("Interface name can't be null");
-    }
-
-    if (itfName.equals(RECURSIVE_RESOLVER_ITF_NAME)) {
+    if (itfName.equals(ErrorManager.ITF_NAME)) {
+      errorManagerItf = (ErrorManager) value;
+    } else if (NodeFactory.ITF_NAME.equals(itfName)) {
+      nodeFactoryItf = (NodeFactory) value;
+    } else if (itfName.equals(RECURSIVE_RESOLVER_ITF_NAME)) {
       recursiveResolverItf = (DefinitionReferenceResolver) value;
     } else if (itfName.equals(BindingChecker.ITF_NAME)) {
       bindingCheckerItf = (BindingChecker) value;
@@ -477,23 +502,20 @@ public class GenericDefinitionReferenceResolver
 
   @Override
   public String[] listFc() {
-    final String[] superList = super.listFc();
-    final String[] list = new String[superList.length + 3];
-    list[0] = RECURSIVE_RESOLVER_ITF_NAME;
-    list[1] = BindingChecker.ITF_NAME;
-    list[2] = TemplateInstantiator.ITF_NAME;
-    System.arraycopy(superList, 0, list, 3, superList.length);
-    return list;
+    return listFcHelper(super.listFc(), ErrorManager.ITF_NAME,
+        NodeFactory.ITF_NAME, RECURSIVE_RESOLVER_ITF_NAME,
+        BindingChecker.ITF_NAME, TemplateInstantiator.ITF_NAME);
   }
 
   @Override
   public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
+    checkItfName(itfName);
 
-    if (itfName == null) {
-      throw new IllegalArgumentException("Interface name can't be null");
-    }
-
-    if (itfName.equals(RECURSIVE_RESOLVER_ITF_NAME)) {
+    if (itfName.equals(ErrorManager.ITF_NAME)) {
+      return errorManagerItf;
+    } else if (NodeFactory.ITF_NAME.equals(itfName)) {
+      return nodeFactoryItf;
+    } else if (itfName.equals(RECURSIVE_RESOLVER_ITF_NAME)) {
       return recursiveResolverItf;
     } else if (itfName.equals(BindingChecker.ITF_NAME)) {
       return bindingCheckerItf;
@@ -507,12 +529,13 @@ public class GenericDefinitionReferenceResolver
   @Override
   public void unbindFc(final String itfName) throws NoSuchInterfaceException,
       IllegalBindingException {
+    checkItfName(itfName);
 
-    if (itfName == null) {
-      throw new IllegalArgumentException("Interface name can't be null");
-    }
-
-    if (itfName.equals(RECURSIVE_RESOLVER_ITF_NAME)) {
+    if (itfName.equals(ErrorManager.ITF_NAME)) {
+      errorManagerItf = null;
+    } else if (NodeFactory.ITF_NAME.equals(itfName)) {
+      nodeFactoryItf = null;
+    } else if (itfName.equals(RECURSIVE_RESOLVER_ITF_NAME)) {
       recursiveResolverItf = null;
     } else if (itfName.equals(BindingChecker.ITF_NAME)) {
       bindingCheckerItf = null;

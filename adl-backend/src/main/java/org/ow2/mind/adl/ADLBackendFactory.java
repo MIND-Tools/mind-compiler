@@ -50,6 +50,8 @@ import org.ow2.mind.compilation.BasicCompilationCommandExecutor;
 import org.ow2.mind.compilation.CompilationCommandExecutor;
 import org.ow2.mind.compilation.CompilerWrapper;
 import org.ow2.mind.compilation.gcc.GccCompilerWrapper;
+import org.ow2.mind.error.ErrorManager;
+import org.ow2.mind.error.ErrorManagerFactory;
 import org.ow2.mind.idl.IDLBackendFactory;
 import org.ow2.mind.idl.IDLLoader;
 import org.ow2.mind.idl.IDLLoaderChainFactory;
@@ -276,7 +278,10 @@ public final class ADLBackendFactory {
 
   public static GraphCompiler newGraphCompiler(final Map<Object, Object> context)
       throws ADLException {
-    final Loader adlLoader = Factory.newLoader();
+    final ErrorManager errorManager = ErrorManagerFactory
+        .newStreamErrorManager();
+
+    final Loader adlLoader = Factory.newLoader(errorManager);
     final IDLLoader idlLoader = IDLLoaderChainFactory.newLoader();
     final BasicInputResourceLocator inputResourceLocator = new BasicInputResourceLocator();
     final BasicOutputFileLocator outputFileLocator = new BasicOutputFileLocator();

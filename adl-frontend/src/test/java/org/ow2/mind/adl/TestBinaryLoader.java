@@ -33,9 +33,10 @@ import java.util.Map;
 
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.Loader;
-import org.ow2.mind.adl.Factory;
 import org.ow2.mind.adl.graph.ComponentGraph;
 import org.ow2.mind.adl.graph.Instantiator;
+import org.ow2.mind.error.ErrorManager;
+import org.ow2.mind.error.ErrorManagerFactory;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -50,7 +51,13 @@ public class TestBinaryLoader {
 
   @BeforeMethod(alwaysRun = true)
   protected void setUp() throws Exception {
-    loader = Factory.newLoader();
+    final ErrorManager errorManager = ErrorManagerFactory
+        .newStreamErrorManager();
+    final ErrorLoader errorLoader = new ErrorLoader();
+    errorLoader.clientLoader = Factory.newLoader(errorManager);
+    errorLoader.errorManagerItf = errorManager;
+    loader = errorLoader;
+
     instantiator = Factory.newInstantiator(loader);
 
     binADLDir = new File("target/test/defs");

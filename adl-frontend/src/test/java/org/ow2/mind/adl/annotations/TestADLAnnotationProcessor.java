@@ -41,12 +41,15 @@ import org.objectweb.fractal.adl.Node;
 import org.ow2.mind.BasicInputResourceLocator;
 import org.ow2.mind.adl.ADLLocator;
 import org.ow2.mind.adl.ASTChecker;
+import org.ow2.mind.adl.ErrorLoader;
 import org.ow2.mind.adl.Factory;
 import org.ow2.mind.adl.annotation.ADLLoaderPhase;
 import org.ow2.mind.adl.annotation.AbstractADLLoaderAnnotationProcessor;
 import org.ow2.mind.adl.annotation.AnnotationProcessorTemplateInstantiator;
 import org.ow2.mind.adl.implementation.ImplementationLocator;
 import org.ow2.mind.annotation.Annotation;
+import org.ow2.mind.error.ErrorManager;
+import org.ow2.mind.error.ErrorManagerFactory;
 import org.ow2.mind.idl.IDLLoader;
 import org.ow2.mind.idl.IDLLoaderChainFactory;
 import org.ow2.mind.idl.IDLLocator;
@@ -61,6 +64,9 @@ public class TestADLAnnotationProcessor {
 
   @BeforeMethod(alwaysRun = true)
   public void setUp() throws Exception {
+    final ErrorManager errorManager = ErrorManagerFactory
+        .newSimpleErrorManager();
+
     // input locators
     final BasicInputResourceLocator inputResourceLocator = new BasicInputResourceLocator();
     final IDLLocator idlLocator = IDLLoaderChainFactory
@@ -75,10 +81,13 @@ public class TestADLAnnotationProcessor {
     // loader chains
     final IDLLoader idlLoader = IDLLoaderChainFactory.newLoader(idlLocator,
         inputResourceLocator);
-    final Loader adlLoader = Factory
-        .newLoader(inputResourceLocator, adlLocator, idlLocator,
-            implementationLocator, idlLoader, pluginFactory);
-    loader = adlLoader;
+    final Loader adlLoader = Factory.newLoader(errorManager,
+        inputResourceLocator, adlLocator, idlLocator, implementationLocator,
+        idlLoader, pluginFactory);
+    final ErrorLoader errorLoader = new ErrorLoader();
+    errorLoader.clientLoader = adlLoader;
+    errorLoader.errorManagerItf = errorManager;
+    loader = errorLoader;
     // ensure that phases are empty.
     FooProcessor.phases = new ArrayList<ProcessParams>();
   }

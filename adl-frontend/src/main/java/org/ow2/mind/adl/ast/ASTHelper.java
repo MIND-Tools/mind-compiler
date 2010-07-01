@@ -185,6 +185,40 @@ public class ASTHelper {
     return d;
   }
 
+  /**
+   * Returns a new {@link Definition} that correspond to an unresolved
+   * definition. This kind of definition node can be used as a return value of
+   * front-end components that must return a definition but was unable to load
+   * it.
+   * 
+   * @param nodeFactory the {@link NodeFactory} to use to create the node.
+   * @param name the {@link Definition#getName() name} of the definition.
+   * @return a new {@link Definition} that correspond to an unresolved
+   *         definition.
+   * @see #isUnresolvedDefinitionNode(Definition)
+   */
+  public static Definition newUnresolvedDefinitionNode(
+      final NodeFactory nodeFactory, final String name) {
+    final MindDefinition d = newNode(nodeFactory, "unresolved",
+        MindDefinition.class);
+    d.setName(name);
+    return d;
+  }
+
+  /**
+   * Returns <code>true</code> if the given {@link Definition} does not
+   * correspond to a correct definition, but has been created by
+   * {@link #newUnresolvedDefinitionNode(NodeFactory, String)}.
+   * 
+   * @param d a definition node.
+   * @return <code>true</code> if the given {@link Definition} correspond to an
+   *         unresolved definition.
+   * @see #newUnresolvedDefinitionNode(NodeFactory, String)
+   */
+  public static boolean isUnresolvedDefinitionNode(final Definition d) {
+    return d.astGetType().equals("unresolved");
+  }
+
   // ---------------------------------------------------------------------------
   // Interface helper methods
   // ---------------------------------------------------------------------------

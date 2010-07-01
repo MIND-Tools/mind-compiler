@@ -27,6 +27,7 @@ import static org.objectweb.fractal.adl.types.TypeInterfaceUtil.isCollection;
 import static org.objectweb.fractal.adl.types.TypeInterfaceUtil.isMandatory;
 import static org.objectweb.fractal.adl.types.TypeInterfaceUtil.isServer;
 import static org.objectweb.fractal.adl.types.TypeInterfaceUtil.isSingleton;
+import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
 import static org.ow2.mind.adl.ast.ASTHelper.getNumberOfElement;
 
 import org.objectweb.fractal.adl.ADLException;
@@ -35,26 +36,42 @@ import org.objectweb.fractal.adl.bindings.BindingErrors;
 import org.objectweb.fractal.adl.error.NodeErrorLocator;
 import org.objectweb.fractal.adl.interfaces.Interface;
 import org.objectweb.fractal.adl.types.TypeInterfaceUtil;
+import org.objectweb.fractal.api.NoSuchInterfaceException;
+import org.objectweb.fractal.api.control.BindingController;
+import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.ow2.mind.adl.ADLErrors;
 import org.ow2.mind.adl.ast.Binding;
+import org.ow2.mind.error.ErrorManager;
 
-public class BasicBindingChecker implements BindingChecker {
+public class BasicBindingChecker implements BindingChecker, BindingController {
+
+  // ---------------------------------------------------------------------------
+  // Client interfaces
+  // ---------------------------------------------------------------------------
+
+  /** The {@link ErrorManager} client interface used to log errors. */
+  public ErrorManager errorManagerItf;
+
+  // ---------------------------------------------------------------------------
+  // Implementation of the BindingChecker interface
+  // ---------------------------------------------------------------------------
 
   public void checkBinding(final Interface fromInterface,
       final Interface toInterface, final Binding binding, final Node locator)
       throws ADLException {
     if (!isClient(fromInterface)) {
-      throw new ADLException(BindingErrors.INVALID_FROM_NOT_A_CLIENT, locator,
-          fromInterface.getName(), new NodeErrorLocator(fromInterface));
+      errorManagerItf
+          .logError(BindingErrors.INVALID_FROM_NOT_A_CLIENT, locator,
+              fromInterface.getName(), new NodeErrorLocator(fromInterface));
     }
     if (!isServer(toInterface)) {
-      throw new ADLException(BindingErrors.INVALID_TO_NOT_A_SERVER, locator,
+      errorManagerItf.logError(BindingErrors.INVALID_TO_NOT_A_SERVER, locator,
           toInterface.getName(), new NodeErrorLocator(toInterface));
     }
 
     if (TypeInterfaceUtil.isMandatory(fromInterface)
         && TypeInterfaceUtil.isOptional(toInterface)) {
-      throw new ADLException(BindingErrors.INVALID_MANDATORY_TO_OPTIONAL,
+      errorManagerItf.logError(BindingErrors.INVALID_MANDATORY_TO_OPTIONAL,
           locator, fromInterface.getName(), toInterface.getName());
     }
 
@@ -65,7 +82,7 @@ public class BasicBindingChecker implements BindingChecker {
 
     // only single-to-single or multi-to-multi is allowed.
     if (singleFromInterface != singleToInterface)
-      throw new ADLException(ADLErrors.INVALID_BINDING_CARDINALITY, locator);
+      errorManagerItf.logError(ADLErrors.INVALID_BINDING_CARDINALITY, locator);
 
     if (!singleFromInterface) {
       // multi-to-multi binding
@@ -75,7 +92,7 @@ public class BasicBindingChecker implements BindingChecker {
       if (fromSize > toSize) {
         // if there are more client interfaces than server interfaces
         if (isMandatory(fromInterface))
-          throw new ADLException(ADLErrors.INVALID_BINDING_COLLECTION_SIZE,
+          errorManagerItf.logError(ADLErrors.INVALID_BINDING_COLLECTION_SIZE,
               locator, fromInterface.getName(), fromSize,
               toInterface.getName(), toSize);
       }
@@ -87,22 +104,22 @@ public class BasicBindingChecker implements BindingChecker {
       final Interface subComponentInterface, final Binding binding,
       final Node locator) throws ADLException {
     if (!isServer(compositeInterface)) {
-      throw new ADLException(BindingErrors.INVALID_FROM_INTERNAL, locator,
+      errorManagerItf.logError(BindingErrors.INVALID_FROM_INTERNAL, locator,
           compositeInterface.getName(),
           new NodeErrorLocator(compositeInterface));
     }
 
     if (!isServer(subComponentInterface)) {
-      throw new ADLException(BindingErrors.INVALID_TO_NOT_A_SERVER, locator,
+      errorManagerItf.logError(BindingErrors.INVALID_TO_NOT_A_SERVER, locator,
           subComponentInterface.getName(), new NodeErrorLocator(
               subComponentInterface));
     }
 
     if (TypeInterfaceUtil.isMandatory(compositeInterface)
         && TypeInterfaceUtil.isOptional(subComponentInterface)) {
-      throw new ADLException(BindingErrors.INVALID_MANDATORY_TO_OPTIONAL,
-          locator, compositeInterface.getName(), subComponentInterface
-              .getName());
+      errorManagerItf.logError(BindingErrors.INVALID_MANDATORY_TO_OPTIONAL,
+          locator, compositeInterface.getName(),
+          subComponentInterface.getName());
     }
 
     if (binding != null) {
@@ -115,7 +132,8 @@ public class BasicBindingChecker implements BindingChecker {
 
       // only single-to-single or multi-to-multi is allowed.
       if (singleFromInterface != singleToInterface)
-        throw new ADLException(ADLErrors.INVALID_BINDING_CARDINALITY, locator);
+        errorManagerItf
+            .logError(ADLErrors.INVALID_BINDING_CARDINALITY, locator);
 
       if (!singleFromInterface) {
         assert !singleToInterface;
@@ -126,7 +144,7 @@ public class BasicBindingChecker implements BindingChecker {
           // sub-component side, so some of the interfaces of the composite side
           // can't be bound to the sub-component.
           if (isMandatory(compositeInterface))
-            throw new ADLException(ADLErrors.INVALID_BINDING_COLLECTION_SIZE,
+            errorManagerItf.logError(ADLErrors.INVALID_BINDING_COLLECTION_SIZE,
                 locator, compositeInterface.getName(), compositeSize,
                 subComponentInterface.getName(), subCompSize);
 
@@ -141,22 +159,22 @@ public class BasicBindingChecker implements BindingChecker {
       final Node locator) throws ADLException {
 
     if (!isClient(subComponentInterface)) {
-      throw new ADLException(BindingErrors.INVALID_FROM_NOT_A_CLIENT, locator,
-          subComponentInterface.getName(), new NodeErrorLocator(
+      errorManagerItf.logError(BindingErrors.INVALID_FROM_NOT_A_CLIENT,
+          locator, subComponentInterface.getName(), new NodeErrorLocator(
               subComponentInterface));
     }
 
     if (!isClient(compositeInterface)) {
-      throw new ADLException(BindingErrors.INVALID_TO_INTERNAL, locator,
+      errorManagerItf.logError(BindingErrors.INVALID_TO_INTERNAL, locator,
           compositeInterface.getName(),
           new NodeErrorLocator(compositeInterface));
     }
 
     if (TypeInterfaceUtil.isMandatory(subComponentInterface)
         && TypeInterfaceUtil.isOptional(compositeInterface)) {
-      throw new ADLException(BindingErrors.INVALID_MANDATORY_TO_OPTIONAL,
-          locator, subComponentInterface.getName(), compositeInterface
-              .getName());
+      errorManagerItf.logError(BindingErrors.INVALID_MANDATORY_TO_OPTIONAL,
+          locator, subComponentInterface.getName(),
+          compositeInterface.getName());
     }
 
     if (binding != null) {
@@ -169,7 +187,8 @@ public class BasicBindingChecker implements BindingChecker {
 
       // only single-to-single or multi-to-multi is allowed.
       if (singleFromInterface != singleToInterface)
-        throw new ADLException(ADLErrors.INVALID_BINDING_CARDINALITY, locator);
+        errorManagerItf
+            .logError(ADLErrors.INVALID_BINDING_CARDINALITY, locator);
 
       if (!singleFromInterface) {
         assert !singleToInterface;
@@ -180,7 +199,7 @@ public class BasicBindingChecker implements BindingChecker {
           // composite side, so some of the interfaces of the sub-component side
           // can't be bound to the composite.
           if (isMandatory(subComponentInterface))
-            throw new ADLException(ADLErrors.INVALID_BINDING_COLLECTION_SIZE,
+            errorManagerItf.logError(ADLErrors.INVALID_BINDING_COLLECTION_SIZE,
                 locator, subComponentInterface.getName(), subCompSize,
                 compositeInterface.getName(), compositeSize);
 
@@ -189,4 +208,46 @@ public class BasicBindingChecker implements BindingChecker {
     }
   }
 
+  // ---------------------------------------------------------------------------
+  // Implementation of the BindingController interface
+  // ---------------------------------------------------------------------------
+
+  public void bindFc(final String itfName, final Object value)
+      throws NoSuchInterfaceException, IllegalBindingException {
+    checkItfName(itfName);
+
+    if (itfName.equals(ErrorManager.ITF_NAME)) {
+      errorManagerItf = (ErrorManager) value;
+    } else {
+      throw new NoSuchInterfaceException("No client interface named '"
+          + itfName + "'");
+    }
+  }
+
+  public String[] listFc() {
+    return new String[]{ErrorManager.ITF_NAME};
+  }
+
+  public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
+    checkItfName(itfName);
+
+    if (itfName.equals(ErrorManager.ITF_NAME)) {
+      return errorManagerItf;
+    } else {
+      throw new NoSuchInterfaceException("No client interface named '"
+          + itfName + "'");
+    }
+  }
+
+  public void unbindFc(final String itfName) throws NoSuchInterfaceException,
+      IllegalBindingException {
+    checkItfName(itfName);
+
+    if (itfName.equals(ErrorManager.ITF_NAME)) {
+      errorManagerItf = null;
+    } else {
+      throw new NoSuchInterfaceException("No client interface named '"
+          + itfName + "'");
+    }
+  }
 }
