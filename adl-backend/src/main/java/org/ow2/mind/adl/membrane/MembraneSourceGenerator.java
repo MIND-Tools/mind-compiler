@@ -48,9 +48,10 @@ import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.ow2.mind.InputResourcesHelper;
 import org.ow2.mind.SourceFileWriter;
 import org.ow2.mind.adl.AbstractSourceGenerator;
+import org.ow2.mind.adl.CompilationDecorationHelper.AdditionalCompilationUnitDecoration;
 import org.ow2.mind.adl.DefinitionSourceGenerator;
 import org.ow2.mind.adl.ImplementationHeaderSourceGenerator;
-import org.ow2.mind.adl.CompilationDecorationHelper.AdditionalCompilationUnitDecoration;
+import org.ow2.mind.adl.ast.ASTHelper;
 import org.ow2.mind.adl.ast.ImplementationContainer;
 import org.ow2.mind.adl.ast.Source;
 import org.ow2.mind.adl.idl.InterfaceDefinitionDecorationHelper;
@@ -119,8 +120,8 @@ public class MembraneSourceGenerator extends AbstractSourceGenerator
     final File outputFile = outputFileLocatorItf.getCSourceOutputFile(
         outputFileName, context);
 
-    if (!inputResourceLocatorItf.isUpToDate(outputFile, InputResourcesHelper
-        .getInputResources(definition), context)) {
+    if (!inputResourceLocatorItf.isUpToDate(outputFile,
+        InputResourcesHelper.getInputResources(definition), context)) {
 
       final StringTemplate st = getInstanceOf("ComponentDefinition");
 
@@ -149,8 +150,8 @@ public class MembraneSourceGenerator extends AbstractSourceGenerator
       try {
         SourceFileWriter.writeToFile(outputFile, st.toString());
       } catch (final IOException e) {
-        throw new CompilerError(IOErrors.WRITE_ERROR, e, outputFile
-            .getAbsolutePath());
+        throw new CompilerError(IOErrors.WRITE_ERROR, e,
+            outputFile.getAbsolutePath());
       }
     }
 
@@ -166,10 +167,12 @@ public class MembraneSourceGenerator extends AbstractSourceGenerator
       } else if (sources.length > 1) {
         dependencies = new ArrayList<File>();
         for (int i = 0; i < sources.length; i++) {
-          dependencies.add(outputFileLocatorItf
-              .getCCompiledTemporaryOutputFile(
-                  ImplementationHeaderSourceGenerator.getImplHeaderFileName(
-                      definition, i), context));
+          if (!ASTHelper.isPreCompiled(sources[i])) {
+            dependencies.add(outputFileLocatorItf
+                .getCCompiledTemporaryOutputFile(
+                    ImplementationHeaderSourceGenerator.getImplHeaderFileName(
+                        definition, i), context));
+          }
         }
       }
     }

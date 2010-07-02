@@ -393,6 +393,12 @@
         <para>In the above code excerpt, the implementation of the primitive 
           component is inlined in the ADL file.</para>
       </example>
+      
+      <para>Moreover, the <code>"source"</code> keyword may be followed by a path 
+        to a pre-compiled file (<code>".o"</code>, <code>".a"</code>, <code>".so"</code>,
+        or <code>.dll</code> file). In that case, the source file will only be added on
+        the linker command. This is particularly usefull to define a component that wraps a
+        pre-compiled C library.</para>
     </section>
   </section>
   

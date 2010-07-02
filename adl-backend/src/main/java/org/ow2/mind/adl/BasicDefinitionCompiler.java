@@ -35,7 +35,9 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 
 import org.objectweb.fractal.adl.ADLException;
@@ -115,6 +117,22 @@ public class BasicDefinitionCompiler
     final Source[] sources = container.getSources();
     for (int i = 0; i < sources.length; i++) {
       final Source src = sources[i];
+
+      // check if src path refer to an already compiled file
+      if (ASTHelper.isPreCompiled(src)) {
+        // src file is already compiled
+        final File srcFile;
+        final URL srcURL = implementationLocatorItf.findSource(src.getPath(),
+            context);
+        try {
+          srcFile = new File(srcURL.toURI());
+        } catch (final URISyntaxException e) {
+          throw new CompilerError(GenericErrors.INTERNAL_ERROR, e);
+        }
+        compilationTasks.add(newFileProviderCompilerCommand(srcFile, context));
+        continue;
+      }
+
       final String implSuffix = "_impl" + i;
       final File cppFile = outputFileLocatorItf.getCSourceTemporaryOutputFile(
           fullyQualifiedNameToPath(definition.getName(), implSuffix, ".i"),
@@ -152,8 +170,8 @@ public class BasicDefinitionCompiler
         try {
           SourceFileWriter.writeToFile(srcFile, inlinedCCode);
         } catch (final IOException e) {
-          throw new CompilerError(IOErrors.WRITE_ERROR, e, srcFile
-              .getAbsolutePath());
+          throw new CompilerError(IOErrors.WRITE_ERROR, e,
+              srcFile.getAbsolutePath());
         }
       } else {
         assert src.getPath() != null;
@@ -323,6 +341,116 @@ public class BasicDefinitionCompiler
       command.addFlags(splitOptionString(definitionflags.value));
 
     return command;
+  }
+
+  protected CompilerCommand newFileProviderCompilerCommand(
+      final File outputFile, final Map<Object, Object> context) {
+    return new FileProviderCompilerCommand(outputFile, context);
+  }
+
+  protected static final class FileProviderCompilerCommand
+      implements
+        CompilerCommand {
+
+    protected final File             outputFile;
+    protected final Collection<File> outputFiles;
+
+    protected FileProviderCompilerCommand(final File outputFile,
+        final Map<Object, Object> context) {
+      this.outputFile = outputFile;
+      outputFiles = Arrays.asList(outputFile);
+    }
+
+    public String getDescription() {
+      return "Provides " + outputFile;
+    }
+
+    public void exec() throws ADLException, InterruptedException {
+      // nothing to do
+    }
+
+    public void prepare() {
+      // nothing to do
+    }
+
+    public Collection<File> getInputFiles() {
+      return Collections.emptyList();
+    }
+
+    public Collection<File> getOutputFiles() {
+      return outputFiles;
+    }
+
+    public boolean forceExec() {
+      return false;
+    }
+
+    public CompilerCommand addDebugFlag() {
+      return this;
+    }
+
+    public CompilerCommand addFlag(final String flag) {
+      return this;
+    }
+
+    public CompilerCommand addFlags(final Collection<String> flags) {
+      return this;
+    }
+
+    public CompilerCommand addFlags(final String... flags) {
+      return this;
+    }
+
+    public CompilerCommand addDefine(final String name) {
+      return this;
+    }
+
+    public CompilerCommand addDefine(final String name, final String value) {
+      return this;
+    }
+
+    public CompilerCommand addIncludeDir(final File includeDir) {
+      return this;
+    }
+
+    public CompilerCommand addIncludeFile(final File includeFile) {
+      return this;
+    }
+
+    public CompilerCommand setOptimizationLevel(final String level) {
+      return this;
+    }
+
+    public CompilerCommand setOutputFile(final File outputFile) {
+      throw new UnsupportedOperationException();
+    }
+
+    public CompilerCommand setInputFile(final File inputFile) {
+      throw new UnsupportedOperationException();
+    }
+
+    public File getOutputFile() {
+      return outputFile;
+    }
+
+    public File getInputFile() {
+      return null;
+    }
+
+    public CompilerCommand addDependency(final File dependency) {
+      throw new UnsupportedOperationException();
+    }
+
+    public CompilerCommand setAllDependenciesManaged(
+        final boolean dependencyManaged) {
+      throw new UnsupportedOperationException();
+    }
+
+    public CompilerCommand setDependencyOutputFile(
+        final File dependencyOutputFile) {
+      throw new UnsupportedOperationException();
+    }
+
   }
 
   // ---------------------------------------------------------------------------

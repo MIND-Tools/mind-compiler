@@ -183,10 +183,12 @@ public final class DependencyHelper {
     final List<File> dependencies = new ArrayList<File>();
     // Split dependency part.
     for (String dependency : DirectiveHelper.splitOptionString(parts[1])) {
+      // un-escape dollar signs.
       dependency = dependency.replace("$$", "$");
       if (dependency.length() > 0) dependencies.add(new File(dependency));
     }
     for (String target : targets) {
+      // un-escape dollar signs.
       target = target.replace("$$", "$");
       rules.put(new File(target), dependencies);
     }
