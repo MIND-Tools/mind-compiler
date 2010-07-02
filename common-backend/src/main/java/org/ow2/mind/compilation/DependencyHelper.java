@@ -187,7 +187,9 @@ public final class DependencyHelper {
       dependency = dependency.replace("$$", "$");
       if (dependency.length() > 0) dependencies.add(new File(dependency));
     }
-    for (final String target : targets) {
+    for (String target : targets) {
+      // un-escape dollar signs.
+      target = target.replace("$$", "$");
       rules.put(new File(target), dependencies);
     }
   }

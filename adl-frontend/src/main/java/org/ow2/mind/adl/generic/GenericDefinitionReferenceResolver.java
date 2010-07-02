@@ -104,8 +104,8 @@ public class GenericDefinitionReferenceResolver
   public Definition resolve(final DefinitionReference reference,
       final Definition encapsulatingDefinition,
       final Map<Object, Object> context) throws ADLException {
-    return resolve(reference, encapsulatingDefinition, getTypeParameters(
-        encapsulatingDefinition, context), context);
+    return resolve(reference, encapsulatingDefinition,
+        getTypeParameters(encapsulatingDefinition, context), context);
   }
 
   // ---------------------------------------------------------------------------
@@ -134,8 +134,8 @@ public class GenericDefinitionReferenceResolver
     if (formalTypeParameters == null || formalTypeParameters.length == 0) {
       if (typeArguments != null && typeArguments.length > 0) {
         throw new ADLException(
-            ADLErrors.INVALID_REFERENCE_NO_TEMPLATE_VARIABLE, reference, d
-                .getName());
+            ADLErrors.INVALID_REFERENCE_NO_TEMPLATE_VARIABLE, reference,
+            d.getName());
       }
     } else {
       // referenced definition has type parameter
@@ -327,8 +327,8 @@ public class GenericDefinitionReferenceResolver
             .iterator().next();
 
         throw new ADLException(
-            ADLErrors.INVALID_REFERENCE_NO_SUCH_TEMPLATE_VARIABLE, value
-                .getValue(), value.getKey());
+            ADLErrors.INVALID_REFERENCE_NO_SUCH_TEMPLATE_VARIABLE,
+            value.getValue(), value.getKey());
       }
 
       return result;
@@ -344,8 +344,8 @@ public class GenericDefinitionReferenceResolver
     for (final Interface itf : castNodeError(typeValue,
         InterfaceContainer.class).getInterfaces()) {
       if (isServer(itf)) {
-        valueServerInterfaces.put(itf.getName(), castNodeError(itf,
-            MindInterface.class));
+        valueServerInterfaces.put(itf.getName(),
+            castNodeError(itf, MindInterface.class));
       }
     }
 
@@ -359,8 +359,7 @@ public class GenericDefinitionReferenceResolver
             ADLErrors.INVALID_TEMPLATE_VALUE_MISSING_SERVER_INTERFACE, locator,
             typeValue.getName(), itf.getName());
       }
-      bindingCheckerItf.checkFromCompositeToSubcomponentBinding(itf, valueItf,
-          null, locator);
+      bindingCheckerItf.checkCompatibility(itf, valueItf, locator);
     }
 
     // checks that each client interface of typeValue is present in
@@ -369,8 +368,8 @@ public class GenericDefinitionReferenceResolver
     for (final Interface itf : castNodeError(templateType,
         InterfaceContainer.class).getInterfaces()) {
       if (isClient(itf)) {
-        templateClientInterfaces.put(itf.getName(), castNodeError(itf,
-            MindInterface.class));
+        templateClientInterfaces.put(itf.getName(),
+            castNodeError(itf, MindInterface.class));
       }
     }
 
@@ -387,8 +386,7 @@ public class GenericDefinitionReferenceResolver
               locator, valueItf.getName(), new NodeErrorLocator(valueItf));
         }
       } else {
-        bindingCheckerItf.checkFromSubcomponentToCompositeBinding(valueItf,
-            itf, null, locator);
+        bindingCheckerItf.checkCompatibility(valueItf, itf, locator);
       }
     }
     if (!templateClientInterfaces.isEmpty()) {

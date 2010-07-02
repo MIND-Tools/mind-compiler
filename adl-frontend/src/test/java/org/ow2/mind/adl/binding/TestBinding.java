@@ -31,7 +31,9 @@ import java.util.Map;
 
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.Loader;
+import org.objectweb.fractal.adl.NodeFactoryImpl;
 import org.objectweb.fractal.adl.bindings.BindingErrors;
+import org.objectweb.fractal.adl.merger.NodeMergerImpl;
 import org.objectweb.fractal.adl.xml.XMLNodeFactoryImpl;
 import org.ow2.mind.BasicInputResourceLocator;
 import org.ow2.mind.adl.ASTChecker;
@@ -46,6 +48,7 @@ import org.ow2.mind.adl.idl.BasicInterfaceSignatureResolver;
 import org.ow2.mind.adl.idl.InterfaceSignatureLoader;
 import org.ow2.mind.adl.imports.ImportDefinitionReferenceResolver;
 import org.ow2.mind.adl.imports.ImportInterfaceSignatureResolver;
+import org.ow2.mind.adl.membrane.CompositeInternalInterfaceLoader;
 import org.ow2.mind.adl.parser.ADLParser;
 import org.ow2.mind.idl.BasicIDLLocator;
 import org.ow2.mind.idl.IDLLoaderChainFactory;
@@ -68,6 +71,7 @@ public class TestBinding {
     final SubComponentResolverLoader scrl = new SubComponentResolverLoader();
     final InterfaceSignatureLoader isl = new InterfaceSignatureLoader();
     final ExtendsLoader el = new ExtendsLoader();
+    final CompositeInternalInterfaceLoader ciil = new CompositeInternalInterfaceLoader();
     final BindingNormalizerLoader bnl = new BindingNormalizerLoader();
     final BindingCheckerLoader bcl = new BindingCheckerLoader();
     final UnboundInterfaceCheckerLoader uicl = new UnboundInterfaceCheckerLoader();
@@ -76,7 +80,8 @@ public class TestBinding {
     cl.clientLoader = uicl;
     uicl.clientLoader = bcl;
     bcl.clientLoader = bnl;
-    bnl.clientLoader = el;
+    bnl.clientLoader = ciil;
+    ciil.clientLoader = el;
     el.clientLoader = isl;
     isl.clientLoader = scrl;
     scrl.clientLoader = adlLoader;
@@ -106,10 +111,15 @@ public class TestBinding {
 
     // additional components
     final BasicADLLocator adlLocator = new BasicADLLocator();
-    final XMLNodeFactoryImpl nodeFactory = new XMLNodeFactoryImpl();
+    final XMLNodeFactoryImpl xmlNodeFactory = new XMLNodeFactoryImpl();
+    final NodeFactoryImpl nodeFactory = new NodeFactoryImpl();
+    final NodeMergerImpl nodeMerger = new NodeMergerImpl();
 
     adlLoader.adlLocatorItf = adlLocator;
-    adlLoader.nodeFactoryItf = nodeFactory;
+    adlLoader.nodeFactoryItf = xmlNodeFactory;
+    ciil.nodeFactoryItf = nodeFactory;
+    ciil.nodeMergerItf = nodeMerger;
+
     idrr.adlLocatorItf = adlLocator;
 
     final BasicInterfaceSignatureResolver bisr = new BasicInterfaceSignatureResolver();

@@ -88,7 +88,7 @@ public final class NameHelper {
       if (!isValid(defName))
         throw new IllegalArgumentException("Name \"" + defName
             + "\" is not a valid name.");
-      return defName + "_tmpl_" + Integer.toHexString(tmplValues.hashCode());
+      name = defName + "_tmpl_" + Integer.toHexString(tmplValues.hashCode());
     }
     i = name.indexOf('$');
     if (i >= 0) {

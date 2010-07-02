@@ -27,12 +27,8 @@ import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
 
 import java.util.Map;
 
-import org.objectweb.fractal.adl.CompilerError;
 import org.objectweb.fractal.adl.Definition;
-import org.objectweb.fractal.adl.Node;
 import org.objectweb.fractal.adl.NodeFactory;
-import org.objectweb.fractal.adl.error.GenericErrors;
-import org.objectweb.fractal.adl.merger.MergeException;
 import org.objectweb.fractal.adl.merger.NodeMerger;
 import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.fractal.api.control.IllegalBindingException;
@@ -43,6 +39,7 @@ import org.ow2.mind.adl.ast.ComponentContainer;
 import org.ow2.mind.adl.ast.DefinitionReference;
 import org.ow2.mind.adl.generic.ast.FormalTypeParameter;
 import org.ow2.mind.adl.generic.ast.FormalTypeParameterContainer;
+import org.ow2.mind.adl.generic.ast.GenericASTHelper;
 import org.ow2.mind.adl.generic.ast.TypeArgument;
 import org.ow2.mind.adl.generic.ast.TypeArgumentContainer;
 
@@ -85,7 +82,9 @@ public class GenericAnonymousDefinitionExtractor
         // Adds formal type parameters of encapsulating definition to anonymous
         // definition.
 
-        final FormalTypeParameterContainer subCompTypeParams = turnsToTypeParamContainer(anonymousDefinition);
+        final FormalTypeParameterContainer subCompTypeParams = GenericASTHelper
+            .turnsToFormalTypeParameterContainer(anonymousDefinition,
+                nodeFactoryItf, nodeMergerItf);
         anonymousDefinition = (Definition) subCompTypeParams;
 
         for (final FormalTypeParameter typeParameter : typeParameters) {
@@ -93,12 +92,14 @@ public class GenericAnonymousDefinitionExtractor
         }
 
         // Add corresponding type arguments to definition reference.
-        final TypeArgumentContainer defRefArgs = turnsToTypeArgumentContainer(component
-            .getDefinitionReference());
+        final TypeArgumentContainer defRefArgs = GenericASTHelper
+            .turnsToTypeArgumentContainer(component.getDefinitionReference(),
+                nodeFactoryItf, nodeMergerItf);
         component.setDefinitionReference((DefinitionReference) defRefArgs);
 
         for (final FormalTypeParameter typeParameter : typeParameters) {
-          final TypeArgument arg = newTypeArgumentNode();
+          final TypeArgument arg = GenericASTHelper
+              .newTypeArgument(nodeFactoryItf);
           arg.setTypeParameterName(typeParameter.getName());
           arg.setTypeParameterReference(typeParameter.getName());
           defRefArgs.addTypeArgument(arg);
@@ -107,55 +108,6 @@ public class GenericAnonymousDefinitionExtractor
     }
 
     return anonymousDefinition;
-  }
-
-  protected FormalTypeParameterContainer turnsToTypeParamContainer(
-      final Node node) {
-    if (node instanceof FormalTypeParameterContainer)
-      return (FormalTypeParameterContainer) node;
-
-    // the given node does not implements FormalParameterContainer.
-    // Create a node that implements it and merge it with the given node.
-    try {
-      final Node n = nodeFactoryItf.newNode(node.astGetType(),
-          FormalTypeParameterContainer.class.getName());
-      return (FormalTypeParameterContainer) nodeMergerItf.merge(node, n, null);
-    } catch (final ClassNotFoundException e) {
-      throw new CompilerError(GenericErrors.INTERNAL_ERROR, e,
-          "Node factory error");
-    } catch (final MergeException e) {
-      throw new CompilerError(GenericErrors.INTERNAL_ERROR, e,
-          "Node merge error");
-    }
-  }
-
-  protected TypeArgumentContainer turnsToTypeArgumentContainer(final Node node) {
-    if (node instanceof TypeArgumentContainer)
-      return (TypeArgumentContainer) node;
-
-    // the given node does not implements ArgumentContainer.
-    // Create a node that implements it and merge it with the given node.
-    try {
-      final Node n = nodeFactoryItf.newNode(node.astGetType(),
-          TypeArgumentContainer.class.getName());
-      return (TypeArgumentContainer) nodeMergerItf.merge(node, n, null);
-    } catch (final ClassNotFoundException e) {
-      throw new CompilerError(GenericErrors.INTERNAL_ERROR, e,
-          "Node factory error");
-    } catch (final MergeException e) {
-      throw new CompilerError(GenericErrors.INTERNAL_ERROR, e,
-          "Node merge error");
-    }
-  }
-
-  protected TypeArgument newTypeArgumentNode() {
-    try {
-      return (TypeArgument) nodeFactoryItf.newNode("argument",
-          TypeArgument.class.getName());
-    } catch (final ClassNotFoundException e) {
-      throw new CompilerError(GenericErrors.INTERNAL_ERROR, e,
-          "Node factory error");
-    }
   }
 
   // ---------------------------------------------------------------------------

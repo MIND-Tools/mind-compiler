@@ -547,6 +547,33 @@ public class ASTHelper {
     return newNode(nodeFactory, "binding", Binding.class);
   }
 
+  public static final String FROM_COMPOSITE_CONTROLLER_DECORATION = "from-composite-controller";
+
+  public static void setFromCompositeControllerDecoration(
+      final Binding binding, final boolean b) {
+    binding.astSetDecoration(FROM_COMPOSITE_CONTROLLER_DECORATION, b);
+  }
+
+  public static boolean isFromCompositeControllerDecoration(
+      final Binding binding) {
+    final Boolean b = (Boolean) binding
+        .astGetDecoration(FROM_COMPOSITE_CONTROLLER_DECORATION);
+    return b != null && b;
+  }
+
+  public static final String TO_COMPOSITE_CONTROLLER_DECORATION = "to-composite-controller";
+
+  public static void setToCompositeControllerDecoration(final Binding binding,
+      final boolean b) {
+    binding.astSetDecoration(TO_COMPOSITE_CONTROLLER_DECORATION, b);
+  }
+
+  public static boolean isToCompositeControllerDecoration(final Binding binding) {
+    final Boolean b = (Boolean) binding
+        .astGetDecoration(TO_COMPOSITE_CONTROLLER_DECORATION);
+    return b != null && b;
+  }
+
   // ---------------------------------------------------------------------------
   // Implementation helper methods
   // ---------------------------------------------------------------------------
