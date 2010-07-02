@@ -109,9 +109,12 @@ public class BasicInstanceCompiler
       } else if (sources.length > 1) {
         dependencies = new ArrayList<File>();
         for (int i = 0; i < sources.length; i++) {
-          dependencies.add(outputFileLocatorItf.getCSourceTemporaryOutputFile(
-              ImplementationHeaderSourceGenerator.getImplHeaderFileName(
-                  instanceDesc.instanceDefinition, i), context));
+          if (!ASTHelper.isPreCompiled(sources[i])) {
+            dependencies.add(outputFileLocatorItf
+                .getCSourceTemporaryOutputFile(
+                    ImplementationHeaderSourceGenerator.getImplHeaderFileName(
+                        instanceDesc.instanceDefinition, i), context));
+          }
         }
       }
     }

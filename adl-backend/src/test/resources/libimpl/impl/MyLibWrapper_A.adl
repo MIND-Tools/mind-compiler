@@ -1,0 +1,5 @@
+
+primitive impl.MyLibWrapper_A extends MyLibType {
+  source myLibWrapper.c;
+  source myLib.a;
+}

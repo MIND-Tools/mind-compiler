@@ -46,6 +46,9 @@ struct __component_InternalServerItfDescriptor {
 #define __COMPONENT_INIT_INTERNAL_SERVER_ITF_DESCRIPTOR(typeName, itfName) \
   {#itfName, ((intptr_t) &(((typeName *) 0x0)->__component_internal_data.inner_type.itfName))}
 
+#define __COMPONENT_INIT_CONTROLLER_SERVER_ITF_DESCRIPTOR(typeName, itfName) \
+  {#itfName, ((intptr_t) &(((typeName *) 0x0)->__component_internal_data.type.itfName))}
+
 struct __component_InternalItfsDescriptor {
   int nbClientInterface;
   struct __component_InternalClientItfDescriptor *clientInterfaces;

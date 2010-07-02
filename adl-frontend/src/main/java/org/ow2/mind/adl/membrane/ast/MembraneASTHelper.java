@@ -27,6 +27,7 @@ import static org.ow2.mind.CommonASTHelper.turnsTo;
 
 import org.objectweb.fractal.adl.Node;
 import org.objectweb.fractal.adl.NodeFactory;
+import org.objectweb.fractal.adl.interfaces.Interface;
 import org.objectweb.fractal.adl.merger.NodeMerger;
 import org.ow2.mind.adl.ast.Data;
 import org.ow2.mind.adl.ast.MindInterface;
@@ -50,6 +51,27 @@ public final class MembraneASTHelper {
   public static boolean isInternalInterface(final ControllerInterface itf) {
     return itf.getIsInternal() != null
         && ControllerInterface.TRUE.equals(itf.getIsInternal());
+  }
+
+  /**
+   * Returns the internal interface node contained by the given container and
+   * having the given name.
+   * 
+   * @param itfContainer a container.
+   * @param name the name of the internal interface to return.
+   * @return the internal interface node contained by the given container and
+   *         having the given name, or <code>null</code> if the given container
+   *         is not an {@link InternalInterfaceContainer} or does not contain an
+   *         interface with the given name.
+   */
+  public static Interface getInternalInterface(final Node itfContainer,
+      final String name) {
+    if (!(itfContainer instanceof InternalInterfaceContainer)) return null;
+    for (final Interface itf : ((InternalInterfaceContainer) itfContainer)
+        .getInternalInterfaces()) {
+      if (name.equals(itf.getName())) return itf;
+    }
+    return null;
   }
 
   /**

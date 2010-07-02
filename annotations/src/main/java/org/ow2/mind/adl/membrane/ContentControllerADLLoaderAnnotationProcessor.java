@@ -25,8 +25,10 @@ package org.ow2.mind.adl.membrane;
 import java.util.Map;
 
 import org.objectweb.fractal.adl.ADLException;
+import org.objectweb.fractal.adl.CompilerError;
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.Node;
+import org.objectweb.fractal.adl.error.GenericErrors;
 import org.objectweb.fractal.adl.interfaces.Interface;
 import org.objectweb.fractal.adl.interfaces.InterfaceContainer;
 import org.objectweb.fractal.adl.types.TypeInterface;
@@ -39,6 +41,10 @@ import org.ow2.mind.adl.ast.ASTHelper;
 import org.ow2.mind.adl.ast.Component;
 import org.ow2.mind.adl.ast.ComponentContainer;
 import org.ow2.mind.adl.idl.InterfaceDefinitionDecorationHelper;
+import org.ow2.mind.adl.membrane.ast.Controller;
+import org.ow2.mind.adl.membrane.ast.ControllerContainer;
+import org.ow2.mind.adl.membrane.ast.ControllerInterface;
+import org.ow2.mind.adl.membrane.ast.MembraneASTHelper;
 import org.ow2.mind.annotation.Annotation;
 import org.ow2.mind.idl.ast.InterfaceDefinition;
 
@@ -54,6 +60,18 @@ public class ContentControllerADLLoaderAnnotationProcessor
 
   public Definition processAnnotation(final Annotation annotation,
       final Node node, final Definition definition, final ADLLoaderPhase phase,
+      final Map<Object, Object> context) throws ADLException {
+    if (phase == ADLLoaderPhase.AFTER_EXTENDS) {
+      return addContentController(definition, context);
+    } else if (phase == ADLLoaderPhase.AFTER_CHECKING) {
+      return addControllerInterfaceDecorations(definition, context);
+    } else {
+      throw new CompilerError(GenericErrors.INTERNAL_ERROR,
+          "ADL Annotation processor executed at unexpected phase + " + phase);
+    }
+  }
+
+  protected Definition addContentController(final Definition definition,
       final Map<Object, Object> context) throws ADLException {
     if (!(definition instanceof ComponentContainer)) {
       throw new ADLException(
@@ -88,6 +106,27 @@ public class ContentControllerADLLoaderAnnotationProcessor
 
     return addControllerInterface(definition, CC, CONTENT_CONTROLLER_SIGNATURE,
         "ContentController", "/fractal/internal/CCdelegate.c");
+  }
+
+  protected Definition addControllerInterfaceDecorations(
+      final Definition definition, final Map<Object, Object> context) {
+    if (!(definition instanceof ControllerContainer)) {
+      return null;
+    }
+    for (final Controller controller : ((ControllerContainer) definition)
+        .getControllers()) {
+      for (final ControllerInterface ctrlItf : controller
+          .getControllerInterfaces()) {
+        if (!MembraneASTHelper.isInternalInterface(ctrlItf)) {
+          final Interface itf = ASTHelper.getInterface(definition,
+              ctrlItf.getName());
+          if (itf != null && TypeInterfaceUtil.isServer(itf)) {
+            itf.astSetDecoration("controller-interface", Boolean.TRUE);
+          }
+        }
+      }
+    }
+    return null;
   }
 
   protected void addUsedIDL(final Definition definition, final String idlName,
