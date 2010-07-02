@@ -148,7 +148,7 @@ __COMPONENT_INIT_INTERNAL_CLIENT_ITF_DESCRIPTOR(<ComponentTypeName(definitionNam
 initInternalServerItfDescriptor(definition, itf) ::= <<
 <if (isServer.(itf.role))>
 <if (itf.numberOfElement)>
-<itf.astDecorations.("collectionIndexes"):initInternalserverItfDescriptor1(definition=definition, itf=itf, index=it);separator=",\n">,
+<itf.astDecorations.("collectionIndexes"):initInternalServerItfDescriptor1(definition=definition, itf=itf, index=it);separator=",\n">,
 <else>
 <initInternalServerItfDescriptor1(definition=definition, itf=itf)>,
 <endif>
