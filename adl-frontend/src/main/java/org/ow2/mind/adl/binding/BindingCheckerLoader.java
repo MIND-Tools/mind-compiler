@@ -30,7 +30,9 @@ import static org.ow2.mind.adl.ast.ASTHelper.getResolvedComponentDefinition;
 import static org.ow2.mind.adl.ast.Binding.THIS_COMPONENT;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.AbstractLoader;
@@ -109,17 +111,20 @@ public class BindingCheckerLoader extends AbstractLoader {
       componentItfs.put(itf.getName(), itf);
     }
     // then add server interfaces of controllers
-    final Controller[] controllers = castNodeError(container,
-        ControllerContainer.class).getControllers();
-    for (final Controller controller : controllers) {
-      for (final ControllerInterface ctrlItf : controller
-          .getControllerInterfaces()) {
-        if (!componentItfs.containsKey(ctrlItf.getName())
-            && !MembraneASTHelper.isInternalInterface(ctrlItf)) {
-          final Interface itf = ASTHelper.getInterface(container,
-              ctrlItf.getName());
-          if (itf != null) {
-            componentItfs.put(ctrlItf.getName(), itf);
+    final Set<Interface> controllerItfs = new HashSet<Interface>();
+    if (container instanceof ControllerContainer) {
+      for (final Controller controller : ((ControllerContainer) container)
+          .getControllers()) {
+        for (final ControllerInterface ctrlItf : controller
+            .getControllerInterfaces()) {
+          if (!componentItfs.containsKey(ctrlItf.getName())
+              && !MembraneASTHelper.isInternalInterface(ctrlItf)) {
+            final Interface itf = ASTHelper.getInterface(container,
+                ctrlItf.getName());
+            if (itf != null) {
+              componentItfs.put(ctrlItf.getName(), itf);
+              controllerItfs.add(itf);
+            }
           }
         }
       }
@@ -137,9 +142,17 @@ public class BindingCheckerLoader extends AbstractLoader {
       if (THIS_COMPONENT.equals(binding.getFromComponent())) {
         bindingCheckerItf.checkFromCompositeToSubcomponentBinding(from, to,
             binding, binding);
+        if (controllerItfs.contains(from)) {
+          // From itf is a controller interface
+          ASTHelper.setFromCompositeControllerDecoration(binding, true);
+        }
       } else if (THIS_COMPONENT.equals(binding.getToComponent())) {
         bindingCheckerItf.checkFromSubcomponentToCompositeBinding(from, to,
             binding, binding);
+        if (controllerItfs.contains(to)) {
+          // To itf is a controller interface
+          ASTHelper.setToCompositeControllerDecoration(binding, true);
+        }
       } else {
         bindingCheckerItf.checkBinding(from, to, binding, binding);
       }

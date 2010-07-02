@@ -246,9 +246,35 @@ InitializeBindings(definition) ::= <<
 
 InitializeBinding(definition, binding) ::= <<
   /* initialize binding from <binding.fromComponent>.<binding.fromInterface> to <binding.toComponent>.<binding.toInterface> */
-  newInstance->__component_internal_data.<if (isThis.(binding.fromComponent))>inner_type<else>components.<binding.fromComponent>->__component_internal_data.type<endif>.<binding.fromInterface><if(binding.fromInterfaceNumber)>[<binding.fromInterfaceNumber>]<endif> = 
-    & newInstance->__component_internal_data.<if (isThis.(binding.toComponent))>inner_type<else>components.<binding.toComponent>->__component_internal_data.type<endif>.<binding.toInterface><if(binding.toInterfaceNumber)>[<binding.toInterfaceNumber>]<endif>;
+  newInstance->__component_internal_data.<FromItfContainer(binding=binding)>.<binding.fromInterface><if(binding.fromInterfaceNumber)>[<binding.fromInterfaceNumber>]<endif> = 
+    & newInstance->__component_internal_data.<ToItfContainer(binding=binding)>.<binding.toInterface><if(binding.toInterfaceNumber)>[<binding.toInterfaceNumber>]<endif>;
 >>
+
+FromItfContainer(binding) ::= <<
+<if (isThis.(binding.fromComponent))>
+<if (binding.astDecorations.("from-composite-controller"))>
+type
+<else>
+inner_type
+<endif>
+<else>
+components.<binding.fromComponent>->__component_internal_data.type
+<endif>
+>>
+
+ToItfContainer(binding) ::= <<
+<if (isThis.(binding.toComponent))>
+<if (binding.astDecorations.("to-composite-controller"))>
+type
+<else>
+inner_type
+<endif>
+<else>
+components.<binding.toComponent>->__component_internal_data.type
+<endif>
+>>
+
+
 
 InitializeAttributes(definition) ::= <<
 <if (definition.astNodeTypes.("attribute"))>
