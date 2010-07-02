@@ -105,10 +105,11 @@ public class BindingCheckerLoader extends AbstractLoader {
     final Map<String, Interface> componentItfs = new HashMap<String, Interface>();
     subComponentInterfaces.put(null, componentItfs);
     // first add internal interfaces
-    final Interface[] interfaces = castNodeError(container,
-        InternalInterfaceContainer.class).getInternalInterfaces();
-    for (final Interface itf : interfaces) {
-      componentItfs.put(itf.getName(), itf);
+    if (container instanceof InternalInterfaceContainer) {
+      for (final Interface itf : ((InternalInterfaceContainer) container)
+          .getInternalInterfaces()) {
+        componentItfs.put(itf.getName(), itf);
+      }
     }
     // then add server interfaces of controllers
     final Set<Interface> controllerItfs = new HashSet<Interface>();

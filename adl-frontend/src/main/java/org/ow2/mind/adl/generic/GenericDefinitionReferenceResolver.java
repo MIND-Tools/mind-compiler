@@ -386,8 +386,7 @@ public class GenericDefinitionReferenceResolver
               locator, valueItf.getName(), new NodeErrorLocator(valueItf));
         }
       } else {
-        bindingCheckerItf.checkFromSubcomponentToCompositeBinding(valueItf,
-            itf, null, locator);
+        bindingCheckerItf.checkCompatibility(valueItf, itf, locator);
       }
     }
     if (!templateClientInterfaces.isEmpty()) {
