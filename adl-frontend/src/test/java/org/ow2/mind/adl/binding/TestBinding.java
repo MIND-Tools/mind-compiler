@@ -142,8 +142,8 @@ public class TestBinding {
     final ImportInterfaceSignatureResolver iisr = new ImportInterfaceSignatureResolver();
     final IDLLocator idlLocator = new BasicIDLLocator();
     iisr.clientResolverItf = bisr;
-    bisr.idlLoaderItf = IDLLoaderChainFactory.newLoader(idlLocator,
-        new BasicInputResourceLocator());
+    bisr.idlLoaderItf = IDLLoaderChainFactory.newLoader(errorManager,
+        idlLocator, new BasicInputResourceLocator());
     iisr.idlLocatorItf = idlLocator;
     isl.interfaceSignatureResolverItf = iisr;
 

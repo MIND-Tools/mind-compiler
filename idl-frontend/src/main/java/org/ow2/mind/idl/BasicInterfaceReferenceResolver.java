@@ -29,12 +29,14 @@ import java.util.Map;
 
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.CompilerError;
-import org.objectweb.fractal.adl.error.ChainedErrorLocator;
+import org.objectweb.fractal.adl.NodeFactory;
 import org.objectweb.fractal.adl.error.GenericErrors;
 import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.fractal.api.control.BindingController;
 import org.objectweb.fractal.api.control.IllegalBindingException;
+import org.ow2.mind.error.ErrorManager;
 import org.ow2.mind.idl.ast.IDL;
+import org.ow2.mind.idl.ast.IDLASTHelper;
 import org.ow2.mind.idl.ast.InterfaceDefinition;
 
 public class BasicInterfaceReferenceResolver
@@ -45,6 +47,12 @@ public class BasicInterfaceReferenceResolver
   // ---------------------------------------------------------------------------
   // Client interfaces
   // ---------------------------------------------------------------------------
+
+  /** The {@link ErrorManager} client interface used to log errors. */
+  public ErrorManager       errorManagerItf;
+
+  /** The {@link NodeFactory} client interface used by this component. */
+  public NodeFactory        nodeFactoryItf;
 
   /** The {@link RecursiveIDLLoader} interface used to load referenced IDLs. */
   public RecursiveIDLLoader recursiveIdlLoaderItf;
@@ -61,8 +69,13 @@ public class BasicInterfaceReferenceResolver
     try {
       itf = recursiveIdlLoaderItf.load(encapsulatingIDL, itfName, context);
     } catch (final ADLException e) {
-      ChainedErrorLocator.chainLocator(e, encapsulatingIDL);
-      throw e;
+      // Log an error only if the exception is IDL_NOT_FOUND
+      if (e.getError().getTemplate() == IDLErrors.IDL_NOT_FOUND) {
+        errorManagerItf.logError(IDLErrors.IDL_NOT_FOUND, encapsulatingIDL,
+            itfName);
+      }
+      return IDLASTHelper.newUnresolvedInterfaceDefinitionNode(nodeFactoryItf,
+          itfName);
     }
     if (!(itf instanceof InterfaceDefinition)) {
       throw new CompilerError(GenericErrors.INTERNAL_ERROR,
@@ -79,7 +92,11 @@ public class BasicInterfaceReferenceResolver
       throws NoSuchInterfaceException, IllegalBindingException {
     checkItfName(itfName);
 
-    if (itfName.equals(RecursiveIDLLoader.ITF_NAME)) {
+    if (ErrorManager.ITF_NAME.equals(itfName)) {
+      errorManagerItf = (ErrorManager) value;
+    } else if (NodeFactory.ITF_NAME.equals(itfName)) {
+      nodeFactoryItf = (NodeFactory) value;
+    } else if (itfName.equals(RecursiveIDLLoader.ITF_NAME)) {
       recursiveIdlLoaderItf = (RecursiveIDLLoader) value;
     } else {
       throw new NoSuchInterfaceException("No client interface named '"
@@ -89,13 +106,18 @@ public class BasicInterfaceReferenceResolver
   }
 
   public String[] listFc() {
-    return listFcHelper(RecursiveIDLLoader.ITF_NAME);
+    return listFcHelper(ErrorManager.ITF_NAME, NodeFactory.ITF_NAME,
+        RecursiveIDLLoader.ITF_NAME);
   }
 
   public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
     checkItfName(itfName);
 
-    if (itfName.equals(RecursiveIDLLoader.ITF_NAME)) {
+    if (ErrorManager.ITF_NAME.equals(itfName)) {
+      return errorManagerItf;
+    } else if (NodeFactory.ITF_NAME.equals(itfName)) {
+      return nodeFactoryItf;
+    } else if (itfName.equals(RecursiveIDLLoader.ITF_NAME)) {
       return recursiveIdlLoaderItf;
     } else {
       throw new NoSuchInterfaceException("No client interface named '"
@@ -107,7 +129,11 @@ public class BasicInterfaceReferenceResolver
       IllegalBindingException {
     checkItfName(itfName);
 
-    if (itfName.equals(RecursiveIDLLoader.ITF_NAME)) {
+    if (ErrorManager.ITF_NAME.equals(itfName)) {
+      errorManagerItf = null;
+    } else if (NodeFactory.ITF_NAME.equals(itfName)) {
+      nodeFactoryItf = null;
+    } else if (itfName.equals(RecursiveIDLLoader.ITF_NAME)) {
       recursiveIdlLoaderItf = null;
     } else {
       throw new NoSuchInterfaceException("No client interface named '"

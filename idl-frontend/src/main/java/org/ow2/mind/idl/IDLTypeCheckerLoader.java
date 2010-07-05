@@ -25,10 +25,10 @@ package org.ow2.mind.idl;
 import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
 import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
 
+import java.net.URL;
 import java.util.Map;
 
 import org.objectweb.fractal.adl.ADLException;
-import org.objectweb.fractal.adl.error.ChainedErrorLocator;
 import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.ow2.mind.idl.ast.ArrayOf;
@@ -56,6 +56,12 @@ public class IDLTypeCheckerLoader extends AbstractIDLLoader {
    * to resolve extended interfaces.
    */
   public InterfaceReferenceResolver interfaceReferenceResolverItf;
+
+  /**
+   * The {@link IDLLocator} client interface used to locate IDL source files to
+   * parse.
+   */
+  public IDLLocator                 idlLocatorItf;
 
   // ---------------------------------------------------------------------------
   // Implementation of the IDLLocator interface
@@ -98,14 +104,11 @@ public class IDLTypeCheckerLoader extends AbstractIDLLoader {
   protected void checkType(final IDL idl, final Type type,
       final Map<Object, Object> context) throws ADLException {
     if (type instanceof TypeDefReference) {
-      try {
-        interfaceReferenceResolverItf.resolve(((TypeDefReference) type)
-            .getName(), idl, context);
-      } catch (final ADLException e) {
-        if (e.getError().getTemplate() != IDLErrors.IDL_NOT_FOUND) {
-          ChainedErrorLocator.chainLocator(e, type);
-          throw e;
-        } // else ignore (the typedefRef is not referencing an interface.
+      final URL itf = idlLocatorItf.findSourceItf(
+          ((TypeDefReference) type).getName(), context);
+      if (itf != null) {
+        interfaceReferenceResolverItf.resolve(
+            ((TypeDefReference) type).getName(), idl, context);
       }
     } else if (type instanceof MemberContainer) {
       for (final Member member : ((MemberContainer) type).getMembers()) {
@@ -128,6 +131,8 @@ public class IDLTypeCheckerLoader extends AbstractIDLLoader {
 
     if (itfName.equals(InterfaceReferenceResolver.ITF_NAME)) {
       interfaceReferenceResolverItf = (InterfaceReferenceResolver) value;
+    } else if (itfName.equals(IDLLocator.ITF_NAME)) {
+      idlLocatorItf = (IDLLocator) value;
     } else {
       super.bindFc(itfName, value);
     }
@@ -136,7 +141,8 @@ public class IDLTypeCheckerLoader extends AbstractIDLLoader {
 
   @Override
   public String[] listFc() {
-    return listFcHelper(super.listFc(), InterfaceReferenceResolver.ITF_NAME);
+    return listFcHelper(super.listFc(), InterfaceReferenceResolver.ITF_NAME,
+        IDLLocator.ITF_NAME);
   }
 
   @Override
@@ -145,6 +151,8 @@ public class IDLTypeCheckerLoader extends AbstractIDLLoader {
 
     if (itfName.equals(InterfaceReferenceResolver.ITF_NAME)) {
       return interfaceReferenceResolverItf;
+    } else if (itfName.equals(IDLLocator.ITF_NAME)) {
+      return idlLocatorItf;
     } else {
       return super.lookupFc(itfName);
     }
@@ -157,6 +165,8 @@ public class IDLTypeCheckerLoader extends AbstractIDLLoader {
 
     if (itfName.equals(InterfaceReferenceResolver.ITF_NAME)) {
       interfaceReferenceResolverItf = null;
+    } else if (itfName.equals(IDLLocator.ITF_NAME)) {
+      idlLocatorItf = null;
     } else {
       super.unbindFc(itfName);
     }

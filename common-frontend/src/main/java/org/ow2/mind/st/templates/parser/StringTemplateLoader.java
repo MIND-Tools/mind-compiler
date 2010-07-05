@@ -32,6 +32,7 @@ import java.util.Map;
 
 import org.objectweb.fractal.adl.ADLErrors;
 import org.objectweb.fractal.adl.ADLException;
+import org.objectweb.fractal.adl.CompilerError;
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.Loader;
 import org.objectweb.fractal.adl.error.BasicErrorLocator;
@@ -74,17 +75,17 @@ public class StringTemplateLoader implements Loader, BindingController {
     try {
       tc = readTemplate(templateFile);
     } catch (final IOException e) {
-      throw new ADLException(ADLErrors.IO_ERROR, e, templateFile.getPath());
+      throw new CompilerError(ADLErrors.IO_ERROR, e, templateFile.getPath());
     } catch (final ParseException e) {
       final ErrorLocator locator = new BasicErrorLocator(
           templateFile.getPath(), e.currentToken.beginLine,
           e.currentToken.beginColumn);
-      throw new ADLException(ADLErrors.PARSE_ERROR, locator, e.getMessage());
+      throw new CompilerError(ADLErrors.PARSE_ERROR, locator, e.getMessage());
     }
 
     if (!tc.getName().equals(name)) {
-      throw new ADLException(ADLErrors.WRONG_DEFINITION_NAME, tc, name, tc
-          .getName());
+      throw new CompilerError(ADLErrors.WRONG_DEFINITION_NAME, tc, name,
+          tc.getName());
     }
 
     String content = tc.getContent();

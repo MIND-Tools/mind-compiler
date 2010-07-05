@@ -28,6 +28,7 @@ import static org.ow2.mind.idl.IDLLocator.ITF_RESOURCE_KIND;
 import org.ow2.mind.BasicInputResourceLocator;
 import org.ow2.mind.InputResourceLocator;
 import org.ow2.mind.annotation.AnnotationChainFactory;
+import org.ow2.mind.error.ErrorManager;
 import org.ow2.mind.idl.annotation.AnnotationLoader;
 import org.ow2.mind.idl.annotation.AnnotationProcessorLoader;
 import org.ow2.mind.idl.annotation.IDLLoaderPhase;
@@ -50,13 +51,15 @@ public final class IDLLoaderChainFactory {
     return idlLocator;
   }
 
-  public static IDLLoader newLoader() {
+  public static IDLLoader newLoader(final ErrorManager errorManager) {
     final BasicInputResourceLocator inputResourceLocator = new BasicInputResourceLocator();
 
-    return newLoader(newIDLLocator(inputResourceLocator), inputResourceLocator);
+    return newLoader(errorManager, newIDLLocator(inputResourceLocator),
+        inputResourceLocator);
   }
 
-  public static IDLLoader newLoader(final IDLLocator idlLocator,
+  public static IDLLoader newLoader(final ErrorManager errorManager,
+      final IDLLocator idlLocator,
       final InputResourceLocator inputResourceLocator) {
 
     // Loader chain components
@@ -84,6 +87,18 @@ public final class IDLLoaderChainFactory {
     eil.clientIDLLoaderItf = apl1;
     apl1.clientIDLLoaderItf = al;
     al.clientIDLLoaderItf = ifl;
+
+    ifl.errorManagerItf = errorManager;
+    al.errorManagerItf = errorManager;
+    apl1.errorManagerItf = errorManager;
+    uil.errorManagerItf = errorManager;
+    eil.errorManagerItf = errorManager;
+    tcl.errorManagerItf = errorManager;
+    kdl.errorManagerItf = errorManager;
+    apl2.errorManagerItf = errorManager;
+    bil.errorManagerItf = errorManager;
+    hl.errorManagerItf = errorManager;
+    cil.errorManagerItf = errorManager;
 
     apl1.setPhase(IDLLoaderPhase.AFTER_PARSING.name());
     apl2.setPhase(IDLLoaderPhase.AFTER_CHECKING.name());
@@ -115,6 +130,9 @@ public final class IDLLoaderChainFactory {
 
     uil.idlResolverItf = includeResolver;
 
+    bir.errorManagerItf = errorManager;
+    ihr.errorManagerItf = errorManager;
+
     // Interface Reference Resolver
     InterfaceReferenceResolver interfaceReferenceResolver;
     final BasicInterfaceReferenceResolver birr = new BasicInterfaceReferenceResolver();
@@ -131,6 +149,9 @@ public final class IDLLoaderChainFactory {
 
     ifl.idlLocatorItf = idlLocator;
     bil.idlLocatorItf = idlLocator;
+    tcl.idlLocatorItf = idlLocator;
+
+    birr.errorManagerItf = errorManager;
 
     // node factories
     final XMLSTNodeFactoryImpl xnf = new XMLSTNodeFactoryImpl();
@@ -139,6 +160,9 @@ public final class IDLLoaderChainFactory {
     final STNodeFactoryImpl nf = new STNodeFactoryImpl();
     ifl.nodeFactoryItf = xnf;
     hl.nodeFactoryItf = nf;
+    ihr.nodeFactoryItf = nf;
+    bir.nodeFactoryItf = nf;
+    birr.nodeFactoryItf = nf;
     ihr.nodeFactoryItf = nf;
 
     bil.inputResourceLocatorItf = inputResourceLocator;

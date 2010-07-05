@@ -31,11 +31,12 @@ import java.net.URL;
 import java.util.Map;
 
 import org.objectweb.fractal.adl.ADLException;
-import org.objectweb.fractal.adl.error.ChainedErrorLocator;
+import org.objectweb.fractal.adl.NodeFactory;
 import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.fractal.api.control.BindingController;
 import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.ow2.mind.PathHelper;
+import org.ow2.mind.error.ErrorManager;
 import org.ow2.mind.idl.ast.IDL;
 import org.ow2.mind.idl.ast.IDLASTHelper;
 import org.ow2.mind.idl.ast.Include;
@@ -45,6 +46,12 @@ public class BasicIncludeResolver implements IncludeResolver, BindingController 
   // ---------------------------------------------------------------------------
   // Client interfaces
   // ---------------------------------------------------------------------------
+
+  /** The {@link ErrorManager} client interface used to log errors. */
+  public ErrorManager       errorManagerItf;
+
+  /** The {@link NodeFactory} client interface used by this component. */
+  public NodeFactory        nodeFactoryItf;
 
   /** The {@link RecursiveIDLLoader} interface used to load referenced IDLs. */
   public RecursiveIDLLoader recursiveIdlLoaderItf;
@@ -77,7 +84,8 @@ public class BasicIncludeResolver implements IncludeResolver, BindingController 
       // absolute path.
       final URL url = idlLocatorItf.findSourceHeader(path, context);
       if (url == null) {
-        throw new ADLException(IDLErrors.IDL_NOT_FOUND, path);
+        errorManagerItf.logError(IDLErrors.IDL_NOT_FOUND, include, path);
+        return IDLASTHelper.newUnresolvedIDLNode(nodeFactoryItf, path);
       }
     } else {
       // look-for header relatively to encapsulatingDir
@@ -89,13 +97,15 @@ public class BasicIncludeResolver implements IncludeResolver, BindingController 
       } else if (path.startsWith("./") || path.startsWith("../")) {
         // the path starts with "./" or "../" which force a resolution
         // relatively to encapsulatingDir. the file has not been found.
-        throw new ADLException(IDLErrors.IDL_NOT_FOUND, path);
+        errorManagerItf.logError(IDLErrors.IDL_NOT_FOUND, include, path);
+        return IDLASTHelper.newUnresolvedIDLNode(nodeFactoryItf, path);
       } else {
         // look-for header relatively to source-path
         path = "/" + path;
         url = idlLocatorItf.findSourceHeader(path, context);
         if (url == null) {
-          throw new ADLException(IDLErrors.IDL_NOT_FOUND, path);
+          errorManagerItf.logError(IDLErrors.IDL_NOT_FOUND, include, path);
+          return IDLASTHelper.newUnresolvedIDLNode(nodeFactoryItf, path);
         }
       }
     }
@@ -105,8 +115,11 @@ public class BasicIncludeResolver implements IncludeResolver, BindingController 
     try {
       return recursiveIdlLoaderItf.load(encapsulatingIDL, path, context);
     } catch (final ADLException e) {
-      ChainedErrorLocator.chainLocator(e, include);
-      throw e;
+      // Log an error only if the exception is IDL_NOT_FOUND
+      if (e.getError().getTemplate() == IDLErrors.IDL_NOT_FOUND) {
+        errorManagerItf.logError(IDLErrors.IDL_NOT_FOUND, include, path);
+      }
+      return IDLASTHelper.newUnresolvedIDLNode(nodeFactoryItf, path);
     }
   }
 
@@ -118,7 +131,11 @@ public class BasicIncludeResolver implements IncludeResolver, BindingController 
       throws NoSuchInterfaceException, IllegalBindingException {
     checkItfName(itfName);
 
-    if (itfName.equals(RecursiveIDLLoader.ITF_NAME)) {
+    if (ErrorManager.ITF_NAME.equals(itfName)) {
+      errorManagerItf = (ErrorManager) value;
+    } else if (NodeFactory.ITF_NAME.equals(itfName)) {
+      nodeFactoryItf = (NodeFactory) value;
+    } else if (itfName.equals(RecursiveIDLLoader.ITF_NAME)) {
       recursiveIdlLoaderItf = (RecursiveIDLLoader) value;
     } else if (itfName.equals(IDLLocator.ITF_NAME)) {
       idlLocatorItf = (IDLLocator) value;
@@ -130,13 +147,18 @@ public class BasicIncludeResolver implements IncludeResolver, BindingController 
   }
 
   public String[] listFc() {
-    return listFcHelper(RecursiveIDLLoader.ITF_NAME, IDLLocator.ITF_NAME);
+    return listFcHelper(ErrorManager.ITF_NAME, NodeFactory.ITF_NAME,
+        RecursiveIDLLoader.ITF_NAME, IDLLocator.ITF_NAME);
   }
 
   public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
     checkItfName(itfName);
 
-    if (itfName.equals(RecursiveIDLLoader.ITF_NAME)) {
+    if (ErrorManager.ITF_NAME.equals(itfName)) {
+      return errorManagerItf;
+    } else if (NodeFactory.ITF_NAME.equals(itfName)) {
+      return nodeFactoryItf;
+    } else if (itfName.equals(RecursiveIDLLoader.ITF_NAME)) {
       return recursiveIdlLoaderItf;
     } else if (itfName.equals(IDLLocator.ITF_NAME)) {
       return idlLocatorItf;
@@ -150,7 +172,11 @@ public class BasicIncludeResolver implements IncludeResolver, BindingController 
       IllegalBindingException {
     checkItfName(itfName);
 
-    if (itfName.equals(RecursiveIDLLoader.ITF_NAME)) {
+    if (ErrorManager.ITF_NAME.equals(itfName)) {
+      errorManagerItf = null;
+    } else if (NodeFactory.ITF_NAME.equals(itfName)) {
+      nodeFactoryItf = null;
+    } else if (itfName.equals(RecursiveIDLLoader.ITF_NAME)) {
       recursiveIdlLoaderItf = null;
     } else if (itfName.equals(IDLLocator.ITF_NAME)) {
       idlLocatorItf = null;

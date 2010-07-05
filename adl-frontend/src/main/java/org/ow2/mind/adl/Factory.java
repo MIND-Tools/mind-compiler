@@ -128,6 +128,7 @@ public final class Factory {
    * Returns a {@link Loader} interface that can be used to parse and check an
    * ADL Definition.
    * 
+   * @param errorManager the error manager component.
    * @return a {@link Loader} interface.
    */
   public static Loader newLoader(final ErrorManager errorManager) {
@@ -138,8 +139,8 @@ public final class Factory {
         .newIDLLocator(inputResourceLocator);
     final ImplementationLocator implementationLocator = newImplementationLocator(inputResourceLocator);
     // IDL Loader Chain
-    final IDLLoader idlLoader = IDLLoaderChainFactory.newLoader(idlLocator,
-        inputResourceLocator);
+    final IDLLoader idlLoader = IDLLoaderChainFactory.newLoader(errorManager,
+        idlLocator, inputResourceLocator);
 
     final org.objectweb.fractal.adl.Factory pluginFactory;
     final SimpleClassPluginFactory scpf = new SimpleClassPluginFactory();

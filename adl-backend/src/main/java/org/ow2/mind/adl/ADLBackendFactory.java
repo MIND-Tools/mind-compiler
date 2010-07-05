@@ -28,42 +28,32 @@ import java.util.Map;
 
 import org.antlr.stringtemplate.StringTemplateGroupLoader;
 import org.objectweb.fractal.adl.ADLException;
+import org.objectweb.fractal.adl.CompilerError;
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.Loader;
 import org.objectweb.fractal.adl.bindings.BindingErrors;
+import org.objectweb.fractal.adl.error.GenericErrors;
 import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.fractal.api.control.BindingController;
 import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.objectweb.fractal.api.control.IllegalLifeCycleException;
-import org.ow2.mind.BasicInputResourceLocator;
 import org.ow2.mind.InputResourceLocator;
 import org.ow2.mind.VoidVisitor;
 import org.ow2.mind.adl.VisitorExtensionHelper.VisitorExtension;
 import org.ow2.mind.adl.factory.FactoryGraphCompiler;
 import org.ow2.mind.adl.generic.GenericDefinitionNameSourceGenerator;
 import org.ow2.mind.adl.idl.IDLDefinitionSourceGenerator;
-import org.ow2.mind.adl.implementation.BasicImplementationLocator;
 import org.ow2.mind.adl.implementation.ImplementationLocator;
 import org.ow2.mind.adl.interfaces.CollectionInterfaceDefinitionSourceGenerator;
 import org.ow2.mind.adl.membrane.MembraneSourceGenerator;
 import org.ow2.mind.compilation.BasicCompilationCommandExecutor;
 import org.ow2.mind.compilation.CompilationCommandExecutor;
 import org.ow2.mind.compilation.CompilerWrapper;
-import org.ow2.mind.compilation.gcc.GccCompilerWrapper;
-import org.ow2.mind.error.ErrorManager;
-import org.ow2.mind.error.ErrorManagerFactory;
-import org.ow2.mind.idl.IDLBackendFactory;
 import org.ow2.mind.idl.IDLLoader;
-import org.ow2.mind.idl.IDLLoaderChainFactory;
 import org.ow2.mind.idl.IDLVisitor;
-import org.ow2.mind.io.BasicOutputFileLocator;
 import org.ow2.mind.io.OutputFileLocator;
-import org.ow2.mind.plugin.BasicPluginManager;
 import org.ow2.mind.plugin.PluginManager;
-import org.ow2.mind.preproc.BasicMPPWrapper;
 import org.ow2.mind.preproc.MPPWrapper;
-import org.ow2.mind.st.STLoaderFactory;
-import org.ow2.mind.st.STNodeFactoryImpl;
 import org.ow2.mind.st.StringTemplateComponentLoader;
 
 public final class ADLBackendFactory {
@@ -79,24 +69,6 @@ public final class ADLBackendFactory {
   public static final String IDL_LOADER_ITF_NAME             = IDLLoader.ITF_NAME;
   public static final String IDL_COMPILER_ITF_NAME           = "idl-compiler";
   public static final String TEMPLATE_GROUP_LOADER_ITF_NAME  = StringTemplateComponentLoader.ITF_NAME;
-
-  public static final DefinitionSourceGenerator newDefinitionSourceGenerator(
-      final Map<Object, Object> context) throws ADLException {
-    final IDLLoader idlLoader = IDLLoaderChainFactory.newLoader();
-    final BasicInputResourceLocator inputResourceLocator = new BasicInputResourceLocator();
-    final BasicOutputFileLocator outputFileLocator = new BasicOutputFileLocator();
-    final BasicPluginManager pluginManager = new BasicPluginManager();
-    final STNodeFactoryImpl nodeFactory = new STNodeFactoryImpl();
-    pluginManager.nodeFactoryItf = nodeFactory;
-
-    final StringTemplateGroupLoader stcLoader = STLoaderFactory.newSTLoader();
-    final IDLVisitor idlCompiler = IDLBackendFactory.newIDLCompiler(idlLoader,
-        inputResourceLocator, outputFileLocator, stcLoader);
-
-    return newDefinitionSourceGenerator(inputResourceLocator,
-        outputFileLocator, idlLoader, idlCompiler, stcLoader, pluginManager,
-        context);
-  }
 
   public static final DefinitionSourceGenerator newDefinitionSourceGenerator(
       final InputResourceLocator inputResourceLocator,
@@ -162,29 +134,6 @@ public final class ADLBackendFactory {
     }
 
     return definitionSourceGenerator;
-  }
-
-  public static DefinitionCompiler newDefinitionCompiler(
-      final Map<Object, Object> context) throws ADLException {
-    final IDLLoader idlLoader = IDLLoaderChainFactory.newLoader();
-    final BasicInputResourceLocator inputResourceLocator = new BasicInputResourceLocator();
-    final BasicOutputFileLocator outputFileLocator = new BasicOutputFileLocator();
-    final ImplementationLocator implementationLocator = new BasicImplementationLocator();
-    final BasicPluginManager pluginManager = new BasicPluginManager();
-    final STNodeFactoryImpl nodeFactory = new STNodeFactoryImpl();
-    pluginManager.nodeFactoryItf = nodeFactory;
-
-    final StringTemplateGroupLoader stcLoader = STLoaderFactory.newSTLoader();
-
-    final IDLVisitor idlCompiler = IDLBackendFactory.newIDLCompiler(idlLoader,
-        inputResourceLocator, outputFileLocator, stcLoader);
-    final DefinitionSourceGenerator definitionSourceGenerator = newDefinitionSourceGenerator(
-        inputResourceLocator, outputFileLocator, idlLoader, idlCompiler,
-        stcLoader, pluginManager, context);
-    final CompilerWrapper compilerWrapper = new GccCompilerWrapper();
-    final MPPWrapper mppWrapper = new BasicMPPWrapper();
-    return newDefinitionCompiler(definitionSourceGenerator,
-        implementationLocator, outputFileLocator, compilerWrapper, mppWrapper);
   }
 
   public static DefinitionCompiler newDefinitionCompiler(
@@ -276,40 +225,6 @@ public final class ADLBackendFactory {
     return graphCompiler;
   }
 
-  public static GraphCompiler newGraphCompiler(final Map<Object, Object> context)
-      throws ADLException {
-    final ErrorManager errorManager = ErrorManagerFactory
-        .newStreamErrorManager();
-
-    final Loader adlLoader = Factory.newLoader(errorManager);
-    final IDLLoader idlLoader = IDLLoaderChainFactory.newLoader();
-    final BasicInputResourceLocator inputResourceLocator = new BasicInputResourceLocator();
-    final BasicOutputFileLocator outputFileLocator = new BasicOutputFileLocator();
-    final ImplementationLocator implementationLocator = new BasicImplementationLocator();
-    final BasicPluginManager pluginManager = new BasicPluginManager();
-    final STNodeFactoryImpl nodeFactory = new STNodeFactoryImpl();
-    pluginManager.nodeFactoryItf = nodeFactory;
-
-    final StringTemplateGroupLoader stcLoader = STLoaderFactory.newSTLoader();
-
-    final IDLVisitor idlCompiler = IDLBackendFactory.newIDLCompiler(idlLoader,
-        inputResourceLocator, outputFileLocator, stcLoader);
-
-    final DefinitionSourceGenerator definitionSourceGenerator = newDefinitionSourceGenerator(
-        inputResourceLocator, outputFileLocator, idlLoader, idlCompiler,
-        stcLoader, pluginManager, context);
-    final CompilerWrapper compilerWrapper = new GccCompilerWrapper();
-    final MPPWrapper mppWrapper = new BasicMPPWrapper();
-
-    final DefinitionCompiler definitionCompiler = newDefinitionCompiler(
-        definitionSourceGenerator, implementationLocator, outputFileLocator,
-        compilerWrapper, mppWrapper);
-
-    return newGraphCompiler(inputResourceLocator, implementationLocator,
-        outputFileLocator, compilerWrapper, mppWrapper, definitionCompiler,
-        adlLoader, stcLoader, pluginManager, context);
-  }
-
   public static CompilationCommandExecutor newCompilationCommandExecutor() {
     return new BasicCompilationCommandExecutor();
   }
@@ -322,11 +237,13 @@ public final class ADLBackendFactory {
     } catch (final NoSuchInterfaceException e) {
       throw new ADLException(BindingErrors.INVALID_ITF_NO_SUCH_INTERFACE, e);
     } catch (final IllegalBindingException e) {
-      throw new ADLException("Illegal binding of the interface '" + itfName
-          + "' of the visitor '" + visitorName + "'.", e);
+      throw new CompilerError(GenericErrors.INTERNAL_ERROR,
+          "Illegal binding of the interface '" + itfName + "' of the visitor '"
+              + visitorName + "'.", e);
     } catch (final IllegalLifeCycleException e) {
-      throw new ADLException("Cannot bind the interface '" + itfName
-          + "' of the visitor '" + visitorName + "'.", e);
+      throw new CompilerError(GenericErrors.INTERNAL_ERROR,
+          "Cannot bind the interface '" + itfName + "' of the visitor '"
+              + visitorName + "'.", e);
     }
   }
 
@@ -341,11 +258,14 @@ public final class ADLBackendFactory {
     } catch (final NoSuchInterfaceException e) {
       throw new ADLException(BindingErrors.INVALID_ITF_NO_SUCH_INTERFACE, e);
     } catch (final IllegalBindingException e) {
-      throw new ADLException("Illegal binding of the interface '" + itfName
-          + "' to the visitor '" + visitorName + "'.", e);
+
+      throw new CompilerError(GenericErrors.INTERNAL_ERROR,
+          "Illegal binding of the interface '" + itfName + "' to the visitor '"
+              + visitorName + "'.", e);
     } catch (final IllegalLifeCycleException e) {
-      throw new ADLException("Cannot bind the interface '" + itfName
-          + "' to the visitor '" + visitorName + "'.", e);
+      throw new CompilerError(GenericErrors.INTERNAL_ERROR,
+          "Cannot bind the interface '" + itfName + "' to the visitor '"
+              + visitorName + "'.", e);
     }
 
   }

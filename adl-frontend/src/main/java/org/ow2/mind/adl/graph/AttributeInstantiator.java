@@ -22,6 +22,9 @@
 
 package org.ow2.mind.adl.graph;
 
+import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
+import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,6 +32,8 @@ import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.CompilerError;
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.error.GenericErrors;
+import org.objectweb.fractal.api.NoSuchInterfaceException;
+import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.ow2.mind.adl.ADLErrors;
 import org.ow2.mind.adl.ast.Attribute;
 import org.ow2.mind.adl.ast.AttributeContainer;
@@ -38,6 +43,7 @@ import org.ow2.mind.adl.ast.DefinitionReference;
 import org.ow2.mind.adl.parameter.ast.Argument;
 import org.ow2.mind.adl.parameter.ast.ArgumentContainer;
 import org.ow2.mind.adl.parameter.ast.FormalParameterContainer;
+import org.ow2.mind.error.ErrorManager;
 import org.ow2.mind.value.ast.NullLiteral;
 import org.ow2.mind.value.ast.NumberLiteral;
 import org.ow2.mind.value.ast.Reference;
@@ -47,6 +53,13 @@ import org.ow2.mind.value.ast.Value;
 public class AttributeInstantiator extends AbstractInstantiator {
 
   private static final Map<String, Value> EMPTY_NAME_VALUE_MAP = new HashMap<String, Value>();
+
+  // ---------------------------------------------------------------------------
+  // Client interfaces
+  // ---------------------------------------------------------------------------
+
+  /** The {@link ErrorManager} client interface used to log errors. */
+  public ErrorManager                     errorManagerItf;
 
   // ---------------------------------------------------------------------------
   // Implementation of the Instantiator interface
@@ -147,6 +160,50 @@ public class AttributeInstantiator extends AbstractInstantiator {
           initAttributes(subGraph, refValues, context);
         }
       }
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Implementation of the BindingController interface
+  // ---------------------------------------------------------------------------
+
+  @Override
+  public String[] listFc() {
+    return listFcHelper(super.listFc(), ErrorManager.ITF_NAME);
+  }
+
+  @Override
+  public Object lookupFc(final String s) throws NoSuchInterfaceException {
+    checkItfName(s);
+
+    if (ErrorManager.ITF_NAME.equals(s)) {
+      return errorManagerItf;
+    } else {
+      return super.lookupFc(s);
+    }
+  }
+
+  @Override
+  public void bindFc(final String s, final Object o)
+      throws NoSuchInterfaceException, IllegalBindingException {
+    checkItfName(s);
+
+    if (ErrorManager.ITF_NAME.equals(s)) {
+      errorManagerItf = (ErrorManager) o;
+    } else {
+      super.bindFc(s, o);
+    }
+  }
+
+  @Override
+  public void unbindFc(final String s) throws IllegalBindingException,
+      NoSuchInterfaceException {
+    checkItfName(s);
+
+    if (ErrorManager.ITF_NAME.equals(s)) {
+      errorManagerItf = null;
+    } else {
+      super.unbindFc(s);
     }
   }
 }

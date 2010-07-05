@@ -73,8 +73,8 @@ public abstract class AbstractADLLoaderTest {
     final org.objectweb.fractal.adl.Factory pluginFactory = new SimpleClassPluginFactory();
 
     // loader chains
-    final IDLLoader idlLoader = IDLLoaderChainFactory.newLoader(idlLocator,
-        inputResourceLocator);
+    final IDLLoader idlLoader = IDLLoaderChainFactory.newLoader(errorManager,
+        idlLocator, inputResourceLocator);
     final Loader adlLoader = Factory.newLoader(errorManager,
         inputResourceLocator, adlLocator, idlLocator, implementationLocator,
         idlLoader, pluginFactory);

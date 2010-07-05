@@ -29,8 +29,14 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import org.objectweb.fractal.adl.ADLException;
+import org.objectweb.fractal.adl.error.Error;
+import org.ow2.mind.error.ErrorCollection;
+import org.ow2.mind.error.ErrorManager;
+import org.ow2.mind.error.ErrorManagerFactory;
 import org.ow2.mind.idl.IDLLoader;
 import org.ow2.mind.idl.IDLLoaderChainFactory;
 import org.testng.annotations.BeforeTest;
@@ -39,12 +45,14 @@ import org.testng.annotations.Test;
 
 public class CheckFractalAPITest {
 
+  ErrorManager        errorManager;
   IDLLoader           idlLoader;
   Map<Object, Object> context;
 
   @BeforeTest(alwaysRun = true)
   public void setUp() {
-    idlLoader = IDLLoaderChainFactory.newLoader();
+    errorManager = ErrorManagerFactory.newSimpleErrorManager();
+    idlLoader = IDLLoaderChainFactory.newLoader(errorManager);
     context = new HashMap<Object, Object>();
   }
 
@@ -74,6 +82,11 @@ public class CheckFractalAPITest {
 
   @Test(groups = {"checkin", "functional"}, dataProvider = "fractal-api")
   public void checkIDL(final String name) throws Exception {
+    errorManager.clear();
     idlLoader.load(name, context);
+    final List<Error> errors = errorManager.getErrors();
+    if (!errors.isEmpty()) {
+      throw new ADLException(new ErrorCollection(errors));
+    }
   }
 }

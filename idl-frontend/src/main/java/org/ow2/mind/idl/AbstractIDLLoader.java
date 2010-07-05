@@ -28,6 +28,7 @@ import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
 import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.fractal.api.control.BindingController;
 import org.objectweb.fractal.api.control.IllegalBindingException;
+import org.ow2.mind.error.ErrorManager;
 
 /**
  * Abstract delegating {@link IDLLoader} component.
@@ -37,6 +38,9 @@ public abstract class AbstractIDLLoader implements IDLLoader, BindingController 
   // ---------------------------------------------------------------------------
   // Client interface
   // ---------------------------------------------------------------------------
+
+  /** The {@link ErrorManager} client interface used to log errors. */
+  public ErrorManager        errorManagerItf;
 
   /** The name of the {@link #clientIDLLoaderItf} client interface. */
   public static final String CLIENT_IDL_LOADER_ITF_NAME = "client-idl-loader";
@@ -49,13 +53,15 @@ public abstract class AbstractIDLLoader implements IDLLoader, BindingController 
   // ---------------------------------------------------------------------------
 
   public String[] listFc() {
-    return listFcHelper(CLIENT_IDL_LOADER_ITF_NAME);
+    return listFcHelper(ErrorManager.ITF_NAME, CLIENT_IDL_LOADER_ITF_NAME);
   }
 
   public Object lookupFc(final String s) throws NoSuchInterfaceException {
     checkItfName(s);
 
-    if (CLIENT_IDL_LOADER_ITF_NAME.equals(s)) {
+    if (ErrorManager.ITF_NAME.equals(s)) {
+      return errorManagerItf;
+    } else if (CLIENT_IDL_LOADER_ITF_NAME.equals(s)) {
       return clientIDLLoaderItf;
     } else {
       throw new NoSuchInterfaceException("No client interface named '" + s
@@ -67,7 +73,9 @@ public abstract class AbstractIDLLoader implements IDLLoader, BindingController 
       throws NoSuchInterfaceException, IllegalBindingException {
     checkItfName(s);
 
-    if (CLIENT_IDL_LOADER_ITF_NAME.equals(s)) {
+    if (ErrorManager.ITF_NAME.equals(s)) {
+      errorManagerItf = (ErrorManager) o;
+    } else if (CLIENT_IDL_LOADER_ITF_NAME.equals(s)) {
       clientIDLLoaderItf = (IDLLoader) o;
     } else {
       throw new NoSuchInterfaceException("No client interface named '" + s
@@ -79,7 +87,9 @@ public abstract class AbstractIDLLoader implements IDLLoader, BindingController 
       NoSuchInterfaceException {
     checkItfName(s);
 
-    if (CLIENT_IDL_LOADER_ITF_NAME.equals(s)) {
+    if (ErrorManager.ITF_NAME.equals(s)) {
+      errorManagerItf = null;
+    } else if (CLIENT_IDL_LOADER_ITF_NAME.equals(s)) {
       clientIDLLoaderItf = null;
     } else {
       throw new NoSuchInterfaceException("No client interface named '" + s

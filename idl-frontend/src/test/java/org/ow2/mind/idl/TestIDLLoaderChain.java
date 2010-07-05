@@ -26,6 +26,8 @@ import java.util.Collection;
 
 import junit.framework.TestCase;
 
+import org.ow2.mind.error.ErrorManager;
+import org.ow2.mind.error.ErrorManagerFactory;
 import org.ow2.mind.idl.ASTChecker.IDLChecker;
 import org.ow2.mind.idl.ASTChecker.IncludeCheckerIterator;
 import org.ow2.mind.idl.ASTChecker.TypeCheckerIterator;
@@ -40,7 +42,14 @@ public class TestIDLLoaderChain extends TestCase {
 
   @Override
   protected void setUp() throws Exception {
-    idlLoader = IDLLoaderChainFactory.newLoader();
+    final ErrorManager errorManager = ErrorManagerFactory
+        .newSimpleErrorManager();
+    final IDLErrorLoader errorLoader = new IDLErrorLoader();
+    errorLoader.errorManagerItf = errorManager;
+    errorLoader.clientIDLLoaderItf = IDLLoaderChainFactory
+        .newLoader(errorManager);
+    idlLoader = errorLoader;
+
     checker = new ASTChecker();
   }
 
@@ -82,8 +91,8 @@ public class TestIDLLoaderChain extends TestCase {
     final IDLChecker foo_bar_checker = foo_foo_checker.containsInclude(
         "\"/foo/bar.idt\"").includes();
 
-    assertSame(foo_bar_checker.idl, test2_checker.containsInclude(
-        "\"/foo/bar.idt\"").includes().idl);
+    assertSame(foo_bar_checker.idl,
+        test2_checker.containsInclude("\"/foo/bar.idt\"").includes().idl);
     assertSame(idl,
         test2_checker.containsInclude("\"/test3.idt\"").includes().idl);
   }

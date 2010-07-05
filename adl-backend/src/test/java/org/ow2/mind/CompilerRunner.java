@@ -141,7 +141,7 @@ public class CompilerRunner {
     final StringTemplateGroupLoader stcLoader = STLoaderFactory.newSTLoader();
 
     // loader chains
-    idlLoader = IDLLoaderChainFactory.newLoader(idlLocator,
+    idlLoader = IDLLoaderChainFactory.newLoader(errorManager, idlLocator,
         inputResourceLocator);
 
     adlLoader = Factory

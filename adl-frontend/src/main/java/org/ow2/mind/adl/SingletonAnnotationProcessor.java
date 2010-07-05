@@ -88,10 +88,11 @@ public class SingletonAnnotationProcessor
         if (ASTHelper.isSingleton(subCompDef)) {
           final Node previousUse = singletonDefs.get(subCompDef);
           if (previousUse != null) {
-            throw new ADLException(
+            errorManagerItf.logError(
                 ADLErrors.INVALID_SUB_COMPONENT_DUPLICATE_SINGLETON, subComp,
                 subComp.getName(), subCompDef.getName(),
                 previousUse.astGetSource());
+            continue;
           }
           singletonDefs.put(subCompDef, subComp);
         }

@@ -113,7 +113,9 @@ public class ADLParser implements Loader, BindingController {
     try {
       d = readADL(is, path);
     } catch (final IOException e) {
-      throw new ADLException(ADLErrors.IO_ERROR, e, path);
+      errorManagerItf.logFatal(ADLErrors.IO_ERROR, e, path);
+      // never executed (logFatal throw an ADLException).
+      return null;
     } catch (final ParseException e) {
       final ErrorLocator locator = new BasicErrorLocator(path,
           e.currentToken.next.beginLine, e.currentToken.next.endLine,

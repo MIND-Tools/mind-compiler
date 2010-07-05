@@ -512,7 +512,7 @@ public class Launcher extends AbstractLauncher {
     final StringTemplateGroupLoader stcLoader = STLoaderFactory.newSTLoader();
 
     // loader chains
-    idlLoader = IDLLoaderChainFactory.newLoader(idlLocator,
+    idlLoader = IDLLoaderChainFactory.newLoader(errorManager, idlLocator,
         inputResourceLocator);
 
     adlLoader = Factory
@@ -729,7 +729,13 @@ public class Launcher extends AbstractLauncher {
 
     adlName = processContext(targetDescriptor, adlName, contextMap);
 
+    errorManager.clear();
     final Definition adlDef = adlLoader.load(adlName, contextMap);
+    final List<Error> errors = errorManager.getErrors();
+    if (!errors.isEmpty()) {
+      // ADL contains errors
+      return;
+    }
 
     if (checkADLMode) {
       result.add(adlDef);
