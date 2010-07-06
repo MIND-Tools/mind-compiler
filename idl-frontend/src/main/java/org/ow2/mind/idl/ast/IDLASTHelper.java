@@ -22,6 +22,7 @@
 
 package org.ow2.mind.idl.ast;
 
+import static org.ow2.mind.CommonASTHelper.newNode;
 import static org.ow2.mind.PathHelper.isRelative;
 
 import java.io.Serializable;
@@ -35,11 +36,358 @@ import java.util.Map;
 
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.Node;
+import org.objectweb.fractal.adl.NodeFactory;
 import org.ow2.mind.NodeContainerDecoration;
 import org.ow2.mind.idl.IDLLoader;
 
 public final class IDLASTHelper {
   private IDLASTHelper() {
+  }
+
+  // ---------------------------------------------------------------------------
+  // InterfaceDefinition helper methods
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Create a new {@link InterfaceDefinition} node using the given
+   * {@link NodeFactory}
+   * 
+   * @param nodeFactory the {@link NodeFactory} to use to create the node.
+   * @param name the name of the {@link InterfaceDefinition}.
+   * @return a new {@link InterfaceDefinition} node.
+   */
+  public static InterfaceDefinition newInterfaceDefinitionNode(
+      final NodeFactory nodeFactory, final String name) {
+    final InterfaceDefinition node = newNode(nodeFactory, "itf",
+        InterfaceDefinition.class, TypeCollectionContainer.class,
+        IncludeContainer.class);
+    setKindDecorations(node);
+    node.setName(name);
+    return node;
+  }
+
+  /**
+   * Create a new {@link Method} node using the given {@link NodeFactory}
+   * 
+   * @param nodeFactory the {@link NodeFactory} to use to create the node.
+   * @param name the name of the {@link Method}.
+   * @return a new {@link Method} node.
+   */
+  public static Method newMethodNode(final NodeFactory nodeFactory,
+      final String name) {
+    final Method node = newNode(nodeFactory, "method", Method.class);
+    setKindDecorations(node);
+    node.setName(name);
+    return node;
+  }
+
+  /**
+   * Create a new {@link Parameter} node using the given {@link NodeFactory}
+   * 
+   * @param nodeFactory the {@link NodeFactory} to use to create the node.
+   * @param name the name of the {@link Parameter}.
+   * @return a new {@link Parameter} node.
+   */
+  public static Parameter newParameterNode(final NodeFactory nodeFactory,
+      final String name) {
+    final Parameter node = newNode(nodeFactory, "parameter", Parameter.class);
+    setKindDecorations(node);
+    node.setName(name);
+    return node;
+  }
+
+  // ---------------------------------------------------------------------------
+  // IDT helper methods
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Create a new {@link SharedTypeDefinition} node using the given
+   * {@link NodeFactory}
+   * 
+   * @param nodeFactory the {@link NodeFactory} to use to create the node.
+   * @param name the name of the {@link SharedTypeDefinition}.
+   * @return a new {@link SharedTypeDefinition} node.
+   */
+  public static SharedTypeDefinition newIDTNode(final NodeFactory nodeFactory,
+      final String name) {
+    final SharedTypeDefinition node = newNode(nodeFactory, "idt",
+        SharedTypeDefinition.class, IncludeContainer.class);
+    setKindDecorations(node);
+    node.setName(name);
+    return node;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Enum helper methods
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Create a new {@link EnumDefinition} node using the given
+   * {@link NodeFactory}
+   * 
+   * @param nodeFactory the {@link NodeFactory} to use to create the node.
+   * @param name the name of the {@link EnumDefinition}.
+   * @return a new {@link EnumDefinition} node.
+   */
+  public static EnumDefinition newEnumDefinitionNode(
+      final NodeFactory nodeFactory, final String name) {
+    final EnumDefinition node = newNode(nodeFactory, "type",
+        EnumDefinition.class);
+    setKindDecorations(node);
+    node.setName(name);
+    return node;
+  }
+
+  /**
+   * Create a new {@link EnumReference} node using the given {@link NodeFactory}
+   * 
+   * @param nodeFactory the {@link NodeFactory} to use to create the node.
+   * @param name the name of the {@link EnumReference}.
+   * @return a new {@link EnumReference} node.
+   */
+  public static EnumReference newEnumReferenceNode(
+      final NodeFactory nodeFactory, final String name) {
+    final EnumReference node = newNode(nodeFactory, "type", EnumReference.class);
+    setKindDecorations(node);
+    node.setName(name);
+    return node;
+  }
+
+  /**
+   * Create a new {@link EnumMember} node using the given {@link NodeFactory}
+   * 
+   * @param nodeFactory the {@link NodeFactory} to use to create the node.
+   * @param name the name of the {@link EnumMember}.
+   * @return a new {@link EnumMember} node.
+   */
+  public static EnumMember newEnumMemberNode(final NodeFactory nodeFactory,
+      final String name) {
+    final EnumMember node = newNode(nodeFactory, "enumMember", EnumMember.class);
+    setKindDecorations(node);
+    node.setName(name);
+    return node;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Struct/Union helper methods
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Create a new {@link StructDefinition} node using the given
+   * {@link NodeFactory}
+   * 
+   * @param nodeFactory the {@link NodeFactory} to use to create the node.
+   * @param name the name of the {@link StructDefinition}.
+   * @return a new {@link StructDefinition} node.
+   */
+  public static StructDefinition newStructDefinitionNode(
+      final NodeFactory nodeFactory, final String name) {
+    final StructDefinition node = newNode(nodeFactory, "type",
+        StructDefinition.class);
+    setKindDecorations(node);
+    node.setName(name);
+    return node;
+  }
+
+  /**
+   * Create a new {@link StructReference} node using the given
+   * {@link NodeFactory}
+   * 
+   * @param nodeFactory the {@link NodeFactory} to use to create the node.
+   * @param name the name of the {@link StructReference}.
+   * @return a new {@link StructReference} node.
+   */
+  public static StructReference newStructReferenceNode(
+      final NodeFactory nodeFactory, final String name) {
+    final StructReference node = newNode(nodeFactory, "type",
+        StructReference.class);
+    setKindDecorations(node);
+    node.setName(name);
+    return node;
+  }
+
+  /**
+   * Create a new {@link UnionDefinition} node using the given
+   * {@link NodeFactory}
+   * 
+   * @param nodeFactory the {@link NodeFactory} to use to create the node.
+   * @param name the name of the {@link UnionDefinition}.
+   * @return a new {@link UnionDefinition} node.
+   */
+  public static UnionDefinition newUnionDefinitionNode(
+      final NodeFactory nodeFactory, final String name) {
+    final UnionDefinition node = newNode(nodeFactory, "type",
+        UnionDefinition.class);
+    setKindDecorations(node);
+    node.setName(name);
+    return node;
+  }
+
+  /**
+   * Create a new {@link UnionReference} node using the given
+   * {@link NodeFactory}
+   * 
+   * @param nodeFactory the {@link NodeFactory} to use to create the node.
+   * @param name the name of the {@link UnionDefinition}.
+   * @return a new {@link UnionReference} node.
+   */
+  public static UnionReference newUnionReferenceNode(
+      final NodeFactory nodeFactory, final String name) {
+    final UnionReference node = newNode(nodeFactory, "type",
+        UnionReference.class);
+    setKindDecorations(node);
+    node.setName(name);
+    return node;
+  }
+
+  /**
+   * Create a new {@link Member} node using the given {@link NodeFactory}
+   * 
+   * @param nodeFactory the {@link NodeFactory} to use to create the node.
+   * @param name the name of the {@link Member}.
+   * @return a new {@link Member} node.
+   */
+  public static Member newMemberNode(final NodeFactory nodeFactory,
+      final String name) {
+    final Member node = newNode(nodeFactory, "member", Member.class);
+    setKindDecorations(node);
+    node.setName(name);
+    return node;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Type helper methods
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Create a new {@link PrimitiveType} node using the given {@link NodeFactory}
+   * 
+   * @param nodeFactory the {@link NodeFactory} to use to create the node.
+   * @param name the name of the {@link PrimitiveType}.
+   * @return a new {@link PrimitiveType} node.
+   */
+  public static PrimitiveType newPrimitiveTypeNode(
+      final NodeFactory nodeFactory, final String name) {
+    final PrimitiveType node = newNode(nodeFactory, "type", PrimitiveType.class);
+    setKindDecorations(node);
+    node.setName(name);
+    return node;
+  }
+
+  /**
+   * Create a new {@link ArrayOf} node using the given {@link NodeFactory}
+   * 
+   * @param nodeFactory the {@link NodeFactory} to use to create the node.
+   * @param size the size of the array. May be null;
+   * @return a new {@link ArrayOf} node.
+   */
+  public static ArrayOf newArrayOfNode(final NodeFactory nodeFactory,
+      final ConstantExpression size) {
+    final ArrayOf node = newNode(nodeFactory, "type", ArrayOf.class);
+    setKindDecorations(node);
+    node.setConstantExpression(size);
+    return node;
+  }
+
+  /**
+   * Create a new {@link PointerOf} node using the given {@link NodeFactory}
+   * 
+   * @param nodeFactory the {@link NodeFactory} to use to create the node.
+   * @return a new {@link PointerOf} node.
+   */
+  public static PointerOf newPointerOfNode(final NodeFactory nodeFactory) {
+    final PointerOf node = newNode(nodeFactory, "type", PointerOf.class);
+    setKindDecorations(node);
+    return node;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Constant Expression helper methods
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Create a new {@link BinaryOperation} node using the given
+   * {@link NodeFactory}
+   * 
+   * @param nodeFactory the {@link NodeFactory} to use to create the node.
+   * @param operation the operation of the {@link BinaryOperation}.
+   * @return a new {@link BinaryOperation} node.
+   */
+  public static BinaryOperation newBinaryOperationNode(
+      final NodeFactory nodeFactory, final String operation) {
+    final BinaryOperation node = newNode(nodeFactory, "constantExpression",
+        BinaryOperation.class);
+    setKindDecorations(node);
+    node.setOperation(operation);
+    return node;
+  }
+
+  /**
+   * Create a new {@link UnaryOperation} node using the given
+   * {@link NodeFactory}
+   * 
+   * @param nodeFactory the {@link NodeFactory} to use to create the node.
+   * @param operation the operation of the {@link UnaryOperation}.
+   * @return a new {@link UnaryOperation} node.
+   */
+  public static UnaryOperation newUnaryOperationNode(
+      final NodeFactory nodeFactory, final String operation) {
+    final UnaryOperation node = newNode(nodeFactory, "constantExpression",
+        UnaryOperation.class);
+    setKindDecorations(node);
+    node.setOperation(operation);
+    return node;
+  }
+
+  /**
+   * Create a new {@link CastOperation} node using the given {@link NodeFactory}
+   * 
+   * @param nodeFactory the {@link NodeFactory} to use to create the node.
+   * @param type the type of the {@link CastOperation}.
+   * @return a new {@link CastOperation} node.
+   */
+  public static CastOperation newCastOperationNode(
+      final NodeFactory nodeFactory, final Type type) {
+    final CastOperation node = newNode(nodeFactory, "constantExpression",
+        CastOperation.class);
+    setKindDecorations(node);
+    node.setType(type);
+    return node;
+  }
+
+  /**
+   * Create a new {@link Literal} node using the given {@link NodeFactory}
+   * 
+   * @param nodeFactory the {@link NodeFactory} to use to create the node.
+   * @param expr the expression of the {@link Literal}.
+   * @return a new {@link Literal} node.
+   */
+  public static Literal newLiteralNode(final NodeFactory nodeFactory,
+      final String expr) {
+    final Literal node = newNode(nodeFactory, "constantExpression",
+        Literal.class);
+    setKindDecorations(node);
+    node.setExpr(expr);
+    return node;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Include helper methods
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Create a new {@link Include} node using the given {@link NodeFactory}
+   * 
+   * @param nodeFactory the {@link NodeFactory} to use to create the node.
+   * @param path the path of the {@link Include}.
+   * @return a new {@link Include} node.
+   */
+  public static Include newIncludeNode(final NodeFactory nodeFactory,
+      final String path) {
+    final Include node = newNode(nodeFactory, "include", Include.class);
+    setKindDecorations(node);
+    node.setPath(path);
+    return node;
   }
 
   public static enum IncludeDelimiter {
@@ -100,6 +448,55 @@ public final class IDLASTHelper {
       decoration.setIDL(loaderItf.load(decoration.getPath(), context));
     }
     return decoration.getIDL();
+  }
+
+  // ---------------------------------------------------------------------------
+  // Kind decoration helper methods
+  // ---------------------------------------------------------------------------
+
+  public static final String KIND_DECORATION = "kind";
+
+  public static void setKindDecorations(final Node node) {
+    if (node instanceof InterfaceDefinition)
+      node.astSetDecoration(KIND_DECORATION, "interface");
+    else if (node instanceof EnumDefinition)
+      node.astSetDecoration(KIND_DECORATION, "enum");
+    else if (node instanceof EnumReference)
+      node.astSetDecoration(KIND_DECORATION, "enumRef");
+    else if (node instanceof StructDefinition)
+      node.astSetDecoration(KIND_DECORATION, "struct");
+    else if (node instanceof StructReference)
+      node.astSetDecoration(KIND_DECORATION, "structRef");
+    else if (node instanceof UnionDefinition)
+      node.astSetDecoration(KIND_DECORATION, "union");
+    else if (node instanceof UnionReference)
+      node.astSetDecoration(KIND_DECORATION, "unionRef");
+    else if (node instanceof TypeDefinition)
+      node.astSetDecoration(KIND_DECORATION, "typedef");
+    else if (node instanceof TypeDefReference)
+      node.astSetDecoration(KIND_DECORATION, "typedefRef");
+    else if (node instanceof PrimitiveType)
+      node.astSetDecoration(KIND_DECORATION, "primitiveType");
+    else if (node instanceof ArrayOf)
+      node.astSetDecoration(KIND_DECORATION, "arrayOf");
+    else if (node instanceof PointerOf)
+      node.astSetDecoration(KIND_DECORATION, "pointerOf");
+    else if (node instanceof ConstantDefinition)
+      node.astSetDecoration(KIND_DECORATION, "constDef");
+    else if (node instanceof BinaryOperation)
+      node.astSetDecoration(KIND_DECORATION, "binaryOperation");
+    else if (node instanceof UnaryOperation)
+      node.astSetDecoration(KIND_DECORATION, "unaryOperation");
+    else if (node instanceof CastOperation)
+      node.astSetDecoration(KIND_DECORATION, "castOperation");
+    else if (node instanceof Literal)
+      node.astSetDecoration(KIND_DECORATION, "literal");
+
+    for (final String type : node.astGetNodeTypes()) {
+      for (final Node n : node.astGetNodes(type)) {
+        if (n != null) setKindDecorations(n);
+      }
+    }
   }
 
   private static ReferencedIDLDecoration getIncludedIDLDecoration(

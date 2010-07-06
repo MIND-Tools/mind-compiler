@@ -215,8 +215,8 @@ public class JTBProcessor extends GJDepthFirst<Object, Node>
 
   private Node newNode(final String name,
       final org.ow2.mind.idl.jtb.syntaxtree.Node syntaxNode) {
-    return newNode(name, syntaxNode.accept(beginTokenVisitor), syntaxNode
-        .accept(endTokenVisitor));
+    return newNode(name, syntaxNode.accept(beginTokenVisitor),
+        syntaxNode.accept(endTokenVisitor));
   }
 
   private void setSource(final Node node, final NodeToken source) {
@@ -240,8 +240,8 @@ public class JTBProcessor extends GJDepthFirst<Object, Node>
 
   private void setSource(final Node node,
       final org.ow2.mind.idl.jtb.syntaxtree.Node syntaxNode) {
-    setSource(node, syntaxNode.accept(beginTokenVisitor), syntaxNode
-        .accept(endTokenVisitor));
+    setSource(node, syntaxNode.accept(beginTokenVisitor),
+        syntaxNode.accept(endTokenVisitor));
   }
 
   private void copySource(final Node node, final Node from) {
@@ -562,7 +562,7 @@ public class JTBProcessor extends GJDepthFirst<Object, Node>
 
     // visit first declarator
     TypeContainer n1 = cloneTree(container);
-    n1.setType(cloneTypeSpecifier(typeSpecifier));
+    n1.setType(typeSpecifier);
     n.f0.accept(this, n1);
     setSource(n1, n.f0);
     result.add(n1);

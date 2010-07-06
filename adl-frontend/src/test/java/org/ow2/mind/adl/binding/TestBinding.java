@@ -35,7 +35,6 @@ import org.objectweb.fractal.adl.NodeFactoryImpl;
 import org.objectweb.fractal.adl.bindings.BindingErrors;
 import org.objectweb.fractal.adl.merger.NodeMergerImpl;
 import org.objectweb.fractal.adl.xml.XMLNodeFactoryImpl;
-import org.ow2.mind.BasicInputResourceLocator;
 import org.ow2.mind.adl.ASTChecker;
 import org.ow2.mind.adl.BasicADLLocator;
 import org.ow2.mind.adl.BasicDefinitionReferenceResolver;
@@ -126,8 +125,7 @@ public class TestBinding {
     final ImportInterfaceSignatureResolver iisr = new ImportInterfaceSignatureResolver();
     final IDLLocator idlLocator = new BasicIDLLocator();
     iisr.clientResolverItf = bisr;
-    bisr.idlLoaderItf = IDLLoaderChainFactory.newLoader(idlLocator,
-        new BasicInputResourceLocator());
+    bisr.idlLoaderItf = IDLLoaderChainFactory.newLoader().loader;
     iisr.idlLocatorItf = idlLocator;
     isl.interfaceSignatureResolverItf = iisr;
 

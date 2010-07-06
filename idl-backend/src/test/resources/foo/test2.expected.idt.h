@@ -18,5 +18,12 @@ typedef struct s myStruct;
 
 typedef test2 test2ItfRef;
 
+typedef struct my {
+  int a;
+  int b;
+} my_s;
+
+typedef struct my (* my_s_ptr);
+
 
 #endif /* _FOO_TEST2_IDT_H */

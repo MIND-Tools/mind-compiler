@@ -80,7 +80,7 @@ public final class ADLBackendFactory {
 
   public static final DefinitionSourceGenerator newDefinitionSourceGenerator(
       final Map<Object, Object> context) throws ADLException {
-    final IDLLoader idlLoader = IDLLoaderChainFactory.newLoader();
+    final IDLLoader idlLoader = IDLLoaderChainFactory.newLoader().loader;
     final BasicInputResourceLocator inputResourceLocator = new BasicInputResourceLocator();
     final BasicOutputFileLocator outputFileLocator = new BasicOutputFileLocator();
     final BasicPluginManager pluginManager = new BasicPluginManager();
@@ -164,7 +164,7 @@ public final class ADLBackendFactory {
 
   public static DefinitionCompiler newDefinitionCompiler(
       final Map<Object, Object> context) throws ADLException {
-    final IDLLoader idlLoader = IDLLoaderChainFactory.newLoader();
+    final IDLLoader idlLoader = IDLLoaderChainFactory.newLoader().loader;
     final BasicInputResourceLocator inputResourceLocator = new BasicInputResourceLocator();
     final BasicOutputFileLocator outputFileLocator = new BasicOutputFileLocator();
     final ImplementationLocator implementationLocator = new BasicImplementationLocator();
@@ -277,7 +277,7 @@ public final class ADLBackendFactory {
   public static GraphCompiler newGraphCompiler(final Map<Object, Object> context)
       throws ADLException {
     final Loader adlLoader = Factory.newLoader();
-    final IDLLoader idlLoader = IDLLoaderChainFactory.newLoader();
+    final IDLLoader idlLoader = IDLLoaderChainFactory.newLoader().loader;
     final BasicInputResourceLocator inputResourceLocator = new BasicInputResourceLocator();
     final BasicOutputFileLocator outputFileLocator = new BasicOutputFileLocator();
     final ImplementationLocator implementationLocator = new BasicImplementationLocator();

@@ -63,6 +63,7 @@ import org.ow2.mind.compilation.gcc.GccCompilerWrapper;
 import org.ow2.mind.idl.IDLBackendFactory;
 import org.ow2.mind.idl.IDLLoader;
 import org.ow2.mind.idl.IDLLoaderChainFactory;
+import org.ow2.mind.idl.IDLLoaderChainFactory.IDLFrontend;
 import org.ow2.mind.idl.IDLLocator;
 import org.ow2.mind.idl.IDLVisitor;
 import org.ow2.mind.idl.OutputBinaryIDLLocator;
@@ -135,12 +136,14 @@ public class CompilerRunner {
     final StringTemplateGroupLoader stcLoader = STLoaderFactory.newSTLoader();
 
     // loader chains
-    idlLoader = IDLLoaderChainFactory.newLoader(idlLocator,
-        inputResourceLocator);
+    final IDLFrontend idlFrontend = IDLLoaderChainFactory.newLoader(idlLocator,
+        inputResourceLocator, pluginFactory);
+
+    idlLoader = idlFrontend.loader;
 
     adlLoader = Factory.newLoader(inputResourceLocator, adlLocator, idlLocator,
-        implementationLocator, idlLoader, pluginFactory);
-    ;
+        implementationLocator, idlFrontend.cache, idlFrontend.loader,
+        pluginFactory);
 
     // instantiator chain
     graphInstantiator = Factory.newInstantiator(adlLoader);

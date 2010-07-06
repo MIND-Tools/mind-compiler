@@ -89,8 +89,10 @@ import org.ow2.mind.adl.parameter.ParametricGenericDefinitionReferenceResolver;
 import org.ow2.mind.adl.parameter.ParametricTemplateInstantiator;
 import org.ow2.mind.adl.parser.ADLParser;
 import org.ow2.mind.annotation.AnnotationChainFactory;
+import org.ow2.mind.idl.IDLCache;
 import org.ow2.mind.idl.IDLLoader;
 import org.ow2.mind.idl.IDLLoaderChainFactory;
+import org.ow2.mind.idl.IDLLoaderChainFactory.IDLFrontend;
 import org.ow2.mind.idl.IDLLocator;
 import org.ow2.mind.plugin.SimpleClassPluginFactory;
 import org.ow2.mind.st.STLoaderFactory;
@@ -136,25 +138,26 @@ public final class Factory {
     final IDLLocator idlLocator = IDLLoaderChainFactory
         .newIDLLocator(inputResourceLocator);
     final ImplementationLocator implementationLocator = newImplementationLocator(inputResourceLocator);
-    // IDL Loader Chain
-    final IDLLoader idlLoader = IDLLoaderChainFactory.newLoader(idlLocator,
-        inputResourceLocator);
-
     final org.objectweb.fractal.adl.Factory pluginFactory;
     final SimpleClassPluginFactory scpf = new SimpleClassPluginFactory();
 
     // Configuration of plugin factory components
     pluginFactory = scpf;
 
+    // IDL Loader Chain
+    final IDLFrontend idlFrontend = IDLLoaderChainFactory.newLoader(idlLocator,
+        inputResourceLocator, pluginFactory);
+
     return newLoader(inputResourceLocator, adlLocator, idlLocator,
-        implementationLocator, idlLoader, pluginFactory);
+        implementationLocator, idlFrontend.cache, idlFrontend.loader,
+        pluginFactory);
   }
 
   public static Loader newLoader(
       final BasicInputResourceLocator inputResourceLocator,
       final ADLLocator adlLocator, final IDLLocator idlLocator,
       final ImplementationLocator implementationLocator,
-      final IDLLoader idlLoader,
+      final IDLCache idlCache, final IDLLoader idlLoader,
       final org.objectweb.fractal.adl.Factory pluginFactory) {
 
     // plugin manager components
@@ -398,12 +401,12 @@ public final class Factory {
           nodeMerger);
       ((BindingController) pluginManager).bindFc(DefinitionCache.ITF_NAME, cl);
       ((BindingController) pluginManager).bindFc("loader", adlLoader);
+      ((BindingController) pluginManager).bindFc(IDLCache.ITF_NAME, idlCache);
       ((BindingController) pluginManager).bindFc(IDLLoader.ITF_NAME, idlLoader);
       ((BindingController) pluginManager).bindFc(
           DefinitionReferenceResolver.ITF_NAME, cdrr);
       ((BindingController) pluginManager).bindFc(
           InterfaceSignatureResolver.ITF_NAME, interfaceSignatureResolver);
-      ((BindingController) pluginManager).bindFc(IDLLoader.ITF_NAME, idlLoader);
       ((BindingController) pluginManager).bindFc("template-loader",
           STLoaderFactory.newSTLoader());
     } catch (final Exception e) {
