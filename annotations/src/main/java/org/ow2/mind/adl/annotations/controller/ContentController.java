@@ -36,7 +36,8 @@ import org.ow2.mind.annotation.AnnotationTarget;
  * a <code>"content-controller"</code> controller interface that can be used to
  * introspect and control the content of a composite component.
  */
-@ADLLoaderProcessor(processor = ContentControllerADLLoaderAnnotationProcessor.class, phases = {ADLLoaderPhase.AFTER_EXTENDS})
+@ADLLoaderProcessor(processor = ContentControllerADLLoaderAnnotationProcessor.class, phases = {
+    ADLLoaderPhase.AFTER_EXTENDS, ADLLoaderPhase.AFTER_CHECKING})
 public class ContentController implements Annotation {
 
   private static final AnnotationTarget[] ANNOTATION_TARGETS    = {DEFINITION};

@@ -41,4 +41,7 @@ public interface BindingChecker {
 
   void checkBinding(Interface fromInterface, Interface toInterface,
       Binding binding, Node locator) throws ADLException;
+
+  void checkCompatibility(Interface from, Interface to, Node locator)
+      throws ADLException;
 }

@@ -97,10 +97,10 @@ public class BindingInstantiator extends AbstractInstantiator {
     final Definition def = graph.getDefinition();
     if (def instanceof BindingContainer) {
       for (final Binding binding : ((BindingContainer) def).getBindings()) {
-        final ComponentGraph clientComponent = getComponent(graph, binding
-            .getFromComponent());
-        final ComponentGraph serverComponent = getComponent(graph, binding
-            .getToComponent());
+        final ComponentGraph clientComponent = getComponent(graph,
+            binding.getFromComponent());
+        final ComponentGraph serverComponent = getComponent(graph,
+            binding.getToComponent());
         String fromItfName = binding.getFromInterface();
         if (Binding.THIS_COMPONENT.equals(binding.getFromComponent()))
           fromItfName = "INTERNAL_" + fromItfName;
@@ -113,7 +113,8 @@ public class BindingInstantiator extends AbstractInstantiator {
         desc.binding = binding;
         desc.serverComponent = serverComponent;
         desc.toInternalServer = Binding.THIS_COMPONENT.equals(binding
-            .getToComponent());
+            .getToComponent())
+            && !ASTHelper.isToCompositeControllerDecoration(binding);
       }
     }
 

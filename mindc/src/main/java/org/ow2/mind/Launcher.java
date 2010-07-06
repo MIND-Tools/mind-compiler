@@ -83,6 +83,7 @@ import org.ow2.mind.error.ErrorManagerFactory;
 import org.ow2.mind.idl.IDLBackendFactory;
 import org.ow2.mind.idl.IDLLoader;
 import org.ow2.mind.idl.IDLLoaderChainFactory;
+import org.ow2.mind.idl.IDLLoaderChainFactory.IDLFrontend;
 import org.ow2.mind.idl.IDLLocator;
 import org.ow2.mind.idl.IDLVisitor;
 import org.ow2.mind.idl.OutputBinaryIDLLocator;
@@ -516,12 +517,14 @@ public class Launcher extends AbstractLauncher {
     final StringTemplateGroupLoader stcLoader = STLoaderFactory.newSTLoader();
 
     // loader chains
-    idlLoader = IDLLoaderChainFactory.newLoader(errorManager, idlLocator,
-        inputResourceLocator);
+     final IDLFrontend idlFrontend = IDLLoaderChainFactory.newLoader(errorManager, idlLocator,
+        inputResourceLocator, pluginFactory);
+
+    idlLoader = idlFrontend.loader;
 
     adlLoader = Factory
         .newLoader(errorManager, inputResourceLocator, adlLocator, idlLocator,
-            implementationLocator, idlLoader, pluginFactory);
+            implementationLocator, idlFrontend.cache, idlFrontend.loader, pluginFactory);
 
     // instantiator chain
     graphInstantiator = Factory.newInstantiator(errorManager, adlLoader);

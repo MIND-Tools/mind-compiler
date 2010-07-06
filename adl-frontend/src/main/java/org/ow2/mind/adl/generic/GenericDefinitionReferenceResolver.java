@@ -402,8 +402,7 @@ public class GenericDefinitionReferenceResolver
             typeValue.getName(), itf.getName());
         continue;
       }
-      bindingCheckerItf.checkFromCompositeToSubcomponentBinding(itf, valueItf,
-          null, locator);
+      bindingCheckerItf.checkCompatibility(itf, valueItf, locator);
     }
 
     // checks that each client interface of typeValue is present in
@@ -432,8 +431,7 @@ public class GenericDefinitionReferenceResolver
           continue;
         }
       } else {
-        bindingCheckerItf.checkFromSubcomponentToCompositeBinding(valueItf,
-            itf, null, locator);
+        bindingCheckerItf.checkCompatibility(valueItf, itf, locator);
       }
     }
     if (!templateClientInterfaces.isEmpty()) {

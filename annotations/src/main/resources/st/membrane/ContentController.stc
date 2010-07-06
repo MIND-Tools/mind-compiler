@@ -109,16 +109,17 @@ ControllerImplementation(definition, controller, interfaceDefinitions) ::= <<
 // -----------------------------------------------------------------------------
 
 initInternalItfsDescriptor(definition) ::= <<
-struct __component_InternalClientItfDescriptor <definition.name;format="toCName">_internalClientItf_descriptor[<internalClientInterfaceCount(definition=definition)>] = {
+struct __component_InternalClientItfDescriptor <definition.name;format="toCName">_internalClientItf_descriptor[] = {
 <if (definition.astNodeTypes.("internalInterface"))>
   <definition.internalInterfaces:initInternalClientItfDescriptor(definition=definition, itf=it)>
 <endif>
 };
 
-struct __component_InternalServerItfDescriptor <definition.name;format="toCName">_internalServerItf_descriptor[<internalServerInterfaceCount(definition=definition)>] = {
+struct __component_InternalServerItfDescriptor <definition.name;format="toCName">_internalServerItf_descriptor[] = {
 <if (definition.astNodeTypes.("internalInterface"))>
   <definition.internalInterfaces:initInternalServerItfDescriptor(definition=definition, itf=it)>
 <endif>
+<definition.interfaces:initControllerServerItfDescriptor(definition=definition, itf=it)>
 };
 
 struct __component_InternalItfsDescriptor <definition.name;format="toCName">_internalItfs_descriptor = {
@@ -127,40 +128,6 @@ struct __component_InternalItfsDescriptor <definition.name;format="toCName">_int
   sizeof(<definition.name;format="toCName">_internalServerItf_descriptor)/sizeof(struct __component_InternalServerItfDescriptor),
   <definition.name;format="toCName">_internalServerItf_descriptor
 };
->>
-
-internalClientInterfaceCount(definition) ::= <<
-<if (definition.astNodeTypes.("internalInterface"))>
-  <definition.internalInterfaces:countClientInterfaces(itf=it)>
-<endif>
-0
->>
-
-countClientInterfaces(itf) ::= <<
-<if (isClient.(itf.role))>
-<if (itf.numberOfElement)>
-<itf.numberOfElement> + 
-<else>
-1 +
-<endif>
-<endif>
->>
-
-internalServerInterfaceCount(definition) ::= <<
-<if (definition.astNodeTypes.("internalInterface"))>
-  <definition.internalInterfaces:countServerInterfaces(itf=it)>
-<endif>
-0
->>
-
-countServerInterfaces(itf) ::= <<
-<if (isServer.(itf.role))>
-<if (itf.numberOfElement)>
-<itf.numberOfElement> + 
-<else>
-1 +
-<endif>
-<endif>
 >>
 
 initInternalClientItfDescriptor(definition, itf) ::= <<
@@ -175,12 +142,13 @@ initInternalClientItfDescriptor(definition, itf) ::= <<
 
 initInternalClientItfDescriptor1(definition, itf, index) ::= <<
 __COMPONENT_INIT_INTERNAL_CLIENT_ITF_DESCRIPTOR(<ComponentTypeName(definitionName=definition.name)>, <itf.name><if (index)>[<index>]<endif>, <itf.astDecorations.("delegated-interface").name><if (index)>[<index>]<endif>)
+
 >>
 
 initInternalServerItfDescriptor(definition, itf) ::= <<
 <if (isServer.(itf.role))>
 <if (itf.numberOfElement)>
-<itf.astDecorations.("collectionIndexes"):initInternalserverItfDescriptor1(definition=definition, itf=itf, index=it);separator=",\n">,
+<itf.astDecorations.("collectionIndexes"):initInternalServerItfDescriptor1(definition=definition, itf=itf, index=it);separator=",\n">,
 <else>
 <initInternalServerItfDescriptor1(definition=definition, itf=itf)>,
 <endif>
@@ -189,6 +157,22 @@ initInternalServerItfDescriptor(definition, itf) ::= <<
 
 initInternalServerItfDescriptor1(definition, itf, index) ::= <<
 __COMPONENT_INIT_INTERNAL_SERVER_ITF_DESCRIPTOR(<ComponentTypeName(definitionName=definition.name)>, <itf.name><if (index)>[<index>]<endif>)
+
+>>
+
+initControllerServerItfDescriptor(definition, itf) ::= <<
+<if (itf.astDecorations.("controller-interface"))>
+<if (itf.numberOfElement)>
+<itf.astDecorations.("collectionIndexes"):initControllerServerItfDescriptor1(definition=definition, itf=itf, index=it);separator=",\n">,
+<else>
+<initControllerServerItfDescriptor1(definition=definition, itf=itf)>,
+<endif>
+<endif>
+>>
+
+initControllerServerItfDescriptor1(definition, itf, index) ::= <<
+__COMPONENT_INIT_CONTROLLER_SERVER_ITF_DESCRIPTOR(<ComponentTypeName(definitionName=definition.name)>, <itf.name><if (index)>[<index>]<endif>)
+
 >>
 
 getFcSubComponents(definition) ::= <<

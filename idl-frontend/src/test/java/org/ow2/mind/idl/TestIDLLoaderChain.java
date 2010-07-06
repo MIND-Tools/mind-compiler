@@ -47,7 +47,7 @@ public class TestIDLLoaderChain extends TestCase {
     final IDLErrorLoader errorLoader = new IDLErrorLoader();
     errorLoader.errorManagerItf = errorManager;
     errorLoader.clientIDLLoaderItf = IDLLoaderChainFactory
-        .newLoader(errorManager);
+        .newLoader(errorManager).loader;
     idlLoader = errorLoader;
 
     checker = new ASTChecker();

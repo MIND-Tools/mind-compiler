@@ -40,8 +40,8 @@ import org.ow2.mind.adl.Factory;
 import org.ow2.mind.adl.implementation.ImplementationLocator;
 import org.ow2.mind.error.ErrorManager;
 import org.ow2.mind.error.ErrorManagerFactory;
-import org.ow2.mind.idl.IDLLoader;
 import org.ow2.mind.idl.IDLLoaderChainFactory;
+import org.ow2.mind.idl.IDLLoaderChainFactory.IDLFrontend;
 import org.ow2.mind.idl.IDLLocator;
 import org.ow2.mind.plugin.SimpleClassPluginFactory;
 import org.testng.annotations.BeforeMethod;
@@ -73,11 +73,11 @@ public abstract class AbstractADLLoaderTest {
     final org.objectweb.fractal.adl.Factory pluginFactory = new SimpleClassPluginFactory();
 
     // loader chains
-    final IDLLoader idlLoader = IDLLoaderChainFactory.newLoader(errorManager,
-        idlLocator, inputResourceLocator);
+   final IDLFrontend idlFrontend = IDLLoaderChainFactory.newLoader(errorManager,
+        idlLocator, inputResourceLocator, pluginFactory);
     final Loader adlLoader = Factory.newLoader(errorManager,
         inputResourceLocator, adlLocator, idlLocator, implementationLocator,
-        idlLoader, pluginFactory);
+        idlFrontend.cache, idlFrontend.loader, pluginFactory);
     final ErrorLoader errLoader = new ErrorLoader();
     errLoader.clientLoader = adlLoader;
     errLoader.errorManagerItf = errorManager;

@@ -49,7 +49,10 @@ import org.ow2.mind.adl.DefinitionReferenceResolver;
 import org.ow2.mind.adl.idl.InterfaceSignatureResolver;
 import org.ow2.mind.adl.parser.ADLParserContextHelper;
 import org.ow2.mind.error.ErrorManager;
+import org.ow2.mind.idl.IDLCache;
 import org.ow2.mind.idl.IDLLoader;
+import org.ow2.mind.idl.ast.IDL;
+import org.ow2.mind.idl.parser.IDLParserContextHelper;
 
 /**
  * Base class for the implementation of annotation processors integrated in the
@@ -81,6 +84,9 @@ public abstract class AbstractADLLoaderAnnotationProcessor
 
   /** The {@link Loader} client interface. */
   public Loader                      loaderItf;
+
+  /** The {@link IDLCache} client interface. */
+  public IDLCache                    idlCacheItf;
 
   /** The {@link IDLLoader} client interface. */
   public IDLLoader                   idlLoaderItf;
@@ -169,6 +175,75 @@ public abstract class AbstractADLLoaderAnnotationProcessor
   }
 
   /**
+   * Returns <code>true</code> if an IDL with the given name as already been
+   * loaded.
+   * 
+   * @return <code>true</code> if an IDL with the given name as already been
+   *         loaded.
+   */
+  protected boolean isIDLAlreadyGenerated(final String name,
+      final Map<Object, Object> context) {
+    return IDLParserContextHelper.isRegisteredIDL(name, context)
+        || idlCacheItf.getInCache(name, context) != null;
+  }
+
+  /**
+   * Load an IDL definition from the given (generated) source. If a definition
+   * is already known in cache for the given name, this method returns the IDL
+   * in cache. <br>
+   * If the loading of the IDL raise an exception, a temporary file is generated
+   * in which the given sources are dumped. This simplifies the debugging of the
+   * generator.
+   * 
+   * @param name the name of the IDL;
+   * @param idlSource the source code of the IDL;
+   * @param context context map.
+   * @return the loaded IDL.
+   * @throws ADLException if a error occurs.
+   * @see #isIDLAlreadyGenerated(String, Map)
+   * @see IDLParserContextHelper#registerIDL(String, String, Map)
+   */
+  protected IDL loadIDLFromSource(final String name, final String idlSource,
+      final Map<Object, Object> context) throws ADLException {
+    final IDL idl = idlCacheItf.getInCache(name, context);
+    if (idl != null) {
+      return idl;
+    }
+    IDLParserContextHelper.registerIDL(name, idlSource, context);
+    try {
+      return idlLoaderItf.load(name, context);
+    } catch (final ADLException e) {
+      // The loading of the generated ADL fails.
+      // Print the ADL content in a temporary file to ease its debugging.
+      try {
+        final File f = File.createTempFile("GeneratedIDL", ".idl");
+        final FileWriter fw = new FileWriter(f);
+        fw.write(idlSource);
+        fw.close();
+
+        // update the error locator to point to the temporary file.
+        final ErrorLocator l = e.getError().getLocator();
+        final ErrorLocator l1 = new BasicErrorLocator(f.getPath(),
+            l.getBeginLine(), l.getBeginColumn());
+        e.getError().setLocator(l1);
+      } catch (final IOException e1) {
+        // ignore
+      }
+      throw e;
+    }
+  }
+
+  protected IDL loadIDLFromAST(final IDL idl, final Map<Object, Object> context)
+      throws ADLException {
+    final IDL d = idlCacheItf.getInCache(idl.getName(), context);
+    if (d != null) {
+      return d;
+    }
+    IDLParserContextHelper.registerIDL(idl, context);
+    return idlLoaderItf.load(idl.getName(), context);
+  }
+
+  /**
    * Returns the StringTemplate template with the given
    * <code>templateName</code> name and found in the
    * <code>templateGroupName</code> group.
@@ -204,7 +279,8 @@ public abstract class AbstractADLLoaderAnnotationProcessor
   public String[] listFc() {
     return listFcHelper(ErrorManager.ITF_NAME, NodeFactory.ITF_NAME,
         NodeMerger.ITF_NAME, DefinitionCache.ITF_NAME, "loader",
-        IDLLoader.ITF_NAME, DefinitionReferenceResolver.ITF_NAME,
+        IDLCache.ITF_NAME, IDLLoader.ITF_NAME,
+        DefinitionReferenceResolver.ITF_NAME,
         InterfaceSignatureResolver.ITF_NAME, "template-loader");
   }
 
@@ -221,6 +297,8 @@ public abstract class AbstractADLLoaderAnnotationProcessor
       return definitionCacheItf;
     } else if (itfName.equals("loader")) {
       return loaderItf;
+    } else if (itfName.equals(IDLCache.ITF_NAME)) {
+      return idlCacheItf;
     } else if (itfName.equals(IDLLoader.ITF_NAME)) {
       return idlLoaderItf;
     } else if (itfName.equals(DefinitionReferenceResolver.ITF_NAME)) {
@@ -249,6 +327,8 @@ public abstract class AbstractADLLoaderAnnotationProcessor
       definitionCacheItf = (DefinitionCache) serverItf;
     } else if (itfName.equals("loader")) {
       loaderItf = (Loader) serverItf;
+    } else if (itfName.equals(IDLCache.ITF_NAME)) {
+      idlCacheItf = (IDLCache) serverItf;
     } else if (itfName.equals(IDLLoader.ITF_NAME)) {
       idlLoaderItf = (IDLLoader) serverItf;
     } else if (itfName.equals(DefinitionReferenceResolver.ITF_NAME)) {
@@ -277,6 +357,8 @@ public abstract class AbstractADLLoaderAnnotationProcessor
       definitionCacheItf = null;
     } else if (itfName.equals("loader")) {
       loaderItf = null;
+    } else if (itfName.equals(IDLCache.ITF_NAME)) {
+      idlCacheItf = null;
     } else if (itfName.equals(IDLLoader.ITF_NAME)) {
       idlLoaderItf = null;
     } else if (itfName.equals(DefinitionReferenceResolver.ITF_NAME)) {

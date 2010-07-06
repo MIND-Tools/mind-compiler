@@ -37,8 +37,8 @@ import org.objectweb.fractal.adl.Loader;
 import org.objectweb.fractal.adl.NodeFactoryImpl;
 import org.objectweb.fractal.adl.bindings.BindingErrors;
 import org.objectweb.fractal.adl.error.Error;
+import org.objectweb.fractal.adl.merger.NodeMergerImpl;
 import org.objectweb.fractal.adl.xml.XMLNodeFactoryImpl;
-import org.ow2.mind.BasicInputResourceLocator;
 import org.ow2.mind.adl.ASTChecker;
 import org.ow2.mind.adl.BasicADLLocator;
 import org.ow2.mind.adl.BasicDefinitionReferenceResolver;
@@ -52,6 +52,7 @@ import org.ow2.mind.adl.idl.BasicInterfaceSignatureResolver;
 import org.ow2.mind.adl.idl.InterfaceSignatureLoader;
 import org.ow2.mind.adl.imports.ImportDefinitionReferenceResolver;
 import org.ow2.mind.adl.imports.ImportInterfaceSignatureResolver;
+import org.ow2.mind.adl.membrane.CompositeInternalInterfaceLoader;
 import org.ow2.mind.adl.parser.ADLParser;
 import org.ow2.mind.error.ErrorCollection;
 import org.ow2.mind.error.ErrorManager;
@@ -80,6 +81,7 @@ public class TestBinding {
     final SubComponentResolverLoader scrl = new SubComponentResolverLoader();
     final InterfaceSignatureLoader isl = new InterfaceSignatureLoader();
     final ExtendsLoader el = new ExtendsLoader();
+    final CompositeInternalInterfaceLoader ciil = new CompositeInternalInterfaceLoader();
     final BindingNormalizerLoader bnl = new BindingNormalizerLoader();
     final BindingCheckerLoader bcl = new BindingCheckerLoader();
     final UnboundInterfaceCheckerLoader uicl = new UnboundInterfaceCheckerLoader();
@@ -90,7 +92,8 @@ public class TestBinding {
     cl.clientLoader = uicl;
     uicl.clientLoader = bcl;
     bcl.clientLoader = bnl;
-    bnl.clientLoader = el;
+    bnl.clientLoader = ciil;
+    ciil.clientLoader = el;
     el.clientLoader = isl;
     isl.clientLoader = scrl;
     scrl.clientLoader = adlLoader;
@@ -99,6 +102,7 @@ public class TestBinding {
     scrl.errorManagerItf = errorManager;
     isl.errorManagerItf = errorManager;
     errl.errorManagerItf = errorManager;
+    uicl.errorManagerItf = errorManager;
 
     // definition reference resolver chain
     final BasicDefinitionReferenceResolver bdrr = new BasicDefinitionReferenceResolver();
@@ -132,9 +136,13 @@ public class TestBinding {
     final BasicADLLocator adlLocator = new BasicADLLocator();
     final XMLNodeFactoryImpl xmlNodeFactory = new XMLNodeFactoryImpl();
     final NodeFactoryImpl nodeFactory = new NodeFactoryImpl();
+    final NodeMergerImpl nodeMerger = new NodeMergerImpl();
 
     adlLoader.adlLocatorItf = adlLocator;
     adlLoader.nodeFactoryItf = xmlNodeFactory;
+    ciil.nodeFactoryItf = nodeFactory;
+    ciil.nodeMergerItf = nodeMerger;
+
     idrr.adlLocatorItf = adlLocator;
     bdrr.nodeFactoryItf = nodeFactory;
 
@@ -142,8 +150,7 @@ public class TestBinding {
     final ImportInterfaceSignatureResolver iisr = new ImportInterfaceSignatureResolver();
     final IDLLocator idlLocator = new BasicIDLLocator();
     iisr.clientResolverItf = bisr;
-    bisr.idlLoaderItf = IDLLoaderChainFactory.newLoader(errorManager,
-        idlLocator, new BasicInputResourceLocator());
+    bisr.idlLoaderItf = IDLLoaderChainFactory.newLoader(errorManager).loader;
     iisr.idlLocatorItf = idlLocator;
     isl.interfaceSignatureResolverItf = iisr;
 

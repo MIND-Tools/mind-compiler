@@ -273,8 +273,22 @@ public class GccCompilerWrapper implements CompilerWrapper, BindingController {
       cmd.add("-o");
       cmd.add(outputFile.getPath());
 
+      // archive files (i.e. '.a' files) are added at the end of the command
+      // line.
+      List<String> archiveFiles = null;
       for (final File inputFile : inputFiles) {
-        cmd.add(inputFile.getPath());
+        final String path = inputFile.getPath();
+        if (path.endsWith(".a")) {
+          if (archiveFiles == null) archiveFiles = new ArrayList<String>();
+          archiveFiles.add(path);
+        } else {
+          cmd.add(path);
+        }
+      }
+      if (archiveFiles != null) {
+        for (final String path : archiveFiles) {
+          cmd.add(path);
+        }
       }
 
       final String linkerScript = getLinkerScript(context);

@@ -37,7 +37,7 @@ public class VarArgsDualAnnotationProcessor
     implements
       IDLLoaderAnnotationProcessor {
 
-  public void processAnnotation(final Annotation annotation, final Node node,
+  public IDL processAnnotation(final Annotation annotation, final Node node,
       final IDL idl, final IDLLoaderPhase phase,
       final Map<Object, Object> context) throws ADLException {
     assert annotation instanceof VarArgsDual;
@@ -45,7 +45,7 @@ public class VarArgsDualAnnotationProcessor
       if (((Method) node).getVaArgs().compareTo(Method.TRUE) == 0) {
         // TODO not really needed as getVaArgs() only return "true" or
         // null (cf org.ow2.mind.idl.parser.JTBProcessor)
-        return;
+        return null;
       }
     }
 

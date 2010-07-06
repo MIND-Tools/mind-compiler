@@ -31,7 +31,7 @@ public class AppTest extends TestCase {
   protected void setUp() throws Exception {
     final ErrorManager errorManager = ErrorManagerFactory
         .newSimpleErrorManager();
-    loader = IDLLoaderChainFactory.newLoader(errorManager);
+    loader = IDLLoaderChainFactory.newLoader(errorManager).loader;
     idlVisitor = IDLBackendFactory.newIDLCompiler(loader);
 
     context = new HashMap<Object, Object>();

@@ -43,6 +43,7 @@ import org.objectweb.fractal.adl.interfaces.InterfaceContainer;
 import org.objectweb.fractal.adl.types.TypeInterface;
 import org.objectweb.fractal.api.control.BindingController;
 import org.ow2.mind.NodeContainerDecoration;
+import org.ow2.mind.PathHelper;
 import org.ow2.mind.adl.annotation.predefined.Singleton;
 import org.ow2.mind.adl.generic.ast.FormalTypeParameterContainer;
 import org.ow2.mind.adl.generic.ast.TypeArgumentContainer;
@@ -580,9 +581,54 @@ public class ASTHelper {
     return newNode(nodeFactory, "binding", Binding.class);
   }
 
+  public static final String FROM_COMPOSITE_CONTROLLER_DECORATION = "from-composite-controller";
+
+  public static void setFromCompositeControllerDecoration(
+      final Binding binding, final boolean b) {
+    binding.astSetDecoration(FROM_COMPOSITE_CONTROLLER_DECORATION, b);
+  }
+
+  public static boolean isFromCompositeControllerDecoration(
+      final Binding binding) {
+    final Boolean b = (Boolean) binding
+        .astGetDecoration(FROM_COMPOSITE_CONTROLLER_DECORATION);
+    return b != null && b;
+  }
+
+  public static final String TO_COMPOSITE_CONTROLLER_DECORATION = "to-composite-controller";
+
+  public static void setToCompositeControllerDecoration(final Binding binding,
+      final boolean b) {
+    binding.astSetDecoration(TO_COMPOSITE_CONTROLLER_DECORATION, b);
+  }
+
+  public static boolean isToCompositeControllerDecoration(final Binding binding) {
+    final Boolean b = (Boolean) binding
+        .astGetDecoration(TO_COMPOSITE_CONTROLLER_DECORATION);
+    return b != null && b;
+  }
+
   // ---------------------------------------------------------------------------
   // Implementation helper methods
   // ---------------------------------------------------------------------------
+
+  /**
+   * Returns <code>true</code> if the given source node refers to a pre-compiled
+   * file (i.e. it refers to a file that ends with <code>.o</code>,
+   * <code>.a</code>, <code>.so</code> or <code>.dll</code>.
+   * 
+   * @param src a source node.
+   * @return code>true</code> if the given source node refers to a pre-compiled
+   *         file.
+   */
+  public static boolean isPreCompiled(final Source src) {
+    final String srcPath = src.getPath();
+    if (srcPath == null) return false;
+    final String srcExt = PathHelper.getExtension(srcPath);
+    return srcExt != null
+        && (srcExt.equals("o") || srcExt.equals("a") || srcExt.equals("so") || srcExt
+            .equals("dll"));
+  }
 
   /**
    * Create a new {@link Source} node using the given {@link NodeFactory}

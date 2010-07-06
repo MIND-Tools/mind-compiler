@@ -25,14 +25,17 @@ package org.ow2.mind.idl.parser;
 import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
 import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Map;
 
 import org.objectweb.fractal.adl.ADLException;
+import org.objectweb.fractal.adl.CompilerError;
 import org.objectweb.fractal.adl.error.BasicErrorLocator;
 import org.objectweb.fractal.adl.error.ErrorLocator;
+import org.objectweb.fractal.adl.error.GenericErrors;
 import org.objectweb.fractal.adl.xml.XMLNodeFactory;
 import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.fractal.api.control.BindingController;
@@ -91,17 +94,39 @@ public class IDLFileLoader implements IDLLoader, BindingController {
 
   protected InterfaceDefinition loadInterfaceDefinition(final String name,
       final Map<Object, Object> context) throws ADLException {
-    final URL idlFile = locateItf(name, context);
-
-    InterfaceDefinition itf;
-    try {
-      itf = readItf(idlFile);
-    } catch (final IOException e) {
+    final InputStream is;
+    final String path;
+    final Object registeredIDL = IDLParserContextHelper.getRegisteredIDL(name,
+        context);
+    if (registeredIDL != null) {
+      if (registeredIDL instanceof InterfaceDefinition) {
+        return (InterfaceDefinition) registeredIDL;
+      } else if (registeredIDL instanceof String) {
+        is = new ByteArrayInputStream(((String) registeredIDL).getBytes());
+        path = "<generated>";
+      } else {
+        throw new CompilerError(GenericErrors.INTERNAL_ERROR,
+            "Unexpected type for registered ADL");
+      }
+    } else {
+      final URL idlFile = locateItf(name, context);
+      path = idlFile.getPath();
+      try {
+        is = idlFile.openStream();
+      } catch (final IOException e) {
       errorManagerItf.logFatal(IDLErrors.IO_ERROR, e, idlFile.getPath());
       // never executed (logFatal throw an ADLException).
       return null;
+      }
+    }
+    InterfaceDefinition itf;
+    try {
+      final Parser parser = new Parser(is);
+      final JTBProcessor processor = new JTBProcessor(nodeFactoryItf, DTD, path);
+      final ITFFile content = parser.ITFFile();
+      itf = processor.toInterfaceDefinition(content);
     } catch (final ParseException e) {
-      final ErrorLocator locator = new BasicErrorLocator(idlFile.getPath(),
+      final ErrorLocator locator = new BasicErrorLocator(path,
           e.currentToken.beginLine, e.currentToken.beginColumn);
       errorManagerItf.logFatal(IDLErrors.PARSE_ERROR, locator, e.getMessage());
       // never executed (logFatal throw an ADLException).
@@ -128,30 +153,43 @@ public class IDLFileLoader implements IDLLoader, BindingController {
     return srcFile;
   }
 
-  protected InterfaceDefinition readItf(final URL srcFile) throws IOException,
-      ParseException {
-    final InputStream is = srcFile.openStream();
-    final Parser parser = new Parser(is);
-    final JTBProcessor processor = new JTBProcessor(nodeFactoryItf, DTD,
-        srcFile.getPath());
-    final ITFFile content = parser.ITFFile();
-    return processor.toInterfaceDefinition(content);
-  }
-
   protected SharedTypeDefinition loadSharedTypeDefinition(final String name,
       final Map<Object, Object> context) throws ADLException {
-    final URL idtFile = locateIdt(name, context);
+    final InputStream is;
+    final String path;
+    final Object registeredIDL = IDLParserContextHelper.getRegisteredIDL(name,
+        context);
+    if (registeredIDL != null) {
+      if (registeredIDL instanceof SharedTypeDefinition) {
+        return (SharedTypeDefinition) registeredIDL;
+      } else if (registeredIDL instanceof String) {
+        is = new ByteArrayInputStream(((String) registeredIDL).getBytes());
+        path = "<generated>";
+      } else {
+        throw new CompilerError(GenericErrors.INTERNAL_ERROR,
+            "Unexpected type for registered ADL");
+      }
+    } else {
+      final URL idtFile = locateIdt(name, context);
+      path = idtFile.getPath();
+      try {
+        is = idtFile.openStream();
+      } catch (final IOException e) {
+        errorManagerItf.logFatal(IDLErrors.IO_ERROR, e, path);
+        // never executed (logFatal throw an ADLException).
+        return null;
+      }
+    }
 
     SharedTypeDefinition idt;
 
     try {
-      idt = readIdt(idtFile);
-    } catch (final IOException e) {
-      errorManagerItf.logFatal(IDLErrors.IO_ERROR, e, idtFile.getPath());
-      // never executed (logFatal throw an ADLException).
-      return null;
+      final Parser parser = new Parser(is);
+      final JTBProcessor processor = new JTBProcessor(nodeFactoryItf, DTD, path);
+      final IDTFile content = parser.IDTFile();
+      idt = processor.toSharedTypeDefinition(content);
     } catch (final ParseException e) {
-      final ErrorLocator locator = new BasicErrorLocator(idtFile.getPath(),
+      final ErrorLocator locator = new BasicErrorLocator(path,
           e.currentToken.beginLine, e.currentToken.beginColumn);
       errorManagerItf.logFatal(IDLErrors.PARSE_ERROR, locator, e.getMessage());
       // never executed (logFatal throw an ADLException).

@@ -52,7 +52,7 @@ public class CheckFractalAPITest {
   @BeforeTest(alwaysRun = true)
   public void setUp() {
     errorManager = ErrorManagerFactory.newSimpleErrorManager();
-    idlLoader = IDLLoaderChainFactory.newLoader(errorManager);
+    idlLoader = IDLLoaderChainFactory.newLoader(errorManager).loader;
     context = new HashMap<Object, Object>();
   }
 

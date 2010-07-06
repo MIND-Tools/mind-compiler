@@ -70,7 +70,7 @@ public class CheckDelegatesTest {
   @BeforeTest(alwaysRun = true)
   public void setUp() {
     errorManager = ErrorManagerFactory.newSimpleErrorManager();
-    idlLoader = IDLLoaderChainFactory.newLoader(errorManager);
+    idlLoader = IDLLoaderChainFactory.newLoader(errorManager).loader;
     idlCompiler = IDLBackendFactory.newIDLCompiler(idlLoader);
 
     final GccCompilerWrapper gcw = new GccCompilerWrapper();

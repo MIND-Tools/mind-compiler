@@ -38,7 +38,7 @@ import org.ow2.mind.error.ErrorManagerFactory;
 import org.ow2.mind.idl.IDLErrorLoader;
 import org.ow2.mind.idl.IDLLoader;
 import org.ow2.mind.idl.IDLLoaderChainFactory;
-import org.ow2.mind.idl.annotation.IDLLoaderAnnotationProcessor;
+import org.ow2.mind.idl.annotation.AbstractIDLLoaderAnnotationProcessor;
 import org.ow2.mind.idl.annotation.IDLLoaderPhase;
 import org.ow2.mind.idl.ast.IDL;
 import org.ow2.mind.idl.ast.InterfaceDefinition;
@@ -58,7 +58,7 @@ public class TestIDLAnnotationProcessor {
     final IDLErrorLoader errorLoader = new IDLErrorLoader();
     errorLoader.errorManagerItf = errorManager;
     errorLoader.clientIDLLoaderItf = IDLLoaderChainFactory
-        .newLoader(errorManager);
+        .newLoader(errorManager).loader;
     loader = errorLoader;
     // ensure that phases are empty.
     FooProcessor.phases = new HashSet<IDLLoaderPhase>();
@@ -71,11 +71,11 @@ public class TestIDLAnnotationProcessor {
     assertTrue(FooProcessor.phases.contains(IDLLoaderPhase.AFTER_CHECKING));
   }
 
-  public static class FooProcessor implements IDLLoaderAnnotationProcessor {
+  public static class FooProcessor extends AbstractIDLLoaderAnnotationProcessor {
 
     public static Set<IDLLoaderPhase> phases = new HashSet<IDLLoaderPhase>();
 
-    public void processAnnotation(final Annotation annotation, final Node node,
+    public IDL processAnnotation(final Annotation annotation, final Node node,
         final IDL idl, final IDLLoaderPhase phase,
         final Map<Object, Object> context) throws ADLException {
       assertNotNull(annotation);
@@ -86,6 +86,7 @@ public class TestIDLAnnotationProcessor {
 
       assertTrue(annotation instanceof FooAnnotation);
       assertTrue(node instanceof InterfaceDefinition || node instanceof Method);
+      return null;
     }
   }
 

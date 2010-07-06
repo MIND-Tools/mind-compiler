@@ -52,7 +52,7 @@ wrapMethod(itfName, method, dualMeths) ::= <<
 <methDef(itfName=itfName, method=method, vaArgs="false")>{
 <if (! (isVoidMethod(method=method)))><varDef(type=method.type, name="ret")>;<endif>
 va_list paramList;
-va_start(paramList, <first(method.parameters).name>);
+va_start(paramList, <last(method.parameters).name>);
 <if (! (isVoidMethod(method=method)))>ret = <endif><dualMeths.(method.name)>(<method.parameters:parameterName(parameter=it); separator=", ">, paramList);
 va_end(paramList);
 <if (! (isVoidMethod(method=method)))>return <endif>ret;

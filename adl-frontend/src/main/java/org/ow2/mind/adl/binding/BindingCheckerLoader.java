@@ -32,7 +32,9 @@ import static org.ow2.mind.adl.ast.ASTHelper.getResolvedComponentDefinition;
 import static org.ow2.mind.adl.ast.Binding.THIS_COMPONENT;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.AbstractLoader;
@@ -42,11 +44,17 @@ import org.objectweb.fractal.adl.interfaces.Interface;
 import org.objectweb.fractal.adl.interfaces.InterfaceContainer;
 import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.fractal.api.control.IllegalBindingException;
+import org.ow2.mind.adl.ast.ASTHelper;
 import org.ow2.mind.adl.ast.Binding;
 import org.ow2.mind.adl.ast.BindingContainer;
 import org.ow2.mind.adl.ast.Component;
 import org.ow2.mind.adl.ast.ComponentContainer;
 import org.ow2.mind.error.ErrorManager;
+import org.ow2.mind.adl.membrane.ast.Controller;
+import org.ow2.mind.adl.membrane.ast.ControllerContainer;
+import org.ow2.mind.adl.membrane.ast.ControllerInterface;
+import org.ow2.mind.adl.membrane.ast.InternalInterfaceContainer;
+import org.ow2.mind.adl.membrane.ast.MembraneASTHelper;
 
 public class BindingCheckerLoader extends AbstractLoader {
 
@@ -100,14 +108,35 @@ public class BindingCheckerLoader extends AbstractLoader {
       subComponentInterfaces.put(subComponent.getName(), subComponentItfs);
     }
 
-    final Interface[] interfaces = castNodeError(container,
-        InterfaceContainer.class).getInterfaces();
-    final Map<String, Interface> componentItfs = new HashMap<String, Interface>(
-        interfaces.length);
-    for (final Interface itf : interfaces) {
-      componentItfs.put(itf.getName(), itf);
-    }
+    // add composite interfaces
+    final Map<String, Interface> componentItfs = new HashMap<String, Interface>();
     subComponentInterfaces.put(null, componentItfs);
+    // first add internal interfaces
+    if (container instanceof InternalInterfaceContainer) {
+      for (final Interface itf : ((InternalInterfaceContainer) container)
+          .getInternalInterfaces()) {
+        componentItfs.put(itf.getName(), itf);
+      }
+    }
+    // then add server interfaces of controllers
+    final Set<Interface> controllerItfs = new HashSet<Interface>();
+    if (container instanceof ControllerContainer) {
+      for (final Controller controller : ((ControllerContainer) container)
+          .getControllers()) {
+        for (final ControllerInterface ctrlItf : controller
+            .getControllerInterfaces()) {
+          if (!componentItfs.containsKey(ctrlItf.getName())
+              && !MembraneASTHelper.isInternalInterface(ctrlItf)) {
+            final Interface itf = ASTHelper.getInterface(container,
+                ctrlItf.getName());
+            if (itf != null) {
+              componentItfs.put(ctrlItf.getName(), itf);
+              controllerItfs.add(itf);
+            }
+          }
+        }
+      }
+    }
 
     for (final Binding binding : bindings) {
 
@@ -122,9 +151,17 @@ public class BindingCheckerLoader extends AbstractLoader {
       if (THIS_COMPONENT.equals(binding.getFromComponent())) {
         bindingCheckerItf.checkFromCompositeToSubcomponentBinding(from, to,
             binding, binding);
+        if (controllerItfs.contains(from)) {
+          // From itf is a controller interface
+          ASTHelper.setFromCompositeControllerDecoration(binding, true);
+        }
       } else if (THIS_COMPONENT.equals(binding.getToComponent())) {
         bindingCheckerItf.checkFromSubcomponentToCompositeBinding(from, to,
             binding, binding);
+        if (controllerItfs.contains(to)) {
+          // To itf is a controller interface
+          ASTHelper.setToCompositeControllerDecoration(binding, true);
+        }
       } else {
         bindingCheckerItf.checkBinding(from, to, binding, binding);
       }

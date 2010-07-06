@@ -9,5 +9,12 @@ primitive <adlName> {
 }
 >>
 
+GenerateIDL(idlName) ::= <<
+interface <idlName> {
+  int add(int a, int b);
+  int sub(int a, int b);
+}
+>>
+
 }$$ 
 }
