@@ -13,4 +13,11 @@ typedef struct s myStruct;
 
 typedef test2 test2ItfRef; 
 
+// MIND-98
+typedef struct my {
+  int a;
+  int b;
+} my_s, *my_s_ptr;
+
+
 #endif
