@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.objectweb.fractal.adl.ADLException;
+import org.objectweb.fractal.adl.CompilerError;
 import org.objectweb.fractal.adl.error.GenericErrors;
 import org.ow2.mind.plugin.PluginManager;
 import org.ow2.mind.plugin.ast.Extension;
@@ -70,7 +71,7 @@ public final class PredefinedAnnotationsHelper {
         }
       }
     }
-    throw new ADLException(GenericErrors.GENERIC_ERROR,
+    throw new CompilerError(GenericErrors.GENERIC_ERROR,
         "Annotation package element not found.");
   }
 }

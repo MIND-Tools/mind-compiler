@@ -31,13 +31,16 @@ import org.objectweb.fractal.adl.types.TypeInterfaceUtil;
 import org.ow2.mind.adl.ast.Attribute;
 import org.ow2.mind.adl.ast.AttributeContainer;
 import org.ow2.mind.adl.idl.InterfaceDefinitionDecorationHelper;
+import org.ow2.mind.error.ErrorManager;
 import org.ow2.mind.idl.ast.InterfaceDefinition;
 import org.ow2.mind.idl.ast.Method;
 
 public class CPLChecker {
-  protected final Definition definition;
+  protected final Definition   definition;
+  protected final ErrorManager errorManager;
 
-  public CPLChecker(final Definition definition) {
+  public CPLChecker(final ErrorManager errorManager, final Definition definition) {
+    this.errorManager = errorManager;
     this.definition = definition;
   }
 
@@ -73,14 +76,14 @@ public class CPLChecker {
       }
 
       if (!foundItf) {
-        throw new ADLException(MPPErrors.UNKNOWN_INTERFACE, itfName);
+        errorManager.logError(MPPErrors.UNKNOWN_INTERFACE, itfName);
       }
       if (isServer) {
         if (!foundMeth) {
-          throw new ADLException(MPPErrors.UNKNOWN_METHOD, itfName, methName);
+          errorManager.logError(MPPErrors.UNKNOWN_METHOD, itfName, methName);
         }
       } else {
-        throw new ADLException(MPPErrors.INVALID_CLIENT_INTERFACE, itfName,
+        errorManager.logError(MPPErrors.INVALID_CLIENT_INTERFACE, itfName,
             methName);
       }
     }
@@ -113,10 +116,10 @@ public class CPLChecker {
       }
 
       if (!foundItf) {
-        throw new ADLException(MPPErrors.UNKNOWN_INTERFACE, itfName);
+        errorManager.logError(MPPErrors.UNKNOWN_INTERFACE, itfName);
       }
       if (!foundMeth) {
-        throw new ADLException(MPPErrors.UNKNOWN_METHOD, itfName, methName);
+        errorManager.logError(MPPErrors.UNKNOWN_METHOD, itfName, methName);
       }
     }
 
@@ -136,7 +139,7 @@ public class CPLChecker {
       }
 
       if (!foundAtt) {
-        throw new ADLException(MPPErrors.UNKNOWN_INTERFACE, attributeName);
+        errorManager.logError(MPPErrors.UNKNOWN_INTERFACE, attributeName);
       }
     }
   }

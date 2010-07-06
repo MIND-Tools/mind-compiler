@@ -56,9 +56,10 @@ import org.ow2.mind.compilation.CompilerErrors;
 import org.ow2.mind.compilation.CompilerWrapper;
 import org.ow2.mind.compilation.DependencyHelper;
 import org.ow2.mind.compilation.ExecutionHelper;
+import org.ow2.mind.compilation.ExecutionHelper.ExecutionResult;
 import org.ow2.mind.compilation.LinkerCommand;
 import org.ow2.mind.compilation.PreprocessorCommand;
-import org.ow2.mind.compilation.ExecutionHelper.ExecutionResult;
+import org.ow2.mind.error.ErrorManager;
 import org.ow2.mind.io.OutputFileLocator;
 
 public class GccCompilerWrapper implements CompilerWrapper, BindingController {
@@ -71,6 +72,9 @@ public class GccCompilerWrapper implements CompilerWrapper, BindingController {
   // ---------------------------------------------------------------------------
   // Client interfaces
   // ---------------------------------------------------------------------------
+
+  /** The {@link ErrorManager} client interface used to log errors. */
+  public ErrorManager         errorManagerItf;
 
   public OutputFileLocator    outputFileLocatorItf;
 
@@ -155,8 +159,8 @@ public class GccCompilerWrapper implements CompilerWrapper, BindingController {
       }
 
       if (result.getExitValue() != 0) {
-        throw new ADLException(CompilerErrors.COMPILER_ERROR, outputFile
-            .getPath(), result.getOutput());
+        throw new ADLException(CompilerErrors.COMPILER_ERROR,
+            outputFile.getPath(), result.getOutput());
       }
       if (result.getOutput() != null) {
         // command returns 0 and generates an output (warning)
@@ -235,8 +239,8 @@ public class GccCompilerWrapper implements CompilerWrapper, BindingController {
       }
 
       if (result.getExitValue() != 0) {
-        throw new ADLException(CompilerErrors.COMPILER_ERROR, outputFile
-            .getPath(), result.getOutput());
+        throw new ADLException(CompilerErrors.COMPILER_ERROR,
+            outputFile.getPath(), result.getOutput());
       }
       if (result.getOutput() != null) {
         // command returns 0 and generates an output (warning)
@@ -287,8 +291,8 @@ public class GccCompilerWrapper implements CompilerWrapper, BindingController {
       final ExecutionResult result = ExecutionHelper
           .exec(getDescription(), cmd);
       if (result.getExitValue() != 0) {
-        throw new ADLException(CompilerErrors.LINKER_ERROR, outputFile
-            .getPath(), result.getOutput());
+        throw new ADLException(CompilerErrors.LINKER_ERROR,
+            outputFile.getPath(), result.getOutput());
       }
       if (result.getOutput() != null) {
         // command returns 0 and generates an output (warning)
@@ -353,15 +357,8 @@ public class GccCompilerWrapper implements CompilerWrapper, BindingController {
 
     // process depMap to replace $TEMP_DIR occurrences
     final Map<File, List<File>> filteredDepMap;
-    String tempDir = null;
-    try {
-      tempDir = outputFileLocatorItf.getCSourceTemporaryOutputDir(context)
-          .getPath();
-    } catch (final ADLException e) {
-      if (depLogger.isLoggable(Level.WARNING))
-        depLogger.warning("Error while processing dependency file '"
-            + dependencyOutputFile + "' : " + e.getMessage());
-    }
+    final String tempDir = outputFileLocatorItf.getCSourceTemporaryOutputDir(
+        context).getPath();
     if (tempDir != null) {
       filteredDepMap = new HashMap<File, List<File>>(depMap.size());
       for (final Map.Entry<File, List<File>> entry : depMap.entrySet()) {
@@ -419,7 +416,9 @@ public class GccCompilerWrapper implements CompilerWrapper, BindingController {
       throws NoSuchInterfaceException, IllegalBindingException {
     checkItfName(itfName);
 
-    if (itfName.equals(OutputFileLocator.ITF_NAME)) {
+    if (itfName.equals(ErrorManager.ITF_NAME)) {
+      errorManagerItf = (ErrorManager) value;
+    } else if (itfName.equals(OutputFileLocator.ITF_NAME)) {
       outputFileLocatorItf = (OutputFileLocator) value;
     } else {
       throw new NoSuchInterfaceException("No client interface named '"
@@ -429,13 +428,15 @@ public class GccCompilerWrapper implements CompilerWrapper, BindingController {
   }
 
   public String[] listFc() {
-    return listFcHelper(OutputFileLocator.ITF_NAME);
+    return listFcHelper(ErrorManager.ITF_NAME, OutputFileLocator.ITF_NAME);
   }
 
   public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
     checkItfName(itfName);
 
-    if (itfName.equals(OutputFileLocator.ITF_NAME)) {
+    if (itfName.equals(ErrorManager.ITF_NAME)) {
+      return errorManagerItf;
+    } else if (itfName.equals(OutputFileLocator.ITF_NAME)) {
       return outputFileLocatorItf;
     } else {
       throw new NoSuchInterfaceException("No client interface named '"
@@ -447,7 +448,9 @@ public class GccCompilerWrapper implements CompilerWrapper, BindingController {
       IllegalBindingException {
     checkItfName(itfName);
 
-    if (itfName.equals(OutputFileLocator.ITF_NAME)) {
+    if (itfName.equals(ErrorManager.ITF_NAME)) {
+      errorManagerItf = null;
+    } else if (itfName.equals(OutputFileLocator.ITF_NAME)) {
       outputFileLocatorItf = null;
     } else {
       throw new NoSuchInterfaceException("No client interface named '"

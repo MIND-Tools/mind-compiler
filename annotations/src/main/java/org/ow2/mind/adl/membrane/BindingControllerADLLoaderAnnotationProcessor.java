@@ -66,8 +66,9 @@ public class BindingControllerADLLoaderAnnotationProcessor
       }
 
       // definition has no client interface
-      throw new ADLException(ADLErrors.INVALID_BINDING_CONTROLLER_NO_BINDING,
+      errorManagerItf.logError(ADLErrors.INVALID_BINDING_CONTROLLER_NO_BINDING,
           node);
+      return null;
     }
   }
 }

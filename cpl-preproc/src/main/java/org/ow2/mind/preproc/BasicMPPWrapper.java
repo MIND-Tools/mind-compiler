@@ -22,6 +22,8 @@
 
 package org.ow2.mind.preproc;
 
+import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
+import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
 import static org.ow2.mind.preproc.InvocationHelper.invokeMethod;
 
 import java.io.File;
@@ -48,18 +50,33 @@ import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.error.Error;
 import org.objectweb.fractal.adl.error.GenericErrors;
 import org.objectweb.fractal.adl.util.FractalADLLogManager;
+import org.objectweb.fractal.api.NoSuchInterfaceException;
+import org.objectweb.fractal.api.control.BindingController;
+import org.objectweb.fractal.api.control.IllegalBindingException;
+import org.ow2.mind.error.ErrorManager;
 import org.ow2.mind.plugin.PluginManager;
 
-public class BasicMPPWrapper implements MPPWrapper {
+public class BasicMPPWrapper implements MPPWrapper, BindingController {
 
   protected static Logger    logger             = FractalADLLogManager
                                                     .getLogger("io");
+
+  // ---------------------------------------------------------------------------
+  // Client interfaces
+  // ---------------------------------------------------------------------------
+
+  /** The {@link ErrorManager} client interface used to log errors. */
+  public ErrorManager        errorManagerItf;
 
   /** Plugin manager client interface name **/
   public static final String PLUGIN_MANAGER_ITF = "plugin-manager";
 
   /** Plugin manager client interface **/
   public PluginManager       pluginManagerItf;
+
+  // ---------------------------------------------------------------------------
+  // Implementation of the MPPWrapper interface
+  // ---------------------------------------------------------------------------
 
   public MPPCommand newMPPCommand(final Definition definition,
       final Map<Object, Object> context) {
@@ -80,7 +97,7 @@ public class BasicMPPWrapper implements MPPWrapper {
 
     BasicMPPCommand(final Definition definition,
         final Map<Object, Object> context) {
-      this.cplChecker = new CPLChecker(definition);
+      this.cplChecker = new CPLChecker(errorManagerItf, definition);
       this.context = context;
     }
 
@@ -210,6 +227,55 @@ public class BasicMPPWrapper implements MPPWrapper {
 
     public String getDescription() {
       return "MPP: " + outputFile.getPath();
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Overridden BindingController methods
+  // ---------------------------------------------------------------------------
+
+  public void bindFc(final String itfName, final Object value)
+      throws NoSuchInterfaceException, IllegalBindingException {
+    checkItfName(itfName);
+
+    if (itfName.equals(ErrorManager.ITF_NAME)) {
+      errorManagerItf = (ErrorManager) value;
+    } else if (itfName.equals(PLUGIN_MANAGER_ITF)) {
+      pluginManagerItf = (PluginManager) value;
+    } else {
+      throw new NoSuchInterfaceException("No client interface named '"
+          + itfName + "'");
+    }
+  }
+
+  public String[] listFc() {
+    return listFcHelper(ErrorManager.ITF_NAME, PLUGIN_MANAGER_ITF);
+  }
+
+  public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
+    checkItfName(itfName);
+
+    if (itfName.equals(ErrorManager.ITF_NAME)) {
+      return errorManagerItf;
+    } else if (itfName.equals(PLUGIN_MANAGER_ITF)) {
+      return pluginManagerItf;
+    } else {
+      throw new NoSuchInterfaceException("No client interface named '"
+          + itfName + "'");
+    }
+  }
+
+  public void unbindFc(final String itfName) throws NoSuchInterfaceException,
+      IllegalBindingException {
+    checkItfName(itfName);
+
+    if (itfName.equals(ErrorManager.ITF_NAME)) {
+      errorManagerItf = null;
+    } else if (itfName.equals(PLUGIN_MANAGER_ITF)) {
+      pluginManagerItf = null;
+    } else {
+      throw new NoSuchInterfaceException("No client interface named '"
+          + itfName + "'");
     }
   }
 }

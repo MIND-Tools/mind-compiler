@@ -31,7 +31,6 @@ import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.CompilerError;
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.Loader;
-import org.objectweb.fractal.adl.bindings.BindingErrors;
 import org.objectweb.fractal.adl.error.GenericErrors;
 import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.fractal.api.control.BindingController;
@@ -235,7 +234,9 @@ public final class ADLBackendFactory {
     try {
       ((BindingController) visitor).bindFc(itfName, serviceMap.get(itfName));
     } catch (final NoSuchInterfaceException e) {
-      throw new ADLException(BindingErrors.INVALID_ITF_NO_SUCH_INTERFACE, e);
+      throw new CompilerError(GenericErrors.INTERNAL_ERROR,
+          "Illegal binding of the interface '" + itfName + "' of the visitor '"
+              + visitorName + "'.", e);
     } catch (final IllegalBindingException e) {
       throw new CompilerError(GenericErrors.INTERNAL_ERROR,
           "Illegal binding of the interface '" + itfName + "' of the visitor '"
@@ -256,7 +257,9 @@ public final class ADLBackendFactory {
     try {
       dispatcher.bindFc(itfName, visitor);
     } catch (final NoSuchInterfaceException e) {
-      throw new ADLException(BindingErrors.INVALID_ITF_NO_SUCH_INTERFACE, e);
+      throw new CompilerError(GenericErrors.INTERNAL_ERROR,
+          "Illegal binding of the interface '" + itfName + "' of the visitor '"
+              + visitorName + "'.", e);
     } catch (final IllegalBindingException e) {
 
       throw new CompilerError(GenericErrors.INTERNAL_ERROR,

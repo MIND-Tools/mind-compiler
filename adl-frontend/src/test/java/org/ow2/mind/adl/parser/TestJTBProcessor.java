@@ -33,7 +33,8 @@ import org.objectweb.fractal.adl.xml.XMLNodeFactory;
 import org.objectweb.fractal.adl.xml.XMLNodeFactoryImpl;
 import org.ow2.mind.adl.jtb.Parser;
 import org.ow2.mind.adl.jtb.syntaxtree.ADLFile;
-import org.ow2.mind.adl.parser.JTBProcessor;
+import org.ow2.mind.error.ErrorManager;
+import org.ow2.mind.error.ErrorManagerFactory;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -41,18 +42,20 @@ public class TestJTBProcessor {
 
   protected static final String DTD = "classpath://org/ow2/mind/adl/mind_v1.dtd";
   XMLNodeFactory                nodeFactory;
+  ErrorManager                  errorManager;
   JTBProcessor                  processor;
 
   @BeforeMethod(alwaysRun = true)
   protected void setUp() throws Exception {
     nodeFactory = new XMLNodeFactoryImpl();
+    errorManager = ErrorManagerFactory.newSimpleErrorManager();
   }
 
   protected Parser getParser(final String fileName) throws Exception {
     final ClassLoader loader = getClass().getClassLoader();
     final InputStream is = loader.getResourceAsStream(fileName);
     assertNotNull(is, "Can't find input file \"" + fileName + "\"");
-    processor = new JTBProcessor(nodeFactory, DTD, fileName);
+    processor = new JTBProcessor(errorManager, nodeFactory, DTD, fileName);
 
     return new Parser(is);
   }

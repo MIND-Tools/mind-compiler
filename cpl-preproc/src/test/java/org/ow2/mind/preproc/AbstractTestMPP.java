@@ -39,6 +39,8 @@ import org.ow2.mind.compilation.CompilerCommand;
 import org.ow2.mind.compilation.CompilerWrapper;
 import org.ow2.mind.compilation.PreprocessorCommand;
 import org.ow2.mind.compilation.gcc.GccCompilerWrapper;
+import org.ow2.mind.error.ErrorManager;
+import org.ow2.mind.error.ErrorManagerFactory;
 import org.ow2.mind.io.BasicOutputFileLocator;
 import org.ow2.mind.plugin.BasicPluginManager;
 import org.ow2.mind.st.STNodeFactoryImpl;
@@ -61,14 +63,21 @@ public class AbstractTestMPP {
 
   @BeforeTest(alwaysRun = true)
   public void setUp() {
+    final ErrorManager errorManager = ErrorManagerFactory
+        .newSimpleErrorManager();
     pluginManager = new BasicPluginManager();
     stNodeFactory = new STNodeFactoryImpl();
     pluginManager.nodeFactoryItf = stNodeFactory;
 
-    mppWrapper = new BasicMPPWrapper();
-    ((BasicMPPWrapper) mppWrapper).pluginManagerItf = pluginManager;
-    compilerWrapper = new GccCompilerWrapper();
+    final BasicMPPWrapper bmppw = new BasicMPPWrapper();
+    bmppw.pluginManagerItf = pluginManager;
+    mppWrapper = bmppw;
+    final GccCompilerWrapper gcw = new GccCompilerWrapper();
+    compilerWrapper = gcw;
     executor = new BasicCompilationCommandExecutor();
+
+    gcw.errorManagerItf = errorManager;
+    bmppw.errorManagerItf = errorManager;
 
     context = new HashMap<Object, Object>();
     final String buildDirName = "target" + File.separator + "build";

@@ -56,17 +56,19 @@ public class ContentControllerADLLoaderAnnotationProcessor
       final Node node, final Definition definition, final ADLLoaderPhase phase,
       final Map<Object, Object> context) throws ADLException {
     if (!(definition instanceof ComponentContainer)) {
-      throw new ADLException(
+      errorManagerItf.logError(
           ADLErrors.INVALID_CONTENT_CONTROLLER_NOT_A_COMPOSITE, definition);
+      return null;
     }
     for (final Component component : ((ComponentContainer) definition)
         .getComponents()) {
       final Definition subCompDef = ASTHelper.getResolvedComponentDefinition(
           component, loaderItf, context);
       if (ASTHelper.getInterface(subCompDef, COMPONENT) == null)
-        throw new ADLException(
-            ADLErrors.INVALID_CONTENT_CONTROLLER_MISSING_COMPONENT_CONTROLLER_ON_SUB_COMPONENT,
-            component, component.getName());
+        errorManagerItf
+            .logError(
+                ADLErrors.INVALID_CONTENT_CONTROLLER_MISSING_COMPONENT_CONTROLLER_ON_SUB_COMPONENT,
+                component, component.getName());
       boolean hasClientItf = false;
       for (final Interface itf : ((InterfaceContainer) subCompDef)
           .getInterfaces()) {
@@ -77,9 +79,10 @@ public class ContentControllerADLLoaderAnnotationProcessor
       }
       if (hasClientItf
           && ASTHelper.getInterface(subCompDef, BINDING_CONTROLLER) == null)
-        throw new ADLException(
-            ADLErrors.INVALID_CONTENT_CONTROLLER_MISSING_BINDING_CONTROLLER_ON_SUB_COMPONENT,
-            component, component.getName());
+        errorManagerItf
+            .logError(
+                ADLErrors.INVALID_CONTENT_CONTROLLER_MISSING_BINDING_CONTROLLER_ON_SUB_COMPONENT,
+                component, component.getName());
     }
 
     addUsedIDL(definition, BINDING_CONTROLLER_SIGNATURE, context);

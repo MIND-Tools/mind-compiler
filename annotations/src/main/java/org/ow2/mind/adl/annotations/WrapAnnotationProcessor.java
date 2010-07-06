@@ -29,7 +29,6 @@ import org.antlr.stringtemplate.StringTemplate;
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.Node;
-import org.objectweb.fractal.adl.error.GenericErrors;
 import org.objectweb.fractal.adl.interfaces.Interface;
 import org.objectweb.fractal.adl.types.TypeInterface;
 import org.objectweb.fractal.adl.types.TypeInterfaceUtil;
@@ -86,20 +85,18 @@ public class WrapAnnotationProcessor
         st.setAttribute("dualMeths", dualMeths);
         // st.setAttribute("sourceInfo", sourceInfo);
 
-        try {
-          final Source src = (Source) nodeFactoryItf.newNode("source",
-              Source.class.getName());
-          src.setCCode(st.toString());
-          ((ImplementationContainer) definition).addSource(src);
-        } catch (final ClassNotFoundException e) {
-          throw new ADLException(GenericErrors.INTERNAL_ERROR, e);
-        }
+        final Source src = ASTHelper.newSource(nodeFactoryItf);
+        src.setCCode(st.toString());
+        ((ImplementationContainer) definition).addSource(src);
       } else {
-        throw new ADLException(AnnotationErrors.INVALID_ANNOTATION, node,
+        errorManagerItf.logError(AnnotationErrors.INVALID_ANNOTATION, node,
             "@Wrap. Client's interfaces cannot be wrapped.");
+        return null;
       }
     } else {
-      throw new ADLException(AnnotationErrors.INVALID_ANNOTATION, node,
+      errorManagerItf.logError(
+          AnnotationErrors.INVALID_ANNOTATION,
+          node,
           "@Wrap applied to interface " + ((Interface) node).getName()
               + ".\n Composite's interfaces cannot be wrapped: "
               + definition.astGetSource());

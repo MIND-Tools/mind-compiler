@@ -464,7 +464,8 @@ public final class Factory {
    * @param loader the loader to be used by the instantiator.
    * @return a graph instantiator
    */
-  public static Instantiator newInstantiator(final Loader loader) {
+  public static Instantiator newInstantiator(final ErrorManager errorManager,
+      final Loader loader) {
     final BasicInstantiator bi = new BasicInstantiator();
     final AttributeInstantiator ai = new AttributeInstantiator();
     final InstanceNameInstantiator ini = new InstanceNameInstantiator();
@@ -474,6 +475,11 @@ public final class Factory {
     ini.clientInstantiatorItf = bgi;
     bgi.clientInstantiatorItf = bi;
     bi.loaderItf = loader;
+
+    ai.errorManagerItf = errorManager;
+    ini.errorManagerItf = errorManager;
+    bgi.errorManagerItf = errorManager;
+
     return ai;
   }
 
@@ -484,6 +490,6 @@ public final class Factory {
    * @return a graph instantiator
    */
   public static Instantiator newInstantiator(final ErrorManager errorManager) {
-    return newInstantiator(newLoader(errorManager));
+    return newInstantiator(errorManager, newLoader(errorManager));
   }
 }

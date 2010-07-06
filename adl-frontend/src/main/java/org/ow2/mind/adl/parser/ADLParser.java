@@ -147,8 +147,8 @@ public class ADLParser implements Loader, BindingController {
   protected Definition readADL(final InputStream is, final String fileName)
       throws IOException, ParseException, ADLException {
     final Parser parser = new Parser(is);
-    final JTBProcessor processor = new JTBProcessor(nodeFactoryItf, DTD,
-        fileName);
+    final JTBProcessor processor = new JTBProcessor(errorManagerItf,
+        nodeFactoryItf, DTD, fileName);
     final ADLFile content = parser.ADLFile();
     return processor.toDefinition(content);
   }

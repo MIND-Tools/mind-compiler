@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.objectweb.fractal.adl.ADLException;
+import org.objectweb.fractal.adl.CompilerError;
 import org.objectweb.fractal.adl.error.GenericErrors;
 import org.ow2.mind.AbstractLauncher.CmdAppendOption;
 import org.ow2.mind.AbstractLauncher.CmdArgument;
@@ -118,37 +119,40 @@ public final class CommandLineOptionExtensionHelper {
           final Element element = (Element) node;
           CmdOption cmdOption = null;
           if (element.getNodeName().equals(FLAG)) {
-            cmdOption = new CmdFlag(element.getAttribute(SHORT_NAME), element
-                .getAttribute(LONG_NAME), element.getAttribute(DESCRIPTION));
+            cmdOption = new CmdFlag(element.getAttribute(SHORT_NAME),
+                element.getAttribute(LONG_NAME),
+                element.getAttribute(DESCRIPTION));
           } else if (element.getNodeName().equals(PROPERTIES)) {
             cmdOption = new CmdProperties(element.getAttribute(SHORT_NAME),
-                element.getAttribute(DESCRIPTION), element
-                    .getAttribute(ARG_NAME_DESC), element
-                    .getAttribute(ARG_VALUE_DESC));
+                element.getAttribute(DESCRIPTION),
+                element.getAttribute(ARG_NAME_DESC),
+                element.getAttribute(ARG_VALUE_DESC));
           } else if (element.getNodeName().equals(ARGUMENT)) {
             final boolean allowMultiple = element.getAttribute(ALLOW_MULTIPLE) != null
                 ? new Boolean(element.getAttribute(ALLOW_MULTIPLE))
-                    .booleanValue()
-                : false;
+                    .booleanValue() : false;
             cmdOption = new CmdArgument(element.getAttribute(SHORT_NAME),
-                element.getAttribute(LONG_NAME), element
-                    .getAttribute(DESCRIPTION), element.getAttribute(ARG_DESC),
+                element.getAttribute(LONG_NAME),
+                element.getAttribute(DESCRIPTION),
+                element.getAttribute(ARG_DESC),
                 element.getAttribute(DEFAULT_VALUE), allowMultiple);
           } else if (element.getNodeName().equals("cmdAppendOption")) {
             final String separator = element.getAttribute(SEPARATOR) != null
                 ? element.getAttribute(SEPARATOR)
                 : "";
             cmdOption = new CmdAppendOption(element.getAttribute(SHORT_NAME),
-                element.getAttribute(LONG_NAME), element
-                    .getAttribute(DESCRIPTION), element.getAttribute(ARG_DESC),
+                element.getAttribute(LONG_NAME),
+                element.getAttribute(DESCRIPTION),
+                element.getAttribute(ARG_DESC),
                 element.getAttribute(DEFAULT_VALUE), separator);
           } else if (element.getNodeName().equals("cmdPathOption")) {
             cmdOption = new CmdPathOption(element.getAttribute(SHORT_NAME),
-                element.getAttribute(LONG_NAME), element
-                    .getAttribute(DESCRIPTION), element.getAttribute(ARG_DESC));
+                element.getAttribute(LONG_NAME),
+                element.getAttribute(DESCRIPTION),
+                element.getAttribute(ARG_DESC));
           } else {
-            throw new ADLException("Unknown plugin element '"
-                + element.getNodeName() + "'.");
+            throw new CompilerError(GenericErrors.GENERIC_ERROR,
+                "Unknown plugin element '" + element.getNodeName() + "'.");
           }
           cmdOptions.add(cmdOption);
           handlerMap.put(cmdOption, newHandler(element.getAttribute(HANDLER)));
@@ -160,17 +164,17 @@ public final class CommandLineOptionExtensionHelper {
   private static CommandOptionHandler newHandler(final String handlerClassName)
       throws ADLException {
     try {
-      return CommandOptionHandler.class.getClassLoader().loadClass(
-          handlerClassName).asSubclass(CommandOptionHandler.class)
+      return CommandOptionHandler.class.getClassLoader()
+          .loadClass(handlerClassName).asSubclass(CommandOptionHandler.class)
           .newInstance();
     } catch (final InstantiationException e) {
-      throw new ADLException(GenericErrors.GENERIC_ERROR, e, "Handler class '"
+      throw new CompilerError(GenericErrors.GENERIC_ERROR, e, "Handler class '"
           + handlerClassName + "' cannot be instantiated.");
     } catch (final IllegalAccessException e) {
-      throw new ADLException(GenericErrors.GENERIC_ERROR, e,
+      throw new CompilerError(GenericErrors.GENERIC_ERROR, e,
           "Illegal access to the handler class '" + handlerClassName + "'.");
     } catch (final ClassNotFoundException e) {
-      throw new ADLException(GenericErrors.GENERIC_ERROR, e, "Handler class '"
+      throw new CompilerError(GenericErrors.GENERIC_ERROR, e, "Handler class '"
           + handlerClassName + "' not found.");
     }
   }

@@ -91,8 +91,8 @@ public final class AnnotationHelper {
       final Annotation previousAnnotation = annotations.put(
           annotation.getClass(), annotation);
       if (previousAnnotation != null) {
-        throw new ADLException(AnnotationErrors.DUPLICATED_ANNOTATION,
-            previousAnnotation);
+        throw new IllegalArgumentException(
+            "Can't specify the same annotation several time on a given element");
       }
     }
 

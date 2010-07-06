@@ -58,7 +58,7 @@ public class TestBinaryLoader {
     errorLoader.errorManagerItf = errorManager;
     loader = errorLoader;
 
-    instantiator = Factory.newInstantiator(loader);
+    instantiator = Factory.newInstantiator(errorManager, loader);
 
     binADLDir = new File("target/test/defs");
     rm(binADLDir);

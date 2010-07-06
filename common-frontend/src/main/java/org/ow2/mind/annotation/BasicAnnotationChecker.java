@@ -25,6 +25,7 @@ package org.ow2.mind.annotation;
 import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
 import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
 import static org.ow2.mind.annotation.AnnotationHelper.addAnnotation;
+import static org.ow2.mind.annotation.AnnotationHelper.getAnnotation;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -49,6 +50,7 @@ public class BasicAnnotationChecker
   // Client interfaces
   // ---------------------------------------------------------------------------
 
+  /** The {@link ErrorManager} client interface used to log errors. */
   public ErrorManager      errorManagerItf;
 
   public AnnotationFactory annotationFactoryItf;
@@ -109,7 +111,12 @@ public class BasicAnnotationChecker
             annotationNode);
         continue;
       }
-      addAnnotation(container, annotation);
+      if (getAnnotation(container, annotation.getClass()) != null) {
+        errorManagerItf.logError(AnnotationErrors.DUPLICATED_ANNOTATION,
+            annotation);
+      } else {
+        addAnnotation(container, annotation);
+      }
     }
   }
 

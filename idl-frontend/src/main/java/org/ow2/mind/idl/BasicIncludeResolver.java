@@ -68,7 +68,8 @@ public class BasicIncludeResolver implements IncludeResolver, BindingController 
 
     String path = getIncludedPath(include);
     if (!PathHelper.isValid(path)) {
-      throw new ADLException(IDLErrors.INVALID_INCLUDE, include, path);
+      errorManagerItf.logError(IDLErrors.INVALID_INCLUDE, include, path);
+      return IDLASTHelper.newUnresolvedIDLNode(nodeFactoryItf, path);
     }
 
     final String encapsulatingIDLName = encapsulatingIDL.getName();

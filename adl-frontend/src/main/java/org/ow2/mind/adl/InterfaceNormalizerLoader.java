@@ -55,7 +55,7 @@ public class InterfaceNormalizerLoader
   @Override
   protected void handleNameClash(final Interface previousDeclaration,
       final Interface subNode) throws ADLException {
-    throw new ADLException(InterfaceErrors.DUPLICATED_INTERFACE_NAME,
+    errorManagerItf.logError(InterfaceErrors.DUPLICATED_INTERFACE_NAME,
         subNode.getName(), new NodeErrorLocator(previousDeclaration));
   }
 

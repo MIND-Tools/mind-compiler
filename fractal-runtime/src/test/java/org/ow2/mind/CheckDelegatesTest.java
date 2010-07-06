@@ -73,7 +73,9 @@ public class CheckDelegatesTest {
     idlLoader = IDLLoaderChainFactory.newLoader(errorManager);
     idlCompiler = IDLBackendFactory.newIDLCompiler(idlLoader);
 
-    compilerWrapper = new GccCompilerWrapper();
+    final GccCompilerWrapper gcw = new GccCompilerWrapper();
+    gcw.errorManagerItf = errorManager;
+    compilerWrapper = gcw;
     commandExecutor = new BasicCompilationCommandExecutor();
 
     context = new HashMap<Object, Object>();

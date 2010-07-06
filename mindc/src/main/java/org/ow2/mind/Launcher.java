@@ -40,6 +40,7 @@ import java.util.logging.Logger;
 
 import org.antlr.stringtemplate.StringTemplateGroupLoader;
 import org.objectweb.fractal.adl.ADLException;
+import org.objectweb.fractal.adl.CompilerError;
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.JavaFactory;
 import org.objectweb.fractal.adl.Loader;
@@ -505,6 +506,9 @@ public class Launcher extends AbstractLauncher {
     final BasicMPPWrapper mppWrapper = new BasicMPPWrapper();
     mppWrapper.pluginManagerItf = pluginManager;
 
+    gcw.errorManagerItf = errorManager;
+    mppWrapper.errorManagerItf = errorManager;
+
     // Plugin Factory Component
     final org.objectweb.fractal.adl.Factory pluginFactory = new SimpleClassPluginFactory();
 
@@ -520,7 +524,7 @@ public class Launcher extends AbstractLauncher {
             implementationLocator, idlLoader, pluginFactory);
 
     // instantiator chain
-    graphInstantiator = Factory.newInstantiator(adlLoader);
+    graphInstantiator = Factory.newInstantiator(errorManager, adlLoader);
 
     // Backend
     final IDLVisitor idlCompiler = IDLBackendFactory.newIDLCompiler(idlLoader,
@@ -713,7 +717,7 @@ public class Launcher extends AbstractLauncher {
       try {
         compile(e.getKey(), e.getValue(), result);
       } catch (final InterruptedException e1) {
-        throw new ADLException(GenericErrors.INTERNAL_ERROR, e,
+        throw new CompilerError(GenericErrors.INTERNAL_ERROR, e,
             "Interrupted while executing compilation tasks");
       }
     }

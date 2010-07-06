@@ -54,7 +54,7 @@ public class AttributeControllerADLLoaderAnnotationProcessor
     if (!((AttributeController) annotation).allowNoAttr
         && (!(definition instanceof AttributeContainer) || ((AttributeContainer) definition)
             .getAttributes().length == 0))
-      throw new ADLException(
+      errorManagerItf.logError(
           ADLErrors.INVALID_ATTRIBUTE_CONTROLLER_NO_ATTRIBUTE, node);
 
     return addControllerInterface(definition, AC,

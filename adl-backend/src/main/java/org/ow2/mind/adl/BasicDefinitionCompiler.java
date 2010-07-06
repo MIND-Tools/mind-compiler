@@ -152,8 +152,8 @@ public class BasicDefinitionCompiler
         try {
           SourceFileWriter.writeToFile(srcFile, inlinedCCode);
         } catch (final IOException e) {
-          throw new CompilerError(IOErrors.WRITE_ERROR, e, srcFile
-              .getAbsolutePath());
+          throw new CompilerError(IOErrors.WRITE_ERROR, e,
+              srcFile.getAbsolutePath());
         }
       } else {
         assert src.getPath() != null;
@@ -213,7 +213,7 @@ public class BasicDefinitionCompiler
         srcFile = outputFileLocatorItf.getCSourceOutputFile(
             additionalCompilationUnit.getPath(), context);
         if (!srcFile.exists()) {
-          throw new ADLException(GenericErrors.INTERNAL_ERROR,
+          throw new CompilerError(GenericErrors.INTERNAL_ERROR,
               "Can't find source file \"" + additionalCompilationUnit + "\"");
         }
       } else {

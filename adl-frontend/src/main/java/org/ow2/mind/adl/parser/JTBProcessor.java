@@ -113,6 +113,7 @@ import org.ow2.mind.adl.parameter.ast.FormalParameterContainer;
 import org.ow2.mind.annotation.ast.AnnotationArgument;
 import org.ow2.mind.annotation.ast.AnnotationContainer;
 import org.ow2.mind.annotation.ast.AnnotationNode;
+import org.ow2.mind.error.ErrorManager;
 import org.ow2.mind.value.ast.Array;
 import org.ow2.mind.value.ast.BooleanLiteral;
 import org.ow2.mind.value.ast.MultipleValueContainer;
@@ -133,20 +134,23 @@ public class JTBProcessor extends GJDepthFirst<Node, Node>
 
   private final String            filename;
   private final XMLNodeFactory    nodeFactory;
+  private final ErrorManager      errorManager;
   private final String            adlDtd;
 
   private final Set<String>       typeParameters    = new HashSet<String>();
-  private ADLException            exception;
   private final BeginTokenVisitor beginTokenVisitor = new BeginTokenVisitor();
   private final EndTokenVisitor   endTokenVisitor   = new EndTokenVisitor();
 
   /**
+   * @param errorManager The error manager to be used to report errors.
    * @param nodeFactory The node factory to be used for instantiating AST nodes.
    * @param adlDtd The grammar definition for ADL nodes.
    * @param filename The name of the parsed file.
    */
-  public JTBProcessor(final XMLNodeFactory nodeFactory, final String adlDtd,
+  public JTBProcessor(final ErrorManager errorManager,
+      final XMLNodeFactory nodeFactory, final String adlDtd,
       final String filename) {
+    this.errorManager = errorManager;
     this.nodeFactory = nodeFactory;
     this.adlDtd = adlDtd;
     this.filename = filename;
@@ -167,11 +171,8 @@ public class JTBProcessor extends GJDepthFirst<Node, Node>
    * @throws ADLException If an error occurs.
    */
   public Definition toDefinition(final ADLFile fileContent) throws ADLException {
-    exception = null;
     typeParameters.clear();
-    final Definition def = (Definition) visit(fileContent, null);
-    if (exception != null) throw exception;
-    return def;
+    return (Definition) visit(fileContent, null);
   }
 
   private Node newNode(final String name) {
@@ -198,8 +199,8 @@ public class JTBProcessor extends GJDepthFirst<Node, Node>
 
   private Node newNode(final String name,
       final org.ow2.mind.adl.jtb.syntaxtree.Node syntaxNode) {
-    return newNode(name, syntaxNode.accept(beginTokenVisitor), syntaxNode
-        .accept(endTokenVisitor));
+    return newNode(name, syntaxNode.accept(beginTokenVisitor),
+        syntaxNode.accept(endTokenVisitor));
   }
 
   private void setSource(final Node node, final NodeToken source) {
@@ -219,8 +220,8 @@ public class JTBProcessor extends GJDepthFirst<Node, Node>
 
   private void setSource(final Node node,
       final org.ow2.mind.adl.jtb.syntaxtree.Node syntaxNode) {
-    setSource(node, syntaxNode.accept(beginTokenVisitor), syntaxNode
-        .accept(endTokenVisitor));
+    setSource(node, syntaxNode.accept(beginTokenVisitor),
+        syntaxNode.accept(endTokenVisitor));
   }
 
   private void copySource(final Node node, final Node from) {
@@ -667,8 +668,11 @@ public class JTBProcessor extends GJDepthFirst<Node, Node>
     final ImplementationContainer implContainer = castNodeError(argu,
         ImplementationContainer.class);
     if (implContainer.getData() != null) {
-      exception = new ADLException(org.ow2.mind.adl.ADLErrors.MULTIPLE_DATA,
-          data);
+      try {
+        errorManager.logError(org.ow2.mind.adl.ADLErrors.MULTIPLE_DATA, data);
+      } catch (final ADLException e) {
+        // ignore.
+      }
     }
     implContainer.setData(data);
 
@@ -793,16 +797,24 @@ public class JTBProcessor extends GJDepthFirst<Node, Node>
       if (comp instanceof FormalTypeParameterReference
           && ((FormalTypeParameterReference) comp).getTypeParameterReference() != null) {
         // both reference to template parameter and anonymous definition
-        exception = new ADLException(ADLErrors.PARSE_ERROR, comp,
-            "The contains construct cannot reference a template parameter and "
-                + "have an anonymous definition.");
+        try {
+          errorManager.logError(ADLErrors.PARSE_ERROR, comp,
+              "The contains construct cannot reference a template parameter and "
+                  + "have an anonymous definition.");
+        } catch (final ADLException e) {
+          // ignore.
+        }
       }
       n.f3.accept(this, comp);
     } else if (!hasDefRef) {
       // neither defRef nor anonymous definition
-      exception = new ADLException(ADLErrors.PARSE_ERROR, comp,
-          "The contains construct must reference "
-              + "another definition or have an anonymous definition.");
+      try {
+        errorManager.logError(ADLErrors.PARSE_ERROR, comp,
+            "The contains construct must reference "
+                + "another definition or have an anonymous definition.");
+      } catch (final ADLException e) {
+        // ignore.
+      }
     }
 
     return comp;

@@ -137,6 +137,9 @@ public class CompilerRunner {
     final BasicMPPWrapper mppWrapper = new BasicMPPWrapper();
     mppWrapper.pluginManagerItf = pluginManager;
 
+    gcw.errorManagerItf = errorManager;
+    mppWrapper.errorManagerItf = errorManager;
+
     // String Template Component Loaders
     final StringTemplateGroupLoader stcLoader = STLoaderFactory.newSTLoader();
 
@@ -149,7 +152,7 @@ public class CompilerRunner {
             implementationLocator, idlLoader, pluginFactory);
 
     // instantiator chain
-    graphInstantiator = Factory.newInstantiator(adlLoader);
+    graphInstantiator = Factory.newInstantiator(errorManager, adlLoader);
 
     // Backend
     final IDLVisitor idlCompiler = IDLBackendFactory.newIDLCompiler(idlLoader,
