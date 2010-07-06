@@ -40,7 +40,7 @@ public class TestIDLLoaderChain extends TestCase {
 
   @Override
   protected void setUp() throws Exception {
-    idlLoader = IDLLoaderChainFactory.newLoader();
+    idlLoader = IDLLoaderChainFactory.newLoader().loader;
     checker = new ASTChecker();
   }
 
@@ -82,8 +82,8 @@ public class TestIDLLoaderChain extends TestCase {
     final IDLChecker foo_bar_checker = foo_foo_checker.containsInclude(
         "\"/foo/bar.idt\"").includes();
 
-    assertSame(foo_bar_checker.idl, test2_checker.containsInclude(
-        "\"/foo/bar.idt\"").includes().idl);
+    assertSame(foo_bar_checker.idl,
+        test2_checker.containsInclude("\"/foo/bar.idt\"").includes().idl);
     assertSame(idl,
         test2_checker.containsInclude("\"/test3.idt\"").includes().idl);
   }

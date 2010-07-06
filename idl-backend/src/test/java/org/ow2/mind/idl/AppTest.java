@@ -27,7 +27,7 @@ public class AppTest extends TestCase {
 
   @Override
   protected void setUp() throws Exception {
-    loader = IDLLoaderChainFactory.newLoader();
+    loader = IDLLoaderChainFactory.newLoader().loader;
     idlVisitor = IDLBackendFactory.newIDLCompiler(loader);
 
     context = new HashMap<Object, Object>();

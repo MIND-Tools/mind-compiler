@@ -44,7 +44,7 @@ public class CheckFractalAPITest {
 
   @BeforeTest(alwaysRun = true)
   public void setUp() {
-    idlLoader = IDLLoaderChainFactory.newLoader();
+    idlLoader = IDLLoaderChainFactory.newLoader().loader;
     context = new HashMap<Object, Object>();
   }
 

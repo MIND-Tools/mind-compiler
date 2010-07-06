@@ -34,7 +34,7 @@ import org.ow2.mind.idl.ast.IDL;
  * The cache is different for each given <code>context</code> (see
  * {@link ContextLocal}).
  */
-public class CacheIDLLoader extends AbstractIDLLoader {
+public class CacheIDLLoader extends AbstractIDLLoader implements IDLCache {
 
   protected final ContextLocal<Map<String, IDL>> contextualCache = new ContextLocal<Map<String, IDL>>();
 
@@ -53,6 +53,20 @@ public class CacheIDLLoader extends AbstractIDLLoader {
     }
 
     return idl;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Implementation of the IDLCache interface
+  // ---------------------------------------------------------------------------
+
+  public IDL getInCache(final String name, final Map<Object, Object> context) {
+    final Map<String, IDL> cache = getCache(context);
+    return cache.get(name);
+  }
+
+  public void addInCache(final IDL d, final Map<Object, Object> context) {
+    final Map<String, IDL> cache = getCache(context);
+    cache.put(d.getName(), d);
   }
 
   // ---------------------------------------------------------------------------

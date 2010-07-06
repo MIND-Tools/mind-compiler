@@ -48,8 +48,8 @@ import org.ow2.mind.adl.membrane.ast.ControllerContainer;
 import org.ow2.mind.adl.membrane.ast.ControllerInterface;
 import org.ow2.mind.annotation.AnnotationHelper;
 import org.ow2.mind.annotation.AnnotationLocatorHelper;
-import org.ow2.mind.idl.IDLLoader;
 import org.ow2.mind.idl.IDLLoaderChainFactory;
+import org.ow2.mind.idl.IDLLoaderChainFactory.IDLFrontend;
 import org.ow2.mind.idl.IDLLocator;
 import org.ow2.mind.plugin.SimpleClassPluginFactory;
 import org.testng.annotations.BeforeMethod;
@@ -75,11 +75,11 @@ public class TestBindingController {
     final org.objectweb.fractal.adl.Factory pluginFactory = new SimpleClassPluginFactory();
 
     // loader chains
-    final IDLLoader idlLoader = IDLLoaderChainFactory.newLoader(idlLocator,
-        inputResourceLocator);
-    final Loader adlLoader = Factory
-        .newLoader(inputResourceLocator, adlLocator, idlLocator,
-            implementationLocator, idlLoader, pluginFactory);
+    final IDLFrontend idlFrontend = IDLLoaderChainFactory.newLoader(idlLocator,
+        inputResourceLocator, pluginFactory);
+    final Loader adlLoader = Factory.newLoader(inputResourceLocator,
+        adlLocator, idlLocator, implementationLocator, idlFrontend.cache,
+        idlFrontend.loader, pluginFactory);
     loader = adlLoader;
 
     context = new HashMap<Object, Object>();

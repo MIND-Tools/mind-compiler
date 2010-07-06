@@ -25,74 +25,15 @@ package org.ow2.mind.idl;
 import java.util.Map;
 
 import org.objectweb.fractal.adl.ADLException;
-import org.objectweb.fractal.adl.Node;
-import org.ow2.mind.idl.ast.ArrayOf;
-import org.ow2.mind.idl.ast.BinaryOperation;
-import org.ow2.mind.idl.ast.CastOperation;
-import org.ow2.mind.idl.ast.ConstantDefinition;
-import org.ow2.mind.idl.ast.EnumDefinition;
-import org.ow2.mind.idl.ast.EnumReference;
 import org.ow2.mind.idl.ast.IDL;
-import org.ow2.mind.idl.ast.InterfaceDefinition;
-import org.ow2.mind.idl.ast.Literal;
-import org.ow2.mind.idl.ast.PointerOf;
-import org.ow2.mind.idl.ast.PrimitiveType;
-import org.ow2.mind.idl.ast.StructDefinition;
-import org.ow2.mind.idl.ast.StructReference;
-import org.ow2.mind.idl.ast.TypeDefReference;
-import org.ow2.mind.idl.ast.TypeDefinition;
-import org.ow2.mind.idl.ast.UnaryOperation;
-import org.ow2.mind.idl.ast.UnionDefinition;
-import org.ow2.mind.idl.ast.UnionReference;
+import org.ow2.mind.idl.ast.IDLASTHelper;
 
 public class KindDecorationLoader extends AbstractIDLLoader {
 
   public IDL load(final String name, final Map<Object, Object> context)
       throws ADLException {
     final IDL idl = clientIDLLoaderItf.load(name, context);
-    addDecorations(idl);
+    IDLASTHelper.setKindDecorations(idl);
     return idl;
-  }
-
-  protected void addDecorations(final Node node) {
-    if (node instanceof InterfaceDefinition)
-      node.astSetDecoration("kind", "interface");
-    else if (node instanceof EnumDefinition)
-      node.astSetDecoration("kind", "enum");
-    else if (node instanceof EnumReference)
-      node.astSetDecoration("kind", "enumRef");
-    else if (node instanceof StructDefinition)
-      node.astSetDecoration("kind", "struct");
-    else if (node instanceof StructReference)
-      node.astSetDecoration("kind", "structRef");
-    else if (node instanceof UnionDefinition)
-      node.astSetDecoration("kind", "union");
-    else if (node instanceof UnionReference)
-      node.astSetDecoration("kind", "unionRef");
-    else if (node instanceof TypeDefinition)
-      node.astSetDecoration("kind", "typedef");
-    else if (node instanceof TypeDefReference)
-      node.astSetDecoration("kind", "typedefRef");
-    else if (node instanceof PrimitiveType)
-      node.astSetDecoration("kind", "primitiveType");
-    else if (node instanceof ArrayOf)
-      node.astSetDecoration("kind", "arrayOf");
-    else if (node instanceof PointerOf)
-      node.astSetDecoration("kind", "pointerOf");
-    else if (node instanceof ConstantDefinition)
-      node.astSetDecoration("kind", "constDef");
-    else if (node instanceof BinaryOperation)
-      node.astSetDecoration("kind", "binaryOperation");
-    else if (node instanceof UnaryOperation)
-      node.astSetDecoration("kind", "unaryOperation");
-    else if (node instanceof CastOperation)
-      node.astSetDecoration("kind", "castOperation");
-    else if (node instanceof Literal) node.astSetDecoration("kind", "literal");
-
-    for (final String type : node.astGetNodeTypes()) {
-      for (final Node n : node.astGetNodes(type)) {
-        if (n != null) addDecorations(n);
-      }
-    }
   }
 }

@@ -54,7 +54,7 @@ public final class ADLParserContextHelper {
     final String contextKey = getContextKey(adlName);
     final Object o = context.get(contextKey);
     if (o != null) {
-      throw new IllegalArgumentException("Invlaid adlName '" + adlName
+      throw new IllegalArgumentException("Invalid adlName '" + adlName
           + "'. An ADL with the same name already exist in the context map");
     }
     context.put(contextKey, adlSource);
@@ -75,7 +75,7 @@ public final class ADLParserContextHelper {
     final String contextKey = getContextKey(definition.getName());
     final Object o = context.get(contextKey);
     if (o != null) {
-      throw new IllegalArgumentException("Invlaid adlName '"
+      throw new IllegalArgumentException("Invalid adlName '"
           + definition.getName()
           + "'. An ADL with the same name already exist in the context map");
     }

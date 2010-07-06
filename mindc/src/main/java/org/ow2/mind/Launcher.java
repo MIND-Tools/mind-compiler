@@ -80,6 +80,7 @@ import org.ow2.mind.compilation.gcc.GccCompilerWrapper;
 import org.ow2.mind.idl.IDLBackendFactory;
 import org.ow2.mind.idl.IDLLoader;
 import org.ow2.mind.idl.IDLLoaderChainFactory;
+import org.ow2.mind.idl.IDLLoaderChainFactory.IDLFrontend;
 import org.ow2.mind.idl.IDLLocator;
 import org.ow2.mind.idl.IDLVisitor;
 import org.ow2.mind.idl.OutputBinaryIDLLocator;
@@ -346,12 +347,12 @@ public class Launcher extends AbstractLauncher {
         .put(BasicOutputFileLocator.OUTPUT_DIR_CONTEXT_KEY, buildDir);
 
     // force mode
-    ForceRegenContextHelper.setForceRegen(compilerContext, forceOpt
-        .isPresent(cmdLine));
-    ForceRegenContextHelper.setKeepTemp(compilerContext, keepTempOpt
-        .isPresent(cmdLine));
-    ForceRegenContextHelper.setNoBinaryAST(compilerContext, noBinASTOpt
-        .isPresent(cmdLine));
+    ForceRegenContextHelper.setForceRegen(compilerContext,
+        forceOpt.isPresent(cmdLine));
+    ForceRegenContextHelper.setKeepTemp(compilerContext,
+        keepTempOpt.isPresent(cmdLine));
+    ForceRegenContextHelper.setNoBinaryAST(compilerContext,
+        noBinASTOpt.isPresent(cmdLine));
 
     // build c-flags
     final List<String> cFlagsList = new ArrayList<String>();
@@ -427,8 +428,8 @@ public class Launcher extends AbstractLauncher {
             + linkerScript + "'. Cannot find file in the source path", 1);
       }
 
-      CompilerContextHelper.setLinkerScript(compilerContext, linkerScriptURL
-          .getPath());
+      CompilerContextHelper.setLinkerScript(compilerContext,
+          linkerScriptURL.getPath());
     }
 
     AnnotationLocatorHelper.addDefaultAnnotationPackage(
@@ -505,11 +506,14 @@ public class Launcher extends AbstractLauncher {
     final StringTemplateGroupLoader stcLoader = STLoaderFactory.newSTLoader();
 
     // loader chains
-    idlLoader = IDLLoaderChainFactory.newLoader(idlLocator,
-        inputResourceLocator);
+    final IDLFrontend idlFrontend = IDLLoaderChainFactory.newLoader(idlLocator,
+        inputResourceLocator, pluginFactory);
+
+    idlLoader = idlFrontend.loader;
 
     adlLoader = Factory.newLoader(inputResourceLocator, adlLocator, idlLocator,
-        implementationLocator, idlLoader, pluginFactory);
+        implementationLocator, idlFrontend.cache, idlFrontend.loader,
+        pluginFactory);
 
     // instantiator chain
     graphInstantiator = Factory.newInstantiator(adlLoader);
@@ -632,8 +636,8 @@ public class Launcher extends AbstractLauncher {
         CompilerContextHelper.setCompilerCommand(context, target.getCompiler()
             .getPath());
       } else {
-        CompilerContextHelper.setCompilerCommand(context, compilerCmdOpt
-            .getDefaultValue());
+        CompilerContextHelper.setCompilerCommand(context,
+            compilerCmdOpt.getDefaultValue());
       }
     }
   }
@@ -650,8 +654,8 @@ public class Launcher extends AbstractLauncher {
         CompilerContextHelper.setLinkerCommand(context, target.getLinker()
             .getPath());
       } else {
-        CompilerContextHelper.setLinkerCommand(context, linkerCmdOpt
-            .getDefaultValue());
+        CompilerContextHelper.setLinkerCommand(context,
+            linkerCmdOpt.getDefaultValue());
       }
     }
   }

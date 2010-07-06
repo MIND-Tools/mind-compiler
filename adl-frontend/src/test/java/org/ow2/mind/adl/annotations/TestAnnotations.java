@@ -17,8 +17,8 @@ import org.ow2.mind.adl.ast.ImplementationContainer;
 import org.ow2.mind.adl.ast.Source;
 import org.ow2.mind.adl.implementation.ImplementationLocator;
 import org.ow2.mind.annotation.AnnotationHelper;
-import org.ow2.mind.idl.IDLLoader;
 import org.ow2.mind.idl.IDLLoaderChainFactory;
+import org.ow2.mind.idl.IDLLoaderChainFactory.IDLFrontend;
 import org.ow2.mind.idl.IDLLocator;
 import org.ow2.mind.plugin.SimpleClassPluginFactory;
 import org.testng.annotations.BeforeMethod;
@@ -41,11 +41,11 @@ public class TestAnnotations {
     final org.objectweb.fractal.adl.Factory pluginFactory = new SimpleClassPluginFactory();
 
     // loader chains
-    final IDLLoader idlLoader = IDLLoaderChainFactory.newLoader(idlLocator,
-        inputResourceLocator);
-    final Loader adlLoader = Factory
-        .newLoader(inputResourceLocator, adlLocator, idlLocator,
-            implementationLocator, idlLoader, pluginFactory);
+    final IDLFrontend idlFrontend = IDLLoaderChainFactory.newLoader(idlLocator,
+        inputResourceLocator, pluginFactory);
+    final Loader adlLoader = Factory.newLoader(inputResourceLocator,
+        adlLocator, idlLocator, implementationLocator, idlFrontend.cache,
+        idlFrontend.loader, pluginFactory);
     loader = adlLoader;
   }
 

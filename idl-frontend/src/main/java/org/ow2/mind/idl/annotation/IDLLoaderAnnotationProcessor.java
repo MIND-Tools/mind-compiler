@@ -37,15 +37,17 @@ public interface IDLLoaderAnnotationProcessor {
 
   /**
    * Process the given annotation that has been found on the given node that
-   * belongs to the given idl.
+   * belongs to the given IDL.
    * 
    * @param annotation the annotation to process
    * @param node the node on which the annotation has been found
-   * @param idl the enclosing idl
+   * @param idl the enclosing IDL
    * @param phase the current loading phase
    * @param context additional parameters
+   * @return the new enclosing IDL if it is different from the given one,
+   *         <code>null</code> otherwise.
    * @throws ADLException if an error occurs.
    */
-  void processAnnotation(Annotation annotation, Node node, IDL idl,
+  IDL processAnnotation(Annotation annotation, Node node, IDL idl,
       IDLLoaderPhase phase, Map<Object, Object> context) throws ADLException;
 }

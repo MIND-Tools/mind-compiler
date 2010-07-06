@@ -63,7 +63,7 @@ public class CheckDelegatesTest {
 
   @BeforeTest(alwaysRun = true)
   public void setUp() {
-    idlLoader = IDLLoaderChainFactory.newLoader();
+    idlLoader = IDLLoaderChainFactory.newLoader().loader;
     idlCompiler = IDLBackendFactory.newIDLCompiler(idlLoader);
 
     compilerWrapper = new GccCompilerWrapper();
