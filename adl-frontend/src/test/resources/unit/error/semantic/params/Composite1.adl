@@ -1,0 +1,5 @@
+
+composite params.Composite1(a, b) {
+
+  contains Primitive1(a, b) as subComp1;
+}

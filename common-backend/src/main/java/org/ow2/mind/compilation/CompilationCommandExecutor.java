@@ -29,6 +29,16 @@ import org.objectweb.fractal.adl.ADLException;
 
 public interface CompilationCommandExecutor {
 
-  void exec(Collection<CompilationCommand> commands, Map<Object, Object> context)
-      throws ADLException, InterruptedException;
+  /**
+   * Execute the given collection of {@link CompilationCommand}.
+   * 
+   * @param commands the compilation command to execute
+   * @param context additional parameters
+   * @return <code>true</code> if and only if every {@link CompilationCommand}
+   *         have been executed successfully.
+   * @throws ADLException if an error occurs.
+   * @throws InterruptedException if the execution has been interrupted.
+   */
+  boolean exec(Collection<CompilationCommand> commands,
+      Map<Object, Object> context) throws ADLException, InterruptedException;
 }

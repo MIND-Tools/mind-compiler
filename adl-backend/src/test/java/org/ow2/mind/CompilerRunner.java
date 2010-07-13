@@ -171,7 +171,7 @@ public class CompilerRunner {
         definitionCompiler, adlLoader, stcLoader, pluginManager, context);
 
     // compilation executor
-    executor = ADLBackendFactory.newCompilationCommandExecutor();
+    executor = ADLBackendFactory.newCompilationCommandExecutor(errorManager);
 
     // init context
     initContext();
@@ -246,16 +246,20 @@ public class CompilerRunner {
 
     errorManager.clear();
     final Definition d = adlLoader.load(adlName, context);
-    final List<Error> errors = errorManager.getErrors();
+    List<Error> errors = errorManager.getErrors();
     if (!errors.isEmpty()) {
       throw new ADLException(new ErrorCollection(errors));
     }
     final ComponentGraph componentGraph = graphInstantiator.instantiate(d,
         context);
+    errors = errorManager.getErrors();
+    if (!errors.isEmpty()) {
+      throw new ADLException(new ErrorCollection(errors));
+    }
 
     final Collection<CompilationCommand> commands = graphCompiler.visit(
         componentGraph, context);
-    executor.exec(commands, context);
+    final boolean execOK = executor.exec(commands, context);
 
     return outputFile;
   }

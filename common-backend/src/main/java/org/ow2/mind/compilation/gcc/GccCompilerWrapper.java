@@ -130,7 +130,7 @@ public class GccCompilerWrapper implements CompilerWrapper, BindingController {
       return readDeps(dependencyOutputFile, outputFile, context);
     }
 
-    public void exec() throws ADLException, InterruptedException {
+    public boolean exec() throws ADLException, InterruptedException {
       final List<String> cmd = new ArrayList<String>();
       cmd.add(this.cmd);
       cmd.add("-E");
@@ -159,14 +159,16 @@ public class GccCompilerWrapper implements CompilerWrapper, BindingController {
       }
 
       if (result.getExitValue() != 0) {
-        throw new ADLException(CompilerErrors.COMPILER_ERROR,
+        errorManagerItf.logError(CompilerErrors.COMPILER_ERROR,
             outputFile.getPath(), result.getOutput());
+        return false;
       }
       if (result.getOutput() != null) {
         // command returns 0 and generates an output (warning)
-        // TODO find a specific way to print warnings
-        ioLogger.warning(result.getOutput());
+        errorManagerItf.logWarning(CompilerErrors.COMPILER_WARNING,
+            outputFile.getPath(), result.getOutput());
       }
+      return true;
     }
 
     public String getDescription() {
@@ -209,7 +211,7 @@ public class GccCompilerWrapper implements CompilerWrapper, BindingController {
       return readDeps(dependencyOutputFile, outputFile, context);
     }
 
-    public void exec() throws ADLException, InterruptedException {
+    public boolean exec() throws ADLException, InterruptedException {
 
       final List<String> cmd = new ArrayList<String>();
       cmd.add(this.cmd);
@@ -239,14 +241,16 @@ public class GccCompilerWrapper implements CompilerWrapper, BindingController {
       }
 
       if (result.getExitValue() != 0) {
-        throw new ADLException(CompilerErrors.COMPILER_ERROR,
+        errorManagerItf.logError(CompilerErrors.COMPILER_ERROR,
             outputFile.getPath(), result.getOutput());
+        return false;
       }
       if (result.getOutput() != null) {
         // command returns 0 and generates an output (warning)
-        // TODO find a specific way to print warnings
-        ioLogger.warning(result.getOutput());
+        errorManagerItf.logWarning(CompilerErrors.COMPILER_WARNING,
+            outputFile.getPath(), result.getOutput());
       }
+      return true;
     }
 
     public String getDescription() {
@@ -266,7 +270,7 @@ public class GccCompilerWrapper implements CompilerWrapper, BindingController {
       return this;
     }
 
-    public void exec() throws ADLException, InterruptedException {
+    public boolean exec() throws ADLException, InterruptedException {
       final List<String> cmd = new ArrayList<String>();
       cmd.add(this.cmd);
 
@@ -304,15 +308,18 @@ public class GccCompilerWrapper implements CompilerWrapper, BindingController {
       // execute command
       final ExecutionResult result = ExecutionHelper
           .exec(getDescription(), cmd);
+
       if (result.getExitValue() != 0) {
-        throw new ADLException(CompilerErrors.LINKER_ERROR,
+        errorManagerItf.logError(CompilerErrors.LINKER_ERROR,
             outputFile.getPath(), result.getOutput());
+        return false;
       }
       if (result.getOutput() != null) {
         // command returns 0 and generates an output (warning)
-        // TODO find a specific way to print warnings
-        ioLogger.warning(result.getOutput());
+        errorManagerItf.logWarning(CompilerErrors.LINKER_WARNING,
+            outputFile.getPath(), result.getOutput());
       }
+      return true;
     }
 
     public String getDescription() {

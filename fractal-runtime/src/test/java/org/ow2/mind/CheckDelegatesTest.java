@@ -76,7 +76,9 @@ public class CheckDelegatesTest {
     final GccCompilerWrapper gcw = new GccCompilerWrapper();
     gcw.errorManagerItf = errorManager;
     compilerWrapper = gcw;
-    commandExecutor = new BasicCompilationCommandExecutor();
+    final BasicCompilationCommandExecutor bcce = new BasicCompilationCommandExecutor();
+    bcce.errorManagerItf = errorManager;
+    commandExecutor = bcce;
 
     context = new HashMap<Object, Object>();
     buildDir = new File("target/build");

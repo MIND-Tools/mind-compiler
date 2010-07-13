@@ -365,8 +365,9 @@ public class BasicDefinitionCompiler
       return "Provides " + outputFile;
     }
 
-    public void exec() throws ADLException, InterruptedException {
+    public boolean exec() throws ADLException, InterruptedException {
       // nothing to do
+      return true;
     }
 
     public void prepare() {

@@ -1,0 +1,9 @@
+//#SemanticError GroupId=ADL ErrorId=ADL_NOT_FOUND line=6
+
+composite adlRefs.ref4
+{
+  contains 
+  foo.unknownADL
+  <Primitive1>
+  as c;
+}

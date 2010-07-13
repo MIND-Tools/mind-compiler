@@ -22,48 +22,47 @@
 
 package org.ow2.mind.preproc;
 
-import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertSame;
-import static org.testng.Assert.fail;
 
-import org.objectweb.fractal.adl.ADLException;
+import java.util.List;
+
+import org.objectweb.fractal.adl.error.Error;
+import org.ow2.mind.error.ErrorHelper;
 import org.testng.annotations.Test;
 
 public class TestMPPErrors extends AbstractTestMPP {
 
   @Test(groups = {"functional"})
   public void test1() throws Exception {
-    try {
-      compileSingleton("error", "error1");
-      fail("An ADLException was expected here");
-    } catch (final ADLException e) {
-      assertNotNull(e.getError());
-      assertSame(e.getError().getTemplate(), MPPErrors.PARSE_ERROR);
-      System.out.println(e.getError().toString());
-    }
+    errorManager.clear();
+    compileSingleton("error", "error1");
+    final List<Error> errors = errorManager.getErrors();
+    assertEquals(errors.size(), 1);
+    final Error error = errors.get(0);
+    assertSame(error.getTemplate(), MPPErrors.PARSE_ERROR);
+    System.out.println(ErrorHelper.formatError(error));
   }
 
   @Test(groups = {"functional"})
   public void testinitSingleton() throws Exception {
-    try {
-      compileSingleton("init", "init");
-      fail("An ADLException was expected here");
-    } catch (final ADLException e) {
-      assertNotNull(e.getError());
-      assertSame(e.getError().getTemplate(), MPPErrors.PARSE_ERROR);
-      System.out.println(e.getError().toString());
-    }
+    errorManager.clear();
+    compileSingleton("init", "init");
+    final List<Error> errors = errorManager.getErrors();
+    assertEquals(errors.size(), 1);
+    final Error error = errors.get(0);
+    assertSame(error.getTemplate(), MPPErrors.PARSE_ERROR);
+    System.out.println(ErrorHelper.formatError(error));
   }
 
   @Test(groups = {"functional"})
   public void testinitMulti() throws Exception {
-    try {
-      compileMulti("init", "init");
-      fail("An ADLException was expected here");
-    } catch (final ADLException e) {
-      assertNotNull(e.getError());
-      assertSame(e.getError().getTemplate(), MPPErrors.PARSE_ERROR);
-      System.out.println(e.getError().toString());
-    }
+    errorManager.clear();
+    compileMulti("init", "init");
+    final List<Error> errors = errorManager.getErrors();
+    assertEquals(errors.size(), 1);
+    final Error error = errors.get(0);
+    assertSame(error.getTemplate(), MPPErrors.PARSE_ERROR);
+    System.out.println(ErrorHelper.formatError(error));
   }
 }

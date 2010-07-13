@@ -109,7 +109,6 @@ public class MIND_preproc {
 
     final CPLLexer lex = new CPLLexer(new ANTLRFileStream(
         mind_preproc.cplFilePath + mind_preproc.cplFileName));
-    lex.setOutPutStream(p);
     final CommonTokenStream tokens = new CommonTokenStream(lex);
 
     final CPLParser mpp = new CPLParser(tokens);
@@ -208,8 +207,9 @@ public class MIND_preproc {
     } catch (final FileNotFoundException e) {
       error("Can't find property file '" + f.getAbsolutePath() + "'", 2);
     } catch (final IOException e) {
-      error("Can't read property file '" + f.getAbsolutePath() + "'. "
-          + e.getMessage(), 3);
+      error(
+          "Can't read property file '" + f.getAbsolutePath() + "'. "
+              + e.getMessage(), 3);
     }
   }
 
@@ -229,15 +229,13 @@ public class MIND_preproc {
 
   protected void printUsage(final PrintStream ps) {
     ps.println("Usage: MIND_preproc [OPTIONS] <file>");
-    ps
-        .println("  where <file> is the name of the MIND CPL file component to be pre-proceed,");
+    ps.println("  where <file> is the name of the MIND CPL file component to be pre-proceed,");
   }
 
   private void printFullUsage(final PrintStream ps) {
     printUsage(ps);
     ps.println();
-    ps
-        .println("Available options are (from command line, options must be prefix with '-') :");
+    ps.println("Available options are (from command line, options must be prefix with '-') :");
     int maxCol = 0;
 
     for (final CmdOption opt : allCmdOptions) {

@@ -50,6 +50,7 @@ public class AbstractTestMPP {
 
   protected static final String        DEFAULT_CPPFLAGS = "-g -Wall -Wredundant-decls -Wunreachable-code";
 
+  protected ErrorManager               errorManager;
   protected MPPWrapper                 mppWrapper;
   protected CompilerWrapper            compilerWrapper;
   protected CompilationCommandExecutor executor;
@@ -63,8 +64,7 @@ public class AbstractTestMPP {
 
   @BeforeTest(alwaysRun = true)
   public void setUp() {
-    final ErrorManager errorManager = ErrorManagerFactory
-        .newSimpleErrorManager();
+    errorManager = ErrorManagerFactory.newSimpleErrorManager();
     pluginManager = new BasicPluginManager();
     stNodeFactory = new STNodeFactoryImpl();
     pluginManager.nodeFactoryItf = stNodeFactory;
@@ -74,7 +74,9 @@ public class AbstractTestMPP {
     mppWrapper = bmppw;
     final GccCompilerWrapper gcw = new GccCompilerWrapper();
     compilerWrapper = gcw;
-    executor = new BasicCompilationCommandExecutor();
+    final BasicCompilationCommandExecutor bcce = new BasicCompilationCommandExecutor();
+    bcce.errorManagerItf = errorManager;
+    executor = bcce;
 
     gcw.errorManagerItf = errorManager;
     bmppw.errorManagerItf = errorManager;
@@ -86,6 +88,8 @@ public class AbstractTestMPP {
       buildDir.mkdirs();
     }
     context.put(BasicOutputFileLocator.OUTPUT_DIR_CONTEXT_KEY, buildDir);
+    context.put(BasicCompilationCommandExecutor.FAIL_FAST_CONTEXT_KEY,
+        Boolean.TRUE);
 
     cppFlags = splitOptionString(DEFAULT_CPPFLAGS);
   }

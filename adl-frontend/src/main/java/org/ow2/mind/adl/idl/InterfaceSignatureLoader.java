@@ -88,8 +88,10 @@ public class InterfaceSignatureLoader extends AbstractLoader {
     try {
       itfDef = interfaceSignatureResolverItf.resolve(itf, container, context);
     } catch (final ADLException e) {
-      errorManagerItf.logError(InterfaceErrors.INTERFACE_NOT_FOUND, itf,
-          itf.getSignature());
+      if (e.getError().getTemplate() == InterfaceErrors.INTERFACE_NOT_FOUND) {
+        errorManagerItf.logError(InterfaceErrors.INTERFACE_NOT_FOUND, itf,
+            itf.getSignature());
+      }
       itfDef = IDLASTHelper.newUnresolvedInterfaceDefinitionNode(
           nodeFactoryItf, itf.getSignature());
     }

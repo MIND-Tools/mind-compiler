@@ -48,6 +48,7 @@ import org.ow2.mind.adl.membrane.MembraneSourceGenerator;
 import org.ow2.mind.compilation.BasicCompilationCommandExecutor;
 import org.ow2.mind.compilation.CompilationCommandExecutor;
 import org.ow2.mind.compilation.CompilerWrapper;
+import org.ow2.mind.error.ErrorManager;
 import org.ow2.mind.idl.IDLLoader;
 import org.ow2.mind.idl.IDLVisitor;
 import org.ow2.mind.io.OutputFileLocator;
@@ -224,8 +225,11 @@ public final class ADLBackendFactory {
     return graphCompiler;
   }
 
-  public static CompilationCommandExecutor newCompilationCommandExecutor() {
-    return new BasicCompilationCommandExecutor();
+  public static CompilationCommandExecutor newCompilationCommandExecutor(
+      final ErrorManager errorManager) {
+    final BasicCompilationCommandExecutor bcce = new BasicCompilationCommandExecutor();
+    bcce.errorManagerItf = errorManager;
+    return bcce;
   }
 
   private static void bindVisitor(final Map<String, Object> serviceMap,

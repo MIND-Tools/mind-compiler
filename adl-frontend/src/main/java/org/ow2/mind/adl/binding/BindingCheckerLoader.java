@@ -49,12 +49,12 @@ import org.ow2.mind.adl.ast.Binding;
 import org.ow2.mind.adl.ast.BindingContainer;
 import org.ow2.mind.adl.ast.Component;
 import org.ow2.mind.adl.ast.ComponentContainer;
-import org.ow2.mind.error.ErrorManager;
 import org.ow2.mind.adl.membrane.ast.Controller;
 import org.ow2.mind.adl.membrane.ast.ControllerContainer;
 import org.ow2.mind.adl.membrane.ast.ControllerInterface;
 import org.ow2.mind.adl.membrane.ast.InternalInterfaceContainer;
 import org.ow2.mind.adl.membrane.ast.MembraneASTHelper;
+import org.ow2.mind.error.ErrorManager;
 
 public class BindingCheckerLoader extends AbstractLoader {
 
@@ -98,12 +98,13 @@ public class BindingCheckerLoader extends AbstractLoader {
           subComponent, null, context);
       assert subCompDef != null;
 
-      final Interface[] interfaces = castNodeError(subCompDef,
-          InterfaceContainer.class).getInterfaces();
-      final Map<String, Interface> subComponentItfs = new HashMap<String, Interface>(
-          interfaces.length);
-      for (final Interface itf : interfaces) {
-        subComponentItfs.put(itf.getName(), itf);
+      final Map<String, Interface> subComponentItfs = new HashMap<String, Interface>();
+      if (subCompDef instanceof InterfaceContainer) {
+        final Interface[] interfaces = ((InterfaceContainer) subCompDef)
+            .getInterfaces();
+        for (final Interface itf : interfaces) {
+          subComponentItfs.put(itf.getName(), itf);
+        }
       }
       subComponentInterfaces.put(subComponent.getName(), subComponentItfs);
     }

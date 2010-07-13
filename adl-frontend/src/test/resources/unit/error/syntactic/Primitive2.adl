@@ -1,3 +1,0 @@
-primitive Primitive2 {
-	src my.c;	
-}

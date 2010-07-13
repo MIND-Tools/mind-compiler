@@ -1,0 +1,8 @@
+
+primitive params.Primitive1(a, b) {
+
+  source {{ }};
+  
+  attribute int a1= a;
+  attribute string s = b;
+}

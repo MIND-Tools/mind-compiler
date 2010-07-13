@@ -113,8 +113,10 @@ public class CompositeInternalInterfaceLoader extends AbstractMembraneLoader {
     // clone external interface to create its dual internal interface.
     final TypeInterface internalItf;
     try {
-      internalItf = (TypeInterface) nodeMergerItf.merge(nodeFactoryItf.newNode(
-          "internalInterface", TypeInterface.class.getName()), itf, null);
+      internalItf = (TypeInterface) nodeMergerItf.merge(
+          nodeFactoryItf.newNode("internalInterface",
+              TypeInterface.class.getName()), itf, null);
+      internalItf.astSetSource(itf.astGetSource());
     } catch (final ClassNotFoundException e) {
       throw new CompilerError(GenericErrors.INTERNAL_ERROR, e,
           "Node factory error");

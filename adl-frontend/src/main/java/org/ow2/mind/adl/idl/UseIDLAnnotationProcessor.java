@@ -27,7 +27,7 @@ import java.util.Map;
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.Node;
-import org.objectweb.fractal.adl.error.ChainedErrorLocator;
+import org.objectweb.fractal.adl.interfaces.InterfaceErrors;
 import org.objectweb.fractal.adl.types.TypeInterface;
 import org.ow2.mind.adl.annotation.ADLLoaderPhase;
 import org.ow2.mind.adl.annotation.AbstractADLLoaderAnnotationProcessor;
@@ -59,8 +59,10 @@ public class UseIDLAnnotationProcessor
         InterfaceDefinitionDecorationHelper.addUsedInterfaceDefinition(
             definition, itfDef);
       } catch (final ADLException e) {
-        ChainedErrorLocator.chainLocator(e, node);
-        throw e;
+        if (e.getError().getTemplate() == InterfaceErrors.INTERFACE_NOT_FOUND) {
+          errorManagerItf.logError(InterfaceErrors.INTERFACE_NOT_FOUND, node,
+              idlName);
+        }
       }
     }
 

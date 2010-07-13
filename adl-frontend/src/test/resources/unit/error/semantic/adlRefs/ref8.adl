@@ -1,0 +1,16 @@
+//#SemanticError GroupId=ADL ErrorId=ADL_NOT_FOUND line=8
+//#SemanticError GroupId=BDG ErrorId=INVALID_ITF_NO_SUCH_INTERFACE line=14
+//#SemanticError GroupId=BDG ErrorId=INVALID_ITF_NO_SUCH_INTERFACE line=15
+
+import api.Type1;
+
+composite adlRefs.ref8<T conformsto 
+  foo.unknownADL
+> extends Type1
+{
+
+  contains T as subComp1;
+  
+  binds this.sItf to subComp1.sItf;
+  binds subComp1.cItf to this.cItf;
+}

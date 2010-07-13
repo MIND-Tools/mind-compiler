@@ -24,11 +24,11 @@ package org.ow2.mind.preproc;
 
 import org.antlr.runtime.CharStream;
 import org.antlr.runtime.Lexer;
-import org.antlr.runtime.Parser;
 import org.antlr.runtime.TokenStream;
+import org.ow2.mind.preproc.parser.AbstractCPLParser;
 
 public interface CPLPreprocessorFactory {
   Lexer getLexer(CharStream cs);
 
-  Parser getParser(TokenStream ts);
+  AbstractCPLParser getParser(TokenStream ts);
 }

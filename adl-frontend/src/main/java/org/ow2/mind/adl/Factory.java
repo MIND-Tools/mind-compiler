@@ -89,8 +89,8 @@ import org.ow2.mind.adl.parameter.ParametricGenericDefinitionReferenceResolver;
 import org.ow2.mind.adl.parameter.ParametricTemplateInstantiator;
 import org.ow2.mind.adl.parser.ADLParser;
 import org.ow2.mind.annotation.AnnotationChainFactory;
-import org.ow2.mind.idl.IDLCache;
 import org.ow2.mind.error.ErrorManager;
+import org.ow2.mind.idl.IDLCache;
 import org.ow2.mind.idl.IDLLoader;
 import org.ow2.mind.idl.IDLLoaderChainFactory;
 import org.ow2.mind.idl.IDLLoaderChainFactory.IDLFrontend;
@@ -147,12 +147,12 @@ public final class Factory {
     pluginFactory = scpf;
 
     // IDL Loader Chain
-    final IDLFrontend idlFrontend = IDLLoaderChainFactory.newLoader(errorManager,
-        idlLocator, inputResourceLocator, pluginFactory);
+    final IDLFrontend idlFrontend = IDLLoaderChainFactory.newLoader(
+        errorManager, idlLocator, inputResourceLocator, pluginFactory);
 
     return newLoader(errorManager, inputResourceLocator, adlLocator,
-        idlLocator, implementationLocator, idlFrontend.cache, idlFrontend.loader,
-        pluginFactory);
+        idlLocator, implementationLocator, idlFrontend.cache,
+        idlFrontend.loader, pluginFactory);
   }
 
   public static Loader newLoader(final ErrorManager errorManager,
@@ -354,6 +354,7 @@ public final class Factory {
     bdrr.nodeFactoryItf = nodeFactory;
     gdrr.nodeFactoryItf = nodeFactory;
 
+    bdrr.errorManagerItf = errorManager;
     pdrr.errorManagerItf = errorManager;
     gdrr.errorManagerItf = errorManager;
 

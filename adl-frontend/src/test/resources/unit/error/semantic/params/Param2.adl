@@ -1,0 +1,8 @@
+//#SemanticError GroupId=MADL ErrorId=INVALID_REFERENCE_TOO_MANY_ARGUMENT line=4
+
+primitive params.Param2 extends 
+Primitive1
+(1, 2, 3)
+{
+
+}

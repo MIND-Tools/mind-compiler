@@ -34,6 +34,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.objectweb.fractal.adl.ADLException;
+import org.ow2.mind.error.ErrorManager;
+import org.ow2.mind.error.ErrorManagerFactory;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
@@ -48,7 +50,11 @@ public class BasicCompilationCommandExecutorTest {
 
   @BeforeTest(alwaysRun = true)
   public void setup() {
-    executor = new BasicCompilationCommandExecutor();
+    final ErrorManager errorManager = ErrorManagerFactory
+        .newSimpleErrorManager();
+    final BasicCompilationCommandExecutor bcce = new BasicCompilationCommandExecutor();
+    bcce.errorManagerItf = errorManager;
+    executor = bcce;
     context = new HashMap<Object, Object>();
   }
 
@@ -136,7 +142,7 @@ public class BasicCompilationCommandExecutorTest {
     public void prepare() {
     }
 
-    public void exec() throws ADLException, InterruptedException {
+    public boolean exec() throws ADLException, InterruptedException {
       if (LOG)
         System.out
             .printf(
@@ -150,6 +156,7 @@ public class BasicCompilationCommandExecutorTest {
             "%5.2f: In Call of preproc task %s. Return result.%n", time(),
             getDescription());
       createdFiles.addAll(outputFiles);
+      return true;
     }
   }
 
@@ -183,7 +190,7 @@ public class BasicCompilationCommandExecutorTest {
     public void prepare() {
     }
 
-    public void exec() throws ADLException, InterruptedException {
+    public boolean exec() throws ADLException, InterruptedException {
       if (LOG)
         System.out
             .printf(
@@ -203,6 +210,7 @@ public class BasicCompilationCommandExecutorTest {
             "%5.2f: In Call of compile task %s. Return result.%n", time(),
             getDescription());
       createdFiles.addAll(outputFiles);
+      return true;
     }
   }
 
@@ -244,7 +252,7 @@ public class BasicCompilationCommandExecutorTest {
     public void prepare() {
     }
 
-    public void exec() throws ADLException, InterruptedException {
+    public boolean exec() throws ADLException, InterruptedException {
       if (LOG)
         System.out.printf("%5.2f: In Call of link task. Thread=%s%n", time(),
             Thread.currentThread());
@@ -261,6 +269,7 @@ public class BasicCompilationCommandExecutorTest {
         System.out.printf("%5.2f: In Call of link task. Return result.%n",
             time());
       createdFiles.addAll(outputFiles);
+      return true;
     }
   }
 }

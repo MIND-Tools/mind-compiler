@@ -42,6 +42,7 @@ import org.objectweb.fractal.adl.ContextLocal;
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.Node;
 import org.objectweb.fractal.adl.NodeFactory;
+import org.objectweb.fractal.adl.NodeUtil;
 import org.objectweb.fractal.adl.error.GenericErrors;
 import org.objectweb.fractal.adl.error.NodeErrorLocator;
 import org.objectweb.fractal.adl.interfaces.Interface;
@@ -253,15 +254,14 @@ public class GenericDefinitionReferenceResolver
       }
 
       if (containErrors) {
-        // the definition reference contains errors, return an unresolved node
-        return ASTHelper.newUnresolvedDefinitionNode(nodeFactoryItf,
-            reference.getName());
+        // the definition reference contains errors, simply return a clone of
+        // the template without instantiating it
+        d = NodeUtil.cloneGraph(d);
+      } else {
+        // instantiate template
+        d = templateInstantiatorItf.instantiateTemplate(d, typeArgumentValues,
+            context);
       }
-
-      // Finally instantiate template
-      d = templateInstantiatorItf.instantiateTemplate(d, typeArgumentValues,
-          context);
-
       // update referenced name
       reference.setName(d.getName());
 

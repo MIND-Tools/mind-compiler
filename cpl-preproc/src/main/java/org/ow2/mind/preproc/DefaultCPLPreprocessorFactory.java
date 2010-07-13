@@ -24,8 +24,8 @@ package org.ow2.mind.preproc;
 
 import org.antlr.runtime.CharStream;
 import org.antlr.runtime.Lexer;
-import org.antlr.runtime.Parser;
 import org.antlr.runtime.TokenStream;
+import org.ow2.mind.preproc.parser.AbstractCPLParser;
 import org.ow2.mind.preproc.parser.CPLLexer;
 import org.ow2.mind.preproc.parser.CPLParser;
 
@@ -35,7 +35,7 @@ public class DefaultCPLPreprocessorFactory implements CPLPreprocessorFactory {
     return new CPLLexer(cs);
   }
 
-  public Parser getParser(final TokenStream ts) {
+  public AbstractCPLParser getParser(final TokenStream ts) {
     return new CPLParser(ts);
   }
 

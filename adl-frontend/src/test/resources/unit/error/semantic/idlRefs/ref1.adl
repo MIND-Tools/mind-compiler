@@ -1,0 +1,9 @@
+//#SemanticError GroupId=MIDL ErrorId=IDL_NOT_FOUND line=6
+
+primitive idlRefs.ref1 {
+
+  provides api.Call as sItf;
+  requires foo.unknownIDL as cItf;
+  
+  source {{ }};
+}

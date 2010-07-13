@@ -22,8 +22,10 @@
 
 package org.ow2.mind.preproc;
 
+import org.antlr.runtime.Token;
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.Definition;
+import org.objectweb.fractal.adl.error.BasicErrorLocator;
 import org.objectweb.fractal.adl.interfaces.Interface;
 import org.objectweb.fractal.adl.interfaces.InterfaceContainer;
 import org.objectweb.fractal.adl.types.TypeInterface;
@@ -44,8 +46,8 @@ public class CPLChecker {
     this.definition = definition;
   }
 
-  public void serverMethDef(final String itfName, final String methName)
-      throws ADLException {
+  public void serverMethDef(final Token itfName, final Token methName,
+      final String sourceFile, final int lineNumberShift) throws ADLException {
 
     // Add this condition so that the testNG will
     // not throw exceptions (stand-alone node)
@@ -56,19 +58,21 @@ public class CPLChecker {
 
       for (final Interface itf : ((InterfaceContainer) definition)
           .getInterfaces()) {
-        if (itf.getName().equals(itfName)) {
+        if (itf.getName().equals(itfName.getText())) {
 
           if (TypeInterfaceUtil.isServer(itf)) {
             isServer = true;
 
-            final InterfaceDefinition itfDef = InterfaceDefinitionDecorationHelper
+            InterfaceDefinition itfDef;
+            itfDef = InterfaceDefinitionDecorationHelper
                 .getResolvedInterfaceDefinition((TypeInterface) itf, null, null);
             for (final Method meth : itfDef.getMethods()) {
-              if (meth.getName().equals(methName)) {
+              if (meth.getName().equals(methName.getText())) {
                 foundMeth = true;
                 break;
               }
             }
+
           }
           foundItf = true;
           break;
@@ -76,21 +80,29 @@ public class CPLChecker {
       }
 
       if (!foundItf) {
-        errorManager.logError(MPPErrors.UNKNOWN_INTERFACE, itfName);
+        errorManager.logError(MPPErrors.UNKNOWN_INTERFACE,
+            new BasicErrorLocator(sourceFile, itfName.getLine()
+                + lineNumberShift, itfName.getCharPositionInLine()),
+            itfName.getText());
       }
       if (isServer) {
         if (!foundMeth) {
-          errorManager.logError(MPPErrors.UNKNOWN_METHOD, itfName, methName);
+          errorManager.logError(MPPErrors.UNKNOWN_METHOD,
+              new BasicErrorLocator(sourceFile, methName.getLine()
+                  + lineNumberShift, methName.getCharPositionInLine()),
+              itfName.getText(), methName.getText());
         }
       } else {
-        errorManager.logError(MPPErrors.INVALID_CLIENT_INTERFACE, itfName,
-            methName);
+        errorManager.logError(MPPErrors.INVALID_CLIENT_INTERFACE,
+            new BasicErrorLocator(sourceFile, itfName.getLine()
+                + lineNumberShift, itfName.getCharPositionInLine()),
+            itfName.getText(), methName.getText());
       }
     }
   }
 
-  public void itfMethCall(final String itfName, final String methName)
-      throws ADLException {
+  public void itfMethCall(final Token itfName, final Token methName,
+      final String sourceFile, final int lineNumberShift) throws ADLException {
 
     // Add this condition so that the testNG will
     // not throw exceptions (stand-alone node)
@@ -100,12 +112,12 @@ public class CPLChecker {
 
       for (final Interface itf : ((InterfaceContainer) definition)
           .getInterfaces()) {
-        if (itf.getName().equals(itfName)) {
+        if (itf.getName().equals(itfName.getText())) {
 
           final InterfaceDefinition itfDef = InterfaceDefinitionDecorationHelper
               .getResolvedInterfaceDefinition((TypeInterface) itf, null, null);
           for (final Method meth : itfDef.getMethods()) {
-            if (meth.getName().equals(methName)) {
+            if (meth.getName().equals(methName.getText())) {
               foundMeth = true;
               break;
             }
@@ -116,30 +128,40 @@ public class CPLChecker {
       }
 
       if (!foundItf) {
-        errorManager.logError(MPPErrors.UNKNOWN_INTERFACE, itfName);
+        errorManager.logError(MPPErrors.UNKNOWN_INTERFACE,
+            new BasicErrorLocator(sourceFile, itfName.getLine()
+                + lineNumberShift, itfName.getCharPositionInLine()),
+            itfName.getText());
       }
       if (!foundMeth) {
-        errorManager.logError(MPPErrors.UNKNOWN_METHOD, itfName, methName);
+        errorManager.logError(MPPErrors.UNKNOWN_METHOD,
+            new BasicErrorLocator(sourceFile, methName.getLine()
+                + lineNumberShift, methName.getCharPositionInLine()),
+            itfName.getText(), methName.getText());
       }
     }
 
   }
 
-  public void attAccess(final String attributeName) throws ADLException {
+  public void attAccess(final Token attributeName, final String sourceFile,
+      final int lineNumberShift) throws ADLException {
     if (this.definition != null) { // add this condition so that the testNG will
       // not throw exceptions
       boolean foundAtt = false;
 
       for (final Attribute att : ((AttributeContainer) definition)
           .getAttributes()) {
-        if (att.getName().equals(attributeName)) {
+        if (att.getName().equals(attributeName.getText())) {
           foundAtt = true;
           break;
         }
       }
 
       if (!foundAtt) {
-        errorManager.logError(MPPErrors.UNKNOWN_INTERFACE, attributeName);
+        errorManager.logError(MPPErrors.UNKNOWN_ATTRIBUTE,
+            new BasicErrorLocator(sourceFile, attributeName.getLine()
+                + lineNumberShift, attributeName.getCharPositionInLine()),
+            attributeName.getText());
       }
     }
   }

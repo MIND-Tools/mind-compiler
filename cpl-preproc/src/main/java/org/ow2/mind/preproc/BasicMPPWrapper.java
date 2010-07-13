@@ -24,7 +24,6 @@ package org.ow2.mind.preproc;
 
 import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
 import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
-import static org.ow2.mind.preproc.InvocationHelper.invokeMethod;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -33,7 +32,6 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -41,13 +39,11 @@ import java.util.logging.Logger;
 
 import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.Lexer;
-import org.antlr.runtime.Parser;
 import org.antlr.runtime.RecognitionException;
 import org.objectweb.fractal.adl.ADLErrors;
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.CompilerError;
 import org.objectweb.fractal.adl.Definition;
-import org.objectweb.fractal.adl.error.Error;
 import org.objectweb.fractal.adl.error.GenericErrors;
 import org.objectweb.fractal.adl.util.FractalADLLogManager;
 import org.objectweb.fractal.api.NoSuchInterfaceException;
@@ -55,6 +51,7 @@ import org.objectweb.fractal.api.control.BindingController;
 import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.ow2.mind.error.ErrorManager;
 import org.ow2.mind.plugin.PluginManager;
+import org.ow2.mind.preproc.parser.AbstractCPLParser;
 
 public class BasicMPPWrapper implements MPPWrapper, BindingController {
 
@@ -147,7 +144,7 @@ public class BasicMPPWrapper implements MPPWrapper, BindingController {
       }
     }
 
-    public void exec() throws ADLException, InterruptedException {
+    public boolean exec() throws ADLException, InterruptedException {
       final Lexer lex;
       try {
         lex = ExtensionHelper.getLexer(pluginManagerItf, inputFile.getPath(),
@@ -157,11 +154,11 @@ public class BasicMPPWrapper implements MPPWrapper, BindingController {
       }
 
       final CommonTokenStream tokens = new CommonTokenStream(lex);
-      final Parser mpp = ExtensionHelper.getParser(pluginManagerItf, tokens,
-          context);
+      final AbstractCPLParser mpp = ExtensionHelper.getParser(pluginManagerItf,
+          tokens, context);
 
-      invokeMethod(mpp, "setCplChecker", new Class[]{CPLChecker.class},
-          new Object[]{this.cplChecker});
+      mpp.setCplChecker(cplChecker);
+      mpp.setErrorManager(errorManagerItf);
 
       PrintStream outPS = null;
       PrintStream headerOutPS = null;
@@ -172,10 +169,7 @@ public class BasicMPPWrapper implements MPPWrapper, BindingController {
         } catch (final FileNotFoundException e) {
           throw new CompilerError(GenericErrors.INTERNAL_ERROR, e, "IO error");
         }
-        invokeMethod(lex, "setOutPutStream", new Class[]{PrintStream.class},
-            new Object[]{outPS});
-        invokeMethod(mpp, "setOutputStream", new Class[]{PrintStream.class},
-            new Object[]{outPS});
+        mpp.setOutputStream(outPS);
 
         if (headerOutputFile != null) {
           try {
@@ -185,12 +179,10 @@ public class BasicMPPWrapper implements MPPWrapper, BindingController {
           } catch (final FileNotFoundException e) {
             throw new CompilerError(GenericErrors.INTERNAL_ERROR, e, "IO error");
           }
-          invokeMethod(mpp, "setHeaderOutputStream",
-              new Class[]{PrintStream.class}, new Object[]{headerOutPS});
+          mpp.setHeaderOutputStream(headerOutPS);
         }
 
-        invokeMethod(mpp, "setSingletonMode", new Class[]{boolean.class},
-            new Object[]{singletonMode});
+        mpp.setSingletonMode(singletonMode);
 
         if (logger.isLoggable(Level.INFO)) logger.info(getDescription());
 
@@ -198,27 +190,17 @@ public class BasicMPPWrapper implements MPPWrapper, BindingController {
           logger.fine("MPP: inputFile=" + inputFile.getPath() + " outputFile="
               + outputFile.getPath() + " singletonMode=" + singletonMode);
 
+        final int nbErrors = errorManagerItf.getErrors().size();
         try {
-          invokeMethod(mpp, "parseFile", new Class[]{}, new Object[]{},
-              RecognitionException.class);
+          mpp.preprocess();
         } catch (final RecognitionException e) {
-          throw new ADLException(MPPErrors.PARSE_ERROR, e, inputFile.getPath(),
-              "MPP parse error.");
+          errorManagerItf.logError(MPPErrors.PARSE_ERROR, e,
+              inputFile.getPath(), "MPP parse error.");
+          return false;
         }
 
-        final List<Error> errors = (List<Error>) invokeMethod(mpp, "getErrors",
-            new Class[]{}, new Object[]{});
-        if (errors != null && errors.size() > 0) {
-          final StringBuilder msg = new StringBuilder();
-          final Iterator<Error> iter = errors.iterator();
-          while (iter.hasNext()) {
-            final Error e = iter.next();
-            msg.append(e);
-            if (iter.hasNext()) msg.append("\n    ");
-          }
+        return errorManagerItf.getErrors().size() == nbErrors;
 
-          throw new ADLException(MPPErrors.PARSE_ERROR, msg.toString());
-        }
       } finally {
         if (outPS != null) outPS.close();
         if (headerOutPS != null) headerOutPS.close();

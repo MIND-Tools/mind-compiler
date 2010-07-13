@@ -45,6 +45,20 @@
                 <groupId>org.antlr</groupId>
                 <artifactId>antlr3-maven-plugin</artifactId>
             </plugin>
+
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <groups>${test.groups}</groups>
+                    <systemPropertyVariables>
+                        <default.file.level>FINEST</default.file.level>
+                        <loggers.outfile>${project.build.testOutputDirectory}/test-log.txt</loggers.outfile>
+                        <mind.test.cflags>-g -Wall -Werror -Wredundant-decls
+                            -Wunreachable-code -Wstrict-prototypes
+                            -Wwrite-strings</mind.test.cflags>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 </project>

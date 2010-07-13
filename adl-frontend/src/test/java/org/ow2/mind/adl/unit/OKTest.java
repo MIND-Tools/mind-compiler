@@ -30,7 +30,7 @@ import org.ow2.mind.unit.UnitTestDataProvider;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-public class OKTest extends AbstractADLLoaderTest {
+public class OKTest extends AbstractErrorTest {
 
   @DataProvider(name = "unit-test")
   protected Object[][] dataProvider() throws Exception {

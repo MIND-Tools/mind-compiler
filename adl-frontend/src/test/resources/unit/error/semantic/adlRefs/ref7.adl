@@ -1,0 +1,11 @@
+//#SemanticError GroupId=ADL ErrorId=ADL_NOT_FOUND line=4
+
+composite adlRefs.ref7 extends generic.Generic1<
+  foo.unknownADL
+  >
+{
+  contains Primitive1 as subComp2;
+  
+  binds subComp1.cItf to subComp2.sItf;
+  binds subComp2.cItf to this.cItf;
+}

@@ -1,0 +1,8 @@
+//#SemanticError GroupId=MADL ErrorId=INVALID_REFERENCE_TOO_MANY_ARGUMENT line=4
+
+composite params.Param3 extends 
+Composite1
+(1, 2, 3)
+{
+
+}

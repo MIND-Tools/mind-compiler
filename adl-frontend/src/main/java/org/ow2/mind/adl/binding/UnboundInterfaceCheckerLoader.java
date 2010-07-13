@@ -92,7 +92,7 @@ public class UnboundInterfaceCheckerLoader extends AbstractLoader {
         if (isClient(itf) && isMandatory(itf)) {
           if (findBinding(bindings, THIS_COMPONENT, itf) == null)
             errorManagerItf.logError(
-                BindingErrors.UNBOUND_COMPOSITE_SERVER_INTERFACE, itf,
+                BindingErrors.UNBOUND_COMPOSITE_SERVER_INTERFACE, container,
                 itf.getName(), ((Definition) container).getName());
         }
       }

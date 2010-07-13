@@ -1,0 +1,3 @@
+primitive simple.Primitive2 {
+	src my.c;	
+}

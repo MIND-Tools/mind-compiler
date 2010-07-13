@@ -39,5 +39,5 @@ public interface CompilationCommand {
 
   boolean forceExec();
 
-  void exec() throws ADLException, InterruptedException;
+  boolean exec() throws ADLException, InterruptedException;
 }

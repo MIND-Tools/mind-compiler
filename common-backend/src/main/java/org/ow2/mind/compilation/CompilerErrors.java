@@ -44,7 +44,15 @@ public enum CompilerErrors implements ErrorTemplate {
       "ouput"),
 
   /** */
+  COMPILER_WARNING(4, "Warnings while compiling the file \"%s\" : \n%s",
+      "filename", "ouput"),
+
+  /** */
   LINKER_ERROR(3, "Error while linking the file \"%s\" : \n%s", "filename",
+      "ouput"),
+
+  /** */
+  LINKER_WARNING(5, "Warning while linking the file \"%s\" : \n%s", "filename",
       "ouput");
 
   /** The groupId of ErrorTemplates defined in this enumeration. */

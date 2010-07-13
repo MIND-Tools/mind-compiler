@@ -29,6 +29,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import org.antlr.stringtemplate.StringTemplate;
 import org.antlr.stringtemplate.StringTemplateGroup;
@@ -38,20 +39,21 @@ import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.Loader;
 import org.objectweb.fractal.adl.NodeFactory;
-import org.objectweb.fractal.adl.error.BasicErrorLocator;
-import org.objectweb.fractal.adl.error.ErrorLocator;
 import org.objectweb.fractal.adl.merger.NodeMerger;
+import org.objectweb.fractal.adl.util.FractalADLLogManager;
 import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.fractal.api.control.BindingController;
 import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.ow2.mind.adl.DefinitionCache;
 import org.ow2.mind.adl.DefinitionReferenceResolver;
+import org.ow2.mind.adl.ast.ASTHelper;
 import org.ow2.mind.adl.idl.InterfaceSignatureResolver;
 import org.ow2.mind.adl.parser.ADLParserContextHelper;
 import org.ow2.mind.error.ErrorManager;
 import org.ow2.mind.idl.IDLCache;
 import org.ow2.mind.idl.IDLLoader;
 import org.ow2.mind.idl.ast.IDL;
+import org.ow2.mind.idl.ast.IDLASTHelper;
 import org.ow2.mind.idl.parser.IDLParserContextHelper;
 
 /**
@@ -65,6 +67,9 @@ public abstract class AbstractADLLoaderAnnotationProcessor
     implements
       ADLLoaderAnnotationProcessor,
       BindingController {
+
+  protected static Logger            logger = FractalADLLogManager
+                                                .getLogger("annotations");
 
   // ---------------------------------------------------------------------------
   // Client interfaces
@@ -136,32 +141,38 @@ public abstract class AbstractADLLoaderAnnotationProcessor
   protected Definition loadFromSource(final String name,
       final String adlSource, final Map<Object, Object> context)
       throws ADLException {
-    final Definition def = definitionCacheItf.getInCache(name, context);
+    Definition def = definitionCacheItf.getInCache(name, context);
     if (def != null) {
       return def;
     }
     ADLParserContextHelper.registerADL(name, adlSource, context);
+    final int nbErrors = errorManagerItf.getErrors().size();
+    boolean containsErrors = false;
     try {
-      return loaderItf.load(name, context);
+      def = loaderItf.load(name, context);
+      containsErrors = errorManagerItf.getErrors().size() != nbErrors;
     } catch (final ADLException e) {
+      containsErrors = true;
+    }
+
+    if (containsErrors) {
       // The loading of the generated ADL fails.
       // Print the ADL content in a temporary file to ease its debugging.
       try {
         final File f = File.createTempFile("GeneratedADL", ".adl");
+        logger.warning("Loading of generated ADL " + name
+            + " fails. Dump ADL sources in " + f);
         final FileWriter fw = new FileWriter(f);
         fw.write(adlSource);
         fw.close();
-
-        // update the error locator to point to the temporary file.
-        final ErrorLocator l = e.getError().getLocator();
-        final ErrorLocator l1 = new BasicErrorLocator(f.getPath(),
-            l.getBeginLine(), l.getBeginColumn());
-        e.getError().setLocator(l1);
       } catch (final IOException e1) {
         // ignore
       }
-      throw e;
+      if (def == null) {
+        def = ASTHelper.newUnresolvedDefinitionNode(nodeFactoryItf, name);
+      }
     }
+    return def;
   }
 
   protected Definition loadFromAST(final Definition def,
@@ -205,32 +216,37 @@ public abstract class AbstractADLLoaderAnnotationProcessor
    */
   protected IDL loadIDLFromSource(final String name, final String idlSource,
       final Map<Object, Object> context) throws ADLException {
-    final IDL idl = idlCacheItf.getInCache(name, context);
+    IDL idl = idlCacheItf.getInCache(name, context);
     if (idl != null) {
       return idl;
     }
     IDLParserContextHelper.registerIDL(name, idlSource, context);
+    final int nbErrors = errorManagerItf.getErrors().size();
+    boolean containsErrors = false;
     try {
-      return idlLoaderItf.load(name, context);
+      idl = idlLoaderItf.load(name, context);
+      containsErrors = errorManagerItf.getErrors().size() != nbErrors;
     } catch (final ADLException e) {
+      containsErrors = true;
+    }
+    if (containsErrors) {
       // The loading of the generated ADL fails.
-      // Print the ADL content in a temporary file to ease its debugging.
+      // Print the IDL content in a temporary file to ease its debugging.
       try {
         final File f = File.createTempFile("GeneratedIDL", ".idl");
+        logger.warning("Loading of generated IDL " + name
+            + " fails. Dump IDL sources in " + f);
         final FileWriter fw = new FileWriter(f);
         fw.write(idlSource);
         fw.close();
-
-        // update the error locator to point to the temporary file.
-        final ErrorLocator l = e.getError().getLocator();
-        final ErrorLocator l1 = new BasicErrorLocator(f.getPath(),
-            l.getBeginLine(), l.getBeginColumn());
-        e.getError().setLocator(l1);
       } catch (final IOException e1) {
         // ignore
       }
-      throw e;
     }
+    if (idl == null) {
+      idl = IDLASTHelper.newUnresolvedIDLNode(nodeFactoryItf, name);
+    }
+    return idl;
   }
 
   protected IDL loadIDLFromAST(final IDL idl, final Map<Object, Object> context)

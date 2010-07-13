@@ -92,7 +92,7 @@ public class ADLParser implements Loader, BindingController {
         return (Definition) registeredADL;
       } else if (registeredADL instanceof String) {
         is = new ByteArrayInputStream(((String) registeredADL).getBytes());
-        path = "<generated>";
+        path = "<generated:" + name + ">";
       } else {
         throw new CompilerError(GenericErrors.INTERNAL_ERROR,
             "Unexpected type for registered ADL");

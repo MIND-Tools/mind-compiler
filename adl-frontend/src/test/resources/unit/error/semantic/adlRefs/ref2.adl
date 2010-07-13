@@ -1,0 +1,7 @@
+//#SemanticError GroupId=ADL ErrorId=ADL_NOT_FOUND line=4
+
+composite adlRefs.ref2 extends 
+foo.unknownADL
+{
+
+}
