@@ -1,0 +1,33 @@
+// Test for MIND-99
+@CompileDef
+@Singleton
+primitive helloworld.ClientInlinedSingleton {
+  data {{
+    struct {
+      const char *s;
+    } PRIVATE;
+  }}
+  
+  provides Main as main;
+  requires Service as sa ;
+  
+  
+  source {{
+    /* -------------------------------------------------------------------------
+       Implementation of the main interface.
+    ------------------------------------------------------------------------- */
+
+    /* int main(int argc, string[] argv) */
+    int METH(main, main) (int argc, char *argv[]){
+      PRIVATE.s = "hello world";
+      
+      /* call the 'print' method of the 'sa' client interface. */
+      CALL(sa, print)(PRIVATE.s);
+    
+      /* call again the same method to look at invocation count */
+      CALL(sa, println)(PRIVATE.s);
+    
+      return 0;
+    }
+  }}
+}
