@@ -35,6 +35,7 @@ import org.objectweb.fractal.adl.AbstractLoader;
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.fractal.api.control.IllegalBindingException;
+import org.ow2.mind.PathHelper.InvalidRelativPathException;
 import org.ow2.mind.adl.ADLErrors;
 import org.ow2.mind.adl.ast.Data;
 import org.ow2.mind.adl.ast.ImplementationContainer;
@@ -86,7 +87,11 @@ public class ImplementationLoader extends AbstractLoader {
         throw new ADLException(ADLErrors.INVALID_PATH, data, path);
 
       if (isRelative(path)) {
-        path = fullyQualifiedNameToAbsolute(def.getName(), path);
+        try {
+          path = fullyQualifiedNameToAbsolute(def.getName(), path);
+        } catch (final InvalidRelativPathException e) {
+          throw new ADLException(ADLErrors.INVALID_PATH, data, path);
+        }
         data.setPath(path);
       }
 
@@ -104,7 +109,11 @@ public class ImplementationLoader extends AbstractLoader {
         throw new ADLException(ADLErrors.INVALID_PATH, src, path);
 
       if (isRelative(path)) {
-        path = fullyQualifiedNameToAbsolute(def.getName(), path);
+        try {
+          path = fullyQualifiedNameToAbsolute(def.getName(), path);
+        } catch (final InvalidRelativPathException e) {
+          throw new ADLException(ADLErrors.INVALID_PATH, src, path);
+        }
         src.setPath(path);
       }
 
