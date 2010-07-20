@@ -36,6 +36,7 @@ import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.fractal.api.control.BindingController;
 import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.ow2.mind.PathHelper;
+import org.ow2.mind.PathHelper.InvalidRelativPathException;
 import org.ow2.mind.idl.ast.IDL;
 import org.ow2.mind.idl.ast.IDLASTHelper;
 import org.ow2.mind.idl.ast.Include;
@@ -81,7 +82,12 @@ public class BasicIncludeResolver implements IncludeResolver, BindingController 
       }
     } else {
       // look-for header relatively to encapsulatingDir
-      final String relPath = toAbsolute(encapsulatingDir, path);
+      String relPath = null;
+      try {
+        relPath = toAbsolute(encapsulatingDir, path);
+      } catch (final InvalidRelativPathException e) {
+        throw new ADLException(IDLErrors.INVALID_INCLUDE, include, path);
+      }
       URL url = idlLocatorItf.findSourceHeader(relPath, context);
       if (url != null) {
         // IDL found with relPath
