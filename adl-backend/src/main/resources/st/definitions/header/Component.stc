@@ -175,9 +175,19 @@ ComponentTypeDef(definition) ::= <<
 <definition.data.astSource; format="sourceTo#line">
 <definition.data.cCode>
 /* End inlined data code. */
+<if (definition.astDecorations.("is-singleton"))>
+typedef struct {
+  COMP_DATA;
+} PRIVATE_DATA_T;
+<endif>
 <elseif (definition.data.path)>
 /* Include data file */
 #include "<definition.data.path; format="toCPath">"
+<if (definition.astDecorations.("is-singleton"))>
+typedef struct {
+  COMP_DATA;
+} PRIVATE_DATA_T;
+<endif>
 <else>
 /* No private data */
 typedef struct {
