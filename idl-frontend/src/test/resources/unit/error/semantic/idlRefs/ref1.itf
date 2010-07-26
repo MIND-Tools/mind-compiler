@@ -1,0 +1,7 @@
+//#SemanticError GroupId=MIDL ErrorId=IDL_NOT_FOUND line=3
+
+interface idlRefs.ref1 :
+foo.unknownADL
+{
+    int meth(int a, int b);
+}

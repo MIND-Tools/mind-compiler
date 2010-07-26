@@ -16,11 +16,11 @@
  *
  * Contact: mind@ow2.org
  *
- * Authors: Matthieu Leclercq
+ * Authors: Ali Erdem Ozcan
  * Contributors: 
  */
 
-package org.ow2.mind.adl.unit;
+package org.ow2.mind.idl;
 
 import static org.testng.Assert.assertNotNull;
 
@@ -30,26 +30,21 @@ import java.net.URLClassLoader;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.objectweb.fractal.adl.Loader;
 import org.ow2.mind.BasicInputResourceLocator;
-import org.ow2.mind.adl.ADLLocator;
-import org.ow2.mind.adl.Factory;
-import org.ow2.mind.adl.implementation.ImplementationLocator;
 import org.ow2.mind.error.ErrorManager;
 import org.ow2.mind.error.ErrorManagerFactory;
-import org.ow2.mind.idl.IDLLoaderChainFactory;
-import org.ow2.mind.idl.IDLLoaderChainFactory.IDLFrontend;
-import org.ow2.mind.idl.IDLLocator;
 import org.ow2.mind.plugin.SimpleClassPluginFactory;
+import org.ow2.mind.unit.ExpectedErrorHelper;
+import org.ow2.mind.unit.UnitTestDataProvider;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
 
-public abstract class AbstractErrorTest {
-
-  private static final String   COMMON_ROOT_DIR = "unit/common/";
+public class SemanticErrorTest {
 
   protected ErrorManager        errorManager;
-  protected ADLLocator          adlLocator;
-  protected Loader              loader;
+  protected IDLLocator          idlLocator;
+  protected IDLLoader           idlLoader;
 
   protected Map<Object, Object> context;
 
@@ -60,36 +55,41 @@ public abstract class AbstractErrorTest {
 
     // input locators
     final BasicInputResourceLocator inputResourceLocator = new BasicInputResourceLocator();
-    final IDLLocator idlLocator = IDLLoaderChainFactory
-        .newIDLLocator(inputResourceLocator);
-    adlLocator = Factory.newADLLocator(inputResourceLocator);
-    final ImplementationLocator implementationLocator = Factory
-        .newImplementationLocator(inputResourceLocator);
+    idlLocator = IDLLoaderChainFactory.newIDLLocator(inputResourceLocator);
 
     // Plugin Manager Components
     final org.objectweb.fractal.adl.Factory pluginFactory = new SimpleClassPluginFactory();
 
     // loader chains
-    final IDLFrontend idlFrontend = IDLLoaderChainFactory.newLoader(
-        errorManager, idlLocator, inputResourceLocator, pluginFactory);
-    loader = Factory.newLoader(errorManager, inputResourceLocator, adlLocator,
-        idlLocator, implementationLocator, idlFrontend.cache,
-        idlFrontend.loader, pluginFactory);
+    idlLoader = IDLLoaderChainFactory.newLoader(errorManager, idlLocator,
+        inputResourceLocator, pluginFactory).loader;
 
     context = new HashMap<Object, Object>();
   }
 
   protected void initSourcePath(String rootDir) {
     if (!rootDir.endsWith("/")) rootDir += "/";
-    final ClassLoader srcLoader = new URLClassLoader(new URL[]{
-        getClass().getClassLoader().getResource(COMMON_ROOT_DIR),
-        getClass().getClassLoader().getResource(rootDir)}, null);
+    final ClassLoader srcLoader = new URLClassLoader(new URL[]{getClass()
+        .getClassLoader().getResource(rootDir)}, null);
     context.put("classloader", srcLoader);
   }
 
-  protected URL findADL(final String adlName) throws IOException {
-    final URL adl = adlLocator.findSourceADL(adlName, context);
-    assertNotNull(adl, "Can't find ADL " + adlName);
+  protected URL findIDL(final String idlName) throws IOException {
+    final URL adl = idlLocator.findSourceItf(idlName, context);
+    assertNotNull(adl, "Can't find IDL " + idlName);
     return adl;
+  }
+
+  @DataProvider(name = "unit-test")
+  protected Object[][] dataProvider() throws Exception {
+    return UnitTestDataProvider.listIDLs("unit/error/semantic");
+  }
+
+  @Test(dataProvider = "unit-test", groups = {"functional"})
+  public void semanticErrorTest(final String rootDir, final String idlName)
+      throws Exception {
+    initSourcePath(rootDir);
+    idlLoader.load(idlName, context);
+    ExpectedErrorHelper.checkErrors(findIDL(idlName), errorManager.getErrors());
   }
 }
