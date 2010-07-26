@@ -36,14 +36,14 @@ import org.ow2.mind.adl.BasicADLLocator;
 import org.ow2.mind.adl.BasicDefinitionReferenceResolver;
 import org.ow2.mind.adl.CacheLoader;
 import org.ow2.mind.adl.CachingDefinitionReferenceResolver;
+import org.ow2.mind.adl.ErrorLoader;
 import org.ow2.mind.adl.ExtendsLoader;
 import org.ow2.mind.adl.STCFNodeMerger;
 import org.ow2.mind.adl.SubComponentResolverLoader;
-import org.ow2.mind.adl.anonymous.AnonymousDefinitionExtractorImpl;
-import org.ow2.mind.adl.anonymous.AnonymousDefinitionLoader;
-import org.ow2.mind.adl.anonymous.ImportAnonymousDefinitionExtractor;
 import org.ow2.mind.adl.imports.ImportDefinitionReferenceResolver;
 import org.ow2.mind.adl.parser.ADLParser;
+import org.ow2.mind.error.ErrorManager;
+import org.ow2.mind.error.ErrorManagerFactory;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -57,17 +57,29 @@ public class TestAnonymous {
 
   @BeforeMethod(alwaysRun = true)
   protected void setUp() throws Exception {
+    final ErrorManager errorManager = ErrorManagerFactory
+        .newSimpleErrorManager();
+
     // Loader chain components
     final ADLParser adlLoader = new ADLParser();
     final AnonymousDefinitionLoader adl = new AnonymousDefinitionLoader();
     final SubComponentResolverLoader scrl = new SubComponentResolverLoader();
     final ExtendsLoader el = new ExtendsLoader();
     final CacheLoader cl = new CacheLoader();
+    final ErrorLoader errl = new ErrorLoader();
 
+    errl.clientLoader = cl;
     cl.clientLoader = el;
     el.clientLoader = scrl;
     scrl.clientLoader = adl;
     adl.clientLoader = adlLoader;
+
+    adlLoader.errorManagerItf = errorManager;
+    adl.errorManagerItf = errorManager;
+    scrl.errorManagerItf = errorManager;
+    el.errorManagerItf = errorManager;
+    cl.errorManagerItf = errorManager;
+    errl.errorManagerItf = errorManager;
 
     // definition reference resolver chain
     final BasicDefinitionReferenceResolver bdrr = new BasicDefinitionReferenceResolver();
@@ -81,6 +93,8 @@ public class TestAnonymous {
 
     el.definitionReferenceResolverItf = cdrr;
     scrl.definitionReferenceResolverItf = cdrr;
+
+    bdrr.errorManagerItf = errorManager;
 
     // anonymous definition resolver chain
     final AnonymousDefinitionExtractorImpl adr = new AnonymousDefinitionExtractorImpl();
@@ -104,8 +118,9 @@ public class TestAnonymous {
     adr.nodeFactoryItf = nodeFactory;
     iadr.nodeFactoryItf = nodeFactory;
     iadr.nodeMergerItf = nodeMerger;
+    bdrr.nodeFactoryItf = nodeFactory;
 
-    loader = cl;
+    loader = errl;
 
     context = new HashMap<Object, Object>();
     checker = new ASTChecker();
@@ -131,8 +146,8 @@ public class TestAnonymous {
     final Definition content = loader
         .load("pkg1.anonymous.Composite1", context);
     checker.assertDefinition(content).containsComponent("subComp1")
-        .isAnInstanceOf("pkg1.anonymous.Composite1$0").containsComponents(
-            "subComp1", "subComp2");
+        .isAnInstanceOf("pkg1.anonymous.Composite1$0")
+        .containsComponents("subComp1", "subComp2");
   }
 
   @Test(groups = {"functional"})
@@ -140,7 +155,7 @@ public class TestAnonymous {
     final Definition content = loader
         .load("pkg1.anonymous.Composite2", context);
     checker.assertDefinition(content).containsComponent("subComp1")
-        .isAnInstanceOf("pkg1.anonymous.Composite2$0").containsComponents(
-            "subComp1", "subComp2");
+        .isAnInstanceOf("pkg1.anonymous.Composite2$0")
+        .containsComponents("subComp1", "subComp2");
   }
 }

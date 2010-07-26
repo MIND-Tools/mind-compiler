@@ -22,9 +22,13 @@
 
 package org.ow2.mind.adl.graph;
 
+import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
+import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
+
 import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.fractal.api.control.BindingController;
 import org.objectweb.fractal.api.control.IllegalBindingException;
+import org.ow2.mind.error.ErrorManager;
 
 public abstract class AbstractInstantiator
     implements
@@ -35,6 +39,9 @@ public abstract class AbstractInstantiator
   // Client interfaces
   // ---------------------------------------------------------------------------
 
+  /** The {@link ErrorManager} client interface used to log errors. */
+  public ErrorManager        errorManagerItf;
+
   public static final String CLIENT_INSTANTIATOR_ITF_NAME = "client-instantiator";
 
   public Instantiator        clientInstantiatorItf;
@@ -44,16 +51,15 @@ public abstract class AbstractInstantiator
   // ---------------------------------------------------------------------------
 
   public String[] listFc() {
-    return new String[]{CLIENT_INSTANTIATOR_ITF_NAME};
+    return listFcHelper(ErrorManager.ITF_NAME, CLIENT_INSTANTIATOR_ITF_NAME);
   }
 
   public Object lookupFc(final String s) throws NoSuchInterfaceException {
+    checkItfName(s);
 
-    if (s == null) {
-      throw new IllegalArgumentException("Interface name can't be null");
-    }
-
-    if (CLIENT_INSTANTIATOR_ITF_NAME.equals(s)) {
+    if (ErrorManager.ITF_NAME.equals(s)) {
+      return errorManagerItf;
+    } else if (CLIENT_INSTANTIATOR_ITF_NAME.equals(s)) {
       return clientInstantiatorItf;
     } else {
       throw new NoSuchInterfaceException("No client interface named '" + s
@@ -63,12 +69,11 @@ public abstract class AbstractInstantiator
 
   public void bindFc(final String s, final Object o)
       throws NoSuchInterfaceException, IllegalBindingException {
+    checkItfName(s);
 
-    if (s == null) {
-      throw new IllegalArgumentException("Interface name can't be null");
-    }
-
-    if (CLIENT_INSTANTIATOR_ITF_NAME.equals(s)) {
+    if (ErrorManager.ITF_NAME.equals(s)) {
+      errorManagerItf = (ErrorManager) o;
+    } else if (CLIENT_INSTANTIATOR_ITF_NAME.equals(s)) {
       clientInstantiatorItf = (Instantiator) o;
     } else {
       throw new NoSuchInterfaceException("No client interface named '" + s
@@ -78,12 +83,11 @@ public abstract class AbstractInstantiator
 
   public void unbindFc(final String s) throws IllegalBindingException,
       NoSuchInterfaceException {
+    checkItfName(s);
 
-    if (s == null) {
-      throw new IllegalArgumentException("Interface name can't be null");
-    }
-
-    if (CLIENT_INSTANTIATOR_ITF_NAME.equals(s)) {
+    if (ErrorManager.ITF_NAME.equals(s)) {
+      errorManagerItf = null;
+    } else if (CLIENT_INSTANTIATOR_ITF_NAME.equals(s)) {
       clientInstantiatorItf = null;
     } else {
       throw new NoSuchInterfaceException("No client interface named '" + s

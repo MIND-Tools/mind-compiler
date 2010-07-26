@@ -30,6 +30,7 @@ import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.Definition;
 import org.ow2.mind.adl.AbstractDefinitionReferenceResolver;
 import org.ow2.mind.adl.DefinitionReferenceResolver;
+import org.ow2.mind.adl.ast.ASTHelper;
 import org.ow2.mind.adl.ast.DefinitionReference;
 import org.ow2.mind.adl.generic.ast.TypeArgument;
 import org.ow2.mind.adl.generic.ast.TypeArgumentContainer;
@@ -38,7 +39,7 @@ import org.ow2.mind.adl.parameter.ast.ArgumentContainer;
 
 /**
  * This delegating {@link DefinitionReferenceResolver} extracts {@link Argument}
- * nodes of the {@link TypeArgument type arguments} contains by the definition
+ * nodes of the {@link TypeArgument type arguments} contained by the definition
  * reference to resolve, and adds them to the definition reference to resolve. <br>
  * i.e. transforms
  * 
@@ -72,7 +73,8 @@ public class ParametricGenericDefinitionReferenceResolver
     final Definition d = clientResolverItf.resolve(reference,
         encapsulatingDefinition, context);
 
-    if (typeArguments != null && typeArguments.length > 0) {
+    if (!ASTHelper.isUnresolvedDefinitionNode(d) && typeArguments != null
+        && typeArguments.length > 0) {
       ArgumentContainer topArgumentContainer = null;
 
       for (final TypeArgument typeArgument : typeArguments) {

@@ -13,6 +13,8 @@ import junit.framework.TestCase;
 
 import org.objectweb.fractal.adl.ADLException;
 import org.ow2.mind.PathHelper;
+import org.ow2.mind.error.ErrorManager;
+import org.ow2.mind.error.ErrorManagerFactory;
 import org.ow2.mind.idl.ast.IDL;
 import org.ow2.mind.io.BasicOutputFileLocator;
 
@@ -27,7 +29,9 @@ public class AppTest extends TestCase {
 
   @Override
   protected void setUp() throws Exception {
-    loader = IDLLoaderChainFactory.newLoader().loader;
+    final ErrorManager errorManager = ErrorManagerFactory
+        .newSimpleErrorManager();
+    loader = IDLLoaderChainFactory.newLoader(errorManager).loader;
     idlVisitor = IDLBackendFactory.newIDLCompiler(loader);
 
     context = new HashMap<Object, Object>();

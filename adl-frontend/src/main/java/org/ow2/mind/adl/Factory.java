@@ -89,6 +89,7 @@ import org.ow2.mind.adl.parameter.ParametricGenericDefinitionReferenceResolver;
 import org.ow2.mind.adl.parameter.ParametricTemplateInstantiator;
 import org.ow2.mind.adl.parser.ADLParser;
 import org.ow2.mind.annotation.AnnotationChainFactory;
+import org.ow2.mind.error.ErrorManager;
 import org.ow2.mind.idl.IDLCache;
 import org.ow2.mind.idl.IDLLoader;
 import org.ow2.mind.idl.IDLLoaderChainFactory;
@@ -129,9 +130,10 @@ public final class Factory {
    * Returns a {@link Loader} interface that can be used to parse and check an
    * ADL Definition.
    * 
+   * @param errorManager the error manager component.
    * @return a {@link Loader} interface.
    */
-  public static Loader newLoader() {
+  public static Loader newLoader(final ErrorManager errorManager) {
 
     final BasicInputResourceLocator inputResourceLocator = new BasicInputResourceLocator();
     final ADLLocator adlLocator = newADLLocator(inputResourceLocator);
@@ -145,15 +147,15 @@ public final class Factory {
     pluginFactory = scpf;
 
     // IDL Loader Chain
-    final IDLFrontend idlFrontend = IDLLoaderChainFactory.newLoader(idlLocator,
-        inputResourceLocator, pluginFactory);
+    final IDLFrontend idlFrontend = IDLLoaderChainFactory.newLoader(
+        errorManager, idlLocator, inputResourceLocator, pluginFactory);
 
-    return newLoader(inputResourceLocator, adlLocator, idlLocator,
-        implementationLocator, idlFrontend.cache, idlFrontend.loader,
-        pluginFactory);
+    return newLoader(errorManager, inputResourceLocator, adlLocator,
+        idlLocator, implementationLocator, idlFrontend.cache,
+        idlFrontend.loader, pluginFactory);
   }
 
-  public static Loader newLoader(
+  public static Loader newLoader(final ErrorManager errorManager,
       final BasicInputResourceLocator inputResourceLocator,
       final ADLLocator adlLocator, final IDLLocator idlLocator,
       final ImplementationLocator implementationLocator,
@@ -238,7 +240,28 @@ public final class Factory {
     bal.inputResourceLocatorItf = inputResourceLocator;
     bal.nodeFactoryItf = nodeFactory;
     fl.nodeFactoryItf = nodeFactory;
+    isl.nodeFactoryItf = nodeFactory;
+    gdl.nodeFactoryItf = nodeFactory;
     acl.nodeFactoryItf = nodeFactory;
+
+    ap.errorManagerItf = errorManager;
+    al.errorManagerItf = errorManager;
+    gdl.errorManagerItf = errorManager;
+    adl.errorManagerItf = errorManager;
+    scrl.errorManagerItf = errorManager;
+    el.errorManagerItf = errorManager;
+    nascl.errorManagerItf = errorManager;
+    isl.errorManagerItf = errorManager;
+    mcl.errorManagerItf = errorManager;
+    bnl.errorManagerItf = errorManager;
+    bcl.errorManagerItf = errorManager;
+    uicl.errorManagerItf = errorManager;
+    il.errorManagerItf = errorManager;
+    pnl.errorManagerItf = errorManager;
+    attrnl.errorManagerItf = errorManager;
+    acl.errorManagerItf = errorManager;
+    bal.errorManagerItf = errorManager;
+    cl.errorManagerItf = errorManager;
 
     il.implementationLocatorItf = implementationLocator;
 
@@ -251,7 +274,8 @@ public final class Factory {
     apl3.pluginManagerItf = pluginManager;
     apl4.pluginManagerItf = pluginManager;
 
-    anl.annotationCheckerItf = AnnotationChainFactory.newAnnotationChecker();
+    anl.annotationCheckerItf = AnnotationChainFactory
+        .newAnnotationChecker(errorManager);
 
     el.nodeMergerItf = stcfNodeMerger;
     ap.adlLocatorItf = adlLocator;
@@ -271,6 +295,8 @@ public final class Factory {
     bisr.idlLoaderItf = idlLoader;
 
     iisr.idlLocatorItf = idlLocator;
+    bisr.nodeFactoryItf = nodeFactory;
+    bisr.errorManagerItf = errorManager;
 
     isl.interfaceSignatureResolverItf = interfaceSignatureResolver;
 
@@ -284,7 +310,9 @@ public final class Factory {
     aic.adlLocatorItf = adlLocator;
 
     aic.adlLocatorItf = adlLocator;
+    aic.errorManagerItf = errorManager;
     iic.idlLocatorItf = idlLocator;
+    iic.errorManagerItf = errorManager;
 
     icl.importCheckerItf = importChecker;
 
@@ -295,6 +323,9 @@ public final class Factory {
     bindingChecker = ibc;
     ibc.clientBindingCheckerItf = bbc;
     bcl.bindingCheckerItf = bbc;
+
+    ibc.errorManagerItf = errorManager;
+    bbc.errorManagerItf = errorManager;
 
     uicl.recursiveLoaderItf = adlLoader;
 
@@ -320,9 +351,18 @@ public final class Factory {
     idrr.adlLocatorItf = adlLocator;
     gdrr.bindingCheckerItf = bindingChecker;
 
+    bdrr.nodeFactoryItf = nodeFactory;
+    gdrr.nodeFactoryItf = nodeFactory;
+
+    bdrr.errorManagerItf = errorManager;
+    pdrr.errorManagerItf = errorManager;
+    gdrr.errorManagerItf = errorManager;
+
     final NoAnyTypeArgumentDefinitionReferenceResolver natadrr = new NoAnyTypeArgumentDefinitionReferenceResolver();
 
     natadrr.clientResolverItf = cdrr;
+    natadrr.errorManagerItf = errorManager;
+
     scrl.definitionReferenceResolverItf = natadrr;
 
     final ExtendsGenericDefinitionReferenceResolver egdrr = new ExtendsGenericDefinitionReferenceResolver();
@@ -368,6 +408,8 @@ public final class Factory {
     pfti.nodeFactoryItf = nodeFactory;
     pfti.nodeMergerItf = nodeMerger;
 
+    fti.errorManagerItf = errorManager;
+
     // anonymous definition resolver chain
     final AnonymousDefinitionExtractorImpl adr = new AnonymousDefinitionExtractorImpl();
     final ImportAnonymousDefinitionExtractor iadr = new ImportAnonymousDefinitionExtractor();
@@ -395,6 +437,8 @@ public final class Factory {
 
     // configuration of plugin-manager
     try {
+      ((BindingController) pluginManager).bindFc(ErrorManager.ITF_NAME,
+          errorManager);
       ((BindingController) pluginManager).bindFc(NodeFactory.ITF_NAME,
           nodeFactory);
       ((BindingController) pluginManager).bindFc(NodeMerger.ITF_NAME,
@@ -424,7 +468,8 @@ public final class Factory {
    * @param loader the loader to be used by the instantiator.
    * @return a graph instantiator
    */
-  public static Instantiator newInstantiator(final Loader loader) {
+  public static Instantiator newInstantiator(final ErrorManager errorManager,
+      final Loader loader) {
     final BasicInstantiator bi = new BasicInstantiator();
     final AttributeInstantiator ai = new AttributeInstantiator();
     final InstanceNameInstantiator ini = new InstanceNameInstantiator();
@@ -434,15 +479,21 @@ public final class Factory {
     ini.clientInstantiatorItf = bgi;
     bgi.clientInstantiatorItf = bi;
     bi.loaderItf = loader;
+
+    ai.errorManagerItf = errorManager;
+    ini.errorManagerItf = errorManager;
+    bgi.errorManagerItf = errorManager;
+
     return ai;
   }
 
   /**
    * Returns a graph instantiator.
    * 
+   * @param errorManager
    * @return a graph instantiator
    */
-  public static Instantiator newInstantiator() {
-    return newInstantiator(newLoader());
+  public static Instantiator newInstantiator(final ErrorManager errorManager) {
+    return newInstantiator(errorManager, newLoader(errorManager));
   }
 }

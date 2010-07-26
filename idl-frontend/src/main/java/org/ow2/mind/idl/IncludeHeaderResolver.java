@@ -39,6 +39,7 @@ import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.ow2.mind.CommonASTHelper;
 import org.ow2.mind.PathHelper;
 import org.ow2.mind.PathHelper.InvalidRelativPathException;
+import org.ow2.mind.error.ErrorManager;
 import org.ow2.mind.idl.ast.Header;
 import org.ow2.mind.idl.ast.IDL;
 import org.ow2.mind.idl.ast.IDLASTHelper;
@@ -50,10 +51,14 @@ public class IncludeHeaderResolver extends AbstractIncludeResolver {
   // Client interfaces
   // ---------------------------------------------------------------------------
 
-  public NodeFactory nodeFactoryItf;
+  /** The {@link ErrorManager} client interface used to log errors. */
+  public ErrorManager errorManagerItf;
+
+  /** The {@link NodeFactory} client interface used by this component. */
+  public NodeFactory  nodeFactoryItf;
 
   /** The {@link IDLLocator} client interface used by this component. */
-  public IDLLocator  idlLocatorItf;
+  public IDLLocator   idlLocatorItf;
 
   // ---------------------------------------------------------------------------
   // Implementation of the UsedIDLResolver interface
@@ -83,7 +88,8 @@ public class IncludeHeaderResolver extends AbstractIncludeResolver {
           try {
             relPath = toAbsolute(encapsulatingDir, path);
           } catch (final InvalidRelativPathException e) {
-            throw new ADLException(IDLErrors.INVALID_INCLUDE, include, path);
+            errorManagerItf.logError(IDLErrors.INVALID_INCLUDE, include, path);
+            return IDLASTHelper.newUnresolvedIDLNode(nodeFactoryItf, path);
           }
           URL url = idlLocatorItf.findSourceHeader(relPath, context);
           if (url != null) {
@@ -93,7 +99,8 @@ public class IncludeHeaderResolver extends AbstractIncludeResolver {
           } else if (path.startsWith("./") || path.startsWith("../")) {
             // the path starts with "./" or "../" which force a resolution
             // relatively to encapsulatingDir. the file has not been found.
-            throw new ADLException(IDLErrors.IDL_NOT_FOUND, path);
+            errorManagerItf.logError(IDLErrors.IDL_NOT_FOUND, include, path);
+            return IDLASTHelper.newUnresolvedIDLNode(nodeFactoryItf, path);
           } else {
             // look-for header relatively to source-path
             path = "/" + path;
@@ -124,7 +131,9 @@ public class IncludeHeaderResolver extends AbstractIncludeResolver {
       throws NoSuchInterfaceException, IllegalBindingException {
     checkItfName(itfName);
 
-    if (itfName.equals(NodeFactory.ITF_NAME)) {
+    if (ErrorManager.ITF_NAME.equals(itfName)) {
+      errorManagerItf = (ErrorManager) value;
+    } else if (NodeFactory.ITF_NAME.equals(itfName)) {
       nodeFactoryItf = (NodeFactory) value;
     } else if (itfName.equals(IDLLocator.ITF_NAME)) {
       idlLocatorItf = (IDLLocator) value;
@@ -136,15 +145,17 @@ public class IncludeHeaderResolver extends AbstractIncludeResolver {
 
   @Override
   public String[] listFc() {
-    return listFcHelper(super.listFc(), NodeFactory.ITF_NAME,
-        IDLLocator.ITF_NAME);
+    return listFcHelper(super.listFc(), ErrorManager.ITF_NAME,
+        NodeFactory.ITF_NAME, IDLLocator.ITF_NAME);
   }
 
   @Override
   public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
     checkItfName(itfName);
 
-    if (itfName.equals(NodeFactory.ITF_NAME)) {
+    if (ErrorManager.ITF_NAME.equals(itfName)) {
+      return errorManagerItf;
+    } else if (NodeFactory.ITF_NAME.equals(itfName)) {
       return nodeFactoryItf;
     } else if (itfName.equals(IDLLocator.ITF_NAME)) {
       return idlLocatorItf;
@@ -158,7 +169,9 @@ public class IncludeHeaderResolver extends AbstractIncludeResolver {
       IllegalBindingException {
     checkItfName(itfName);
 
-    if (itfName.equals(NodeFactory.ITF_NAME)) {
+    if (ErrorManager.ITF_NAME.equals(itfName)) {
+      errorManagerItf = null;
+    } else if (itfName.equals(NodeFactory.ITF_NAME)) {
       nodeFactoryItf = null;
     } else if (itfName.equals(IDLLocator.ITF_NAME)) {
       idlLocatorItf = null;

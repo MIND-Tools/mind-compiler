@@ -27,22 +27,23 @@ import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
 
 import java.util.Map;
 
+import org.objectweb.fractal.adl.ADLErrors;
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.Loader;
-import org.objectweb.fractal.adl.error.ChainedErrorLocator;
+import org.objectweb.fractal.adl.NodeFactory;
 import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.fractal.api.control.BindingController;
 import org.objectweb.fractal.api.control.IllegalBindingException;
+import org.ow2.mind.adl.ast.ASTHelper;
 import org.ow2.mind.adl.ast.DefinitionReference;
+import org.ow2.mind.error.ErrorManager;
 
 /**
  * Basic implementation of the {@link DefinitionReferenceResolver} interface.
  * This component simply call its {@link #loaderItf} client interface to load
  * the {@link Definition} whose name is the
- * {@link DefinitionReference#getName() name} contained by the reference. <br>
- * Moreover this component checks that the loaded definition has the
- * {@link DefinitionReference#getExpectedKind() expected kind}.
+ * {@link DefinitionReference#getName() name} contained by the reference.
  */
 public class BasicDefinitionReferenceResolver
     implements
@@ -52,6 +53,12 @@ public class BasicDefinitionReferenceResolver
   // ---------------------------------------------------------------------------
   // Client interfaces
   // ---------------------------------------------------------------------------
+
+  /** The {@link ErrorManager} client interface used to log errors. */
+  public ErrorManager        errorManagerItf;
+
+  /** The {@link NodeFactory} client interface used by this component. */
+  public NodeFactory         nodeFactoryItf;
 
   /** The name of the {@link #loaderItf} client interface. */
   public static final String LOADER_ITF_NAME = "loader";
@@ -67,12 +74,17 @@ public class BasicDefinitionReferenceResolver
       final Definition encapsulatingDefinition,
       final Map<Object, Object> context) throws ADLException {
     // load referenced ADL
-    Definition d;
+    final Definition d;
     try {
       d = loaderItf.load(reference.getName(), context);
     } catch (final ADLException e) {
-      ChainedErrorLocator.chainLocator(e, reference);
-      throw e;
+      // Log an error only if the exception is ADL_NOT_FOUND
+      if (e.getError().getTemplate() == ADLErrors.ADL_NOT_FOUND) {
+        errorManagerItf.logError(ADLErrors.ADL_NOT_FOUND, reference,
+            reference.getName());
+      }
+      return ASTHelper.newUnresolvedDefinitionNode(nodeFactoryItf,
+          reference.getName());
     }
 
     return d;
@@ -83,14 +95,19 @@ public class BasicDefinitionReferenceResolver
   // ---------------------------------------------------------------------------
 
   public String[] listFc() {
-    return listFcHelper(LOADER_ITF_NAME);
+    return listFcHelper(ErrorManager.ITF_NAME, LOADER_ITF_NAME,
+        NodeFactory.ITF_NAME);
   }
 
   public Object lookupFc(final String s) throws NoSuchInterfaceException {
     checkItfName(s);
 
-    if (LOADER_ITF_NAME.equals(s)) {
+    if (ErrorManager.ITF_NAME.equals(s)) {
+      return errorManagerItf;
+    } else if (LOADER_ITF_NAME.equals(s)) {
       return loaderItf;
+    } else if (NodeFactory.ITF_NAME.equals(s)) {
+      return nodeFactoryItf;
     } else {
       throw new NoSuchInterfaceException("No client interface named '" + s
           + "'");
@@ -101,8 +118,12 @@ public class BasicDefinitionReferenceResolver
       throws NoSuchInterfaceException, IllegalBindingException {
     checkItfName(s);
 
-    if (LOADER_ITF_NAME.equals(s)) {
+    if (ErrorManager.ITF_NAME.equals(s)) {
+      errorManagerItf = (ErrorManager) o;
+    } else if (LOADER_ITF_NAME.equals(s)) {
       loaderItf = (Loader) o;
+    } else if (NodeFactory.ITF_NAME.equals(s)) {
+      nodeFactoryItf = (NodeFactory) o;
     } else {
       throw new NoSuchInterfaceException("No client interface named '" + s
           + "' for binding the interface");
@@ -113,8 +134,12 @@ public class BasicDefinitionReferenceResolver
       NoSuchInterfaceException {
     checkItfName(s);
 
-    if (LOADER_ITF_NAME.equals(s)) {
+    if (ErrorManager.ITF_NAME.equals(s)) {
+      errorManagerItf = null;
+    } else if (LOADER_ITF_NAME.equals(s)) {
       loaderItf = null;
+    } else if (NodeFactory.ITF_NAME.equals(s)) {
+      nodeFactoryItf = null;
     } else {
       throw new NoSuchInterfaceException("No client interface named '" + s
           + "'");

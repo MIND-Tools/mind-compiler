@@ -28,7 +28,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
-import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.CompilerError;
 import org.objectweb.fractal.adl.error.GenericErrors;
 import org.ow2.mind.ForceRegenContextHelper;
@@ -40,32 +39,30 @@ public class BasicOutputFileLocator implements OutputFileLocator {
   public static final String TEMPORARY_OUTPUT_DIR_CONTEXT_KEY = "temporaryOutputDir";
 
   public File getCSourceOutputFile(final String path,
-      final Map<Object, Object> context) throws ADLException {
+      final Map<Object, Object> context) {
     if (isRelative(path))
       throw new IllegalArgumentException("path must be absolute");
     final File outDir = getOutputDir(context);
     return mkdirs(new File(outDir, path));
   }
 
-  public File getCSourceOutputDir(final Map<Object, Object> context)
-      throws ADLException {
+  public File getCSourceOutputDir(final Map<Object, Object> context) {
     return getOutputDir(context);
   }
 
   public File getCSourceTemporaryOutputFile(final String path,
-      final Map<Object, Object> context) throws ADLException {
+      final Map<Object, Object> context) {
     if (ForceRegenContextHelper.getKeepTemp(context))
       return getCSourceOutputFile(path, context);
     return getTemporaryOutputFile(path, context);
   }
 
-  public File getCSourceTemporaryOutputDir(final Map<Object, Object> context)
-      throws ADLException {
+  public File getCSourceTemporaryOutputDir(final Map<Object, Object> context) {
     return getTemporaryOutputDir(context);
   }
 
   public File getCCompiledOutputFile(final String path,
-      final Map<Object, Object> context) throws ADLException {
+      final Map<Object, Object> context) {
     if (isRelative(path))
       throw new IllegalArgumentException("path must be absolute");
     final File outDir = getOutputDir(context);
@@ -73,7 +70,7 @@ public class BasicOutputFileLocator implements OutputFileLocator {
   }
 
   public File getCExecutableOutputFile(String path,
-      final Map<Object, Object> context) throws ADLException {
+      final Map<Object, Object> context) {
     final File outDir = getOutputDir(context);
 
     // ensure that executable path on Windows ends with ".exe".
@@ -85,25 +82,23 @@ public class BasicOutputFileLocator implements OutputFileLocator {
     return mkdirs(new File(outDir, path));
   }
 
-  public File getCCompiledOutputDir(final Map<Object, Object> context)
-      throws ADLException {
+  public File getCCompiledOutputDir(final Map<Object, Object> context) {
     return getOutputDir(context);
   }
 
   public File getCCompiledTemporaryOutputFile(final String path,
-      final Map<Object, Object> context) throws ADLException {
+      final Map<Object, Object> context) {
     if (ForceRegenContextHelper.getKeepTemp(context))
       return getCCompiledOutputFile(path, context);
     return getTemporaryOutputFile(path, context);
   }
 
-  public File getCCompiledTemporaryOutputDir(final Map<Object, Object> context)
-      throws ADLException {
+  public File getCCompiledTemporaryOutputDir(final Map<Object, Object> context) {
     return getTemporaryOutputDir(context);
   }
 
   public File getMetadataOutputFile(final String path,
-      final Map<Object, Object> context) throws ADLException {
+      final Map<Object, Object> context) {
     if (isRelative(path))
       throw new IllegalArgumentException("path must be absolute");
     final File outDir = getOutputDir(context);
@@ -111,18 +106,18 @@ public class BasicOutputFileLocator implements OutputFileLocator {
   }
 
   protected File getTemporaryOutputFile(final String path,
-      final Map<Object, Object> context) throws ADLException {
+      final Map<Object, Object> context) {
     if (isRelative(path))
       throw new IllegalArgumentException("path must be absolute");
     final File outDir = getTemporaryOutputDir(context);
     return mkdirs(new File(outDir, path));
   }
 
-  protected File mkdirs(final File outputFile) throws ADLException {
+  protected File mkdirs(final File outputFile) {
     final File parent = outputFile.getParentFile();
     if (parent.exists()) {
       if (!parent.isDirectory()) {
-        throw new ADLException(GenericErrors.GENERIC_ERROR,
+        throw new CompilerError(GenericErrors.GENERIC_ERROR,
             "IO Error: cannot create directory \"" + parent.getPath()
                 + "\". File exists but is not a directory.");
       }
@@ -132,13 +127,12 @@ public class BasicOutputFileLocator implements OutputFileLocator {
     return outputFile;
   }
 
-  protected File getOutputDir(final Map<Object, Object> context)
-      throws ADLException {
+  protected File getOutputDir(final Map<Object, Object> context) {
     File outDir = (File) context.get(OUTPUT_DIR_CONTEXT_KEY);
     if (outDir == null) outDir = new File(DEFAULT_OUTPUT_DIR);
     if (outDir.exists()) {
       if (!outDir.isDirectory()) {
-        throw new ADLException(IOErrors.INVALID_OUTPUT_DIR, outDir);
+        throw new CompilerError(IOErrors.INVALID_OUTPUT_DIR, outDir);
       }
     } else {
       outDir.mkdirs();

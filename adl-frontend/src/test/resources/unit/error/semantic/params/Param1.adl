@@ -1,0 +1,8 @@
+//#SemanticError GroupId=ADL ErrorId=ADL_NOT_FOUND line=4
+
+primitive params.Param1 extends 
+foo.UnknownADL
+(1, 2)
+{
+
+}

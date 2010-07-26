@@ -43,6 +43,7 @@ import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.fractal.api.control.BindingController;
 import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.ow2.mind.adl.DefinitionSourceGenerator;
+import org.ow2.mind.io.IOErrors;
 import org.ow2.mind.io.OutputFileLocator;
 
 public class GenericDefinitionNameSourceGenerator
@@ -101,21 +102,19 @@ public class GenericDefinitionNameSourceGenerator
       mapOutStream = new FileOutputStream(mapFile);
       map.store(mapOutStream, "Template instance names");
     } catch (final FileNotFoundException e) {
-      // ignore
-      // TODO raise a warning
-      System.err.println("Error while writing template name file");
-      e.printStackTrace();
+      throw new CompilerError(IOErrors.WRITE_ERROR, e,
+          mapFile.getAbsolutePath());
     } catch (final IOException e) {
-      // ignore
-      // TODO raise a warning
-      System.err.println("Error while writing template name file");
-      e.printStackTrace();
+      throw new CompilerError(IOErrors.WRITE_ERROR, e,
+          mapFile.getAbsolutePath());
     } finally {
-      if (mapOutStream != null) try {
-        mapOutStream.close();
-      } catch (final IOException e) {
-        // ignore
-      }
+      if (mapOutStream != null)
+        try {
+          mapOutStream.close();
+        } catch (final IOException e) {
+          throw new CompilerError(IOErrors.WRITE_ERROR, e,
+              mapFile.getAbsolutePath());
+        }
     }
   }
 

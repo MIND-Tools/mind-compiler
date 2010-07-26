@@ -22,6 +22,9 @@
 
 package org.ow2.mind.compilation;
 
+import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
+import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -41,22 +44,36 @@ import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.CompilerError;
 import org.objectweb.fractal.adl.error.GenericErrors;
 import org.objectweb.fractal.adl.util.FractalADLLogManager;
+import org.objectweb.fractal.api.NoSuchInterfaceException;
+import org.objectweb.fractal.api.control.BindingController;
+import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.ow2.mind.ForceRegenContextHelper;
+import org.ow2.mind.error.ErrorManager;
 
 public class BasicCompilationCommandExecutor
     implements
-      CompilationCommandExecutor {
+      CompilationCommandExecutor,
+      BindingController {
 
   protected static Logger    depLogger                  = FractalADLLogManager
                                                             .getLogger("dep");
 
   public static final String CONCURENT_JOBS_CONTEXT_KEY = "jobs";
 
+  public static final String FAIL_FAST_CONTEXT_KEY      = "fail-fast";
+
+  // ---------------------------------------------------------------------------
+  // Client interfaces
+  // ---------------------------------------------------------------------------
+
+  /** The {@link ErrorManager} client interface used to log errors. */
+  public ErrorManager        errorManagerItf;
+
   // ---------------------------------------------------------------------------
   // Implementation of the CompilationCommandExecutor interface
   // ---------------------------------------------------------------------------
 
-  public void exec(final Collection<CompilationCommand> commands,
+  public boolean exec(final Collection<CompilationCommand> commands,
       final Map<Object, Object> context) throws ADLException,
       InterruptedException {
     final Map<CommandInfo, Collection<CommandInfo>> depGraph = new HashMap<CommandInfo, Collection<CommandInfo>>();
@@ -67,15 +84,20 @@ public class BasicCompilationCommandExecutor
     if (depGraph.isEmpty() && readyTask.isEmpty()) {
       if (depLogger.isLoggable(Level.INFO))
         depLogger.info("Nothing to be done, compiled files are up-to-dates.");
-      return;
+      return true;
     }
 
     int jobs = 1;
-    final Object o = context.get(CONCURENT_JOBS_CONTEXT_KEY);
+    Object o = context.get(CONCURENT_JOBS_CONTEXT_KEY);
     if (o instanceof Integer) {
       jobs = (Integer) o;
     }
-    execDepGraph(jobs, depGraph, readyTask, force);
+    boolean failFast = false;
+    o = context.get(FAIL_FAST_CONTEXT_KEY);
+    if (o instanceof Boolean) {
+      failFast = (Boolean) o;
+    }
+    return execDepGraph(jobs, depGraph, readyTask, failFast);
   }
 
   protected void buildDepGraph(final Collection<CompilationCommand> commands,
@@ -396,31 +418,43 @@ public class BasicCompilationCommandExecutor
     return cmdInfo.maxInputTimestamp;
   }
 
-  protected void execDepGraph(final int nbJobs,
+  protected boolean execDepGraph(final int nbJobs,
       final Map<CommandInfo, Collection<CommandInfo>> depGraph,
-      final LinkedList<CommandInfo> readyTask, final boolean force)
+      final LinkedList<CommandInfo> readyTask, final boolean failFast)
       throws ADLException, InterruptedException {
     if (nbJobs == 1) {
-      execDepGraphSynchronous(depGraph, readyTask, force);
+      return execDepGraphSynchronous(depGraph, readyTask, failFast);
     } else {
       final ExecutionState exceptionHolder = new ExecutionState(readyTask,
-          depGraph, nbJobs, force);
-      exceptionHolder.terminate();
-      assert depGraph.isEmpty();
+          depGraph, nbJobs, failFast);
+      return exceptionHolder.terminate();
     }
   }
 
-  protected void execDepGraphSynchronous(
+  protected boolean execDepGraphSynchronous(
       final Map<CommandInfo, Collection<CommandInfo>> depGraph,
-      final LinkedList<CommandInfo> readyTask, final boolean force)
+      final LinkedList<CommandInfo> readyTask, final boolean failFast)
       throws ADLException, InterruptedException {
+    boolean result = true;
     while (!readyTask.isEmpty()) {
       final CommandInfo cmdInfo = readyTask.removeFirst();
 
-      cmdInfo.command.exec();
-      commandEnded(cmdInfo, depGraph, readyTask);
+      boolean execOK;
+      try {
+        execOK = cmdInfo.command.exec();
+      } catch (final ADLException e) {
+        execOK = false;
+      }
+      if (execOK) {
+        commandEnded(cmdInfo, depGraph, readyTask);
+      } else {
+        commandFailed(cmdInfo, depGraph, readyTask);
+        result = false;
+        if (failFast) return result;
+      }
     }
     assert depGraph.isEmpty();
+    return result;
   }
 
   protected boolean commandEnded(final CommandInfo cmd,
@@ -445,10 +479,22 @@ public class BasicCompilationCommandExecutor
     return commandUnlocked;
   }
 
+  protected void commandFailed(final CommandInfo cmd,
+      final Map<CommandInfo, Collection<CommandInfo>> depGraph,
+      final LinkedList<CommandInfo> readyTask) {
+    final Collection<CommandInfo> deps = depGraph.remove(cmd);
+    if (deps != null) {
+      for (final CommandInfo cmdInfo : deps) {
+        commandFailed(cmdInfo, depGraph, readyTask);
+      }
+    }
+  }
+
   protected final class ExecutionState {
     final LinkedList<CommandInfo>                   readyTask;
     final Map<CommandInfo, Collection<CommandInfo>> depGraph;
-    final boolean                                   force;
+    final boolean                                   failFast;
+    boolean                                         result    = true;
 
     final Lock                                      lock      = new ReentrantLock();
     Condition                                       condition = lock
@@ -458,10 +504,10 @@ public class BasicCompilationCommandExecutor
 
     ExecutionState(final LinkedList<CommandInfo> readyTask,
         final Map<CommandInfo, Collection<CommandInfo>> depGraph,
-        final int nbJob, final boolean force) {
+        final int nbJob, final boolean failFast) {
       this.readyTask = readyTask;
       this.depGraph = depGraph;
-      this.force = force;
+      this.failFast = failFast;
 
       lock.lock();
       try {
@@ -482,18 +528,39 @@ public class BasicCompilationCommandExecutor
     void work() {
       lock.lock();
       try {
-        while (!readyTask.isEmpty()) {
+        // execute a command if :
+        // - a task is ready to be executed
+        // - AND
+        // * we are not in fail-fast mode
+        // * OR we are in fail-fast mode AND there is no error (i.e.
+        // result == true AND exception == null)
+        //
+        while (!readyTask.isEmpty()
+            && (!failFast || (result && exception == null))) {
           final CommandInfo cmdInfo = readyTask.removeFirst();
           lock.unlock();
 
+          boolean execOK;
           try {
-            cmdInfo.command.exec();
+            execOK = cmdInfo.command.exec();
+          } catch (final ADLException e) {
+            execOK = false;
           } catch (final Exception e) {
             lock.lock();
             if (exception != null) {
               exception = e;
             }
             break;
+          }
+          if (!execOK) {
+            lock.lock();
+            commandFailed(cmdInfo, depGraph, readyTask);
+            result = false;
+            if (failFast) {
+              break;
+            } else {
+              continue;
+            }
           }
 
           lock.lock();
@@ -508,7 +575,7 @@ public class BasicCompilationCommandExecutor
       }
     }
 
-    void terminate() throws ADLException, InterruptedException {
+    boolean terminate() throws ADLException, InterruptedException {
       lock.lock();
       try {
         while (nbRunningThread > 0) {
@@ -518,12 +585,10 @@ public class BasicCompilationCommandExecutor
         lock.unlock();
       }
       if (exception != null) {
-        if (exception instanceof ADLException)
-          throw (ADLException) exception;
-        else
-          throw new CompilerError(GenericErrors.INTERNAL_ERROR, exception,
-              "Unexpected error");
+        throw new CompilerError(GenericErrors.INTERNAL_ERROR, exception,
+            "Unexpected error");
       }
+      return result;
     }
   }
 
@@ -563,6 +628,49 @@ public class BasicCompilationCommandExecutor
           }
         }
       }
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Implementation of the BindingController interface
+  // ---------------------------------------------------------------------------
+
+  public String[] listFc() {
+    return listFcHelper(ErrorManager.ITF_NAME);
+  }
+
+  public Object lookupFc(final String s) throws NoSuchInterfaceException {
+    checkItfName(s);
+
+    if (ErrorManager.ITF_NAME.equals(s)) {
+      return errorManagerItf;
+    } else {
+      throw new NoSuchInterfaceException("No client interface named '" + s
+          + "'");
+    }
+  }
+
+  public void bindFc(final String s, final Object o)
+      throws NoSuchInterfaceException, IllegalBindingException {
+    checkItfName(s);
+
+    if (ErrorManager.ITF_NAME.equals(s)) {
+      errorManagerItf = (ErrorManager) o;
+    } else {
+      throw new NoSuchInterfaceException("No client interface named '" + s
+          + "' for binding the interface");
+    }
+  }
+
+  public void unbindFc(final String s) throws IllegalBindingException,
+      NoSuchInterfaceException {
+    checkItfName(s);
+
+    if (ErrorManager.ITF_NAME.equals(s)) {
+      errorManagerItf = null;
+    } else {
+      throw new NoSuchInterfaceException("No client interface named '" + s
+          + "'");
     }
   }
 }

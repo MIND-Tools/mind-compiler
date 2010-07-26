@@ -26,6 +26,8 @@ import java.util.Collection;
 
 import junit.framework.TestCase;
 
+import org.ow2.mind.error.ErrorManager;
+import org.ow2.mind.error.ErrorManagerFactory;
 import org.ow2.mind.idl.ASTChecker.IDLChecker;
 import org.ow2.mind.idl.ASTChecker.IncludeCheckerIterator;
 import org.ow2.mind.idl.ASTChecker.TypeCheckerIterator;
@@ -40,7 +42,14 @@ public class TestIDLLoaderChain extends TestCase {
 
   @Override
   protected void setUp() throws Exception {
-    idlLoader = IDLLoaderChainFactory.newLoader().loader;
+    final ErrorManager errorManager = ErrorManagerFactory
+        .newSimpleErrorManager();
+    final IDLErrorLoader errorLoader = new IDLErrorLoader();
+    errorLoader.errorManagerItf = errorManager;
+    errorLoader.clientIDLLoaderItf = IDLLoaderChainFactory
+        .newLoader(errorManager).loader;
+    idlLoader = errorLoader;
+
     checker = new ASTChecker();
   }
 

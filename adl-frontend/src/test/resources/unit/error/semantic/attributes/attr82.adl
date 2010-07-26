@@ -1,4 +1,5 @@
-//#SemanticError GroupId=MADL ErrorId=INCOMPATIBLE_ARGUMENT_TYPE line=4
+//#SemanticError GroupId=MADL ErrorId=INCOMPATIBLE_ARGUMENT_TYPE line=5
+//#SemanticError GroupId=MADL ErrorId=INCOMPATIBLE_ARGUMENT_TYPE line=5
 // argument: integer assigned to string
 primitive attributes.attr82(a) extends attr7(a), attr8(
   a) {}

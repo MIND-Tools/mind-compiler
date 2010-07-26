@@ -51,6 +51,7 @@ import org.ow2.mind.adl.generic.ast.FormalTypeParameter;
 import org.ow2.mind.adl.generic.ast.TypeArgument;
 import org.ow2.mind.adl.implementation.SharedImplementationDecorationHelper;
 import org.ow2.mind.annotation.AnnotationHelper;
+import org.ow2.mind.error.ErrorManager;
 
 public class FactoryTemplateInstantiator
     implements
@@ -60,6 +61,9 @@ public class FactoryTemplateInstantiator
   // ---------------------------------------------------------------------------
   // Client interfaces
   // ---------------------------------------------------------------------------
+
+  /** The {@link ErrorManager} client interface used to log errors. */
+  public ErrorManager                errorManagerItf;
 
   /** The name of the {@link #clientInstantiatorItf} client interface. */
   public static final String         CLIENT_INSTANTIATOR_ITF_NAME = "client-instantiator";
@@ -103,7 +107,7 @@ public class FactoryTemplateInstantiator
             .getDefinitionReference();
         if (defRef == null) {
           // The value of the TypeArgument is ANY.
-          throw new ADLException(
+          errorManagerItf.logError(
               ADLErrors.INVALID_REFERENCE_ANY_TEMPLATE_VALUE, typeArgument);
         } else {
           final Definition instantiatedDef = definitionReferenceResolverItf
@@ -139,12 +143,12 @@ public class FactoryTemplateInstantiator
     if (AnnotationHelper.getAnnotation(instantiatedDef, Singleton.class) != null) {
       // definition is a singleton, cannot make a factory of that kind of
       // definition.
-      throw new ADLException(ADLErrors.INVALID_FACTORY_OF_SINGLETON, defRef);
+      errorManagerItf.logError(ADLErrors.INVALID_FACTORY_OF_SINGLETON, defRef);
     }
     if (ASTHelper.isAbstract(instantiatedDef)) {
       // definition is abstract, cannot make a factory of that kind of
       // definition.
-      throw new ADLException(ADLErrors.INVALID_FACTORY_OF_ABSTRACT, defRef);
+      errorManagerItf.logError(ADLErrors.INVALID_FACTORY_OF_ABSTRACT, defRef);
     }
 
     checkReferencedInstantiatedDef(instantiatedDef, defRef, context);
@@ -163,7 +167,7 @@ public class FactoryTemplateInstantiator
         if (AnnotationHelper.getAnnotation(subCompDef, Singleton.class) != null) {
           // definition is a singleton, cannot make a factory of that kind of
           // definition.
-          throw new ADLException(
+          errorManagerItf.logError(
               ADLErrors.INVALID_FACTORY_OF_REFERENCED_SINGLETON, defRef,
               subCompDef.getName());
         }
@@ -181,8 +185,9 @@ public class FactoryTemplateInstantiator
     if (instantiatedDef instanceof ComponentContainer) {
       for (final Component cmp : ((ComponentContainer) instantiatedDef)
           .getComponents()) {
-        findSharedImplementations(getResolvedComponentDefinition(cmp,
-            loaderItf, context), sharedImpls, context);
+        findSharedImplementations(
+            getResolvedComponentDefinition(cmp, loaderItf, context),
+            sharedImpls, context);
       }
     }
   }
@@ -195,7 +200,9 @@ public class FactoryTemplateInstantiator
       throws NoSuchInterfaceException, IllegalBindingException {
     checkItfName(itfName);
 
-    if (itfName.equals(DefinitionReferenceResolver.ITF_NAME)) {
+    if (itfName.equals(ErrorManager.ITF_NAME)) {
+      errorManagerItf = (ErrorManager) value;
+    } else if (itfName.equals(DefinitionReferenceResolver.ITF_NAME)) {
       definitionReferenceResolverItf = (DefinitionReferenceResolver) value;
     } else if (itfName.equals(CLIENT_INSTANTIATOR_ITF_NAME)) {
       clientInstantiatorItf = (TemplateInstantiator) value;
@@ -208,14 +215,17 @@ public class FactoryTemplateInstantiator
   }
 
   public String[] listFc() {
-    return listFcHelper(DefinitionReferenceResolver.ITF_NAME,
-        CLIENT_INSTANTIATOR_ITF_NAME, LOADER_ITF_NAME);
+    return listFcHelper(ErrorManager.ITF_NAME,
+        DefinitionReferenceResolver.ITF_NAME, CLIENT_INSTANTIATOR_ITF_NAME,
+        LOADER_ITF_NAME);
   }
 
   public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
     checkItfName(itfName);
 
-    if (itfName.equals(DefinitionReferenceResolver.ITF_NAME)) {
+    if (itfName.equals(ErrorManager.ITF_NAME)) {
+      return errorManagerItf;
+    } else if (itfName.equals(DefinitionReferenceResolver.ITF_NAME)) {
       return definitionReferenceResolverItf;
     } else if (itfName.equals(CLIENT_INSTANTIATOR_ITF_NAME)) {
       return clientInstantiatorItf;
@@ -231,7 +241,9 @@ public class FactoryTemplateInstantiator
       NoSuchInterfaceException {
     checkItfName(itfName);
 
-    if (itfName.equals(DefinitionReferenceResolver.ITF_NAME)) {
+    if (itfName.equals(ErrorManager.ITF_NAME)) {
+      errorManagerItf = null;
+    } else if (itfName.equals(DefinitionReferenceResolver.ITF_NAME)) {
       definitionReferenceResolverItf = null;
     } else if (itfName.equals(CLIENT_INSTANTIATOR_ITF_NAME)) {
       clientInstantiatorItf = null;

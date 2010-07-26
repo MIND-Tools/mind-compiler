@@ -66,8 +66,8 @@ public class BindingNormalizerLoader extends AbstractNormalizerLoader<Binding> {
     for (final Binding binding : bindings) {
       if (binding.getFromInterfaceNumber() != null
           && binding.getToInterfaceNumber() != null) continue;
-      final Interface fromItf = getBindingInterface(d, binding
-          .getFromComponent(), binding.getFromInterface());
+      final Interface fromItf = getBindingInterface(d,
+          binding.getFromComponent(), binding.getFromInterface());
       if (fromItf == null) continue;
       final Interface toItf = getBindingInterface(d, binding.getToComponent(),
           binding.getToInterface());
@@ -135,7 +135,12 @@ public class BindingNormalizerLoader extends AbstractNormalizerLoader<Binding> {
       itfName = node.getFromComponent() + "." + node.getFromInterface() + "["
           + node.getFromInterfaceNumber() + "]";
 
-    throw new ADLException(BindingErrors.DUPLICATED_BINDING, node, itfName,
+    errorManagerItf.logError(BindingErrors.DUPLICATED_BINDING, node, itfName,
         new NodeErrorLocator(previousDeclaration));
+  }
+
+  @Override
+  protected void removeSubNode(final Node node, final Binding subNode) {
+    ((BindingContainer) node).removeBinding(subNode);
   }
 }

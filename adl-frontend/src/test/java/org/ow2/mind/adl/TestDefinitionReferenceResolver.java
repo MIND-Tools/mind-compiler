@@ -29,18 +29,13 @@ import java.util.HashMap;
 
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.Loader;
+import org.objectweb.fractal.adl.NodeFactoryImpl;
 import org.objectweb.fractal.adl.xml.XMLNodeFactoryImpl;
-import org.ow2.mind.adl.BasicADLLocator;
-import org.ow2.mind.adl.BasicDefinitionReferenceResolver;
-import org.ow2.mind.adl.BinaryADLLoader;
-import org.ow2.mind.adl.CacheLoader;
-import org.ow2.mind.adl.CachingDefinitionReferenceResolver;
-import org.ow2.mind.adl.ExtendsLoader;
-import org.ow2.mind.adl.STCFNodeMerger;
-import org.ow2.mind.adl.SubComponentResolverLoader;
 import org.ow2.mind.adl.graph.Instantiator;
 import org.ow2.mind.adl.imports.ImportDefinitionReferenceResolver;
 import org.ow2.mind.adl.parser.ADLParser;
+import org.ow2.mind.error.ErrorManager;
+import org.ow2.mind.error.ErrorManagerFactory;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -56,15 +51,25 @@ public class TestDefinitionReferenceResolver {
 
   @BeforeMethod(alwaysRun = true)
   protected void setUp() throws Exception {
+    final ErrorManager errorManager = ErrorManagerFactory
+        .newSimpleErrorManager();
     // Loader chain components
     final ADLParser adlLoader = new ADLParser();
     final SubComponentResolverLoader scrl = new SubComponentResolverLoader();
     final ExtendsLoader el = new ExtendsLoader();
     final CacheLoader cl = new CacheLoader();
+    final ErrorLoader errl = new ErrorLoader();
 
+    loader = errl;
+    errl.clientLoader = cl;
     cl.clientLoader = el;
     el.clientLoader = scrl;
     scrl.clientLoader = adlLoader;
+
+    adlLoader.errorManagerItf = errorManager;
+    scrl.errorManagerItf = errorManager;
+    el.errorManagerItf = errorManager;
+    errl.errorManagerItf = errorManager;
 
     // definition reference resolver chain
     final BasicDefinitionReferenceResolver bdrr = new BasicDefinitionReferenceResolver();
@@ -79,17 +84,19 @@ public class TestDefinitionReferenceResolver {
     el.definitionReferenceResolverItf = cdrr;
     scrl.definitionReferenceResolverItf = cdrr;
 
+    bdrr.errorManagerItf = errorManager;
+
     // additional components
     final STCFNodeMerger stcfNodeMerger = new STCFNodeMerger();
     final BasicADLLocator adlLocator = new BasicADLLocator();
-    final XMLNodeFactoryImpl nodeFactory = new XMLNodeFactoryImpl();
+    final XMLNodeFactoryImpl xmlNodeFactory = new XMLNodeFactoryImpl();
+    final NodeFactoryImpl nodeFactory = new NodeFactoryImpl();
 
     el.nodeMergerItf = stcfNodeMerger;
     idrr.adlLocatorItf = adlLocator;
     adlLoader.adlLocatorItf = adlLocator;
-    adlLoader.nodeFactoryItf = nodeFactory;
-
-    loader = cl;
+    adlLoader.nodeFactoryItf = xmlNodeFactory;
+    bdrr.nodeFactoryItf = nodeFactory;
 
     context = new HashMap<Object, Object>();
 
@@ -135,14 +142,14 @@ public class TestDefinitionReferenceResolver {
   @Test(groups = {"functional"})
   public void test2() throws Exception {
     final Definition def = loader.load("pkg1.Composite1", context);
-    checker.assertDefinition(def).containsComponent("subComp1").isAnInstanceOf(
-        "pkg1.pkg2.Primitive1");
+    checker.assertDefinition(def).containsComponent("subComp1")
+        .isAnInstanceOf("pkg1.pkg2.Primitive1");
   }
 
   @Test(groups = {"functional"})
   public void test3() throws Exception {
     final Definition def = loader.load("pkg1.Composite2", context);
-    checker.assertDefinition(def).containsComponent("subComp1").isAnInstanceOf(
-        "pkg1.Composite1");
+    checker.assertDefinition(def).containsComponent("subComp1")
+        .isAnInstanceOf("pkg1.Composite1");
   }
 }

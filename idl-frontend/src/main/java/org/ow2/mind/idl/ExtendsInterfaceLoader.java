@@ -32,6 +32,7 @@ import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.ow2.mind.idl.ast.IDL;
+import org.ow2.mind.idl.ast.IDLASTHelper;
 import org.ow2.mind.idl.ast.InterfaceDefinition;
 import org.ow2.mind.idl.ast.Method;
 
@@ -61,9 +62,11 @@ public class ExtendsInterfaceLoader extends AbstractIDLLoader {
         final InterfaceDefinition extendedItf = interfaceReferenceResolverItf
             .resolve(itf.getExtends(), itf, context);
 
-        mergeInterface(itf, extendedItf);
-        ExtendedInterfaceDecorationHelper
-            .addExtendedInterface(itf, extendedItf);
+        if (!IDLASTHelper.isUnresolvedInterfaceDefinitionNode(extendedItf)) {
+          mergeInterface(itf, extendedItf);
+          ExtendedInterfaceDecorationHelper.addExtendedInterface(itf,
+              extendedItf);
+        }
       }
     }
 

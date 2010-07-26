@@ -30,14 +30,17 @@ import java.util.Map;
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.CompilerError;
 import org.objectweb.fractal.adl.Definition;
-import org.objectweb.fractal.adl.error.ChainedErrorLocator;
+import org.objectweb.fractal.adl.NodeFactory;
 import org.objectweb.fractal.adl.error.GenericErrors;
 import org.objectweb.fractal.adl.types.TypeInterface;
 import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.fractal.api.control.BindingController;
 import org.objectweb.fractal.api.control.IllegalBindingException;
+import org.ow2.mind.error.ErrorManager;
+import org.ow2.mind.idl.IDLErrors;
 import org.ow2.mind.idl.IDLLoader;
 import org.ow2.mind.idl.ast.IDL;
+import org.ow2.mind.idl.ast.IDLASTHelper;
 import org.ow2.mind.idl.ast.InterfaceDefinition;
 
 public class BasicInterfaceSignatureResolver
@@ -49,8 +52,14 @@ public class BasicInterfaceSignatureResolver
   // Client interfaces
   // ---------------------------------------------------------------------------
 
+  /** The {@link ErrorManager} client interface used to log errors. */
+  public ErrorManager errorManagerItf;
+
+  /** The {@link NodeFactory} client interface used by this component. */
+  public NodeFactory  nodeFactoryItf;
+
   /** The Loader interface used to load referenced IDLs. */
-  public IDLLoader idlLoaderItf;
+  public IDLLoader    idlLoaderItf;
 
   // ---------------------------------------------------------------------------
   // Overridden InterfaceReferenceResolver methods
@@ -64,8 +73,12 @@ public class BasicInterfaceSignatureResolver
     try {
       itfDefinition = idlLoaderItf.load(itf.getSignature(), context);
     } catch (final ADLException e) {
-      ChainedErrorLocator.chainLocator(e, itf);
-      throw e;
+      if (e.getError().getTemplate() == IDLErrors.IDL_NOT_FOUND) {
+        errorManagerItf.logError(IDLErrors.IDL_NOT_FOUND, itf,
+            itf.getSignature());
+      }
+      itfDefinition = IDLASTHelper.newUnresolvedInterfaceDefinitionNode(
+          nodeFactoryItf, itf.getSignature());
     }
     if (!(itfDefinition instanceof InterfaceDefinition)) {
       throw new CompilerError(GenericErrors.INTERNAL_ERROR,
@@ -82,23 +95,31 @@ public class BasicInterfaceSignatureResolver
       throws NoSuchInterfaceException, IllegalBindingException {
     checkItfName(itfName);
 
-    if (itfName.equals(IDLLoader.ITF_NAME)) {
+    if (itfName.equals(ErrorManager.ITF_NAME)) {
+      errorManagerItf = (ErrorManager) value;
+    } else if (itfName.equals(NodeFactory.ITF_NAME)) {
+      nodeFactoryItf = (NodeFactory) value;
+    } else if (itfName.equals(IDLLoader.ITF_NAME)) {
       idlLoaderItf = (IDLLoader) value;
     } else {
       throw new NoSuchInterfaceException("No client interface named '"
           + itfName + "'");
     }
-
   }
 
   public String[] listFc() {
-    return listFcHelper(IDLLoader.ITF_NAME);
+    return listFcHelper(ErrorManager.ITF_NAME, NodeFactory.ITF_NAME,
+        IDLLoader.ITF_NAME);
   }
 
   public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
     checkItfName(itfName);
 
-    if (itfName.equals(IDLLoader.ITF_NAME)) {
+    if (itfName.equals(ErrorManager.ITF_NAME)) {
+      return errorManagerItf;
+    } else if (itfName.equals(NodeFactory.ITF_NAME)) {
+      return nodeFactoryItf;
+    } else if (itfName.equals(IDLLoader.ITF_NAME)) {
       return idlLoaderItf;
     } else {
       throw new NoSuchInterfaceException("No client interface named '"
@@ -110,12 +131,15 @@ public class BasicInterfaceSignatureResolver
       IllegalBindingException {
     checkItfName(itfName);
 
-    if (itfName.equals(IDLLoader.ITF_NAME)) {
+    if (itfName.equals(ErrorManager.ITF_NAME)) {
+      errorManagerItf = null;
+    } else if (itfName.equals(NodeFactory.ITF_NAME)) {
+      nodeFactoryItf = null;
+    } else if (itfName.equals(IDLLoader.ITF_NAME)) {
       idlLoaderItf = null;
     } else {
       throw new NoSuchInterfaceException("No client interface named '"
           + itfName + "'");
     }
   }
-
 }

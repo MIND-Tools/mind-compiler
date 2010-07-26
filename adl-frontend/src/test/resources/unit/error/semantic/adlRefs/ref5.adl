@@ -1,0 +1,12 @@
+//#SemanticError GroupId=ADL ErrorId=ADL_NOT_FOUND line=8
+//#SemanticError GroupId=BDG ErrorId=UNBOUND_COMPOSITE_SERVER_INTERFACE line=4
+
+composite adlRefs.ref5 extends api.Type1
+{
+  contains 
+  generic.Generic1<
+  foo.unknownADL
+  >as c;
+  
+  binds c.cItf to this.cItf;
+}

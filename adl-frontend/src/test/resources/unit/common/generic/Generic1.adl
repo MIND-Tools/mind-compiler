@@ -1,0 +1,10 @@
+import api.Call;
+import api.Type1;
+
+composite generic.Generic1 <T conformsto Type1> extends Type1 {
+
+  contains T as subComp1;
+  
+  binds this.sItf to subComp1.sItf;
+  binds subComp1.cItf to this.cItf;
+}

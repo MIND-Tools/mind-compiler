@@ -25,6 +25,7 @@ grammar CPL;
 options {
 	output = template;
 	backtrack = true;
+	superClass = AbstractCPLParser;
 }
 
 tokens{
@@ -51,6 +52,7 @@ tokens{
     import org.objectweb.fractal.adl.ADLException;
     import org.objectweb.fractal.adl.error.BasicErrorLocator;
     import org.objectweb.fractal.adl.error.Error;
+    import org.ow2.mind.error.ErrorManager;
     import org.ow2.mind.preproc.CPLChecker;
     import org.ow2.mind.preproc.MPPErrors;
 }
@@ -61,39 +63,25 @@ tokens{
 }
 
 @members{
-	private PrintStream out = System.out;
-	private PrintStream headerOut = null;
-	private boolean singletonMode = false;
-	private CPLChecker cplChecker = null;
-		
 	private String sourceFile = null;
 	private int sourceLineShift = 0;
-	
-	private List<Error> errors = new ArrayList<Error>();
-
-	public void setOutputStream(PrintStream out) { this.out = out;}
-	public void setHeaderOutputStream(PrintStream out) { this.headerOut = out;}
-	public void setSingletonMode(boolean singletonMode) { this.singletonMode = singletonMode; }
-	public void setCplChecker(CPLChecker cplChecker){this.cplChecker = cplChecker;}
 	
 	public void displayRecognitionError(String[] tokenNames,
                                         			RecognitionException e) {
 		if (sourceFile == null) sourceFile = e.input.getSourceName();
-		
-		Error err = new Error(MPPErrors.PARSE_ERROR, new BasicErrorLocator(sourceFile,
-		  (e.line + sourceLineShift), e.charPositionInLine),  
-		  super.getErrorMessage(e, tokenNames));
-		errors.add(err);			
+
+    try {
+		  errorManager.logError(MPPErrors.PARSE_ERROR, new BasicErrorLocator(sourceFile,
+		    (e.line + sourceLineShift), e.charPositionInLine),  
+		    super.getErrorMessage(e, tokenNames));
+		} catch (ADLException e1) {
+		  // ignore
+		}
 	}
 	
-	public List<Error> getErrors() {
-        		return errors;
-    	}
-}
-
-@lexer::members{
-	private PrintStream out;
-	public void setOutPutStream(PrintStream out) { this.out = out;}
+	public void preprocess() throws RecognitionException {
+	  parseFile();
+	}
 }
 
 parseFile returns [String res]
@@ -143,17 +131,12 @@ protected serverMethDef returns [StringBuilder res = new StringBuilder()]
         | ')'  { tmp += ")"; }
       )* // handle case of (((... METH(foo) )))(...
     {
-      try{
-        cplChecker.serverMethDef($id.text, $meth.text);
-      } catch (final ADLException exception) {
-        Error err = exception.getError();
-        if (err.getTemplate() == MPPErrors.UNKNOWN_METHOD) {
-          err.setLocator(new BasicErrorLocator(sourceFile, $meth.line+ sourceLineShift, $meth.pos));
-        } else {
-          err.setLocator(new BasicErrorLocator(sourceFile, $id.line+ sourceLineShift, $id.pos));
-        }
-        errors.add(err);
+      try {
+        cplChecker.serverMethDef($id, $meth, sourceFile, sourceLineShift);
+      } catch (ADLException e1) {
+        // ignore
       }
+      
       if (itfIdx == null) {
           $res.append("INTERFACE_METHOD").append($ws1.text).append("(")
               .append($ws2.text).append($id.text).append($ws3.text).append(",")
@@ -269,14 +252,12 @@ protected methCall returns [StringBuilder res ]
 protected attAccess returns [StringBuilder res = new StringBuilder()]
     : ATTR ws1=ws '(' ws2=ws att=ID ws3=ws ')' 
       { 
-        try{
-    	    cplChecker.attAccess($att.text);
-    	  } catch (final ADLException exception) {
-          Error err = exception.getError();
-          err.setLocator(new BasicErrorLocator(sourceFile, $att.line+ sourceLineShift, $att.pos));
-          errors.add(err);
-        }
-        $res.append("ATTRIBUTE_ACCESS").append($ws1.text).append("(")
+	      try {
+          cplChecker.attAccess($att, sourceFile, sourceLineShift);
+	      } catch (ADLException e) {
+	        // ignore
+	      }
+    	  $res.append("ATTRIBUTE_ACCESS").append($ws1.text).append("(")
             .append($ws2.text).append($att.text).append($ws3.text).append(")");
       }
     ;
@@ -334,17 +315,11 @@ protected privateAccess returns [StringBuilder res = new StringBuilder()]
 protected itfMethCall returns [StringBuilder res = new StringBuilder()]
 	: CALL ws1=ws '(' ws2=ws itf=ID ws3=ws ',' ws4=ws meth=ID ws5=ws ')' ws6=ws params
       {
-	    try{
-    	  cplChecker.itfMethCall($itf.text, $meth.text);
-        } catch (final ADLException exception) {
-          Error err = exception.getError();
-          if (err.getTemplate() == MPPErrors.UNKNOWN_METHOD) {
-            err.setLocator(new BasicErrorLocator(sourceFile, $meth.line+ sourceLineShift, $meth.pos));
-          } else {
-            err.setLocator(new BasicErrorLocator(sourceFile, $itf.line+ sourceLineShift, $itf.pos));
-          }
-          errors.add(err);
-        }
+	      try {
+	    	  cplChecker.itfMethCall($itf, $meth, sourceFile, sourceLineShift);
+	      } catch (ADLException e) {
+	        // ignore
+	      }
  
         if ($params.res == null)
           $res.append("CALL_INTERFACE_METHOD_WITHOUT_PARAM").append($ws1.text).append("(")
@@ -536,6 +511,9 @@ protected sourceLineInfo returns [StringBuilder res = new StringBuilder()]
 	: '#' ws1=ws {$res.append("#").append($ws1.text);} ( 'line' {$res.append("line");})? ws2=ws line=INT ws3=ws filename=. {$res.append($ws2.text).append($line.text).append($ws3.text).append($filename.text);}
 	{sourceLineShift=Integer.parseInt($line.text) - $line.line - 1;
 	 sourceFile = $filename.text;
+	 if (sourceFile.startsWith("\"") && sourceFile.endsWith("\"")) {
+	   sourceFile = sourceFile.substring(1, sourceFile.length()-1);
+	 }
 	}
 	;
 	

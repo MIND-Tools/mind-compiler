@@ -23,15 +23,11 @@
 package org.ow2.mind;
 
 import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.LineNumberReader;
 import java.io.PrintStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,13 +36,11 @@ import java.util.logging.Logger;
 
 import org.antlr.stringtemplate.StringTemplateGroupLoader;
 import org.objectweb.fractal.adl.ADLException;
+import org.objectweb.fractal.adl.CompilerError;
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.JavaFactory;
 import org.objectweb.fractal.adl.Loader;
 import org.objectweb.fractal.adl.NodeFactory;
-import org.objectweb.fractal.adl.error.ChainedErrorLocator;
-import org.objectweb.fractal.adl.error.Error;
-import org.objectweb.fractal.adl.error.ErrorLocator;
 import org.objectweb.fractal.adl.error.GenericErrors;
 import org.objectweb.fractal.adl.util.FractalADLLogManager;
 import org.objectweb.fractal.cecilia.targetDescriptor.TargetDescriptorException;
@@ -77,6 +71,8 @@ import org.ow2.mind.compilation.CompilerWrapper;
 import org.ow2.mind.compilation.DirectiveHelper;
 import org.ow2.mind.compilation.LinkerCommand;
 import org.ow2.mind.compilation.gcc.GccCompilerWrapper;
+import org.ow2.mind.error.ErrorManager;
+import org.ow2.mind.error.ErrorManagerFactory;
 import org.ow2.mind.idl.IDLBackendFactory;
 import org.ow2.mind.idl.IDLLoader;
 import org.ow2.mind.idl.IDLLoaderChainFactory;
@@ -214,6 +210,7 @@ public class Launcher extends AbstractLauncher {
   protected File                       buildDir;
 
   // compiler components :
+  protected ErrorManager               errorManager;
   protected Loader                     adlLoader;
   protected IDLLoader                  idlLoader;
   protected Instantiator               graphInstantiator;
@@ -473,6 +470,10 @@ public class Launcher extends AbstractLauncher {
   protected void initCompiler(final CommandLine cmdLine,
       final NodeFactory stNodeFactory, final PluginManager pluginManager,
       final Map<Object, Object> compilerContext) throws ADLException {
+    // error manager
+    errorManager = ErrorManagerFactory.newStreamErrorManager(System.err,
+        printStackTrace);
+
     // input locators
     final BasicInputResourceLocator inputResourceLocator = new BasicInputResourceLocator();
     final OutputBinaryIDLLocator obil = new OutputBinaryIDLLocator();
@@ -499,6 +500,9 @@ public class Launcher extends AbstractLauncher {
     final BasicMPPWrapper mppWrapper = new BasicMPPWrapper();
     mppWrapper.pluginManagerItf = pluginManager;
 
+    gcw.errorManagerItf = errorManager;
+    mppWrapper.errorManagerItf = errorManager;
+
     // Plugin Factory Component
     final org.objectweb.fractal.adl.Factory pluginFactory = new SimpleClassPluginFactory();
 
@@ -506,17 +510,17 @@ public class Launcher extends AbstractLauncher {
     final StringTemplateGroupLoader stcLoader = STLoaderFactory.newSTLoader();
 
     // loader chains
-    final IDLFrontend idlFrontend = IDLLoaderChainFactory.newLoader(idlLocator,
-        inputResourceLocator, pluginFactory);
+    final IDLFrontend idlFrontend = IDLLoaderChainFactory.newLoader(
+        errorManager, idlLocator, inputResourceLocator, pluginFactory);
 
     idlLoader = idlFrontend.loader;
 
-    adlLoader = Factory.newLoader(inputResourceLocator, adlLocator, idlLocator,
-        implementationLocator, idlFrontend.cache, idlFrontend.loader,
-        pluginFactory);
+    adlLoader = Factory.newLoader(errorManager, inputResourceLocator,
+        adlLocator, idlLocator, implementationLocator, idlFrontend.cache,
+        idlFrontend.loader, pluginFactory);
 
     // instantiator chain
-    graphInstantiator = Factory.newInstantiator(adlLoader);
+    graphInstantiator = Factory.newInstantiator(errorManager, adlLoader);
 
     // Backend
     final IDLVisitor idlCompiler = IDLBackendFactory.newIDLCompiler(idlLoader,
@@ -533,7 +537,7 @@ public class Launcher extends AbstractLauncher {
         definitionCompiler, adlLoader, stcLoader, pluginManager,
         compilerContext);
 
-    executor = ADLBackendFactory.newCompilationCommandExecutor();
+    executor = ADLBackendFactory.newCompilationCommandExecutor(errorManager);
   }
 
   protected TargetDescriptorLoader createTargetDescriptorLoader(
@@ -696,8 +700,7 @@ public class Launcher extends AbstractLauncher {
     }
   }
 
-  public List<Object> compile() throws ADLException,
-      InvalidCommandLineException {
+  public List<Object> compile() throws InvalidCommandLineException {
     // Check if at least 1 adlName is specified
     if (adlToExecName.size() == 0) {
       throw new InvalidCommandLineException("no definition name is specified.",
@@ -709,8 +712,17 @@ public class Launcher extends AbstractLauncher {
       try {
         compile(e.getKey(), e.getValue(), result);
       } catch (final InterruptedException e1) {
-        throw new ADLException(GenericErrors.INTERNAL_ERROR, e,
+        throw new CompilerError(GenericErrors.INTERNAL_ERROR, e,
             "Interrupted while executing compilation tasks");
+      } catch (final ADLException e1) {
+        if (!errorManager.getErrors().contains(e1.getError())) {
+          // the error has not been logged in the error manager, print it.
+          try {
+            errorManager.logError(e1.getError());
+          } catch (final ADLException e2) {
+            // ignore
+          }
+        }
       }
     }
     return result;
@@ -725,7 +737,12 @@ public class Launcher extends AbstractLauncher {
 
     adlName = processContext(targetDescriptor, adlName, contextMap);
 
+    errorManager.clear();
     final Definition adlDef = adlLoader.load(adlName, contextMap);
+    if (!errorManager.getErrors().isEmpty()) {
+      // ADL contains errors
+      return;
+    }
 
     if (checkADLMode) {
       result.add(adlDef);
@@ -740,10 +757,12 @@ public class Launcher extends AbstractLauncher {
     if (compileDef) {
       final Collection<CompilationCommand> commands = definitionCompiler.visit(
           adlDef, contextMap);
-      executor.exec(commands, contextMap);
-      for (final CompilationCommand command : commands) {
-        if (command instanceof CompilerCommand) {
-          result.addAll(command.getOutputFiles());
+      final boolean execOK = executor.exec(commands, contextMap);
+      if (execOK) {
+        for (final CompilationCommand command : commands) {
+          if (command instanceof CompilerCommand) {
+            result.addAll(command.getOutputFiles());
+          }
         }
       }
       return;
@@ -751,12 +770,19 @@ public class Launcher extends AbstractLauncher {
 
     final ComponentGraph graph = graphInstantiator.instantiate(adlDef,
         contextMap);
+    if (!errorManager.getErrors().isEmpty()) {
+      // ADL contains errors
+      return;
+    }
+
     final Collection<CompilationCommand> commands = graphCompiler.visit(graph,
         contextMap);
-    executor.exec(commands, contextMap);
-    for (final CompilationCommand command : commands) {
-      if (command instanceof LinkerCommand) {
-        result.addAll(command.getOutputFiles());
+    final boolean execOK = executor.exec(commands, contextMap);
+    if (execOK) {
+      for (final CompilationCommand command : commands) {
+        if (command instanceof LinkerCommand) {
+          result.addAll(command.getOutputFiles());
+        }
       }
     }
   }
@@ -815,93 +841,6 @@ public class Launcher extends AbstractLauncher {
     System.exit(e.exitValue);
   }
 
-  protected void handleException(final ADLException e) {
-    logger.log(Level.FINER, "Caught an ADL Exception", e);
-    if (printStackTrace) {
-      e.printStackTrace();
-    } else {
-      final Error error = e.getError();
-      ErrorLocator locator = error.getLocator();
-      if (locator instanceof ChainedErrorLocator) {
-        locator = ((ChainedErrorLocator) locator).getRootLocator();
-        if (locator == null) {
-          final Iterator<ErrorLocator> iter = ((ChainedErrorLocator) error
-              .getLocator()).getChainedLocations().iterator();
-          while (iter.hasNext() && locator == null) {
-            locator = iter.next();
-          }
-        }
-      }
-      // cwd is the current working dir.
-      String cwd = new File("foo").getAbsolutePath();
-      cwd = cwd.substring(0, cwd.length() - 3);
-
-      String fileLocation = null;
-
-      if (locator != null && locator.getInputFilePath() != null) {
-        fileLocation = locator.getInputFilePath();
-        if (fileLocation.startsWith(cwd)) {
-          fileLocation = fileLocation.substring(cwd.length());
-        }
-      }
-
-      final StringBuffer sb = new StringBuffer();
-      if (locator != null && fileLocation != null) {
-        sb.append("At ").append(fileLocation);
-
-        if (locator.getBeginLine() >= 0) {
-          sb.append(":").append(locator.getBeginLine());
-          if (locator.getBeginColumn() >= 0) {
-            sb.append(",").append(locator.getBeginColumn());
-          }
-        }
-        sb.append(":\n |--> ");
-        if (locator.getBeginLine() >= 0) {
-          final File inputFile = new File(locator.getInputFilePath());
-          if (inputFile.exists()) {
-            try {
-              final LineNumberReader reader = new LineNumberReader(
-                  new FileReader(inputFile));
-              for (int i = 0; i < locator.getBeginLine() - 1; i++) {
-                reader.readLine();
-              }
-              final String line = reader.readLine().replace("\t", "    ");
-              sb.append("  ").append(line).append("\n |-->   ");
-              if (locator.getBeginColumn() >= 0) {
-                for (int i = 0; i < locator.getBeginColumn() - 1; i++) {
-                  sb.append(" ");
-                }
-                int end = line.length();
-                if (locator.getEndColumn() >= 0
-                    && locator.getBeginLine() == locator.getEndLine()) {
-                  end = locator.getEndColumn();
-                }
-                for (int i = locator.getBeginColumn(); i < end + 1; i++) {
-                  sb.append("-");
-                }
-                sb.append("\n |--> ");
-
-              }
-            } catch (final IOException e1) {
-              // ignore
-              e.printStackTrace();
-            }
-          }
-        }
-      }
-      sb.append(error.getMessage()).append("\n");
-      Throwable cause = e.getCause();
-      while (cause != null) {
-        sb.append("caused by : ");
-        sb.append(cause.getMessage()).append('\n');
-        cause = cause.getCause();
-      }
-
-      System.err.println(sb);
-    }
-    System.exit(1);
-  }
-
   /**
    * Entry point.
    * 
@@ -916,9 +855,8 @@ public class Launcher extends AbstractLauncher {
       l.handleException(e);
     } catch (final CompilerInstantiationException e) {
       l.handleException(e);
-    } catch (final ADLException e) {
-      l.handleException(e);
     }
+    if (!l.errorManager.getErrors().isEmpty()) System.exit(1);
   }
 
   public static void nonExitMain(final String... args)

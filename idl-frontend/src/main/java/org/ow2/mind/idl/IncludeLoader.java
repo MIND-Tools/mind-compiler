@@ -71,7 +71,7 @@ public class IncludeLoader extends AbstractIDLLoader {
       if (extension == null
           || !(extension.equals(IDT_EXTENSION) || extension
               .equals(HEADER_EXTENSION))) {
-        throw new ADLException(IDLErrors.INVALID_INCLUDE, include, path);
+        errorManagerItf.logError(IDLErrors.INVALID_INCLUDE, include, path);
       }
 
       idlResolverItf.resolve(include, container, context);

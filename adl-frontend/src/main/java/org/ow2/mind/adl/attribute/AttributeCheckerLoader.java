@@ -43,6 +43,7 @@ import org.ow2.mind.adl.ast.AttributeContainer;
 import org.ow2.mind.adl.parameter.ast.FormalParameter;
 import org.ow2.mind.adl.parameter.ast.FormalParameterContainer;
 import org.ow2.mind.adl.parameter.ast.ParameterASTHelper.ParameterType;
+import org.ow2.mind.error.ErrorManager;
 import org.ow2.mind.value.ast.NullLiteral;
 import org.ow2.mind.value.ast.NumberLiteral;
 import org.ow2.mind.value.ast.Reference;
@@ -56,8 +57,11 @@ public class AttributeCheckerLoader extends AbstractLoader {
   // Client interfaces
   // ---------------------------------------------------------------------------
 
+  /** The {@link ErrorManager} client interface used to log errors. */
+  public ErrorManager errorManagerItf;
+
   /** The {@link NodeFactory} client interface. */
-  public NodeFactory nodeFactoryItf;
+  public NodeFactory  nodeFactoryItf;
 
   // ---------------------------------------------------------------------------
   // Implementation of the Loader interface
@@ -77,31 +81,34 @@ public class AttributeCheckerLoader extends AbstractLoader {
     Map<String, FormalParameter> formalParameters = null;
 
     for (final Attribute attr : container.getAttributes()) {
+      ParameterType type = null;
+
       final String typeName = attr.getType();
       if (typeName == null) {
-        throw new ADLException(ADLErrors.INVALID_ATTRIBUTE_MISSING_TYPE, attr);
+        errorManagerItf
+            .logError(ADLErrors.INVALID_ATTRIBUTE_MISSING_TYPE, attr);
+      } else {
+        type = ParameterType.fromCType(typeName);
       }
-
-      final ParameterType type = ParameterType.fromCType(typeName);
 
       final Value value = attr.getValue();
 
       if (value != null) {
-        if (value instanceof NumberLiteral) {
+        if (type != null && (value instanceof NumberLiteral)) {
           if (!type.isCompatible(value))
-            throw new ADLException(
+            errorManagerItf.logError(
                 ADLErrors.INVALID_ATTRIBUTE_VALUE_INCOMPATIBLE_TYPE, value);
 
-          if (typeName.startsWith("u")
+          if (typeName != null && typeName.startsWith("u")
               && ((NumberLiteral) value).getValue().startsWith("-")) {
-            // TODO use a specific API to print warning
-            System.out.println("Warning at " + value.astGetSource()
-                + ": Initialize unsigned attribute with negative value");
+            errorManagerItf.logWarning(
+                ADLErrors.WARNING_ATTRIBUTE_UNSIGNED_ASSIGNED_TO_NEGATIVE,
+                value);
           }
-        } else if (value instanceof StringLiteral
-            || value instanceof NullLiteral) {
+        } else if (type != null
+            && (value instanceof StringLiteral || value instanceof NullLiteral)) {
           if (!type.isCompatible(value))
-            throw new ADLException(
+            errorManagerItf.logError(
                 ADLErrors.INVALID_ATTRIBUTE_VALUE_INCOMPATIBLE_TYPE, value);
         } else {
           assert value instanceof Reference;
@@ -120,16 +127,17 @@ public class AttributeCheckerLoader extends AbstractLoader {
 
           final FormalParameter refParam = formalParameters.get(refParamName);
           if (refParam == null) {
-            throw new ADLException(ADLErrors.UNDEFINED_PARAMETER, value,
+            errorManagerItf.logError(ADLErrors.UNDEFINED_PARAMETER, value,
                 refParamName);
-          }
-          setUsedFormalParameter(refParam);
-          final ParameterType referencedType = getInferredParameterType(refParam);
-          if (referencedType == null) {
-            setInferredParameterType(refParam, type);
-          } else if (!type.isCompatible(referencedType)) {
-            throw new ADLException(ADLErrors.INCOMPATIBLE_ARGUMENT_TYPE, value,
-                refParamName);
+          } else {
+            setUsedFormalParameter(refParam);
+            final ParameterType referencedType = getInferredParameterType(refParam);
+            if (referencedType == null) {
+              setInferredParameterType(refParam, type);
+            } else if (type != null && !type.isCompatible(referencedType)) {
+              errorManagerItf.logError(ADLErrors.INCOMPATIBLE_ARGUMENT_TYPE,
+                  value, refParamName);
+            }
           }
         }
       } else {
@@ -152,7 +160,9 @@ public class AttributeCheckerLoader extends AbstractLoader {
       throws NoSuchInterfaceException, IllegalBindingException {
     checkItfName(itfName);
 
-    if (itfName.equals(NodeFactory.ITF_NAME)) {
+    if (itfName.equals(ErrorManager.ITF_NAME)) {
+      errorManagerItf = (ErrorManager) value;
+    } else if (itfName.equals(NodeFactory.ITF_NAME)) {
       this.nodeFactoryItf = (NodeFactory) value;
     } else {
       super.bindFc(itfName, value);
@@ -162,14 +172,17 @@ public class AttributeCheckerLoader extends AbstractLoader {
 
   @Override
   public String[] listFc() {
-    return listFcHelper(super.listFc(), NodeFactory.ITF_NAME);
+    return listFcHelper(super.listFc(), ErrorManager.ITF_NAME,
+        NodeFactory.ITF_NAME);
   }
 
   @Override
   public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
     checkItfName(itfName);
 
-    if (itfName.equals(NodeFactory.ITF_NAME)) {
+    if (itfName.equals(ErrorManager.ITF_NAME)) {
+      return errorManagerItf;
+    } else if (itfName.equals(NodeFactory.ITF_NAME)) {
       return this.nodeFactoryItf;
     } else {
       return super.lookupFc(itfName);
@@ -181,7 +194,9 @@ public class AttributeCheckerLoader extends AbstractLoader {
       IllegalBindingException {
     checkItfName(itfName);
 
-    if (itfName.equals(NodeFactory.ITF_NAME)) {
+    if (itfName.equals(ErrorManager.ITF_NAME)) {
+      errorManagerItf = null;
+    } else if (itfName.equals(NodeFactory.ITF_NAME)) {
       this.nodeFactoryItf = null;
     } else {
       super.unbindFc(itfName);

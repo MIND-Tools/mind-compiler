@@ -25,37 +25,27 @@ package org.ow2.mind.io;
 import java.io.File;
 import java.util.Map;
 
-import org.objectweb.fractal.adl.ADLException;
-
 public interface OutputFileLocator {
 
   String ITF_NAME = "output-file-locator";
 
-  File getCSourceOutputFile(String path, Map<Object, Object> context)
-      throws ADLException;
+  File getCSourceOutputFile(String path, Map<Object, Object> context);
 
-  File getCSourceOutputDir(Map<Object, Object> context) throws ADLException;
+  File getCSourceOutputDir(Map<Object, Object> context);
 
-  File getCSourceTemporaryOutputFile(String path, Map<Object, Object> context)
-      throws ADLException;
+  File getCSourceTemporaryOutputFile(String path, Map<Object, Object> context);
 
-  File getCSourceTemporaryOutputDir(Map<Object, Object> context)
-      throws ADLException;
+  File getCSourceTemporaryOutputDir(Map<Object, Object> context);
 
-  File getCCompiledOutputFile(String path, Map<Object, Object> context)
-      throws ADLException;
+  File getCCompiledOutputFile(String path, Map<Object, Object> context);
 
-  File getCExecutableOutputFile(String path, Map<Object, Object> context)
-      throws ADLException;
+  File getCExecutableOutputFile(String path, Map<Object, Object> context);
 
-  File getCCompiledOutputDir(Map<Object, Object> context) throws ADLException;
+  File getCCompiledOutputDir(Map<Object, Object> context);
 
-  File getCCompiledTemporaryOutputFile(String path, Map<Object, Object> context)
-      throws ADLException;
+  File getCCompiledTemporaryOutputFile(String path, Map<Object, Object> context);
 
-  File getCCompiledTemporaryOutputDir(Map<Object, Object> context)
-      throws ADLException;
+  File getCCompiledTemporaryOutputDir(Map<Object, Object> context);
 
-  File getMetadataOutputFile(String path, Map<Object, Object> context)
-      throws ADLException;
+  File getMetadataOutputFile(String path, Map<Object, Object> context);
 }

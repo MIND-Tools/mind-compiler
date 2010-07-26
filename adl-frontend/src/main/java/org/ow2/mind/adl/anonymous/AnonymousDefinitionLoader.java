@@ -39,6 +39,7 @@ import org.ow2.mind.adl.anonymous.ast.AnonymousDefinitionContainer;
 import org.ow2.mind.adl.ast.Component;
 import org.ow2.mind.adl.ast.ComponentContainer;
 import org.ow2.mind.adl.generic.ast.FormalTypeParameterReference;
+import org.ow2.mind.error.ErrorManager;
 
 /**
  * Delegating loader that {@link AnonymousDefinitionExtractor resolves}
@@ -55,6 +56,9 @@ public class AnonymousDefinitionLoader extends AbstractLoader {
   // ---------------------------------------------------------------------------
   // Client interfaces
   // ---------------------------------------------------------------------------
+
+  /** The {@link ErrorManager} client interface used to log errors. */
+  public ErrorManager                             errorManagerItf;
 
   /** The {@link AnonymousDefinitionExtractor} interface. */
   public AnonymousDefinitionExtractor             anonymousDefinitionExtractorItf;
@@ -104,9 +108,9 @@ public class AnonymousDefinitionLoader extends AbstractLoader {
             || (subComp instanceof FormalTypeParameterReference && ((FormalTypeParameterReference) subComp)
                 .getTypeParameterReference() != null)) {
           // this cannot happen if input definition has been read from
-          // STCFParser. but it may happen if it has been read from an XML
+          // ADLParser. but it may happen if it has been read from an XML
           // parser.
-          throw new ADLException(ADLErrors.INVALID_SUB_COMPONENT, subComp);
+          errorManagerItf.logError(ADLErrors.INVALID_SUB_COMPONENT, subComp);
         }
 
         // resolve it.
@@ -149,7 +153,9 @@ public class AnonymousDefinitionLoader extends AbstractLoader {
       throws NoSuchInterfaceException, IllegalBindingException {
     checkItfName(itfName);
 
-    if (itfName.equals(AnonymousDefinitionExtractor.ITF_NAME)) {
+    if (itfName.equals(ErrorManager.ITF_NAME)) {
+      errorManagerItf = (ErrorManager) value;
+    } else if (itfName.equals(AnonymousDefinitionExtractor.ITF_NAME)) {
       anonymousDefinitionExtractorItf = (AnonymousDefinitionExtractor) value;
     } else {
       super.bindFc(itfName, value);
@@ -159,14 +165,17 @@ public class AnonymousDefinitionLoader extends AbstractLoader {
 
   @Override
   public String[] listFc() {
-    return listFcHelper(super.listFc(), AnonymousDefinitionExtractor.ITF_NAME);
+    return listFcHelper(super.listFc(), ErrorManager.ITF_NAME,
+        AnonymousDefinitionExtractor.ITF_NAME);
   }
 
   @Override
   public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
     checkItfName(itfName);
 
-    if (itfName.equals(AnonymousDefinitionExtractor.ITF_NAME)) {
+    if (itfName.equals(ErrorManager.ITF_NAME)) {
+      return errorManagerItf;
+    } else if (itfName.equals(AnonymousDefinitionExtractor.ITF_NAME)) {
       return anonymousDefinitionExtractorItf;
     } else {
       return super.lookupFc(itfName);
@@ -178,7 +187,9 @@ public class AnonymousDefinitionLoader extends AbstractLoader {
       IllegalBindingException {
     checkItfName(itfName);
 
-    if (itfName.equals(AnonymousDefinitionExtractor.ITF_NAME)) {
+    if (itfName.equals(ErrorManager.ITF_NAME)) {
+      errorManagerItf = null;
+    } else if (itfName.equals(AnonymousDefinitionExtractor.ITF_NAME)) {
       anonymousDefinitionExtractorItf = null;
     } else {
       super.unbindFc(itfName);

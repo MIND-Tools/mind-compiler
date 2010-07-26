@@ -42,6 +42,7 @@ import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.fractal.api.control.BindingController;
 import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.ow2.mind.InputResourcesHelper;
+import org.ow2.mind.error.ErrorManager;
 import org.ow2.mind.idl.IDLErrors;
 import org.ow2.mind.idl.IDLLoader;
 import org.ow2.mind.idl.IDLLocator;
@@ -61,6 +62,9 @@ public class IDLFileLoader implements IDLLoader, BindingController {
   // ---------------------------------------------------------------------------
   // Client interfaces
   // ---------------------------------------------------------------------------
+
+  /** The {@link ErrorManager} client interface used to log errors. */
+  public ErrorManager           errorManagerItf;
 
   /**
    * Client interface bound to the {@link XMLNodeFactory node factory}
@@ -112,7 +116,9 @@ public class IDLFileLoader implements IDLLoader, BindingController {
       try {
         is = idlFile.openStream();
       } catch (final IOException e) {
-        throw new ADLException(IDLErrors.IO_ERROR, e, path);
+      errorManagerItf.logFatal(IDLErrors.IO_ERROR, e, idlFile.getPath());
+      // never executed (logFatal throw an ADLException).
+      return null;
       }
     }
     InterfaceDefinition itf;
@@ -124,7 +130,9 @@ public class IDLFileLoader implements IDLLoader, BindingController {
     } catch (final ParseException e) {
       final ErrorLocator locator = new BasicErrorLocator(path,
           e.currentToken.beginLine, e.currentToken.beginColumn);
-      throw new ADLException(IDLErrors.PARSE_ERROR, locator, e.getMessage());
+      errorManagerItf.logFatal(IDLErrors.PARSE_ERROR, locator, e.getMessage());
+      // never executed (logFatal throw an ADLException).
+      return null;
     } catch (final TokenMgrError e) {
       // TokenMgrError do not have location info.
       final ErrorLocator locator = new BasicErrorLocator(path, -1, -1);
@@ -132,8 +140,8 @@ public class IDLFileLoader implements IDLLoader, BindingController {
     }
 
     if (!name.equals(itf.getName())) {
-      throw new ADLException(IDLErrors.UNEXPECTED_ITF_NAME, itf, itf.getName(),
-          name);
+      errorManagerItf.logError(IDLErrors.UNEXPECTED_ITF_NAME, itf,
+          itf.getName(), name);
     }
 
     InputResourcesHelper.addInputResource(itf,
@@ -173,11 +181,14 @@ public class IDLFileLoader implements IDLLoader, BindingController {
       try {
         is = idtFile.openStream();
       } catch (final IOException e) {
-        throw new ADLException(IDLErrors.IO_ERROR, e, path);
+        errorManagerItf.logFatal(IDLErrors.IO_ERROR, e, path);
+        // never executed (logFatal throw an ADLException).
+        return null;
       }
     }
 
     SharedTypeDefinition idt;
+
     try {
       final Parser parser = new Parser(is);
       final JTBProcessor processor = new JTBProcessor(nodeFactoryItf, DTD, path);
@@ -186,7 +197,9 @@ public class IDLFileLoader implements IDLLoader, BindingController {
     } catch (final ParseException e) {
       final ErrorLocator locator = new BasicErrorLocator(path,
           e.currentToken.beginLine, e.currentToken.beginColumn);
-      throw new ADLException(IDLErrors.PARSE_ERROR, locator, e.getMessage());
+      errorManagerItf.logFatal(IDLErrors.PARSE_ERROR, locator, e.getMessage());
+      // never executed (logFatal throw an ADLException).
+      return null;
     }
 
     idt.setName(name);
@@ -225,7 +238,9 @@ public class IDLFileLoader implements IDLLoader, BindingController {
       throws NoSuchInterfaceException, IllegalBindingException {
     checkItfName(itfName);
 
-    if (itfName.equals(XMLNodeFactory.ITF_NAME)) {
+    if (ErrorManager.ITF_NAME.equals(itfName)) {
+      errorManagerItf = (ErrorManager) value;
+    } else if (itfName.equals(XMLNodeFactory.ITF_NAME)) {
       this.nodeFactoryItf = (XMLNodeFactory) value;
     } else if (itfName.equals(IDLLocator.ITF_NAME)) {
       this.idlLocatorItf = (IDLLocator) value;
@@ -237,13 +252,16 @@ public class IDLFileLoader implements IDLLoader, BindingController {
   }
 
   public String[] listFc() {
-    return listFcHelper(XMLNodeFactory.ITF_NAME, IDLLocator.ITF_NAME);
+    return listFcHelper(ErrorManager.ITF_NAME, XMLNodeFactory.ITF_NAME,
+        IDLLocator.ITF_NAME);
   }
 
   public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
     checkItfName(itfName);
 
-    if (itfName.equals(XMLNodeFactory.ITF_NAME)) {
+    if (ErrorManager.ITF_NAME.equals(itfName)) {
+      return errorManagerItf;
+    } else if (itfName.equals(XMLNodeFactory.ITF_NAME)) {
       return this.nodeFactoryItf;
     } else if (itfName.equals(IDLLocator.ITF_NAME)) {
       return this.idlLocatorItf;
@@ -257,7 +275,9 @@ public class IDLFileLoader implements IDLLoader, BindingController {
       IllegalBindingException {
     checkItfName(itfName);
 
-    if (itfName.equals(XMLNodeFactory.ITF_NAME)) {
+    if (ErrorManager.ITF_NAME.equals(itfName)) {
+      errorManagerItf = null;
+    } else if (itfName.equals(XMLNodeFactory.ITF_NAME)) {
       this.nodeFactoryItf = null;
     } else if (itfName.equals(IDLLocator.ITF_NAME)) {
       this.idlLocatorItf = null;

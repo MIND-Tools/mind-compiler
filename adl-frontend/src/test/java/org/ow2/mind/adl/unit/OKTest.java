@@ -23,13 +23,14 @@
 package org.ow2.mind.adl.unit;
 
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 import org.objectweb.fractal.adl.Definition;
 import org.ow2.mind.unit.UnitTestDataProvider;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-public class OKTest extends AbstractADLLoaderTest {
+public class OKTest extends AbstractErrorTest {
 
   @DataProvider(name = "unit-test")
   protected Object[][] dataProvider() throws Exception {
@@ -41,6 +42,8 @@ public class OKTest extends AbstractADLLoaderTest {
       throws Exception {
     initSourcePath(rootDir);
     final Definition d = loader.load(adlName, context);
+    assertTrue(errorManager.getErrors().isEmpty());
+    assertTrue(errorManager.getWarnings().isEmpty());
     assertNotNull(d);
   }
 }

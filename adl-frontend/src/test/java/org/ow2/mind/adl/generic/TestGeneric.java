@@ -25,38 +25,37 @@ package org.ow2.mind.adl.generic;
 import static org.ow2.mind.BCImplChecker.checkBCImplementation;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertSame;
+import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
+import java.util.Collection;
 import java.util.HashMap;
 
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.Loader;
+import org.objectweb.fractal.adl.NodeFactoryImpl;
 import org.objectweb.fractal.adl.components.ComponentErrors;
+import org.objectweb.fractal.adl.error.Error;
 import org.objectweb.fractal.adl.xml.XMLNodeFactoryImpl;
 import org.ow2.mind.adl.ADLErrors;
 import org.ow2.mind.adl.ASTChecker;
+import org.ow2.mind.adl.ASTChecker.DefinitionChecker;
 import org.ow2.mind.adl.BasicADLLocator;
 import org.ow2.mind.adl.BasicDefinitionReferenceResolver;
 import org.ow2.mind.adl.CacheLoader;
 import org.ow2.mind.adl.CachingDefinitionReferenceResolver;
+import org.ow2.mind.adl.ErrorLoader;
 import org.ow2.mind.adl.ExtendsLoader;
 import org.ow2.mind.adl.STCFNodeMerger;
 import org.ow2.mind.adl.SubComponentResolverLoader;
-import org.ow2.mind.adl.ASTChecker.DefinitionChecker;
 import org.ow2.mind.adl.binding.BasicBindingChecker;
-import org.ow2.mind.adl.generic.CachingTemplateInstantiator;
-import org.ow2.mind.adl.generic.ExtendsGenericDefinitionReferenceResolver;
-import org.ow2.mind.adl.generic.GenericAnonymousDefinitionExtractor;
-import org.ow2.mind.adl.generic.GenericDefinitionLoader;
-import org.ow2.mind.adl.generic.GenericDefinitionReferenceResolver;
-import org.ow2.mind.adl.generic.NoAnySubComponentLoader;
-import org.ow2.mind.adl.generic.NoAnyTypeArgumentDefinitionReferenceResolver;
-import org.ow2.mind.adl.generic.TemplateInstanceLoader;
-import org.ow2.mind.adl.generic.TemplateInstantiatorImpl;
 import org.ow2.mind.adl.graph.Instantiator;
 import org.ow2.mind.adl.imports.ImportDefinitionReferenceResolver;
 import org.ow2.mind.adl.parser.ADLParser;
+import org.ow2.mind.error.ErrorCollection;
+import org.ow2.mind.error.ErrorManager;
+import org.ow2.mind.error.ErrorManagerFactory;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -72,6 +71,9 @@ public class TestGeneric {
 
   @BeforeMethod(alwaysRun = true)
   protected void setUp() throws Exception {
+    final ErrorManager errorManager = ErrorManagerFactory
+        .newSimpleErrorManager();
+
     // Loader chain components
     final ADLParser adlLoader = new ADLParser();
     final GenericDefinitionLoader gdl = new GenericDefinitionLoader();
@@ -79,12 +81,22 @@ public class TestGeneric {
     final ExtendsLoader el = new ExtendsLoader();
     final NoAnySubComponentLoader nascl = new NoAnySubComponentLoader();
     final CacheLoader cl = new CacheLoader();
+    final ErrorLoader errl = new ErrorLoader();
 
+    errl.clientLoader = cl;
     cl.clientLoader = nascl;
     nascl.clientLoader = el;
     el.clientLoader = scrl;
     scrl.clientLoader = gdl;
     gdl.clientLoader = adlLoader;
+
+    errl.errorManagerItf = errorManager;
+    cl.errorManagerItf = errorManager;
+    nascl.errorManagerItf = errorManager;
+    el.errorManagerItf = errorManager;
+    scrl.errorManagerItf = errorManager;
+    gdl.errorManagerItf = errorManager;
+    adlLoader.errorManagerItf = errorManager;
 
     // definition reference resolver chain
     final BasicDefinitionReferenceResolver bdrr = new BasicDefinitionReferenceResolver();
@@ -99,9 +111,13 @@ public class TestGeneric {
     bdrr.loaderItf = cl;
     cdrr.loaderItf = cl;
 
+    bdrr.errorManagerItf = errorManager;
+    gdrr.errorManagerItf = errorManager;
+
     final NoAnyTypeArgumentDefinitionReferenceResolver natadrr = new NoAnyTypeArgumentDefinitionReferenceResolver();
 
     natadrr.clientResolverItf = cdrr;
+    natadrr.errorManagerItf = errorManager;
     scrl.definitionReferenceResolverItf = natadrr;
 
     final ExtendsGenericDefinitionReferenceResolver egdrr = new ExtendsGenericDefinitionReferenceResolver();
@@ -127,6 +143,7 @@ public class TestGeneric {
     final STCFNodeMerger stcfNodeMerger = new STCFNodeMerger();
     final BasicADLLocator adlLocator = new BasicADLLocator();
     final XMLNodeFactoryImpl xmlNodeFactory = new XMLNodeFactoryImpl();
+    final NodeFactoryImpl nodeFactory = new NodeFactoryImpl();
     final BasicBindingChecker bindingChecker = new BasicBindingChecker();
 
     el.nodeMergerItf = stcfNodeMerger;
@@ -134,8 +151,10 @@ public class TestGeneric {
     adlLoader.adlLocatorItf = adlLocator;
     adlLoader.nodeFactoryItf = xmlNodeFactory;
     gdrr.bindingCheckerItf = bindingChecker;
+    bdrr.nodeFactoryItf = nodeFactory;
+    gdrr.nodeFactoryItf = nodeFactory;
 
-    loader = cl;
+    loader = errl;
 
     context = new HashMap<Object, Object>();
 
@@ -207,8 +226,8 @@ public class TestGeneric {
     final Definition content = loader.load("pkg1.generic.Generic2", context);
 
     checker.assertDefinition(content).containsFormalTypeParameters("U", "V")
-        .whereFirst().conformsTo("pkg1.pkg2.Type1").andNext().conformsTo(
-            "pkg1.pkg2.Type1");
+        .whereFirst().conformsTo("pkg1.pkg2.Type1").andNext()
+        .conformsTo("pkg1.pkg2.Type1");
 
     checker.assertDefinition(content).containsComponents("c1", "c2")
         .whereFirst().referencesFormalTypeParameter("U").andNext()
@@ -245,22 +264,30 @@ public class TestGeneric {
     checker.assertDefinition(content).containsFormalTypeParameters("W")
         .whereFirst().conformsTo("pkg1.pkg2.Type1");
 
-    checker.assertDefinition(content)
-        .containsComponents("c1", "c2", "c3", "c4").whereFirst()
-        .referencesFormalTypeParameter("W").andNext().isAnInstanceOf(
-            "pkg1.pkg2.Primitive1").andNext()
-        .referencesFormalTypeParameter("W").andNext().isAnInstanceOf(
+    checker
+        .assertDefinition(content)
+        .containsComponents("c1", "c2", "c3", "c4")
+        .whereFirst()
+        .referencesFormalTypeParameter("W")
+        .andNext()
+        .isAnInstanceOf("pkg1.pkg2.Primitive1")
+        .andNext()
+        .referencesFormalTypeParameter("W")
+        .andNext()
+        .isAnInstanceOf(
             "pkg1.generic.Generic2<pkg1.pkg2.Type1,pkg1.pkg2.Primitive1>");
 
-    final DefinitionChecker defC4 = checker.assertDefinition(content)
-        .containsComponent("c4").isAnInstanceOf(
+    final DefinitionChecker defC4 = checker
+        .assertDefinition(content)
+        .containsComponent("c4")
+        .isAnInstanceOf(
             "pkg1.generic.Generic2<pkg1.pkg2.Type1,pkg1.pkg2.Primitive1>");
 
-    defC4.containsFormalTypeParameters("U", "V").whereFirst().conformsTo(
-        "pkg1.pkg2.Type1").andNext().conformsTo("pkg1.pkg2.Type1");
+    defC4.containsFormalTypeParameters("U", "V").whereFirst()
+        .conformsTo("pkg1.pkg2.Type1").andNext().conformsTo("pkg1.pkg2.Type1");
     defC4.containsComponents("c1", "c2").whereFirst()
-        .referencesFormalTypeParameter("U").andNext().isAnInstanceOf(
-            "pkg1.pkg2.Primitive1");
+        .referencesFormalTypeParameter("U").andNext()
+        .isAnInstanceOf("pkg1.pkg2.Primitive1");
   }
 
   @Test(groups = {"functional"})
@@ -270,29 +297,45 @@ public class TestGeneric {
     checker.assertDefinition(content)
         .containsFormalTypeParameters(/* no FTP */);
 
-    checker.assertDefinition(content).containsComponents("c1", "c2", "c3",
-        "c4", "c5").whereFirst().isAnInstanceOf("pkg1.Composite1").andNext()
-        .isAnInstanceOf("pkg1.pkg2.Primitive1").andNext().isAnInstanceOf(
-            "pkg1.Composite1").andNext().isAnInstanceOf(
+    checker
+        .assertDefinition(content)
+        .containsComponents("c1", "c2", "c3", "c4", "c5")
+        .whereFirst()
+        .isAnInstanceOf("pkg1.Composite1")
+        .andNext()
+        .isAnInstanceOf("pkg1.pkg2.Primitive1")
+        .andNext()
+        .isAnInstanceOf("pkg1.Composite1")
+        .andNext()
+        .isAnInstanceOf(
             "pkg1.generic.Generic2<pkg1.Composite1,pkg1.pkg2.Primitive1>")
         .andNext()
         .isAnInstanceOf("pkg1.generic.Generic3<pkg1.pkg2.Primitive1>");
 
-    final DefinitionChecker defC4 = checker.assertDefinition(content)
-        .containsComponent("c4").isAnInstanceOf(
+    final DefinitionChecker defC4 = checker
+        .assertDefinition(content)
+        .containsComponent("c4")
+        .isAnInstanceOf(
             "pkg1.generic.Generic2<pkg1.Composite1,pkg1.pkg2.Primitive1>");
 
-    defC4.containsComponents("c1", "c2").whereFirst().isAnInstanceOf(
-        "pkg1.Composite1").andNext().isAnInstanceOf("pkg1.pkg2.Primitive1");
+    defC4.containsComponents("c1", "c2").whereFirst()
+        .isAnInstanceOf("pkg1.Composite1").andNext()
+        .isAnInstanceOf("pkg1.pkg2.Primitive1");
 
     final DefinitionChecker defC5 = checker.assertDefinition(content)
-        .containsComponent("c5").isAnInstanceOf(
-            "pkg1.generic.Generic3<pkg1.pkg2.Primitive1>");
+        .containsComponent("c5")
+        .isAnInstanceOf("pkg1.generic.Generic3<pkg1.pkg2.Primitive1>");
 
-    defC5.containsComponents("c1", "c2", "c3", "c4").whereFirst()
-        .isAnInstanceOf("pkg1.pkg2.Primitive1").andNext().isAnInstanceOf(
-            "pkg1.pkg2.Primitive1").andNext().isAnInstanceOf(
-            "pkg1.pkg2.Primitive1").andNext().isAnInstanceOf(
+    defC5
+        .containsComponents("c1", "c2", "c3", "c4")
+        .whereFirst()
+        .isAnInstanceOf("pkg1.pkg2.Primitive1")
+        .andNext()
+        .isAnInstanceOf("pkg1.pkg2.Primitive1")
+        .andNext()
+        .isAnInstanceOf("pkg1.pkg2.Primitive1")
+        .andNext()
+        .isAnInstanceOf(
             "pkg1.generic.Generic2<pkg1.pkg2.Primitive1,pkg1.pkg2.Primitive1>");
   }
 
@@ -310,9 +353,9 @@ public class TestGeneric {
         .that()
         .isAnInstanceOf(
             "pkg1.generic.Generic2<pkg1.generic.Generic1<pkg1.pkg2.Type1>,pkg1.generic.Generic1<pkg1.pkg2.Type1>>")
-        .containsComponents("c1", "c2").whereFirst().isAnInstanceOf(
-            "pkg1.generic.Generic1<pkg1.pkg2.Type1>").andNext().isAnInstanceOf(
-            "pkg1.generic.Generic1<pkg1.pkg2.Type1>");
+        .containsComponents("c1", "c2").whereFirst()
+        .isAnInstanceOf("pkg1.generic.Generic1<pkg1.pkg2.Type1>").andNext()
+        .isAnInstanceOf("pkg1.generic.Generic1<pkg1.pkg2.Type1>");
   }
 
   @Test(groups = {"functional"})
@@ -333,8 +376,9 @@ public class TestGeneric {
         .that()
         .isAnInstanceOf(
             "pkg1.generic.Generic2<pkg1.generic.Generic1<pkg1.pkg2.Primitive1>,pkg1.generic.Generic1<pkg1.pkg2.Primitive1>>")
-        .containsComponents("c1", "c2").whereFirst().isAnInstanceOf(
-            "pkg1.generic.Generic1<pkg1.pkg2.Primitive1>").andNext()
+        .containsComponents("c1", "c2").whereFirst()
+        .isAnInstanceOf("pkg1.generic.Generic1<pkg1.pkg2.Primitive1>")
+        .andNext()
         .isAnInstanceOf("pkg1.generic.Generic1<pkg1.pkg2.Primitive1>");
   }
 
@@ -344,7 +388,12 @@ public class TestGeneric {
       loader.load("pkg1.generic.Composite5", context);
       fail("An ADLException was expected here");
     } catch (final ADLException e) {
-      assertSame(e.getError().getTemplate(),
+      assertTrue(e.getError() instanceof ErrorCollection);
+      final Collection<Error> errors = ((ErrorCollection) e.getError())
+          .getErrors();
+      assertEquals(errors.size(), 1);
+      final Error err = errors.iterator().next();
+      assertSame(err.getTemplate(),
           ADLErrors.INVALID_TEMPLATE_VALUE_TYPE_DEFINITON);
     }
 
@@ -356,7 +405,12 @@ public class TestGeneric {
       loader.load("pkg1.generic.Cycle1", context);
       fail("ADLException was expected here");
     } catch (final ADLException e) {
-      assertEquals(e.getError().getTemplate(), ComponentErrors.DEFINITION_CYCLE);
+      assertTrue(e.getError() instanceof ErrorCollection);
+      final Collection<Error> errors = ((ErrorCollection) e.getError())
+          .getErrors();
+      assertEquals(errors.size(), 1);
+      final Error err = errors.iterator().next();
+      assertEquals(err.getTemplate(), ComponentErrors.DEFINITION_CYCLE);
     }
   }
 

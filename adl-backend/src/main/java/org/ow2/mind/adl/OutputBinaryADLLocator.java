@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Map;
 
-import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.fractal.api.control.BindingController;
 import org.objectweb.fractal.api.control.IllegalBindingException;
@@ -43,8 +42,6 @@ public class OutputBinaryADLLocator implements ADLLocator, BindingController {
         binADL = binADLOutputFile.toURI().toURL();
       }
     } catch (final IOException e) {
-      // ignore
-    } catch (final ADLException e) {
       // ignore
     }
     if (binADL == null) {

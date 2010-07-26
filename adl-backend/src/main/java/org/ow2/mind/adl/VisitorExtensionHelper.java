@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.objectweb.fractal.adl.ADLException;
+import org.objectweb.fractal.adl.CompilerError;
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.error.GenericErrors;
 import org.ow2.mind.VoidVisitor;
@@ -95,16 +96,17 @@ public class VisitorExtensionHelper {
 
     public void setVisitor(final String visitorClass) throws ADLException {
       try {
-        visitor = VisitorExtension.class.getClassLoader().loadClass(
-            visitorClass).asSubclass(VoidVisitor.class).newInstance();
+        visitor = VisitorExtension.class.getClassLoader()
+            .loadClass(visitorClass).asSubclass(VoidVisitor.class)
+            .newInstance();
       } catch (final InstantiationException e) {
-        throw new ADLException(GenericErrors.GENERIC_ERROR, e,
+        throw new CompilerError(GenericErrors.GENERIC_ERROR, e,
             "Extension class '" + visitorClass + "' cannot be instantiated.");
       } catch (final IllegalAccessException e) {
-        throw new ADLException(GenericErrors.GENERIC_ERROR, e,
+        throw new CompilerError(GenericErrors.GENERIC_ERROR, e,
             "Illegal access to the extension class '" + visitorClass + "'.");
       } catch (final ClassNotFoundException e) {
-        throw new ADLException(GenericErrors.GENERIC_ERROR, e,
+        throw new CompilerError(GenericErrors.GENERIC_ERROR, e,
             "Extension class '" + visitorClass + "' not found.");
       }
     }

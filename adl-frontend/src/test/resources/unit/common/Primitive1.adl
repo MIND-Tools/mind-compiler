@@ -1,0 +1,7 @@
+
+import api.Type1;
+
+primitive Primitive1 extends Type1 {
+
+  source {{ }};
+}

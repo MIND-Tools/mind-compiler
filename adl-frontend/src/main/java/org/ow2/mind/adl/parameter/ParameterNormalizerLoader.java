@@ -36,7 +36,7 @@ public class ParameterNormalizerLoader
   @Override
   protected void handleNameClash(final FormalParameter previousDeclaration,
       final FormalParameter subNode) throws ADLException {
-    throw new ADLException(ADLErrors.DUPLICATED_ARGUMENT_VARIABLE_NAME,
+    errorManagerItf.logError(ADLErrors.DUPLICATED_ARGUMENT_VARIABLE_NAME,
         subNode, subNode.getName());
   }
 
@@ -47,6 +47,11 @@ public class ParameterNormalizerLoader
     } else {
       return null;
     }
+  }
+
+  @Override
+  protected void removeSubNode(final Node node, final FormalParameter subNode) {
+    ((FormalParameterContainer) node).removeFormalParameter(subNode);
   }
 
   @Override

@@ -25,6 +25,7 @@ package org.ow2.mind.annotation;
 import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
 import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
 import static org.ow2.mind.annotation.AnnotationHelper.addAnnotation;
+import static org.ow2.mind.annotation.AnnotationHelper.getAnnotation;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -38,6 +39,7 @@ import org.objectweb.fractal.api.control.BindingController;
 import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.ow2.mind.annotation.ast.AnnotationContainer;
 import org.ow2.mind.annotation.ast.AnnotationNode;
+import org.ow2.mind.error.ErrorManager;
 
 public class BasicAnnotationChecker
     implements
@@ -47,6 +49,9 @@ public class BasicAnnotationChecker
   // ---------------------------------------------------------------------------
   // Client interfaces
   // ---------------------------------------------------------------------------
+
+  /** The {@link ErrorManager} client interface used to log errors. */
+  public ErrorManager      errorManagerItf;
 
   public AnnotationFactory annotationFactoryItf;
 
@@ -80,13 +85,17 @@ public class BasicAnnotationChecker
   protected void checkAnnotationContainer(final AnnotationContainer container,
       final Map<Object, Object> context) throws ADLException {
     for (final AnnotationNode annotationNode : container.getAnnotations()) {
+      // remove annotation node from AST.
+      container.removeAnnotation(annotationNode);
+
       Annotation annotation;
       try {
         annotation = annotationFactoryItf
             .newAnnotation(annotationNode, context);
       } catch (final AnnotationInitializationException e) {
-        throw new ADLException(AnnotationErrors.INVALID_ANNOTATION,
+        errorManagerItf.logError(AnnotationErrors.INVALID_ANNOTATION,
             new NodeErrorLocator(e.getLocation()), e, e.getMessage());
+        continue;
       }
 
       boolean isValidTarget = false;
@@ -98,13 +107,16 @@ public class BasicAnnotationChecker
       }
 
       if (!isValidTarget) {
-        throw new ADLException(AnnotationErrors.INVALID_ANNOTATION_TARGET,
+        errorManagerItf.logError(AnnotationErrors.INVALID_ANNOTATION_TARGET,
             annotationNode);
+        continue;
       }
-      addAnnotation(container, annotation);
-
-      // remove annotation node from AST.
-      container.removeAnnotation(annotationNode);
+      if (getAnnotation(container, annotation.getClass()) != null) {
+        errorManagerItf.logError(AnnotationErrors.DUPLICATED_ANNOTATION,
+            annotation);
+      } else {
+        addAnnotation(container, annotation);
+      }
     }
   }
 
@@ -113,13 +125,15 @@ public class BasicAnnotationChecker
   // ---------------------------------------------------------------------------
 
   public String[] listFc() {
-    return listFcHelper(AnnotationFactory.ITF_NAME);
+    return listFcHelper(ErrorManager.ITF_NAME, AnnotationFactory.ITF_NAME);
   }
 
   public Object lookupFc(final String s) throws NoSuchInterfaceException {
     checkItfName(s);
 
-    if (AnnotationFactory.ITF_NAME.equals(s)) {
+    if (ErrorManager.ITF_NAME.equals(s)) {
+      return errorManagerItf;
+    } else if (AnnotationFactory.ITF_NAME.equals(s)) {
       return annotationFactoryItf;
     } else {
       throw new NoSuchInterfaceException("No client interface named '" + s
@@ -131,7 +145,9 @@ public class BasicAnnotationChecker
       throws NoSuchInterfaceException, IllegalBindingException {
     checkItfName(s);
 
-    if (AnnotationFactory.ITF_NAME.equals(s)) {
+    if (ErrorManager.ITF_NAME.equals(s)) {
+      errorManagerItf = (ErrorManager) o;
+    } else if (AnnotationFactory.ITF_NAME.equals(s)) {
       annotationFactoryItf = (AnnotationFactory) o;
     } else {
       throw new NoSuchInterfaceException("No client interface named '" + s
@@ -143,7 +159,9 @@ public class BasicAnnotationChecker
       NoSuchInterfaceException {
     checkItfName(s);
 
-    if (AnnotationFactory.ITF_NAME.equals(s)) {
+    if (ErrorManager.ITF_NAME.equals(s)) {
+      errorManagerItf = null;
+    } else if (AnnotationFactory.ITF_NAME.equals(s)) {
       annotationFactoryItf = null;
     } else {
       throw new NoSuchInterfaceException("No client interface named '" + s

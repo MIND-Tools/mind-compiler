@@ -1,0 +1,5 @@
+
+type api.Type1 {
+  provides Call as sItf;
+  requires Call as cItf;
+}

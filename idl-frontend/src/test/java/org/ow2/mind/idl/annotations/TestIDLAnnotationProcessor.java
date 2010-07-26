@@ -33,6 +33,9 @@ import java.util.Set;
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.Node;
 import org.ow2.mind.annotation.Annotation;
+import org.ow2.mind.error.ErrorManager;
+import org.ow2.mind.error.ErrorManagerFactory;
+import org.ow2.mind.idl.IDLErrorLoader;
 import org.ow2.mind.idl.IDLLoader;
 import org.ow2.mind.idl.IDLLoaderChainFactory;
 import org.ow2.mind.idl.annotation.AbstractIDLLoaderAnnotationProcessor;
@@ -50,7 +53,13 @@ public class TestIDLAnnotationProcessor {
   @BeforeMethod(alwaysRun = true)
   public void setUp() {
     // loader chains
-    loader = IDLLoaderChainFactory.newLoader().loader;
+    final ErrorManager errorManager = ErrorManagerFactory
+        .newSimpleErrorManager();
+    final IDLErrorLoader errorLoader = new IDLErrorLoader();
+    errorLoader.errorManagerItf = errorManager;
+    errorLoader.clientIDLLoaderItf = IDLLoaderChainFactory
+        .newLoader(errorManager).loader;
+    loader = errorLoader;
     // ensure that phases are empty.
     FooProcessor.phases = new HashSet<IDLLoaderPhase>();
   }

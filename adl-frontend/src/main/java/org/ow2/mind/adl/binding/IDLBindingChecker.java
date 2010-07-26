@@ -37,6 +37,7 @@ import org.objectweb.fractal.api.control.BindingController;
 import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.ow2.mind.adl.ast.Binding;
 import org.ow2.mind.adl.idl.InterfaceDefinitionDecorationHelper;
+import org.ow2.mind.error.ErrorManager;
 import org.ow2.mind.idl.ExtendedInterfaceDecorationHelper;
 import org.ow2.mind.idl.ast.InterfaceDefinition;
 
@@ -45,6 +46,9 @@ public class IDLBindingChecker implements BindingChecker, BindingController {
   // ---------------------------------------------------------------------------
   // Client interfaces
   // ---------------------------------------------------------------------------
+
+  /** The {@link ErrorManager} client interface used to log errors. */
+  public ErrorManager        errorManagerItf;
 
   public static final String CLIENT_BINDING_CHECKER_ITF_NAME = "client-binding-checker";
   public BindingChecker      clientBindingCheckerItf;
@@ -104,7 +108,7 @@ public class IDLBindingChecker implements BindingChecker, BindingController {
       final Set<String> extendedItf = ExtendedInterfaceDecorationHelper
           .getExtendedInterface(toItf);
       if (!extendedItf.contains(fromSignature)) {
-        throw new ADLException(BindingErrors.INVALID_SIGNATURE, locator,
+        errorManagerItf.logError(BindingErrors.INVALID_SIGNATURE, locator,
             new NodeErrorLocator(from), new NodeErrorLocator(to));
       }
     }
@@ -118,7 +122,9 @@ public class IDLBindingChecker implements BindingChecker, BindingController {
       throws NoSuchInterfaceException, IllegalBindingException {
     checkItfName(itfName);
 
-    if (itfName.equals(CLIENT_BINDING_CHECKER_ITF_NAME)) {
+    if (itfName.equals(ErrorManager.ITF_NAME)) {
+      errorManagerItf = (ErrorManager) value;
+    } else if (itfName.equals(CLIENT_BINDING_CHECKER_ITF_NAME)) {
       clientBindingCheckerItf = (BindingChecker) value;
     } else {
       throw new NoSuchInterfaceException("No client interface named '"
@@ -127,13 +133,15 @@ public class IDLBindingChecker implements BindingChecker, BindingController {
   }
 
   public String[] listFc() {
-    return new String[]{CLIENT_BINDING_CHECKER_ITF_NAME};
+    return new String[]{ErrorManager.ITF_NAME, CLIENT_BINDING_CHECKER_ITF_NAME};
   }
 
   public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
     checkItfName(itfName);
 
-    if (itfName.equals(CLIENT_BINDING_CHECKER_ITF_NAME)) {
+    if (itfName.equals(ErrorManager.ITF_NAME)) {
+      return errorManagerItf;
+    } else if (itfName.equals(CLIENT_BINDING_CHECKER_ITF_NAME)) {
       return clientBindingCheckerItf;
     } else {
       throw new NoSuchInterfaceException("No client interface named '"
@@ -145,7 +153,9 @@ public class IDLBindingChecker implements BindingChecker, BindingController {
       IllegalBindingException {
     checkItfName(itfName);
 
-    if (itfName.equals(CLIENT_BINDING_CHECKER_ITF_NAME)) {
+    if (itfName.equals(ErrorManager.ITF_NAME)) {
+      errorManagerItf = null;
+    } else if (itfName.equals(CLIENT_BINDING_CHECKER_ITF_NAME)) {
       clientBindingCheckerItf = null;
     } else {
       throw new NoSuchInterfaceException("No client interface named '"

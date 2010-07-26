@@ -39,13 +39,12 @@ import org.ow2.mind.adl.BasicADLLocator;
 import org.ow2.mind.adl.BasicDefinitionReferenceResolver;
 import org.ow2.mind.adl.CacheLoader;
 import org.ow2.mind.adl.CachingDefinitionReferenceResolver;
+import org.ow2.mind.adl.ErrorLoader;
 import org.ow2.mind.adl.ExtendsLoader;
 import org.ow2.mind.adl.STCFNodeMerger;
 import org.ow2.mind.adl.SubComponentResolverLoader;
 import org.ow2.mind.adl.ast.ASTHelper;
 import org.ow2.mind.adl.binding.BasicBindingChecker;
-import org.ow2.mind.adl.factory.FactoryLoader;
-import org.ow2.mind.adl.factory.FactoryTemplateInstantiator;
 import org.ow2.mind.adl.generic.CachingTemplateInstantiator;
 import org.ow2.mind.adl.generic.ExtendsGenericDefinitionReferenceResolver;
 import org.ow2.mind.adl.generic.GenericDefinitionLoader;
@@ -53,6 +52,8 @@ import org.ow2.mind.adl.generic.GenericDefinitionReferenceResolver;
 import org.ow2.mind.adl.generic.TemplateInstantiatorImpl;
 import org.ow2.mind.adl.imports.ImportDefinitionReferenceResolver;
 import org.ow2.mind.adl.parser.ADLParser;
+import org.ow2.mind.error.ErrorManager;
+import org.ow2.mind.error.ErrorManagerFactory;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -66,6 +67,9 @@ public class TestFactory {
 
   @BeforeMethod(alwaysRun = true)
   protected void setUp() throws Exception {
+    final ErrorManager errorManager = ErrorManagerFactory
+        .newSimpleErrorManager();
+
     // Loader chain components
     final ADLParser adlLoader = new ADLParser();
     final FactoryLoader fl = new FactoryLoader();
@@ -73,12 +77,21 @@ public class TestFactory {
     final SubComponentResolverLoader scrl = new SubComponentResolverLoader();
     final ExtendsLoader el = new ExtendsLoader();
     final CacheLoader cl = new CacheLoader();
+    final ErrorLoader errl = new ErrorLoader();
 
+    errl.clientLoader = cl;
     cl.clientLoader = el;
     el.clientLoader = scrl;
     scrl.clientLoader = gdl;
     gdl.clientLoader = fl;
     fl.clientLoader = adlLoader;
+
+    errl.errorManagerItf = errorManager;
+    cl.errorManagerItf = errorManager;
+    el.errorManagerItf = errorManager;
+    scrl.errorManagerItf = errorManager;
+    gdl.errorManagerItf = errorManager;
+    adlLoader.errorManagerItf = errorManager;
 
     // definition reference resolver chain
     final BasicDefinitionReferenceResolver bdrr = new BasicDefinitionReferenceResolver();
@@ -94,6 +107,9 @@ public class TestFactory {
     cdrr.loaderItf = cl;
 
     scrl.definitionReferenceResolverItf = cdrr;
+
+    bdrr.errorManagerItf = errorManager;
+    gdrr.errorManagerItf = errorManager;
 
     final ExtendsGenericDefinitionReferenceResolver egdrr = new ExtendsGenericDefinitionReferenceResolver();
 
@@ -130,8 +146,9 @@ public class TestFactory {
     adlLoader.nodeFactoryItf = xmlNodeFactory;
     gdrr.bindingCheckerItf = bindingChecker;
     fl.nodeFactoryItf = nodeFactory;
+    bdrr.nodeFactoryItf = nodeFactory;
 
-    loader = cl;
+    loader = errl;
 
     context = new HashMap<Object, Object>();
 
@@ -151,8 +168,9 @@ public class TestFactory {
   @Test(groups = {"functional"})
   public void test1() throws Exception {
     final Definition d = loader.load("pkg1.factory.Factory1", context);
-    final Definition def = checker.assertDefinition(d).containsComponent(
-        "factory").isAnInstanceOf("Factory<pkg1.Composite1>").def;
+    final Definition def = checker.assertDefinition(d)
+        .containsComponent("factory")
+        .isAnInstanceOf("Factory<pkg1.Composite1>").def;
 
     checker.assertDefinition(def).containsInterfaces("factory", "allocator")
         .whereFirst().isServer().hasSignature("fractal.api.Factory").andNext()
@@ -168,8 +186,9 @@ public class TestFactory {
   public void test2() throws Exception {
     final Definition composite1Def = loader.load("pkg1.Composite1", context);
     final Definition d = loader.load("pkg1.factory.Factory1", context);
-    final Definition def = checker.assertDefinition(d).containsComponent(
-        "factory").isAnInstanceOf("Factory<pkg1.Composite1>").def;
+    final Definition def = checker.assertDefinition(d)
+        .containsComponent("factory")
+        .isAnInstanceOf("Factory<pkg1.Composite1>").def;
     final Definition instantiatedDefinition = ASTHelper
         .getFactoryInstantiatedDefinition(def, null, null);
     assertSame(instantiatedDefinition, composite1Def);
@@ -178,8 +197,9 @@ public class TestFactory {
   @Test(groups = {"functional"})
   public void test3() throws Exception {
     final Definition d = loader.load("pkg1.factory.GenericFactory1", context);
-    final Definition def = checker.assertDefinition(d).containsComponent(
-        "factory").isAnInstanceOf("Factory<pkg1.pkg2.Type1>").def;
+    final Definition def = checker.assertDefinition(d)
+        .containsComponent("factory")
+        .isAnInstanceOf("Factory<pkg1.pkg2.Type1>").def;
 
     checker.assertDefinition(def).containsInterfaces("factory", "allocator")
         .whereFirst().isServer().hasSignature("fractal.api.Factory").andNext()
@@ -189,10 +209,11 @@ public class TestFactory {
   @Test(groups = {"functional"})
   public void test4() throws Exception {
     final Definition d = loader.load("pkg1.factory.Factory2", context);
-    final Definition def = checker.assertDefinition(d).containsComponent(
-        "subComp").isAnInstanceOf(
-        "pkg1.factory.GenericFactory1<pkg1.Composite1>").containsComponent(
-        "factory").isAnInstanceOf("Factory<pkg1.Composite1>").def;
+    final Definition def = checker.assertDefinition(d)
+        .containsComponent("subComp")
+        .isAnInstanceOf("pkg1.factory.GenericFactory1<pkg1.Composite1>")
+        .containsComponent("factory")
+        .isAnInstanceOf("Factory<pkg1.Composite1>").def;
 
     final Definition instantiatedDefinition = ASTHelper
         .getFactoryInstantiatedDefinition(def, null, null);
@@ -203,15 +224,17 @@ public class TestFactory {
   @Test(groups = {"functional"})
   public void test5() throws Exception {
     final Definition d1 = loader.load("pkg1.factory.Factory1", context);
-    final Definition def1 = checker.assertDefinition(d1).containsComponent(
-        "factory").isAnInstanceOf("Factory<pkg1.Composite1>").def;
+    final Definition def1 = checker.assertDefinition(d1)
+        .containsComponent("factory")
+        .isAnInstanceOf("Factory<pkg1.Composite1>").def;
     assertNotNull(def1);
 
     final Definition d2 = loader.load("pkg1.factory.Factory2", context);
-    final Definition def2 = checker.assertDefinition(d2).containsComponent(
-        "subComp").isAnInstanceOf(
-        "pkg1.factory.GenericFactory1<pkg1.Composite1>").containsComponent(
-        "factory").isAnInstanceOf("Factory<pkg1.Composite1>").def;
+    final Definition def2 = checker.assertDefinition(d2)
+        .containsComponent("subComp")
+        .isAnInstanceOf("pkg1.factory.GenericFactory1<pkg1.Composite1>")
+        .containsComponent("factory")
+        .isAnInstanceOf("Factory<pkg1.Composite1>").def;
     assertNotNull(def2);
 
     assertSame(def1, def2);

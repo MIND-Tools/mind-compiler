@@ -37,6 +37,7 @@ import java.util.Map;
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.Node;
 import org.objectweb.fractal.adl.NodeFactory;
+import org.ow2.mind.CommonASTHelper;
 import org.ow2.mind.NodeContainerDecoration;
 import org.ow2.mind.idl.IDLLoader;
 
@@ -639,6 +640,74 @@ public final class IDLASTHelper {
         deco.setIDL((IDL) replacement.getValue());
       }
     }
+  }
+
+  /**
+   * Returns a new {@link IDL} that correspond to an unresolved IDL. This kind
+   * of IDL node can be used as a return value of front-end components that must
+   * return a IDL but was unable to load it.
+   * 
+   * @param nodeFactory the {@link NodeFactory} to use to create the node.
+   * @param name the {@link IDL#getName() name} of the IDL.
+   * @return a new {@link IDL} that correspond to an unresolved IDL.
+   * @see #isUnresolvedIDLNode(IDL)
+   */
+  public static IDL newUnresolvedIDLNode(final NodeFactory nodeFactory,
+      final String name) {
+    final IDL idl = CommonASTHelper.newNode(nodeFactory, "unresolved",
+        IDL.class);
+    idl.setName(name);
+    return idl;
+  }
+
+  /**
+   * Returns <code>true</code> if the given {@link IDL} does not correspond to a
+   * correct IDL, but has been created by
+   * {@link #newUnresolvedIDLNode(NodeFactory, String)}.
+   * 
+   * @param idl an IDL node.
+   * @return <code>true</code> if the given {@link IDL} correspond to an
+   *         unresolved IDL.
+   * @see #newUnresolvedIDLNode(NodeFactory, String)
+   */
+  public static boolean isUnresolvedIDLNode(final IDL idl) {
+    return idl.astGetType().equals("unresolved");
+  }
+
+  /**
+   * Returns a new {@link InterfaceDefinition} that correspond to an unresolved
+   * IDL. This kind of IDL node can be used as a return value of front-end
+   * components that must return a IDL but was unable to load it.
+   * 
+   * @param nodeFactory the {@link NodeFactory} to use to create the node.
+   * @param name the {@link IDL#getName() name} of the IDL.
+   * @return a new {@link InterfaceDefinition} that correspond to an unresolved
+   *         IDL.
+   * @see #isUnresolvedInterfaceDefinitionNode(InterfaceDefinition)
+   */
+  public static InterfaceDefinition newUnresolvedInterfaceDefinitionNode(
+      final NodeFactory nodeFactory, final String name) {
+    final InterfaceDefinition idl = CommonASTHelper.newNode(nodeFactory,
+        "unresolved", InterfaceDefinition.class);
+    idl.setName(name);
+    return idl;
+  }
+
+  /**
+   * Returns <code>true</code> if the given {@link InterfaceDefinition} does not
+   * correspond to a correct IDL, but has been created by
+   * {@link #newUnresolvedInterfaceDefinitionNode(NodeFactory, String)} or
+   * {@link #newUnresolvedIDLNode(NodeFactory, String)}.
+   * 
+   * @param idl an InterfaceDefinition node.
+   * @return <code>true</code> if the given {@link InterfaceDefinition}
+   *         correspond to an unresolved IDL.
+   * @see #newUnresolvedInterfaceDefinitionNode(NodeFactory, String)
+   * @see #newUnresolvedIDLNode(NodeFactory, String)
+   */
+  public static boolean isUnresolvedInterfaceDefinitionNode(
+      final InterfaceDefinition idl) {
+    return idl.astGetType().equals("unresolved");
   }
 
 }

@@ -83,6 +83,12 @@ public enum ADLErrors implements ErrorTemplate {
       "Invalid @controller.ContentController annotation, sub-component %s must have a \"bindingController\" interface",
       "<sub comp name>"),
 
+  /** */
+  WARNING_SINGLETON_SUB_COMPONENT(
+      15,
+      "WARNINIG : sub-component \"%s\" is singleton. The \"@Singleton\" annotation should be"
+          + " added on definition", "<subCompName>"),
+
   // ---------------------------------------------------------------------------
   // template errors (020-049)
   // ---------------------------------------------------------------------------
@@ -143,6 +149,11 @@ public enum ADLErrors implements ErrorTemplate {
       "Invalid type argument: required interface \"%s\" must be optional. Interface declared at %s",
       "<client itf name>", "<client itf locator>"),
 
+  /** */
+  WARNING_TEMPLATE_VARIABLE_HIDE(32,
+      "WARNING : template variable %s hides import at %s",
+      "<template variable>", "<import location>"),
+
   // ---------------------------------------------------------------------------
   // Inheritance errors (50-59)
   // ---------------------------------------------------------------------------
@@ -202,6 +213,10 @@ public enum ADLErrors implements ErrorTemplate {
   INVALID_ATTRIBUTE_CONTROLLER_NO_ATTRIBUTE(
       63,
       "Invalid @controller.AttributeController annotation, definition has no attribute"),
+
+  /** */
+  WARNING_ATTRIBUTE_UNSIGNED_ASSIGNED_TO_NEGATIVE(64,
+      "WARNING : Initialize unsigned attribute with negative value"),
 
   // ---------------------------------------------------------------------------
   // Implementation errors (65-69)

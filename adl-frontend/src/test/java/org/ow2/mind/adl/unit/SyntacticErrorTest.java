@@ -33,7 +33,7 @@ import org.ow2.mind.unit.UnitTestDataProvider;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-public class SyntacticErrorTest extends AbstractADLLoaderTest {
+public class SyntacticErrorTest extends AbstractErrorTest {
 
   @DataProvider(name = "unit-test")
   protected Object[][] dataProvider() throws Exception {
@@ -50,9 +50,8 @@ public class SyntacticErrorTest extends AbstractADLLoaderTest {
       final Error error = e.getError();
       assertNotNull(error);
       assertEquals(ADLErrors.PARSE_ERROR, error.getTemplate());
-      assertEquals(ADLErrors.GROUP_ID, error.getTemplate().getGroupId());
       return;
     }
-    fail("Successful loading of erroneous adl file.");
+    fail(adlName + " : Successful loading of erroneous adl file.");
   }
 }

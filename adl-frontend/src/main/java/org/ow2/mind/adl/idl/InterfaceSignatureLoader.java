@@ -31,13 +31,16 @@ import java.util.Map;
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.AbstractLoader;
 import org.objectweb.fractal.adl.Definition;
-import org.objectweb.fractal.adl.error.ChainedErrorLocator;
+import org.objectweb.fractal.adl.NodeFactory;
 import org.objectweb.fractal.adl.interfaces.Interface;
 import org.objectweb.fractal.adl.interfaces.InterfaceContainer;
+import org.objectweb.fractal.adl.interfaces.InterfaceErrors;
 import org.objectweb.fractal.adl.types.TypeInterface;
 import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.ow2.mind.InputResourcesHelper;
+import org.ow2.mind.error.ErrorManager;
+import org.ow2.mind.idl.ast.IDLASTHelper;
 import org.ow2.mind.idl.ast.InterfaceDefinition;
 
 public class InterfaceSignatureLoader extends AbstractLoader {
@@ -45,6 +48,12 @@ public class InterfaceSignatureLoader extends AbstractLoader {
   // ---------------------------------------------------------------------------
   // Client interfaces
   // ---------------------------------------------------------------------------
+
+  /** The {@link ErrorManager} client interface used to log errors. */
+  public ErrorManager               errorManagerItf;
+
+  /** The {@link NodeFactory} client interface used by this component. */
+  public NodeFactory                nodeFactoryItf;
 
   /** The client interface used to resolve signature of component interfaces. */
   public InterfaceSignatureResolver interfaceSignatureResolverItf;
@@ -79,13 +88,17 @@ public class InterfaceSignatureLoader extends AbstractLoader {
     try {
       itfDef = interfaceSignatureResolverItf.resolve(itf, container, context);
     } catch (final ADLException e) {
-      ChainedErrorLocator.chainLocator(e, itf);
-      throw e;
+      if (e.getError().getTemplate() == InterfaceErrors.INTERFACE_NOT_FOUND) {
+        errorManagerItf.logError(InterfaceErrors.INTERFACE_NOT_FOUND, itf,
+            itf.getSignature());
+      }
+      itfDef = IDLASTHelper.newUnresolvedInterfaceDefinitionNode(
+          nodeFactoryItf, itf.getSignature());
     }
 
     setResolvedInterfaceDefinition(itf, itfDef);
-    InputResourcesHelper.addInputResources(def, InputResourcesHelper
-        .getInputResources(itfDef));
+    InputResourcesHelper.addInputResources(def,
+        InputResourcesHelper.getInputResources(itfDef));
   }
 
   // ---------------------------------------------------------------------------
@@ -97,7 +110,11 @@ public class InterfaceSignatureLoader extends AbstractLoader {
       throws NoSuchInterfaceException, IllegalBindingException {
     checkItfName(itfName);
 
-    if (itfName.equals(InterfaceSignatureResolver.ITF_NAME)) {
+    if (ErrorManager.ITF_NAME.equals(itfName)) {
+      errorManagerItf = (ErrorManager) value;
+    } else if (NodeFactory.ITF_NAME.equals(itfName)) {
+      nodeFactoryItf = (NodeFactory) value;
+    } else if (InterfaceSignatureResolver.ITF_NAME.equals(itfName)) {
       interfaceSignatureResolverItf = (InterfaceSignatureResolver) value;
     } else {
       super.bindFc(itfName, value);
@@ -106,14 +123,19 @@ public class InterfaceSignatureLoader extends AbstractLoader {
 
   @Override
   public String[] listFc() {
-    return listFcHelper(super.listFc(), InterfaceSignatureResolver.ITF_NAME);
+    return listFcHelper(super.listFc(), InterfaceSignatureResolver.ITF_NAME,
+        ErrorManager.ITF_NAME, NodeFactory.ITF_NAME);
   }
 
   @Override
   public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
     checkItfName(itfName);
 
-    if (itfName.equals(InterfaceSignatureResolver.ITF_NAME)) {
+    if (ErrorManager.ITF_NAME.equals(itfName)) {
+      return errorManagerItf;
+    } else if (NodeFactory.ITF_NAME.equals(itfName)) {
+      return nodeFactoryItf;
+    } else if (InterfaceSignatureResolver.ITF_NAME.equals(itfName)) {
       return interfaceSignatureResolverItf;
     } else {
       return super.lookupFc(itfName);
@@ -125,7 +147,11 @@ public class InterfaceSignatureLoader extends AbstractLoader {
       IllegalBindingException {
     checkItfName(itfName);
 
-    if (itfName.equals(InterfaceSignatureResolver.ITF_NAME)) {
+    if (ErrorManager.ITF_NAME.equals(itfName)) {
+      errorManagerItf = null;
+    } else if (NodeFactory.ITF_NAME.equals(itfName)) {
+      nodeFactoryItf = null;
+    } else if (InterfaceSignatureResolver.ITF_NAME.equals(itfName)) {
       interfaceSignatureResolverItf = null;
     } else {
       super.unbindFc(itfName);

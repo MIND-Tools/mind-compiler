@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.objectweb.fractal.adl.ADLException;
+import org.objectweb.fractal.adl.CompilerError;
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.error.GenericErrors;
 import org.objectweb.fractal.api.NoSuchInterfaceException;
@@ -92,7 +93,7 @@ public class BasicInstanceCompiler
     final File srcFile = outputFileLocatorItf.getCSourceOutputFile(
         instancesFileName, context);
     if (!srcFile.exists()) {
-      throw new ADLException(GenericErrors.INTERNAL_ERROR,
+      throw new CompilerError(GenericErrors.INTERNAL_ERROR,
           "Can't find source file \"" + instancesFileName + "\"");
     }
 

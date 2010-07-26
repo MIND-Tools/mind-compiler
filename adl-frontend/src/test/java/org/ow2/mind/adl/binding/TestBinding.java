@@ -23,9 +23,12 @@
 package org.ow2.mind.adl.binding;
 
 import static org.ow2.mind.BCImplChecker.checkBCImplementation;
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertSame;
+import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -33,6 +36,7 @@ import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.Loader;
 import org.objectweb.fractal.adl.NodeFactoryImpl;
 import org.objectweb.fractal.adl.bindings.BindingErrors;
+import org.objectweb.fractal.adl.error.Error;
 import org.objectweb.fractal.adl.merger.NodeMergerImpl;
 import org.objectweb.fractal.adl.xml.XMLNodeFactoryImpl;
 import org.ow2.mind.adl.ASTChecker;
@@ -40,6 +44,7 @@ import org.ow2.mind.adl.BasicADLLocator;
 import org.ow2.mind.adl.BasicDefinitionReferenceResolver;
 import org.ow2.mind.adl.CacheLoader;
 import org.ow2.mind.adl.CachingDefinitionReferenceResolver;
+import org.ow2.mind.adl.ErrorLoader;
 import org.ow2.mind.adl.ExtendsLoader;
 import org.ow2.mind.adl.STCFNodeMerger;
 import org.ow2.mind.adl.SubComponentResolverLoader;
@@ -49,6 +54,9 @@ import org.ow2.mind.adl.imports.ImportDefinitionReferenceResolver;
 import org.ow2.mind.adl.imports.ImportInterfaceSignatureResolver;
 import org.ow2.mind.adl.membrane.CompositeInternalInterfaceLoader;
 import org.ow2.mind.adl.parser.ADLParser;
+import org.ow2.mind.error.ErrorCollection;
+import org.ow2.mind.error.ErrorManager;
+import org.ow2.mind.error.ErrorManagerFactory;
 import org.ow2.mind.idl.BasicIDLLocator;
 import org.ow2.mind.idl.IDLLoaderChainFactory;
 import org.ow2.mind.idl.IDLLocator;
@@ -65,6 +73,9 @@ public class TestBinding {
 
   @BeforeMethod(alwaysRun = true)
   protected void setUp() throws Exception {
+    final ErrorManager errorManager = ErrorManagerFactory
+        .newSimpleErrorManager();
+
     // Loader chain components
     final ADLParser adlLoader = new ADLParser();
     final SubComponentResolverLoader scrl = new SubComponentResolverLoader();
@@ -75,7 +86,9 @@ public class TestBinding {
     final BindingCheckerLoader bcl = new BindingCheckerLoader();
     final UnboundInterfaceCheckerLoader uicl = new UnboundInterfaceCheckerLoader();
     final CacheLoader cl = new CacheLoader();
+    final ErrorLoader errl = new ErrorLoader();
 
+    errl.clientLoader = cl;
     cl.clientLoader = uicl;
     uicl.clientLoader = bcl;
     bcl.clientLoader = bnl;
@@ -84,6 +97,12 @@ public class TestBinding {
     el.clientLoader = isl;
     isl.clientLoader = scrl;
     scrl.clientLoader = adlLoader;
+
+    adlLoader.errorManagerItf = errorManager;
+    scrl.errorManagerItf = errorManager;
+    isl.errorManagerItf = errorManager;
+    errl.errorManagerItf = errorManager;
+    uicl.errorManagerItf = errorManager;
 
     // definition reference resolver chain
     final BasicDefinitionReferenceResolver bdrr = new BasicDefinitionReferenceResolver();
@@ -99,6 +118,8 @@ public class TestBinding {
     el.definitionReferenceResolverItf = cdrr;
     el.nodeMergerItf = new STCFNodeMerger();
 
+    bdrr.errorManagerItf = errorManager;
+
     // Binding checkers
     final BindingChecker bindingChecker;
     final BasicBindingChecker bbc = new BasicBindingChecker();
@@ -107,6 +128,9 @@ public class TestBinding {
     ibc.clientBindingCheckerItf = bbc;
 
     bcl.bindingCheckerItf = bindingChecker;
+
+    bbc.errorManagerItf = errorManager;
+    ibc.errorManagerItf = errorManager;
 
     // additional components
     final BasicADLLocator adlLocator = new BasicADLLocator();
@@ -120,16 +144,17 @@ public class TestBinding {
     ciil.nodeMergerItf = nodeMerger;
 
     idrr.adlLocatorItf = adlLocator;
+    bdrr.nodeFactoryItf = nodeFactory;
 
     final BasicInterfaceSignatureResolver bisr = new BasicInterfaceSignatureResolver();
     final ImportInterfaceSignatureResolver iisr = new ImportInterfaceSignatureResolver();
     final IDLLocator idlLocator = new BasicIDLLocator();
     iisr.clientResolverItf = bisr;
-    bisr.idlLoaderItf = IDLLoaderChainFactory.newLoader().loader;
+    bisr.idlLoaderItf = IDLLoaderChainFactory.newLoader(errorManager).loader;
     iisr.idlLocatorItf = idlLocator;
     isl.interfaceSignatureResolverItf = iisr;
 
-    loader = cl;
+    loader = errl;
 
     context = new HashMap<Object, Object>();
 
@@ -167,7 +192,12 @@ public class TestBinding {
       loader.load("pkg1.binding.BindInvalid", context);
       fail("An exception was expected here");
     } catch (final ADLException e) {
-      assertSame(e.getError().getTemplate(), BindingErrors.INVALID_SIGNATURE);
+      assertTrue(e.getError() instanceof ErrorCollection);
+      final Collection<Error> errors = ((ErrorCollection) e.getError())
+          .getErrors();
+      assertEquals(errors.size(), 1);
+      final Error err = errors.iterator().next();
+      assertSame(err.getTemplate(), BindingErrors.INVALID_SIGNATURE);
     }
   }
 

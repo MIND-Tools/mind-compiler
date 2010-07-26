@@ -30,12 +30,13 @@ import java.util.Map;
 
 import org.antlr.runtime.ANTLRFileStream;
 import org.antlr.runtime.Lexer;
-import org.antlr.runtime.Parser;
 import org.antlr.runtime.TokenStream;
 import org.objectweb.fractal.adl.ADLException;
+import org.objectweb.fractal.adl.CompilerError;
 import org.objectweb.fractal.adl.error.GenericErrors;
 import org.ow2.mind.plugin.PluginManager;
 import org.ow2.mind.plugin.ast.Extension;
+import org.ow2.mind.preproc.parser.AbstractCPLParser;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -60,7 +61,7 @@ public final class ExtensionHelper {
         ppFactory = getExtensionFactory(extensions.iterator().next(),
             "factory", CPLPreprocessorFactory.class);
       } else {
-        throw new ADLException(GenericErrors.GENERIC_ERROR,
+        throw new CompilerError(GenericErrors.GENERIC_ERROR,
             "There are more than one extensions for the extension-point '"
                 + CPL_EXTENSION + "'. This is illegal.");
       }
@@ -77,9 +78,9 @@ public final class ExtensionHelper {
     return ppFactory.getLexer(new ANTLRFileStream(inputPath));
   }
 
-  public static Parser getParser(final PluginManager pluginManagerItf,
-      final TokenStream tokens, final Map<Object, Object> context)
-      throws ADLException {
+  public static AbstractCPLParser getParser(
+      final PluginManager pluginManagerItf, final TokenStream tokens,
+      final Map<Object, Object> context) throws ADLException {
     if (!extensionLoaded) {
       loadExtension(pluginManagerItf, context);
     }
@@ -102,21 +103,21 @@ public final class ExtensionHelper {
                 .getClassLoader().loadClass(className).asSubclass(expectedType);
             return extensionClass.newInstance();
           } catch (final ClassNotFoundException e) {
-            throw new ADLException(GenericErrors.GENERIC_ERROR, e,
+            throw new CompilerError(GenericErrors.GENERIC_ERROR, e,
                 "Extension class '" + extensionName + "' not found.");
           } catch (final InstantiationException e) {
-            throw new ADLException(GenericErrors.GENERIC_ERROR, e,
+            throw new CompilerError(GenericErrors.GENERIC_ERROR, e,
                 "Extension class '" + extensionName
                     + "' cannot be instantiated.");
           } catch (final IllegalAccessException e) {
-            throw new ADLException(GenericErrors.GENERIC_ERROR, e,
+            throw new CompilerError(GenericErrors.GENERIC_ERROR, e,
                 "Illegal access to the extension class '" + extensionName
                     + "'.");
           }
         }
       }
     }
-    throw new ADLException(GenericErrors.GENERIC_ERROR, "No extension class '"
+    throw new CompilerError(GenericErrors.GENERIC_ERROR, "No extension class '"
         + extensionName + "' found.");
   }
 }

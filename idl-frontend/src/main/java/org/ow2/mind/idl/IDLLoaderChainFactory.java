@@ -35,6 +35,7 @@ import org.objectweb.fractal.cecilia.adl.plugin.PluginManager;
 import org.ow2.mind.BasicInputResourceLocator;
 import org.ow2.mind.InputResourceLocator;
 import org.ow2.mind.annotation.AnnotationChainFactory;
+import org.ow2.mind.error.ErrorManager;
 import org.ow2.mind.idl.annotation.AnnotationLoader;
 import org.ow2.mind.idl.annotation.AnnotationProcessorLoader;
 import org.ow2.mind.idl.annotation.IDLLoaderPhase;
@@ -73,7 +74,7 @@ public final class IDLLoaderChainFactory {
     return idlLocator;
   }
 
-  public static IDLFrontend newLoader() {
+  public static IDLFrontend newLoader(final ErrorManager errorManager) {
     final BasicInputResourceLocator inputResourceLocator = new BasicInputResourceLocator();
 
     final org.objectweb.fractal.adl.Factory pluginFactory;
@@ -82,11 +83,13 @@ public final class IDLLoaderChainFactory {
     // Configuration of plugin factory components
     pluginFactory = scpf;
 
-    return newLoader(newIDLLocator(inputResourceLocator), inputResourceLocator,
-        pluginFactory);
+
+    return newLoader(errorManager, newIDLLocator(inputResourceLocator),
+        inputResourceLocator, pluginFactory);
   }
 
-  public static IDLFrontend newLoader(final IDLLocator idlLocator,
+  public static IDLFrontend newLoader(final ErrorManager errorManager,
+      final IDLLocator idlLocator,
       final InputResourceLocator inputResourceLocator,
       final org.objectweb.fractal.adl.Factory pluginFactory) {
 
@@ -124,6 +127,18 @@ public final class IDLLoaderChainFactory {
     apl1.clientIDLLoaderItf = al;
     al.clientIDLLoaderItf = ifl;
 
+    ifl.errorManagerItf = errorManager;
+    al.errorManagerItf = errorManager;
+    apl1.errorManagerItf = errorManager;
+    uil.errorManagerItf = errorManager;
+    eil.errorManagerItf = errorManager;
+    tcl.errorManagerItf = errorManager;
+    kdl.errorManagerItf = errorManager;
+    apl2.errorManagerItf = errorManager;
+    bil.errorManagerItf = errorManager;
+    hl.errorManagerItf = errorManager;
+    cil.errorManagerItf = errorManager;
+
     apl1.setPhase(IDLLoaderPhase.AFTER_PARSING.name());
     apl2.setPhase(IDLLoaderPhase.AFTER_CHECKING.name());
     apl1.pluginManagerItf = pluginManager;
@@ -156,6 +171,9 @@ public final class IDLLoaderChainFactory {
 
     uil.idlResolverItf = includeResolver;
 
+    bir.errorManagerItf = errorManager;
+    ihr.errorManagerItf = errorManager;
+
     // Interface Reference Resolver
     InterfaceReferenceResolver interfaceReferenceResolver;
     final BasicInterfaceReferenceResolver birr = new BasicInterfaceReferenceResolver();
@@ -172,6 +190,9 @@ public final class IDLLoaderChainFactory {
 
     ifl.idlLocatorItf = idlLocator;
     bil.idlLocatorItf = idlLocator;
+    tcl.idlLocatorItf = idlLocator;
+
+    birr.errorManagerItf = errorManager;
 
     // node factories
     final XMLSTNodeFactoryImpl xnf = new XMLSTNodeFactoryImpl();
@@ -182,6 +203,9 @@ public final class IDLLoaderChainFactory {
     nodeMerger.setClassLoader(IDLLoaderChainFactory.class.getClassLoader());
     ifl.nodeFactoryItf = xnf;
     hl.nodeFactoryItf = nf;
+    ihr.nodeFactoryItf = nf;
+    bir.nodeFactoryItf = nf;
+    birr.nodeFactoryItf = nf;
     ihr.nodeFactoryItf = nf;
 
     bil.inputResourceLocatorItf = inputResourceLocator;

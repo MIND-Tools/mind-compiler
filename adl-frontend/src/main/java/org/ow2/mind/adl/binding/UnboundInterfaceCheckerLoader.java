@@ -26,6 +26,8 @@ import static java.lang.Integer.parseInt;
 import static org.objectweb.fractal.adl.types.TypeInterfaceUtil.isClient;
 import static org.objectweb.fractal.adl.types.TypeInterfaceUtil.isCollection;
 import static org.objectweb.fractal.adl.types.TypeInterfaceUtil.isMandatory;
+import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
+import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
 import static org.ow2.mind.adl.ast.ASTHelper.getNumberOfElement;
 import static org.ow2.mind.adl.ast.ASTHelper.getResolvedComponentDefinition;
 import static org.ow2.mind.adl.ast.Binding.THIS_COMPONENT;
@@ -41,17 +43,22 @@ import org.objectweb.fractal.adl.interfaces.Interface;
 import org.objectweb.fractal.adl.interfaces.InterfaceContainer;
 import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.fractal.api.control.IllegalBindingException;
+import org.ow2.mind.adl.ast.ASTHelper;
 import org.ow2.mind.adl.ast.Binding;
 import org.ow2.mind.adl.ast.BindingContainer;
 import org.ow2.mind.adl.ast.Component;
 import org.ow2.mind.adl.ast.ComponentContainer;
 import org.ow2.mind.adl.membrane.ast.InternalInterfaceContainer;
+import org.ow2.mind.error.ErrorManager;
 
 public class UnboundInterfaceCheckerLoader extends AbstractLoader {
 
   // ---------------------------------------------------------------------------
   // Client interfaces
   // ---------------------------------------------------------------------------
+
+  /** The {@link ErrorManager} client interface used to log errors. */
+  public ErrorManager        errorManagerItf;
 
   /** The name of the {@link #recursiveLoaderItf} client interface. */
   public static final String RECURSIVE_LOADER_ITF_NAME = "recursive-loader";
@@ -84,9 +91,9 @@ public class UnboundInterfaceCheckerLoader extends AbstractLoader {
           .getInternalInterfaces()) {
         if (isClient(itf) && isMandatory(itf)) {
           if (findBinding(bindings, THIS_COMPONENT, itf) == null)
-            throw new ADLException(
-                BindingErrors.UNBOUND_COMPOSITE_SERVER_INTERFACE, itf, itf
-                    .getName(), ((Definition) container).getName());
+            errorManagerItf.logError(
+                BindingErrors.UNBOUND_COMPOSITE_SERVER_INTERFACE, container,
+                itf.getName(), ((Definition) container).getName());
         }
       }
     }
@@ -96,13 +103,14 @@ public class UnboundInterfaceCheckerLoader extends AbstractLoader {
       final Definition subCompDef = getResolvedComponentDefinition(
           subComponent, recursiveLoaderItf, context);
       assert subCompDef != null;
+      if (ASTHelper.isUnresolvedDefinitionNode(subCompDef)) continue;
 
       if (subCompDef instanceof InterfaceContainer) {
         for (final Interface itf : ((InterfaceContainer) subCompDef)
             .getInterfaces()) {
           if (isClient(itf) && isMandatory(itf)) {
             if (findBinding(bindings, subComponent.getName(), itf) == null)
-              throw new ADLException(BindingErrors.UNBOUND_CLIENT_INTERFACE,
+              errorManagerItf.logError(BindingErrors.UNBOUND_CLIENT_INTERFACE,
                   subComponent, itf.getName(), subComponent.getName());
           }
         }
@@ -163,12 +171,11 @@ public class UnboundInterfaceCheckerLoader extends AbstractLoader {
   @Override
   public void bindFc(final String itfName, final Object value)
       throws NoSuchInterfaceException, IllegalBindingException {
+    checkItfName(itfName);
 
-    if (itfName == null) {
-      throw new IllegalArgumentException("Interface name can't be null");
-    }
-
-    if (itfName.equals(RECURSIVE_LOADER_ITF_NAME)) {
+    if (itfName.equals(ErrorManager.ITF_NAME)) {
+      errorManagerItf = (ErrorManager) value;
+    } else if (itfName.equals(RECURSIVE_LOADER_ITF_NAME)) {
       recursiveLoaderItf = (Loader) value;
     } else {
       super.bindFc(itfName, value);
@@ -178,21 +185,17 @@ public class UnboundInterfaceCheckerLoader extends AbstractLoader {
 
   @Override
   public String[] listFc() {
-    final String[] superList = super.listFc();
-    final String[] list = new String[superList.length + 1];
-    list[0] = RECURSIVE_LOADER_ITF_NAME;
-    System.arraycopy(superList, 0, list, 1, superList.length);
-    return list;
+    return listFcHelper(super.listFc(), ErrorManager.ITF_NAME,
+        RECURSIVE_LOADER_ITF_NAME);
   }
 
   @Override
   public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
+    checkItfName(itfName);
 
-    if (itfName == null) {
-      throw new IllegalArgumentException("Interface name can't be null");
-    }
-
-    if (itfName.equals(RECURSIVE_LOADER_ITF_NAME)) {
+    if (itfName.equals(ErrorManager.ITF_NAME)) {
+      return errorManagerItf;
+    } else if (itfName.equals(RECURSIVE_LOADER_ITF_NAME)) {
       return recursiveLoaderItf;
     } else {
       return super.lookupFc(itfName);
@@ -202,12 +205,11 @@ public class UnboundInterfaceCheckerLoader extends AbstractLoader {
   @Override
   public void unbindFc(final String itfName) throws NoSuchInterfaceException,
       IllegalBindingException {
+    checkItfName(itfName);
 
-    if (itfName == null) {
-      throw new IllegalArgumentException("Interface name can't be null");
-    }
-
-    if (itfName.equals(RECURSIVE_LOADER_ITF_NAME)) {
+    if (itfName.equals(ErrorManager.ITF_NAME)) {
+      errorManagerItf = null;
+    } else if (itfName.equals(RECURSIVE_LOADER_ITF_NAME)) {
       recursiveLoaderItf = null;
     } else {
       super.unbindFc(itfName);

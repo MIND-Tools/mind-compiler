@@ -40,6 +40,7 @@ import org.ow2.mind.adl.ADLErrors;
 import org.ow2.mind.adl.ast.Data;
 import org.ow2.mind.adl.ast.ImplementationContainer;
 import org.ow2.mind.adl.ast.Source;
+import org.ow2.mind.error.ErrorManager;
 
 public class ImplementationLoader extends AbstractLoader {
 
@@ -47,6 +48,10 @@ public class ImplementationLoader extends AbstractLoader {
   // Client interfaces
   // ---------------------------------------------------------------------------
 
+  /** The {@link ErrorManager} client interface used to log errors. */
+  public ErrorManager          errorManagerItf;
+
+  /** The {@link ImplementationLocator} client interface by this component. */
   public ImplementationLocator implementationLocatorItf;
 
   // ---------------------------------------------------------------------------
@@ -83,20 +88,22 @@ public class ImplementationLoader extends AbstractLoader {
       final Map<Object, Object> context) throws ADLException {
     String path = data.getPath();
     if (path != null) {
-      if (!isValid(path))
-        throw new ADLException(ADLErrors.INVALID_PATH, data, path);
+      if (!isValid(path)) {
+        errorManagerItf.logError(ADLErrors.INVALID_PATH, data, path);
+        return;
+      }
 
       if (isRelative(path)) {
         try {
           path = fullyQualifiedNameToAbsolute(def.getName(), path);
         } catch (final InvalidRelativPathException e) {
-          throw new ADLException(ADLErrors.INVALID_PATH, data, path);
+          errorManagerItf.logError(ADLErrors.INVALID_PATH, data, path);
         }
         data.setPath(path);
       }
 
       if (implementationLocatorItf.findSource(path, context) == null) {
-        throw new ADLException(ADLErrors.SOURCE_NOT_FOUND, data, path);
+        errorManagerItf.logError(ADLErrors.SOURCE_NOT_FOUND, data, path);
       }
     }
   }
@@ -105,20 +112,22 @@ public class ImplementationLoader extends AbstractLoader {
       final Map<Object, Object> context) throws ADLException {
     String path = src.getPath();
     if (path != null) {
-      if (!isValid(path))
-        throw new ADLException(ADLErrors.INVALID_PATH, src, path);
+      if (!isValid(path)) {
+        errorManagerItf.logError(ADLErrors.INVALID_PATH, src, path);
+        return;
+      }
 
       if (isRelative(path)) {
         try {
           path = fullyQualifiedNameToAbsolute(def.getName(), path);
         } catch (final InvalidRelativPathException e) {
-          throw new ADLException(ADLErrors.INVALID_PATH, src, path);
+          errorManagerItf.logError(ADLErrors.INVALID_PATH, src, path);
         }
         src.setPath(path);
       }
 
       if (implementationLocatorItf.findSource(path, context) == null) {
-        throw new ADLException(ADLErrors.SOURCE_NOT_FOUND, src, path);
+        errorManagerItf.logError(ADLErrors.SOURCE_NOT_FOUND, src, path);
       }
     }
   }
@@ -132,7 +141,9 @@ public class ImplementationLoader extends AbstractLoader {
       throws NoSuchInterfaceException, IllegalBindingException {
     checkItfName(itfName);
 
-    if (itfName.equals(ImplementationLocator.ITF_NAME)) {
+    if (itfName.equals(ErrorManager.ITF_NAME)) {
+      errorManagerItf = (ErrorManager) value;
+    } else if (itfName.equals(ImplementationLocator.ITF_NAME)) {
       this.implementationLocatorItf = (ImplementationLocator) value;
     } else {
       super.bindFc(itfName, value);
@@ -142,14 +153,17 @@ public class ImplementationLoader extends AbstractLoader {
 
   @Override
   public String[] listFc() {
-    return listFcHelper(super.listFc(), ImplementationLocator.ITF_NAME);
+    return listFcHelper(super.listFc(), ErrorManager.ITF_NAME,
+        ImplementationLocator.ITF_NAME);
   }
 
   @Override
   public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
     checkItfName(itfName);
 
-    if (itfName.equals(ImplementationLocator.ITF_NAME)) {
+    if (itfName.equals(ErrorManager.ITF_NAME)) {
+      return errorManagerItf;
+    } else if (itfName.equals(ImplementationLocator.ITF_NAME)) {
       return this.implementationLocatorItf;
     } else {
       return super.lookupFc(itfName);
@@ -161,7 +175,9 @@ public class ImplementationLoader extends AbstractLoader {
       IllegalBindingException {
     checkItfName(itfName);
 
-    if (itfName.equals(ImplementationLocator.ITF_NAME)) {
+    if (itfName.equals(ErrorManager.ITF_NAME)) {
+      errorManagerItf = null;
+    } else if (itfName.equals(ImplementationLocator.ITF_NAME)) {
       this.implementationLocatorItf = null;
     } else {
       super.unbindFc(itfName);

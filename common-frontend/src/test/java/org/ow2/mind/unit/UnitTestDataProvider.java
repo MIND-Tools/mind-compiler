@@ -38,6 +38,15 @@ public final class UnitTestDataProvider {
   public static final String INCLUDE_TEST_PROPERTY_NAME = "includeTest";
 
   public static Object[][] listADLs(final String... rootDirs) throws Exception {
+    return list(rootDirs, ".adl");
+  }
+
+  public static Object[][] listIDLs(final String... rootDirs) throws Exception {
+    return list(rootDirs, ".itf", ".idt");
+  }
+
+  private static Object[][] list(final String[] rootDirs,
+      final String... suffixes) throws Exception {
     final String includeTest = System.getProperty(INCLUDE_TEST_PROPERTY_NAME);
     final Pattern regexp;
     if (includeTest != null)
@@ -59,7 +68,7 @@ public final class UnitTestDataProvider {
       final File testDir = new File(root.toURI());
       assert testDir.isDirectory();
       final List<String> adlNameList = new ArrayList<String>();
-      listADLs(testDir, "", regexp, adlNameList);
+      list(testDir, "", regexp, adlNameList, suffixes);
       adls.put(rootDir, adlNameList);
       nbADL += adlNameList.size();
     }
@@ -76,12 +85,16 @@ public final class UnitTestDataProvider {
 
   // Recursively looks in sub directories of 'dir' and returns all files with
   // .adl extension.
-  private static void listADLs(final File dir, final String prefix,
-      final Pattern regexp, final List<String> list) throws Exception {
+  private static void list(final File dir, final String prefix,
+      final Pattern regexp, final List<String> list, final String... suffixes)
+      throws Exception {
     assert dir.isDirectory();
     final String[] adlNames = dir.list(new FilenameFilter() {
       public boolean accept(final File dir, final String name) {
-        return name.endsWith(".adl");
+        for (final String suffix : suffixes) {
+          if (name.endsWith(suffix)) return true;
+        }
+        return false;
       }
     });
 
@@ -99,7 +112,7 @@ public final class UnitTestDataProvider {
     });
     if (subDirs != null) {
       for (final File subDir : subDirs) {
-        listADLs(subDir, prefix + subDir.getName() + ".", regexp, list);
+        list(subDir, prefix + subDir.getName() + ".", regexp, list, suffixes);
 
       }
     }

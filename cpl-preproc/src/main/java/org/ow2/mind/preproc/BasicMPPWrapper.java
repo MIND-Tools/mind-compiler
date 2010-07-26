@@ -22,7 +22,8 @@
 
 package org.ow2.mind.preproc;
 
-import static org.ow2.mind.preproc.InvocationHelper.invokeMethod;
+import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
+import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -31,7 +32,6 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -39,27 +39,41 @@ import java.util.logging.Logger;
 
 import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.Lexer;
-import org.antlr.runtime.Parser;
 import org.antlr.runtime.RecognitionException;
 import org.objectweb.fractal.adl.ADLErrors;
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.CompilerError;
 import org.objectweb.fractal.adl.Definition;
-import org.objectweb.fractal.adl.error.Error;
 import org.objectweb.fractal.adl.error.GenericErrors;
 import org.objectweb.fractal.adl.util.FractalADLLogManager;
+import org.objectweb.fractal.api.NoSuchInterfaceException;
+import org.objectweb.fractal.api.control.BindingController;
+import org.objectweb.fractal.api.control.IllegalBindingException;
+import org.ow2.mind.error.ErrorManager;
 import org.ow2.mind.plugin.PluginManager;
+import org.ow2.mind.preproc.parser.AbstractCPLParser;
 
-public class BasicMPPWrapper implements MPPWrapper {
+public class BasicMPPWrapper implements MPPWrapper, BindingController {
 
   protected static Logger    logger             = FractalADLLogManager
                                                     .getLogger("io");
+
+  // ---------------------------------------------------------------------------
+  // Client interfaces
+  // ---------------------------------------------------------------------------
+
+  /** The {@link ErrorManager} client interface used to log errors. */
+  public ErrorManager        errorManagerItf;
 
   /** Plugin manager client interface name **/
   public static final String PLUGIN_MANAGER_ITF = "plugin-manager";
 
   /** Plugin manager client interface **/
   public PluginManager       pluginManagerItf;
+
+  // ---------------------------------------------------------------------------
+  // Implementation of the MPPWrapper interface
+  // ---------------------------------------------------------------------------
 
   public MPPCommand newMPPCommand(final Definition definition,
       final Map<Object, Object> context) {
@@ -80,7 +94,7 @@ public class BasicMPPWrapper implements MPPWrapper {
 
     BasicMPPCommand(final Definition definition,
         final Map<Object, Object> context) {
-      this.cplChecker = new CPLChecker(definition);
+      this.cplChecker = new CPLChecker(errorManagerItf, definition);
       this.context = context;
     }
 
@@ -130,7 +144,7 @@ public class BasicMPPWrapper implements MPPWrapper {
       }
     }
 
-    public void exec() throws ADLException, InterruptedException {
+    public boolean exec() throws ADLException, InterruptedException {
       final Lexer lex;
       try {
         lex = ExtensionHelper.getLexer(pluginManagerItf, inputFile.getPath(),
@@ -140,11 +154,11 @@ public class BasicMPPWrapper implements MPPWrapper {
       }
 
       final CommonTokenStream tokens = new CommonTokenStream(lex);
-      final Parser mpp = ExtensionHelper.getParser(pluginManagerItf, tokens,
-          context);
+      final AbstractCPLParser mpp = ExtensionHelper.getParser(pluginManagerItf,
+          tokens, context);
 
-      invokeMethod(mpp, "setCplChecker", new Class[]{CPLChecker.class},
-          new Object[]{this.cplChecker});
+      mpp.setCplChecker(cplChecker);
+      mpp.setErrorManager(errorManagerItf);
 
       PrintStream outPS = null;
       PrintStream headerOutPS = null;
@@ -155,10 +169,7 @@ public class BasicMPPWrapper implements MPPWrapper {
         } catch (final FileNotFoundException e) {
           throw new CompilerError(GenericErrors.INTERNAL_ERROR, e, "IO error");
         }
-        invokeMethod(lex, "setOutPutStream", new Class[]{PrintStream.class},
-            new Object[]{outPS});
-        invokeMethod(mpp, "setOutputStream", new Class[]{PrintStream.class},
-            new Object[]{outPS});
+        mpp.setOutputStream(outPS);
 
         if (headerOutputFile != null) {
           try {
@@ -168,12 +179,10 @@ public class BasicMPPWrapper implements MPPWrapper {
           } catch (final FileNotFoundException e) {
             throw new CompilerError(GenericErrors.INTERNAL_ERROR, e, "IO error");
           }
-          invokeMethod(mpp, "setHeaderOutputStream",
-              new Class[]{PrintStream.class}, new Object[]{headerOutPS});
+          mpp.setHeaderOutputStream(headerOutPS);
         }
 
-        invokeMethod(mpp, "setSingletonMode", new Class[]{boolean.class},
-            new Object[]{singletonMode});
+        mpp.setSingletonMode(singletonMode);
 
         if (logger.isLoggable(Level.INFO)) logger.info(getDescription());
 
@@ -181,27 +190,17 @@ public class BasicMPPWrapper implements MPPWrapper {
           logger.fine("MPP: inputFile=" + inputFile.getPath() + " outputFile="
               + outputFile.getPath() + " singletonMode=" + singletonMode);
 
+        final int nbErrors = errorManagerItf.getErrors().size();
         try {
-          invokeMethod(mpp, "parseFile", new Class[]{}, new Object[]{},
-              RecognitionException.class);
+          mpp.preprocess();
         } catch (final RecognitionException e) {
-          throw new ADLException(MPPErrors.PARSE_ERROR, e, inputFile.getPath(),
-              "MPP parse error.");
+          errorManagerItf.logError(MPPErrors.PARSE_ERROR, e,
+              inputFile.getPath(), "MPP parse error.");
+          return false;
         }
 
-        final List<Error> errors = (List<Error>) invokeMethod(mpp, "getErrors",
-            new Class[]{}, new Object[]{});
-        if (errors != null && errors.size() > 0) {
-          final StringBuilder msg = new StringBuilder();
-          final Iterator<Error> iter = errors.iterator();
-          while (iter.hasNext()) {
-            final Error e = iter.next();
-            msg.append(e);
-            if (iter.hasNext()) msg.append("\n    ");
-          }
+        return errorManagerItf.getErrors().size() == nbErrors;
 
-          throw new ADLException(MPPErrors.PARSE_ERROR, msg.toString());
-        }
       } finally {
         if (outPS != null) outPS.close();
         if (headerOutPS != null) headerOutPS.close();
@@ -210,6 +209,55 @@ public class BasicMPPWrapper implements MPPWrapper {
 
     public String getDescription() {
       return "MPP: " + outputFile.getPath();
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Overridden BindingController methods
+  // ---------------------------------------------------------------------------
+
+  public void bindFc(final String itfName, final Object value)
+      throws NoSuchInterfaceException, IllegalBindingException {
+    checkItfName(itfName);
+
+    if (itfName.equals(ErrorManager.ITF_NAME)) {
+      errorManagerItf = (ErrorManager) value;
+    } else if (itfName.equals(PLUGIN_MANAGER_ITF)) {
+      pluginManagerItf = (PluginManager) value;
+    } else {
+      throw new NoSuchInterfaceException("No client interface named '"
+          + itfName + "'");
+    }
+  }
+
+  public String[] listFc() {
+    return listFcHelper(ErrorManager.ITF_NAME, PLUGIN_MANAGER_ITF);
+  }
+
+  public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
+    checkItfName(itfName);
+
+    if (itfName.equals(ErrorManager.ITF_NAME)) {
+      return errorManagerItf;
+    } else if (itfName.equals(PLUGIN_MANAGER_ITF)) {
+      return pluginManagerItf;
+    } else {
+      throw new NoSuchInterfaceException("No client interface named '"
+          + itfName + "'");
+    }
+  }
+
+  public void unbindFc(final String itfName) throws NoSuchInterfaceException,
+      IllegalBindingException {
+    checkItfName(itfName);
+
+    if (itfName.equals(ErrorManager.ITF_NAME)) {
+      errorManagerItf = null;
+    } else if (itfName.equals(PLUGIN_MANAGER_ITF)) {
+      pluginManagerItf = null;
+    } else {
+      throw new NoSuchInterfaceException("No client interface named '"
+          + itfName + "'");
     }
   }
 }

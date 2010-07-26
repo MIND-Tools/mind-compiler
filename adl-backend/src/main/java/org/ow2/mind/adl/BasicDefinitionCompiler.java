@@ -231,7 +231,7 @@ public class BasicDefinitionCompiler
         srcFile = outputFileLocatorItf.getCSourceOutputFile(
             additionalCompilationUnit.getPath(), context);
         if (!srcFile.exists()) {
-          throw new ADLException(GenericErrors.INTERNAL_ERROR,
+          throw new CompilerError(GenericErrors.INTERNAL_ERROR,
               "Can't find source file \"" + additionalCompilationUnit + "\"");
         }
       } else {
@@ -365,8 +365,9 @@ public class BasicDefinitionCompiler
       return "Provides " + outputFile;
     }
 
-    public void exec() throws ADLException, InterruptedException {
+    public boolean exec() throws ADLException, InterruptedException {
       // nothing to do
+      return true;
     }
 
     public void prepare() {

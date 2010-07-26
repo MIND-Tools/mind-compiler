@@ -56,7 +56,7 @@ public class AttributeInstantiator extends AbstractInstantiator {
       final Map<Object, Object> context) throws ADLException {
     if (definition instanceof FormalParameterContainer) {
       if (((FormalParameterContainer) definition).getFormalParameters().length > 0) {
-        throw new ADLException(ADLErrors.INSTANTIATE_ARGUMENT_DEFINIITON,
+        errorManagerItf.logError(ADLErrors.INSTANTIATE_ARGUMENT_DEFINIITON,
             definition, definition.getName());
       }
     }

@@ -7,9 +7,12 @@ import java.util.Map;
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.Loader;
 import org.ow2.mind.adl.ASTChecker;
+import org.ow2.mind.adl.ErrorLoader;
 import org.ow2.mind.adl.Factory;
 import org.ow2.mind.adl.annotation.predefined.Singleton;
 import org.ow2.mind.annotation.AnnotationLocatorHelper;
+import org.ow2.mind.error.ErrorManager;
+import org.ow2.mind.error.ErrorManagerFactory;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -22,7 +25,14 @@ public class TestSingleton {
 
   @BeforeMethod(alwaysRun = true)
   protected void setUp() throws Exception {
-    loader = Factory.newLoader();
+    final ErrorManager errorManager = ErrorManagerFactory
+        .newSimpleErrorManager();
+
+    final ErrorLoader errL = new ErrorLoader();
+    errL.errorManagerItf = errorManager;
+    errL.clientLoader = Factory.newLoader(errorManager);
+    loader = errL;
+
     checker = new ASTChecker();
     context = new HashMap<Object, Object>();
     AnnotationLocatorHelper.addDefaultAnnotationPackage(Singleton.class
@@ -49,11 +59,14 @@ public class TestSingleton {
     checker.assertDefinition(def1).isMultiton();
 
     final Definition def = loader.load("pkg1.singleton.Composite2", context);
-    checker.assertDefinition(def).isSingleton().containsComponent("subComp1")
+    checker
+        .assertDefinition(def)
+        .isSingleton()
+        .containsComponent("subComp1")
         .isAnInstanceOf(
             "pkg1.generic.Generic1<pkg1.singleton.SingletonPrimitive>")
-        .isSingleton().containsComponent("subComp1").isAnInstanceOf(
-            "pkg1.singleton.SingletonPrimitive").isSingleton();
+        .isSingleton().containsComponent("subComp1")
+        .isAnInstanceOf("pkg1.singleton.SingletonPrimitive").isSingleton();
     checker.assertDefinition(def1).isMultiton();
   }
 

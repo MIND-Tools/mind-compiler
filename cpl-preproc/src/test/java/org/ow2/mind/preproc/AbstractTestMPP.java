@@ -39,6 +39,8 @@ import org.ow2.mind.compilation.CompilerCommand;
 import org.ow2.mind.compilation.CompilerWrapper;
 import org.ow2.mind.compilation.PreprocessorCommand;
 import org.ow2.mind.compilation.gcc.GccCompilerWrapper;
+import org.ow2.mind.error.ErrorManager;
+import org.ow2.mind.error.ErrorManagerFactory;
 import org.ow2.mind.io.BasicOutputFileLocator;
 import org.ow2.mind.plugin.BasicPluginManager;
 import org.ow2.mind.st.STNodeFactoryImpl;
@@ -48,6 +50,7 @@ public class AbstractTestMPP {
 
   protected static final String        DEFAULT_CPPFLAGS = "-g -Wall -Wredundant-decls -Wunreachable-code";
 
+  protected ErrorManager               errorManager;
   protected MPPWrapper                 mppWrapper;
   protected CompilerWrapper            compilerWrapper;
   protected CompilationCommandExecutor executor;
@@ -61,14 +64,22 @@ public class AbstractTestMPP {
 
   @BeforeTest(alwaysRun = true)
   public void setUp() {
+    errorManager = ErrorManagerFactory.newSimpleErrorManager();
     pluginManager = new BasicPluginManager();
     stNodeFactory = new STNodeFactoryImpl();
     pluginManager.nodeFactoryItf = stNodeFactory;
 
-    mppWrapper = new BasicMPPWrapper();
-    ((BasicMPPWrapper) mppWrapper).pluginManagerItf = pluginManager;
-    compilerWrapper = new GccCompilerWrapper();
-    executor = new BasicCompilationCommandExecutor();
+    final BasicMPPWrapper bmppw = new BasicMPPWrapper();
+    bmppw.pluginManagerItf = pluginManager;
+    mppWrapper = bmppw;
+    final GccCompilerWrapper gcw = new GccCompilerWrapper();
+    compilerWrapper = gcw;
+    final BasicCompilationCommandExecutor bcce = new BasicCompilationCommandExecutor();
+    bcce.errorManagerItf = errorManager;
+    executor = bcce;
+
+    gcw.errorManagerItf = errorManager;
+    bmppw.errorManagerItf = errorManager;
 
     context = new HashMap<Object, Object>();
     final String buildDirName = "target" + File.separator + "build";
@@ -77,6 +88,8 @@ public class AbstractTestMPP {
       buildDir.mkdirs();
     }
     context.put(BasicOutputFileLocator.OUTPUT_DIR_CONTEXT_KEY, buildDir);
+    context.put(BasicCompilationCommandExecutor.FAIL_FAST_CONTEXT_KEY,
+        Boolean.TRUE);
 
     cppFlags = splitOptionString(DEFAULT_CPPFLAGS);
   }

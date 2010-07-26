@@ -29,9 +29,11 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.objectweb.fractal.adl.ADLException;
+import org.objectweb.fractal.adl.error.Error;
 import org.ow2.mind.compilation.BasicCompilationCommandExecutor;
 import org.ow2.mind.compilation.CompilationCommand;
 import org.ow2.mind.compilation.CompilationCommandExecutor;
@@ -39,6 +41,9 @@ import org.ow2.mind.compilation.CompilerCommand;
 import org.ow2.mind.compilation.CompilerContextHelper;
 import org.ow2.mind.compilation.CompilerWrapper;
 import org.ow2.mind.compilation.gcc.GccCompilerWrapper;
+import org.ow2.mind.error.ErrorCollection;
+import org.ow2.mind.error.ErrorManager;
+import org.ow2.mind.error.ErrorManagerFactory;
 import org.ow2.mind.idl.IDLBackendFactory;
 import org.ow2.mind.idl.IDLLoader;
 import org.ow2.mind.idl.IDLLoaderChainFactory;
@@ -53,6 +58,7 @@ public class CheckDelegatesTest {
   public static final String DEFAULT_CFLAGS  = "-g -Wall -Werror -Wredundant-decls -Wunreachable-code -Wstrict-prototypes -Wwrite-strings";
   public static final String CFLAGS_PROPERTY = "mind.test.cflags";
 
+  ErrorManager               errorManager;
   IDLLoader                  idlLoader;
   IDLVisitor                 idlCompiler;
 
@@ -63,11 +69,16 @@ public class CheckDelegatesTest {
 
   @BeforeTest(alwaysRun = true)
   public void setUp() {
-    idlLoader = IDLLoaderChainFactory.newLoader().loader;
+    errorManager = ErrorManagerFactory.newSimpleErrorManager();
+    idlLoader = IDLLoaderChainFactory.newLoader(errorManager).loader;
     idlCompiler = IDLBackendFactory.newIDLCompiler(idlLoader);
 
-    compilerWrapper = new GccCompilerWrapper();
-    commandExecutor = new BasicCompilationCommandExecutor();
+    final GccCompilerWrapper gcw = new GccCompilerWrapper();
+    gcw.errorManagerItf = errorManager;
+    compilerWrapper = gcw;
+    final BasicCompilationCommandExecutor bcce = new BasicCompilationCommandExecutor();
+    bcce.errorManagerItf = errorManager;
+    commandExecutor = bcce;
 
     context = new HashMap<Object, Object>();
     buildDir = new File("target/build");
@@ -113,7 +124,12 @@ public class CheckDelegatesTest {
   }
 
   private void compileIDL(final String idlName) throws ADLException {
+    errorManager.clear();
     final IDL idl = idlLoader.load(idlName, context);
+    final List<Error> errors = errorManager.getErrors();
+    if (!errors.isEmpty()) {
+      throw new ADLException(new ErrorCollection(errors));
+    }
     idlCompiler.visit(idl, context);
   }
 

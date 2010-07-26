@@ -38,6 +38,7 @@ import org.objectweb.fractal.adl.Loader;
 import org.ow2.mind.BasicInputResourceLocator;
 import org.ow2.mind.adl.ADLLocator;
 import org.ow2.mind.adl.ASTChecker;
+import org.ow2.mind.adl.ErrorLoader;
 import org.ow2.mind.adl.Factory;
 import org.ow2.mind.adl.annotations.controller.BindingController;
 import org.ow2.mind.adl.ast.ASTHelper;
@@ -48,6 +49,8 @@ import org.ow2.mind.adl.membrane.ast.ControllerContainer;
 import org.ow2.mind.adl.membrane.ast.ControllerInterface;
 import org.ow2.mind.annotation.AnnotationHelper;
 import org.ow2.mind.annotation.AnnotationLocatorHelper;
+import org.ow2.mind.error.ErrorManager;
+import org.ow2.mind.error.ErrorManagerFactory;
 import org.ow2.mind.idl.IDLLoaderChainFactory;
 import org.ow2.mind.idl.IDLLoaderChainFactory.IDLFrontend;
 import org.ow2.mind.idl.IDLLocator;
@@ -63,6 +66,9 @@ public class TestBindingController {
 
   @BeforeMethod(alwaysRun = true)
   public void setUp() throws Exception {
+    final ErrorManager errorManager = ErrorManagerFactory
+        .newSimpleErrorManager();
+
     // input locators
     final BasicInputResourceLocator inputResourceLocator = new BasicInputResourceLocator();
     final IDLLocator idlLocator = IDLLoaderChainFactory
@@ -75,12 +81,15 @@ public class TestBindingController {
     final org.objectweb.fractal.adl.Factory pluginFactory = new SimpleClassPluginFactory();
 
     // loader chains
-    final IDLFrontend idlFrontend = IDLLoaderChainFactory.newLoader(idlLocator,
-        inputResourceLocator, pluginFactory);
-    final Loader adlLoader = Factory.newLoader(inputResourceLocator,
-        adlLocator, idlLocator, implementationLocator, idlFrontend.cache,
-        idlFrontend.loader, pluginFactory);
-    loader = adlLoader;
+    final IDLFrontend idlFrontend = IDLLoaderChainFactory.newLoader(errorManager,
+        idlLocator, inputResourceLocator, pluginFactory);
+    final Loader adlLoader = Factory.newLoader(errorManager,
+        inputResourceLocator, adlLocator, idlLocator, implementationLocator,
+        idlFrontend.cache, idlFrontend.loader, pluginFactory);
+    final ErrorLoader errorLoader = new ErrorLoader();
+    errorLoader.errorManagerItf = errorManager;
+    errorLoader.clientLoader = adlLoader;
+    loader = errorLoader;
 
     context = new HashMap<Object, Object>();
     AnnotationLocatorHelper.addDefaultAnnotationPackage(

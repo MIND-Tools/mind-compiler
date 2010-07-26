@@ -191,11 +191,13 @@ public class BinaryIDLLoader extends AbstractIDLLoader {
 
       return idl;
     } catch (final IOException e) {
-      throw new ADLException(GenericErrors.INTERNAL_ERROR, e,
+      errorManagerItf.logFatal(GenericErrors.INTERNAL_ERROR, e,
           "Can't read binary IDL " + location);
+      return null;
     } catch (final ClassNotFoundException e) {
-      throw new ADLException(GenericErrors.INTERNAL_ERROR, e,
+      errorManagerItf.logFatal(GenericErrors.INTERNAL_ERROR, e,
           "Can't read binary IDL " + location);
+      return null;
     }
   }
 

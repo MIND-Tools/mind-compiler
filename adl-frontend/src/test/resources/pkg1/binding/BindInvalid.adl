@@ -2,7 +2,7 @@ import pkg1.pkg2.Type1;
 import pkg1.pkg2.Primitive1;
 import pkg1.pkg2.Primitive2;
 
-composite pkg1.binding.BindingInvalid extends Type1 {
+composite pkg1.binding.BindingInvalid {
 
   contains ProvideI1 as server_comp;
   

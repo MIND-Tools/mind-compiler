@@ -32,26 +32,25 @@ import org.objectweb.fractal.adl.NodeFactoryImpl;
 import org.objectweb.fractal.adl.merger.NodeMergerImpl;
 import org.objectweb.fractal.adl.xml.XMLNodeFactoryImpl;
 import org.ow2.mind.adl.ASTChecker;
+import org.ow2.mind.adl.ASTChecker.DefinitionChecker;
 import org.ow2.mind.adl.BasicADLLocator;
 import org.ow2.mind.adl.BasicDefinitionReferenceResolver;
 import org.ow2.mind.adl.CacheLoader;
 import org.ow2.mind.adl.CachingDefinitionReferenceResolver;
+import org.ow2.mind.adl.ErrorLoader;
 import org.ow2.mind.adl.ExtendsLoader;
 import org.ow2.mind.adl.GraphChecker;
 import org.ow2.mind.adl.STCFNodeMerger;
 import org.ow2.mind.adl.SubComponentResolverLoader;
-import org.ow2.mind.adl.ASTChecker.DefinitionChecker;
 import org.ow2.mind.adl.binding.BasicBindingChecker;
 import org.ow2.mind.adl.generic.CachingTemplateInstantiator;
 import org.ow2.mind.adl.generic.GenericDefinitionLoader;
 import org.ow2.mind.adl.generic.GenericDefinitionReferenceResolver;
 import org.ow2.mind.adl.generic.TemplateInstantiatorImpl;
 import org.ow2.mind.adl.imports.ImportDefinitionReferenceResolver;
-import org.ow2.mind.adl.parameter.ExtendsParametricDefinitionReferenceResolver;
-import org.ow2.mind.adl.parameter.ParametricDefinitionReferenceResolver;
-import org.ow2.mind.adl.parameter.ParametricGenericDefinitionReferenceResolver;
-import org.ow2.mind.adl.parameter.ParametricTemplateInstantiator;
 import org.ow2.mind.adl.parser.ADLParser;
+import org.ow2.mind.error.ErrorManager;
+import org.ow2.mind.error.ErrorManagerFactory;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -66,17 +65,29 @@ public class TestParameterGeneric {
 
   @BeforeMethod(alwaysRun = true)
   protected void setUp() throws Exception {
+    final ErrorManager errorManager = ErrorManagerFactory
+        .newSimpleErrorManager();
+
     // Loader chain components
     final ADLParser adlLoader = new ADLParser();
     final GenericDefinitionLoader gdl = new GenericDefinitionLoader();
     final SubComponentResolverLoader scrl = new SubComponentResolverLoader();
     final ExtendsLoader el = new ExtendsLoader();
     final CacheLoader cl = new CacheLoader();
+    final ErrorLoader errl = new ErrorLoader();
 
+    errl.clientLoader = cl;
     cl.clientLoader = el;
     el.clientLoader = scrl;
     scrl.clientLoader = gdl;
     gdl.clientLoader = adlLoader;
+
+    errl.errorManagerItf = errorManager;
+    cl.errorManagerItf = errorManager;
+    el.errorManagerItf = errorManager;
+    scrl.errorManagerItf = errorManager;
+    gdl.errorManagerItf = errorManager;
+    adlLoader.errorManagerItf = errorManager;
 
     // definition reference resolver chain
     final BasicDefinitionReferenceResolver bdrr = new BasicDefinitionReferenceResolver();
@@ -95,6 +106,10 @@ public class TestParameterGeneric {
     cdrr.loaderItf = cl;
 
     scrl.definitionReferenceResolverItf = cdrr;
+
+    bdrr.errorManagerItf = errorManager;
+    pdrr.errorManagerItf = errorManager;
+    gdrr.errorManagerItf = errorManager;
 
     final ExtendsParametricDefinitionReferenceResolver epdrr = new ExtendsParametricDefinitionReferenceResolver();
 
@@ -134,8 +149,10 @@ public class TestParameterGeneric {
     gdrr.bindingCheckerItf = bindingChecker;
     pti.nodeFactoryItf = nodeFactory;
     pti.nodeMergerItf = nodeMerger;
+    bdrr.nodeFactoryItf = nodeFactory;
+    gdrr.nodeFactoryItf = nodeFactory;
 
-    loader = cl;
+    loader = errl;
 
     context = new HashMap<Object, Object>();
 
@@ -162,19 +179,18 @@ public class TestParameterGeneric {
 
         .andNext().isAnInstanceOf("pkg1.parameter.Parameter1")
 
-        .andNext().that().isAnInstanceOf(
-            "pkg1.generic.Generic4<pkg1.parameter.Parameter1>");
+        .andNext().that()
+        .isAnInstanceOf("pkg1.generic.Generic4<pkg1.parameter.Parameter1>");
 
     g4.containsFormalParameter("W$a");
 
-    g4
-        .containsComponents("c1")
+    g4.containsComponents("c1")
         .whereFirst()
         .that()
         .isAnInstanceOf(
             "pkg1.generic.Generic2<pkg1.generic.Generic1<pkg1.parameter.Parameter1>,pkg1.generic.Generic1<pkg1.parameter.Parameter1>>")
-        .containsComponents("c1", "c2").whereFirst().that().isAnInstanceOf(
-            "pkg1.generic.Generic1<pkg1.parameter.Parameter1>")
+        .containsComponents("c1", "c2").whereFirst().that()
+        .isAnInstanceOf("pkg1.generic.Generic1<pkg1.parameter.Parameter1>")
         .containsFormalParameter("T$a");
 
   }
@@ -184,19 +200,24 @@ public class TestParameterGeneric {
     final Definition content = loader.load("pkg1.parameterGeneric.Composite2",
         context);
     checker.assertDefinition(content).containsFormalParameters(/* no FP */);
-    checker.assertDefinition(content).containsComponents("c1", "c2", "c3",
-        "c4", "c5")
+    checker
+        .assertDefinition(content)
+        .containsComponents("c1", "c2", "c3", "c4", "c5")
 
-    .whereFirst()/* c1 */.isAnInstanceOf("pkg1.parameter.Parameter1")
+        .whereFirst()
+        /* c1 */.isAnInstanceOf("pkg1.parameter.Parameter1")
 
-    .andNext()/* c2 */.isAnInstanceOf("pkg1.parameter.Parameter1")
+        .andNext()
+        /* c2 */.isAnInstanceOf("pkg1.parameter.Parameter1")
 
-    .andNext()/* c3 */.isAnInstanceOf(
-        "pkg1.generic.Generic4<pkg1.parameter.Parameter1>")
+        .andNext()
+        /* c3 */.isAnInstanceOf(
+            "pkg1.generic.Generic4<pkg1.parameter.Parameter1>")
 
-    .andNext()/* c4 */.isAnInstanceOf(
-        "pkg1.generic.Generic1<pkg1.parameter.Parameter1>")
+        .andNext()
+        /* c4 */.isAnInstanceOf(
+            "pkg1.generic.Generic1<pkg1.parameter.Parameter1>")
 
-    .andNext()/* c5 */.isAnInstanceOf("pkg1.parameterGeneric.Composite1");
+        .andNext()/* c5 */.isAnInstanceOf("pkg1.parameterGeneric.Composite1");
   }
 }

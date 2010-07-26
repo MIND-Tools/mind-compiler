@@ -22,6 +22,8 @@
 
 package org.ow2.mind.adl.graph;
 
+import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
+import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
 import static org.ow2.mind.adl.ast.ASTHelper.getResolvedComponentDefinition;
 import static org.ow2.mind.adl.ast.ASTHelper.isType;
 import static org.ow2.mind.annotation.AnnotationHelper.getAnnotation;
@@ -39,12 +41,16 @@ import org.ow2.mind.adl.ADLErrors;
 import org.ow2.mind.adl.annotation.predefined.Singleton;
 import org.ow2.mind.adl.ast.Component;
 import org.ow2.mind.adl.ast.ComponentContainer;
+import org.ow2.mind.error.ErrorManager;
 
 public class BasicInstantiator implements Instantiator, BindingController {
 
   // ---------------------------------------------------------------------------
   // Client interfaces
   // ---------------------------------------------------------------------------
+
+  /** The {@link ErrorManager} client interface used to log errors. */
+  public ErrorManager        errorManagerItf;
 
   /** The name of the {@link #loaderItf} client interface. */
   public static final String LOADER_ITF_NAME = "loader";
@@ -60,8 +66,8 @@ public class BasicInstantiator implements Instantiator, BindingController {
       final Map<Object, Object> context) throws ADLException {
 
     if (isType(definition))
-      throw new ADLException(ADLErrors.INSTANTIATE_TYPE_DEFINIITON, definition,
-          definition.getName());
+      errorManagerItf.logError(ADLErrors.INSTANTIATE_TYPE_DEFINIITON,
+          definition, definition.getName());
 
     final ComponentGraph graph = new ComponentGraph(definition, definition);
     if (definition instanceof ComponentContainer)
@@ -110,12 +116,11 @@ public class BasicInstantiator implements Instantiator, BindingController {
 
   public void bindFc(final String itfName, final Object value)
       throws NoSuchInterfaceException, IllegalBindingException {
+    checkItfName(itfName);
 
-    if (itfName == null) {
-      throw new IllegalArgumentException("Interface name can't be null");
-    }
-
-    if (LOADER_ITF_NAME.equals(itfName)) {
+    if (ErrorManager.ITF_NAME.equals(itfName)) {
+      errorManagerItf = (ErrorManager) value;
+    } else if (LOADER_ITF_NAME.equals(itfName)) {
       loaderItf = (Loader) value;
     } else {
       throw new NoSuchInterfaceException("No client interface named '"
@@ -125,16 +130,15 @@ public class BasicInstantiator implements Instantiator, BindingController {
   }
 
   public String[] listFc() {
-    return new String[]{LOADER_ITF_NAME};
+    return listFcHelper(ErrorManager.ITF_NAME, LOADER_ITF_NAME);
   }
 
   public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
+    checkItfName(itfName);
 
-    if (itfName == null) {
-      throw new IllegalArgumentException("Interface name can't be null");
-    }
-
-    if (LOADER_ITF_NAME.equals(itfName)) {
+    if (ErrorManager.ITF_NAME.equals(itfName)) {
+      return errorManagerItf;
+    } else if (LOADER_ITF_NAME.equals(itfName)) {
       return loaderItf;
     } else {
       throw new NoSuchInterfaceException("No client interface named '"
@@ -144,12 +148,11 @@ public class BasicInstantiator implements Instantiator, BindingController {
 
   public void unbindFc(final String itfName) throws NoSuchInterfaceException,
       IllegalBindingException {
+    checkItfName(itfName);
 
-    if (itfName == null) {
-      throw new IllegalArgumentException("Interface name can't be null");
-    }
-
-    if (LOADER_ITF_NAME.equals(itfName)) {
+    if (ErrorManager.ITF_NAME.equals(itfName)) {
+      errorManagerItf = null;
+    } else if (LOADER_ITF_NAME.equals(itfName)) {
       loaderItf = null;
     } else {
       throw new NoSuchInterfaceException("No client interface named '"

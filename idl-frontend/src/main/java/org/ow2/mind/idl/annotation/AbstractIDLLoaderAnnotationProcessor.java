@@ -42,6 +42,7 @@ import org.objectweb.fractal.adl.merger.NodeMerger;
 import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.fractal.api.control.BindingController;
 import org.objectweb.fractal.api.control.IllegalBindingException;
+import org.ow2.mind.error.ErrorManager;
 import org.ow2.mind.idl.IDLCache;
 import org.ow2.mind.idl.IDLLoader;
 import org.ow2.mind.idl.ast.IDL;
@@ -62,6 +63,9 @@ public abstract class AbstractIDLLoaderAnnotationProcessor
   // ---------------------------------------------------------------------------
   // Client interfaces
   // ---------------------------------------------------------------------------
+
+  /** The {@link ErrorManager} client interface used to log errors. */
+  public ErrorManager              errorManagerItf;
 
   /** The client interface used to create new AST nodes. */
   public NodeFactory               nodeFactoryItf;
@@ -185,14 +189,17 @@ public abstract class AbstractIDLLoaderAnnotationProcessor
   // ---------------------------------------------------------------------------
 
   public String[] listFc() {
-    return listFcHelper(NodeFactory.ITF_NAME, NodeMerger.ITF_NAME,
-        IDLCache.ITF_NAME, IDLLoader.ITF_NAME, "template-loader");
+    return listFcHelper(ErrorManager.ITF_NAME, NodeFactory.ITF_NAME,
+        NodeMerger.ITF_NAME, IDLCache.ITF_NAME, IDLLoader.ITF_NAME,
+        "template-loader");
   }
 
   public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
     checkItfName(itfName);
 
-    if (itfName.equals(NodeFactory.ITF_NAME)) {
+    if (itfName.equals(ErrorManager.ITF_NAME)) {
+      return errorManagerItf;
+    } else if (itfName.equals(NodeFactory.ITF_NAME)) {
       return nodeFactoryItf;
     } else if (itfName.equals(NodeMerger.ITF_NAME)) {
       return nodeMergerItf;
@@ -212,7 +219,9 @@ public abstract class AbstractIDLLoaderAnnotationProcessor
       throws NoSuchInterfaceException, IllegalBindingException {
     checkItfName(itfName);
 
-    if (itfName.equals(NodeFactory.ITF_NAME)) {
+    if (itfName.equals(ErrorManager.ITF_NAME)) {
+      errorManagerItf = (ErrorManager) serverItf;
+    } else if (itfName.equals(NodeFactory.ITF_NAME)) {
       nodeFactoryItf = (NodeFactory) serverItf;
     } else if (itfName.equals(NodeMerger.ITF_NAME)) {
       nodeMergerItf = (NodeMerger) serverItf;
@@ -232,7 +241,9 @@ public abstract class AbstractIDLLoaderAnnotationProcessor
       NoSuchInterfaceException {
     checkItfName(itfName);
 
-    if (itfName.equals(NodeFactory.ITF_NAME)) {
+    if (itfName.equals(ErrorManager.ITF_NAME)) {
+      errorManagerItf = null;
+    } else if (itfName.equals(NodeFactory.ITF_NAME)) {
       nodeFactoryItf = null;
     } else if (itfName.equals(NodeMerger.ITF_NAME)) {
       nodeMergerItf = null;

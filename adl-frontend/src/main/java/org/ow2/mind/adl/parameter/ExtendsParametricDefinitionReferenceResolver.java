@@ -77,9 +77,16 @@ public class ExtendsParametricDefinitionReferenceResolver
 
         final Map<String, Value> values = new HashMap<String, Value>(
             formalParameters.length);
+        for (final FormalParameter formalParameter : formalParameters) {
+          values.put(formalParameter.getName(), null);
+        }
         for (final Argument argument : ((ArgumentContainer) reference)
             .getArguments()) {
-          assert argument.getName() != null;
+          if (argument.getName() == null) {
+            // argument name may be null if an error has been detected on
+            // arguments
+            continue;
+          }
 
           values.put(argument.getName(), argument.getValue());
         }
@@ -98,8 +105,12 @@ public class ExtendsParametricDefinitionReferenceResolver
                   final String ref = ((Reference) argValue).getRef();
                   final Value v = values.get(ref);
                   if (v != null) {
-                    // normally v is never null...
                     argument.setValue(NodeUtil.cloneTree(v));
+                  } else if (values.containsKey(ref)) {
+                    // the argument references a formal parameter, but its value
+                    // is null. i.e. the formal parameter do not have a value
+                    // because of an error. Set null value to argument.
+                    argument.setValue(null);
                   }
                 }
               }
@@ -116,8 +127,12 @@ public class ExtendsParametricDefinitionReferenceResolver
               final String ref = ((Reference) attrValue).getRef();
               final Value v = values.get(ref);
               if (v != null) {
-                // normally v is never null...
                 attribute.setValue(NodeUtil.cloneTree(v));
+              } else if (values.containsKey(ref)) {
+                // the attribute references a formal parameter, but its value
+                // is null. i.e. the formal parameter do not have a value
+                // because of an error. Set null value to attribute.
+                attribute.setValue(null);
               }
 
             }

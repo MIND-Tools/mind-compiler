@@ -1,0 +1,10 @@
+
+import api.Type1;
+
+composite Composite1 extends Type1{
+
+  contains Primitive1 as subComp1;
+  
+  binds this.sItf to subComp1.sItf;
+  binds subComp1.cItf to this.cItf;
+}
