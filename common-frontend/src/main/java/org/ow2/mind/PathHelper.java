@@ -128,8 +128,13 @@ public final class PathHelper {
    * @param path a valid path (see {@link #isValid(String)}).
    * @return the absolute path that is denoted by the given
    *         <code>path<code> relatively to the given <code>dirName</code>.
+   * @throws InvalidRelativPathException if the given path does not designate a
+   *           file inside the source tree. For instance if <code>dirName</code>
+   *           is <code>"foo/"</code> and <code>path</code> is
+   *           <code>"../../bar"</code>.
    */
-  public static String toAbsolute(String dirName, String path) {
+  public static String toAbsolute(String dirName, String path)
+      throws InvalidRelativPathException {
     if (!isRelative(path)) return path;
 
     // remove '/' at the end of dirName if any
@@ -147,8 +152,8 @@ public final class PathHelper {
     assert path.startsWith("../");
     final int lastSlash = dirName.lastIndexOf('/');
     if (lastSlash <= 0) {
-      if (path.startsWith("../../")) {
-        throw new IllegalArgumentException("Invalid relative path \"" + path
+      if (path.startsWith("../../") || dirName.length() == 0) {
+        throw new InvalidRelativPathException("Invalid relative path \"" + path
             + "\" for directory \"" + dirName + "\".");
       }
       return (dirName.startsWith("/")) ? "/" + path.substring(3) : path
@@ -194,11 +199,16 @@ public final class PathHelper {
    * @return the absolute path that is denoted by the given <code>path</code>
    *         relatively to the directory that correspond to the package name of
    *         the given fully-qualified name.
+   * @throws InvalidRelativPathException if the given path does not designate a
+   *           file inside the source tree. For instance if
+   *           <code>fullyQualifiedName</code> is <code>"foo.bar"</code> and
+   *           <code>path</code> is <code>"../../bar"</code>.
    * @see #fullyQualifiedNameToDirName(String)
    * @see #toAbsolute(String, String)
    */
   public static String fullyQualifiedNameToAbsolute(
-      final String fullyQualifiedName, final String path) {
+      final String fullyQualifiedName, final String path)
+      throws InvalidRelativPathException {
     return toAbsolute(fullyQualifiedNameToDirName(fullyQualifiedName), path);
   }
 
@@ -213,11 +223,15 @@ public final class PathHelper {
    * @return the absolute path that is denoted by the given <code>path</code>
    *         relatively to the directory that correspond to the given package
    *         name.
+   * @throws InvalidRelativPathException if the given path does not designate a
+   *           file inside the source tree. For instance if
+   *           <code>packageName</code> is <code>"foo"</code> and
+   *           <code>path</code> is <code>"../../bar"</code>.
    * @see #packageNameToDirName(String)
    * @see #toAbsolute(String, String)
    */
   public static String packageNameToAbsolute(final String packageName,
-      final String path) {
+      final String path) throws InvalidRelativPathException {
     return toAbsolute(packageNameToDirName(packageName), path);
   }
 
@@ -257,5 +271,18 @@ public final class PathHelper {
       path += extension;
     }
     return path;
+  }
+
+  /**
+   * Exception thrown by {@link PathHelper#toAbsolute(String, String)}.
+   */
+  public static class InvalidRelativPathException extends Exception {
+
+    /**
+     * @see Exception#Exception(String)
+     */
+    public InvalidRelativPathException(final String message) {
+      super(message);
+    }
   }
 }

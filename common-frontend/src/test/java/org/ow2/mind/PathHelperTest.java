@@ -40,6 +40,7 @@ import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
+import org.ow2.mind.PathHelper.InvalidRelativPathException;
 import org.testng.annotations.Test;
 
 public class PathHelperTest {
@@ -133,9 +134,11 @@ public class PathHelperTest {
 
   /**
    * Test method for {@link PathHelper#toAbsolute(String, String)}.
+   * 
+   * @throws Exception
    */
   @Test(groups = {"functional"})
-  public void testToAbsolute() {
+  public void testToAbsolute() throws Exception {
     assertEquals("foo/bar.txt", toAbsolute("foo", "./bar.txt"));
     assertEquals("foo/bar.txt", toAbsolute("foo", "bar.txt"));
     assertEquals("foo/bar.txt", toAbsolute("foo/", "./bar.txt"));
@@ -153,10 +156,18 @@ public class PathHelperTest {
 
     assertEquals("toto/bar.txt", toAbsolute("foo/titi", "../../toto/bar.txt"));
 
+    testFaultyToAbsolute("foo", "../../bar.txt");
+    testFaultyToAbsolute("foo", "./../../bar.txt");
+    testFaultyToAbsolute("/", "../bar.txt");
+    testFaultyToAbsolute("", "../bar.txt");
+
+  }
+
+  private void testFaultyToAbsolute(final String dirName, final String path) {
     try {
-      toAbsolute("foo", "./../../bar.txt");
+      toAbsolute(dirName, path);
       fail();
-    } catch (final IllegalArgumentException e) {
+    } catch (final InvalidRelativPathException e) {
       // OK
     }
   }
@@ -184,28 +195,34 @@ public class PathHelperTest {
   /**
    * Test method for
    * {@link PathHelper#fullyQualifiedNameToAbsolute(String, String)} .
+   * 
+   * @throws Exception
    */
   @Test(groups = {"functional"})
-  public void testFullyQualifiedNameToAbsolute() {
-    assertEquals("/foo/bar.txt", fullyQualifiedNameToAbsolute("foo.toto",
-        "./bar.txt"));
-    assertEquals("/foo/titi/bar.txt", fullyQualifiedNameToAbsolute("foo.toto",
-        "./titi/bar.txt"));
-    assertEquals("/bar.txt", fullyQualifiedNameToAbsolute("foo.toto",
-        "../bar.txt"));
-    assertEquals("/hello/cli_src/client.c", fullyQualifiedNameToAbsolute(
-        "hello.client.Client", "../cli_src/client.c"));
+  public void testFullyQualifiedNameToAbsolute() throws Exception {
+    assertEquals("/foo/bar.txt",
+        fullyQualifiedNameToAbsolute("foo.toto", "./bar.txt"));
+    assertEquals("/foo/titi/bar.txt",
+        fullyQualifiedNameToAbsolute("foo.toto", "./titi/bar.txt"));
+    assertEquals("/bar.txt",
+        fullyQualifiedNameToAbsolute("foo.toto", "../bar.txt"));
+    assertEquals(
+        "/hello/cli_src/client.c",
+        fullyQualifiedNameToAbsolute("hello.client.Client",
+            "../cli_src/client.c"));
   }
 
   /**
    * Test method for {@link PathHelper#packageNameToAbsolute(String, String)} .
+   * 
+   * @throws Exception
    */
   @Test(groups = {"functional"})
-  public void testPackageNameToAbsolute() {
-    assertEquals("/foo/toto/bar.txt", packageNameToAbsolute("foo.toto",
-        "./bar.txt"));
-    assertEquals("/foo/toto/titi/bar.txt", packageNameToAbsolute("foo.toto",
-        "./titi/bar.txt"));
+  public void testPackageNameToAbsolute() throws Exception {
+    assertEquals("/foo/toto/bar.txt",
+        packageNameToAbsolute("foo.toto", "./bar.txt"));
+    assertEquals("/foo/toto/titi/bar.txt",
+        packageNameToAbsolute("foo.toto", "./titi/bar.txt"));
     assertEquals("/bar.txt", packageNameToAbsolute("foo", "../bar.txt"));
   }
 

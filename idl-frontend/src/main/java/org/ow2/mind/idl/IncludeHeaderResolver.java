@@ -38,6 +38,7 @@ import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.ow2.mind.CommonASTHelper;
 import org.ow2.mind.PathHelper;
+import org.ow2.mind.PathHelper.InvalidRelativPathException;
 import org.ow2.mind.error.ErrorManager;
 import org.ow2.mind.idl.ast.Header;
 import org.ow2.mind.idl.ast.IDL;
@@ -83,7 +84,13 @@ public class IncludeHeaderResolver extends AbstractIncludeResolver {
 
         if (!path.startsWith("/")) {
           // look-for header relatively to encapsulatingDir
-          final String relPath = toAbsolute(encapsulatingDir, path);
+          String relPath;
+          try {
+            relPath = toAbsolute(encapsulatingDir, path);
+          } catch (final InvalidRelativPathException e) {
+            errorManagerItf.logError(IDLErrors.INVALID_INCLUDE, include, path);
+            return IDLASTHelper.newUnresolvedIDLNode(nodeFactoryItf, path);
+          }
           URL url = idlLocatorItf.findSourceHeader(relPath, context);
           if (url != null) {
             // IDL found with relPath
