@@ -31,6 +31,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.Map;
 
+import org.objectweb.fractal.adl.ADLErrors;
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.CompilerError;
 import org.objectweb.fractal.adl.error.BasicErrorLocator;
@@ -49,6 +50,7 @@ import org.ow2.mind.idl.ast.InterfaceDefinition;
 import org.ow2.mind.idl.ast.SharedTypeDefinition;
 import org.ow2.mind.idl.jtb.ParseException;
 import org.ow2.mind.idl.jtb.Parser;
+import org.ow2.mind.idl.jtb.TokenMgrError;
 import org.ow2.mind.idl.jtb.syntaxtree.IDTFile;
 import org.ow2.mind.idl.jtb.syntaxtree.ITFFile;
 
@@ -123,6 +125,10 @@ public class IDLFileLoader implements IDLLoader, BindingController {
       final ErrorLocator locator = new BasicErrorLocator(path,
           e.currentToken.beginLine, e.currentToken.beginColumn);
       throw new ADLException(IDLErrors.PARSE_ERROR, locator, e.getMessage());
+    } catch (final TokenMgrError e) {
+      // TokenMgrError do not have location info.
+      final ErrorLocator locator = new BasicErrorLocator(path, -1, -1);
+      throw new ADLException(ADLErrors.PARSE_ERROR, locator, e.getMessage());
     }
 
     if (!name.equals(itf.getName())) {
