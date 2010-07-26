@@ -17,15 +17,17 @@ primitive helloworld.ClientInlinedSingleton {
        Implementation of the main interface.
     ------------------------------------------------------------------------- */
 
+    void prints(void) {
+      /* call the 'print' method of the 'sa' client interface. */
+      CALL(sa, print)(PRIVATE.s);
+    }
+
     /* int main(int argc, string[] argv) */
     int METH(main, main) (int argc, char *argv[]){
       PRIVATE.s = "hello world";
       
-      /* call the 'print' method of the 'sa' client interface. */
-      CALL(sa, print)(PRIVATE.s);
-    
-      /* call again the same method to look at invocation count */
-      CALL(sa, println)(PRIVATE.s);
+      prints(); 
+      prints();
     
       return 0;
     }
