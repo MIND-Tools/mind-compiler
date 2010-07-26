@@ -22,6 +22,10 @@
 
 package org.ow2.mind.error;
 
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.LineNumberReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -61,10 +65,36 @@ public class SimpleErrorManager implements ErrorManager {
       } else {
         errorId = Integer.toString(error.getTemplate().getErrorId());
       }
-      logger.fine("Error " + error.getTemplate().getGroupId() + ":" + errorId);
-      logger.fine(ErrorHelper.formatError(error));
+      logger.finer("Error " + error.getTemplate().getGroupId() + ":" + errorId);
+      logger.finer(ErrorHelper.formatError(error));
 
-      logger.fine("Stack trace : ");
+      if (error.getLocator().getInputFilePath() != null
+          && logger.isLoggable(Level.FINEST)) {
+        final File inputFile = new File(error.getLocator().getInputFilePath());
+        if (inputFile.exists()) {
+          logger.finest("Input File :");
+          LineNumberReader reader = null;
+          try {
+            reader = new LineNumberReader(new FileReader(inputFile));
+            String line;
+            while ((line = reader.readLine()) != null) {
+              logger.finest(line);
+            }
+          } catch (final IOException e1) {
+            // ignore
+          } finally {
+            if (reader != null) {
+              try {
+                reader.close();
+              } catch (final IOException e) {
+                // ignore
+              }
+            }
+          }
+        }
+      }
+
+      logger.finer("Stack trace : ");
       // capture the current stack-trace
       StackTraceElement[] stackTrace;
       try {
@@ -78,7 +108,7 @@ public class SimpleErrorManager implements ErrorManager {
         if (!stackTrace[i].getMethodName().equals("logError")) break;
       }
       for (; i < stackTrace.length; i++) {
-        logger.fine("  " + stackTrace[i].toString());
+        logger.finer("  " + stackTrace[i].toString());
       }
     }
   }
