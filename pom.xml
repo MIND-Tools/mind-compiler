@@ -555,6 +555,21 @@
                     </executions>
                 </plugin>
 
+                <!-- Configure YATL plugin -->
+                <plugin>
+                    <groupId>org.ow2.mind.yatl</groupId>
+                    <artifactId>maven-yatlc-plugin</artifactId>
+                    <version>0.1-SNAPSHOT</version>
+                    <executions>
+                        <execution>
+                            <id>Compile templates</id>
+                            <goals>
+                                <goal>yatlc</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+
                 <!-- Configure antlr plugin -->
                 <plugin>
                     <groupId>org.antlr</groupId>

@@ -58,6 +58,11 @@
     <build>
         <plugins>
             <plugin>
+                <groupId>org.ow2.mind.yatl</groupId>
+                <artifactId>maven-yatlc-plugin</artifactId>
+            </plugin>
+
+            <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
                     <groups>${test.groups}</groups>
