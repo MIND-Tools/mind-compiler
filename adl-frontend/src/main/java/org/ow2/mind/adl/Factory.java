@@ -193,6 +193,8 @@ public final class Factory {
     final NoAnySubComponentLoader nascl = new NoAnySubComponentLoader();
     final AnnotationProcessorLoader apl2 = new AnnotationProcessorLoader();
     final AnnotationProcessorLoader apl3 = new AnnotationProcessorLoader();
+    final InterfaceNormalizerLoader inl = new InterfaceNormalizerLoader();
+    final InterfaceCheckerLoader itfcl = new InterfaceCheckerLoader();
     final InterfaceSignatureLoader isl = new InterfaceSignatureLoader();
     final CompositeInternalInterfaceLoader ciil = new CompositeInternalInterfaceLoader();
     final MembraneCheckerLoader mcl = new MembraneCheckerLoader();
@@ -222,7 +224,9 @@ public final class Factory {
     bnl.clientLoader = mcl;
     mcl.clientLoader = ciil;
     ciil.clientLoader = isl;
-    isl.clientLoader = apl3;
+    isl.clientLoader = itfcl;
+    itfcl.clientLoader = inl;
+    inl.clientLoader = apl3;
     apl3.clientLoader = apl2;
     apl2.clientLoader = nascl;
     nascl.clientLoader = el;
@@ -251,6 +255,8 @@ public final class Factory {
     scrl.errorManagerItf = errorManager;
     el.errorManagerItf = errorManager;
     nascl.errorManagerItf = errorManager;
+    inl.errorManagerItf = errorManager;
+    itfcl.errorManagerItf = errorManager;
     isl.errorManagerItf = errorManager;
     mcl.errorManagerItf = errorManager;
     bnl.errorManagerItf = errorManager;

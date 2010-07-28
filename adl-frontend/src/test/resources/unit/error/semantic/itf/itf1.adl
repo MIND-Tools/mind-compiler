@@ -1,0 +1,7 @@
+//#SemanticError GroupId=MADL ErrorId=MISSING_COLLECTION_SIZE line=4
+
+primitive itf.itf1 {
+  provides api.Call as multiCall[];
+  
+  source {{ }};
+}

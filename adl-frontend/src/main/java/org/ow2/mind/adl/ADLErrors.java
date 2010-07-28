@@ -357,7 +357,16 @@ public enum ADLErrors implements ErrorTemplate {
       "Invalid membrane. interfaces %s are not implemented. Add a source file or a controller.",
       "<itfs list>"),
 
-  ;
+  // ---------------------------------------------------------------------------
+  // Interface errors (160-169)
+  // ---------------------------------------------------------------------------
+
+  /** */
+  // Temporary error (i.e. unsupported feature)
+  MISSING_COLLECTION_SIZE(
+      169,
+      "Unbounded collection interface is not yet supported. The interface %s must have a fixed size.",
+      "<itf name>");
 
   /** The groupId of ErrorTemplates defined in this enumeration. */
   public static final String GROUP_ID = "MADL";
