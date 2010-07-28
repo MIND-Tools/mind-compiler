@@ -41,6 +41,7 @@ import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.JavaFactory;
 import org.objectweb.fractal.adl.Loader;
 import org.objectweb.fractal.adl.NodeFactory;
+import org.objectweb.fractal.adl.error.Error;
 import org.objectweb.fractal.adl.error.GenericErrors;
 import org.objectweb.fractal.adl.util.FractalADLLogManager;
 import org.objectweb.fractal.cecilia.targetDescriptor.TargetDescriptorException;
@@ -701,6 +702,11 @@ public class Launcher extends AbstractLauncher {
   }
 
   public List<Object> compile() throws InvalidCommandLineException {
+    return compile(null, null);
+  }
+
+  public List<Object> compile(final List<Error> errors,
+      final List<Error> warnings) throws InvalidCommandLineException {
     // Check if at least 1 adlName is specified
     if (adlToExecName.size() == 0) {
       throw new InvalidCommandLineException("no definition name is specified.",
@@ -724,6 +730,8 @@ public class Launcher extends AbstractLauncher {
           }
         }
       }
+      if (errors != null) errors.addAll(errorManager.getErrors());
+      if (warnings != null) warnings.addAll(errorManager.getWarnings());
     }
     return result;
   }
@@ -862,9 +870,16 @@ public class Launcher extends AbstractLauncher {
   public static void nonExitMain(final String... args)
       throws InvalidCommandLineException, CompilerInstantiationException,
       ADLException {
+    nonExitMain(null, null, args);
+  }
+
+  public static void nonExitMain(final List<Error> errors,
+      final List<Error> warnings, final String... args)
+      throws InvalidCommandLineException, CompilerInstantiationException,
+      ADLException {
     final Launcher l = new Launcher();
     l.init(args);
-    l.compile();
+    l.compile(errors, warnings);
   }
 
   protected static boolean nullOrEmpty(final String s) {
