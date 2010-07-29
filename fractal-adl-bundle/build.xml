@@ -16,20 +16,20 @@
 			<fileset refid="sources.dependency.fileset" />
 		</unjar>
 		<delete dir="target/src-dep/META-INF" />
-		<delete file="target/${mypom.name}.source_${mypom.version}.jar" />
+		<delete file="target/${mypom.groupId}.${mypom.artifactId}.source_${mypom.version}.jar" />
 
-		<jar destfile="target/${mypom.name}.source_${mypom.version}.jar" basedir="target/src-dep">
+		<jar destfile="target/${mypom.groupId}.${mypom.artifactId}.source_${mypom.version}.jar" basedir="target/src-dep">
 			<manifest>
-				<attribute name="Bundle-SymbolicName" value="${mypom.name}.source" />
+				<attribute name="Bundle-SymbolicName" value="${mypom.groupId}.${mypom.artifactId}.source" />
 				<attribute name="Bundle-Name" value="${mypom.name}.source" />
 				<attribute name="Bundle-Version" value="${mypom.version}" />
-				<attribute name="Eclipse-SourceBundle" value="${mypom.name};version=&quot;${mypom.version}&quot;" />
+				<attribute name="Eclipse-SourceBundle" value="${mypom.artifactId};version=&quot;${mypom.version}&quot;" />
 				<attribute name="Bundle-ManifestVersion" value="2"/>
 			</manifest>
 		</jar>
 		<artifact:install>
 			<pom refid="mypom" />
-			<attach file="target/${mypom.name}.source_${mypom.version}.jar" type="java-source" />
+			<attach file="target/${mypom.groupId}.${mypom.artifactId}.source_${mypom.version}.jar" type="java-source" />
 		</artifact:install>
 	</target>
 
