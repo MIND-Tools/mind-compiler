@@ -1,0 +1,405 @@
+package org.ow2.mind.idl;
+
+import static org.ow2.mind.st.BackendFormatRenderer.*;
+
+import org.objectweb.fractal.adl.*;
+import org.ow2.mind.idl.ast.*;
+
+public class IDL2C {
+
+
+  // ---------------------------------------------------------------------------
+  // IDL File templates
+  // ---------------------------------------------------------------------------
+
+  public $idlFile(IDL idl) throws ADLException {
+#ifndef <pathToUpperCName(idl.getName())>_H
+#define <pathToUpperCName(idl.getName())>_H
+
+/* This file is a generated file, do not edit. */
+
+#include "mindcommon.h"
+
+<(idl instanceof IncludeContainer)
+ ? Include inc : ((IncludeContainer) idl).getIncludes() 
+   | $includeDirective(inc)
+   ; separator="\n">
+<InterfaceDefinition refItf : IDLASTHelper.getReferencedInterfaces(idl, null, null)
+ | $includeReference(refItf)
+ ; separator="\n">
+
+<%
+if (idl instanceof InterfaceDefinition) {
+  for (Method meth : ((InterfaceDefinition) idl).getMethods()) {
+    if (IDLASTHelper.isVaArgs(meth)) {
+%>
+#include "stdarg.h"
+<%
+      break;
+    }
+  }
+}
+%>
+
+<(idl instanceof TypeCollectionContainer)
+ ? {<Type type : ((TypeCollectionContainer) idl).getTypes()
+     | { <$defType(type)> <(!(type instanceof ConstantDefinition)) ? ";"> }
+     ; separator="\n\n">}>
+
+<(idl instanceof InterfaceDefinition)
+ ? $defInterface((InterfaceDefinition) idl)>
+
+#endif /* <pathToUpperCName(idl.getName())>_H */
+  }
+  
+  protected $includeDirective(Include include) {
+<%
+  String s = include.getPath();
+  String path = s.substring(1, s.length() - 1);
+  if (path.endsWith(".idt")) {
+    path += ".h";
+  }
+  if (path.startsWith("/")) {
+    path = path.substring(1);
+  }
+  s = s.substring(0, 1) + path + s.substring(s.length() - 1);
+%>
+#include <s>
+  }
+
+  protected $includeReference(InterfaceDefinition itf) {
+#include "<nameToPath(itf.getName())>.itf.h"
+  }
+  
+  // ---------------------------------------------------------------------------
+  // Interface templates
+  // ---------------------------------------------------------------------------
+  
+  protected $defInterface(InterfaceDefinition itf) {
+<$interfaceVTableDef(itf)>
+
+<$interfaceTypeDef(itf)>
+
+#ifndef __COMPONENT_IS_BOUND_DEFINED
+#define __COMPONENT_IS_BOUND_DEFINED
+
+struct __component_generic_itf_desc {
+  void *selfData;
+  void *meth;
+  void *isBound;
+};
+
+__MIND_ATTRIBUTE_UNUSED
+static __MIND_INLINE int __component_is_bound(void *itfPtr) {
+  if (itfPtr == NULL) {
+    return 0;
+  }
+  while (((struct __component_generic_itf_desc *) itfPtr)->isBound != NULL
+     && ((struct __component_generic_itf_desc *) itfPtr)->isBound 
+        != ((struct __component_generic_itf_desc *) itfPtr)->selfData) {
+    itfPtr = ((struct __component_generic_itf_desc *) itfPtr)->isBound;
+  }
+  if (((struct __component_generic_itf_desc *) itfPtr)->isBound == NULL) {
+    return 0;
+  } else {
+    return 1;
+  }
+}
+
+#endif
+  }
+
+  public static enum ThisPointerKind {
+    UN_TYPED("void *_mind_this"), 
+    TYPED("CONTEXT_PTR_DECL"), 
+    NO_POINTER("");
+    
+    private final String cValue;
+    
+    private ThisPointerKind(String cValue) {
+      this.cValue = cValue;
+    }
+    
+    public String getCValue() {
+      return cValue;
+    }
+  }
+
+  protected $interfaceDescType(InterfaceDefinition itf) {
+    <$interfaceDescType(itf.getName())>
+  }
+  
+  protected $interfaceDescType(String signature) {
+    struct __component_<toCName(signature)>_itf_desc
+  }
+
+  protected $interfaceVTableType(InterfaceDefinition itf) {
+    <$interfaceVTableType(itf.getName())>
+  }
+  
+  protected $interfaceVTableType(String signature) {
+    struct __component_<toCName(signature)>_vTable
+  }
+  
+  protected $interfaceVTableDef(InterfaceDefinition itf) {
+struct __component_<toCName(itf.getName())>_vTable {
+  <Method meth : itf.getMethods()
+   | { <$methodPointerDef(meth, ThisPointerKind.UN_TYPED)>; }
+   ; separator="\n  ">
+};
+  }
+
+  protected $interfaceTypeDef(InterfaceDefinition itf) {
+<$interfaceDescType(itf)> {
+  void *selfData;
+  <$interfaceVTableType(itf)> *meths;
+  void *isBound;
+};
+typedef <$interfaceDescType(itf)> *<toCName(itf.getName())>;
+  }
+
+  public $methodDef(Method method, String methodName, ThisPointerKind thisPtr) {
+<$typeQualifier(method)><$varDecl(method.getType(), methodPrototype(methodName, method.getParameters(), thisPtr, IDLASTHelper.isVaArgs(method)))>
+  }
+
+  public $methodPointerCast(Method method, ThisPointerKind thisPtr) {
+(<$varDecl(method.getType(), methodPrototype("(*)", method.getParameters(), thisPtr, IDLASTHelper.isVaArgs(method)))>)
+  }
+
+  public $methodPointerDef(Method method, ThisPointerKind thisPtr) {
+<$methodDef(method, methodPointerName(method.getName()), thisPtr)>
+  }
+
+  protected $methodPointerName(String name) {
+(* <name>)
+  }
+
+  public $methodPrototype(String name, Parameter[] parameters, ThisPointerKind thisPtr, boolean vaArgs) {
+<name>(<
+  thisPtr.getCValue()
+><
+ ((vaArgs || parameters.length != 0) && thisPtr != ThisPointerKind.NO_POINTER)
+ ? ", "
+><
+ Parameter param : parameters
+ | $parameterDef(param)
+ ; separator=", "
+><
+ (vaArgs) 
+ ? "..."
+><
+ ((!vaArgs && parameters.length == 0) && thisPtr == ThisPointerKind.NO_POINTER)
+ ? "void"
+>)
+  }
+
+  protected $parameterDef(Parameter parameter) {
+<$typeQualifier(parameter)><varDecl(parameter.getType(), parameterName(parameter))>
+  }
+
+  protected $parameterName(Parameter parameter) {
+<(IDLASTHelper.isOut(parameter)) 
+ ? { (*<parameter.getName()>) }
+ :  parameter.getName()>
+  }
+  
+  
+  // ---------------------------------------------------------------------------
+  // Type definition templates
+  // ---------------------------------------------------------------------------
+  
+  public $defType(Type type) {
+<% 
+    if (type instanceof ConstantDefinition) {
+      defType((ConstantDefinition) type, stringBuilder);
+    } else if (type instanceof EnumDefinition) {
+      defType((EnumDefinition) type, stringBuilder);
+    } else if (type instanceof StructDefinition) {
+      defType((StructDefinition) type, stringBuilder);
+    } else if (type instanceof StructReference) {
+      defType((StructReference) type, stringBuilder);
+    } else if (type instanceof TypeDefinition) {
+      defType((TypeDefinition) type, stringBuilder);
+    } else if (type instanceof UnionDefinition) {
+      defType((UnionDefinition) type, stringBuilder);
+    } else if (type instanceof UnionReference) {
+      defType((UnionReference) type, stringBuilder);
+    }
+%>
+  }
+  
+  public $defType(ConstantDefinition constDef) {
+#define <constDef.getName()> <constDef.getValue()>
+  }
+  
+  public $defType(EnumDefinition type) {
+enum <type.getName()> {
+  <EnumMember member : type.getEnumMembers()
+   | $enumMemberDef(member)
+   ; separator=",\n">
+}
+  }
+  
+  protected $enumMemberDef(EnumMember member) {
+<member.getName()><(member.getConstantExpression() != null)
+                   ? { = <$expression(member.getConstantExpression())> } >
+  }
+  
+  public $defType(StructDefinition type) {
+struct <type.getName()> {
+  <Member member : type.getMembers()
+   | $memberDef(member)
+   ; separator="\n  ">
+}
+  }
+  
+  public $defType(StructReference type) {
+struct <type.getName()>
+  }
+  
+  public $defType(UnionDefinition type) {
+union <type.getName()> {
+  <Member member : type.getMembers()
+   | $memberDef(member)
+   ; separator="\n  ">
+}
+  }
+  
+  public $defType(UnionReference type) {
+union <type.getName()>
+  }
+  
+  protected $memberDef(Member member) {
+<$typeQualifier(member)><$varDecl(member.getType(), member.getName())>;
+  }
+  
+  public $defType(TypeDefinition type) {
+typedef <$typeQualifier(type)><$varDecl(type.getType(), type.getName())>
+  }
+  
+  // ---------------------------------------------------------------------------
+  // Variable declaration templates
+  // ---------------------------------------------------------------------------
+
+  public $varDecl(Type type, String name) {
+<%
+    if (type instanceof ArrayOf) {
+      varDecl((ArrayOf) type, name, stringBuilder);
+    } else if (type instanceof EnumDefinition) {
+      varDecl((EnumDefinition) type, name, stringBuilder);
+    } else if (type instanceof EnumReference) {
+      varDecl((EnumReference) type, name, stringBuilder);
+    } else if (type instanceof PointerOf) {
+      varDecl((PointerOf) type, name, stringBuilder);
+    } else if (type instanceof PrimitiveType) {
+      varDecl((PrimitiveType) type, name, stringBuilder);
+    } else if (type instanceof StructDefinition) {
+      varDecl((StructDefinition) type, name, stringBuilder);
+    } else if (type instanceof StructReference) {
+      varDecl((StructReference) type, name, stringBuilder);
+    } else if (type instanceof TypeDefReference) {
+      varDecl((TypeDefReference) type, name, stringBuilder);
+    } else if (type instanceof UnionDefinition) {
+      varDecl((UnionDefinition) type, name, stringBuilder);
+    } else if (type instanceof UnionReference) {
+      varDecl((UnionReference) type, name, stringBuilder);
+    }
+%>
+  }
+  
+  public $varDecl(ArrayOf type, String name) {
+<$varDecl(type.getType(), arrayOfVarName(type, name))>  
+}
+
+  protected $arrayOfVarName(ArrayOf type, String name) {
+<name>[<(type.getConstantExpression() != null)
+        ? $expression(type.getConstantExpression())>]
+}
+  
+  public $varDecl(EnumDefinition type, String name) {
+<$defType(type)> <name>
+  }
+  
+  public $varDecl(EnumReference type, String name) {
+enum <type.getName()> <name>
+  }
+  
+  public $varDecl(PointerOf type, String name) {
+<$varDecl(type.getType(), pointerOfVarName(type, name))>
+  }
+  
+  protected $pointerOfVarName(PointerOf type, String name) {
+(* <$typeQualifier(type)><name>)
+  }
+  
+  public $varDecl(PrimitiveType type, String name) {
+<(type.getName().equals("string"))
+ ? "__MIND_STRING_TYPEDEF"
+ : type.getName()> <name>
+  }
+  
+  public $varDecl(StructDefinition type, String name) {
+<$defType(type)> <name>
+  }
+  
+  public $varDecl(StructReference type, String name) {
+<$defType(type)> <name>
+  }
+  
+  public $varDecl(TypeDefReference type, String name) {
+<toCName(type.getName())> <name>
+  }
+  
+  public $varDecl(UnionDefinition type, String name) {
+<$defType(type)> <name>
+  }
+  
+  public $varDecl(UnionReference type, String name) {
+<$defType(type)> <name>
+  }
+  
+  // ---------------------------------------------------------------------------
+  // Expression templates
+  // ---------------------------------------------------------------------------
+
+  public $expression(ConstantExpression expr) {
+<%
+    if (expr instanceof BinaryOperation) {
+      expression((BinaryOperation) expr, stringBuilder);
+    } else if (expr instanceof CastOperation) {
+      expression((CastOperation) expr, stringBuilder);
+    } else if (expr instanceof Literal) {
+      expression((Literal) expr, stringBuilder);
+    } else if (expr instanceof UnaryOperation) {
+      expression((UnaryOperation) expr, stringBuilder);
+    }
+%>
+  }
+
+  public $expression(BinaryOperation expr) {
+<% 
+ConstantExpression[] subExprs = expr.getConstantExpressions();
+%>
+(<$expression(subExprs[0])>) <expr.getOperation()> (<$expression(subExprs[1])>)
+  }    
+
+  public $expression(UnaryOperation expr) {
+<expr.getOperation()> (<$expression(expr.getConstantExpression())>)
+  }    
+
+  public $expression(CastOperation expr) {
+((<$varDecl(expr.getType(), "")>) <$expression(expr.getConstantExpression())>)
+  }    
+
+  public $expression(Literal expr) {
+<expr.getExpr()>
+  }    
+
+  // ---------------------------------------------------------------------------
+  // Internal templates
+  // ---------------------------------------------------------------------------
+
+  protected $typeQualifier(TypeQualifier qualifier) {
+<(IDLASTHelper.isConst(qualifier)) ? "const "><(IDLASTHelper.isVolatile(qualifier)) ? "volatile ">
+  }
+}

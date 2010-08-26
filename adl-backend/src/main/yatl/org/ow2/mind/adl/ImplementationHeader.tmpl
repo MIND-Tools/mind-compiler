@@ -1,0 +1,90 @@
+package org.ow2.mind.adl;
+
+import static org.ow2.mind.st.BackendFormatRenderer.*;
+
+import org.objectweb.fractal.adl.ADLException;
+import org.objectweb.fractal.adl.Definition;
+import org.objectweb.fractal.adl.interfaces.Interface;
+import org.objectweb.fractal.adl.interfaces.InterfaceContainer;
+import org.objectweb.fractal.adl.types.TypeInterface;
+import org.objectweb.fractal.adl.types.TypeInterfaceUtil;
+import org.ow2.mind.adl.ast.ASTHelper;
+import org.ow2.mind.adl.idl.InterfaceDefinitionDecorationHelper;
+import org.ow2.mind.adl.membrane.ast.InternalInterfaceContainer;
+import org.ow2.mind.idl.IDL2C;
+import org.ow2.mind.idl.IDL2C.ThisPointerKind;
+import org.ow2.mind.idl.ast.Method;
+
+public class ImplementationHeader extends BackendHelper {
+
+  protected IDL2C idl2c = new IDL2C();
+
+  public $generate(Definition definition) throws ADLException {
+    /* Generated file: <nameToPath(definition.getName())>.inc */
+#define __COMPONENT_IN_<toUpperCName(definition.getName())>
+<$includeDefinitionHeader(definition)>
+
+<$serverMethodsDeclaration(definition)>
+  }
+  
+  // -----------------------------------------------------------------------------
+  // Internal templates
+  // -----------------------------------------------------------------------------
+
+  // -----------------------------------------------------------------------------
+  // Server method declaration
+
+  protected $serverMethodsDeclaration(Definition definition) throws ADLException {
+/* Start declaration of server methods */
+<(definition instanceof InterfaceContainer) 
+ ? Interface itf : ((InterfaceContainer) definition).getInterfaces()
+   | $serverMethodDecls(definition, itf)
+   ; separator="\n">
+<(definition instanceof InternalInterfaceContainer)
+ ? Interface itf : ((InternalInterfaceContainer) definition).getInternalInterfaces()
+   | $serverMethodDecls(definition, itf)
+   ; separator="\n">
+/* End declaration of server methods */
+  }
+
+  protected $serverMethodDecls(Definition definition, Interface itf) throws ADLException {
+<%
+if (! TypeInterfaceUtil.isServer(itf)) return;
+
+int nbElement = ASTHelper.getNumberOfElement(itf);
+if (nbElement != -1) {
+  for (int i = 0; i < nbElement; i++) {
+%>
+<$serverMethodDecls(definition, itf, i)>
+<% 
+  } // end of for each nbElement
+} else { // nbElement == -1
+%>
+<$serverMethodDecls(definition, itf, -1)>
+<%
+}
+%>
+  }
+
+  protected $serverMethodDecls(Definition definition, Interface itf, int index) throws ADLException {
+<Method method : InterfaceDefinitionDecorationHelper.getResolvedInterfaceDefinition((TypeInterface) itf, null, null).getMethods()
+ | (ASTHelper.isSingleton(definition))
+   ? $singletonServerMethodDecl(definition, itf, index, method)
+   : $multiServerMethodDecl(definition, itf, index, method)
+ ; separator="\n">
+  }
+
+  protected $multiServerMethodDecl(Definition definition, Interface itf, int index, Method method) {
+<$idl2c.methodDef(method, methodMacroName(itf.getName(), index, method.getName()), ThisPointerKind.TYPED)>;
+  }
+
+  protected $singletonServerMethodDecl(Definition definition, Interface itf, int index, Method method) {
+<$idl2c.methodDef(method, methodMacroName(itf.getName(), index, method.getName()), ThisPointerKind.NO_POINTER)>;
+  }
+
+  protected $methodMacroName(String itfName, int index, String methodName) {
+<(index != -1)
+ ? {INTERFACE_COLLECTION_METHOD(<itfName>, <index>, <methodName>)}
+ : {INTERFACE_METHOD(<itfName>, <methodName>)}>
+  }
+}

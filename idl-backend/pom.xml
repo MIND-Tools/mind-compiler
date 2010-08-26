@@ -34,4 +34,13 @@
             <classifier>jdk15</classifier>
         </dependency>
     </dependencies>
+    
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.ow2.mind.yatl</groupId>
+                <artifactId>maven-yatlc-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
 </project>

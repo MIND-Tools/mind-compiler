@@ -1,0 +1,106 @@
+package org.ow2.mind.adl;
+
+import static org.ow2.mind.st.BackendFormatRenderer.*;
+
+import org.objectweb.fractal.adl.Definition;
+import org.objectweb.fractal.adl.interfaces.Interface;
+import org.objectweb.fractal.adl.types.TypeInterface;
+import org.ow2.mind.adl.ast.Attribute;
+import org.ow2.mind.adl.ast.Component;
+import org.ow2.mind.idl.ast.InterfaceDefinition;
+
+public class BackendHelper {
+
+  // ---------------------------------------------------------------------------
+  // InterfaceDefinition helper methods
+
+  public static $interfaceType(Interface itf) {
+    <$interfaceType(((TypeInterface) itf).getSignature())>
+  }
+  
+  public static $interfaceType(String signature) {
+    <toCName(signature)>
+  }
+
+  public static $interfaceDescType(Interface itf) {
+    <$interfaceDescType(((TypeInterface) itf).getSignature())>
+  }
+  
+  public static $interfaceDescType(String signature) {
+    struct __component_<toCName(signature)>_itf_desc
+  }
+
+  public static $interfaceVTableType(Interface itf) {
+    <$interfaceVTableType(((TypeInterface) itf).getSignature())>
+  }
+  
+  public static $interfaceVTableType(String signature) {
+    struct __component_<toCName(signature)>_vTable
+  }
+  
+  public static $includeItf(Interface itf) {
+    <$includeItf(((TypeInterface) itf).getSignature())>
+  }
+  
+  public static $includeItf(InterfaceDefinition itfDef) {
+    <$includeItf(itfDef.getName())>
+  }
+  
+  public static $includeItf(String signature) {
+    #include "<nameToPath(signature)>.itf.h"
+  }
+
+  // ---------------------------------------------------------------------------
+  // Definition helper methods
+
+  public static $includeDefinitionHeader(Definition definition) {
+    <$includeDefinitionHeader(definition.getName())>
+  }
+  
+  public static $includeDefinitionHeader(String defName) {
+    #include "<nameToPath(defName)>.adl.h"
+  }
+  
+  public static $componentTypeName(Component subComp) {
+    <$componentTypeName(subComp.getDefinitionReference().getName())>
+  }
+  
+  public static $componentTypeName(Definition definition) {
+    <$componentTypeName(definition.getName())>
+  }
+  
+  public static $componentTypeName(String definitionName) {
+    __component_<toCName(definitionName)>_t
+  }
+  
+  public static $vTableInstanceName(Definition definition, Interface itf) {
+    <$vTableInstanceName(definition, itf, -1)>
+  }
+  
+  public static $vTableInstanceName(Definition definition, Interface itf, int index) {
+    __component_<toCName(definition.getName())>_<itf.getName()><(index != -1) ? {_<index>}>_VTable
+  }
+  
+  public static $componentSingletonInstanceName(Definition definition) {
+     <$componentSingletonInstanceName(definition.getName())>
+  }
+  
+  public static $componentSingletonInstanceName(String definitionName) {
+    __component_<toCName(definitionName)>_singleton_instance
+  }
+
+  
+  // ---------------------------------------------------------------------------
+  // Attribute helper methods
+  
+  public static $attributeTypeName(Attribute attr) {
+    <$attributeTypeName(attr.getType())>
+  }
+  
+  public static $attributeTypeName(String attrType) {
+    <(attrType.equals("string")) 
+     ? { const char * } 
+     : attrType >
+  }
+  
+}

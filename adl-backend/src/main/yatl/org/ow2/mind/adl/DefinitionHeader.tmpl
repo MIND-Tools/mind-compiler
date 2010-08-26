@@ -1,0 +1,507 @@
+package org.ow2.mind.adl;
+
+import static org.ow2.mind.st.BackendFormatRenderer.*;
+
+import org.objectweb.fractal.adl.ADLException;
+import org.objectweb.fractal.adl.Definition;
+import org.objectweb.fractal.adl.interfaces.Interface;
+import org.objectweb.fractal.adl.interfaces.InterfaceContainer;
+import org.objectweb.fractal.adl.types.TypeInterface;
+import org.objectweb.fractal.adl.types.TypeInterfaceUtil;
+import org.ow2.mind.adl.ast.ASTHelper;
+import org.ow2.mind.adl.ast.Attribute;
+import org.ow2.mind.adl.ast.AttributeContainer;
+import org.ow2.mind.adl.ast.Component;
+import org.ow2.mind.adl.ast.ComponentContainer;
+import org.ow2.mind.adl.ast.Data;
+import org.ow2.mind.adl.ast.ImplementationContainer;
+import org.ow2.mind.adl.ast.MindInterface;
+import org.ow2.mind.adl.ast.Source;
+import org.ow2.mind.adl.idl.InterfaceDefinitionDecorationHelper;
+import org.ow2.mind.adl.membrane.ControllerInterfaceDecorationHelper;
+import org.ow2.mind.adl.membrane.ast.Controller;
+import org.ow2.mind.adl.membrane.ast.ControllerContainer;
+import org.ow2.mind.adl.membrane.ast.InternalInterfaceContainer;
+import org.ow2.mind.adl.parameter.ast.FormalParameter;
+import org.ow2.mind.adl.parameter.ast.FormalParameterContainer;
+import org.ow2.mind.adl.parameter.ast.ParameterASTHelper;
+import org.ow2.mind.idl.ast.InterfaceDefinition;
+
+public class DefinitionHeader extends BackendHelper {
+
+
+    public $generate(Definition definition) throws ADLException {
+/* Generated file: <nameToPath(definition.getName())>.adl.h */
+#ifndef __COMPONENT_<toUpperCName(definition.getName())>_ADL_H
+#define __COMPONENT_<toUpperCName(definition.getName())>_ADL_H
+
+#include "mindcommon.h"
+
+/* Start including the interface descriptions */
+<Interface itf : ((InterfaceContainer) definition).getInterfaces() 
+ | $includeItf(itf)
+ ; separator="\n">
+<$usedInterfaceDefinitions(definition)>
+/* End including the interface descriptions */
+
+<% if (definition instanceof ComponentContainer) { %>
+/* Start including the sub-component descriptions */
+<Component comp : ((ComponentContainer) definition).getComponents() 
+ | $includeDefinitionHeader(comp.getDefinitionReference().getName())
+ ; separator="\n">
+/* End including the sub-component descriptions */
+<% } %>
+
+<$controllerGlobalDecls(definition)>
+
+/* Start definition of internal component data type */
+<$componentInternalDataTypeName(definition)> {
+  <$typeStructures(definition)>
+  <$subComponentStructures(definition)>
+  <$attributeStructures(definition)>
+  <$controllerStructures(definition)>
+};
+/* End definition of internal component data type */
+
+/* Start definition of component type */
+<$componentTypeDef(definition)> 
+/* End  definition of component type */
+
+/* Start declaration of interface V-Tables. */
+<$componentVTableDecl(definition)>
+/* End declaration of interface V-Tables. */
+
+/* Start declaration of factory */
+<$factoryDef(definition)>
+/* End declaration of factory */
+
+#endif /* __COMPONENT_<toUpperCName(definition.getName())>_ADL_H */
+
+    }
+
+  // ---------------------------------------------------------------------------
+  // Internal templates
+  // ---------------------------------------------------------------------------
+
+  // ---------------------------------------------------------------------------
+  // controllers global declarations
+
+  protected $controllerGlobalDecls(Definition definition) {
+<% 
+if (definition instanceof ControllerContainer) { 
+%>
+<Controller ctrl 
+ : ((ControllerContainer) definition).getControllers() 
+ | { 
+     <Source src : ctrl.getSources() | { // TODO } > 
+   }>
+<% 
+} 
+%>
+  }
+  
+  // ---------------------------------------------------------------------------
+  // Used interface definitions
+
+  protected $usedInterfaceDefinitions(Definition definition) throws ADLException {
+<InterfaceDefinition itf : InterfaceDefinitionDecorationHelper.getUsedInterfaceDefinitions(definition, null, null) 
+ | $includeItf(itf)
+ ; separator="\n">
+  }
+  
+  // ---------------------------------------------------------------------------
+  // Internal data type generation
+
+  protected $typeStructures(Definition definition) {
+<% 
+Interface[] itfs = (definition instanceof InterfaceContainer) ? ((InterfaceContainer) definition).getInterfaces() : null;
+if (itfs != null && itfs.length > 0) { 
+%>
+  /* external interfaces */
+  struct {
+    <Interface itf : itfs 
+     | $interfaceDescriptorDecl((TypeInterface) itf)
+     ; separator="\n    ">
+  } type;
+<% 
+} 
+
+Interface[] internalItfs = (definition instanceof InternalInterfaceContainer) ? ((InternalInterfaceContainer) definition).getInternalInterfaces() : null;
+if (internalItfs != null && internalItfs.length > 0) {
+%>
+  /* internal interfaces */
+  struct {
+    <Interface itf : internalItfs 
+     | $interfaceDescriptorDecl((TypeInterface) itf)
+     ; separator="\n    ">
+  } inner_type;
+<%
+}
+%>
+  }
+  
+  protected $interfaceDescriptorDecl(TypeInterface itf) {
+    <(TypeInterfaceUtil.isClient(itf)) 
+     ? $interfaceType(itf) 
+     : $interfaceDescType(itf)
+    > <itf.getName()><(ASTHelper.getNumberOfElement(itf) != -1) 
+                      ? { [<ASTHelper.getNumberOfElement(itf)>] }>; 
+  }
+
+  
+  
+  protected $subComponentStructures(Definition definition) {
+<% 
+Component subComps[] = (definition instanceof ComponentContainer) ? ((ComponentContainer) definition).getComponents() : null;
+if (subComps != null && subComps.length > 0 ) {
+%>
+  /* sub components */
+  struct {
+    <Component subComp : subComps 
+     | { <$componentTypeName(subComp)> *<subComp.getName()>; } 
+     ; separator="\n    ">
+  } components;
+<%
+}
+%>
+  }
+  
+  protected $attributeStructures(Definition definition) {
+<% 
+Attribute attrs[] = (definition instanceof AttributeContainer) ? ((AttributeContainer) definition).getAttributes() : null;
+if (attrs != null && attrs.length > 0 ) {
+%>
+  /* attributes */
+  struct {
+    <Attribute attr : attrs 
+     | { <$attributeTypeName(attr)> <attr.getName()>; } 
+     ; separator="\n    ">
+  } attributes;
+<%
+}
+%>
+  }
+
+  protected $controllerStructures(Definition definition) {
+<% 
+Controller ctrls[] = (definition instanceof ControllerContainer) ? ((ControllerContainer) definition).getControllers() : null;
+if (ctrls != null && ctrls.length > 0 ) {
+%>
+  <Controller ctrl : ctrls 
+   | { <Source src : ctrl.getSources()
+       | { /* TODO ctrl data decl */ }
+       ; separator="\n    "> 
+     } > 
+<%
+}
+%>
+  }
+  
+  protected $componentInternalDataTypeName(Definition definition) {
+struct __component_<toCName(definition.getName())>_internal_data_t
+  }
+  
+  protected $componentTypeDef(Definition definition) {
+#ifdef __COMPONENT_IN_<toUpperCName(definition.getName())>
+#ifdef COMP_DATA
+#undef COMP_DATA
+#endif
+#define COMP_DATA <$componentInternalDataTypeName(definition)> __component_internal_data
+
+#ifdef PRIVATE_DATA_T
+#undef PRIVATE_DATA_T
+#endif
+#define PRIVATE_DATA_T <$componentTypeName(definition)>
+
+<%
+Data data = (definition instanceof ImplementationContainer) ? ((ImplementationContainer) definition).getData() : null;
+if (data != null) {
+  if (data.getCCode() != null) {
+%>
+/* Start inlined data code */
+<sourceToLine(data.astGetSource())>
+<data.getCCode()>
+/* End inlined data code. */
+<%
+    if (ASTHelper.isSingleton(definition)) {
+%>
+typedef struct {
+  COMP_DATA;
+} PRIVATE_DATA_T;
+<%
+    }
+  } else { /* data.getPath() != null */
+%>
+/* Include data file */
+#include "<toCPath(data.getPath())>"
+<%
+  }
+  if (ASTHelper.isSingleton(definition)) {
+%>
+typedef struct {
+  COMP_DATA;
+} PRIVATE_DATA_T;
+<%
+  }
+} else { /* data == null */
+%>
+/* No private data */
+typedef struct {
+  COMP_DATA;
+} PRIVATE_DATA_T;
+<%
+}
+%>
+
+<%
+if (ASTHelper.isSingleton(definition)) {
+%>
+/* declaration of singleton instance as global variable. */
+#define INSTANCE_<$componentSingletonInstanceName(definition)>_DECLARED
+extern PRIVATE_DATA_T <$componentSingletonInstanceName(definition)>;
+<%
+}
+%>
+
+#else /* __COMPONENT_IN_<toUpperCName(definition.getName())> */
+typedef struct {
+  <$componentInternalDataTypeName(definition)> __component_internal_data;
+} <$componentTypeName(definition)>;
+#endif /* __COMPONENT_IN_<toUpperCName(definition.getName())> */
+  }
+
+  // -----------------------------------------------------------------------------
+  // V-Table declaration
+
+  protected $componentVTableDecl(Definition definition) {
+<% 
+Interface[] itfs = (definition instanceof InterfaceContainer) ? ((InterfaceContainer) definition).getInterfaces() : null;
+if (itfs != null && itfs.length > 0) { 
+%>
+/* Start declaration of server interface V-Tables. */
+<Interface itf : itfs
+ | $serverInterfaceVTableDecl(definition, (MindInterface) itf)
+ ; separator="\n">
+/* End declaration of server interface V-Tables. */
+<% 
+} 
+
+Interface[] internalItfs = (definition instanceof InternalInterfaceContainer) ? ((InternalInterfaceContainer) definition).getInternalInterfaces() : null;
+if (internalItfs != null && internalItfs.length > 0) {
+%>
+/* Start declaration of internal server interface V-Tables */
+<Interface itf : internalItfs
+ | $serverInterfaceVTableDecl(definition, (MindInterface) itf)
+ ; separator="\n">
+/* End declaration of internal server interface V-Tables */
+<%
+}
+%>
+  }
+  
+
+  protected $serverInterfaceVTableDecl(Definition definition, MindInterface itf) {
+<%
+if (! TypeInterfaceUtil.isServer(itf)) return;
+
+int nbElement = ASTHelper.getNumberOfElement(itf);
+if (nbElement != -1) {
+  for (int i = 0; i < nbElement; i++) {
+%>
+extern <$interfaceVTableType(itf)> <$vTableInstanceName(definition,itf,i)>;
+
+<% 
+  } // end of for each nbElement
+} else { // nbElement == -1
+%>
+extern <$interfaceVTableType(itf)> <$vTableInstanceName(definition,itf)>;
+<%
+}
+%>
+  }
+
+  // -----------------------------------------------------------------------------
+  // Factory macros
+  
+  protected $factoryDef(Definition definition) {
+#define <toUpperCName(definition.getName())>_DECLARE_INSTANCE(instance_name) \
+extern <$componentTypeName(definition)> instance_name;
+
+#define <toUpperCName(definition.getName())>_INIT_INSTANCE(instance_name<$addItfNames(definition)><$addSubComponentNames(definition)><$addAttributeNames(definition)>) \
+<$initializeGlobalControllerStructures(definition)><$componentTypeName(definition)> instance_name = { \
+  { /* __component_internal_data: */ \
+    <$initializeInterfaces(definition)><$initializeComponents(definition)><$initializeAttributes(definition)><$initializeControllerStructures(definition)>  } \
+};
+
+int __component_<toCName(definition.getName())>_factory(void **instance, void *allocItf <$componentFactoryParameters(definition)>);
+int __component_<toCName(definition.getName())>_destroy(void *instance, void *allocItf);
+  }
+  
+  protected $addItfNames(Definition definition) {
+<% 
+Interface[] itfs = (definition instanceof InterfaceContainer) ? ((InterfaceContainer) definition).getInterfaces() : null;
+Interface[] internalItfs = (definition instanceof InternalInterfaceContainer) ? ((InternalInterfaceContainer) definition).getInternalInterfaces() : null;
+%>
+<
+ (itfs != null) ? {<Interface itf : itfs | $addItfName(itf)>}
+><
+ (internalItfs != null) ? {<Interface itf : internalItfs | $addItfName(itf)>}
+>
+}
+
+  protected $addItfName(Interface itf) {
+<%
+if (TypeInterfaceUtil.isServer(itf)) return;
+
+int nbElement = ASTHelper.getNumberOfElement(itf);
+if (nbElement != -1) {
+  for (int i = 0; i < nbElement; i++) {
+%>, <itf.getName()>_<i>_ptr, <itf.getName()>_<i>_instance, <itf.getName()>_<i>_vTable<%
+  } // end of for each nbElement
+} else { // nbElement == -1
+%>, <itf.getName()>_ptr, <itf.getName()>_instance, <itf.getName()>_vTable<%
+}
+%>
+  }
+
+  protected $addSubComponentNames(Definition definition) {
+<(definition instanceof ComponentContainer) 
+ ? Component subComp : ((ComponentContainer) definition).getComponents()
+   | {, <subComp.getName()>}
+>
+  }
+
+  protected $addAttributeNames(Definition definition)  {
+<(definition instanceof AttributeContainer) 
+ ? Attribute attr : ((AttributeContainer) definition).getAttributes()
+   | {, <attr.getName()>}
+>
+  }
+   
+  protected $initializeInterfaces(Definition definition) {
+<% 
+Interface[] itfs = (definition instanceof InterfaceContainer) ? ((InterfaceContainer) definition).getInterfaces() : null;
+Interface[] internalItfs = (definition instanceof InternalInterfaceContainer) ? ((InternalInterfaceContainer) definition).getInternalInterfaces() : null;
+if (itfs != null && itfs.length > 0) {
+%>
+    { /* type */ \
+      <Interface itf : itfs 
+       | $initializeInterface(definition, itf)
+       ; separator=", \\\n      " > \
+    }, \
+    <%
+} // endif (itfs != null && itfs.length > 0)
+if (internalItfs != null && internalItfs.length > 0) {
+%>
+    { /* inner_type */ \
+      <Interface itf : internalItfs 
+       | $initializeInterface(definition, itf)
+       ; separator=", \\\n      " > \
+    }, \
+    <%
+} // endif (internalItfs != null && internalItfs.length > 0)
+%>
+  }
+
+  protected $initializeInterface(Definition definition, Interface itf) {
+    <(TypeInterfaceUtil.isClient(itf))
+     ? $initializeClientInterface(definition, itf)
+     : $initializeServerInterface(definition, itf)>
+  }
+
+  protected $initializeClientInterface(Definition definition, Interface itf) {
+<%
+int nbElement = ASTHelper.getNumberOfElement(itf);
+if (nbElement != -1) {
+  for (int i = 0; i < nbElement; i++) {
+%><itf.getName()>_<i>_ptr <(i != nbElement-1) ? ", "><%
+  } // end of for each nbElement
+} else { // nbElement == -1
+%><itf.getName()>_ptr<%
+}
+%>
+  }
+
+  protected $initializeServerInterface(Definition definition, Interface itf) {
+<%
+int nbElement = ASTHelper.getNumberOfElement(itf);
+if (nbElement != -1) {
+  for (int i = 0; i < nbElement; i++) {
+%>{ &instance_name, &<$vTableInstanceName(definition,itf, i)>, <$isBoundValue(definition, itf, i)>} <(i != nbElement-1) ? ", "><%
+  } // end of for each nbElement
+} else { // nbElement == -1
+%>{ &instance_name, &<$vTableInstanceName(definition,itf)>, <$isBoundValue(definition, itf)>}<%
+}
+%>
+  }
+
+  protected $isBoundValue(Definition definition, Interface itf) {
+    <$isBoundValue(definition, itf, -1)>
+  }
+
+  protected $isBoundValue(Definition definition, Interface itf, int index) {
+<%
+Interface delegatedInterface = ControllerInterfaceDecorationHelper.getDelegatedInterface(itf);
+%>
+<(delegatedInterface != null)
+ ? { <delegatedInterface.getName()><(index != -1) ? { _<index> }>_ptr }
+ : "&instance_name"
+>
+  }
+
+  protected $initializeComponents(Definition definition) {
+<% 
+Component subComps[] = (definition instanceof ComponentContainer) ? ((ComponentContainer) definition).getComponents() : null;
+if (subComps != null && subComps.length > 0 ) {
+%>
+    { /* components */ \
+      <Component subComp : subComps
+       | { &(<subComp.getName()>) }
+       ; separator=", \\\n      "> \
+    } \
+    <%
+}
+%>
+  }
+
+  protected $initializeAttributes(Definition definition) {
+<% 
+Attribute attrs[] = (definition instanceof AttributeContainer) ? ((AttributeContainer) definition).getAttributes() : null;
+if (attrs != null && attrs.length > 0 ) {
+%>
+    {  /* attributes: */ \
+      <Attribute attr : attrs
+       | { (<attr.getName()>) }
+       ; separator=", \\\n      "> \
+    } \
+    <%
+}
+%>
+  }
+
+  protected $initializeGlobalControllerStructures(Definition definition) {
+<(definition instanceof ControllerContainer) 
+ ? Controller ctrl : ((ControllerContainer) definition).getControllers() 
+   | { <Source src : ctrl.getSources()
+       | { /* TODO ctrl global data decl */ }> 
+     } > 
+  }
+
+  protected $initializeControllerStructures(Definition definition) {
+<(definition instanceof ControllerContainer) 
+ ? Controller ctrl : ((ControllerContainer) definition).getControllers() 
+   | { <Source src : ctrl.getSources()
+       | { /* TODO ctrl data decl */ }> 
+     } > 
+  }
+
+  protected $componentFactoryParameters(Definition definition) {
+<(definition instanceof FormalParameterContainer)
+ ? FormalParameter param : ((FormalParameterContainer) definition).getFormalParameters()
+   | { , <(ParameterASTHelper.getInferredParameterType(param) != null) 
+          ?  ParameterASTHelper.getInferredParameterType(param).getCType()
+          : "int"
+         > <param.getName()> 
+     }>
+  }
+}

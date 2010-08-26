@@ -45,6 +45,14 @@ public final class IDLASTHelper {
   private IDLASTHelper() {
   }
 
+  public static boolean isVaArgs(final Method meth) {
+    return meth.getVaArgs() != null && Method.TRUE.equals(meth.getVaArgs());
+  }
+
+  public static boolean isOut(final Parameter param) {
+    return param.getIsOut() != null && Parameter.TRUE.equals(param.getIsOut());
+  }
+
   // ---------------------------------------------------------------------------
   // InterfaceDefinition helper methods
   // ---------------------------------------------------------------------------
@@ -259,6 +267,16 @@ public final class IDLASTHelper {
   // ---------------------------------------------------------------------------
   // Type helper methods
   // ---------------------------------------------------------------------------
+
+  public static boolean isConst(final TypeQualifier qualifier) {
+    return (qualifier.getIsConst() != null && TypeQualifier.TRUE
+        .equals(qualifier.getIsConst()));
+  }
+
+  public static boolean isVolatile(final TypeQualifier qualifier) {
+    return (qualifier.getIsVolatile() != null && TypeQualifier.TRUE
+        .equals(qualifier.getIsVolatile()));
+  }
 
   /**
    * Create a new {@link PrimitiveType} node using the given {@link NodeFactory}
