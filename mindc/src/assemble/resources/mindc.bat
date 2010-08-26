@@ -16,7 +16,7 @@
 @REM  Authors: Edine Coly (edine.coly@mail.sogeti.com)
 @REM  Contributors: 
 @REM -----------------------------------------------------------------------------
-@REM Mind Compiler batch script 0.1-alpha-4-SNAPSHOT
+@REM Mind Compiler batch script ${project.version}
 @REM
 @REM Required ENV vars:
 @REM ------------------

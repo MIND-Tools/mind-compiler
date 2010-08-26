@@ -47,6 +47,7 @@ import org.ow2.mind.InputResourcesHelper;
 import org.ow2.mind.adl.ADLLocator;
 import org.ow2.mind.adl.jtb.ParseException;
 import org.ow2.mind.adl.jtb.Parser;
+import org.ow2.mind.adl.jtb.TokenMgrError;
 import org.ow2.mind.adl.jtb.syntaxtree.ADLFile;
 
 /**
@@ -113,10 +114,14 @@ public class ADLParser implements Loader, BindingController {
           e.currentToken.next.beginLine, e.currentToken.next.endLine,
           e.currentToken.next.beginColumn, e.currentToken.next.endColumn);
       throw new ADLException(ADLErrors.PARSE_ERROR, locator, e.getMessage());
+    } catch (final TokenMgrError e) {
+      // TokenMgrError do not have location info.
+      final ErrorLocator locator = new BasicErrorLocator(path, -1, -1);
+      throw new ADLException(ADLErrors.PARSE_ERROR, locator, e.getMessage());
     }
 
-    InputResourcesHelper.addInputResource(d, adlLocatorItf
-        .toInputResource(name));
+    InputResourcesHelper.addInputResource(d,
+        adlLocatorItf.toInputResource(name));
 
     return d;
   }
