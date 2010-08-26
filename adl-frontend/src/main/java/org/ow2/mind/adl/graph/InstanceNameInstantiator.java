@@ -53,19 +53,22 @@ public class InstanceNameInstantiator extends AbstractInstantiator {
         instanceName = "__component_" + toValidName(def.getName())
             + "_singleton_instance";
       } else {
-        final ComponentGraph[] parents = graph.getParents();
-        if (parents.length == 0) {
+        if (graph.getParents().length == 0) {
           // top level component
           instanceName = "__component_" + toValidName(def.getName());
-          path = instanceName;
         } else {
           instanceName = path + "_"
               + graph.getNameInParent(graph.getParents()[0]);
-          path = instanceName;
         }
       }
       graph.setDecoration("instance-name", instanceName);
 
+      if (graph.getParents().length == 0) {
+        // top level component
+        path = "__component_" + toValidName(def.getName());
+      } else {
+        path = path + "_" + graph.getNameInParent(graph.getParents()[0]);
+      }
       for (final ComponentGraph subComponent : graph.getSubComponents()) {
         initInstanceName(subComponent, path);
       }

@@ -1,0 +1,6 @@
+// Test for MIND-114
+@Singleton
+composite toto {
+  contains as hw
+    primitive { }
+}
