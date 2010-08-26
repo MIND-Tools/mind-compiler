@@ -1,0 +1,16 @@
+// Test for MIND-114
+
+composite hw {
+  provides Main as main;
+
+  contains helloworld.Client as client;
+  contains as server
+    primitive {
+      provides helloworld.Service as s ;
+      attribute int count = 2;
+      source helloworld/server.c;
+    }
+  
+  binds this.main to client.main;
+  binds client.sa to server.s;
+}

@@ -1,0 +1,9 @@
+// Test for MIND-114
+@Compile(addBootstrap=false)
+@Singleton
+composite helloWorld {
+  contains hw as hw;
+  contains toto as toto;
+  contains Bootstrap as bs;
+  binds bs.entryPoint to hw.main;
+}

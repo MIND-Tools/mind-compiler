@@ -94,6 +94,10 @@ public class WrapAnnotationProcessor
         } catch (final ClassNotFoundException e) {
           throw new ADLException(GenericErrors.INTERNAL_ERROR, e);
         }
+
+        // remove annotation from node to avoid it to be reprocessed on a
+        // definition that extends this one.
+        AnnotationHelper.removeAnnotation(node, annotation);
       } else {
         throw new ADLException(AnnotationErrors.INVALID_ANNOTATION, node,
             "@Wrap. Client's interfaces cannot be wrapped.");
