@@ -88,6 +88,10 @@ public class WrapAnnotationProcessor
         final Source src = ASTHelper.newSource(nodeFactoryItf);
         src.setCCode(st.toString());
         ((ImplementationContainer) definition).addSource(src);
+
+        // remove annotation from node to avoid it to be reprocessed on a
+        // definition that extends this one.
+        AnnotationHelper.removeAnnotation(node, annotation);
       } else {
         errorManagerItf.logError(AnnotationErrors.INVALID_ANNOTATION, node,
             "@Wrap. Client's interfaces cannot be wrapped.");

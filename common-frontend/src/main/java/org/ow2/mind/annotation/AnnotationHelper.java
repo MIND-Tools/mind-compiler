@@ -52,14 +52,13 @@ public final class AnnotationHelper {
     decoration.addAnnotation(annotation);
   }
 
-  @SuppressWarnings("unchecked")
   public static <T extends Annotation> T getAnnotation(final Node container,
       final Class<T> annotationClass) {
     final AnnotationDecoration decoration = getDecoration(container);
     if (decoration == null)
       return null;
     else
-      return (T) decoration.getAnnotation(annotationClass);
+      return decoration.getAnnotation(annotationClass);
   }
 
   public static Annotation[] getAnnotations(final Node container) {
@@ -68,6 +67,20 @@ public final class AnnotationHelper {
       return new Annotation[0];
     else
       return decoration.getAnnotations();
+  }
+
+  public static void removeAnnotation(final Node container,
+      final Annotation annotation) {
+    removeAnnotation(container, annotation.getClass());
+  }
+
+  public static <T extends Annotation> T removeAnnotation(final Node container,
+      final Class<T> annotationClass) {
+    final AnnotationDecoration decoration = getDecoration(container);
+    if (decoration == null)
+      return null;
+    else
+      return decoration.removeAnnotation(annotationClass);
   }
 
   private static AnnotationDecoration getDecoration(final Node container) {
@@ -96,8 +109,14 @@ public final class AnnotationHelper {
       }
     }
 
-    Annotation getAnnotation(final Class<? extends Annotation> annotationClass) {
-      return annotations.get(annotationClass);
+    @SuppressWarnings("unchecked")
+    <T extends Annotation> T getAnnotation(final Class<T> annotationClass) {
+      return (T) annotations.get(annotationClass);
+    }
+
+    @SuppressWarnings("unchecked")
+    <T extends Annotation> T removeAnnotation(final Class<T> annotationClass) {
+      return (T) annotations.remove(annotationClass);
     }
 
     /**

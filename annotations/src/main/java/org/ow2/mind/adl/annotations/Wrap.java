@@ -45,7 +45,7 @@ public class Wrap implements Annotation {
   }
 
   public boolean isInherited() {
-    return true;
+    return false;
   }
 
 }
