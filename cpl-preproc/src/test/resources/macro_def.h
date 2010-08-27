@@ -68,19 +68,4 @@
 
 #define PARAMS_RPARENT )
 
-#define METH_PTR_DECL(ptrName) ptrName // METH_PTR_DECL_0(COMPONENT_NAME, ptrName)
-#define METH_PTR_DECL_0(compName, ptrName) METH_PTR_DECL_1(compName, ptrName)
-#define METH_PTR_DECL_1(compName, ptrName) (* __component_##compName##_methptr_##ptrName)
-
-#define METH_PTR(ptrName) ptrName
-
-#ifndef _METH_PTR_DECL
-#define _METH_PTR_DECL(ptrName) (* ptrName)
-#endif
-
-#ifndef _METH_PTR
-#define _METH_PTR(ptrName) ptrName
-#endif
-
-
 #endif //MACRO_DEF_H

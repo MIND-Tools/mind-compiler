@@ -1,0 +1,14 @@
+@CompileDef
+primitive helloworld.ClientMethPtr {
+  data {{
+struct {
+  int a, b;
+} PRIVATE;
+}}
+  
+  provides Main as main;
+  requires Service as sa ;
+  
+  
+  source client_meth_ptr.c;
+}
