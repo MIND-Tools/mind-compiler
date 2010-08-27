@@ -103,9 +103,9 @@ parseFile returns [String res]
 
 
 protected methPtrDef returns [StringBuilder res = new StringBuilder()] 
-	: METH_PTR ws1=ws { $res.append("METH_PTR").append($ws1.text); }
+	: METH_PTR ws1=ws { $res.append($ws1.text); }
 	  (
-        '(' ws2=ws ID ws3=ws ')' { $res.append("(").append($ws2.text).append($ID.text).append($ws3.text).append(")"); } 
+        '(' ws2=ws ID ws3=ws ')' { $res.append($ws2.text).append($ID.text).append($ws3.text); } 
         | ptrMethArg             { $res.append($ptrMethArg.res); }
       )
       (
@@ -385,8 +385,8 @@ protected ptrMethCall returns [StringBuilder res = new StringBuilder()]
         '(' ws2=ws meth=ID ws3=ws ')' ws4=ws p1=params
           {
             $res.append("CALL_METHOD_PTR_").append($p1.res == null ? "WITHOUT_PARAM" : "WITH_PARAM")
-                .append("(METH_PTR").append($ws1.text).append("(")
-                .append($ws2.text).append($meth.text).append($ws3.text).append("))")
+                .append($ws1.text).append("(")
+                .append($ws2.text).append($meth.text).append($ws3.text).append(")")
                 .append($ws4.text).append($p1.res == null ? "" : $p1.res);
           }
 		| '(' ws5=ws methExpr=ptrMethCallArg ws6=ws ')' ws7=ws p2=params
