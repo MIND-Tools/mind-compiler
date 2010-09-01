@@ -73,9 +73,9 @@ public final class DepsHelper {
         throw new IllegalArgumentException("Illegal URL " + url
             + " Invalid URL protocol for jar file");
       }
-      final File jarFile = new File(jarURL.getPath());
+      final File jarFile = new File(jarURL.toURI().getPath());
       if (!jarFile.exists())
-        throw new IllegalArgumentException("Illegal URL path " + path);
+        throw new IllegalArgumentException("Illegal URL path " + jarFile);
       File unpackedJar = unpackedJars.get(jarFile);
       if (unpackedJar == null) {
         unpackedJar = unpackJar(jarFile);

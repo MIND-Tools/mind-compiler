@@ -26,9 +26,11 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -135,6 +137,25 @@ public final class DependencyHelper {
       depLogger.fine("Output file '" + outputFile
           + "' is up to date, do not recompile.");
     return false;
+  }
+
+  public static void writeDepFile(final File depFile,
+      final Map<File, List<File>> deps) throws IOException {
+    final PrintStream ps = new PrintStream(depFile);
+    for (final Map.Entry<File, List<File>> dep : deps.entrySet()) {
+      ps.printf("%s : ", dep.getKey().getPath());
+      final Iterator<File> iter = dep.getValue().iterator();
+      while (iter.hasNext()) {
+        final File file = iter.next();
+        ps.print(file.getPath());
+        if (iter.hasNext()) {
+          ps.print(" \\\n    ");
+        } else {
+          ps.print("\n\n");
+        }
+      }
+    }
+    ps.close();
   }
 
   public static Map<File, List<File>> parseDepFile(final File depfile) {
