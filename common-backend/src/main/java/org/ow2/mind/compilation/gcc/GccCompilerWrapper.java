@@ -30,9 +30,7 @@ import static org.ow2.mind.compilation.CompilerContextHelper.getLinkerCommand;
 import static org.ow2.mind.compilation.CompilerContextHelper.getLinkerScript;
 
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.LineNumberReader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -46,7 +44,6 @@ import org.objectweb.fractal.adl.util.FractalADLLogManager;
 import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.fractal.api.control.BindingController;
 import org.objectweb.fractal.api.control.IllegalBindingException;
-import org.ow2.mind.SourceFileWriter;
 import org.ow2.mind.compilation.AbstractCompilerCommand;
 import org.ow2.mind.compilation.AbstractLinkerCommand;
 import org.ow2.mind.compilation.AbstractPreprocessorCommand;
@@ -318,32 +315,34 @@ public class GccCompilerWrapper implements CompilerWrapper, BindingController {
 
   protected void processDependencyOutputFile(final File dependencyOutputFile,
       final Map<Object, Object> context) throws ADLException {
-    String depFile = "";
-    LineNumberReader reader = null;
-    String tempDir = outputFileLocatorItf.getCSourceTemporaryOutputDir(context)
-        .getPath();
-    if (File.separatorChar != '/')
-      tempDir = tempDir.replace(File.separatorChar, '/');
     try {
-      reader = new LineNumberReader(new FileReader(dependencyOutputFile));
-      String line = reader.readLine();
-      while (line != null) {
-        if (File.separatorChar != '/') line.replace(File.separatorChar, '/');
-        line = line.replace(tempDir, TEMP_DIR);
-        depFile += line + "\n";
-        line = reader.readLine();
+      final String tempDir = outputFileLocatorItf.getCSourceTemporaryOutputDir(
+          context).getCanonicalPath();
+
+      final Map<File, List<File>> deps = DependencyHelper
+          .parseDepFile(dependencyOutputFile);
+      final Map<File, List<File>> newDeps = new HashMap<File, List<File>>(
+          deps.size());
+      for (final Map.Entry<File, List<File>> dep : deps.entrySet()) {
+        final File target = new File(dep.getKey().getCanonicalPath()
+            .replace(tempDir, TEMP_DIR));
+        final List<File> depFiles = new ArrayList<File>(dep.getValue().size());
+        for (final File depFile : dep.getValue()) {
+          depFiles.add(new File(depFile.getCanonicalPath().replace(tempDir,
+              TEMP_DIR)));
+        }
+        newDeps.put(target, depFiles);
       }
-      SourceFileWriter.writeToFile(dependencyOutputFile, depFile);
-    } catch (final IOException e) {
+      DependencyHelper.writeDepFile(dependencyOutputFile, newDeps);
+    } catch (final IOException ioe) {
       if (depLogger.isLoggable(Level.WARNING))
-        depLogger.warning("Error while processing dependency file '"
-            + dependencyOutputFile + "' : " + e.getMessage());
-    } finally {
-      if (reader != null) try {
-        reader.close();
-      } catch (final IOException e) {
-        // ignore
-      }
+        depLogger
+            .warning("Error while processing dependency file '"
+                + dependencyOutputFile
+                + "' remove it to force future compilation.");
+      if (depLogger.isLoggable(Level.FINE))
+        depLogger.log(Level.FINE, "Error while processing dependency file '"
+            + dependencyOutputFile + ":", ioe);
     }
   }
 

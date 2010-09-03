@@ -63,8 +63,8 @@ public abstract class AbstractFunctionalTest {
       final ClassLoader parent, final String... rootDirs) {
     final List<URL> rootDirList = new ArrayList<URL>();
     for (String rootDir : rootDirs) {
-      if (rootDir.startsWith("/")) {
-        final File rootFile = new File(rootDir);
+      final File rootFile = new File(rootDir);
+      if (rootFile.isAbsolute()) {
         if (!rootFile.isDirectory()) {
           fail(rootDir + " is not a valid source directory");
         }
@@ -97,8 +97,8 @@ public abstract class AbstractFunctionalTest {
     }
 
     System.out.println("Init src path : " + rootDirList);
-    final ClassLoader srcLoader = new URLClassLoader(
-        rootDirList.toArray(new URL[0]), null);
+    final ClassLoader srcLoader = new URLClassLoader(rootDirList
+        .toArray(new URL[0]), null);
 
     runner.context.put("classloader", srcLoader);
   }
