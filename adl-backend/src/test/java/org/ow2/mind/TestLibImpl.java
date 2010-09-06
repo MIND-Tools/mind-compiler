@@ -129,6 +129,8 @@ public class TestLibImpl extends AbstractFunctionalTest {
         ExecutionHelper.exec(
             "ar -r " + aFile.getAbsolutePath() + " "
                 + objectFile.getAbsolutePath()).getExitValue(), 0);
+    assertEquals(ExecutionHelper.exec("ranlib " + aFile.getAbsolutePath())
+        .getExitValue(), 0);
 
     runner.compileAndRun(
         "GenericApplication<impl.MyLibTester<impl.MyLibWrapper_A>>",

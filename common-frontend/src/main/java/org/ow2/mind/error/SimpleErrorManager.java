@@ -68,7 +68,8 @@ public class SimpleErrorManager implements ErrorManager {
       logger.finer("Error " + error.getTemplate().getGroupId() + ":" + errorId);
       logger.finer(ErrorHelper.formatError(error));
 
-      if (error.getLocator().getInputFilePath() != null
+      if (error.getLocator() != null
+          && error.getLocator().getInputFilePath() != null
           && logger.isLoggable(Level.FINEST)) {
         final File inputFile = new File(error.getLocator().getInputFilePath());
         if (inputFile.exists()) {

@@ -26,6 +26,7 @@ import static org.ow2.mind.PathHelper.fullyQualifiedNameToPath;
 import static org.ow2.mind.PathHelper.isRelative;
 import static org.ow2.mind.compilation.DirectiveHelper.splitOptionString;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -83,8 +84,10 @@ import org.testng.Assert;
 
 public class CompilerRunner {
 
-  public static final String        DEFAULT_CFLAGS  = "-g -Wall -Werror -Wredundant-decls -Wunreachable-code -Wstrict-prototypes -Wwrite-strings";
-  public static final String        CFLAGS_PROPERTY = "mind.test.cflags";
+  public static final String        DEFAULT_CFLAGS    = "-g -Wall -Werror -Wredundant-decls -Wunreachable-code -Wstrict-prototypes -Wwrite-strings";
+  public static final String        CFLAGS_PROPERTY   = "mind.test.cflags";
+
+  public static final String        COMPILER_PROPERTY = "mind.test.compiler";
 
   public ErrorManager               errorManager;
   public Loader                     adlLoader;
@@ -191,6 +194,12 @@ public class CompilerRunner {
     final String cFlags = System.getProperty(CFLAGS_PROPERTY, DEFAULT_CFLAGS);
     CompilerContextHelper.setCFlags(context, splitOptionString(cFlags));
 
+    final String compiler = System.getProperty(COMPILER_PROPERTY);
+    if (compiler != null) {
+      CompilerContextHelper.setCompilerCommand(context, compiler);
+      CompilerContextHelper.setLinkerCommand(context, compiler);
+    }
+
     // Add additional predefined annotation packages
     for (final String annotationPackage : PredefinedAnnotationsHelper
         .getPredefinedAnnotations(pluginManager, context)) {
@@ -260,6 +269,15 @@ public class CompilerRunner {
     final Collection<CompilationCommand> commands = graphCompiler.visit(
         componentGraph, context);
     final boolean execOK = executor.exec(commands, context);
+
+    errors = errorManager.getErrors();
+    if (!errors.isEmpty()) {
+      throw new ADLException(new ErrorCollection(errors));
+    }
+
+    assertTrue(
+        execOK,
+        "Execution of compilation commands returns false, but no error has been logged in error manager ");
 
     return outputFile;
   }
