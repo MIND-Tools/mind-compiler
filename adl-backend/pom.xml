@@ -12,6 +12,12 @@
     <packaging>jar</packaging>
     <name>ADL backend module</name>
 
+    <properties>
+        <mind.test.cflags>-g -Wall -Werror -Wredundant-decls -Wunreachable-code
+            -Wstrict-prototypes -Wwrite-strings</mind.test.cflags>
+        <mind.test.compiler>gcc</mind.test.compiler>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -63,9 +69,8 @@
                     <systemPropertyVariables>
                         <default.file.level>FINEST</default.file.level>
                         <loggers.outfile>${project.build.testOutputDirectory}/test-log.txt</loggers.outfile>
-                        <mind.test.cflags>-g -Wall -Werror -Wredundant-decls
-                            -Wunreachable-code -Wstrict-prototypes
-                            -Wwrite-strings</mind.test.cflags>
+                        <mind.test.cflags>${mind.test.cflags}</mind.test.cflags>
+                        <mind.test.compiler>${mind.test.compiler}</mind.test.compiler>
                     </systemPropertyVariables>
                 </configuration>
             </plugin>
@@ -86,21 +91,76 @@
     <profiles>
         <profile>
             <id>stdc89</id>
+
+            <activation>
+                <property>
+                    <name>allTests</name>
+                    <value>true</value>
+                </property>
+            </activation>
+
             <build>
                 <plugins>
                     <plugin>
                         <artifactId>maven-surefire-plugin</artifactId>
-                        <configuration>
-                            <groups>${test.groups}</groups>
-                            <systemPropertyVariables>
-                                <default.file.level>FINEST</default.file.level>
-                                <loggers.outfile>${project.build.testOutputDirectory}/test-log.txt</loggers.outfile>
-                                <mind.test.cflags>-g -std=c89
-                                    -D__MIND_STRICT_C89 -Wall -Werror
-                                    -Wredundant-decls -Wunreachable-code
-                                    -Wstrict-prototypes -Wwrite-strings</mind.test.cflags>
-                            </systemPropertyVariables>
-                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>stdc89</id>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>test</goal>
+                                </goals>
+                                <configuration>
+                                    <reportsDirectory>${project.build.directory}/surefire-reports-stdc89</reportsDirectory>
+                                    <groups>${test.groups}</groups>
+                                    <systemPropertyVariables>
+                                        <default.file.level>FINEST</default.file.level>
+                                        <loggers.outfile>${project.build.testOutputDirectory}/test-log.txt</loggers.outfile>
+                                        <mind.test.cflags>-std=c89 -D__MIND_NO_INLINE
+                                            ${mind.test.cflags}</mind.test.cflags>
+                                        <mind.test.compiler>${mind.test.compiler}</mind.test.compiler>
+                                    </systemPropertyVariables>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>gcc4</id>
+
+            <activation>
+                <property>
+                    <name>allTests</name>
+                    <value>true</value>
+                </property>
+            </activation>
+
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>gcc4</id>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>test</goal>
+                                </goals>
+                                <configuration>
+                                    <reportsDirectory>${project.build.directory}/surefire-reports-gcc4</reportsDirectory>
+                                    <groups>${test.groups}</groups>
+                                    <systemPropertyVariables>
+                                        <default.file.level>FINEST</default.file.level>
+                                        <loggers.outfile>${project.build.testOutputDirectory}/test-log.txt</loggers.outfile>
+                                        <mind.test.cflags>${mind.test.cflags}</mind.test.cflags>
+                                        <mind.test.compiler>gcc4</mind.test.compiler>
+                                    </systemPropertyVariables>
+                                </configuration>
+                            </execution>
+                        </executions>
                     </plugin>
                 </plugins>
             </build>

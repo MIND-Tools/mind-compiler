@@ -9,13 +9,13 @@ composite wrap.TestSystemWrapper extends ApplicationType {
     requires System as system;
     
     source {{
-      #include <assert.h>
+      #include <mindassert.h>
     
       /* int main(int argc, string[] argv) */
       int METH(main, main) (int argc, char *argv[]){
       
         void *ptr = CALL(system, malloc)(4);
-        assert(ptr != NULL);
+        mindassert(ptr != NULL);
         CALL(system, free)(ptr);
         
         CALL(system, printf)("helloworld %s, %d\n", "foo", 3);

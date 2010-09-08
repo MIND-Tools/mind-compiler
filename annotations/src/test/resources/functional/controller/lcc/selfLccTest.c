@@ -1,4 +1,4 @@
-#include <assert.h>
+#include <mindassert.h>
 
 /* -----------------------------------------------------------------------------
    Implementation of the main interface.
@@ -9,23 +9,23 @@ int METH(main, main) (int argc, char *argv[]) {
   int err;
 
   err = CALL(lifeCycleController, getFcState)();
-  assert(err == FRACTAL_API_STOPPED);
+  mindassert(err == FRACTAL_API_STOPPED);
 
   err = CALL(lifeCycleController, startFc)();
-  assert(err == FRACTAL_API_OK);
+  mindassert(err == FRACTAL_API_OK);
 
   err = CALL(lifeCycleController, getFcState)();
-  assert(err == FRACTAL_API_STARTED);
+  mindassert(err == FRACTAL_API_STARTED);
 
-  assert(PRIVATE.a  == 1);
+  mindassert(PRIVATE.a  == 1);
 
   err = CALL(lifeCycleController, stopFc)();
-  assert(err == FRACTAL_API_OK);
+  mindassert(err == FRACTAL_API_OK);
 
   err = CALL(lifeCycleController, getFcState)();
-  assert(err == FRACTAL_API_STOPPED);
+  mindassert(err == FRACTAL_API_STOPPED);
 
-  assert(PRIVATE.a == 2);
+  mindassert(PRIVATE.a == 2);
 
   return 0;
 }

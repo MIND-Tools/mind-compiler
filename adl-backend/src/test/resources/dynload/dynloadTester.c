@@ -1,7 +1,7 @@
 #include <dlfcn.h>
 #include <stdio.h>
 #include <string.h>
-#include <assert.h>
+#include <mindassert.h>
 
 #define CONTROLLED_FLAG "--controlled"
 #define FACTORY_FLAG "--factory"
@@ -89,13 +89,13 @@ int METH(main, main) (int argc, char *argv[]) {
       int err;
 
       err = CALL_PTR(factoryComp, getFcInterface)("bindingController", (void **)&bc);
-      assert(err == FRACTAL_API_OK);
+      mindassert(err == FRACTAL_API_OK);
 
       err = CALL_PTR(bc, bindFc)("allocator", GET_MY_INTERFACE(allocator));
-      assert(err == FRACTAL_API_OK);
+      mindassert(err == FRACTAL_API_OK);
 
       err = CALL_PTR(factoryComp, getFcInterface)("factory", (void **)&factoryItf);
-      assert(err == FRACTAL_API_OK);
+      mindassert(err == FRACTAL_API_OK);
     } else {
       factory_type *factComp = (factory_type *) compSymbol;
 
@@ -104,14 +104,14 @@ int METH(main, main) (int argc, char *argv[]) {
     }
 
     err = CALL_PTR(factoryItf, newFcInstance)(&comp);
-    assert(err == FRACTAL_API_OK);
+    mindassert(err == FRACTAL_API_OK);
 
     if (factoryOfControlled) {
       CALL(checkComponent)((fractal_api_Component) comp);
     }
 
     err = CALL_PTR(factoryItf, destroyFcInstance)(comp);
-    assert(err == FRACTAL_API_OK);
+    mindassert(err == FRACTAL_API_OK);
 
   }
 
@@ -130,22 +130,22 @@ static int METH(checkComponent)(fractal_api_Component compItf)
   void *itfRef;
 
   nbItf = CALL_PTR(compItf, listFcInterfaces)(NULL);
-  assert(nbItf >=0);
+  mindassert(nbItf >=0);
   itfNames = (const char **) CALL(allocator, alloc)(nbItf* sizeof(char *));
   itfRefs = (void **) CALL(allocator, alloc)(nbItf* sizeof(void *));
 
   err = CALL_PTR(compItf, listFcInterfaces)(itfNames);
-  assert(err == nbItf);
+  mindassert(err == nbItf);
 
   err = CALL_PTR(compItf, getFcInterfaces)(itfRefs);
-  assert(err == nbItf);
+  mindassert(err == nbItf);
 
   for (i = 0; i < nbItf; i++) {
-    assert(itfNames[i] != NULL);
+    mindassert(itfNames[i] != NULL);
 
     err = CALL_PTR(compItf, getFcInterface)(itfNames[i], &itfRef);
-    assert(err == FRACTAL_API_OK);
-    assert(itfRef == itfRefs[i]);
+    mindassert(err == FRACTAL_API_OK);
+    mindassert(itfRef == itfRefs[i]);
   }
 
   CALL(allocator, free)(itfNames);

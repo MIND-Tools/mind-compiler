@@ -1,4 +1,4 @@
-#include <assert.h>
+#include <mindassert.h>
 #include <string.h>
 
 #define NB_ITF 2
@@ -20,28 +20,28 @@ int METH(main, main) (int argc, char *argv[]) {
   const char *signature;
 
   nbItf = CALL(testedComponent, listFcInterfaces)(NULL);
-  assert(nbItf == NB_ITF);
+  mindassert(nbItf == NB_ITF);
 
   err = CALL(testedComponent, listFcInterfaces)(itfNames);
-  assert(err == NB_ITF);
+  mindassert(err == NB_ITF);
 
   err = CALL(testedComponent, getFcInterfaces)(itfRefs);
-  assert(err == NB_ITF);
+  mindassert(err == NB_ITF);
 
   for (i = 0; i < NB_ITF; i++) {
-    assert(itfNames[i] != NULL);
-    assert(strcmp(itfNames[i], expectedNames[i]) == 0);
+    mindassert(itfNames[i] != NULL);
+    mindassert(strcmp(itfNames[i], expectedNames[i]) == 0);
 
-    assert(CALL(testedComponent, getFcInterfaceRole)(itfNames[i]) == expectedRoles[i]);
-    assert(CALL(testedComponent, getFcInterfaceSignature)(itfNames[i], &signature) == FRACTAL_API_OK);
-    assert(strcmp(signature, expectedSignatures[i]) == 0);
+    mindassert(CALL(testedComponent, getFcInterfaceRole)(itfNames[i]) == expectedRoles[i]);
+    mindassert(CALL(testedComponent, getFcInterfaceSignature)(itfNames[i], &signature) == FRACTAL_API_OK);
+    mindassert(strcmp(signature, expectedSignatures[i]) == 0);
 
-    assert(CALL(testedComponent, getFcInterface)(itfNames[i], &itfRef) == FRACTAL_API_OK);
-    assert(itfRef == itfRefs[i]);
+    mindassert(CALL(testedComponent, getFcInterface)(itfNames[i], &itfRef) == FRACTAL_API_OK);
+    mindassert(itfRef == itfRefs[i]);
   }
 
   err = CALL(testedComponent, getFcInterface) ("main", &itfRef);
-  assert (err == FRACTAL_API_OK);
+  mindassert (err == FRACTAL_API_OK);
 
   err = CALL_PTR((Main) itfRef, main) (argc, argv);
 

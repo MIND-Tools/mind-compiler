@@ -7,8 +7,8 @@ template st.membrane.ContentController : st.common.ComponentHelper implements st
 ControllerGlobalDecl(definition, controller) ::= <<
 #include "fractal/internal/CCdelegate.h"
 
-// declare internal interfaces descriptor. This structure is defined in the 
-// membrane implementation (i.e. in 'ctrl_impl.c' file)
+/* declare internal interfaces descriptor. This structure is defined in the 
+   membrane implementation (i.e. in 'ctrl_impl.c' file) */
 extern struct __component_InternalItfsDescriptor <definition.name;format="toCName">_internalItfs_descriptor;
 >>
 
