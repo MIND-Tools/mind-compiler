@@ -21,6 +21,7 @@
         <mind.test.cflags>-g -Wall -Werror -Wredundant-decls -Wunreachable-code
             -Wstrict-prototypes -Wwrite-strings</mind.test.cflags>
         <mind.test.compiler>gcc</mind.test.compiler>
+        <mind.test.compiler.gcc4>gcc4</mind.test.compiler.gcc4>
     </properties>
 
     <dependencies>
@@ -112,7 +113,7 @@
                                     <groups>${test.groups}</groups>
                                     <systemPropertyVariables>
                                         <default.file.level>FINEST</default.file.level>
-                                        <loggers.outfile>${project.build.testOutputDirectory}/test-log.txt</loggers.outfile>
+                                        <loggers.outfile>${project.build.testOutputDirectory}/test-log-stdc89.txt</loggers.outfile>
                                         <mind.test.cflags>-std=c89 -D__MIND_NO_INLINE
                                             ${mind.test.cflags}</mind.test.cflags>
                                         <mind.test.compiler>${mind.test.compiler}</mind.test.compiler>
@@ -151,9 +152,9 @@
                                     <groups>${test.groups}</groups>
                                     <systemPropertyVariables>
                                         <default.file.level>FINEST</default.file.level>
-                                        <loggers.outfile>${project.build.testOutputDirectory}/test-log.txt</loggers.outfile>
+                                        <loggers.outfile>${project.build.testOutputDirectory}/test-log-gcc4.txt</loggers.outfile>
                                         <mind.test.cflags>${mind.test.cflags}</mind.test.cflags>
-                                        <mind.test.compiler>gcc4</mind.test.compiler>
+                                        <mind.test.compiler>${mind.test.compiler.gcc4}</mind.test.compiler>
                                     </systemPropertyVariables>
                                 </configuration>
                             </execution>
