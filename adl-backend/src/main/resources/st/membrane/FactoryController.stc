@@ -39,7 +39,7 @@ int METH(factory, newFcInstance)(void ** instance) {
 
 FactoryParameters(definition) ::= <<
 <if (definition.astNodeTypes.("formalParameter"))>
-<definition.formalParameters:{, ATTR(<it.name>)}>
+<definition.formalParameters:{, ATTR(<it.name;format="nameToPath">)}>
 <endif>
 >>
 

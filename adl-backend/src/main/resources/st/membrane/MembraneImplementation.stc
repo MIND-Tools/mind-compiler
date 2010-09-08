@@ -141,9 +141,9 @@ ComponentFactoryParameters(definition) ::= <<
 ComponentFactoryParameter(definition, parameter) ::= <<
 , 
 <if (parameter.astDecorations.("inferred-type"))>
-<parameter.astDecorations.("inferred-type").cType> <it.name>
+<parameter.astDecorations.("inferred-type").cType> <parameter.name;format="toCName">
 <else>
-int <it.name>
+int <parameter.name;format="toCName">
 <endif>
 >>
 
@@ -209,7 +209,7 @@ InitializeComponentParameters(definition, component) ::= <<
 
 InitializeComponentParameter(definition, component, argument) ::= <<
 , <if (argument.value.astAttributes.("ref"))>
-  <argument.value.ref>
+  <argument.value.ref;format="toCName">
 <elseif (argument.value.astAttributes.("value"))>
   <argument.value.value>
 <else>
@@ -286,7 +286,7 @@ InitializeAttribute(definition, attribute) ::= <<
 <if (attribute.value)>
 newInstance->__component_internal_data.attributes.<attribute.name> = 
 <if (attribute.value.astAttributes.("ref"))>
-  <attribute.value.ref>
+  <attribute.value.ref;format="toCName">
 <elseif (attribute.value.astAttributes.("value"))>
   <attribute.value.value>
 <else>
