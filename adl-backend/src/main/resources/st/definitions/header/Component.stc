@@ -379,9 +379,9 @@ ComponentFactoryParameters(definition) ::= <<
 ComponentFactoryParameter(definition, parameter) ::= <<
 , 
 <if (parameter.astDecorations.("inferred-type"))>
-<parameter.astDecorations.("inferred-type").cType> <it.name>
+<parameter.astDecorations.("inferred-type").cType> <parameter.name;format="toCName">
 <else>
-int <it.name>
+int <parameter.name;format="toCName">
 <endif>
 >>
 

@@ -1,7 +1,7 @@
 // Test for MIND-114
 @Compile(addBootstrap=false)
 @Singleton
-composite helloWorld {
+composite helloWorldApp {
   contains hw as hw;
   contains toto as toto;
   contains Bootstrap as bs;
