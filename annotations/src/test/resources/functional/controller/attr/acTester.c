@@ -1,4 +1,4 @@
-#include <assert.h>
+#include <mindassert.h>
 #include <string.h>
 
 #define NB_ATTR 3
@@ -19,43 +19,43 @@ int METH(main, main) (int argc, char *argv[]) {
   const char *attrNames[NB_ATTR];
 
   nbAttr = CALL(testedAC, listFcAttributes)(NULL);
-  assert(nbAttr == NB_ATTR);
+  mindassert(nbAttr == NB_ATTR);
 
   err = CALL(testedAC, listFcAttributes)(attrNames);
-  assert(err == NB_ATTR);
+  mindassert(err == NB_ATTR);
 
   for (i = 0; i < NB_ATTR; i++) {
     enum AttributeType type;
-    assert(attrNames[i] != NULL);
-    assert(strcmp(attrNames[i], expectedNames[i]) == 0);
+    mindassert(attrNames[i] != NULL);
+    mindassert(strcmp(attrNames[i], expectedNames[i]) == 0);
 
-    assert(CALL(testedAC, getFcAttributeSize)(attrNames[i]) == expectedSizes[i]);
-    assert(CALL(testedAC, getFcAttributeType)(attrNames[i], &type) == FRACTAL_API_OK);
-    assert(type == expectedTypes[i]);
+    mindassert(CALL(testedAC, getFcAttributeSize)(attrNames[i]) == expectedSizes[i]);
+    mindassert(CALL(testedAC, getFcAttributeType)(attrNames[i], &type) == FRACTAL_API_OK);
+    mindassert(type == expectedTypes[i]);
 
     if (expectedTypes[i] == INT_ATTR_TYPE) {
       int attrValue;
-      assert(CALL(testedAC, getFcAttribute)(attrNames[i], (void **)&attrValue) == FRACTAL_API_OK);
-      assert(attrValue == expectedIntValues[i]);
+      mindassert(CALL(testedAC, getFcAttribute)(attrNames[i], (void **)&attrValue) == FRACTAL_API_OK);
+      mindassert(attrValue == expectedIntValues[i]);
     } else {
       char * attrValue;
-      assert(expectedTypes[i] == STRING_ATTR_TYPE);
-      assert(CALL(testedAC, getFcAttribute)(attrNames[i], (void **)&attrValue) == FRACTAL_API_OK);
-      assert(strcmp(attrValue, expectedStringValues[i]) == 0);
+      mindassert(expectedTypes[i] == STRING_ATTR_TYPE);
+      mindassert(CALL(testedAC, getFcAttribute)(attrNames[i], (void **)&attrValue) == FRACTAL_API_OK);
+      mindassert(strcmp(attrValue, expectedStringValues[i]) == 0);
     }
 
   }
 
-  assert(CALL(testedMain, main)(argc, argv) == 4);
+  mindassert(CALL(testedMain, main)(argc, argv) == 4);
 
   {
     int attrValue;
-    assert(CALL(testedAC, setFcAttribute)("attr1", (void *) 3) == FRACTAL_API_OK);
-    assert(CALL(testedAC, getFcAttribute)("attr1", (void **)&attrValue) == FRACTAL_API_OK);
-    assert(attrValue == 3);
+    mindassert(CALL(testedAC, setFcAttribute)("attr1", (void *) 3) == FRACTAL_API_OK);
+    mindassert(CALL(testedAC, getFcAttribute)("attr1", (void **)&attrValue) == FRACTAL_API_OK);
+    mindassert(attrValue == 3);
   }
 
-  assert(CALL(testedMain, main)(argc, argv) == 7);
+  mindassert(CALL(testedMain, main)(argc, argv) == 7);
 
   return 0;
 }

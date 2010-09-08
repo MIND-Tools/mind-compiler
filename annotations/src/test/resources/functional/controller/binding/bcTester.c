@@ -1,4 +1,4 @@
-#include <assert.h>
+#include <mindassert.h>
 #include <string.h>
 
 int testCalled = 0;
@@ -25,37 +25,37 @@ int METH(main, main)(int argc, char *argv[]) {
   void *itfRef;
 
   nbItf = CALL(testedBC, listFc)(NULL);
-  assert(nbItf == NB_ITF);
+  mindassert(nbItf == NB_ITF);
 
   err = CALL(testedBC, listFc)(itfNames);
-  assert(err == NB_ITF);
+  mindassert(err == NB_ITF);
 
   for (i = 0; i < NB_ITF; i++) {
-    assert(itfNames[i] != NULL);
-    assert(strcmp(itfNames[i], expectedNames[i]) == 0);
+    mindassert(itfNames[i] != NULL);
+    mindassert(strcmp(itfNames[i], expectedNames[i]) == 0);
 
-    assert(CALL(testedBC, lookupFc)(itfNames[i], &itfRef) == FRACTAL_API_OK);
-    assert(((Main) itfRef)->selfData == ((Main) expectedBinding[i])->selfData);
-    assert(((Main) itfRef)->meths == ((Main) expectedBinding[i])->meths);
+    mindassert(CALL(testedBC, lookupFc)(itfNames[i], &itfRef) == FRACTAL_API_OK);
+    mindassert(((Main) itfRef)->selfData == ((Main) expectedBinding[i])->selfData);
+    mindassert(((Main) itfRef)->meths == ((Main) expectedBinding[i])->meths);
 
-    assert(CALL(testedBC, unbindFc)(itfNames[i]) == FRACTAL_API_OK);
-    assert(CALL(testedBC, lookupFc)(itfNames[i], &itfRef) == FRACTAL_API_OK);
-    assert(itfRef == NULL);
+    mindassert(CALL(testedBC, unbindFc)(itfNames[i]) == FRACTAL_API_OK);
+    mindassert(CALL(testedBC, lookupFc)(itfNames[i], &itfRef) == FRACTAL_API_OK);
+    mindassert(itfRef == NULL);
 
-    assert(CALL(testedBC, bindFc)(itfNames[i], expectedBinding[i]) == FRACTAL_API_OK);
-    assert(CALL(testedBC, lookupFc)(itfNames[i], &itfRef) == FRACTAL_API_OK);
-    assert(((Main) itfRef)->selfData == ((Main) expectedBinding[i])->selfData);
-    assert(((Main) itfRef)->meths == ((Main) expectedBinding[i])->meths);
+    mindassert(CALL(testedBC, bindFc)(itfNames[i], expectedBinding[i]) == FRACTAL_API_OK);
+    mindassert(CALL(testedBC, lookupFc)(itfNames[i], &itfRef) == FRACTAL_API_OK);
+    mindassert(((Main) itfRef)->selfData == ((Main) expectedBinding[i])->selfData);
+    mindassert(((Main) itfRef)->meths == ((Main) expectedBinding[i])->meths);
 
   }
 
   err = CALL(testedMain, main) (argc, argv);
 
-  assert(err == 5);
-  assert(testCalled);
-  assert(testCollection0Called);
-  assert(testCollection1Called);
-  assert(testCollection2Called);
+  mindassert(err == 5);
+  mindassert(testCalled);
+  mindassert(testCollection0Called);
+  mindassert(testCollection1Called);
+  mindassert(testCollection2Called);
 
   return 0;
 }
