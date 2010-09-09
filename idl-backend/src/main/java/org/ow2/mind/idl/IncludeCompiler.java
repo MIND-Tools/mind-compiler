@@ -30,7 +30,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.objectweb.fractal.adl.ADLException;
-import org.objectweb.fractal.adl.ContextLocal;
 import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.ow2.mind.AbstractDelegatingVoidVisitor;
@@ -45,13 +44,11 @@ public class IncludeCompiler extends AbstractDelegatingVoidVisitor<IDL>
     implements
       IDLVisitor {
 
-  protected ContextLocal<Set<String>> contextualCompiledIDLs = new ContextLocal<Set<String>>();
-
   // ---------------------------------------------------------------------------
   // Client interfaces
   // ---------------------------------------------------------------------------
 
-  public IDLLoader                    idlLoaderItf;
+  public IDLLoader idlLoaderItf;
 
   // ---------------------------------------------------------------------------
   // Implementation of the Visitor interface
@@ -59,13 +56,14 @@ public class IncludeCompiler extends AbstractDelegatingVoidVisitor<IDL>
 
   public void visit(final IDL idl, final Map<Object, Object> context)
       throws ADLException {
-    Set<String> compiledIDLs = contextualCompiledIDLs.get(context);
-    if (compiledIDLs == null) {
-      compiledIDLs = new HashSet<String>();
-      contextualCompiledIDLs.set(context, compiledIDLs);
-    }
-    if (!compiledIDLs.add(idl.getName())) {
-      // IDL already compiled
+    visit(idl, new HashSet<String>(), context);
+  }
+
+  protected void visit(final IDL idl, final Set<String> visitedIDLS,
+      final Map<Object, Object> context) throws ADLException {
+
+    if (!visitedIDLS.add(idl.getName())) {
+      // IDL already visited.
       return;
     }
 
@@ -86,14 +84,14 @@ public class IncludeCompiler extends AbstractDelegatingVoidVisitor<IDL>
         final IDL includedIDL = IDLASTHelper.getIncludedIDL(include,
             idlLoaderItf, context);
         if (!(includedIDL instanceof Header)) {
-          visit(includedIDL, context);
+          visit(includedIDL, visitedIDLS, context);
         }
       }
     }
     // Compile references IDLs
     for (final InterfaceDefinition itf : IDLASTHelper.getReferencedInterfaces(
         idl, idlLoaderItf, context)) {
-      visit(itf, context);
+      visit(itf, visitedIDLS, context);
     }
 
   }
