@@ -1,7 +1,7 @@
 
 #include "mindassert.h"
 
-// supposed to be defines in assembly code.
+/* supposed to be defines in assembly code. */
 extern int myGlobalInt;
 
 /* -----------------------------------------------------------------------------
