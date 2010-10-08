@@ -584,7 +584,7 @@ public class ASTHelper {
    * <code>.a</code>, <code>.so</code> or <code>.dll</code>.
    * 
    * @param src a source node.
-   * @return code>true</code> if the given source node refers to a pre-compiled
+   * @return <code>true</code> if the given source node refers to a pre-compiled
    *         file.
    */
   public static boolean isPreCompiled(final Source src) {
@@ -594,6 +594,22 @@ public class ASTHelper {
     return srcExt != null
         && (srcExt.equals("o") || srcExt.equals("a") || srcExt.equals("so") || srcExt
             .equals("dll"));
+  }
+
+  /**
+   * Returns <code>true</code> if the given source node refers to an assembly
+   * source file (i.e. it refers to a file that ends with <code>.s</code>, or
+   * <code>.S</code>).
+   * 
+   * @param src a source node.
+   * @return <code>true</code> if the given source node refers to an assembly
+   *         source file.
+   */
+  public static boolean isAssembly(final Source src) {
+    final String srcPath = src.getPath();
+    if (srcPath == null) return false;
+    final String srcExt = PathHelper.getExtension(srcPath);
+    return srcExt != null && (srcExt.equals("s") || srcExt.equals("S"));
   }
 
   /**

@@ -167,7 +167,8 @@ public class MembraneSourceGenerator extends AbstractSourceGenerator
       } else if (sources.length > 1) {
         dependencies = new ArrayList<File>();
         for (int i = 0; i < sources.length; i++) {
-          if (!ASTHelper.isPreCompiled(sources[i])) {
+          final Source src = sources[i];
+          if (!ASTHelper.isPreCompiled(src) && !ASTHelper.isAssembly(src)) {
             dependencies.add(outputFileLocatorItf
                 .getCCompiledTemporaryOutputFile(
                     ImplementationHeaderSourceGenerator.getImplHeaderFileName(

@@ -102,6 +102,29 @@ public class IncrementalTest extends AbstractIncrementalTest {
   }
 
   @Test(groups = {"functional"})
+  public void incrementalTest17() throws Exception {
+    cleanBuildDir();
+    final Map<String, Long> t1 = recompileDefinition("asm.Assembly");
+
+    pause();
+    final Map<String, Long> t2 = recompileDefinition("asm.Assembly");
+    assertUnchangedAll(".*", t1, t2);
+  }
+
+  @Test(groups = {"functional"})
+  public void incrementalTest18() throws Exception {
+    cleanBuildDir();
+    final Map<String, Long> t1 = recompileDefinition("asm.Assembly");
+
+    pause();
+    touchFile("asm/asm.s");
+    pause();
+    final Map<String, Long> t2 = recompileDefinition("asm.Assembly");
+    assertChanged("asm/Assembly_impl1.o", t1, t2);
+    assertUnchangedAll(".*", t1, t2);
+  }
+
+  @Test(groups = {"functional"})
   public void incrementalTest2() throws Exception {
     cleanBuildDir();
     final Map<String, Long> t1 = recompile("helloworld.HelloworldApplication");
