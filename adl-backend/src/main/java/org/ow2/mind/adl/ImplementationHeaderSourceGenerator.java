@@ -122,7 +122,8 @@ public class ImplementationHeaderSourceGenerator
     final Source[] sources = ((ImplementationContainer) definition)
         .getSources();
     for (int i = 0; i < sources.length; i++) {
-      if (!ASTHelper.isPreCompiled(sources[i])) {
+      final Source src = sources[i];
+      if (!ASTHelper.isPreCompiled(src) && !ASTHelper.isAssembly(src)) {
         sb.append("#include \"")
             .append(toCPath(getImplHeaderFileName(definition, i)))
             .append("\"\n");

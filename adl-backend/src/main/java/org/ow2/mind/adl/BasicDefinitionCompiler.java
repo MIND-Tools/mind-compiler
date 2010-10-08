@@ -130,50 +130,15 @@ public class BasicDefinitionCompiler
           throw new CompilerError(GenericErrors.INTERNAL_ERROR, e);
         }
         compilationTasks.add(newFileProviderCompilerCommand(srcFile, context));
-        continue;
-      }
 
-      final String implSuffix = "_impl" + i;
-      final File cppFile = outputFileLocatorItf.getCSourceTemporaryOutputFile(
-          fullyQualifiedNameToPath(definition.getName(), implSuffix, ".i"),
-          context);
-      final File mppFile = outputFileLocatorItf.getCSourceTemporaryOutputFile(
-          fullyQualifiedNameToPath(definition.getName(), implSuffix, ".mpp.c"),
-          context);
-      final File objectFile = outputFileLocatorItf.getCCompiledOutputFile(
-          fullyQualifiedNameToPath(definition.getName(), implSuffix, ".o"),
-          context);
-      final File depFile = outputFileLocatorItf.getCCompiledOutputFile(
-          fullyQualifiedNameToPath(definition.getName(), implSuffix, ".d"),
-          context);
-
-      final File headerFile;
-      if (sources.length == 1) {
-        headerFile = outputFileLocatorItf.getCSourceTemporaryOutputFile(
-            ImplementationHeaderSourceGenerator
-                .getImplHeaderFileName(definition), context);
-      } else {
-        headerFile = outputFileLocatorItf.getCSourceTemporaryOutputFile(
-            ImplementationHeaderSourceGenerator.getImplHeaderFileName(
-                definition, i), context);
-      }
-
-      final File srcFile;
-      String inlinedCCode = src.getCCode();
-      if (inlinedCCode != null) {
-        // Implementation code is inlined in the ADL. Dump it in a file.
-        srcFile = outputFileLocatorItf.getCSourceOutputFile(
-            fullyQualifiedNameToPath(definition.getName(), implSuffix, ".c"),
+      } else if (ASTHelper.isAssembly(src)) {
+        // src file is an assembly file
+        final String implSuffix = "_impl" + i;
+        final File objectFile = outputFileLocatorItf.getCCompiledOutputFile(
+            fullyQualifiedNameToPath(definition.getName(), implSuffix, ".o"),
             context);
-        inlinedCCode = BackendFormatRenderer.sourceToLine(src) + "\n"
-            + inlinedCCode + "\n";
-        try {
-          SourceFileWriter.writeToFile(srcFile, inlinedCCode);
-        } catch (final IOException e) {
-          throw new CompilerError(IOErrors.WRITE_ERROR, e,
-              srcFile.getAbsolutePath());
-        }
-      } else {
+
+        final File srcFile;
         assert src.getPath() != null;
         final URL srcURL = implementationLocatorItf.findSource(src.getPath(),
             context);
@@ -182,28 +147,94 @@ public class BasicDefinitionCompiler
         } catch (final URISyntaxException e) {
           throw new CompilerError(GenericErrors.INTERNAL_ERROR, e);
         }
+
+        final CompilerCommand gccCommand = newAssemblyCompilerCommand(
+            definition, srcFile, objectFile, context);
+
+        // Add source-level C-Flags
+        final CFlags sourceFlags = getAnnotation(src, CFlags.class);
+        if (sourceFlags != null) {
+          gccCommand.addFlags(splitOptionString(sourceFlags.value));
+        }
+
+        compilationTasks.add(gccCommand);
+
+      } else {
+        // src file is a normal C file to be processed with MPP.
+        final String implSuffix = "_impl" + i;
+        final File cppFile = outputFileLocatorItf
+            .getCSourceTemporaryOutputFile(
+                fullyQualifiedNameToPath(definition.getName(), implSuffix, ".i"),
+                context);
+        final File mppFile = outputFileLocatorItf
+            .getCSourceTemporaryOutputFile(
+                fullyQualifiedNameToPath(definition.getName(), implSuffix,
+                    ".mpp.c"), context);
+        final File objectFile = outputFileLocatorItf.getCCompiledOutputFile(
+            fullyQualifiedNameToPath(definition.getName(), implSuffix, ".o"),
+            context);
+        final File depFile = outputFileLocatorItf.getCCompiledOutputFile(
+            fullyQualifiedNameToPath(definition.getName(), implSuffix, ".d"),
+            context);
+
+        final File headerFile;
+        if (sources.length == 1) {
+          headerFile = outputFileLocatorItf.getCSourceTemporaryOutputFile(
+              ImplementationHeaderSourceGenerator
+                  .getImplHeaderFileName(definition), context);
+        } else {
+          headerFile = outputFileLocatorItf.getCSourceTemporaryOutputFile(
+              ImplementationHeaderSourceGenerator.getImplHeaderFileName(
+                  definition, i), context);
+        }
+
+        final File srcFile;
+        String inlinedCCode = src.getCCode();
+        if (inlinedCCode != null) {
+          // Implementation code is inlined in the ADL. Dump it in a file.
+          srcFile = outputFileLocatorItf.getCSourceOutputFile(
+              fullyQualifiedNameToPath(definition.getName(), implSuffix, ".c"),
+              context);
+          inlinedCCode = BackendFormatRenderer.sourceToLine(src) + "\n"
+              + inlinedCCode + "\n";
+          try {
+            SourceFileWriter.writeToFile(srcFile, inlinedCCode);
+          } catch (final IOException e) {
+            throw new CompilerError(IOErrors.WRITE_ERROR, e,
+                srcFile.getAbsolutePath());
+          }
+        } else {
+          assert src.getPath() != null;
+          final URL srcURL = implementationLocatorItf.findSource(src.getPath(),
+              context);
+          try {
+            srcFile = new File(srcURL.toURI());
+          } catch (final URISyntaxException e) {
+            throw new CompilerError(GenericErrors.INTERNAL_ERROR, e);
+          }
+        }
+
+        final PreprocessorCommand cppCommand = newPreprocessorCommand(
+            definition, srcFile, null, depFile, cppFile, context);
+        final MPPCommand mppCommand = newMPPCommand(definition, cppFile,
+            mppFile, headerFile, context);
+        final CompilerCommand gccCommand = newCompilerCommand(definition,
+            mppFile, objectFile, context);
+
+        cppCommand.addIncludeFile(outputFileLocatorItf.getCSourceOutputFile(
+            DefinitionIncSourceGenerator.getIncFileName(definition), context));
+
+        // Add source-level C-Flags
+        final CFlags sourceFlags = getAnnotation(src, CFlags.class);
+        if (sourceFlags != null) {
+          cppCommand.addFlags(splitOptionString(sourceFlags.value));
+          gccCommand.addFlags(splitOptionString(sourceFlags.value));
+        }
+
+        compilationTasks.add(cppCommand);
+        compilationTasks.add(mppCommand);
+        compilationTasks.add(gccCommand);
       }
-
-      final PreprocessorCommand cppCommand = newPreprocessorCommand(definition,
-          srcFile, null, depFile, cppFile, context);
-      final MPPCommand mppCommand = newMPPCommand(definition, cppFile, mppFile,
-          headerFile, context);
-      final CompilerCommand gccCommand = newCompilerCommand(definition,
-          mppFile, objectFile, context);
-
-      cppCommand.addIncludeFile(outputFileLocatorItf.getCSourceOutputFile(
-          DefinitionIncSourceGenerator.getIncFileName(definition), context));
-
-      // Add source-level C-Flags
-      final CFlags sourceFlags = getAnnotation(src, CFlags.class);
-      if (sourceFlags != null) {
-        cppCommand.addFlags(splitOptionString(sourceFlags.value));
-        gccCommand.addFlags(splitOptionString(sourceFlags.value));
-      }
-
-      compilationTasks.add(cppCommand);
-      compilationTasks.add(mppCommand);
-      compilationTasks.add(gccCommand);
     }
   }
 
@@ -334,6 +365,39 @@ public class BasicDefinitionCompiler
     command.addIncludeFile(outputFileLocatorItf.getCSourceOutputFile(
         fullyQualifiedNameToPath(definition.getName(),
             DefinitionMacroSourceGenerator.FILE_EXT), context));
+
+    // Add definition level C-Flags
+    final CFlags definitionflags = getAnnotation(definition, CFlags.class);
+    if (definitionflags != null)
+      command.addFlags(splitOptionString(definitionflags.value));
+
+    return command;
+  }
+
+  protected CompilerCommand newAssemblyCompilerCommand(
+      final Definition definition, final File inputFile, final File outputFile,
+      final Map<Object, Object> context) throws ADLException {
+    final CompilerCommand command = compilerWrapperItf
+        .newCompilerCommand(context);
+    command.setOutputFile(outputFile).setInputFile(inputFile)
+        .setAllDependenciesManaged(true);
+
+    command.addIncludeDir(outputFileLocatorItf.getCSourceOutputDir(context));
+
+    final URL[] inputResourceRoots = implementationLocatorItf
+        .getInputResourcesRoot(context);
+    if (inputResourceRoots != null) {
+      for (final URL inputResourceRoot : inputResourceRoots) {
+        try {
+          final File inputDir = new File(inputResourceRoot.toURI());
+          if (inputDir.isDirectory()) {
+            command.addIncludeDir(inputDir);
+          }
+        } catch (final URISyntaxException e) {
+          continue;
+        }
+      }
+    }
 
     // Add definition level C-Flags
     final CFlags definitionflags = getAnnotation(definition, CFlags.class);

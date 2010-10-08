@@ -1,0 +1,6 @@
+@Run
+primitive asm.Assembly extends ApplicationType{
+  
+  source assembly.c;
+  source asm.s;
+}
