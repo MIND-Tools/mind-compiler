@@ -320,9 +320,9 @@
       <para>See <xref linkend="api-fapi-LCC"/> for details on the
         <classname>fractal.api.LifeCycleController</classname> interface signature.</para>
       
-      <para>The <classname>@controller.LifeCycleController</classname> annotation 
-        can only be attached to primitive component definitions. In that case,
-        the component implementation must provides the implementation of at least 
+      <para>When the <classname>@controller.LifeCycleController</classname> annotation 
+        is attached to a definitions of primitive compoent, 
+        the source code must contain at least the implementation of  
         one of the <varname>startFc</varname> or <varname>stopFc</varname> method of the
         <varname>lifeCycleController</varname> interface. For instance:</para>
         
@@ -341,6 +341,12 @@
    return FRACTAL_API_OK;
  }</programlisting>
       </example>
+      
+      <para>If a composite contains at least one sub-component that 
+        provides a life-cycle controller, then a life-cycle controller is automatically 
+        added on the composite definition. So in most cases, it is not necessary to declare
+        explicitly the life-cycle controller on composite definition since it would be added
+        automatically when necessary.</para>
       
     </section>
 

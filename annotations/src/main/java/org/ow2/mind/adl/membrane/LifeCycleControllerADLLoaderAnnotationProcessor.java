@@ -22,6 +22,8 @@
 
 package org.ow2.mind.adl.membrane;
 
+import static org.ow2.mind.annotation.AnnotationHelper.getAnnotation;
+
 import java.util.Map;
 
 import org.objectweb.fractal.adl.ADLException;
@@ -32,6 +34,7 @@ import org.ow2.mind.adl.annotation.ADLLoaderPhase;
 import org.ow2.mind.adl.annotations.controller.LifeCycleController;
 import org.ow2.mind.adl.ast.Component;
 import org.ow2.mind.annotation.Annotation;
+import org.ow2.mind.annotation.AnnotationHelper;
 
 /**
  * {@link ADLLoaderAnnotationProcessor annotation processor} for the
@@ -49,6 +52,11 @@ public class LifeCycleControllerADLLoaderAnnotationProcessor
     if (phase == ADLLoaderPhase.ON_SUB_COMPONENT) {
       assert node instanceof Component;
       node.astSetDecoration("hasLifeCycleController", Boolean.TRUE);
+
+      // add the LCC annotation to the definition if not present
+      if (getAnnotation(definition, LifeCycleController.class) == null) {
+        AnnotationHelper.addAnnotation(definition, new LifeCycleController());
+      }
     }
 
     return addControllerInterface(definition, LCC,
