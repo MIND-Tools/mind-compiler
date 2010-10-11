@@ -1,0 +1,5 @@
+
+@Run
+composite controller.lcc.TestCompositeComponent2 
+    extends LCCTester<CompositeComponent2> {
+}

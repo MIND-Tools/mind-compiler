@@ -1,0 +1,10 @@
+
+@Compile
+@controller.LifeCycleController
+composite controller.lcc.CompositeComponent2 {
+  provides Main as main;
+
+  contains CompositeComponent as subComp;
+  
+  binds this.main to subComp.main;
+}
