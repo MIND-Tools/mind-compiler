@@ -1,0 +1,5 @@
+
+@Run
+composite controller.binding.TestBCUserImpl 
+    extends BCTester<BCUserImpl> {
+}

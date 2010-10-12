@@ -1,0 +1,7 @@
+
+@CompileDef
+@controller.BindingController
+primitive controller.binding.BCUserImpl extends BCTested {
+
+  source bcUserImpl.c;
+}

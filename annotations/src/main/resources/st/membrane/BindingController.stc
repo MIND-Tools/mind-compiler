@@ -35,6 +35,13 @@ ControllerImplementation(definition, controller, interfaceDefinitions) ::= <<
 // -----------------------------------------------------------------------------
 
 initBindingDescriptors(definition) ::= <<
+// The binding descriptor is useful only if one of the binding controller method
+// is not implemented in source code.
+#if ! defined(INTERFACE_METHOD_bindingController_listFc_IMPLEMENTED) \
+   || ! defined(INTERFACE_METHOD_bindingController_lookupFc_IMPLEMENTED) \
+   || ! defined(INTERFACE_METHOD_bindingController_bindFc_IMPLEMENTED) \
+   || ! defined(INTERFACE_METHOD_bindingController_unbindFc_IMPLEMENTED)
+
 static struct {
   int nbBindings;
   struct __component_BindingDescriptor bindingDesc[<bindingCount(definition=definition)>];
@@ -44,6 +51,8 @@ static struct {
     <definition.interfaces:initBindingDescriptor(definition=definition, itf=it);separator="\n">
   }
 };
+
+#endif
 >>
 
 bindingCount(definition) ::= <<
@@ -79,14 +88,17 @@ __COMPONENT_INIT_BINDING_DESCRIPTOR(<ComponentTypeName(definitionName=definition
 >> 
 
 listFc(definition) ::= <<
+#ifndef INTERFACE_METHOD_bindingController_listFc_IMPLEMENTED
 int METH(bindingController, listFc)(__MIND_STRING_TYPEDEF clientItfNames[]) 
 {
   return __component_listFc_delegate(clientItfNames,
       <bindingDescPointer(definition=definition)>);
 }
+#endif
 >>
 
 lookupFc(definition) ::= <<
+#ifndef INTERFACE_METHOD_bindingController_lookupFc_IMPLEMENTED
 int METH(bindingController, lookupFc)(__MIND_STRING_TYPEDEF clientItfName,
     void **interfaceReference) 
 {
@@ -94,24 +106,29 @@ int METH(bindingController, lookupFc)(__MIND_STRING_TYPEDEF clientItfName,
       <bindingDescPointer(definition=definition)>, 
       <componentPointer(definition=definition)>);
 }
+#endif
 >>
 
 bindFc(definition) ::= <<
+#ifndef INTERFACE_METHOD_bindingController_bindFc_IMPLEMENTED
 int METH(bindingController, bindFc)(__MIND_STRING_TYPEDEF clientItfName, void *serverItf) 
 {
   return __component_bindFc_delegate(clientItfName, serverItf,
       <bindingDescPointer(definition=definition)>, 
       <componentPointer(definition=definition)>);
 }
+#endif
 >>
 
 unbindFc(definition) ::= <<
+#ifndef INTERFACE_METHOD_bindingController_unbindFc_IMPLEMENTED
 int METH(bindingController, unbindFc)(__MIND_STRING_TYPEDEF clientItfName) 
 {
   return __component_unbindFc_delegate(clientItfName,
       <bindingDescPointer(definition=definition)>, 
       <componentPointer(definition=definition)>);
 }
+#endif
 >>
 
 
