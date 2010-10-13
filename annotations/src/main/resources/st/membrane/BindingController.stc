@@ -35,8 +35,8 @@ ControllerImplementation(definition, controller, interfaceDefinitions) ::= <<
 // -----------------------------------------------------------------------------
 
 initBindingDescriptors(definition) ::= <<
-// The binding descriptor is useful only if one of the binding controller method
-// is not implemented in source code.
+/* The binding descriptor is useful only if one of the binding controller method
+   is not implemented in source code. */
 #if ! defined(INTERFACE_METHOD_bindingController_listFc_IMPLEMENTED) \
    || ! defined(INTERFACE_METHOD_bindingController_lookupFc_IMPLEMENTED) \
    || ! defined(INTERFACE_METHOD_bindingController_bindFc_IMPLEMENTED) \

@@ -25,7 +25,9 @@ package org.ow2.mind.adl.annotation;
 import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
 import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.AbstractLoader;
@@ -78,13 +80,29 @@ public class AnnotationProcessorLoader extends AbstractLoader
   protected Definition processOnSubComponentAnnotations(Definition def,
       final Node node, final Map<Object, Object> context) throws ADLException {
     if (def instanceof ComponentContainer) {
-      for (final Component subComp : ((ComponentContainer) def).getComponents()) {
-        // assume that sub-component definition has already been loaded.
-        final Definition subCompDef = ASTHelper.getResolvedComponentDefinition(
-            subComp, null, null);
+      final Set<String> processedSubComps = new HashSet<String>();
+      do {
+        for (final Component subComp : ((ComponentContainer) def)
+            .getComponents()) {
+          if (!processedSubComps.add(subComp.getName())) {
+            // sub comp already processed, ignore it
+            continue;
+          }
+          // assume that sub-component definition has already been loaded.
+          final Definition subCompDef = ASTHelper
+              .getResolvedComponentDefinition(subComp, null, null);
 
-        def = processSubComponent(def, subComp, subCompDef, context);
-      }
+          final Definition d = processSubComponent(def, subComp, subCompDef,
+              context);
+          if (def != d) {
+            // definition has been modified, must restart processing on new
+            // subComponents
+            def = d;
+            break;
+          }
+        }
+      } while (processedSubComps.size() < ((ComponentContainer) def)
+          .getComponents().length);
     }
     return def;
   }

@@ -1,0 +1,29 @@
+
+@Compile
+composite controller.lcc.CompositeComponent3 {
+  provides Main as main;
+
+  contains MultiPrimitiveComponent as subComp1;
+  contains MultiPrimitiveComponent as subComp2;
+  
+  contains  as multiplex 
+  primitive {
+    provides Main as main;
+    requires Main as subComp1;
+    requires Main as subComp2;
+    source {{
+    
+      /* int main(int argc, string[] argv) */
+      int METH(main, main) (int argc, char *argv[]){
+        int sc1, sc2;
+        sc1 = CALL(subComp1, main)(argc, argv);
+        sc2 = CALL(subComp2, main)(argc, argv);
+        return (sc1 < sc2) ? sc1 : sc2;
+      }
+    }};
+  }
+  
+  binds this.main to multiplex.main;
+  binds multiplex.subComp1 to subComp1.main;
+  binds multiplex.subComp2 to subComp2.main;
+}
