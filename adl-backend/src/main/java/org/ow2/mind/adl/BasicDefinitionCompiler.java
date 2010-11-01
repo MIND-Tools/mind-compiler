@@ -280,17 +280,28 @@ public class BasicDefinitionCompiler
         }
       }
 
-      final PreprocessorCommand cppCommand = newPreprocessorCommand(definition,
-          srcFile, additionalCompilationUnit.getDependencies(), depFile,
-          cppFile, context);
-      final MPPCommand mppCommand = newMPPCommand(definition, cppFile, mppFile,
-          null, context);
-      final CompilerCommand gccCommand = newCompilerCommand(definition,
-          mppFile, objectFile, context);
+      if (additionalCompilationUnit.skipMPP()) {
+        final PreprocessorCommand cppCommand = newPreprocessorCommand(
+            definition, srcFile, additionalCompilationUnit.getDependencies(),
+            depFile, cppFile, context);
+        final CompilerCommand gccCommand = newCompilerCommand(definition,
+            cppFile, objectFile, context);
 
-      compilationTasks.add(cppCommand);
-      compilationTasks.add(mppCommand);
-      compilationTasks.add(gccCommand);
+        compilationTasks.add(cppCommand);
+        compilationTasks.add(gccCommand);
+      } else {
+        final PreprocessorCommand cppCommand = newPreprocessorCommand(
+            definition, srcFile, additionalCompilationUnit.getDependencies(),
+            depFile, cppFile, context);
+        final MPPCommand mppCommand = newMPPCommand(definition, cppFile,
+            mppFile, null, context);
+        final CompilerCommand gccCommand = newCompilerCommand(definition,
+            mppFile, objectFile, context);
+
+        compilationTasks.add(cppCommand);
+        compilationTasks.add(mppCommand);
+        compilationTasks.add(gccCommand);
+      }
     }
   }
 
