@@ -83,12 +83,14 @@ public final class CompilationDecorationHelper {
   public static class AdditionalCompilationUnitDecoration {
     protected String           path;
     protected boolean          generatedFile;
+    protected boolean          skipMPP;
     protected Collection<File> dependencies;
 
     public AdditionalCompilationUnitDecoration(final String path,
         final boolean generatedFile, final File... dependencies) {
       this.path = path;
       this.generatedFile = generatedFile;
+      this.skipMPP = false;
       if (dependencies != null && dependencies.length > 0)
         this.dependencies = Arrays.asList(dependencies);
     }
@@ -97,6 +99,16 @@ public final class CompilationDecorationHelper {
         final boolean generatedFile, final Collection<File> dependencies) {
       this.path = path;
       this.generatedFile = generatedFile;
+      this.skipMPP = false;
+      this.dependencies = dependencies;
+    }
+
+    public AdditionalCompilationUnitDecoration(final String path,
+        final boolean generatedFile, final boolean skipMPP,
+        final Collection<File> dependencies) {
+      this.path = path;
+      this.generatedFile = generatedFile;
+      this.skipMPP = skipMPP;
       this.dependencies = dependencies;
     }
 
@@ -122,6 +134,10 @@ public final class CompilationDecorationHelper {
      */
     public boolean isGeneratedFile() {
       return generatedFile;
+    }
+
+    public boolean skipMPP() {
+      return skipMPP;
     }
 
     @Override
