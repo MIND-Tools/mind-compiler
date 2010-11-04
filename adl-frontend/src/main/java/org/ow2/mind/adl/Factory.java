@@ -188,6 +188,7 @@ public final class Factory {
     final ImportCheckerLoader icl = new ImportCheckerLoader();
     final GenericDefinitionLoader gdl = new GenericDefinitionLoader();
     final AnonymousDefinitionLoader adl = new AnonymousDefinitionLoader();
+    final SubComponentNormalizerLoader scnl = new SubComponentNormalizerLoader();
     final SubComponentResolverLoader scrl = new SubComponentResolverLoader();
     final ExtendsLoader el = new ExtendsLoader();
     final NoAnySubComponentLoader nascl = new NoAnySubComponentLoader();
@@ -231,7 +232,8 @@ public final class Factory {
     apl2.clientLoader = nascl;
     nascl.clientLoader = el;
     el.clientLoader = scrl;
-    scrl.clientLoader = adl;
+    scrl.clientLoader = scnl;
+    scnl.clientLoader = adl;
     adl.clientLoader = gdl;
     gdl.clientLoader = icl;
     icl.clientLoader = apl1;
@@ -252,6 +254,7 @@ public final class Factory {
     al.errorManagerItf = errorManager;
     gdl.errorManagerItf = errorManager;
     adl.errorManagerItf = errorManager;
+    scnl.errorManagerItf = errorManager;
     scrl.errorManagerItf = errorManager;
     el.errorManagerItf = errorManager;
     nascl.errorManagerItf = errorManager;

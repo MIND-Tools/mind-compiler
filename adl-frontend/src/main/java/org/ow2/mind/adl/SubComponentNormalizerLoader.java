@@ -56,7 +56,7 @@ public class SubComponentNormalizerLoader
   protected void handleNameClash(final Component previousDeclaration,
       final Component subNode) throws ADLException {
     errorManagerItf.logError(ComponentErrors.DUPLICATED_COMPONENT_NAME,
-        subNode.getName(), new NodeErrorLocator(previousDeclaration));
+        subNode, subNode.getName(), new NodeErrorLocator(previousDeclaration));
   }
 
   @Override

@@ -25,6 +25,7 @@ package org.ow2.mind.adl.annotation;
 import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
 import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -80,11 +81,11 @@ public class AnnotationProcessorLoader extends AbstractLoader
   protected Definition processOnSubComponentAnnotations(Definition def,
       final Node node, final Map<Object, Object> context) throws ADLException {
     if (def instanceof ComponentContainer) {
-      final Set<String> processedSubComps = new HashSet<String>();
+      final Set<Component> processedSubComps = new HashSet<Component>();
       do {
         for (final Component subComp : ((ComponentContainer) def)
             .getComponents()) {
-          if (!processedSubComps.add(subComp.getName())) {
+          if (!processedSubComps.add(subComp)) {
             // sub comp already processed, ignore it
             continue;
           }
@@ -101,8 +102,8 @@ public class AnnotationProcessorLoader extends AbstractLoader
             break;
           }
         }
-      } while (processedSubComps.size() < ((ComponentContainer) def)
-          .getComponents().length);
+      } while (!processedSubComps.containsAll(Arrays
+          .asList(((ComponentContainer) def).getComponents())));
     }
     return def;
   }

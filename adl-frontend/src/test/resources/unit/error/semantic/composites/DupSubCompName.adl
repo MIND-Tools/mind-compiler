@@ -1,0 +1,8 @@
+//#SemanticError GroupId=CMP ErrorId=DUPLICATED_COMPONENT_NAME line=4
+composite composites.DupSubCompName extends api.Type1 {
+    contains Primitive1 as p1;
+    contains Primitive1 as p1;
+    
+    binds this.sItf to p1.sItf;
+    binds p1.cItf to this.cItf;
+}
