@@ -18,11 +18,11 @@ all: factoryExample
 #    the name of the ADL template followed by an arbitrary hash-code suffix 
 #    (boot/GenericLCCApplication_tmpl_71ee0182 in this example)
 #
-#  - The argument boot.GenericLCCApplication<lcc.SimpleLCC>:simpleLCC must be 
-#    surrounded by double quote in the command-line to avoid shell 
+#  - The argument boot.GenericApplication<factory.FactoryExample>:factoryExample
+#    must be surrounded by double quote in the command-line to avoid shell 
 #    interpretation issue of '<' and '>'.
 factoryExample: build
-	$(MINDC) -src-path=src -src-path=../common-src -o=build "boot.GenericApplication<factory.FactoryExample>:factoryExample"
+	$(MINDC) -src-path=src -o=build "boot.GenericApplication<factory.FactoryExample>:factoryExample"
 
 build:
 	mkdir -p build

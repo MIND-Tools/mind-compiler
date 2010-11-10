@@ -22,7 +22,7 @@ all: simpleLCC
 #    surrounded by double quote in the command-line to avoid shell 
 #    interpretation issue of '<' and '>'.
 simpleLCC: build
-	$(MINDC) -src-path=src -src-path=../common-src -o=build "boot.GenericLCCApplication<lcc.SimpleLCC>:simpleLCC"
+	$(MINDC) -src-path=src -o=build "boot.GenericLCCApplication<lcc.SimpleLCC>:simpleLCC"
 
 build:
 	mkdir -p build

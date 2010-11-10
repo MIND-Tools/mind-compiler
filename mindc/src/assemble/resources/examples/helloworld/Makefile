@@ -10,7 +10,7 @@ endif
 all: helloworld
 
 helloworld: build
-	$(MINDC) -src-path=src -src-path=../common-src -o=build helloworld.HelloworldApplication:hw
+	$(MINDC) -src-path=src -o=build helloworld.HelloworldApplication:hw
 
 build:
 	mkdir -p build
