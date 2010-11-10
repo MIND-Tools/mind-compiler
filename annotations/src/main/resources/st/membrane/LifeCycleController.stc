@@ -10,12 +10,12 @@ $${
 // Implementation of the ControllerGenerator interface
 // -----------------------------------------------------------------------------
 
-ControllerGlobalDecl(definition, controller) ::= ""
+ControllerGlobalDecl(definition, controller) ::= <<
+#include "fractal/internal/LCCdelegate.h"
+>>
 
 ControllerData(definition, controller) ::= <<
-struct {
-  int state;
-} lccState;
+struct __component_LifeCycleState lccState;
 >>
 
 ControllerDataStaticInit(definition, controller) ::= <<
@@ -33,8 +33,6 @@ ControllerImplementation(definition, controller, interfaceDefinitions) ::= <<
 /* -----------------------------------------------------------------------------
    Implementation of the LifeCycleController interface
 ----------------------------------------------------------------------------- */
-
-#include "fractal/internal/LCCdelegate.h"
 
 <if(definition.astNodeTypes.("source"))>
 <if(definition.sources)>
@@ -140,11 +138,7 @@ if (err != FRACTAL_API_OK) return err;
 
 
 lccStatePointer(definition) ::= <<
-<if (definition.astDecorations.("is-singleton"))>
-((struct __component_LifeCycleState *) (&__component_<definition.name;format="toCName">_singleton_instance.__component_internal_data.lccState))
-<else>
-((struct __component_LifeCycleState *) &(CONTEXT_PTR_ACCESS->__component_internal_data.lccState))
-<endif>
+&(CONTEXT_PTR_ACCESS->__component_internal_data.lccState)
 >>
 
 }$$
