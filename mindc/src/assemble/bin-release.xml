@@ -13,6 +13,7 @@
             <excludes>
                 <exclude>${project.groupId}:fractal-runtime</exclude>
             </excludes>
+            <fileMode>0644</fileMode>
         </dependencySet>
 
         <dependencySet>
@@ -22,6 +23,7 @@
             </includes>
             <scope>test</scope>
             <outputFileNameMapping>${artifact.groupId}.${artifact.artifactId}_${artifact.version}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
+            <fileMode>0644</fileMode>
         </dependencySet>
 
         <dependencySet>
@@ -35,6 +37,7 @@
                 <include>${project.groupId}:fractal-runtime</include>
             </includes>
             <outputDirectory>runtime</outputDirectory>
+            <fileMode>0644</fileMode>
         </dependencySet>
 
     </dependencySets>
@@ -43,6 +46,7 @@
             <directory>src/assemble/resources/examples</directory>
             <filtered>false</filtered>
             <outputDirectory>examples</outputDirectory>
+            <fileMode>0644</fileMode>
         </fileSet>
     </fileSets>
     <files>
