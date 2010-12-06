@@ -16,24 +16,28 @@ ControllerData(definition, controller) ::= <<
 struct __component_ContentDescriptor *contentDesc;
 >>
 
+ControllerDataStaticInit(definition, controller) ::= <<
+/* contentDesc */ &instance_name##_contentDesc,
+>>
+
 nbDynamicSubComponent(definition) ::= <<
 <definition.astDecorations.("annotations").annotationMap.("org.ow2.mind.adl.annotations.controller.ContentController").nbDynamicSubComponent>
 >>
 
 ControllerGlobalDataStaticInit(definition, controller) ::= <<
-fractal_api_Component instance_name##_dynamicSubComponent[<nbDynamicSubComponent(definition=definition)>]; \
+struct __component_SubComponentDescriptor instance_name##_subComponentDesc[<length(definition.components)> + <nbDynamicSubComponent(definition=definition)>] = \
+  {<definition.components:InitSubCompDesc(definition=definition, component=it); separator=", ">}; \
 struct __component_ContentDescriptor instance_name##_contentDesc = { \
-  sizeof(instance_name.__component_internal_data.components)/sizeof(fractal_api_Component), \
-  (fractal_api_Component *) & instance_name.__component_internal_data.components, \
-  sizeof(instance_name##_dynamicSubComponent)/sizeof(fractal_api_Component), \
-  instance_name##_dynamicSubComponent, \
+  sizeof(instance_name##_subComponentDesc)/sizeof(struct __component_SubComponentDescriptor), \
+  instance_name##_subComponentDesc, \
   & <definition.name;format="toCName">_internalItfs_descriptor \
 };
 >>
 
-ControllerDataStaticInit(definition, controller) ::= <<
-/* contentDesc */ &instance_name##_contentDesc,
+InitSubCompDesc(definition, component) ::= <<
+{&(<component.name>.__component_internal_data.type.component), "<component.name>"}
 >>
+
 
 ControllerDataFactoryNew(definition, controller) ::= <<
   newInstance->__component_internal_data.contentDesc = 
@@ -41,46 +45,34 @@ ControllerDataFactoryNew(definition, controller) ::= <<
   if (newInstance->__component_internal_data.contentDesc == NULL)
     goto error_contentDesc;
   
-  newInstance->__component_internal_data.contentDesc->nbStaticSubComponent = 
-    sizeof(newInstance->__component_internal_data.components)/sizeof(fractal_api_Component);
-  newInstance->__component_internal_data.contentDesc->staticSubComponents = 
-    (fractal_api_Component*) & newInstance->__component_internal_data.components;
-  
-  newInstance->__component_internal_data.contentDesc->nbDynamicSubComponent = <nbDynamicSubComponent(definition=definition)>;
-  newInstance->__component_internal_data.contentDesc->dynamicSubComponents = 
-    (fractal_api_Component*) CALL_PTR((memory_api_Allocator) allocItf, alloc)(sizeof(fractal_api_Component) * newInstance->__component_internal_data.contentDesc->nbDynamicSubComponent);
-  if (newInstance->__component_internal_data.contentDesc->dynamicSubComponents == NULL)
+  newInstance->__component_internal_data.contentDesc->nbSubComponent = <length(definition.components)> + <nbDynamicSubComponent(definition=definition)>;
+  newInstance->__component_internal_data.contentDesc->subComponents = 
+    (struct __component_SubComponentDescriptor*) CALL_PTR((memory_api_Allocator) allocItf, alloc)(sizeof(struct __component_SubComponentDescriptor) * newInstance->__component_internal_data.contentDesc->nbSubComponent);
+  if (newInstance->__component_internal_data.contentDesc->subComponents == NULL)
     goto error_content_dynamicSubComponents;
-
+  {
+    int i = 0;
+    <definition.components:factoryInitCompDesc(definition=definition, component=it);separator="\n">
+  }
+  
 >>
 
-factoryInitBinding(definition, binding) ::= <<
-  newInstance->__component_internal_data.contentDesc->bindingDesc[i].clientComponent =
-    (fractal_api_Component) <subComponentPointer(subComponentName=binding.fromComponent)>;
-  newInstance->__component_internal_data.contentDesc->bindingDesc[i].clientItfName =
-    __COMPONENT_STRINGIFY_ITF_NAME(<binding.fromInterface><if (binding.fromInterfaceNumber)>[<binding.fromInterfaceNumber>]<endif>);
-  newInstance->__component_internal_data.contentDesc->bindingDesc[i].serverComponent =
-    (fractal_api_Component) <subComponentPointer(subComponentName=binding.toComponent)>;
-  newInstance->__component_internal_data.contentDesc->bindingDesc[i].serverItfName =
-    __COMPONENT_STRINGIFY_ITF_NAME(<binding.toInterface><if (binding.toInterfaceNumber)>[<binding.toInterfaceNumber>]<endif>);
-  i++;
->>
-
-subComponentPointer(subComponentName) ::= <<
-<if (isThis.(subComponentName))> newInstance
-<else> /*<subComponentName>*/  newInstance->__component_internal_data.components.<subComponentName>
-<endif>
+factoryInitCompDesc(definition, component) ::= <<
+newInstance->__component_internal_data.contentDesc->subComponents[i].subComponent 
+  = &(newInstance->__component_internal_data.components.<component.name>->__component_internal_data.type.component);
+newInstance->__component_internal_data.contentDesc->subComponents[i].name = "<component.name>";
+i++;
 >>
 
 ControllerDataFactoryNewClear(definition, controller) ::= <<
-  CALL_PTR((memory_api_Allocator) allocItf, free)(newInstance->__component_internal_data.contentDesc->dynamicSubComponents);
+  CALL_PTR((memory_api_Allocator) allocItf, free)(newInstance->__component_internal_data.contentDesc->subComponents);
 error_content_dynamicSubComponents :
   CALL_PTR((memory_api_Allocator) allocItf, free)(newInstance->__component_internal_data.contentDesc);
 error_contentDesc :
 >>
 
 ControllerDataFactoryDestroy(definition, controller) ::= <<
-  CALL_PTR((memory_api_Allocator) allocItf, free)(destroyInstance->__component_internal_data.contentDesc->dynamicSubComponents);
+  CALL_PTR((memory_api_Allocator) allocItf, free)(destroyInstance->__component_internal_data.contentDesc->subComponents);
   CALL_PTR((memory_api_Allocator) allocItf, free)(destroyInstance->__component_internal_data.contentDesc);
 >>
 
@@ -94,7 +86,13 @@ ControllerImplementation(definition, controller, interfaceDefinitions) ::= <<
 
 <getFcSubComponents(definition=definition)>
 
+<getFcSubComponent(definition=definition)>
+
+<getFcSubComponentName(definition=definition)>
+
 <addFcSubComponent(definition=definition)>
+
+<addFcNamedSubComponent(definition=definition)>
 
 <removeFcSubComponent(definition=definition)>
 
@@ -183,10 +181,37 @@ int METH(contentController, getFcSubComponents)(fractal_api_Component subCompone
 }
 >>
 
+getFcSubComponent(definition) ::= <<
+int METH(contentController, getFcSubComponent)(__MIND_STRING_TYPEDEF name,
+    fractal_api_Component *subComponent) 
+{
+  return __component_getFcSubComponent(name, subComponent,
+      <contentDescPointer(definition=definition)>);
+}
+>>
+
+getFcSubComponentName(definition) ::= <<
+int METH(contentController, getFcSubComponentName)(fractal_api_Component subComponent,
+    __MIND_STRING_TYPEDEF *name) 
+{
+  return __component_getFcSubComponentName(subComponent, name,
+      <contentDescPointer(definition=definition)>);
+}
+>>
+
 addFcSubComponent(definition) ::= <<
 int METH(contentController, addFcSubComponent)(fractal_api_Component subComponent) 
 {
-  return __component_addFcSubComponents(subComponent,
+  return __component_addFcSubComponent(subComponent,
+      <contentDescPointer(definition=definition)>);
+}
+>>
+
+addFcNamedSubComponent(definition) ::= <<
+int METH(contentController, addFcNamedSubComponent)(fractal_api_Component subComponent,
+    __MIND_STRING_TYPEDEF name) 
+{
+  return __component_addFcNamedSubComponent(subComponent, name,
       <contentDescPointer(definition=definition)>);
 }
 >>

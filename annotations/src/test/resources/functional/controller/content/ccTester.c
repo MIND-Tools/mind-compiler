@@ -9,8 +9,10 @@
 int METH(main, main)(int argc, char *argv[]) {
   int nbSubComp, err, i, initialSubCompFound;
   fractal_api_Component initialSubComp;
+  fractal_api_Component initialSubComp2;
   fractal_api_Component subComps[2];
   void *delegator;
+  string subCompName;
 
   nbSubComp = CALL(testedCC, getFcSubComponents)(NULL);
   mindassert(nbSubComp == 1);
@@ -19,12 +21,21 @@ int METH(main, main)(int argc, char *argv[]) {
   mindassert(err == 1);
   mindassert(initialSubComp != NULL);
 
+  err = CALL(testedCC, getFcSubComponent)("subComp1", &initialSubComp2);
+  mindassert(err == 0);
+  mindassert(initialSubComp2 != NULL);
+  mindassert(initialSubComp2 == initialSubComp);
+
+  err = CALL(testedCC, getFcSubComponentName)(initialSubComp2, &subCompName);
+  mindassert(err == 0);
+  mindassert(strcmp(subCompName, "subComp1") == 0);
+
   /* create a delegator component using factory */
   err = CALL(delegatorFactory, newFcInstance)(&delegator);
   mindassert(err == 0);
 
   /* add it as a sub-component of testedCC */
-  err = CALL(testedCC, addFcSubComponent)((fractal_api_Component) delegator);
+  err = CALL(testedCC, addFcNamedSubComponent)((fractal_api_Component) delegator, "delegator");
   mindassert(err == 0);
 
   err = CALL(testedCC, getFcSubComponents)(NULL);
@@ -46,6 +57,15 @@ int METH(main, main)(int argc, char *argv[]) {
   }
 
   mindassert(initialSubCompFound == 1);
+
+  err = CALL(testedCC, getFcSubComponent)("delegator", &initialSubComp2);
+  mindassert(err == 0);
+  mindassert(initialSubComp2 != NULL);
+  mindassert(initialSubComp2 == delegator);
+
+  err = CALL(testedCC, getFcSubComponentName)(delegator, &subCompName);
+  mindassert(err == 0);
+  mindassert(strcmp(subCompName, "delegator") == 0);
 
   /* try to readd the same a second time. should return an error */
   err = CALL(testedCC, addFcSubComponent)((fractal_api_Component) delegator);

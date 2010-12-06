@@ -136,6 +136,7 @@ public class CheckDelegatesTest {
   private void compileDelegate(final String delegateName)
       throws URISyntaxException, IOException, ADLException,
       InterruptedException {
+    errorManager.clear();
     final CompilerCommand command = compilerWrapper.newCompilerCommand(context);
     final File src = new File(getClass().getClassLoader()
         .getResource("fractal/internal/" + delegateName + ".c").toURI());
@@ -143,7 +144,13 @@ public class CheckDelegatesTest {
     command.setInputFile(src).setOutputFile(outputFile);
     command.addIncludeDir(buildDir);
     command.addIncludeDir(new File("target/classes"));
-    commandExecutor.exec(Arrays.asList((CompilationCommand) command), context);
+    final boolean compileOK = commandExecutor.exec(
+        Arrays.asList((CompilationCommand) command), context);
+    if (!compileOK) {
+      final List<Error> errors = errorManager.getErrors();
+      throw new ADLException(new ErrorCollection(errors));
+    }
+
   }
 
 }

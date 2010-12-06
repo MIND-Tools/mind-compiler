@@ -49,14 +49,45 @@ interface fractal.api.ContentController {
   int getFcSubComponents(in fractal.api.Component subComponents[]);
 
   /**
-   * Adds a sub-component to this component. More precisely adds the component
-   * whose reference is given as a sub-component of the component to which this
-   * interface belongs. If <i>C</i> is the sub-component set returned by {@link
-   * #getFcSubComponents getFcSubComponents} just before a call to this
-   * method, and <i>C'</i> is the sub-component set just after this call, then
-   * <code>subComponent</code> is guaranteed to be in <i>C'</i>, but <i>C'</i>
-   * is <i>not</i> guaranteed to be the union of <i>C</i> and
-   * <i>{subComponent}</i>, nor to contain all the elements of <i>C</i>.
+   * Returns the sub-component of the component to which this
+   * interface belongs and which has the given name.
+   *
+   * @param name the name of the sub-component to return.
+   * @param subComponent (out parameter) the {@link Component} interface of the
+   *      sub-component.
+   * @return  <code>0</code> if the sub-component has been returned correctly.
+   *      {@link FRACTAL_API_NO_SUCH_SUB_COMPONENT} if no sub-component with the
+   *      given name can be found.
+   *      {@link FRACTAL_API_OPERATION_NOT_SUPPORTED} if this operation is not
+   *      supported.
+   */
+  int getFcSubComponent(in string name, out fractal.api.Component subComponent);
+
+  /**
+   * Returns the name of the given sub-component.
+   *
+   * @param subComponent the {@link Component} interface of a sub-component.
+   * @param name (out parameter) the name of the given sub-component.
+   * @return  <code>0</code> if the name of the sub-component has been returned
+   *      correctly.
+   *      {@link FRACTAL_API_NO_SUCH_SUB_COMPONENT} if the given
+   *      <code>subComponent</code> is not a sub component.
+   *      {@link FRACTAL_API_OPERATION_NOT_SUPPORTED} if this operation is not
+   *      supported.
+   */
+  int getFcSubComponentName(in fractal.api.Component subComponent,
+      out string name);
+
+  /**
+   * Adds a sub-component to this component with a <code>NULL</code> local-name.
+   * More precisely adds the component whose reference is given as a 
+   * sub-component of the component to which this interface belongs. If <i>C</i>
+   * is the sub-component set returned by {@link #getFcSubComponents 
+   * getFcSubComponents} just before a call to this method, and <i>C'</i> is the
+   * sub-component set just after this call, then <code>subComponent</code> is 
+   * guaranteed to be in <i>C'</i>, but <i>C'</i> is <i>not</i> guaranteed to be
+   * the union of <i>C</i> and <i>{subComponent}</i>, nor to contain all the
+   * elements of <i>C</i>.
    *
    * @param subComponent the component to be added inside this component.
    * @return <code>0</code> if the component is added correctly.
@@ -68,6 +99,31 @@ interface fractal.api.ContentController {
    *      supported.
    */
   int addFcSubComponent(in fractal.api.Component subComponent);
+
+  /**
+   * Adds a sub-component to this component with the given local-name.
+   * More precisely adds the component whose reference is given as a 
+   * sub-component of the component to which this interface belongs. If <i>C</i>
+   * is the sub-component set returned by {@link #getFcSubComponents 
+   * getFcSubComponents} just before a call to this method, and <i>C'</i> is the
+   * sub-component set just after this call, then <code>subComponent</code> is 
+   * guaranteed to be in <i>C'</i>, but <i>C'</i> is <i>not</i> guaranteed to be
+   * the union of <i>C</i> and <i>{subComponent}</i>, nor to contain all the
+   * elements of <i>C</i>.
+   *
+   * @param subComponent the component to be added inside this component.
+   * @param name the local-name of the added sub-component. May be 
+   *      <code>null</code>.
+   * @return <code>0</code> if the component is added correctly.
+   *      {@link FRACTAL_API_ILLEGAL_CONTENT} if the component cannot be added.
+   *      {@link FRACTAL_API_ILLEGAL_LIFE_CYCLE} if this component has a
+   *      {@link LifeCycleController} interface, but it is not in an appropriate
+   *      state to perform this operation.
+   *      {@link FRACTAL_API_OPERATION_NOT_SUPPORTED} if this operation is not
+   *      supported.
+   */
+  int addFcNamedSubComponent(in fractal.api.Component subComponent, 
+      in string name);
 
   /**
    * Removes a sub-component from this component. More precisely removes the

@@ -56,12 +56,15 @@ struct __component_InternalItfsDescriptor {
   struct __component_InternalServerItfDescriptor *serverInterfaces;
 };
 
+struct __component_SubComponentDescriptor {
+  fractal_api_Component subComponent;
+  __MIND_STRING_TYPEDEF name;
+};
+
 struct __component_ContentDescriptor
 {
-  int nbStaticSubComponent;
-  fractal_api_Component *staticSubComponents;
-  int nbDynamicSubComponent;
-  fractal_api_Component *dynamicSubComponents;
+  int nbSubComponent;
+  struct __component_SubComponentDescriptor *subComponents;
   struct __component_InternalItfsDescriptor *internalItfsDesc;
 };
 
@@ -70,21 +73,33 @@ struct __component_ContentDescriptor
 int __component_getFcSubComponents(fractal_api_Component subComponents[],
     struct __component_ContentDescriptor *desc);
 
-int __component_addFcSubComponents(fractal_api_Component subComponent,
+int __component_getFcSubComponent(__MIND_STRING_TYPEDEF name,
+    fractal_api_Component *subComponent,
+    struct __component_ContentDescriptor *desc);
+
+int __component_getFcSubComponentName(fractal_api_Component subComponent,
+    __MIND_STRING_TYPEDEF *name,
+    struct __component_ContentDescriptor *desc);
+
+int __component_addFcSubComponent(fractal_api_Component subComponent,
+    struct __component_ContentDescriptor *desc);
+
+int __component_addFcNamedSubComponent(fractal_api_Component subComponent,
+    __MIND_STRING_TYPEDEF name,
     struct __component_ContentDescriptor *desc);
 
 int __component_removeFcSubComponents(fractal_api_Component subComponent,
     struct __component_ContentDescriptor *desc);
 
 int __component_addFcSubBinding(fractal_api_Component clientComponent,
-      const char *clientItfName, fractal_api_Component serverComponent,
-      const char *serverItfName,
-      struct __component_ContentDescriptor *desc,
-      void* component_ptr);
+    __MIND_STRING_TYPEDEF clientItfName, fractal_api_Component serverComponent,
+    __MIND_STRING_TYPEDEF serverItfName,
+    struct __component_ContentDescriptor *desc,
+    void* component_ptr);
 
 int __component_removeFcSubBinding(fractal_api_Component clientComponent,
-      const char *clientItfName,
-      struct __component_ContentDescriptor *desc,
-      void* component_ptr);
+    __MIND_STRING_TYPEDEF clientItfName,
+    struct __component_ContentDescriptor *desc,
+    void* component_ptr);
 
 #endif

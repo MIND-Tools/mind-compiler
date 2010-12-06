@@ -613,6 +613,85 @@
           </td>
         </tr>
       </informaltable>
+
+      <informaltable border="all" width="100%">
+        <tr>
+          <td>
+            <programlisting language="idl"> int getFcSubComponent(in string name, out fractal.api.Component subComponent);</programlisting>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <para>The <varname>getFcSubComponent</varname> method returns the
+               sub-component of the component to which this interface belongs 
+               and which has the given <code>name</code>.</para>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <variablelist>
+              <varlistentry>
+                <term><varname>name</varname></term>
+                <listitem><para>the name of the sub-component to return.</para></listitem>
+              </varlistentry>
+              <varlistentry>
+                <term><varname>subComponent</varname></term>
+                <listitem><para> (out parameter) the 
+                  <link linkend="api-fapi-C"><classname>fractal.api.Component</classname></link> 
+                  interface of the sub-component.</para></listitem>
+              </varlistentry>
+              <varlistentry>
+                <term>return</term>
+                <listitem><para><code>0</code> if the sub-component has been 
+                  returned correctly. <code>FRACTAL_API_NO_SUCH_SUB_COMPONENT</code>
+                  if no sub-component with the given name can be found.
+                  <code>FRACTAL_API_OPERATION_NOT_SUPPORTED</code> if this 
+                  operation is not supported.</para></listitem>
+              </varlistentry>
+            </variablelist>
+          </td>
+        </tr>
+      </informaltable>
+    
+      <informaltable border="all" width="100%">
+        <tr>
+          <td>
+            <programlisting language="idl"> int getFcSubComponentName(in fractal.api.Component subComponent,
+   out string name);</programlisting>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <para>The <varname>getFcSubComponentName</varname> method returns
+              the name of the given sub-component.</para>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <variablelist>
+              <varlistentry>
+                <term><varname>subComponent</varname></term>
+                <listitem><para>the 
+                  <link linkend="api-fapi-C"><classname>fractal.api.Component</classname></link>
+                  interface of a sub-component.</para></listitem>
+              </varlistentry>
+              <varlistentry>
+                <term><varname>name</varname></term>
+                <listitem><para> (out parameter) the name of the given sub-component.</para></listitem>
+              </varlistentry>
+              <varlistentry>
+                <term>return</term>
+                <listitem><para> <code>0</code> if the name of the sub-component
+                  has been returned correctly. 
+                  <code>FRACTAL_API_NO_SUCH_SUB_COMPONENT</code> if the given
+                  <code>subComponent</code> is not a sub component.
+                  <code>FRACTAL_API_OPERATION_NOT_SUPPORTED</code> if this 
+                  operation is not supported.</para></listitem>
+              </varlistentry>
+            </variablelist>
+          </td>
+        </tr>
+      </informaltable>
     
       <informaltable border="all" width="100%">
         <tr>
@@ -641,6 +720,55 @@
               <varlistentry>
                 <term><varname>subComponent</varname></term>
                 <listitem><para>the component to be added inside this component.</para></listitem>
+              </varlistentry>
+              <varlistentry>
+                <term>return</term>
+                <listitem><para><code>0</code> if the component is added 
+                  correctly. <code>FRACTAL_API_ILLEGAL_CONTENT</code> if the 
+                  component cannot be added. 
+                  <code>FRACTAL_API_ILLEGAL_LIFE_CYCLE</code> if this component
+                  has a 
+                  interface, but it is not in an appropriate state to perform 
+                  this operation. <code>FRACTAL_API_OPERATION_NOT_SUPPORTED</code>
+                  if this operation is not supported.</para></listitem>
+              </varlistentry>
+            </variablelist>
+          </td>
+        </tr>
+      </informaltable>
+    
+      <informaltable border="all" width="100%">
+        <tr>
+          <td>
+            <programlisting language="idl"> int addFcSubComponent(in fractal.api.Component subComponent);</programlisting>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <para>The <varname>addFcSubComponent</varname> method adds a sub-component 
+            to this component with the given local-name. More precisely adds the component whose reference
+            is given as a sub-component of the component to which this interface
+            belongs. If <varname>C</varname> is the sub-component set returned
+            by <varname>getFcSubComponents</varname> just before a call to this
+            method, and <varname>C'</varname> is the sub-component set just 
+            after this call, then <code>subComponent</code> is guaranteed to be
+            in <varname>C'</varname>, but <varname>C'</varname> is 
+            <emphasis>not</emphasis> guaranteed to be the union of 
+            <varname>C</varname> and <code>{subComponent}</code>, nor to contain
+            all the elements of <varname>C</varname>.</para>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <variablelist>
+              <varlistentry>
+                <term><varname>subComponent</varname></term>
+                <listitem><para>the component to be added inside this component.</para></listitem>
+              </varlistentry>
+              <varlistentry>
+                <term><varname>name</varname></term>
+                <listitem><para>the local-name of the added sub-component. May be 
+                  <code>null</code>.</para></listitem>
               </varlistentry>
               <varlistentry>
                 <term>return</term>
