@@ -97,6 +97,42 @@ public final class IDLASTHelper {
     return node;
   }
 
+  /**
+   * Returns the method contained by the given interface definition with the
+   * given name. Returns <code>null</code> if the given interface definition
+   * does not contain a method with the given name.
+   * 
+   * @param itfDef an interface definition.
+   * @param methodName the name of the method to return.
+   * @return the method contained by the given interface definition with the
+   *         given name or <code>null</code>.
+   */
+  public static Method getMethod(final InterfaceDefinition itfDef,
+      final String methodName) {
+    for (final Method meth : itfDef.getMethods()) {
+      if (meth.getName().equals(methodName)) return meth;
+    }
+    return null;
+  }
+
+  /**
+   * Returns the parameter contained by the given method with the given name.
+   * Returns <code>null</code> if the given method does not contain a parameter
+   * with the given name.
+   * 
+   * @param method a method.
+   * @param parameterName the name of the parameter to return.
+   * @return the parameter contained by the given method with the given name or
+   *         <code>null</code>.
+   */
+  public static Parameter getParameter(final Method method,
+      final String parameterName) {
+    for (final Parameter param : method.getParameters()) {
+      if (param.getName().equals(parameterName)) return param;
+    }
+    return null;
+  }
+
   // ---------------------------------------------------------------------------
   // IDT helper methods
   // ---------------------------------------------------------------------------

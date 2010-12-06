@@ -35,6 +35,7 @@ tokens{
     GET_MY_INTERFACE = 'GET_MY_INTERFACE';
     BIND_MY_INTERFACE = 'BIND_MY_INTERFACE';
     IS_BOUND    = 'IS_BOUND';
+    GET_COLLECTION_SIZE = 'GET_COLLECTION_SIZE';
 	CALL 		= 'CALL';
 	CALL_PTR 	= 'CALL_PTR';
 	ATTR 		= 'ATTR';
@@ -240,13 +241,14 @@ protected expr  returns [String res = ""]
 	;
 	
 protected methCall returns [StringBuilder res ]
-	: itfMethCall 		{ $res = $itfMethCall.res; }
-	| collItfMethCall 	{ $res = $collItfMethCall.res; }
-	| prvMethCall		{ $res = $prvMethCall.res; }
-	| ptrMethCall 		{ $res = $ptrMethCall.res; }
-	| getMyInterfaceCall{ $res = $getMyInterfaceCall.res; }
-	| bindMyInterfaceCall{ $res = $bindMyInterfaceCall.res; }
-	| isBoundCall       { $res = $isBoundCall.res; }
+	: itfMethCall           { $res = $itfMethCall.res; }
+	| collItfMethCall       { $res = $collItfMethCall.res; }
+	| prvMethCall           { $res = $prvMethCall.res; }
+	| ptrMethCall           { $res = $ptrMethCall.res; }
+	| getMyInterfaceCall    { $res = $getMyInterfaceCall.res; }
+	| bindMyInterfaceCall   { $res = $bindMyInterfaceCall.res; }
+  | isBoundCall           { $res = $isBoundCall.res; }
+  | getCollectionSizeCall { $res = $getCollectionSizeCall.res; }
 	;
 
 protected attAccess returns [StringBuilder res = new StringBuilder()]
@@ -276,12 +278,14 @@ protected structDecl returns [StringBuilder res = new StringBuilder()]
               | ( t = ~(';'| PRIVATE) {str.append($t.text); } ) * 
             ) ';'
             {
+              String structContent = $structfield.text.substring(1); // (NB: removes first '{'
+              cplChecker.prvDecl(structContent, sourceFile, sourceLineShift);
               if (singletonMode) {
                 $res.append($text); 
               } else if (isPrivate) {
                 $res.append("typedef struct").append($ws1.text).append("{");
                 $res.append(" COMP_DATA; ");
-                $res.append($structfield.text.substring(1)); // (NB: removes first '{'
+                $res.append(structContent);
                 $res.append($ws2.text).append(" PRIVATE_DATA_T");
                 $res.append(str);
                 $res.append(";");
@@ -308,7 +312,11 @@ protected structfield
 	;
 
 protected privateAccess returns [StringBuilder res = new StringBuilder()]
-    : PRIVATE ws1=ws '.'{ if (singletonMode) $res.append($text); else $res.append("CONTEXT_PTR_ACCESS").append($ws1.text).append("->"); }
+    : PRIVATE ws1=ws '.'
+      {
+        if (singletonMode) $res.append($text); 
+        else $res.append("CONTEXT_PTR_ACCESS").append($ws1.text).append("->"); 
+      }
     | {singletonMode==true}? PRIVATE { $res.append($text); } 
     ;
 
@@ -337,6 +345,12 @@ protected itfMethCall returns [StringBuilder res = new StringBuilder()]
 protected collItfMethCall returns [StringBuilder res = new StringBuilder()]
     : CALL ws1=ws '(' ws2=ws itf=ID ws3=ws index ws4=ws ',' ws5=ws meth=ID ws6=ws ')' ws7=ws params
       {
+        try {
+          cplChecker.collItfMethCall($itf, $meth, $index.res, sourceFile, sourceLineShift);
+        } catch (ADLException e) {
+          // ignore
+        }
+ 
         if ($params.res == null)
           $res.append("CALL_COLLECTION_INTERFACE_METHOD_WITHOUT_PARAM").append($ws1.text).append("(")
               .append($ws2.text).append($itf.text).append($ws3.text).append(",")
@@ -424,6 +438,12 @@ protected getMyInterfaceCall returns [StringBuilder res = new StringBuilder()]
 @init{StringBuilder idx = null;}
 	: GET_MY_INTERFACE ws1=ws '(' ws2=ws ID ws3=ws ( index ws4=ws {idx = $index.res;} ) ? ')'
       {
+        try {
+          cplChecker.getMyItf($ID, idx, sourceFile, sourceLineShift);
+        } catch (ADLException e) {
+          // ignore
+        }
+ 
         if (idx == null)
           $res.append("GET_MY_INTERFACE").append($ws1.text).append("(")
               .append($ws2.text).append($ID.text).append($ws3.text).append(")");
@@ -439,6 +459,11 @@ protected bindMyInterfaceCall returns [StringBuilder res = new StringBuilder()]
 	: BIND_MY_INTERFACE ws1=ws '(' ws2=ws ID ws3=ws ( index ws4=ws {idx = $index.res;} ) ? 
 	  ',' ws5=ws sItf=macroParam ws6=ws ')'
       {
+        try {
+          cplChecker.bindMyItf($ID, idx, sourceFile, sourceLineShift);
+        } catch (ADLException e) {
+          // ignore
+        }
         if (idx == null)
           $res.append("BIND_MY_INTERFACE").append($ws1.text).append("(")
               .append($ws2.text).append($ID.text).append($ws3.text).append(",")
@@ -450,11 +475,16 @@ protected bindMyInterfaceCall returns [StringBuilder res = new StringBuilder()]
               .append($ws5.text).append($sItf.res).append($ws6.text).append(")");
       }
     ;
-	
+  
 protected isBoundCall returns [StringBuilder res = new StringBuilder()]
 @init{StringBuilder idx = null;}
-	: IS_BOUND ws1=ws '(' ws2=ws ID ws3=ws ( index ws4=ws {idx = $index.res;} ) ? ')'
+  : IS_BOUND ws1=ws '(' ws2=ws ID ws3=ws ( index ws4=ws {idx = $index.res;} ) ? ')'
       {
+        try {
+          cplChecker.isBound($ID, idx, sourceFile, sourceLineShift);
+        } catch (ADLException e) {
+          // ignore
+        }
         if (idx == null)
           $res.append("IS_BOUND").append($ws1.text).append("(")
               .append($ws2.text).append($ID.text).append($ws3.text).append(")");
@@ -462,6 +492,19 @@ protected isBoundCall returns [StringBuilder res = new StringBuilder()]
           $res.append("IS_BOUND_COLLECTION").append($ws1.text).append("(")
               .append($ws2.text).append($ID.text).append($ws3.text).append(",")
               .append(idx).append($ws4.text).append(")");
+      }
+    ;
+  
+protected getCollectionSizeCall returns [StringBuilder res = new StringBuilder()]
+  : GET_COLLECTION_SIZE ws1=ws '(' ws2=ws ID ws3=ws ')'
+      {
+        try {
+          cplChecker.getCollectionSize($ID, sourceFile, sourceLineShift);
+        } catch (ADLException e) {
+          // ignore
+        }
+        $res.append("GET_COLLECTION_SIZE").append($ws1.text).append("(")
+            .append($ws2.text).append($ID.text).append($ws3.text).append(")");
       }
     ;
 	

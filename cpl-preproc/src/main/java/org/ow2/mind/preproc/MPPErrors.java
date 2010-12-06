@@ -53,6 +53,26 @@ public enum MPPErrors implements ErrorTemplate {
   /** */
   UNKNOWN_ATTRIBUTE(5, "Unknown attribute \"%s\".", "<attName>"),
 
+  /** */
+  INVALID_INDEX(6, "In interface \"%s\" invalid index \"%s\".", "<itfName>",
+      "<index>"),
+
+  /** */
+  INVALID_INTERFACE_MISSING_INDEX(
+      7,
+      "Interface \"%s\" is a collection interface, an index must be specified.",
+      "<itf name>"),
+
+  /** */
+  INVALID_INTERFACE_NOT_A_COLLECTION(
+      8,
+      "Interface \"%s\" is not a collection interface, an index cannot be specified here.",
+      "<itf name>"),
+
+  /** */
+  MISSING_PRIVATE_DECLARATION(9,
+      "Missing declaration of PRIVATE structure in \"%s\".", "<data file name>"),
+
   ;
 
   /** The groupId of ErrorTemplates defined in this enumeration. */

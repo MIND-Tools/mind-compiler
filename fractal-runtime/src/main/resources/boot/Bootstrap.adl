@@ -46,5 +46,5 @@ primitive boot.Bootstrap {
   requires Main as entryPoint;
   requires optional LifeCycleController as appLCC;
   
-  source bootstrap.c
+  source bootstrap.c;
 }
