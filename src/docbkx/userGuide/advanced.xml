@@ -234,7 +234,7 @@
           must be added to the component <classname>foo.bar.MyControlledComponent</classname>.</para> 
       </example>
       
-      <para>When the <classname>@controller.BindingContrller</classname> annotation is
+      <para>When the <classname>@controller.BindingController</classname> annotation is
         attached to an ADL definition, a control interface called 
         <varname>bindingController</varname> is automatically added. The signature of this 
         interface is defined in the <classname>fractal.api.BindingController</classname>
@@ -242,6 +242,12 @@
         
       <para>See <xref linkend="api-fapi-BC"/> for details on the
         <classname>fractal.api.BindingController</classname> interface signature.</para>
+        
+      <para>By default, the <classname>@controller.BindingController</classname> annotation
+        can be specified only on components that have at least one required interface.
+        The annotation has an optional field called <code>allowNoRequiredItf</code>
+        that can be set to <code>true</code> to bypass this limitation (i.e. 
+        <code>@controller.BindingController(allowNoRequiredItf=true)</code>).</para>
     </section>
 
     <section id="adv-ctrl-cc">
@@ -375,6 +381,12 @@
         
       <para>See <xref linkend="api-fapi-AC"/> for details on the
         <classname>fractal.api.AttributeController</classname> interface signature.</para>
+
+      <para>By default, the <classname>@controller.AttributeController</classname> annotation
+        can be specified only on components that have at least one attribute.
+        The annotation has an optional field called <code>allowNoAttr</code>
+        that can be set to <code>true</code> to bypass this limitation (i.e. 
+        <code>@controller.AttributeController(allowNoAttr=true)</code>).</para>
     </section>
   </section>
 </chapter>

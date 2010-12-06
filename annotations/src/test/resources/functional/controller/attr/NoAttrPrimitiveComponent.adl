@@ -1,0 +1,11 @@
+
+@Compile
+@controller.AttributeController(allowNoAttr=true)
+primitive controller.attr.NoAttrPrimitiveComponent extends ACTested {
+  
+  source {{
+    int METH(main, main) (int argc, char *argv[]) {
+      return 0;
+    }
+  }};
+}
