@@ -83,7 +83,7 @@ int METH(main, main) (int argc, char *argv[]) {
     int err;
     void *comp;
 
-    if (controlled) {
+    if (factoryOfControlled) {
       fractal_api_Component factoryComp = (fractal_api_Component) compSymbol;
       fractal_api_BindingController bc;
       int err;

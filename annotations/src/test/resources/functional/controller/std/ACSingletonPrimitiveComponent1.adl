@@ -1,0 +1,14 @@
+import controller.binding.*;
+import controller.attr.*;
+import controller.component.*;
+
+@CompileDef
+@Singleton
+primitive controller.std.ACSingletonPrimitiveComponent1 extends ControlledComponent, controller.attr.ACTested {
+
+  source ../attr/primitiveComponent.c;
+
+  attribute int attr1=0;
+  attribute int attr2=4;
+  attribute string attr3="toto";
+}

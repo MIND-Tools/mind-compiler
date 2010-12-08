@@ -1,0 +1,12 @@
+import controller.binding.*;
+import controller.attr.*;
+import controller.component.*;
+
+@CompileDef
+@controller.StdControllers
+@Singleton
+primitive controller.std.CISingletonPrimitiveComponent extends controller.component.CITested {
+  provides Main as main;
+
+  source ../../empty_main.c;
+}

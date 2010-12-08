@@ -1,0 +1,4 @@
+@controller.StdControllers
+primitive controller.std.ControlledComponent {
+
+}

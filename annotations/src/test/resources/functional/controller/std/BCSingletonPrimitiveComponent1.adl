@@ -1,0 +1,10 @@
+import controller.binding.*;
+import controller.attr.*;
+import controller.component.*;
+
+@CompileDef
+@Singleton
+primitive controller.std.BCSingletonPrimitiveComponent1 extends ControlledComponent, controller.binding.BCTested {
+
+  source ../binding/primitiveComponent.c;
+}

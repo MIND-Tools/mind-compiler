@@ -93,7 +93,7 @@ public class DynloadTest extends AbstractFunctionalTest {
     if (isRunningOnWindows()) return;
 
     runTester(dynloadRunner.compile("Factory<EmptyMultiPrimitive>"), false,
-        true, false);
+        true, true);
   }
 
   protected void runTester(final File lib, final boolean controlled,

@@ -1,0 +1,8 @@
+import controller.binding.*;
+import controller.attr.*;
+import controller.component.*;
+
+@Run
+composite controller.std.BCTestSingletonPrimitiveComponent1 
+    extends BCTester<BCSingletonPrimitiveComponent1> {
+}
