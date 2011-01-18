@@ -86,7 +86,7 @@ public enum ADLErrors implements ErrorTemplate {
   /** */
   WARNING_SINGLETON_SUB_COMPONENT(
       15,
-      "WARNINIG : sub-component \"%s\" is singleton. The \"@Singleton\" annotation should be"
+      "WARNING : sub-component \"%s\" is singleton. The \"@Singleton\" annotation should be"
           + " added on definition", "<subCompName>"),
 
   // ---------------------------------------------------------------------------
