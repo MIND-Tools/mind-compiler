@@ -1,0 +1,37 @@
+<plugin
+    id="org.ow2.mind.plugin"
+    name="The core plugin">
+    <extension-point
+        id="BooleanEvaluator"
+        dtd="dtd/BooleanEvaluator.dtd" />
+
+    <extension
+        point="org.ow2.mind.plugin.BooleanEvaluator"
+        name="Default Evaluators">
+        <evaluator
+            name="or"
+            class="org.ow2.mind.plugin.util.OrBooleanEvaluator" />
+
+        <evaluator
+            name="and"
+            class="org.ow2.mind.plugin.util.AndBooleanEvaluator" />
+
+        <evaluator
+            name="not"
+            class="org.ow2.mind.plugin.util.NotBooleanEvaluator" />
+
+        <evaluator
+            name="contextContains"
+            class="org.ow2.mind.plugin.util.ContextBooleanEvaluator" />
+    </extension>
+
+    <extension-point
+        id="guice-module"
+        dtd="dtd/GuiceModule.dtd" />
+
+    <extension
+        point="org.ow2.mind.plugin.guice-module">
+        <module
+            class="org.ow2.mind.plugin.PluginLoaderModule" />
+    </extension>
+</plugin>

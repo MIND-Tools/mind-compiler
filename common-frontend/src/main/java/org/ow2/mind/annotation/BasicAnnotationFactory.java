@@ -22,34 +22,25 @@
 
 package org.ow2.mind.annotation;
 
-import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
-import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
-
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.objectweb.fractal.adl.CompilerError;
 import org.objectweb.fractal.adl.error.GenericErrors;
-import org.objectweb.fractal.api.NoSuchInterfaceException;
-import org.objectweb.fractal.api.control.BindingController;
-import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.ow2.mind.annotation.ast.AnnotationArgument;
 import org.ow2.mind.annotation.ast.AnnotationNode;
 import org.ow2.mind.value.ValueEvaluationException;
 import org.ow2.mind.value.ValueEvaluator;
 
-public class BasicAnnotationFactory
-    implements
-      AnnotationFactory,
-      BindingController {
+import com.google.inject.Inject;
 
-  // ---------------------------------------------------------------------------
-  // Client interfaces
-  // ---------------------------------------------------------------------------
+public class BasicAnnotationFactory implements AnnotationFactory {
 
+  @Inject
   public ValueEvaluator    evaluatorItf;
 
+  @Inject
   public AnnotationLocator annotationLocatorItf;
 
   // ---------------------------------------------------------------------------
@@ -140,54 +131,4 @@ public class BasicAnnotationFactory
 
     return annotation;
   }
-
-  // ---------------------------------------------------------------------------
-  // Implementation of the BindingController interface
-  // ---------------------------------------------------------------------------
-
-  public String[] listFc() {
-    return listFcHelper(ValueEvaluator.ITF_NAME, AnnotationLocator.ITF_NAME);
-  }
-
-  public Object lookupFc(final String s) throws NoSuchInterfaceException {
-    checkItfName(s);
-
-    if (ValueEvaluator.ITF_NAME.equals(s)) {
-      return evaluatorItf;
-    } else if (AnnotationLocator.ITF_NAME.equals(s)) {
-      return annotationLocatorItf;
-    } else {
-      throw new NoSuchInterfaceException("No client interface named '" + s
-          + "'");
-    }
-  }
-
-  public void bindFc(final String s, final Object o)
-      throws NoSuchInterfaceException, IllegalBindingException {
-    checkItfName(s);
-
-    if (ValueEvaluator.ITF_NAME.equals(s)) {
-      evaluatorItf = (ValueEvaluator) o;
-    } else if (AnnotationLocator.ITF_NAME.equals(s)) {
-      annotationLocatorItf = (AnnotationLocator) o;
-    } else {
-      throw new NoSuchInterfaceException("No client interface named '" + s
-          + "' for binding the interface");
-    }
-  }
-
-  public void unbindFc(final String s) throws IllegalBindingException,
-      NoSuchInterfaceException {
-    checkItfName(s);
-
-    if (ValueEvaluator.ITF_NAME.equals(s)) {
-      evaluatorItf = null;
-    } else if (AnnotationLocator.ITF_NAME.equals(s)) {
-      annotationLocatorItf = null;
-    } else {
-      throw new NoSuchInterfaceException("No client interface named '" + s
-          + "'");
-    }
-  }
-
 }

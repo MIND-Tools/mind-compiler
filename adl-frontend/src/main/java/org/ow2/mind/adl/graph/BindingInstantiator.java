@@ -34,9 +34,16 @@ import org.objectweb.fractal.adl.interfaces.InterfaceContainer;
 import org.ow2.mind.adl.ast.ASTHelper;
 import org.ow2.mind.adl.ast.Binding;
 import org.ow2.mind.adl.ast.BindingContainer;
+import org.ow2.mind.adl.graph.Instantiator.AbstractDelegatingInstantiator;
 import org.ow2.mind.adl.membrane.ast.InternalInterfaceContainer;
+import org.ow2.mind.error.ErrorManager;
 
-public class BindingInstantiator extends AbstractInstantiator {
+import com.google.inject.Inject;
+
+public class BindingInstantiator extends AbstractDelegatingInstantiator {
+
+  @Inject
+  protected ErrorManager errorManagerItf;
 
   // ---------------------------------------------------------------------------
   // Implementation of the Instantiator interface

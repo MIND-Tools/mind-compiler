@@ -125,6 +125,9 @@ import org.ow2.mind.value.ast.StringLiteral;
 import org.ow2.mind.value.ast.Value;
 import org.xml.sax.SAXException;
 
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
+
 /**
  * Translate the JTB AST of an ADL file into a "fractal-adl like" AST.
  */
@@ -132,7 +135,8 @@ public class JTBProcessor extends GJDepthFirst<Node, Node>
     implements
       ParserConstants {
 
-  private final String            filename;
+  public static final String      ADL_DTD           = "adl-dtd";
+
   private final XMLNodeFactory    nodeFactory;
   private final ErrorManager      errorManager;
   private final String            adlDtd;
@@ -141,14 +145,11 @@ public class JTBProcessor extends GJDepthFirst<Node, Node>
   private final BeginTokenVisitor beginTokenVisitor = new BeginTokenVisitor();
   private final EndTokenVisitor   endTokenVisitor   = new EndTokenVisitor();
 
-  /**
-   * @param errorManager The error manager to be used to report errors.
-   * @param nodeFactory The node factory to be used for instantiating AST nodes.
-   * @param adlDtd The grammar definition for ADL nodes.
-   * @param filename The name of the parsed file.
-   */
-  public JTBProcessor(final ErrorManager errorManager,
-      final XMLNodeFactory nodeFactory, final String adlDtd,
+  private String                  filename;
+
+  @Inject
+  protected JTBProcessor(final ErrorManager errorManager,
+      final XMLNodeFactory nodeFactory, @Named(ADL_DTD) final String adlDtd,
       final String filename) {
     this.errorManager = errorManager;
     this.nodeFactory = nodeFactory;
@@ -160,6 +161,10 @@ public class JTBProcessor extends GJDepthFirst<Node, Node>
       throw new CompilerError(GenericErrors.INTERNAL_ERROR, e,
           "Error in dtd file '" + adlDtd + "'");
     }
+  }
+
+  public void setFilename(final String filename) {
+    this.filename = filename;
   }
 
   /**

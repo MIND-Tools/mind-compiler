@@ -2,65 +2,45 @@
 package org.ow2.mind.adl.annotations;
 
 import static org.objectweb.fractal.adl.NodeUtil.castNodeError;
-import static org.ow2.mind.BCImplChecker.checkBCImplementation;
 import static org.testng.Assert.assertEquals;
 
 import java.util.HashMap;
 
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.Loader;
-import org.ow2.mind.BasicInputResourceLocator;
-import org.ow2.mind.adl.ADLLocator;
+import org.ow2.mind.CommonFrontendModule;
+import org.ow2.mind.adl.ADLFrontendModule;
 import org.ow2.mind.adl.ErrorLoader;
-import org.ow2.mind.adl.Factory;
-import org.ow2.mind.adl.annotation.AnnotationLoader;
 import org.ow2.mind.adl.ast.ImplementationContainer;
 import org.ow2.mind.adl.ast.Source;
-import org.ow2.mind.adl.implementation.ImplementationLocator;
 import org.ow2.mind.annotation.AnnotationHelper;
-import org.ow2.mind.error.ErrorManager;
-import org.ow2.mind.error.ErrorManagerFactory;
-import org.ow2.mind.idl.IDLLoaderChainFactory;
-import org.ow2.mind.idl.IDLLoaderChainFactory.IDLFrontend;
-import org.ow2.mind.idl.IDLLocator;
-import org.ow2.mind.plugin.SimpleClassPluginFactory;
+import org.ow2.mind.idl.IDLFrontendModule;
+import org.ow2.mind.plugin.PluginLoaderModule;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.google.inject.Key;
+import com.google.inject.name.Names;
 
 public class TestAnnotations {
   private Loader loader;
 
   @BeforeMethod(alwaysRun = true)
   public void setUp() {
-    final ErrorManager errorManager = ErrorManagerFactory
-        .newSimpleErrorManager();
+    final Injector injector = Guice.createInjector(new CommonFrontendModule(),
+        new PluginLoaderModule(), new IDLFrontendModule(),
+        new ADLFrontendModule() {
+          protected void configureErrorLoader() {
+            bind(Loader.class).annotatedWith(Names.named("ErrorLoader"))
+                .toChainStartingWith(ErrorLoader.class)
+                .endingWith(Loader.class);
+          }
+        });
 
-    // input locators
-    final BasicInputResourceLocator inputResourceLocator = new BasicInputResourceLocator();
-    final IDLLocator idlLocator = IDLLoaderChainFactory
-        .newIDLLocator(inputResourceLocator);
-    final ADLLocator adlLocator = Factory.newADLLocator(inputResourceLocator);
-    final ImplementationLocator implementationLocator = Factory
-        .newImplementationLocator(inputResourceLocator);
-
-    // Plugin Manager Components
-    final org.objectweb.fractal.adl.Factory pluginFactory = new SimpleClassPluginFactory();
-
-    // loader chains
-    final IDLFrontend idlFrontend = IDLLoaderChainFactory.newLoader(errorManager,
-        idlLocator, inputResourceLocator, pluginFactory);
-    final Loader adlLoader = Factory.newLoader(errorManager,
-        inputResourceLocator, adlLocator, idlLocator, implementationLocator,
-        idlFrontend.cache, idlFrontend.loader, pluginFactory);
-    final ErrorLoader errorLoader = new ErrorLoader();
-    errorLoader.clientLoader = adlLoader;
-    errorLoader.errorManagerItf = errorManager;
-    loader = errorLoader;
-  }
-
-  @Test(groups = {"functional", "checkin"})
-  public void testAnnotationLoaderBC() throws Exception {
-    checkBCImplementation(new AnnotationLoader());
+    loader = injector.getInstance(Key.get(Loader.class,
+        Names.named("ErrorLoader")));
   }
 
   @Test(groups = {"functional"})

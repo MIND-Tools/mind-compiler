@@ -22,8 +22,6 @@
 
 package org.ow2.mind.adl.graph;
 
-import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
-import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
 import static org.ow2.mind.adl.ast.ASTHelper.getResolvedComponentDefinition;
 import static org.ow2.mind.adl.ast.ASTHelper.isType;
 import static org.ow2.mind.annotation.AnnotationHelper.getAnnotation;
@@ -34,29 +32,21 @@ import java.util.Map;
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.Loader;
-import org.objectweb.fractal.api.NoSuchInterfaceException;
-import org.objectweb.fractal.api.control.BindingController;
-import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.ow2.mind.adl.ADLErrors;
 import org.ow2.mind.adl.annotation.predefined.Singleton;
 import org.ow2.mind.adl.ast.Component;
 import org.ow2.mind.adl.ast.ComponentContainer;
 import org.ow2.mind.error.ErrorManager;
 
-public class BasicInstantiator implements Instantiator, BindingController {
+import com.google.inject.Inject;
 
-  // ---------------------------------------------------------------------------
-  // Client interfaces
-  // ---------------------------------------------------------------------------
+public class BasicInstantiator implements Instantiator {
 
-  /** The {@link ErrorManager} client interface used to log errors. */
-  public ErrorManager        errorManagerItf;
+  @Inject
+  protected ErrorManager errorManagerItf;
 
-  /** The name of the {@link #loaderItf} client interface. */
-  public static final String LOADER_ITF_NAME = "loader";
-
-  /** The Loader interface used to load referenced definitions. */
-  public Loader              loaderItf;
+  @Inject
+  protected Loader       loaderItf;
 
   // ---------------------------------------------------------------------------
   // Implementation of the Loader interface
@@ -108,55 +98,5 @@ public class BasicInstantiator implements Instantiator, BindingController {
 
   protected boolean isSingleton(final Definition subCompDef) {
     return getAnnotation(subCompDef, Singleton.class) != null;
-  }
-
-  // ---------------------------------------------------------------------------
-  // Overridden BindingController methods
-  // ---------------------------------------------------------------------------
-
-  public void bindFc(final String itfName, final Object value)
-      throws NoSuchInterfaceException, IllegalBindingException {
-    checkItfName(itfName);
-
-    if (ErrorManager.ITF_NAME.equals(itfName)) {
-      errorManagerItf = (ErrorManager) value;
-    } else if (LOADER_ITF_NAME.equals(itfName)) {
-      loaderItf = (Loader) value;
-    } else {
-      throw new NoSuchInterfaceException("No client interface named '"
-          + itfName + "' for binding the interface");
-    }
-
-  }
-
-  public String[] listFc() {
-    return listFcHelper(ErrorManager.ITF_NAME, LOADER_ITF_NAME);
-  }
-
-  public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
-    checkItfName(itfName);
-
-    if (ErrorManager.ITF_NAME.equals(itfName)) {
-      return errorManagerItf;
-    } else if (LOADER_ITF_NAME.equals(itfName)) {
-      return loaderItf;
-    } else {
-      throw new NoSuchInterfaceException("No client interface named '"
-          + itfName + "' for binding the interface");
-    }
-  }
-
-  public void unbindFc(final String itfName) throws NoSuchInterfaceException,
-      IllegalBindingException {
-    checkItfName(itfName);
-
-    if (ErrorManager.ITF_NAME.equals(itfName)) {
-      errorManagerItf = null;
-    } else if (LOADER_ITF_NAME.equals(itfName)) {
-      loaderItf = null;
-    } else {
-      throw new NoSuchInterfaceException("No client interface named '"
-          + itfName + "' for binding the interface");
-    }
   }
 }

@@ -12,11 +12,15 @@ import java.util.Map;
 import junit.framework.TestCase;
 
 import org.objectweb.fractal.adl.ADLException;
+import org.ow2.mind.CommonBackendModule;
+import org.ow2.mind.CommonFrontendModule;
 import org.ow2.mind.PathHelper;
-import org.ow2.mind.error.ErrorManager;
-import org.ow2.mind.error.ErrorManagerFactory;
 import org.ow2.mind.idl.ast.IDL;
 import org.ow2.mind.io.BasicOutputFileLocator;
+import org.ow2.mind.plugin.PluginLoaderModule;
+
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 
 /**
  * Unit test for simple App.
@@ -29,10 +33,11 @@ public class AppTest extends TestCase {
 
   @Override
   protected void setUp() throws Exception {
-    final ErrorManager errorManager = ErrorManagerFactory
-        .newSimpleErrorManager();
-    loader = IDLLoaderChainFactory.newLoader(errorManager).loader;
-    idlVisitor = IDLBackendFactory.newIDLCompiler(loader);
+    final Injector injector = Guice.createInjector(new CommonFrontendModule(),
+        new IDLFrontendModule(), new PluginLoaderModule(),
+        new CommonBackendModule(), new IDLBackendModule());
+    loader = injector.getInstance(IDLLoader.class);
+    idlVisitor = injector.getInstance(IDLVisitor.class);
 
     context = new HashMap<Object, Object>();
     context.put(BasicOutputFileLocator.OUTPUT_DIR_CONTEXT_KEY, new File(

@@ -31,9 +31,6 @@ import org.ow2.mind.adl.ast.Source;
 
 public interface ImplementationLocator extends GenericResourceLocator {
 
-  /** Default name of this interface. */
-  String ITF_NAME                     = "implementation-locator";
-
   /**
    * The value of {@link InputResource#getKind() input-resource's kind} that is
    * used to reference a {@link Source}.

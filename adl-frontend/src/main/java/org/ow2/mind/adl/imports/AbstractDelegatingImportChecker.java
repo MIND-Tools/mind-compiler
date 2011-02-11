@@ -22,35 +22,25 @@
 
 package org.ow2.mind.adl.imports;
 
-import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
-import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
 import static org.ow2.mind.adl.imports.ast.ImportASTHelper.isOnDemandImport;
 
 import java.util.Map;
 
 import org.objectweb.fractal.adl.ADLException;
-import org.objectweb.fractal.api.NoSuchInterfaceException;
-import org.objectweb.fractal.api.control.BindingController;
-import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.ow2.mind.adl.ADLErrors;
 import org.ow2.mind.adl.imports.ast.Import;
 import org.ow2.mind.error.ErrorManager;
+import org.ow2.mind.inject.InjectDelegate;
 
-public abstract class AbstractDelegatingImportChecker
-    implements
-      ImportChecker,
-      BindingController {
+import com.google.inject.Inject;
 
-  // ---------------------------------------------------------------------------
-  // Client interfaces
-  // ---------------------------------------------------------------------------
+public abstract class AbstractDelegatingImportChecker implements ImportChecker {
 
-  /** The {@link ErrorManager} client interface used to log errors. */
-  public ErrorManager        errorManagerItf;
+  @Inject
+  protected ErrorManager  errorManagerItf;
 
-  public static final String CLIENT_CHECKER_ITF_NAME = "client-validator";
-
-  public ImportChecker       clientCheckerOptItf;
+  @InjectDelegate
+  protected ImportChecker clientCheckerOptItf;
 
   // ---------------------------------------------------------------------------
   // Implementation of the ImportChecker interface
@@ -99,54 +89,5 @@ public abstract class AbstractDelegatingImportChecker
 
   protected abstract boolean isValidPackage(String pckgName,
       Map<Object, Object> context);
-
-  // ---------------------------------------------------------------------------
-  // Implementation of the BindingController interface
-  // ---------------------------------------------------------------------------
-
-  public String[] listFc() {
-    return listFcHelper(ErrorManager.ITF_NAME, CLIENT_CHECKER_ITF_NAME);
-  }
-
-  public Object lookupFc(final String s) throws NoSuchInterfaceException {
-    checkItfName(s);
-
-    if (s.equals(ErrorManager.ITF_NAME)) {
-      return errorManagerItf;
-    } else if (CLIENT_CHECKER_ITF_NAME.equals(s)) {
-      return clientCheckerOptItf;
-    } else {
-      throw new NoSuchInterfaceException("No client interface named '" + s
-          + "'");
-    }
-  }
-
-  public void bindFc(final String s, final Object o)
-      throws NoSuchInterfaceException, IllegalBindingException {
-    checkItfName(s);
-
-    if (s.equals(ErrorManager.ITF_NAME)) {
-      errorManagerItf = (ErrorManager) o;
-    } else if (CLIENT_CHECKER_ITF_NAME.equals(s)) {
-      clientCheckerOptItf = (ImportChecker) o;
-    } else {
-      throw new NoSuchInterfaceException("No client interface named '" + s
-          + "' for binding the interface");
-    }
-  }
-
-  public void unbindFc(final String s) throws IllegalBindingException,
-      NoSuchInterfaceException {
-    checkItfName(s);
-
-    if (s.equals(ErrorManager.ITF_NAME)) {
-      errorManagerItf = null;
-    } else if (CLIENT_CHECKER_ITF_NAME.equals(s)) {
-      clientCheckerOptItf = null;
-    } else {
-      throw new NoSuchInterfaceException("No client interface named '" + s
-          + "'");
-    }
-  }
 
 }

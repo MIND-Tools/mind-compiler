@@ -35,28 +35,26 @@ import java.util.Map;
 
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.Loader;
-import org.ow2.mind.BasicInputResourceLocator;
-import org.ow2.mind.adl.ADLLocator;
+import org.ow2.mind.CommonFrontendModule;
+import org.ow2.mind.adl.ADLFrontendModule;
 import org.ow2.mind.adl.ASTChecker;
 import org.ow2.mind.adl.ErrorLoader;
-import org.ow2.mind.adl.Factory;
 import org.ow2.mind.adl.annotations.controller.BindingController;
 import org.ow2.mind.adl.ast.ASTHelper;
-import org.ow2.mind.adl.implementation.ImplementationLocator;
 import org.ow2.mind.adl.membrane.ControllerInterfaceDecorationHelper;
 import org.ow2.mind.adl.membrane.ast.Controller;
 import org.ow2.mind.adl.membrane.ast.ControllerContainer;
 import org.ow2.mind.adl.membrane.ast.ControllerInterface;
 import org.ow2.mind.annotation.AnnotationHelper;
-import org.ow2.mind.annotation.AnnotationLocatorHelper;
-import org.ow2.mind.error.ErrorManager;
-import org.ow2.mind.error.ErrorManagerFactory;
-import org.ow2.mind.idl.IDLLoaderChainFactory;
-import org.ow2.mind.idl.IDLLoaderChainFactory.IDLFrontend;
-import org.ow2.mind.idl.IDLLocator;
-import org.ow2.mind.plugin.SimpleClassPluginFactory;
+import org.ow2.mind.idl.IDLFrontendModule;
+import org.ow2.mind.plugin.PluginLoaderModule;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.google.inject.Key;
+import com.google.inject.name.Names;
 
 public class TestBindingController {
 
@@ -66,36 +64,20 @@ public class TestBindingController {
 
   @BeforeMethod(alwaysRun = true)
   public void setUp() throws Exception {
-    final ErrorManager errorManager = ErrorManagerFactory
-        .newSimpleErrorManager();
+    final Injector injector = Guice.createInjector(new CommonFrontendModule(),
+        new PluginLoaderModule(), new IDLFrontendModule(),
+        new ADLFrontendModule() {
+          protected void configureErrorLoader() {
+            bind(Loader.class).annotatedWith(Names.named("ErrorLoader"))
+                .toChainStartingWith(ErrorLoader.class)
+                .endingWith(Loader.class);
+          }
+        });
 
-    // input locators
-    final BasicInputResourceLocator inputResourceLocator = new BasicInputResourceLocator();
-    final IDLLocator idlLocator = IDLLoaderChainFactory
-        .newIDLLocator(inputResourceLocator);
-    final ADLLocator adlLocator = Factory.newADLLocator(inputResourceLocator);
-    final ImplementationLocator implementationLocator = Factory
-        .newImplementationLocator(inputResourceLocator);
-
-    // Plugin Manager Components
-    final org.objectweb.fractal.adl.Factory pluginFactory = new SimpleClassPluginFactory();
-
-    // loader chains
-    final IDLFrontend idlFrontend = IDLLoaderChainFactory.newLoader(errorManager,
-        idlLocator, inputResourceLocator, pluginFactory);
-    final Loader adlLoader = Factory.newLoader(errorManager,
-        inputResourceLocator, adlLocator, idlLocator, implementationLocator,
-        idlFrontend.cache, idlFrontend.loader, pluginFactory);
-    final ErrorLoader errorLoader = new ErrorLoader();
-    errorLoader.errorManagerItf = errorManager;
-    errorLoader.clientLoader = adlLoader;
-    loader = errorLoader;
+    loader = injector.getInstance(Key.get(Loader.class,
+        Names.named("ErrorLoader")));
 
     context = new HashMap<Object, Object>();
-    AnnotationLocatorHelper.addDefaultAnnotationPackage(
-        "org.ow2.mind.adl.annotation.predefined", context);
-    AnnotationLocatorHelper.addDefaultAnnotationPackage(
-        "org.ow2.mind.adl.annotations", context);
 
     astChecker = new ASTChecker();
   }

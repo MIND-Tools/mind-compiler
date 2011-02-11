@@ -22,8 +22,6 @@
 
 package org.ow2.mind.adl.membrane;
 
-import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
-import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
 import static org.ow2.mind.PathHelper.fullyQualifiedNameToPath;
 import static org.ow2.mind.adl.CompilationDecorationHelper.addAdditionalCompilationUnit;
 
@@ -36,15 +34,12 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.antlr.stringtemplate.StringTemplate;
-import org.antlr.stringtemplate.StringTemplateGroupLoader;
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.CompilerError;
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.interfaces.Interface;
 import org.objectweb.fractal.adl.interfaces.InterfaceContainer;
 import org.objectweb.fractal.adl.types.TypeInterface;
-import org.objectweb.fractal.api.NoSuchInterfaceException;
-import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.ow2.mind.InputResourcesHelper;
 import org.ow2.mind.SourceFileWriter;
 import org.ow2.mind.adl.AbstractSourceGenerator;
@@ -58,38 +53,29 @@ import org.ow2.mind.adl.idl.InterfaceDefinitionDecorationHelper;
 import org.ow2.mind.idl.IDLLoader;
 import org.ow2.mind.idl.ast.InterfaceDefinition;
 import org.ow2.mind.io.IOErrors;
-import org.ow2.mind.st.StringTemplateComponentLoader;
+
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
 
 public class MembraneSourceGenerator extends AbstractSourceGenerator
     implements
       DefinitionSourceGenerator {
 
-  protected static final String MEMBRANE_TEMPLATE_NAME = "st.membrane.MembraneImplementation";
-  protected static final String FILE_SUFFIX            = "_ctrl_impl";
-  protected static final String FILE_EXT               = ".c";
+  /** The name to be used to inject the templateGroupName used by this class. */
+  public static final String    TEMPLATE_NAME    = "membrane.implementation";
 
-  // ---------------------------------------------------------------------------
-  // Client Interfaces
-  // ---------------------------------------------------------------------------
+  /** The default templateGroupName used by this class. */
+  public static final String    DEFAULT_TEMPLATE = "st.membrane.MembraneImplementation";
 
-  /** Client interface used to load IDL files if needed. */
-  public IDLLoader              idlLoaderItf;
+  protected static final String FILE_SUFFIX      = "_ctrl_impl";
+  protected static final String FILE_EXT         = ".c";
 
-  // ---------------------------------------------------------------------------
-  // Constructors
-  // ---------------------------------------------------------------------------
+  @Inject
+  protected IDLLoader           idlLoaderItf;
 
-  /**
-   * Public constructor.
-   */
-  public MembraneSourceGenerator() {
-    super(MEMBRANE_TEMPLATE_NAME);
-  }
-
-  /**
-   * Protected constructor can be used by sub-class.
-   */
-  protected MembraneSourceGenerator(final String templateGroupName) {
+  @Inject
+  protected MembraneSourceGenerator(
+      @Named(TEMPLATE_NAME) final String templateGroupName) {
     super(templateGroupName);
   }
 
@@ -181,57 +167,5 @@ public class MembraneSourceGenerator extends AbstractSourceGenerator
     addAdditionalCompilationUnit(definition,
         new AdditionalCompilationUnitDecoration(outputFileName, true,
             dependencies));
-  }
-
-  // ---------------------------------------------------------------------------
-  // Implementation of the BindingController interface
-  // ---------------------------------------------------------------------------
-
-  @Override
-  public void bindFc(final String itfName, final Object value)
-      throws NoSuchInterfaceException, IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(IDLLoader.ITF_NAME)) {
-      idlLoaderItf = (IDLLoader) value;
-    } else if (itfName.equals(StringTemplateComponentLoader.ITF_NAME)) {
-      templateGroupLoaderItf = (StringTemplateGroupLoader) value;
-    } else {
-      super.bindFc(itfName, value);
-    }
-
-  }
-
-  @Override
-  public String[] listFc() {
-    return listFcHelper(super.listFc(), IDLLoader.ITF_NAME,
-        StringTemplateComponentLoader.ITF_NAME);
-  }
-
-  @Override
-  public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
-    checkItfName(itfName);
-
-    if (itfName.equals(IDLLoader.ITF_NAME)) {
-      return idlLoaderItf;
-    } else if (itfName.equals(StringTemplateComponentLoader.ITF_NAME)) {
-      return templateGroupLoaderItf;
-    } else {
-      return super.lookupFc(itfName);
-    }
-  }
-
-  @Override
-  public void unbindFc(final String itfName) throws NoSuchInterfaceException,
-      IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(IDLLoader.ITF_NAME)) {
-      idlLoaderItf = null;
-    } else if (itfName.equals(StringTemplateComponentLoader.ITF_NAME)) {
-      templateGroupLoaderItf = null;
-    } else {
-      super.unbindFc(itfName);
-    }
   }
 }

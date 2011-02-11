@@ -22,28 +22,25 @@
 
 package org.ow2.mind.adl;
 
-import static org.ow2.mind.BCImplChecker.checkBCImplementation;
 import static org.testng.Assert.assertNotNull;
 
 import java.util.HashMap;
 
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.Loader;
-import org.objectweb.fractal.adl.NodeFactoryImpl;
-import org.objectweb.fractal.adl.xml.XMLNodeFactoryImpl;
-import org.ow2.mind.adl.graph.Instantiator;
+import org.ow2.mind.CommonFrontendModule;
 import org.ow2.mind.adl.imports.ImportDefinitionReferenceResolver;
 import org.ow2.mind.adl.parser.ADLParser;
-import org.ow2.mind.error.ErrorManager;
-import org.ow2.mind.error.ErrorManagerFactory;
+import org.ow2.mind.plugin.PluginLoaderModule;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 
 public class TestDefinitionReferenceResolver {
 
   Loader                  loader;
-
-  Instantiator            instantiator;
 
   HashMap<Object, Object> context;
 
@@ -51,86 +48,30 @@ public class TestDefinitionReferenceResolver {
 
   @BeforeMethod(alwaysRun = true)
   protected void setUp() throws Exception {
-    final ErrorManager errorManager = ErrorManagerFactory
-        .newSimpleErrorManager();
-    // Loader chain components
-    final ADLParser adlLoader = new ADLParser();
-    final SubComponentResolverLoader scrl = new SubComponentResolverLoader();
-    final ExtendsLoader el = new ExtendsLoader();
-    final CacheLoader cl = new CacheLoader();
-    final ErrorLoader errl = new ErrorLoader();
+    final Injector injector = Guice.createInjector(new CommonFrontendModule(),
+        new PluginLoaderModule(), new AbstractADLFrontendModule() {
 
-    loader = errl;
-    errl.clientLoader = cl;
-    cl.clientLoader = el;
-    el.clientLoader = scrl;
-    scrl.clientLoader = adlLoader;
+          protected void configureTest() {
+            bind(Loader.class).toChainStartingWith(ErrorLoader.class)
+                .followedBy(CacheLoader.class).followedBy(ExtendsLoader.class)
+                .followedBy(SubComponentResolverLoader.class)
+                .endingWith(ADLParser.class);
 
-    adlLoader.errorManagerItf = errorManager;
-    scrl.errorManagerItf = errorManager;
-    el.errorManagerItf = errorManager;
-    errl.errorManagerItf = errorManager;
+            bind(DefinitionReferenceResolver.class)
+                .toChainStartingWith(CachingDefinitionReferenceResolver.class)
+                .followedBy(ImportDefinitionReferenceResolver.class)
+                .endingWith(BasicDefinitionReferenceResolver.class);
 
-    // definition reference resolver chain
-    final BasicDefinitionReferenceResolver bdrr = new BasicDefinitionReferenceResolver();
-    final ImportDefinitionReferenceResolver idrr = new ImportDefinitionReferenceResolver();
-    final CachingDefinitionReferenceResolver cdrr = new CachingDefinitionReferenceResolver();
+            setDefaultExtendsLoaderConfig();
+            setDefaultSubComponentLoaderConfig();
+          }
+        });
 
-    cdrr.clientResolverItf = idrr;
-    idrr.clientResolverItf = bdrr;
-    bdrr.loaderItf = cl;
-    cdrr.loaderItf = cl;
-
-    el.definitionReferenceResolverItf = cdrr;
-    scrl.definitionReferenceResolverItf = cdrr;
-
-    bdrr.errorManagerItf = errorManager;
-
-    // additional components
-    final STCFNodeMerger stcfNodeMerger = new STCFNodeMerger();
-    final BasicADLLocator adlLocator = new BasicADLLocator();
-    final XMLNodeFactoryImpl xmlNodeFactory = new XMLNodeFactoryImpl();
-    final NodeFactoryImpl nodeFactory = new NodeFactoryImpl();
-
-    el.nodeMergerItf = stcfNodeMerger;
-    idrr.adlLocatorItf = adlLocator;
-    adlLoader.adlLocatorItf = adlLocator;
-    adlLoader.nodeFactoryItf = xmlNodeFactory;
-    bdrr.nodeFactoryItf = nodeFactory;
+    loader = injector.getInstance(Loader.class);
 
     context = new HashMap<Object, Object>();
 
     checker = new ASTChecker();
-  }
-
-  @Test(groups = {"functional", "checkin"})
-  public void testBasicDefinitionReferenceResolverBC() throws Exception {
-    checkBCImplementation(new BasicDefinitionReferenceResolver());
-  }
-
-  @Test(groups = {"functional", "checkin"})
-  public void testBinaryADLLoaderBC() throws Exception {
-    checkBCImplementation(new BinaryADLLoader());
-  }
-
-  @Test(groups = {"functional", "checkin"})
-  public void testCacheLoaderBC() throws Exception {
-    checkBCImplementation(new CacheLoader());
-  }
-
-  @Test(groups = {"functional", "checkin"})
-  public void testCachingDefinitionReferenceResolverBC() throws Exception {
-    checkBCImplementation(new CachingDefinitionReferenceResolver());
-  }
-
-  @Test(groups = {"functional", "checkin"})
-  public void testExtendsLoaderBC() throws Exception {
-    checkBCImplementation(new ExtendsLoader());
-  }
-
-  @Test(groups = {"functional", "checkin"})
-  public void testSubComponentResolverLoaderBC() throws Exception {
-    checkBCImplementation(new SubComponentResolverLoader());
   }
 
   @Test(groups = {"functional"})

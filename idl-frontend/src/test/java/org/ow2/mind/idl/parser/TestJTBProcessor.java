@@ -22,40 +22,51 @@
 
 package org.ow2.mind.idl.parser;
 
+import static org.testng.Assert.assertNotNull;
+
 import java.io.InputStream;
 
-import junit.framework.TestCase;
-
 import org.objectweb.fractal.adl.xml.XMLNodeFactory;
-import org.objectweb.fractal.adl.xml.XMLNodeFactoryImpl;
+import org.ow2.mind.CommonFrontendModule;
 import org.ow2.mind.idl.ASTChecker;
 import org.ow2.mind.idl.ASTChecker.IDLChecker;
 import org.ow2.mind.idl.ASTChecker.MethodCheckerIterator;
 import org.ow2.mind.idl.ASTChecker.ParameterCheckerIterator;
 import org.ow2.mind.idl.ASTChecker.TypeCheckerIterator;
+import org.ow2.mind.idl.IDLFrontendModule;
 import org.ow2.mind.idl.ast.InterfaceDefinition;
 import org.ow2.mind.idl.jtb.Parser;
 import org.ow2.mind.idl.jtb.syntaxtree.ITFFile;
+import org.ow2.mind.plugin.PluginLoaderModule;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
-public class TestJTBProcessor extends TestCase {
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+
+public class TestJTBProcessor {
   protected static final String DTD = "classpath://org/ow2/mind/idl/mind_v1.dtd";
   XMLNodeFactory                nodeFactory;
   JTBProcessor                  processor;
+  Injector                      injector;
 
-  @Override
+  @BeforeMethod(alwaysRun = true)
   protected void setUp() throws Exception {
-    nodeFactory = new XMLNodeFactoryImpl();
+    injector = Guice.createInjector(new CommonFrontendModule(),
+        new IDLFrontendModule(), new PluginLoaderModule());
+    nodeFactory = injector.getInstance(XMLNodeFactory.class);
   }
 
   protected Parser getParser(final String fileName) throws Exception {
     final ClassLoader loader = getClass().getClassLoader();
     final InputStream is = loader.getResourceAsStream(fileName);
-    assertNotNull("Can't find input file \"" + fileName + "\"", is);
-    processor = new JTBProcessor(nodeFactory, DTD, fileName);
-
+    assertNotNull(is, "Can't find input file \"" + fileName + "\"");
+    processor = injector.getInstance(JTBProcessor.class);
+    processor.setFilename(fileName);
     return new Parser(is);
   }
 
+  @Test(groups = {"functional"})
   public void test1() throws Exception {
     final Parser parser = getParser("test1.itf");
     final ITFFile content = parser.ITFFile();
@@ -87,8 +98,8 @@ public class TestJTBProcessor extends TestCase {
 
     // check m2;
     methodsChecker.andNext().returnsType().isPrimitiveType("unsigned float");
-    methodsChecker.hasParameters("f1").whereFirst().hasType().isPrimitiveType(
-        "float");
+    methodsChecker.hasParameters("f1").whereFirst().hasType()
+        .isPrimitiveType("float");
 
     // check m3;
     methodsChecker.andNext().returnsType().isPointerOf()

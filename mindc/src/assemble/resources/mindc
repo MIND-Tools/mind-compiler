@@ -185,7 +185,7 @@ done
 exec "$JAVACMD" \
   -classpath "${MIND_CLASSPATH}" \
   ${MIND_OPTS} \
-  -Dcecilia.launcher.name=mindc \
+  -Dmindc.launcher.name=mindc \
   ${LAUNCHER} \
   -src-path="${MIND_RUNTIME}" \
   "$@"

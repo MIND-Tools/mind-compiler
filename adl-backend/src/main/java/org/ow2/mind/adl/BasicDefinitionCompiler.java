@@ -22,13 +22,9 @@
 
 package org.ow2.mind.adl;
 
-import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
-import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
 import static org.ow2.mind.PathHelper.fullyQualifiedNameToPath;
 import static org.ow2.mind.PathHelper.replaceExtension;
 import static org.ow2.mind.adl.CompilationDecorationHelper.getAdditionalCompilationUnit;
-import static org.ow2.mind.annotation.AnnotationHelper.getAnnotation;
-import static org.ow2.mind.compilation.DirectiveHelper.splitOptionString;
 
 import java.io.File;
 import java.io.IOException;
@@ -44,12 +40,8 @@ import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.CompilerError;
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.error.GenericErrors;
-import org.objectweb.fractal.api.NoSuchInterfaceException;
-import org.objectweb.fractal.api.control.BindingController;
-import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.ow2.mind.SourceFileWriter;
 import org.ow2.mind.adl.CompilationDecorationHelper.AdditionalCompilationUnitDecoration;
-import org.ow2.mind.adl.annotation.predefined.CFlags;
 import org.ow2.mind.adl.ast.ASTHelper;
 import org.ow2.mind.adl.ast.ImplementationContainer;
 import org.ow2.mind.adl.ast.Source;
@@ -64,27 +56,27 @@ import org.ow2.mind.preproc.MPPCommand;
 import org.ow2.mind.preproc.MPPWrapper;
 import org.ow2.mind.st.BackendFormatRenderer;
 
-public class BasicDefinitionCompiler
-    implements
-      DefinitionCompiler,
-      BindingController {
+import com.google.inject.Inject;
 
-  // ---------------------------------------------------------------------------
-  // Client interfaces
-  // ---------------------------------------------------------------------------
+public class BasicDefinitionCompiler implements DefinitionCompiler {
 
-  public static final String       DEFINITION_SOURCE_GENERATOR_ITF_NAME = "definition-source-generator";
+  @Inject
+  protected DefinitionSourceGenerator definitionSourceGeneratorItf;
 
-  public DefinitionSourceGenerator definitionSourceGeneratorItf;
+  @Inject
+  protected OutputFileLocator         outputFileLocatorItf;
 
-  /** Client interface used to locate output files. */
-  public OutputFileLocator         outputFileLocatorItf;
+  @Inject
+  protected ImplementationLocator     implementationLocatorItf;
 
-  public ImplementationLocator     implementationLocatorItf;
+  @Inject
+  protected CompilerWrapper           compilerWrapperItf;
 
-  public CompilerWrapper           compilerWrapperItf;
+  @Inject
+  protected MPPWrapper                mppWrapperItf;
 
-  public MPPWrapper                mppWrapperItf;
+  @Inject
+  protected FlagExtractor             flagExtractor;
 
   // ---------------------------------------------------------------------------
   // Implementation of the Visitor interface
@@ -152,10 +144,7 @@ public class BasicDefinitionCompiler
             definition, srcFile, objectFile, context);
 
         // Add source-level C-Flags
-        final CFlags sourceFlags = getAnnotation(src, CFlags.class);
-        if (sourceFlags != null) {
-          gccCommand.addFlags(splitOptionString(sourceFlags.value));
-        }
+        gccCommand.addFlags(flagExtractor.getCFlags(src, context));
 
         compilationTasks.add(gccCommand);
 
@@ -225,11 +214,8 @@ public class BasicDefinitionCompiler
             DefinitionIncSourceGenerator.getIncFileName(definition), context));
 
         // Add source-level C-Flags
-        final CFlags sourceFlags = getAnnotation(src, CFlags.class);
-        if (sourceFlags != null) {
-          cppCommand.addFlags(splitOptionString(sourceFlags.value));
-          gccCommand.addFlags(splitOptionString(sourceFlags.value));
-        }
+        cppCommand.addFlags(flagExtractor.getCFlags(src, context));
+        gccCommand.addFlags(flagExtractor.getCFlags(src, context));
 
         compilationTasks.add(cppCommand);
         compilationTasks.add(mppCommand);
@@ -341,9 +327,7 @@ public class BasicDefinitionCompiler
     }
 
     // Add definition level C-Flags
-    final CFlags definitionflags = getAnnotation(definition, CFlags.class);
-    if (definitionflags != null)
-      command.addFlags(splitOptionString(definitionflags.value));
+    command.addFlags(flagExtractor.getCFlags(definition, context));
 
     return command;
   }
@@ -378,9 +362,7 @@ public class BasicDefinitionCompiler
             DefinitionMacroSourceGenerator.FILE_EXT), context));
 
     // Add definition level C-Flags
-    final CFlags definitionflags = getAnnotation(definition, CFlags.class);
-    if (definitionflags != null)
-      command.addFlags(splitOptionString(definitionflags.value));
+    command.addFlags(flagExtractor.getCFlags(definition, context));
 
     return command;
   }
@@ -411,9 +393,7 @@ public class BasicDefinitionCompiler
     }
 
     // Add definition level C-Flags
-    final CFlags definitionflags = getAnnotation(definition, CFlags.class);
-    if (definitionflags != null)
-      command.addFlags(splitOptionString(definitionflags.value));
+    command.addFlags(flagExtractor.getCFlags(definition, context));
 
     return command;
   }
@@ -527,74 +507,5 @@ public class BasicDefinitionCompiler
       throw new UnsupportedOperationException();
     }
 
-  }
-
-  // ---------------------------------------------------------------------------
-  // implementation of the BindingController interface
-  // ---------------------------------------------------------------------------
-
-  public void bindFc(final String itfName, final Object value)
-      throws NoSuchInterfaceException, IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(DEFINITION_SOURCE_GENERATOR_ITF_NAME)) {
-      definitionSourceGeneratorItf = (DefinitionSourceGenerator) value;
-    } else if (itfName.equals(OutputFileLocator.ITF_NAME)) {
-      outputFileLocatorItf = (OutputFileLocator) value;
-    } else if (itfName.equals(CompilerWrapper.ITF_NAME)) {
-      compilerWrapperItf = (CompilerWrapper) value;
-    } else if (itfName.equals(MPPWrapper.ITF_NAME)) {
-      mppWrapperItf = (MPPWrapper) value;
-    } else if (itfName.equals(ImplementationLocator.ITF_NAME)) {
-      implementationLocatorItf = (ImplementationLocator) value;
-    } else {
-      throw new NoSuchInterfaceException("No client interface named '"
-          + itfName + "'");
-    }
-  }
-
-  public String[] listFc() {
-    return listFcHelper(DEFINITION_SOURCE_GENERATOR_ITF_NAME,
-        OutputFileLocator.ITF_NAME, CompilerWrapper.ITF_NAME,
-        MPPWrapper.ITF_NAME, ImplementationLocator.ITF_NAME);
-  }
-
-  public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
-    checkItfName(itfName);
-
-    if (itfName.equals(DEFINITION_SOURCE_GENERATOR_ITF_NAME)) {
-      return definitionSourceGeneratorItf;
-    } else if (itfName.equals(OutputFileLocator.ITF_NAME)) {
-      return outputFileLocatorItf;
-    } else if (itfName.equals(CompilerWrapper.ITF_NAME)) {
-      return compilerWrapperItf;
-    } else if (itfName.equals(MPPWrapper.ITF_NAME)) {
-      return mppWrapperItf;
-    } else if (itfName.equals(ImplementationLocator.ITF_NAME)) {
-      return implementationLocatorItf;
-    } else {
-      throw new NoSuchInterfaceException("No client interface named '"
-          + itfName + "'");
-    }
-  }
-
-  public void unbindFc(final String itfName) throws NoSuchInterfaceException,
-      IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(DEFINITION_SOURCE_GENERATOR_ITF_NAME)) {
-      definitionSourceGeneratorItf = null;
-    } else if (itfName.equals(OutputFileLocator.ITF_NAME)) {
-      outputFileLocatorItf = null;
-    } else if (itfName.equals(CompilerWrapper.ITF_NAME)) {
-      compilerWrapperItf = null;
-    } else if (itfName.equals(MPPWrapper.ITF_NAME)) {
-      mppWrapperItf = null;
-    } else if (itfName.equals(ImplementationLocator.ITF_NAME)) {
-      implementationLocatorItf = null;
-    } else {
-      throw new NoSuchInterfaceException("No client interface named '"
-          + itfName + "'");
-    }
   }
 }

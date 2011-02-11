@@ -47,6 +47,17 @@ public final class CompilerContextHelper {
     context.put(C_FLAGS_CONTEXT_KEY, flags);
   }
 
+  public static void addCFlags(final Map<Object, Object> context,
+      final List<String> flags) {
+    final List<String> f = getCFlags(context);
+    if (f.isEmpty()) {
+      setCFlags(context, flags);
+    } else {
+      f.addAll(flags);
+    }
+  }
+
+  @SuppressWarnings("unchecked")
   public static List<String> getCFlags(final Map<Object, Object> context) {
     List<String> flags = (List<String>) context.get(C_FLAGS_CONTEXT_KEY);
     if (flags == null) flags = Collections.emptyList();
@@ -56,6 +67,16 @@ public final class CompilerContextHelper {
   public static void setLDFlags(final Map<Object, Object> context,
       final List<String> flags) {
     context.put(LD_FLAGS_CONTEXT_KEY, flags);
+  }
+
+  public static void addLDFlags(final Map<Object, Object> context,
+      final List<String> flags) {
+    final List<String> f = getLDFlags(context);
+    if (f.isEmpty()) {
+      setLDFlags(context, flags);
+    } else {
+      f.addAll(flags);
+    }
   }
 
   public static List<String> getLDFlags(final Map<Object, Object> context) {

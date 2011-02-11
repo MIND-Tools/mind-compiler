@@ -22,42 +22,32 @@
 
 package org.ow2.mind.adl;
 
-import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
-import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
 import static org.ow2.mind.PathHelper.fullyQualifiedNameToPath;
 
-import org.antlr.stringtemplate.StringTemplateGroupLoader;
 import org.objectweb.fractal.adl.Definition;
-import org.objectweb.fractal.api.NoSuchInterfaceException;
-import org.objectweb.fractal.api.control.IllegalBindingException;
-import org.ow2.mind.st.StringTemplateComponentLoader;
+
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
 
 /**
  * {@link DefinitionSourceGenerator} component that generated {@value #FILE_EXT}
- * files using the {@value #MACRO_TEMPLATE_NAME} template.
+ * files using the {@value #DEFAULT_TEMPLATE} template.
  */
 public class DefinitionMacroSourceGenerator
     extends
       DefinitionIncSourceGenerator {
 
-  protected static final String MACRO_TEMPLATE_NAME = "st.definitions.implementations.Macro";
-  protected static final String FILE_EXT            = ".macro";
+  /** The name to be used to inject the templateGroupName used by this class. */
+  public static final String    TEMPLATE_NAME    = "definitions.implementations.macro";
 
-  // ---------------------------------------------------------------------------
-  // Constructors
-  // ---------------------------------------------------------------------------
+  /** The default templateGroupName used by this class. */
+  public static final String    DEFAULT_TEMPLATE = "st.definitions.implementations.Macro";
 
-  /**
-   * Public constructor.
-   */
-  public DefinitionMacroSourceGenerator() {
-    super(MACRO_TEMPLATE_NAME);
-  }
+  protected static final String FILE_EXT         = ".macro";
 
-  /**
-   * Protected constructor can be used by sub-class.
-   */
-  protected DefinitionMacroSourceGenerator(final String templateGroupName) {
+  @Inject
+  protected DefinitionMacroSourceGenerator(
+      @Named(TEMPLATE_NAME) final String templateGroupName) {
     super(templateGroupName);
   }
 
@@ -85,49 +75,4 @@ public class DefinitionMacroSourceGenerator
   protected String getOutputFileName(final Definition definition) {
     return getMacroFileName(definition);
   }
-
-  // ---------------------------------------------------------------------------
-  // Implementation of the BindingController interface
-  // ---------------------------------------------------------------------------
-  @Override
-  public void bindFc(final String itfName, final Object value)
-      throws NoSuchInterfaceException, IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(StringTemplateComponentLoader.ITF_NAME)) {
-      templateGroupLoaderItf = (StringTemplateGroupLoader) value;
-    } else {
-      super.bindFc(itfName, value);
-    }
-
-  }
-
-  @Override
-  public String[] listFc() {
-    return listFcHelper(super.listFc(), StringTemplateComponentLoader.ITF_NAME);
-  }
-
-  @Override
-  public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
-    checkItfName(itfName);
-
-    if (itfName.equals(StringTemplateComponentLoader.ITF_NAME)) {
-      return templateGroupLoaderItf;
-    } else {
-      return super.lookupFc(itfName);
-    }
-  }
-
-  @Override
-  public void unbindFc(final String itfName) throws NoSuchInterfaceException,
-      IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(StringTemplateComponentLoader.ITF_NAME)) {
-      templateGroupLoaderItf = null;
-    } else {
-      super.unbindFc(itfName);
-    }
-  }
-
 }

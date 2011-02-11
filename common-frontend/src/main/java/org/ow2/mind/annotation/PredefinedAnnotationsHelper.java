@@ -22,56 +22,47 @@
 
 package org.ow2.mind.annotation;
 
-import static org.ow2.mind.plugin.ast.PluginASTHelper.getExtensionConfig;
-
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.objectweb.fractal.adl.ADLException;
-import org.objectweb.fractal.adl.CompilerError;
-import org.objectweb.fractal.adl.error.GenericErrors;
+import org.ow2.mind.plugin.ConfigurationElement;
 import org.ow2.mind.plugin.PluginManager;
-import org.ow2.mind.plugin.ast.Extension;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
+import org.ow2.mind.plugin.util.BooleanEvaluatorHelper;
 
 public final class PredefinedAnnotationsHelper {
 
-  public static final String ANNOTATION_EXTENSIONS = "org.ow2.mind.predefined-annotations";
-  public static final String ANNOTATION            = "annotation";
-  public static final String PACKAGE               = "package";
+  public static final String  ANNOTATION_EXTENSIONS = "org.ow2.mind.predefined-annotations";
+  private static final String ANNOTATION            = "annotation";
+  private static final String PACKAGE               = "package";
+  private static final String ENABLE_WHEN           = "enableWhen";
+
+  private static List<String> predefinedAnnotations;
 
   private PredefinedAnnotationsHelper() {
   }
 
-  public static String[] getPredefinedAnnotations(
-      final PluginManager pluginManagerItf, final Map<Object, Object> context)
-      throws ADLException {
-    final Collection<Extension> extensions = pluginManagerItf.getExtensions(
-        ANNOTATION_EXTENSIONS, context);
-    final List<String> annotationPackages = new ArrayList<String>();
-    for (final Extension extension : extensions) {
-      annotationPackages.add(getAnnotationPackage(extension));
-    }
-    return annotationPackages.toArray(new String[0]);
+  public static List<String> getPredefinedAnnotations(
+      final PluginManager pluginManagerItf, final Map<Object, Object> context) {
+    if (predefinedAnnotations == null)
+      initPredefinedAnnotations(pluginManagerItf, context);
+    return Collections.unmodifiableList(predefinedAnnotations);
   }
 
-  private static String getAnnotationPackage(final Extension extension)
-      throws ADLException {
-    final NodeList nodes = getExtensionConfig(extension).getChildNodes();
-    for (int i = 0; i < nodes.getLength(); i++) {
-      final Node node = nodes.item(i);
-      if (node instanceof Element) {
-        final Element element = (Element) node;
-        if (element.getNodeName().equals(ANNOTATION)) {
-          return element.getAttribute(PACKAGE);
-        }
+  private static void initPredefinedAnnotations(
+      final PluginManager pluginManagerItf, final Map<Object, Object> context) {
+    predefinedAnnotations = new ArrayList<String>();
+    final Iterable<ConfigurationElement> configurationElements = pluginManagerItf
+        .getConfigurationElements(ANNOTATION_EXTENSIONS, ANNOTATION);
+    for (final ConfigurationElement configurationElement : configurationElements) {
+      final ConfigurationElement condition = configurationElement
+          .getChild(ENABLE_WHEN);
+      if (condition == null
+          || BooleanEvaluatorHelper.evaluate(condition.getChild(),
+              pluginManagerItf, context)) {
+        predefinedAnnotations.add(configurationElement.getAttribute(PACKAGE));
       }
     }
-    throw new CompilerError(GenericErrors.GENERIC_ERROR,
-        "Annotation package element not found.");
   }
 }

@@ -22,19 +22,72 @@
 
 package org.ow2.mind.plugin;
 
-import java.util.Collection;
-import java.util.Map;
-
-import org.objectweb.fractal.adl.ADLException;
-import org.ow2.mind.plugin.ast.Extension;
-
+/**
+ * PluginManager can used to retrieve configurations of plugins and extension
+ * points.
+ */
 public interface PluginManager {
 
-  public void setClassLoader(ClassLoader cl);
+  /**
+   * Returns the {@link ExtensionPoint} object corresponding to the given
+   * extension-point identifier.
+   * 
+   * @param extensionPoint an extension-point identifier.
+   * @return an {@link ExtensionPoint} object or <code>null</code> if no
+   *         extension-point can be found with the given identifier.
+   */
+  ExtensionPoint getExtensionPoint(String extensionPoint);
 
-  public Collection<Extension> getExtensions(String extensionPoint,
-      Map<Object, Object> context) throws ADLException;
+  /**
+   * Returns the {@link Extension} objects that are bound to the given
+   * extension-point.
+   * 
+   * @param extensionPoint an extension-point identifier.
+   * @return the {@link Extension} objects, or <code>null</code> if no
+   *         extension-point can be found with the given identifier.
+   * @see ExtensionPoint#getExtensions()
+   */
+  Iterable<Extension> getExtensions(String extensionPoint);
 
-  public Collection<String> getExtensionPointNames(Map<Object, Object> context)
-      throws ADLException;
+  /**
+   * Returns all the top-level {@link ConfigurationElement} objects of every
+   * extensions that are bound to the given extension-point.
+   * 
+   * @param extensionPoint an extension-point identifier.
+   * @return the {@link ConfigurationElement} objects, or <code>null</code> if
+   *         no extension-point can be found with the given identifier.
+   * @see ExtensionPoint#getConfigurationElements()
+   */
+  Iterable<ConfigurationElement> getConfigurationElements(String extensionPoint);
+
+  /**
+   * Returns all the top-level {@link ConfigurationElement} objects with the
+   * given name of every extensions that are bound to the given extension-point.
+   * 
+   * @param extensionPoint an extension-point identifier.
+   * @param name the name of the {@link ConfigurationElement} to return.
+   * @return the {@link ConfigurationElement} objects, or <code>null</code> if
+   *         no extension-point can be found with the given identifier.
+   * @see ExtensionPoint#getConfigurationElements()
+   */
+  Iterable<ConfigurationElement> getConfigurationElements(
+      String extensionPoint, String name);
+
+  /**
+   * Returns the identifiers of every extension-points.
+   * 
+   * @return the identifiers of every extension-points.
+   */
+  Iterable<String> getExtensionPointNames();
+
+  /**
+   * Creates an instance of the given class. This method is not intended to be
+   * used directly by clients. Clients should use
+   * {@link ConfigurationElement#createInstance(String, Class)} instead.
+   * 
+   * @param <T> The type of created object
+   * @param clazz the class to instantiate.
+   * @return an instance of the given class.
+   */
+  <T> T getInstance(Class<T> clazz);
 }

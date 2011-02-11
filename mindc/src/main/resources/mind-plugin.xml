@@ -1,3 +1,244 @@
-<plugin id="org.ow2.mind.mindc" name="The MIND Compiler">
-	<extension-point id="command-line-options"/>
+<!--
+  Copyright (C) 2011 STMicroelectronics
+
+ This file is part of "Mind Compiler" is free software: you can redistribute 
+ it and/or modify it under the terms of the GNU Lesser General Public License 
+ as published by the Free Software Foundation, either version 3 of the 
+ License, or (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful, but WITHOUT 
+ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ details.
+
+ You should have received a copy of the GNU Lesser General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+ Contact: mind@ow2.org
+
+ Authors: Matthieu Leclercq
+ Contributors: 
+
+ -->
+<plugin
+    id="org.ow2.mind.mindc"
+    name="The MIND Compiler Launcher">
+
+    <extension-point
+        id="command-line-options"
+        dtd="dtd/CommandLineOption.dtd" />
+
+    <extension
+        point="org.ow2.mind.plugin.guice-module">
+        <module
+            class="org.ow2.mind.MindcModule" />
+    </extension>
+    
+    <extension
+        point="org.ow2.mind.mindc.command-line-options">
+
+        <cmdPathOption
+            id="org.ow2.mind.mindc.SrcPath"
+            handler="org.ow2.mind.cli.SrcPathOptionHandler"
+            shortName="S"
+            longName="src-path"
+            description="the search path of ADL,IDL and implementation files (list of path separated by ':' on Linux or ';' on Windows)"
+            argDesc="&lt;path list&gt;" />
+
+        <cmdArgument
+            id="org.ow2.mind.mindc.OutPath"
+            handler="org.ow2.mind.cli.OutPathOptionHandler"
+            shortName="o"
+            longName="out-path"
+            defaultValue="."
+            allowMultiple="false"
+            description="the path where generated files will be put"
+            argDesc="&lt;output path&gt;" />
+
+        <cmdArgument
+            id="org.ow2.mind.mindc.TargetDescriptor"
+            handler="org.ow2.mind.cli.TargetDescriptorOptionHandler"
+            shortName="t"
+            longName="target-descriptor"
+            allowMultiple="false"
+            description="Specify the target descriptor"
+            argDesc="&lt;name&gt;">
+            <processAfter
+                id="org.ow2.mind.mindc.SrcPath" />
+            <processAfter
+                id="org.ow2.mind.mindc.CFlags" />
+            <processAfter
+                id="org.ow2.mind.mindc.IncPath" />
+            <processAfter
+                id="org.ow2.mind.mindc.LDFlags" />
+            <processAfter
+                id="org.ow2.mind.mindc.LDPath" />
+            <processAfter
+                id="org.ow2.mind.mindc.LinkerScript" />
+        </cmdArgument>
+
+        <!-- =============================== -->
+        <!-- Incremental compilation options -->
+        <!-- =============================== -->
+
+        <cmdFlag
+            id="org.ow2.mind.mindc.Force"
+            handler="org.ow2.mind.cli.ForceRegenOptionhandler"
+            shortName="F"
+            longName="force"
+            description="Force the regeneration and the recompilation of every output files" />
+
+        <cmdFlag
+            id="org.ow2.mind.mindc.KeepTempFile"
+            handler="org.ow2.mind.cli.ForceRegenOptionhandler"
+            shortName="K"
+            longName="keep"
+            description="Keep temporary output files in default output directory" />
+
+        <cmdFlag
+            id="org.ow2.mind.mindc.NoBinaryADL"
+            handler="org.ow2.mind.cli.ForceRegenOptionhandler"
+            shortName="B"
+            longName="no-bin"
+            description="Do not generate binary ADL/IDL ('.def', '.itfdef' and '.idtdef' files)." />
+
+        <!-- ============= -->
+        <!-- Flags options -->
+        <!-- ============= -->
+
+        <cmdAppendOption
+            id="org.ow2.mind.mindc.CFlags"
+            handler="org.ow2.mind.cli.FlagsOptionHandler"
+            shortName="c"
+            longName="c-flags"
+            description="The c-flags compiler directives"
+            argDesc="&lt;flags&gt;">
+            <processAfter
+                id="org.ow2.mind.mindc.IncPath" />
+        </cmdAppendOption>
+
+        <cmdPathOption
+            id="org.ow2.mind.mindc.IncPath"
+            handler="org.ow2.mind.cli.FlagsOptionHandler"
+            shortName="I"
+            longName="inc-path"
+            description="The list of path to be added in compiler include paths"
+            argDesc="&lt;path list&gt;">
+            <processAfter
+                id="org.ow2.mind.mindc.SrcPath" />
+            <processAfter
+                id="org.ow2.mind.mindc.OutPath" />
+        </cmdPathOption>
+
+        <cmdAppendOption
+            id="org.ow2.mind.mindc.LDFlags"
+            handler="org.ow2.mind.cli.FlagsOptionHandler"
+            shortName="l"
+            longName="ld-flags"
+            description="The ld-flags linker directives"
+            argDesc="&lt;flags&gt;">
+            <processAfter
+                id="org.ow2.mind.mindc.LDPath" />
+        </cmdAppendOption>
+
+        <cmdPathOption
+            id="org.ow2.mind.mindc.LDPath"
+            handler="org.ow2.mind.cli.FlagsOptionHandler"
+            shortName="L"
+            longName="ld-path"
+            description="The list of path to be added to linker library search path"
+            argDesc="&lt;path list&gt;" />
+
+        <cmdArgument
+            id="org.ow2.mind.mindc.LinkerScript"
+            handler="org.ow2.mind.cli.FlagsOptionHandler"
+            shortName="T"
+            longName="linker-script"
+            allowMultiple="false"
+            description="Linker script to use (given path is resolved in source path)"
+            argDesc="&lt;path&gt;">
+            <processAfter
+                id="org.ow2.mind.mindc.SrcPath" />
+        </cmdArgument>
+
+        <!-- =========================== -->
+        <!-- Compilation Command options -->
+        <!-- =========================== -->
+
+        <cmdArgument
+            id="org.ow2.mind.mindc.CompilerCommand"
+            handler="org.ow2.mind.cli.CompilationCommandOptionHandler"
+            longName="compiler-command"
+            defaultValue="gcc"
+            allowMultiple="false"
+            description="The command of the C compiler"
+            argDesc="&lt;path&gt;" />
+
+        <cmdArgument
+            id="org.ow2.mind.mindc.LinkerCommand"
+            handler="org.ow2.mind.cli.CompilationCommandOptionHandler"
+            longName="linker-command"
+            defaultValue="gcc"
+            allowMultiple="false"
+            description="The command of the linker"
+            argDesc="&lt;path&gt;" />
+
+        <cmdArgument
+            id="org.ow2.mind.mindc.Jobs"
+            handler="org.ow2.mind.cli.JobsOptionHandler"
+            shortName="j"
+            longName="jobs"
+            defaultValue="1"
+            allowMultiple="false"
+            description="The number of concurrent compilation jobs"
+            argDesc="&lt;number&gt;" />
+
+        <!-- ================= -->
+        <!-- Compilation Stage -->
+        <!-- ================= -->
+
+        <cmdFlag
+            id="org.ow2.mind.mindc.CheckADL"
+            handler="org.ow2.mind.cli.StageOptionHandler"
+            longName="check-adl"
+            description="Only check input ADL(s), do not compile" />
+
+        <cmdFlag
+            id="org.ow2.mind.mindc.Def2C"
+            handler="org.ow2.mind.cli.StageOptionHandler"
+            shortName="d"
+            longName="def2c"
+            description="Only generate source code of the given definitions" />
+
+        <cmdFlag
+            id="org.ow2.mind.mindc.Def2O"
+            handler="org.ow2.mind.cli.StageOptionHandler"
+            shortName="D"
+            longName="def2o"
+            description="Generate and compile source code of the given definitions, do not link an executable application" />
+
+        <cmdFlag
+            id="org.ow2.mind.mindc.PrintStackTrace"
+            handler="org.ow2.mind.cli.PrintStackTraceOptionHandler"
+            shortName="e"
+            description="Print error stack traces" />
+        
+        <exclusiveGroup>
+            <exclusiveOption
+                id="org.ow2.mind.mindc.CheckADL" />
+            <exclusiveOption
+                id="org.ow2.mind.mindc.Def2C" />
+            <exclusiveOption
+                id="org.ow2.mind.mindc.Def2O" />
+        </exclusiveGroup>
+    </extension>
+
+    <extension
+        point="org.ow2.mind.plugin.BooleanEvaluator"
+        name="Command-line option Evaluators">
+        <evaluator
+            name="cmdOption"
+            class="org.ow2.mind.cli.CmdOptionBooleanEvaluator" />
+    </extension>
+
 </plugin>

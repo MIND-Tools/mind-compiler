@@ -22,7 +22,6 @@
 
 package org.ow2.mind.adl.factory;
 
-import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
 import static org.ow2.mind.adl.generic.ast.GenericASTHelper.getTemplateName;
 
 import java.util.Map;
@@ -35,39 +34,26 @@ import org.objectweb.fractal.adl.NodeFactory;
 import org.objectweb.fractal.adl.error.GenericErrors;
 import org.objectweb.fractal.adl.merger.MergeException;
 import org.objectweb.fractal.adl.merger.NodeMerger;
-import org.objectweb.fractal.api.NoSuchInterfaceException;
-import org.objectweb.fractal.api.control.BindingController;
-import org.objectweb.fractal.api.control.IllegalBindingException;
-import org.ow2.mind.BindingControllerImplHelper;
 import org.ow2.mind.adl.ast.Attribute;
 import org.ow2.mind.adl.ast.AttributeContainer;
-import org.ow2.mind.adl.generic.TemplateInstantiator;
+import org.ow2.mind.adl.generic.TemplateInstantiator.AbstractDelegatingTemplateInstantiator;
 import org.ow2.mind.adl.parameter.ast.FormalParameter;
 import org.ow2.mind.adl.parameter.ast.FormalParameterContainer;
 import org.ow2.mind.adl.parameter.ast.ParameterASTHelper;
 import org.ow2.mind.adl.parameter.ast.ParameterASTHelper.ParameterType;
 import org.ow2.mind.value.ast.Reference;
 
+import com.google.inject.Inject;
+
 public class ParametricFactoryTemplateInstantiator
-    implements
-      TemplateInstantiator,
-      BindingController {
+    extends
+      AbstractDelegatingTemplateInstantiator {
 
-  // ---------------------------------------------------------------------------
-  // Client interfaces
-  // ---------------------------------------------------------------------------
+  @Inject
+  protected NodeFactory nodeFactoryItf;
 
-  /** The name of the {@link #clientInstantiatorItf} client interface. */
-  public static final String  CLIENT_INSTANTIATOR_ITF_NAME = "client-instantiator";
-
-  /** The client {@link TemplateInstantiator} interface. */
-  public TemplateInstantiator clientInstantiatorItf;
-
-  /** The node factory interface */
-  public NodeFactory          nodeFactoryItf;
-
-  /** The node merger interface */
-  public NodeMerger           nodeMergerItf;
+  @Inject
+  protected NodeMerger  nodeMergerItf;
 
   // ---------------------------------------------------------------------------
   // Implementation of the TemplateInstantiator interface
@@ -127,8 +113,8 @@ public class ParametricFactoryTemplateInstantiator
 
   protected Attribute newAttributeNode() {
     try {
-      return (Attribute) nodeFactoryItf.newNode("attribute", Attribute.class
-          .getName());
+      return (Attribute) nodeFactoryItf.newNode("attribute",
+          Attribute.class.getName());
     } catch (final ClassNotFoundException e) {
       throw new CompilerError(GenericErrors.INTERNAL_ERROR, e,
           "Node factory error");
@@ -137,8 +123,8 @@ public class ParametricFactoryTemplateInstantiator
 
   protected Reference newReferenceNode() {
     try {
-      return (Reference) nodeFactoryItf.newNode("value", Reference.class
-          .getName());
+      return (Reference) nodeFactoryItf.newNode("value",
+          Reference.class.getName());
     } catch (final ClassNotFoundException e) {
       throw new CompilerError(GenericErrors.INTERNAL_ERROR, e,
           "Node factory error");
@@ -160,63 +146,6 @@ public class ParametricFactoryTemplateInstantiator
     } catch (final MergeException e) {
       throw new CompilerError(GenericErrors.INTERNAL_ERROR, e,
           "Node merge error");
-    }
-  }
-
-  // ---------------------------------------------------------------------------
-  // Implementation of the BindingController interface
-  // ---------------------------------------------------------------------------
-
-  public void bindFc(final String itfName, final Object value)
-      throws NoSuchInterfaceException, IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(NodeFactory.ITF_NAME)) {
-      nodeFactoryItf = (NodeFactory) value;
-    } else if (itfName.equals(NodeMerger.ITF_NAME)) {
-      nodeMergerItf = (NodeMerger) value;
-    } else if (itfName.equals(CLIENT_INSTANTIATOR_ITF_NAME)) {
-      clientInstantiatorItf = (TemplateInstantiator) value;
-    } else {
-      throw new NoSuchInterfaceException("No client interface named '"
-          + itfName + "' for binding the interface");
-    }
-  }
-
-  public String[] listFc() {
-    return BindingControllerImplHelper
-        .listFcHelper(CLIENT_INSTANTIATOR_ITF_NAME, NodeFactory.ITF_NAME,
-            NodeMerger.ITF_NAME);
-  }
-
-  public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
-    checkItfName(itfName);
-
-    if (itfName.equals(NodeFactory.ITF_NAME)) {
-      return nodeFactoryItf;
-    } else if (itfName.equals(NodeMerger.ITF_NAME)) {
-      return nodeMergerItf;
-    } else if (itfName.equals(CLIENT_INSTANTIATOR_ITF_NAME)) {
-      return clientInstantiatorItf;
-    } else {
-      throw new NoSuchInterfaceException("No client interface named '"
-          + itfName + "'");
-    }
-  }
-
-  public void unbindFc(final String itfName) throws IllegalBindingException,
-      NoSuchInterfaceException {
-    checkItfName(itfName);
-
-    if (itfName.equals(NodeFactory.ITF_NAME)) {
-      nodeFactoryItf = null;
-    } else if (itfName.equals(NodeMerger.ITF_NAME)) {
-      nodeMergerItf = null;
-    } else if (itfName.equals(CLIENT_INSTANTIATOR_ITF_NAME)) {
-      clientInstantiatorItf = null;
-    } else {
-      throw new NoSuchInterfaceException("No client interface named '"
-          + itfName + "'");
     }
   }
 }

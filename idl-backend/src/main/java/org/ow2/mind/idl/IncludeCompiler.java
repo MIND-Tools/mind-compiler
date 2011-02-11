@@ -22,33 +22,28 @@
 
 package org.ow2.mind.idl;
 
-import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
-import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
-
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
 import org.objectweb.fractal.adl.ADLException;
-import org.objectweb.fractal.api.NoSuchInterfaceException;
-import org.objectweb.fractal.api.control.IllegalBindingException;
-import org.ow2.mind.AbstractDelegatingVoidVisitor;
 import org.ow2.mind.idl.ast.Header;
 import org.ow2.mind.idl.ast.IDL;
 import org.ow2.mind.idl.ast.IDLASTHelper;
 import org.ow2.mind.idl.ast.Include;
 import org.ow2.mind.idl.ast.IncludeContainer;
 import org.ow2.mind.idl.ast.InterfaceDefinition;
+import org.ow2.mind.inject.InjectDelegate;
 
-public class IncludeCompiler extends AbstractDelegatingVoidVisitor<IDL>
-    implements
-      IDLVisitor {
+import com.google.inject.Inject;
 
-  // ---------------------------------------------------------------------------
-  // Client interfaces
-  // ---------------------------------------------------------------------------
+public class IncludeCompiler implements IDLVisitor {
 
-  public IDLLoader idlLoaderItf;
+  @Inject
+  protected IDLLoader  idlLoaderItf;
+
+  @InjectDelegate
+  protected IDLVisitor clientVisitorItf;
 
   // ---------------------------------------------------------------------------
   // Implementation of the Visitor interface
@@ -94,53 +89,5 @@ public class IncludeCompiler extends AbstractDelegatingVoidVisitor<IDL>
       visit(itf, visitedIDLS, context);
     }
 
-  }
-
-  // ---------------------------------------------------------------------------
-  // Overridden BindingController methods
-  // ---------------------------------------------------------------------------
-
-  @Override
-  public void bindFc(final String itfName, final Object value)
-      throws NoSuchInterfaceException, IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(IDLLoader.ITF_NAME)) {
-      idlLoaderItf = (IDLLoader) value;
-    } else {
-      throw new NoSuchInterfaceException("No client interface named '"
-          + itfName + "'");
-    }
-
-  }
-
-  @Override
-  public String[] listFc() {
-    return listFcHelper(IDLLoader.ITF_NAME);
-  }
-
-  @Override
-  public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
-    checkItfName(itfName);
-
-    if (itfName.equals(IDLLoader.ITF_NAME)) {
-      return idlLoaderItf;
-    } else {
-      throw new NoSuchInterfaceException("No client interface named '"
-          + itfName + "'");
-    }
-  }
-
-  @Override
-  public void unbindFc(final String itfName) throws NoSuchInterfaceException,
-      IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(IDLLoader.ITF_NAME)) {
-      idlLoaderItf = null;
-    } else {
-      throw new NoSuchInterfaceException("No client interface named '"
-          + itfName + "'");
-    }
   }
 }

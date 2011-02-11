@@ -27,11 +27,24 @@ import java.util.Map;
 import org.objectweb.fractal.adl.ADLException;
 import org.ow2.mind.idl.ast.IDL;
 import org.ow2.mind.idl.ast.InterfaceDefinition;
+import org.ow2.mind.inject.InjectDelegate;
 
 public interface InterfaceReferenceResolver {
 
-  String ITF_NAME = "interface-reference-resolver";
-
   InterfaceDefinition resolve(String itfName, IDL encapsulatingIDL,
       Map<Object, Object> context) throws ADLException;
+
+  /**
+   * An abstract delegating {@link InterfaceReferenceResolver} component.
+   */
+  public abstract class AbstractDelegatingInterfaceReferenceResolver
+      implements
+        InterfaceReferenceResolver {
+
+    /**
+     * The client {@link InterfaceReferenceResolver} used by this component.
+     */
+    @InjectDelegate
+    protected InterfaceReferenceResolver clientResolverItf;
+  }
 }

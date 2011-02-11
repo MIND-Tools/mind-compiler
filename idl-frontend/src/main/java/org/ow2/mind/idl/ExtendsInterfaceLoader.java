@@ -23,30 +23,22 @@
 package org.ow2.mind.idl;
 
 import static org.objectweb.fractal.adl.NodeUtil.cloneGraph;
-import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
-import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
 
 import java.util.Map;
 
 import org.objectweb.fractal.adl.ADLException;
-import org.objectweb.fractal.api.NoSuchInterfaceException;
-import org.objectweb.fractal.api.control.IllegalBindingException;
+import org.ow2.mind.idl.IDLLoader.AbstractDelegatingIDLLoader;
 import org.ow2.mind.idl.ast.IDL;
 import org.ow2.mind.idl.ast.IDLASTHelper;
 import org.ow2.mind.idl.ast.InterfaceDefinition;
 import org.ow2.mind.idl.ast.Method;
 
-public class ExtendsInterfaceLoader extends AbstractIDLLoader {
+import com.google.inject.Inject;
 
-  // ---------------------------------------------------------------------------
-  // Client interface
-  // ---------------------------------------------------------------------------
+public class ExtendsInterfaceLoader extends AbstractDelegatingIDLLoader {
 
-  /**
-   * The {@link InterfaceReferenceResolver} client interface used by this loader
-   * to resolve extended interfaces.
-   */
-  public InterfaceReferenceResolver interfaceReferenceResolverItf;
+  @Inject
+  protected InterfaceReferenceResolver interfaceReferenceResolverItf;
 
   // ---------------------------------------------------------------------------
   // Implementation of the IDLLoader interface
@@ -92,51 +84,6 @@ public class ExtendsInterfaceLoader extends AbstractIDLLoader {
     // after methods defined in "superItf"
     for (final Method method : meths) {
       itf.addMethod(method);
-    }
-  }
-
-  // ---------------------------------------------------------------------------
-  // Overridden BindingController methods
-  // ---------------------------------------------------------------------------
-
-  @Override
-  public void bindFc(final String itfName, final Object value)
-      throws NoSuchInterfaceException, IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(InterfaceReferenceResolver.ITF_NAME)) {
-      interfaceReferenceResolverItf = (InterfaceReferenceResolver) value;
-    } else {
-      super.bindFc(itfName, value);
-    }
-
-  }
-
-  @Override
-  public String[] listFc() {
-    return listFcHelper(super.listFc(), InterfaceReferenceResolver.ITF_NAME);
-  }
-
-  @Override
-  public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
-    checkItfName(itfName);
-
-    if (itfName.equals(InterfaceReferenceResolver.ITF_NAME)) {
-      return interfaceReferenceResolverItf;
-    } else {
-      return super.lookupFc(itfName);
-    }
-  }
-
-  @Override
-  public void unbindFc(final String itfName) throws NoSuchInterfaceException,
-      IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(InterfaceReferenceResolver.ITF_NAME)) {
-      interfaceReferenceResolverItf = null;
-    } else {
-      super.unbindFc(itfName);
     }
   }
 }

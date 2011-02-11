@@ -30,15 +30,17 @@ import java.net.URLClassLoader;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.ow2.mind.BasicInputResourceLocator;
+import org.ow2.mind.CommonFrontendModule;
 import org.ow2.mind.error.ErrorManager;
-import org.ow2.mind.error.ErrorManagerFactory;
-import org.ow2.mind.plugin.SimpleClassPluginFactory;
+import org.ow2.mind.plugin.PluginLoaderModule;
 import org.ow2.mind.unit.ExpectedErrorHelper;
 import org.ow2.mind.unit.UnitTestDataProvider;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 
 public class SemanticErrorTest {
 
@@ -50,19 +52,17 @@ public class SemanticErrorTest {
 
   @BeforeMethod(alwaysRun = true)
   public void setUp() {
+    final Injector injector = Guice.createInjector(new CommonFrontendModule(),
+        new IDLFrontendModule(), new PluginLoaderModule());
+
     // error manager component
-    errorManager = ErrorManagerFactory.newSimpleErrorManager();
+    errorManager = injector.getInstance(ErrorManager.class);
 
     // input locators
-    final BasicInputResourceLocator inputResourceLocator = new BasicInputResourceLocator();
-    idlLocator = IDLLoaderChainFactory.newIDLLocator(inputResourceLocator);
-
-    // Plugin Manager Components
-    final org.objectweb.fractal.adl.Factory pluginFactory = new SimpleClassPluginFactory();
+    idlLocator = injector.getInstance(IDLLocator.class);
 
     // loader chains
-    idlLoader = IDLLoaderChainFactory.newLoader(errorManager, idlLocator,
-        inputResourceLocator, pluginFactory).loader;
+    idlLoader = injector.getInstance(IDLLoader.class);
 
     context = new HashMap<Object, Object>();
   }

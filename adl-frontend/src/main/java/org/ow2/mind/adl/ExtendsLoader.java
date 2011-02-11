@@ -22,116 +22,70 @@
 
 package org.ow2.mind.adl;
 
-import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
-import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
 import static org.ow2.mind.adl.ast.ASTHelper.isComposite;
 import static org.ow2.mind.adl.ast.ASTHelper.isPrimitive;
 import static org.ow2.mind.adl.ast.ASTHelper.isType;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import org.objectweb.fractal.adl.ADLException;
-import org.objectweb.fractal.adl.AbstractLoader;
 import org.objectweb.fractal.adl.CompilerError;
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.Node;
 import org.objectweb.fractal.adl.components.ComponentErrors;
-import org.objectweb.fractal.adl.components.ComponentLoaderAttributes;
 import org.objectweb.fractal.adl.error.GenericErrors;
 import org.objectweb.fractal.adl.error.NodeErrorLocator;
 import org.objectweb.fractal.adl.merger.MergeException;
 import org.objectweb.fractal.adl.merger.NodeMerger;
-import org.objectweb.fractal.api.NoSuchInterfaceException;
-import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.ow2.mind.adl.ast.ASTHelper;
 import org.ow2.mind.adl.ast.AbstractDefinition;
 import org.ow2.mind.adl.ast.DefinitionReference;
 import org.ow2.mind.adl.ast.MindDefinition;
 import org.ow2.mind.error.ErrorManager;
 
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
+
 /**
  * This delegating loader merges a definitions with the definitions it extends.
  */
-public class ExtendsLoader extends AbstractLoader
-    implements
-      ComponentLoaderAttributes {
+public class ExtendsLoader extends AbstractDelegatingLoader {
 
-  // ---------------------------------------------------------------------------
-  // Client interfaces
-  // ---------------------------------------------------------------------------
+  @Inject
+  protected ErrorManager                errorManagerItf;
 
-  /** The {@link ErrorManager} client interface used to log errors. */
-  public ErrorManager                 errorManagerItf;
+  /**
+   * The name of the {@link DefinitionReferenceResolver} to be injected in this
+   * class.
+   */
+  public static final String            EXTENDS_DEFINITION_RESOLVER = "ExtendsDefinitionResolver";
 
-  /** The interface used to resolve referenced definitions. */
-  public DefinitionReferenceResolver  definitionReferenceResolverItf;
+  @Inject
+  @Named(EXTENDS_DEFINITION_RESOLVER)
+  protected DefinitionReferenceResolver definitionReferenceResolverItf;
 
-  /** The node merger component used to merge AST. */
-  public NodeMerger                   nodeMergerItf;
+  /**
+   * The name of the {@link NodeMerger} to be injected in this class.
+   */
+  public static final String            EXTENDS_NODE_MERGER         = "ExtendsNodeMerger";
 
-  // ---------------------------------------------------------------------------
-  // Attributes
-  // ---------------------------------------------------------------------------
+  @Inject
+  @Named(EXTENDS_NODE_MERGER)
+  protected NodeMerger                  nodeMergerItf;
+
+  /**
+   * The name of the {@link #nameAttributes} to be injected in this class.
+   */
+  public static final String            ADL_ID_ATTRIBUTES           = "ADL_ID_Attributes";
 
   /**
    * The names of the "name" attribute for each AST node type. This map
    * associates the names of the "name" attribute, used to detect overridden
    * elements, to each AST node type that has such an attribute.
    */
-  protected final Map<String, String> nameAttributes;
-
-  // ---------------------------------------------------------------------------
-  // Constructor
-  // ---------------------------------------------------------------------------
-
-  /**
-   * Default constructor.
-   */
-  public ExtendsLoader() {
-    nameAttributes = new HashMap<String, String>();
-    nameAttributes.put("component", "name");
-    nameAttributes.put("interface", "name");
-    nameAttributes.put("attribute", "name");
-    nameAttributes.put("annotation", "type");
-    nameAttributes.put("argument", "name");
-    nameAttributes.put("template", "name");
-  }
-
-  // ---------------------------------------------------------------------------
-  // Implementation of the ComponentLoaderAttributes interface
-  // ---------------------------------------------------------------------------
-
-  public String getNameAttributes() {
-    final StringBuffer b = new StringBuffer();
-    for (final Map.Entry<String, String> e : nameAttributes.entrySet()) {
-      b.append(e.getKey());
-      b.append(' ');
-      b.append(e.getValue());
-      b.append(' ');
-    }
-    return b.toString();
-  }
-
-  public void setNameAttributes(String nameAttributes) {
-    this.nameAttributes.clear();
-    String key = null;
-    int p = nameAttributes.indexOf(' ');
-    while (p != -1) {
-      final String s = nameAttributes.substring(0, p);
-      if (key == null) {
-        key = s;
-      } else {
-        this.nameAttributes.put(key, s);
-        key = null;
-      }
-      nameAttributes = nameAttributes.substring(p + 1);
-      p = nameAttributes.indexOf(' ');
-    }
-    if (key != null) {
-      this.nameAttributes.put(key, nameAttributes);
-    }
-  }
+  @Inject
+  @Named(ADL_ID_ATTRIBUTES)
+  protected Map<String, String>         nameAttributes;
 
   // ---------------------------------------------------------------------------
   // Implementation of the Loader interface
@@ -258,63 +212,5 @@ public class ExtendsLoader extends AbstractLoader
       }
     }
     return superDef;
-  }
-
-  // ---------------------------------------------------------------------------
-  // Overridden BindingController methods
-  // ---------------------------------------------------------------------------
-
-  @Override
-  public void bindFc(final String itfName, final Object value)
-      throws NoSuchInterfaceException, IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(ErrorManager.ITF_NAME)) {
-      errorManagerItf = (ErrorManager) value;
-    } else if (itfName.equals(DefinitionReferenceResolver.ITF_NAME)) {
-      definitionReferenceResolverItf = (DefinitionReferenceResolver) value;
-    } else if (itfName.equals(NodeMerger.ITF_NAME)) {
-      nodeMergerItf = (NodeMerger) value;
-    } else {
-      super.bindFc(itfName, value);
-    }
-
-  }
-
-  @Override
-  public String[] listFc() {
-    return listFcHelper(super.listFc(), ErrorManager.ITF_NAME,
-        DefinitionReferenceResolver.ITF_NAME, NodeMerger.ITF_NAME);
-  }
-
-  @Override
-  public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
-    checkItfName(itfName);
-
-    if (itfName.equals(ErrorManager.ITF_NAME)) {
-      return errorManagerItf;
-    } else if (itfName.equals(DefinitionReferenceResolver.ITF_NAME)) {
-      return definitionReferenceResolverItf;
-    } else if (itfName.equals(NodeMerger.ITF_NAME)) {
-      return nodeMergerItf;
-    } else {
-      return super.lookupFc(itfName);
-    }
-  }
-
-  @Override
-  public void unbindFc(final String itfName) throws NoSuchInterfaceException,
-      IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(ErrorManager.ITF_NAME)) {
-      errorManagerItf = null;
-    } else if (itfName.equals(DefinitionReferenceResolver.ITF_NAME)) {
-      definitionReferenceResolverItf = null;
-    } else if (itfName.equals(NodeMerger.ITF_NAME)) {
-      nodeMergerItf = null;
-    } else {
-      super.unbindFc(itfName);
-    }
   }
 }

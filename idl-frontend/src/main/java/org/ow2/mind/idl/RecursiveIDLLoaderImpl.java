@@ -22,34 +22,22 @@
 
 package org.ow2.mind.idl;
 
-import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
-import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
-
 import java.util.HashMap;
 import java.util.Map;
 
 import org.objectweb.fractal.adl.ADLException;
-import org.objectweb.fractal.api.NoSuchInterfaceException;
-import org.objectweb.fractal.api.control.BindingController;
-import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.ow2.mind.idl.ast.IDL;
 
-public class RecursiveIDLLoaderImpl
-    implements
-      RecursiveIDLLoader,
-      BindingController {
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
-  protected ThreadLocal<Map<String, IDL>> loadingIDLs                = new ThreadLocal<Map<String, IDL>>();
+@Singleton
+public class RecursiveIDLLoaderImpl implements RecursiveIDLLoader {
 
-  // ---------------------------------------------------------------------------
-  // Client interface
-  // ---------------------------------------------------------------------------
+  protected ThreadLocal<Map<String, IDL>> loadingIDLs = new ThreadLocal<Map<String, IDL>>();
 
-  /** The name of the {@link #clientIDLLoaderItf} client interface. */
-  public static final String              CLIENT_IDL_LOADER_ITF_NAME = "client-idl-loader";
-
-  /** The client {@link IDLLoader} used by this component. */
-  public IDLLoader                        clientIDLLoaderItf;
+  @Inject
+  protected IDLLoader                     clientIDLLoaderItf;
 
   // ---------------------------------------------------------------------------
   // Implementation of the IDLLoader interface
@@ -75,49 +63,6 @@ public class RecursiveIDLLoaderImpl
       return clientIDLLoaderItf.load(name, context);
     } finally {
       loadingIDLs.remove(encapsulatingIDL.getName());
-    }
-  }
-
-  // ---------------------------------------------------------------------------
-  // Implementation of the BindingController interface
-  // ---------------------------------------------------------------------------
-
-  public String[] listFc() {
-    return listFcHelper(CLIENT_IDL_LOADER_ITF_NAME);
-  }
-
-  public Object lookupFc(final String s) throws NoSuchInterfaceException {
-    checkItfName(s);
-
-    if (CLIENT_IDL_LOADER_ITF_NAME.equals(s)) {
-      return clientIDLLoaderItf;
-    } else {
-      throw new NoSuchInterfaceException("No client interface named '" + s
-          + "'");
-    }
-  }
-
-  public void bindFc(final String s, final Object o)
-      throws NoSuchInterfaceException, IllegalBindingException {
-    checkItfName(s);
-
-    if (CLIENT_IDL_LOADER_ITF_NAME.equals(s)) {
-      clientIDLLoaderItf = (IDLLoader) o;
-    } else {
-      throw new NoSuchInterfaceException("No client interface named '" + s
-          + "' for binding the interface");
-    }
-  }
-
-  public void unbindFc(final String s) throws IllegalBindingException,
-      NoSuchInterfaceException {
-    checkItfName(s);
-
-    if (CLIENT_IDL_LOADER_ITF_NAME.equals(s)) {
-      clientIDLLoaderItf = null;
-    } else {
-      throw new NoSuchInterfaceException("No client interface named '" + s
-          + "'");
     }
   }
 }

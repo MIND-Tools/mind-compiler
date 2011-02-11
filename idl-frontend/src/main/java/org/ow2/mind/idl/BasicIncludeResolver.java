@@ -22,8 +22,6 @@
 
 package org.ow2.mind.idl;
 
-import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
-import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
 import static org.ow2.mind.PathHelper.toAbsolute;
 import static org.ow2.mind.idl.ast.IDLASTHelper.getIncludedPath;
 
@@ -32,9 +30,6 @@ import java.util.Map;
 
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.NodeFactory;
-import org.objectweb.fractal.api.NoSuchInterfaceException;
-import org.objectweb.fractal.api.control.BindingController;
-import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.ow2.mind.PathHelper;
 import org.ow2.mind.PathHelper.InvalidRelativPathException;
 import org.ow2.mind.error.ErrorManager;
@@ -42,23 +37,21 @@ import org.ow2.mind.idl.ast.IDL;
 import org.ow2.mind.idl.ast.IDLASTHelper;
 import org.ow2.mind.idl.ast.Include;
 
-public class BasicIncludeResolver implements IncludeResolver, BindingController {
+import com.google.inject.Inject;
 
-  // ---------------------------------------------------------------------------
-  // Client interfaces
-  // ---------------------------------------------------------------------------
+public class BasicIncludeResolver implements IncludeResolver {
 
-  /** The {@link ErrorManager} client interface used to log errors. */
-  public ErrorManager       errorManagerItf;
+  @Inject
+  protected ErrorManager       errorManagerItf;
 
-  /** The {@link NodeFactory} client interface used by this component. */
-  public NodeFactory        nodeFactoryItf;
+  @Inject
+  protected NodeFactory        nodeFactoryItf;
 
-  /** The {@link RecursiveIDLLoader} interface used to load referenced IDLs. */
-  public RecursiveIDLLoader recursiveIdlLoaderItf;
+  @Inject
+  protected RecursiveIDLLoader recursiveIdlLoaderItf;
 
-  /** The {@link IDLLocator} client interface used by this component. */
-  public IDLLocator         idlLocatorItf;
+  @Inject
+  protected IDLLocator         idlLocatorItf;
 
   // ---------------------------------------------------------------------------
   // Implementation of the IncludeResolver interface
@@ -128,69 +121,6 @@ public class BasicIncludeResolver implements IncludeResolver, BindingController 
         errorManagerItf.logError(IDLErrors.IDL_NOT_FOUND, include, path);
       }
       return IDLASTHelper.newUnresolvedIDLNode(nodeFactoryItf, path);
-    }
-  }
-
-  // ---------------------------------------------------------------------------
-  // Overridden BindingController methods
-  // ---------------------------------------------------------------------------
-
-  public void bindFc(final String itfName, final Object value)
-      throws NoSuchInterfaceException, IllegalBindingException {
-    checkItfName(itfName);
-
-    if (ErrorManager.ITF_NAME.equals(itfName)) {
-      errorManagerItf = (ErrorManager) value;
-    } else if (NodeFactory.ITF_NAME.equals(itfName)) {
-      nodeFactoryItf = (NodeFactory) value;
-    } else if (itfName.equals(RecursiveIDLLoader.ITF_NAME)) {
-      recursiveIdlLoaderItf = (RecursiveIDLLoader) value;
-    } else if (itfName.equals(IDLLocator.ITF_NAME)) {
-      idlLocatorItf = (IDLLocator) value;
-    } else {
-      throw new NoSuchInterfaceException("No client interface named '"
-          + itfName + "'");
-    }
-
-  }
-
-  public String[] listFc() {
-    return listFcHelper(ErrorManager.ITF_NAME, NodeFactory.ITF_NAME,
-        RecursiveIDLLoader.ITF_NAME, IDLLocator.ITF_NAME);
-  }
-
-  public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
-    checkItfName(itfName);
-
-    if (ErrorManager.ITF_NAME.equals(itfName)) {
-      return errorManagerItf;
-    } else if (NodeFactory.ITF_NAME.equals(itfName)) {
-      return nodeFactoryItf;
-    } else if (itfName.equals(RecursiveIDLLoader.ITF_NAME)) {
-      return recursiveIdlLoaderItf;
-    } else if (itfName.equals(IDLLocator.ITF_NAME)) {
-      return idlLocatorItf;
-    } else {
-      throw new NoSuchInterfaceException("No client interface named '"
-          + itfName + "'");
-    }
-  }
-
-  public void unbindFc(final String itfName) throws NoSuchInterfaceException,
-      IllegalBindingException {
-    checkItfName(itfName);
-
-    if (ErrorManager.ITF_NAME.equals(itfName)) {
-      errorManagerItf = null;
-    } else if (NodeFactory.ITF_NAME.equals(itfName)) {
-      nodeFactoryItf = null;
-    } else if (itfName.equals(RecursiveIDLLoader.ITF_NAME)) {
-      recursiveIdlLoaderItf = null;
-    } else if (itfName.equals(IDLLocator.ITF_NAME)) {
-      idlLocatorItf = null;
-    } else {
-      throw new NoSuchInterfaceException("No client interface named '"
-          + itfName + "'");
     }
   }
 }

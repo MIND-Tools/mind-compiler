@@ -32,9 +32,6 @@ import org.objectweb.fractal.adl.error.GenericErrors;
 import org.objectweb.fractal.adl.interfaces.Interface;
 import org.objectweb.fractal.adl.interfaces.InterfaceContainer;
 import org.objectweb.fractal.adl.types.TypeInterfaceUtil;
-import org.objectweb.fractal.api.NoSuchInterfaceException;
-import org.objectweb.fractal.api.control.IllegalBindingException;
-import org.objectweb.fractal.api.control.IllegalLifeCycleException;
 import org.ow2.mind.adl.annotation.ADLLoaderAnnotationProcessor;
 import org.ow2.mind.adl.annotation.ADLLoaderPhase;
 import org.ow2.mind.adl.annotation.ADLLoaderProcessor;
@@ -46,6 +43,9 @@ import org.ow2.mind.adl.ast.AttributeContainer;
 import org.ow2.mind.adl.ast.ComponentContainer;
 import org.ow2.mind.annotation.Annotation;
 
+import com.google.inject.Inject;
+import com.google.inject.Injector;
+
 public class StdControllersADLLoaderAnnotationProcessor
     extends
       AbstractControllerADLLoaderAnnotationProcessor {
@@ -54,6 +54,9 @@ public class StdControllersADLLoaderAnnotationProcessor
   protected static final Class<? extends Annotation> BINDING_ANNO   = BindingController.class;
   protected static final Class<? extends Annotation> COMPONENT_ANNO = Component.class;
   protected static final Class<? extends Annotation> CONTENT_ANNO   = ContentController.class;
+
+  @Inject
+  Injector                                           injector;
 
   public Definition processAnnotation(final Annotation annotation,
       final Node node, Definition definition, final ADLLoaderPhase phase,
@@ -104,7 +107,7 @@ public class StdControllersADLLoaderAnnotationProcessor
     Annotation annotationInstance;
 
     try {
-      processorInstance = getProcessor(processorClass);
+      processorInstance = injector.getInstance(processorClass);
       annotationInstance = annoClass.newInstance();
     } catch (final InstantiationException e) {
       throw new CompilerError(GenericErrors.INTERNAL_ERROR, e,
@@ -116,32 +119,6 @@ public class StdControllersADLLoaderAnnotationProcessor
     final Definition r = processorInstance.processAnnotation(
         annotationInstance, definition, definition, phase, context);
     return (r == null) ? definition : r;
-  }
-
-  protected ADLLoaderAnnotationProcessor getProcessor(
-      final Class<? extends ADLLoaderAnnotationProcessor> processorClass)
-      throws InstantiationException, IllegalAccessException {
-    final ADLLoaderAnnotationProcessor processorInstance = processorClass
-        .newInstance();
-    if (processorInstance instanceof org.objectweb.fractal.api.control.BindingController) {
-      final org.objectweb.fractal.api.control.BindingController processorBC = (org.objectweb.fractal.api.control.BindingController) processorInstance;
-      final String[] processorClientItfs = processorBC.listFc();
-      for (final String processorClientItf : processorClientItfs) {
-        try {
-          processorBC.bindFc(processorClientItf, lookupFc(processorClientItf));
-        } catch (final NoSuchInterfaceException e) {
-          throw new CompilerError(GenericErrors.INTERNAL_ERROR, e,
-              "Can't execute annotaton processor");
-        } catch (final IllegalBindingException e) {
-          throw new CompilerError(GenericErrors.INTERNAL_ERROR, e,
-              "Can't execute annotaton processor");
-        } catch (final IllegalLifeCycleException e) {
-          throw new CompilerError(GenericErrors.INTERNAL_ERROR, e,
-              "Can't execute annotaton processor");
-        }
-      }
-    }
-    return processorInstance;
   }
 
   protected boolean execForPhase(final ADLLoaderProcessor annoProcessor,

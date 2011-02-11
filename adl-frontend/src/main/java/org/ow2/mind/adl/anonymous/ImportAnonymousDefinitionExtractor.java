@@ -22,8 +22,6 @@
 
 package org.ow2.mind.adl.anonymous;
 
-import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
-import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
 import static org.ow2.mind.adl.imports.ast.ImportASTHelper.turnsToImportContainer;
 
 import java.util.Map;
@@ -31,11 +29,12 @@ import java.util.Map;
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.NodeFactory;
 import org.objectweb.fractal.adl.merger.NodeMerger;
-import org.objectweb.fractal.api.NoSuchInterfaceException;
-import org.objectweb.fractal.api.control.IllegalBindingException;
+import org.ow2.mind.adl.anonymous.AnonymousDefinitionExtractor.AbstractDelegatingAnonymousDefinitionExtractor;
 import org.ow2.mind.adl.ast.Component;
 import org.ow2.mind.adl.imports.ast.Import;
 import org.ow2.mind.adl.imports.ast.ImportContainer;
+
+import com.google.inject.Inject;
 
 /**
  * Delegating {@link AnonymousDefinitionExtractor} component that adds
@@ -44,17 +43,13 @@ import org.ow2.mind.adl.imports.ast.ImportContainer;
  */
 public class ImportAnonymousDefinitionExtractor
     extends
-      AbstractAnonymousDefinitionExtractor {
+      AbstractDelegatingAnonymousDefinitionExtractor {
 
-  // ---------------------------------------------------------------------------
-  // Client interfaces
-  // ---------------------------------------------------------------------------
+  @Inject
+  protected NodeFactory nodeFactoryItf;
 
-  /** The node factory interface */
-  public NodeFactory nodeFactoryItf;
-
-  /** The node merger interface */
-  public NodeMerger  nodeMergerItf;
+  @Inject
+  protected NodeMerger  nodeMergerItf;
 
   // ---------------------------------------------------------------------------
   // Implementation of the AnonymousDefinitionResolver interface
@@ -79,57 +74,5 @@ public class ImportAnonymousDefinitionExtractor
       }
     }
     return anonymousDefinition;
-  }
-
-  // ---------------------------------------------------------------------------
-  // Overridden BindingController methods
-  // ---------------------------------------------------------------------------
-
-  @Override
-  public void bindFc(final String itfName, final Object value)
-      throws NoSuchInterfaceException, IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(NodeFactory.ITF_NAME)) {
-      nodeFactoryItf = (NodeFactory) value;
-    } else if (itfName.equals(NodeMerger.ITF_NAME)) {
-      nodeMergerItf = (NodeMerger) value;
-    } else {
-      super.bindFc(itfName, value);
-    }
-
-  }
-
-  @Override
-  public String[] listFc() {
-    return listFcHelper(super.listFc(), NodeFactory.ITF_NAME,
-        NodeMerger.ITF_NAME);
-  }
-
-  @Override
-  public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
-    checkItfName(itfName);
-
-    if (itfName.equals(NodeFactory.ITF_NAME)) {
-      return nodeFactoryItf;
-    } else if (itfName.equals(NodeMerger.ITF_NAME)) {
-      return nodeMergerItf;
-    } else {
-      return super.lookupFc(itfName);
-    }
-  }
-
-  @Override
-  public void unbindFc(final String itfName) throws NoSuchInterfaceException,
-      IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(NodeFactory.ITF_NAME)) {
-      nodeFactoryItf = null;
-    } else if (itfName.equals(NodeMerger.ITF_NAME)) {
-      nodeMergerItf = null;
-    } else {
-      super.unbindFc(itfName);
-    }
   }
 }

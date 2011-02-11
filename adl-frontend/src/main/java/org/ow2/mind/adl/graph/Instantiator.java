@@ -26,6 +26,7 @@ import java.util.Map;
 
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.Definition;
+import org.ow2.mind.inject.InjectDelegate;
 
 /**
  * Instantiator interface allows to instantiate an ADL definition into a graph
@@ -43,4 +44,16 @@ public interface Instantiator {
    */
   ComponentGraph instantiate(Definition definition, Map<Object, Object> context)
       throws ADLException;
+
+  /**
+   * An abstract delegating {@link Instantiator} component.
+   */
+  public abstract class AbstractDelegatingInstantiator implements Instantiator {
+
+    /**
+     * The client {@link Instantiator} used by this component.
+     */
+    @InjectDelegate
+    protected Instantiator clientInstantiatorItf;
+  }
 }

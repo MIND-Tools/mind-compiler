@@ -22,9 +22,6 @@
 
 package org.ow2.mind.idl.annotation;
 
-import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
-import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
-
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -39,14 +36,13 @@ import org.objectweb.fractal.adl.NodeFactory;
 import org.objectweb.fractal.adl.error.BasicErrorLocator;
 import org.objectweb.fractal.adl.error.ErrorLocator;
 import org.objectweb.fractal.adl.merger.NodeMerger;
-import org.objectweb.fractal.api.NoSuchInterfaceException;
-import org.objectweb.fractal.api.control.BindingController;
-import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.ow2.mind.error.ErrorManager;
 import org.ow2.mind.idl.IDLCache;
 import org.ow2.mind.idl.IDLLoader;
 import org.ow2.mind.idl.ast.IDL;
 import org.ow2.mind.idl.parser.IDLParserContextHelper;
+
+import com.google.inject.Inject;
 
 /**
  * Base class for the implementation of annotation processors integrated in the
@@ -57,30 +53,25 @@ import org.ow2.mind.idl.parser.IDLParserContextHelper;
  */
 public abstract class AbstractIDLLoaderAnnotationProcessor
     implements
-      IDLLoaderAnnotationProcessor,
-      BindingController {
+      IDLLoaderAnnotationProcessor {
 
-  // ---------------------------------------------------------------------------
-  // Client interfaces
-  // ---------------------------------------------------------------------------
+  @Inject
+  protected ErrorManager              errorManagerItf;
 
-  /** The {@link ErrorManager} client interface used to log errors. */
-  public ErrorManager              errorManagerItf;
+  @Inject
+  protected NodeFactory               nodeFactoryItf;
 
-  /** The client interface used to create new AST nodes. */
-  public NodeFactory               nodeFactoryItf;
+  @Inject
+  protected NodeMerger                nodeMergerItf;
 
-  /** The client interface used to merge AST nodes. */
-  public NodeMerger                nodeMergerItf;
+  @Inject
+  protected IDLCache                  idlCacheItf;
 
-  /** The {@link IDLCache} client interface. */
-  public IDLCache                  idlCacheItf;
+  @Inject
+  protected IDLLoader                 idlLoaderItf;
 
-  /** The {@link IDLLoader} client interface. */
-  public IDLLoader                 idlLoaderItf;
-
-  /** The {@link StringTemplateGroupLoader} client interface. */
-  public StringTemplateGroupLoader templateLoaderItf;
+  @Inject
+  protected StringTemplateGroupLoader templateLoaderItf;
 
   // ---------------------------------------------------------------------------
   // Utility methods
@@ -182,80 +173,5 @@ public abstract class AbstractIDLLoaderAnnotationProcessor
    * @see StringTemplateGroup#registerRenderer(Class, Object)
    */
   protected void registerCustomRenderer(final StringTemplateGroup templateGroup) {
-  }
-
-  // ---------------------------------------------------------------------------
-  // Implementation of the BindingController interface
-  // ---------------------------------------------------------------------------
-
-  public String[] listFc() {
-    return listFcHelper(ErrorManager.ITF_NAME, NodeFactory.ITF_NAME,
-        NodeMerger.ITF_NAME, IDLCache.ITF_NAME, IDLLoader.ITF_NAME,
-        "template-loader");
-  }
-
-  public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
-    checkItfName(itfName);
-
-    if (itfName.equals(ErrorManager.ITF_NAME)) {
-      return errorManagerItf;
-    } else if (itfName.equals(NodeFactory.ITF_NAME)) {
-      return nodeFactoryItf;
-    } else if (itfName.equals(NodeMerger.ITF_NAME)) {
-      return nodeMergerItf;
-    } else if (itfName.equals(IDLCache.ITF_NAME)) {
-      return idlCacheItf;
-    } else if (itfName.equals(IDLLoader.ITF_NAME)) {
-      return idlLoaderItf;
-    } else if (itfName.equals("template-loader")) {
-      return templateLoaderItf;
-    } else {
-      throw new NoSuchInterfaceException("No client interface named '"
-          + itfName + "'");
-    }
-  }
-
-  public void bindFc(final String itfName, final Object serverItf)
-      throws NoSuchInterfaceException, IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(ErrorManager.ITF_NAME)) {
-      errorManagerItf = (ErrorManager) serverItf;
-    } else if (itfName.equals(NodeFactory.ITF_NAME)) {
-      nodeFactoryItf = (NodeFactory) serverItf;
-    } else if (itfName.equals(NodeMerger.ITF_NAME)) {
-      nodeMergerItf = (NodeMerger) serverItf;
-    } else if (itfName.equals(IDLCache.ITF_NAME)) {
-      idlCacheItf = (IDLCache) serverItf;
-    } else if (itfName.equals(IDLLoader.ITF_NAME)) {
-      idlLoaderItf = (IDLLoader) serverItf;
-    } else if (itfName.equals("template-loader")) {
-      templateLoaderItf = (StringTemplateGroupLoader) serverItf;
-    } else {
-      throw new NoSuchInterfaceException("No client interface named '"
-          + itfName + "'");
-    }
-  }
-
-  public void unbindFc(final String itfName) throws IllegalBindingException,
-      NoSuchInterfaceException {
-    checkItfName(itfName);
-
-    if (itfName.equals(ErrorManager.ITF_NAME)) {
-      errorManagerItf = null;
-    } else if (itfName.equals(NodeFactory.ITF_NAME)) {
-      nodeFactoryItf = null;
-    } else if (itfName.equals(NodeMerger.ITF_NAME)) {
-      nodeMergerItf = null;
-    } else if (itfName.equals(IDLCache.ITF_NAME)) {
-      idlCacheItf = null;
-    } else if (itfName.equals(IDLLoader.ITF_NAME)) {
-      idlLoaderItf = null;
-    } else if (itfName.equals("template-loader")) {
-      templateLoaderItf = null;
-    } else {
-      throw new NoSuchInterfaceException("No client interface named '"
-          + itfName + "'");
-    }
   }
 }

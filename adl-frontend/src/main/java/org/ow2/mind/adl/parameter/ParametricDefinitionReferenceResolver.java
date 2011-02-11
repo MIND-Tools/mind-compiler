@@ -22,8 +22,6 @@
 
 package org.ow2.mind.adl.parameter;
 
-import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
-import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
 import static org.ow2.mind.adl.parameter.ast.ParameterASTHelper.getInferredParameterType;
 import static org.ow2.mind.adl.parameter.ast.ParameterASTHelper.setInferredParameterType;
 import static org.ow2.mind.adl.parameter.ast.ParameterASTHelper.setUsedFormalParameter;
@@ -39,11 +37,9 @@ import org.objectweb.fractal.adl.ContextLocal;
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.error.GenericErrors;
 import org.objectweb.fractal.adl.error.NodeErrorLocator;
-import org.objectweb.fractal.api.NoSuchInterfaceException;
-import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.ow2.mind.adl.ADLErrors;
-import org.ow2.mind.adl.AbstractDefinitionReferenceResolver;
 import org.ow2.mind.adl.DefinitionReferenceResolver;
+import org.ow2.mind.adl.DefinitionReferenceResolver.AbstractDelegatingDefinitionReferenceResolver;
 import org.ow2.mind.adl.ast.ASTHelper;
 import org.ow2.mind.adl.ast.DefinitionReference;
 import org.ow2.mind.adl.parameter.ast.Argument;
@@ -55,6 +51,8 @@ import org.ow2.mind.error.ErrorManager;
 import org.ow2.mind.value.ast.Reference;
 import org.ow2.mind.value.ast.Value;
 
+import com.google.inject.Inject;
+
 /**
  * This delegating {@link DefinitionReferenceResolver} checks that
  * {@link Argument} nodes contained by the {@link DefinitionReference} to
@@ -63,16 +61,18 @@ import org.ow2.mind.value.ast.Value;
  */
 public class ParametricDefinitionReferenceResolver
     extends
-      AbstractDefinitionReferenceResolver {
+      AbstractDelegatingDefinitionReferenceResolver {
 
-  protected final ContextLocal<Map<Definition, Map<String, FormalParameter>>> contextualParameters = new ContextLocal<Map<Definition, Map<String, FormalParameter>>>();
+  // define a class to alias this too long generic type
+  protected static final class FormalParameterCache
+      extends
+        ContextLocal<Map<Definition, Map<String, FormalParameter>>> {
+  }
 
-  // ---------------------------------------------------------------------------
-  // Client interfaces
-  // ---------------------------------------------------------------------------
+  protected final FormalParameterCache contextualParameters = new FormalParameterCache();
 
-  /** The {@link ErrorManager} client interface used to log errors. */
-  public ErrorManager                                                         errorManagerItf;
+  @Inject
+  protected ErrorManager               errorManagerItf;
 
   // ---------------------------------------------------------------------------
   // Implementation of the DefinitionReferenceResolver interface
@@ -279,50 +279,5 @@ public class ParametricDefinitionReferenceResolver
     }
 
     return result;
-  }
-
-  // ---------------------------------------------------------------------------
-  // Overridden BindingController methods
-  // ---------------------------------------------------------------------------
-
-  @Override
-  public void bindFc(final String itfName, final Object value)
-      throws NoSuchInterfaceException, IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(ErrorManager.ITF_NAME)) {
-      errorManagerItf = (ErrorManager) value;
-    } else {
-      super.bindFc(itfName, value);
-    }
-
-  }
-
-  @Override
-  public String[] listFc() {
-    return listFcHelper(super.listFc(), ErrorManager.ITF_NAME);
-  }
-
-  @Override
-  public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
-    checkItfName(itfName);
-
-    if (itfName.equals(ErrorManager.ITF_NAME)) {
-      return errorManagerItf;
-    } else {
-      return super.lookupFc(itfName);
-    }
-  }
-
-  @Override
-  public void unbindFc(final String itfName) throws NoSuchInterfaceException,
-      IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(ErrorManager.ITF_NAME)) {
-      errorManagerItf = null;
-    } else {
-      super.unbindFc(itfName);
-    }
   }
 }

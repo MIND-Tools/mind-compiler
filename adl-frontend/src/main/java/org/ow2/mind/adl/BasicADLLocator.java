@@ -32,6 +32,8 @@ import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.util.ClassLoaderHelper;
 import org.ow2.mind.InputResource;
 
+import com.google.common.collect.Lists;
+
 /**
  * Basic implementation of the {@link ADLLocator} interface for STCF ADL.
  */
@@ -43,6 +45,10 @@ public class BasicADLLocator implements ADLLocator {
   // ---------------------------------------------------------------------------
   // public static methods
   // ---------------------------------------------------------------------------
+
+  public Iterable<String> getResourceKind() {
+    return Lists.newArrayList(ADLLocator.ADL_RESOURCE_KIND);
+  };
 
   public static String getADLSourceName(final Definition definition) {
     return getADLSourceName(definition.getName());

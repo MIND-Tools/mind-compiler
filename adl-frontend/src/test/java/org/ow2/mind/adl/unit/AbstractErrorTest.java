@@ -31,17 +31,17 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.objectweb.fractal.adl.Loader;
-import org.ow2.mind.BasicInputResourceLocator;
+import org.ow2.mind.CommonFrontendModule;
+import org.ow2.mind.adl.ADLFrontendModule;
 import org.ow2.mind.adl.ADLLocator;
-import org.ow2.mind.adl.Factory;
-import org.ow2.mind.adl.implementation.ImplementationLocator;
 import org.ow2.mind.error.ErrorManager;
-import org.ow2.mind.error.ErrorManagerFactory;
-import org.ow2.mind.idl.IDLLoaderChainFactory;
-import org.ow2.mind.idl.IDLLoaderChainFactory.IDLFrontend;
-import org.ow2.mind.idl.IDLLocator;
-import org.ow2.mind.plugin.SimpleClassPluginFactory;
+import org.ow2.mind.error.SimpleErrorManager;
+import org.ow2.mind.idl.IDLFrontendModule;
+import org.ow2.mind.plugin.PluginLoaderModule;
 import org.testng.annotations.BeforeMethod;
+
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 
 public abstract class AbstractErrorTest {
 
@@ -55,26 +55,18 @@ public abstract class AbstractErrorTest {
 
   @BeforeMethod(alwaysRun = true)
   public void setUp() {
+    final Injector injector = Guice.createInjector(new CommonFrontendModule() {
+      @Override
+      protected void configureErrorManager() {
+        bind(ErrorManager.class).to(SimpleErrorManager.class);
+      }
+    }, new PluginLoaderModule(), new IDLFrontendModule(),
+        new ADLFrontendModule());
+
+    loader = injector.getInstance(Loader.class);
     // error manager component
-    errorManager = ErrorManagerFactory.newSimpleErrorManager();
-
-    // input locators
-    final BasicInputResourceLocator inputResourceLocator = new BasicInputResourceLocator();
-    final IDLLocator idlLocator = IDLLoaderChainFactory
-        .newIDLLocator(inputResourceLocator);
-    adlLocator = Factory.newADLLocator(inputResourceLocator);
-    final ImplementationLocator implementationLocator = Factory
-        .newImplementationLocator(inputResourceLocator);
-
-    // Plugin Manager Components
-    final org.objectweb.fractal.adl.Factory pluginFactory = new SimpleClassPluginFactory();
-
-    // loader chains
-    final IDLFrontend idlFrontend = IDLLoaderChainFactory.newLoader(
-        errorManager, idlLocator, inputResourceLocator, pluginFactory);
-    loader = Factory.newLoader(errorManager, inputResourceLocator, adlLocator,
-        idlLocator, implementationLocator, idlFrontend.cache,
-        idlFrontend.loader, pluginFactory);
+    errorManager = injector.getInstance(ErrorManager.class);
+    adlLocator = injector.getInstance(ADLLocator.class);
 
     context = new HashMap<Object, Object>();
   }

@@ -22,22 +22,18 @@
 
 package org.ow2.mind.adl.anonymous;
 
-import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
-import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
-
 import java.util.HashMap;
 import java.util.Map;
 
 import org.objectweb.fractal.adl.ContextLocal;
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.NodeFactory;
-import org.objectweb.fractal.api.NoSuchInterfaceException;
-import org.objectweb.fractal.api.control.BindingController;
-import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.ow2.mind.adl.anonymous.ast.AnonymousDefinitionContainer;
 import org.ow2.mind.adl.ast.ASTHelper;
 import org.ow2.mind.adl.ast.Component;
 import org.ow2.mind.adl.ast.DefinitionReference;
+
+import com.google.inject.Inject;
 
 /**
  * Basic implementation of the {@link AnonymousDefinitionExtractor} interface.
@@ -46,17 +42,12 @@ import org.ow2.mind.adl.ast.DefinitionReference;
  */
 public class AnonymousDefinitionExtractorImpl
     implements
-      AnonymousDefinitionExtractor,
-      BindingController {
+      AnonymousDefinitionExtractor {
 
-  protected ContextLocal<Map<String, Integer>> contextualCounters = new ContextLocal<Map<String, Integer>>();
+  protected final ContextLocal<Map<String, Integer>> contextualCounters = new ContextLocal<Map<String, Integer>>();
 
-  // ---------------------------------------------------------------------------
-  // Client interfaces
-  // ---------------------------------------------------------------------------
-
-  /** The node factory interface */
-  public NodeFactory                           nodeFactoryItf;
+  @Inject
+  protected NodeFactory                              nodeFactoryItf;
 
   // ---------------------------------------------------------------------------
   // Implementation of the AnonymousDefinitionResolver interface
@@ -95,49 +86,5 @@ public class AnonymousDefinitionExtractorImpl
     component.setDefinitionReference(defRef);
 
     return anonymousDefinition;
-  }
-
-  // ---------------------------------------------------------------------------
-  // Overridden BindingController methods
-  // ---------------------------------------------------------------------------
-
-  public void bindFc(final String itfName, final Object value)
-      throws NoSuchInterfaceException, IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(NodeFactory.ITF_NAME)) {
-      nodeFactoryItf = (NodeFactory) value;
-    } else {
-      throw new NoSuchInterfaceException("No client interface named '"
-          + itfName + "'");
-    }
-
-  }
-
-  public String[] listFc() {
-    return listFcHelper(NodeFactory.ITF_NAME);
-  }
-
-  public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
-    checkItfName(itfName);
-
-    if (itfName.equals(NodeFactory.ITF_NAME)) {
-      return nodeFactoryItf;
-    } else {
-      throw new NoSuchInterfaceException("No client interface named '"
-          + itfName + "'");
-    }
-  }
-
-  public void unbindFc(final String itfName) throws NoSuchInterfaceException,
-      IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(NodeFactory.ITF_NAME)) {
-      nodeFactoryItf = null;
-    } else {
-      throw new NoSuchInterfaceException("No client interface named '"
-          + itfName + "'");
-    }
   }
 }

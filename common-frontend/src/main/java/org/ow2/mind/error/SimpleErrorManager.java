@@ -39,11 +39,16 @@ import org.objectweb.fractal.adl.error.ErrorTemplate;
 import org.objectweb.fractal.adl.error.NodeErrorLocator;
 import org.objectweb.fractal.adl.util.FractalADLLogManager;
 
+import com.google.inject.Singleton;
+
+import com.google.inject.Singleton;
+
 /**
  * Simple implementation of {@link ErrorManager} interface. Every methods
  * implemented by this class calls {@link ErrorManager#logError(Error)} or
  * {@link ErrorManager#logWarning(Error)}.
  */
+@Singleton
 public class SimpleErrorManager implements ErrorManager {
 
   protected static Logger     logger   = FractalADLLogManager

@@ -27,15 +27,32 @@ import java.io.PrintStream;
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.error.Error;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import com.google.inject.name.Named;
+
 /**
  * This error manager log errors and warnings on {@link PrintStream} (
  * <code>System.err</code> by default).
  */
+@Singleton
 public class StreamErrorManager extends SimpleErrorManager {
 
-  protected PrintStream errorStream      = System.err;
-  protected PrintStream warningStream    = System.err;
-  protected boolean     printStackTraces = false;
+  public static final String ERROR_STREAM_NAME      = "ErrorManager.errorStream";
+  public static final String WARNING_STREAM_NAME    = "ErrorManager.warningStream";
+  public static final String PRINT_STACK_TRACE_NAME = "ErrorManager.printStackTrace";
+
+  @Inject
+  @Named(ERROR_STREAM_NAME)
+  protected PrintStream      errorStream;
+
+  @Inject
+  @Named(WARNING_STREAM_NAME)
+  protected PrintStream      warningStream;
+
+  @Inject
+  @Named(PRINT_STACK_TRACE_NAME)
+  protected boolean          printStackTraces;
 
   @Override
   public void logError(final Error error) throws ADLException {

@@ -9,20 +9,26 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.objectweb.fractal.adl.ADLException;
 import org.ow2.mind.Launcher;
-import org.ow2.mind.AbstractLauncher.CmdAppendOption;
-import org.ow2.mind.AbstractLauncher.CmdArgument;
-import org.ow2.mind.AbstractLauncher.CmdFlag;
-import org.ow2.mind.AbstractLauncher.CmdOption;
-import org.ow2.mind.AbstractLauncher.CmdPathOption;
-import org.ow2.mind.AbstractLauncher.CmdProperties;
-import org.ow2.mind.AbstractLauncher.InvalidCommandLineException;
-import org.ow2.mind.AbstractLauncher.Options;
+import org.ow2.mind.cli.CmdAppendOption;
+import org.ow2.mind.cli.CmdArgument;
+import org.ow2.mind.cli.CmdFlag;
+import org.ow2.mind.cli.CmdOption;
+import org.ow2.mind.cli.CmdPathOption;
+import org.ow2.mind.cli.CmdProperties;
+import org.ow2.mind.cli.InvalidCommandLineException;
+import org.ow2.mind.cli.Options;
 import org.ow2.mind.plugin.BasicPluginManager;
+import org.ow2.mind.plugin.PluginLoaderModule;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+
+import com.google.inject.AbstractModule;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.google.inject.name.Names;
+import com.google.inject.util.Modules;
 
 /**
  * Copyright (C) 2009 STMicroelectronics This file is part of "Mind Compiler" is
@@ -82,10 +88,23 @@ public class LauncherTest {
   }
 
   protected class LauncherTester extends Launcher {
+    final List<String> pathList;
+
     protected LauncherTester(final List<String> pathList) {
-      super();
-      BasicPluginManager.setPluginClassLoader(compilerContext,
-          getPluginClassLoader(pathList));
+      this.pathList = pathList;
+    }
+
+    @Override
+    protected Injector getBootstrapInjector() {
+      return Guice.createInjector(Modules.override(new PluginLoaderModule())
+          .with(new AbstractModule() {
+            @Override
+            public void configure() {
+              bind(ClassLoader.class).annotatedWith(
+                  Names.named(BasicPluginManager.PLUGIN_CLASS_LOADER))
+                  .toInstance(getPluginClassLoader(pathList));
+            }
+          }));
     }
 
     public Map<Object, Object> getContext() {
@@ -97,10 +116,9 @@ public class LauncherTest {
     }
 
     public void testMain(final String... args)
-        throws InvalidCommandLineException, CompilerInstantiationException,
-        ADLException {
+        throws InvalidCommandLineException {
       init(args);
-      compile();
+      compile(null, null);
     }
   }
 

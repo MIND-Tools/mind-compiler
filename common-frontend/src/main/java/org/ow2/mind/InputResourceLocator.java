@@ -9,8 +9,6 @@ import java.util.Map;
 
 public interface InputResourceLocator {
 
-  String ITF_NAME = "input-resource-locator";
-
   /**
    * Returns the URLs that are used as root directory to find input resources.
    * 

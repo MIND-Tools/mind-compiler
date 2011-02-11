@@ -33,11 +33,18 @@ import java.util.Map;
 import org.objectweb.fractal.adl.util.ClassLoaderHelper;
 import org.ow2.mind.InputResource;
 
+import com.google.common.collect.Lists;
+
 public class BasicImplementationLocator implements ImplementationLocator {
 
   // ---------------------------------------------------------------------------
   // Implementation of the ImplementationLocator interface
   // ---------------------------------------------------------------------------
+
+  public Iterable<String> getResourceKind() {
+    return Lists
+        .newArrayList(ImplementationLocator.IMPLEMENTATION_RESOURCE_KIND);
+  }
 
   public URL[] getInputResourcesRoot(final Map<Object, Object> context) {
     final ClassLoader cl = ClassLoaderHelper.getClassLoader(this, context);

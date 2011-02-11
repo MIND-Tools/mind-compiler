@@ -32,19 +32,21 @@ import java.util.Set;
 
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.Node;
+import org.ow2.mind.CommonFrontendModule;
 import org.ow2.mind.annotation.Annotation;
-import org.ow2.mind.error.ErrorManager;
-import org.ow2.mind.error.ErrorManagerFactory;
-import org.ow2.mind.idl.IDLErrorLoader;
+import org.ow2.mind.idl.IDLFrontendModule;
 import org.ow2.mind.idl.IDLLoader;
-import org.ow2.mind.idl.IDLLoaderChainFactory;
 import org.ow2.mind.idl.annotation.AbstractIDLLoaderAnnotationProcessor;
 import org.ow2.mind.idl.annotation.IDLLoaderPhase;
 import org.ow2.mind.idl.ast.IDL;
 import org.ow2.mind.idl.ast.InterfaceDefinition;
 import org.ow2.mind.idl.ast.Method;
+import org.ow2.mind.plugin.PluginLoaderModule;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 
 public class TestIDLAnnotationProcessor {
 
@@ -52,16 +54,9 @@ public class TestIDLAnnotationProcessor {
 
   @BeforeMethod(alwaysRun = true)
   public void setUp() {
-    // loader chains
-    final ErrorManager errorManager = ErrorManagerFactory
-        .newSimpleErrorManager();
-    final IDLErrorLoader errorLoader = new IDLErrorLoader();
-    errorLoader.errorManagerItf = errorManager;
-    errorLoader.clientIDLLoaderItf = IDLLoaderChainFactory
-        .newLoader(errorManager).loader;
-    loader = errorLoader;
-    // ensure that phases are empty.
-    FooProcessor.phases = new HashSet<IDLLoaderPhase>();
+    final Injector injector = Guice.createInjector(new CommonFrontendModule(),
+        new IDLFrontendModule(), new PluginLoaderModule());
+    loader = injector.getInstance(IDLLoader.class);
   }
 
   @Test(groups = {"functional"})

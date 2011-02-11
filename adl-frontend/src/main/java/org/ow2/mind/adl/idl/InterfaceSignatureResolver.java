@@ -28,12 +28,25 @@ import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.types.TypeInterface;
 import org.ow2.mind.idl.ast.InterfaceDefinition;
+import org.ow2.mind.inject.InjectDelegate;
 
 public interface InterfaceSignatureResolver {
-
-  String ITF_NAME = "interface-signature-resolver";
 
   InterfaceDefinition resolve(TypeInterface itf,
       final Definition encapsulatingDefinition, Map<Object, Object> context)
       throws ADLException;
+
+  /**
+   * An abstract delegating {@link InterfaceSignatureResolver} component.
+   */
+  public abstract class AbstractDelegatingInterfaceSignatureResolver
+      implements
+        InterfaceSignatureResolver {
+
+    /**
+     * The client {@link InterfaceSignatureResolver} used by this component.
+     */
+    @InjectDelegate
+    protected InterfaceSignatureResolver clientResolverItf;
+  }
 }

@@ -30,32 +30,40 @@ import java.io.InputStream;
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.Node;
 import org.objectweb.fractal.adl.xml.XMLNodeFactory;
-import org.objectweb.fractal.adl.xml.XMLNodeFactoryImpl;
+import org.ow2.mind.CommonFrontendModule;
+import org.ow2.mind.adl.AbstractADLFrontendModule;
 import org.ow2.mind.adl.jtb.Parser;
 import org.ow2.mind.adl.jtb.syntaxtree.ADLFile;
-import org.ow2.mind.error.ErrorManager;
-import org.ow2.mind.error.ErrorManagerFactory;
+import org.ow2.mind.plugin.PluginLoaderModule;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 
 public class TestJTBProcessor {
 
   protected static final String DTD = "classpath://org/ow2/mind/adl/mind_v1.dtd";
   XMLNodeFactory                nodeFactory;
-  ErrorManager                  errorManager;
   JTBProcessor                  processor;
+  Injector                      injector;
 
   @BeforeMethod(alwaysRun = true)
   protected void setUp() throws Exception {
-    nodeFactory = new XMLNodeFactoryImpl();
-    errorManager = ErrorManagerFactory.newSimpleErrorManager();
+
+    injector = Guice.createInjector(new CommonFrontendModule(),
+        new PluginLoaderModule(), new AbstractADLFrontendModule() {
+        });
+
+    nodeFactory = injector.getInstance(XMLNodeFactory.class);
   }
 
   protected Parser getParser(final String fileName) throws Exception {
     final ClassLoader loader = getClass().getClassLoader();
     final InputStream is = loader.getResourceAsStream(fileName);
     assertNotNull(is, "Can't find input file \"" + fileName + "\"");
-    processor = new JTBProcessor(errorManager, nodeFactory, DTD, fileName);
+    processor = injector.getInstance(JTBProcessor.class);
+    processor.setFilename(fileName);
 
     return new Parser(is);
   }

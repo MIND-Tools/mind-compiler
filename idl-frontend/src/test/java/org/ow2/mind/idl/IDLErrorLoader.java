@@ -28,9 +28,16 @@ import java.util.Map;
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.error.Error;
 import org.ow2.mind.error.ErrorCollection;
+import org.ow2.mind.error.ErrorManager;
+import org.ow2.mind.idl.IDLLoader.AbstractDelegatingIDLLoader;
 import org.ow2.mind.idl.ast.IDL;
 
-public class IDLErrorLoader extends AbstractIDLLoader {
+import com.google.inject.Inject;
+
+public class IDLErrorLoader extends AbstractDelegatingIDLLoader {
+
+  @Inject
+  protected ErrorManager errorManagerItf;
 
   public IDL load(final String name, final Map<Object, Object> context)
       throws ADLException {

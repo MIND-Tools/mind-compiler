@@ -30,6 +30,7 @@ import java.util.Map;
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.Definition;
 import org.ow2.mind.InputResourcesHelper;
+import org.ow2.mind.adl.DefinitionReferenceResolver.AbstractDelegatingDefinitionReferenceResolver;
 import org.ow2.mind.adl.ast.DefinitionReference;
 
 /**
@@ -40,7 +41,7 @@ import org.ow2.mind.adl.ast.DefinitionReference;
  */
 public class InputResourcesDefinitionReferenceResolver
     extends
-      AbstractDefinitionReferenceResolver {
+      AbstractDelegatingDefinitionReferenceResolver {
 
   // ---------------------------------------------------------------------------
   // Implementation of the DefinitionReferenceResolver interface

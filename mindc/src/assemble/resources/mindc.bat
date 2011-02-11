@@ -90,7 +90,7 @@ set MIND_CLASSPATH=%MIND_CLASSPATH%%VarTmp%
 goto :eof
 
 :runMind
-%MIND_JAVA_EXE% -classpath %MIND_CLASSPATH% %MIND_OPTS% -Dcecilia.launcher.name=mindc %LAUNCHER% -src-path=%MIND_RUNTIME% %MIND_CMD_LINE_ARGS%
+%MIND_JAVA_EXE% -classpath %MIND_CLASSPATH% %MIND_OPTS% -Dmindc.launcher.name=mindc %LAUNCHER% -src-path=%MIND_RUNTIME% %MIND_CMD_LINE_ARGS%
 
 
 :error

@@ -27,8 +27,6 @@ import java.util.Map;
 
 public interface OutputFileLocator {
 
-  String ITF_NAME = "output-file-locator";
-
   File getCSourceOutputFile(String path, Map<Object, Object> context);
 
   File getCSourceOutputDir(Map<Object, Object> context);

@@ -22,37 +22,41 @@
 
 package org.ow2.mind.idl;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertSame;
+
 import java.util.Collection;
 
-import junit.framework.TestCase;
-
-import org.ow2.mind.error.ErrorManager;
-import org.ow2.mind.error.ErrorManagerFactory;
+import org.ow2.mind.CommonFrontendModule;
 import org.ow2.mind.idl.ASTChecker.IDLChecker;
 import org.ow2.mind.idl.ASTChecker.IncludeCheckerIterator;
 import org.ow2.mind.idl.ASTChecker.TypeCheckerIterator;
 import org.ow2.mind.idl.ast.IDL;
 import org.ow2.mind.idl.ast.IDLASTHelper;
 import org.ow2.mind.idl.ast.InterfaceDefinition;
+import org.ow2.mind.plugin.PluginLoaderModule;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
-public class TestIDLLoaderChain extends TestCase {
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+
+public class TestIDLLoaderChain {
 
   protected IDLLoader  idlLoader;
   protected ASTChecker checker;
 
-  @Override
+  @BeforeMethod(alwaysRun = true)
   protected void setUp() throws Exception {
-    final ErrorManager errorManager = ErrorManagerFactory
-        .newSimpleErrorManager();
-    final IDLErrorLoader errorLoader = new IDLErrorLoader();
-    errorLoader.errorManagerItf = errorManager;
-    errorLoader.clientIDLLoaderItf = IDLLoaderChainFactory
-        .newLoader(errorManager).loader;
-    idlLoader = errorLoader;
+    final Injector injector = Guice.createInjector(new CommonFrontendModule(),
+        new IDLFrontendModule(), new PluginLoaderModule());
+    idlLoader = injector.getInstance(IDLLoader.class);
 
     checker = new ASTChecker();
   }
 
+  @Test(groups = {"functional"})
   public void test1() throws Exception {
     final IDL idl = idlLoader.load("test1", null);
     final IDLChecker idlChecker = checker.assertIDL(idl);
@@ -65,6 +69,7 @@ public class TestIDLLoaderChain extends TestCase {
     idlChecker.containsMethods("m1", "m2", "m3", "m4", "m5");
   }
 
+  @Test(groups = {"functional"})
   public void test2() throws Exception {
     final IDL idl = idlLoader.load("/test2.idt", null);
     final IDLChecker idlChecker = checker.assertIDL(idl);
@@ -75,6 +80,7 @@ public class TestIDLLoaderChain extends TestCase {
     containedIncludes.andNext().includes().containsIncludes("\"/test3.idt\"");
   }
 
+  @Test(groups = {"functional"})
   public void test3() throws Exception {
     final IDL idl = idlLoader.load("/test3.idt", null);
     checker.assertIDL(idl).definesType().whereFirst().isStructDef("s")
@@ -82,9 +88,9 @@ public class TestIDLLoaderChain extends TestCase {
     final Collection<InterfaceDefinition> referencedInterfaces = IDLASTHelper
         .getReferencedInterfaces(idl, null, null);
     assertNotNull(referencedInterfaces);
-    assertEquals(1, referencedInterfaces.size());
+    assertEquals(referencedInterfaces.size(), 1);
     final InterfaceDefinition foo_foo = referencedInterfaces.iterator().next();
-    assertEquals("foo.foo", foo_foo.getName());
+    assertEquals(foo_foo.getName(), "foo.foo");
     final IDLChecker foo_foo_checker = checker.assertIDL(foo_foo);
     final IDLChecker test2_checker = foo_foo_checker.containsInclude(
         "\"/test2.idt\"").includes();

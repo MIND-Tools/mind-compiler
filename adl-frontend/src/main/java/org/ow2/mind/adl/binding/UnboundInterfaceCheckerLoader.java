@@ -26,8 +26,6 @@ import static java.lang.Integer.parseInt;
 import static org.objectweb.fractal.adl.types.TypeInterfaceUtil.isClient;
 import static org.objectweb.fractal.adl.types.TypeInterfaceUtil.isCollection;
 import static org.objectweb.fractal.adl.types.TypeInterfaceUtil.isMandatory;
-import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
-import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
 import static org.ow2.mind.adl.ast.ASTHelper.getNumberOfElement;
 import static org.ow2.mind.adl.ast.ASTHelper.getResolvedComponentDefinition;
 import static org.ow2.mind.adl.ast.Binding.THIS_COMPONENT;
@@ -35,14 +33,12 @@ import static org.ow2.mind.adl.ast.Binding.THIS_COMPONENT;
 import java.util.Map;
 
 import org.objectweb.fractal.adl.ADLException;
-import org.objectweb.fractal.adl.AbstractLoader;
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.Loader;
 import org.objectweb.fractal.adl.bindings.BindingErrors;
 import org.objectweb.fractal.adl.interfaces.Interface;
 import org.objectweb.fractal.adl.interfaces.InterfaceContainer;
-import org.objectweb.fractal.api.NoSuchInterfaceException;
-import org.objectweb.fractal.api.control.IllegalBindingException;
+import org.ow2.mind.adl.AbstractDelegatingLoader;
 import org.ow2.mind.adl.ast.ASTHelper;
 import org.ow2.mind.adl.ast.Binding;
 import org.ow2.mind.adl.ast.BindingContainer;
@@ -51,20 +47,15 @@ import org.ow2.mind.adl.ast.ComponentContainer;
 import org.ow2.mind.adl.membrane.ast.InternalInterfaceContainer;
 import org.ow2.mind.error.ErrorManager;
 
-public class UnboundInterfaceCheckerLoader extends AbstractLoader {
+import com.google.inject.Inject;
 
-  // ---------------------------------------------------------------------------
-  // Client interfaces
-  // ---------------------------------------------------------------------------
+public class UnboundInterfaceCheckerLoader extends AbstractDelegatingLoader {
 
-  /** The {@link ErrorManager} client interface used to log errors. */
-  public ErrorManager        errorManagerItf;
+  @Inject
+  protected ErrorManager errorManagerItf;
 
-  /** The name of the {@link #recursiveLoaderItf} client interface. */
-  public static final String RECURSIVE_LOADER_ITF_NAME = "recursive-loader";
-
-  /** The loader interface used to load referenced definition if needed. */
-  public Loader              recursiveLoaderItf;
+  @Inject
+  protected Loader       recursiveLoaderItf;
 
   // ---------------------------------------------------------------------------
   // Implementation of the Loader interface
@@ -162,57 +153,5 @@ public class UnboundInterfaceCheckerLoader extends AbstractLoader {
       }
     }
     return null;
-  }
-
-  // ---------------------------------------------------------------------------
-  // Overridden BindingController methods
-  // ---------------------------------------------------------------------------
-
-  @Override
-  public void bindFc(final String itfName, final Object value)
-      throws NoSuchInterfaceException, IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(ErrorManager.ITF_NAME)) {
-      errorManagerItf = (ErrorManager) value;
-    } else if (itfName.equals(RECURSIVE_LOADER_ITF_NAME)) {
-      recursiveLoaderItf = (Loader) value;
-    } else {
-      super.bindFc(itfName, value);
-    }
-
-  }
-
-  @Override
-  public String[] listFc() {
-    return listFcHelper(super.listFc(), ErrorManager.ITF_NAME,
-        RECURSIVE_LOADER_ITF_NAME);
-  }
-
-  @Override
-  public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
-    checkItfName(itfName);
-
-    if (itfName.equals(ErrorManager.ITF_NAME)) {
-      return errorManagerItf;
-    } else if (itfName.equals(RECURSIVE_LOADER_ITF_NAME)) {
-      return recursiveLoaderItf;
-    } else {
-      return super.lookupFc(itfName);
-    }
-  }
-
-  @Override
-  public void unbindFc(final String itfName) throws NoSuchInterfaceException,
-      IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(ErrorManager.ITF_NAME)) {
-      errorManagerItf = null;
-    } else if (itfName.equals(RECURSIVE_LOADER_ITF_NAME)) {
-      recursiveLoaderItf = null;
-    } else {
-      super.unbindFc(itfName);
-    }
   }
 }

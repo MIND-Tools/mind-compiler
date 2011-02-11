@@ -29,14 +29,12 @@ import org.ow2.mind.NameHelper;
 import org.ow2.mind.PathHelper;
 import org.ow2.mind.idl.ast.IDL;
 import org.ow2.mind.idl.ast.InterfaceDefinition;
+import org.ow2.mind.inject.InjectDelegate;
 
 /**
  * {@link IDL} loader interface.
  */
 public interface IDLLoader {
-
-  /** The default name of this interface. */
-  String ITF_NAME = "idl-loader";
 
   /**
    * Load the {@link IDL} whose name is given.
@@ -51,4 +49,17 @@ public interface IDLLoader {
    * @throws ADLException if the file cannot be found, or if it contains errors.
    */
   IDL load(String name, Map<Object, Object> context) throws ADLException;
+
+  /**
+   * An abstract delegating {@link IDLLoader} component.
+   */
+  public abstract class AbstractDelegatingIDLLoader implements IDLLoader {
+
+    /**
+     * The client {@link IDLLoader} used by this component.
+     */
+    @InjectDelegate
+    protected IDLLoader clientIDLLoaderItf;
+  }
+
 }

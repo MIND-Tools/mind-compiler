@@ -26,6 +26,7 @@ import java.util.Map;
 
 import org.objectweb.fractal.adl.Definition;
 import org.ow2.mind.adl.ast.Component;
+import org.ow2.mind.inject.InjectDelegate;
 
 /**
  * Interface used to extract a {@link Definition} from a sub-component
@@ -54,4 +55,18 @@ public interface AnonymousDefinitionExtractor {
    */
   Definition extractAnonymousDefinition(Component component,
       Definition encapsulatingDefinition, Map<Object, Object> context);
+
+  /**
+   * An abstract delegating {@link AnonymousDefinitionExtractor} component.
+   */
+  public abstract class AbstractDelegatingAnonymousDefinitionExtractor
+      implements
+        AnonymousDefinitionExtractor {
+
+    /**
+     * The client {@link AnonymousDefinitionExtractor} used by this component.
+     */
+    @InjectDelegate
+    protected AnonymousDefinitionExtractor clientExtractorItf;
+  }
 }

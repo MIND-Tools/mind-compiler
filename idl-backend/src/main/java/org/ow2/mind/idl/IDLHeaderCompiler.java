@@ -22,8 +22,6 @@
 
 package org.ow2.mind.idl;
 
-import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
-import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
 import static org.ow2.mind.SourceFileWriter.writeToFile;
 
 import java.io.File;
@@ -37,8 +35,6 @@ import org.antlr.stringtemplate.StringTemplateGroup;
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.CompilerError;
 import org.objectweb.fractal.adl.util.FractalADLLogManager;
-import org.objectweb.fractal.api.NoSuchInterfaceException;
-import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.ow2.mind.InputResourceLocator;
 import org.ow2.mind.InputResourcesHelper;
 import org.ow2.mind.PathHelper;
@@ -48,42 +44,39 @@ import org.ow2.mind.io.OutputFileLocator;
 import org.ow2.mind.st.AbstractStringTemplateProcessor;
 import org.ow2.mind.st.BackendFormatRenderer;
 
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
+
 /**
  * {@link IDLVisitor} component that generated {@value #IDT_FILE_EXT} and
- * {@value #ITF_FILE_EXT} files using the {@value #IDL2C_TEMPLATE_NAME}
- * template.
+ * {@value #ITF_FILE_EXT} files using the {@value #DEFAULT_TEMPLATE} template.
  */
-
 public class IDLHeaderCompiler extends AbstractStringTemplateProcessor
     implements
       IDLVisitor {
 
-  protected static final String IDL2C_TEMPLATE_NAME = "st.interfaces.IDL2C";
-  protected final static String IDT_FILE_EXT        = "idt.h";
-  protected final static String ITF_FILE_EXT        = "itf.h";
+  /** The name to be used to inject the templateGroupName used by this class. */
+  public static final String     TEMPLATE_NAME    = "IDL2C";
 
-  protected static Logger       depLogger           = FractalADLLogManager
-                                                        .getLogger("dep");
+  /** The default templateGroupName used by this class. */
+  public static final String     DEFAULT_TEMPLATE = "st.interfaces.IDL2C";
 
-  // ---------------------------------------------------------------------------
-  // Client interfaces
-  // ---------------------------------------------------------------------------
+  protected final static String  IDT_FILE_EXT     = "idt.h";
+  protected final static String  ITF_FILE_EXT     = "itf.h";
 
-  /** Client interface used to locate output files. */
-  public OutputFileLocator      outputFileLocatorItf;
+  protected static Logger        depLogger        = FractalADLLogManager
+                                                      .getLogger("dep");
 
-  /** client interface used to checks timestamps of input resources. */
-  public InputResourceLocator   inputResourceLocatorItf;
+  @Inject
+  protected OutputFileLocator    outputFileLocatorItf;
 
-  // ---------------------------------------------------------------------------
-  // Constructor
-  // ---------------------------------------------------------------------------
+  @Inject
+  protected InputResourceLocator inputResourceLocatorItf;
 
-  /**
-   * Public constructor.
-   */
-  public IDLHeaderCompiler() {
-    super(IDL2C_TEMPLATE_NAME);
+  @Inject
+  protected IDLHeaderCompiler(
+      @Named(TEMPLATE_NAME) final String templateGroupName) {
+    super(templateGroupName);
   }
 
   // ---------------------------------------------------------------------------
@@ -110,8 +103,8 @@ public class IDLHeaderCompiler extends AbstractStringTemplateProcessor
       try {
         writeToFile(headerFile, st.toString());
       } catch (final IOException e) {
-        throw new CompilerError(IOErrors.WRITE_ERROR, e, headerFile
-            .getAbsolutePath());
+        throw new CompilerError(IOErrors.WRITE_ERROR, e,
+            headerFile.getAbsolutePath());
       }
     }
   }
@@ -126,8 +119,8 @@ public class IDLHeaderCompiler extends AbstractStringTemplateProcessor
       return true;
     }
 
-    if (!inputResourceLocatorItf.isUpToDate(outputFile, InputResourcesHelper
-        .getInputResources(idl), context)) {
+    if (!inputResourceLocatorItf.isUpToDate(outputFile,
+        InputResourcesHelper.getInputResources(idl), context)) {
       if (depLogger.isLoggable(Level.FINE)) {
         depLogger.fine("Generated source file '" + outputFile
             + "' is out-of-date, regenerate.");
@@ -163,56 +156,4 @@ public class IDLHeaderCompiler extends AbstractStringTemplateProcessor
       }
     });
   }
-
-  // ---------------------------------------------------------------------------
-  // Overridden BindingController methods
-  // ---------------------------------------------------------------------------
-
-  @Override
-  public void bindFc(final String itfName, final Object value)
-      throws NoSuchInterfaceException, IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(OutputFileLocator.ITF_NAME)) {
-      outputFileLocatorItf = (OutputFileLocator) value;
-    } else if (itfName.equals(InputResourceLocator.ITF_NAME)) {
-      inputResourceLocatorItf = (InputResourceLocator) value;
-    } else {
-      super.bindFc(itfName, value);
-    }
-  }
-
-  @Override
-  public String[] listFc() {
-    return listFcHelper(super.listFc(), OutputFileLocator.ITF_NAME,
-        InputResourceLocator.ITF_NAME);
-  }
-
-  @Override
-  public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
-    checkItfName(itfName);
-
-    if (itfName.equals(OutputFileLocator.ITF_NAME)) {
-      return outputFileLocatorItf;
-    } else if (itfName.equals(InputResourceLocator.ITF_NAME)) {
-      return inputResourceLocatorItf;
-    } else {
-      return super.lookupFc(itfName);
-    }
-  }
-
-  @Override
-  public void unbindFc(final String itfName) throws NoSuchInterfaceException,
-      IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(OutputFileLocator.ITF_NAME)) {
-      outputFileLocatorItf = null;
-    } else if (itfName.equals(InputResourceLocator.ITF_NAME)) {
-      inputResourceLocatorItf = null;
-    } else {
-      super.unbindFc(itfName);
-    }
-  }
-
 }

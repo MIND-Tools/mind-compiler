@@ -22,11 +22,8 @@
 
 package org.ow2.mind.adl;
 
-import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
-import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
 import static org.ow2.mind.PathHelper.fullyQualifiedNameToPath;
 import static org.ow2.mind.PathHelper.replaceExtension;
-import static org.ow2.mind.compilation.DirectiveHelper.splitOptionString;
 
 import java.io.File;
 import java.net.URISyntaxException;
@@ -42,38 +39,37 @@ import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.CompilerError;
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.error.GenericErrors;
-import org.objectweb.fractal.api.NoSuchInterfaceException;
-import org.objectweb.fractal.api.control.BindingController;
-import org.objectweb.fractal.api.control.IllegalBindingException;
-import org.ow2.mind.adl.annotation.predefined.LDFlags;
 import org.ow2.mind.adl.ast.ImplementationContainer;
 import org.ow2.mind.adl.ast.Source;
 import org.ow2.mind.adl.graph.ComponentGraph;
 import org.ow2.mind.adl.implementation.ImplementationLocator;
 import org.ow2.mind.adl.implementation.SharedImplementationDecorationHelper;
-import org.ow2.mind.annotation.AnnotationHelper;
 import org.ow2.mind.compilation.CompilationCommand;
 import org.ow2.mind.compilation.CompilerCommand;
 import org.ow2.mind.compilation.CompilerContextHelper;
 import org.ow2.mind.compilation.CompilerWrapper;
 import org.ow2.mind.compilation.LinkerCommand;
+import org.ow2.mind.inject.InjectDelegate;
 import org.ow2.mind.io.OutputFileLocator;
 
-public class BasicGraphLinker implements GraphCompiler, BindingController {
+import com.google.inject.Inject;
 
-  // ---------------------------------------------------------------------------
-  // Client interfaces
-  // ---------------------------------------------------------------------------
+public class BasicGraphLinker implements GraphCompiler {
 
-  public static final String   CLIENT_COMPILER_ITF_NAME = "client-compiler";
-  public GraphCompiler         clientCompilerItf;
+  @InjectDelegate
+  protected GraphCompiler         clientCompilerItf;
 
-  public CompilerWrapper       compilerWrapperItf;
+  @Inject
+  protected CompilerWrapper       compilerWrapperItf;
 
-  /** Client interface used to locate output files. */
-  public OutputFileLocator     outputFileLocatorItf;
+  @Inject
+  protected OutputFileLocator     outputFileLocatorItf;
 
-  public ImplementationLocator implementationLocatorItf;
+  @Inject
+  protected ImplementationLocator implementationLocatorItf;
+
+  @Inject
+  protected FlagExtractor         flagExtractor;
 
   // ---------------------------------------------------------------------------
   // Implementation of the Visitor interface
@@ -105,7 +101,7 @@ public class BasicGraphLinker implements GraphCompiler, BindingController {
     }
     command.setOutputFile(outputFile);
 
-    addLDFlags(graph, new HashSet<Definition>(), command);
+    addLDFlags(graph, new HashSet<Definition>(), command, context);
 
     result.add(command);
 
@@ -183,86 +179,23 @@ public class BasicGraphLinker implements GraphCompiler, BindingController {
   }
 
   protected void addLDFlags(final ComponentGraph graph,
-      final Set<Definition> visitedDefinitions, final LinkerCommand command) {
+      final Set<Definition> visitedDefinitions, final LinkerCommand command,
+      final Map<Object, Object> context) throws ADLException {
     final Definition def = graph.getDefinition();
     if (visitedDefinitions.add(def)) {
       // get LDFlags annotation at definition level.
-      LDFlags flags = AnnotationHelper.getAnnotation(def, LDFlags.class);
-      if (flags != null) command.addFlags(splitOptionString(flags.value));
+      command.addFlags(flagExtractor.getLDFlags(def, context));
 
       // get LDFlags annotation at source level.
       if (def instanceof ImplementationContainer) {
         for (final Source src : ((ImplementationContainer) def).getSources()) {
-          flags = AnnotationHelper.getAnnotation(src, LDFlags.class);
-          if (flags != null) command.addFlags(splitOptionString(flags.value));
+          command.addFlags(flagExtractor.getLDFlags(src, context));
         }
       }
     }
 
     for (final ComponentGraph subComp : graph.getSubComponents()) {
-      addLDFlags(subComp, visitedDefinitions, command);
-    }
-  }
-
-  // ---------------------------------------------------------------------------
-  // implementation of the BindingController interface
-  // ---------------------------------------------------------------------------
-
-  public void bindFc(final String itfName, final Object value)
-      throws NoSuchInterfaceException, IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(CLIENT_COMPILER_ITF_NAME)) {
-      clientCompilerItf = (GraphCompiler) value;
-    } else if (itfName.equals(OutputFileLocator.ITF_NAME)) {
-      outputFileLocatorItf = (OutputFileLocator) value;
-    } else if (itfName.equals(ImplementationLocator.ITF_NAME)) {
-      implementationLocatorItf = (ImplementationLocator) value;
-    } else if (itfName.equals(CompilerWrapper.ITF_NAME)) {
-      compilerWrapperItf = (CompilerWrapper) value;
-    } else {
-      throw new NoSuchInterfaceException("No client interface named '"
-          + itfName + "'");
-    }
-  }
-
-  public String[] listFc() {
-    return listFcHelper(CLIENT_COMPILER_ITF_NAME, OutputFileLocator.ITF_NAME,
-        ImplementationLocator.ITF_NAME, CompilerWrapper.ITF_NAME);
-  }
-
-  public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
-    checkItfName(itfName);
-
-    if (itfName.equals(CLIENT_COMPILER_ITF_NAME)) {
-      return clientCompilerItf;
-    } else if (itfName.equals(OutputFileLocator.ITF_NAME)) {
-      return outputFileLocatorItf;
-    } else if (itfName.equals(ImplementationLocator.ITF_NAME)) {
-      return implementationLocatorItf;
-    } else if (itfName.equals(CompilerWrapper.ITF_NAME)) {
-      return compilerWrapperItf;
-    } else {
-      throw new NoSuchInterfaceException("No client interface named '"
-          + itfName + "'");
-    }
-  }
-
-  public void unbindFc(final String itfName) throws NoSuchInterfaceException,
-      IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(CLIENT_COMPILER_ITF_NAME)) {
-      clientCompilerItf = null;
-    } else if (itfName.equals(OutputFileLocator.ITF_NAME)) {
-      outputFileLocatorItf = null;
-    } else if (itfName.equals(ImplementationLocator.ITF_NAME)) {
-      implementationLocatorItf = null;
-    } else if (itfName.equals(CompilerWrapper.ITF_NAME)) {
-      compilerWrapperItf = null;
-    } else {
-      throw new NoSuchInterfaceException("No client interface named '"
-          + itfName + "'");
+      addLDFlags(subComp, visitedDefinitions, command, context);
     }
   }
 }

@@ -22,43 +22,39 @@
 
 package org.ow2.mind.annotation;
 
-import static org.ow2.mind.annotation.AnnotationLocatorHelper.getDefaultAnnotationPackages;
-
 import java.util.List;
 import java.util.Map;
 
+import org.ow2.mind.plugin.PluginManager;
+
+import com.google.inject.Inject;
+
 public class BasicAnnotationLocator implements AnnotationLocator {
 
-  @SuppressWarnings("null")
+  @Inject
+  protected PluginManager pluginLoaderItf;
+
   public Class<? extends Annotation> findAnnotationClass(final String name,
       final Map<Object, Object> context) throws ClassNotFoundException,
       ClassCastException {
-    Class<? extends Annotation> annotationClass = null;
-    ClassNotFoundException exception = null;
     try {
-      annotationClass = getClass().getClassLoader().loadClass(name).asSubclass(
-          Annotation.class);
+      return getClass().getClassLoader().loadClass(name)
+          .asSubclass(Annotation.class);
     } catch (final ClassNotFoundException e) {
-      exception = e;
       // If the class cannot be loaded directly, look into the context if there
       // are default packages where we need to look for annotations.
-      final List<String> packageList = getDefaultAnnotationPackages(context);
+      final List<String> packageList = PredefinedAnnotationsHelper
+          .getPredefinedAnnotations(pluginLoaderItf, context);
       for (final String packageName : packageList) {
         try {
           final String qualifiedName = packageName + "." + name;
-          annotationClass = getClass().getClassLoader()
-              .loadClass(qualifiedName).asSubclass(Annotation.class);
+          return getClass().getClassLoader().loadClass(qualifiedName)
+              .asSubclass(Annotation.class);
         } catch (final ClassNotFoundException e1) {
-          continue;
         }
-        break;
       }
+      throw e;
     }
-    if (annotationClass == null) {
-      throw exception;
-    }
-    return annotationClass;
-
   }
 
 }

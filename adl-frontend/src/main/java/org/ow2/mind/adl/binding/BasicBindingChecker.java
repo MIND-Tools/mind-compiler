@@ -27,7 +27,6 @@ import static org.objectweb.fractal.adl.types.TypeInterfaceUtil.isCollection;
 import static org.objectweb.fractal.adl.types.TypeInterfaceUtil.isMandatory;
 import static org.objectweb.fractal.adl.types.TypeInterfaceUtil.isServer;
 import static org.objectweb.fractal.adl.types.TypeInterfaceUtil.isSingleton;
-import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
 import static org.ow2.mind.adl.ast.ASTHelper.getNumberOfElement;
 
 import org.objectweb.fractal.adl.ADLException;
@@ -36,21 +35,16 @@ import org.objectweb.fractal.adl.bindings.BindingErrors;
 import org.objectweb.fractal.adl.error.NodeErrorLocator;
 import org.objectweb.fractal.adl.interfaces.Interface;
 import org.objectweb.fractal.adl.types.TypeInterfaceUtil;
-import org.objectweb.fractal.api.NoSuchInterfaceException;
-import org.objectweb.fractal.api.control.BindingController;
-import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.ow2.mind.adl.ADLErrors;
 import org.ow2.mind.adl.ast.Binding;
 import org.ow2.mind.error.ErrorManager;
 
-public class BasicBindingChecker implements BindingChecker, BindingController {
+import com.google.inject.Inject;
 
-  // ---------------------------------------------------------------------------
-  // Client interfaces
-  // ---------------------------------------------------------------------------
+public class BasicBindingChecker implements BindingChecker {
 
-  /** The {@link ErrorManager} client interface used to log errors. */
-  public ErrorManager errorManagerItf;
+  @Inject
+  protected ErrorManager errorManagerItf;
 
   // ---------------------------------------------------------------------------
   // Implementation of the BindingChecker interface
@@ -225,49 +219,6 @@ public class BasicBindingChecker implements BindingChecker, BindingController {
           errorManagerItf.logError(ADLErrors.INVALID_BINDING_COLLECTION_SIZE,
               locator, from.getName(), fromSize, to.getName(), toSize);
       }
-    }
-  }
-
-  // ---------------------------------------------------------------------------
-  // Implementation of the BindingController interface
-  // ---------------------------------------------------------------------------
-
-  public void bindFc(final String itfName, final Object value)
-      throws NoSuchInterfaceException, IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(ErrorManager.ITF_NAME)) {
-      errorManagerItf = (ErrorManager) value;
-    } else {
-      throw new NoSuchInterfaceException("No client interface named '"
-          + itfName + "'");
-    }
-  }
-
-  public String[] listFc() {
-    return new String[]{ErrorManager.ITF_NAME};
-  }
-
-  public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
-    checkItfName(itfName);
-
-    if (itfName.equals(ErrorManager.ITF_NAME)) {
-      return errorManagerItf;
-    } else {
-      throw new NoSuchInterfaceException("No client interface named '"
-          + itfName + "'");
-    }
-  }
-
-  public void unbindFc(final String itfName) throws NoSuchInterfaceException,
-      IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(ErrorManager.ITF_NAME)) {
-      errorManagerItf = null;
-    } else {
-      throw new NoSuchInterfaceException("No client interface named '"
-          + itfName + "'");
     }
   }
 }

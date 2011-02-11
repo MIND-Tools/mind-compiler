@@ -22,9 +22,6 @@
 
 package org.ow2.mind.st;
 
-import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
-import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -38,36 +35,26 @@ import org.antlr.stringtemplate.language.AngleBracketTemplateLexer;
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.Loader;
 import org.objectweb.fractal.adl.util.ClassLoaderHelper;
-import org.objectweb.fractal.api.NoSuchInterfaceException;
-import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.ow2.mind.st.templates.ast.BoundInterface;
 import org.ow2.mind.st.templates.ast.PluginInterface;
 import org.ow2.mind.st.templates.ast.ServerInterface;
 import org.ow2.mind.st.templates.ast.TemplateComponent;
 
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
+
 public class StringTemplateComponentLoader implements StringTemplateGroupLoader {
-  // ---------------------------------------------------------------------------
-  // Server interface names
-  // ---------------------------------------------------------------------------
 
-  public static final String            ITF_NAME        = "template-group-loader";
+  public static final String            STRING_TEMPLATE_LOADER_NAME = "StringTemplateLoader";
 
-  // ---------------------------------------------------------------------------
-  // Client interfaces
-  // ---------------------------------------------------------------------------
-
-  /**
-   * Client interface bound to the {@link Loader String Template Loader}
-   * component.
-   */
+  @Inject
+  @Named("StringTemplateLoader")
   public Loader                         loaderItf;
 
-  public static final String            LOADER_ITF_NAME = "loader";
-
-  protected StringTemplateErrorListener errors          = null;
+  protected StringTemplateErrorListener errors                      = null;
 
   public StringTemplateComponentLoader() {
-    errors = (new org.ow2.mind.st.StringTemplateGroup("DefaultGroup"))
+    errors = new org.ow2.mind.st.StringTemplateGroup("DefaultGroup")
         .getErrorListener();
   }
 
@@ -104,7 +91,7 @@ public class StringTemplateComponentLoader implements StringTemplateGroupLoader 
     org.ow2.mind.st.StringTemplateGroup group = null;
     InputStreamReader br = null;
     // group file format defaults to <...>
-    Class lexer = AngleBracketTemplateLexer.class;
+    Class<?> lexer = AngleBracketTemplateLexer.class;
     if (templateLexer != null) {
       lexer = templateLexer;
     }
@@ -112,11 +99,6 @@ public class StringTemplateComponentLoader implements StringTemplateGroupLoader 
     final TemplateComponent stc = getTemplate(groupName);
     br = new InputStreamReader(new ByteArrayInputStream(stc.getContent()
         .getBytes()));
-
-    if (br == null) {
-      error("no such group file " + groupName + ".stg");
-      return null;
-    }
 
     // FIXME: Here the down cast might be dangereous.
     group = new org.ow2.mind.st.StringTemplateGroup(br, lexer, errors,
@@ -143,18 +125,18 @@ public class StringTemplateComponentLoader implements StringTemplateGroupLoader 
     // Register maps for plugin interfaces
     for (final PluginInterface pluginInterface : stc.getPluginInterfaces()) {
       final PluginInterfaceMap map = new PluginInterfaceMap(
-          (org.ow2.mind.st.StringTemplateGroup) superGroup, pluginInterface
-              .getRepository(), loadInterface(pluginInterface.getSignature())
-              .getName(), this);
+          (org.ow2.mind.st.StringTemplateGroup) superGroup,
+          pluginInterface.getRepository(), loadInterface(
+              pluginInterface.getSignature()).getName(), this);
       group.defineMap(pluginInterface.getName(), map);
     }
 
     // Register maps for bound interfaces
     for (final BoundInterface boundInterface : stc.getBoundInterfaces()) {
       final BoundInterfaceMap map = new BoundInterfaceMap(
-          (org.ow2.mind.st.StringTemplateGroup) superGroup, boundInterface
-              .getBoundTo(), loadInterface(boundInterface.getSignature())
-              .getName(), this);
+          (org.ow2.mind.st.StringTemplateGroup) superGroup,
+          boundInterface.getBoundTo(), loadInterface(
+              boundInterface.getSignature()).getName(), this);
       group.defineMap(boundInterface.getName(), map);
     }
 
@@ -165,23 +147,10 @@ public class StringTemplateComponentLoader implements StringTemplateGroupLoader 
           + groupName + "'.");
     }
     br = null;
-    if (br != null) {
-      try {
-        br.close();
-      } catch (final IOException ioe2) {
-        error("Cannot close template group file: " + groupName + ".stg", ioe2);
-      }
-    }
 
     return group;
   }
 
-  /*
-   * (non-Javadoc)
-   * @see
-   * org.antlr.stringtemplate.StringTemplateGroupLoader#loadInterface(java.lang
-   * .String)
-   */
   public StringTemplateGroupInterface loadInterface(final String interfaceName) {
     StringTemplateGroupInterface I;
     final InputStreamReader br = locateItf(interfaceName.replace('.', '/')
@@ -213,11 +182,11 @@ public class StringTemplateComponentLoader implements StringTemplateGroupLoader 
         .getResourceAsStream(name));
   }
 
-  public void error(final String msg) {
+  protected void error(final String msg) {
     error(msg, null);
   }
 
-  public void error(final String msg, final Exception e) {
+  protected void error(final String msg, final Exception e) {
     if (errors != null) {
       errors.error(msg, e);
     } else {
@@ -227,49 +196,4 @@ public class StringTemplateComponentLoader implements StringTemplateGroupLoader 
       }
     }
   }
-
-  // ---------------------------------------------------------------------------
-  // Implementation of the BindingController interface
-  // ---------------------------------------------------------------------------
-
-  public void bindFc(final String itfName, final Object value)
-      throws NoSuchInterfaceException, IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(LOADER_ITF_NAME)) {
-      this.loaderItf = (Loader) value;
-    } else {
-      throw new NoSuchInterfaceException("There is no interface named '"
-          + itfName + "'");
-    }
-
-  }
-
-  public String[] listFc() {
-    return listFcHelper(LOADER_ITF_NAME);
-  }
-
-  public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
-    checkItfName(itfName);
-
-    if (itfName.equals(LOADER_ITF_NAME)) {
-      return this.loaderItf;
-    } else {
-      throw new NoSuchInterfaceException("There is no interface named '"
-          + itfName + "'");
-    }
-  }
-
-  public void unbindFc(final String itfName) throws NoSuchInterfaceException,
-      IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(LOADER_ITF_NAME)) {
-      this.loaderItf = null;
-    } else {
-      throw new NoSuchInterfaceException("There is no interface named '"
-          + itfName + "'");
-    }
-  }
-
 }

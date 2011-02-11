@@ -22,11 +22,7 @@
 
 package org.ow2.mind.adl;
 
-import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
-import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
 import static org.ow2.mind.PathHelper.replaceExtension;
-import static org.ow2.mind.annotation.AnnotationHelper.getAnnotation;
-import static org.ow2.mind.compilation.DirectiveHelper.splitOptionString;
 
 import java.io.File;
 import java.net.URISyntaxException;
@@ -40,11 +36,7 @@ import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.CompilerError;
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.error.GenericErrors;
-import org.objectweb.fractal.api.NoSuchInterfaceException;
-import org.objectweb.fractal.api.control.BindingController;
-import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.ow2.mind.InputResourceLocator;
-import org.ow2.mind.adl.annotation.predefined.CFlags;
 import org.ow2.mind.adl.ast.ASTHelper;
 import org.ow2.mind.adl.ast.ImplementationContainer;
 import org.ow2.mind.adl.ast.Source;
@@ -56,27 +48,27 @@ import org.ow2.mind.io.OutputFileLocator;
 import org.ow2.mind.preproc.MPPCommand;
 import org.ow2.mind.preproc.MPPWrapper;
 
-public class BasicInstanceCompiler
-    implements
-      InstanceCompiler,
-      BindingController {
+import com.google.inject.Inject;
 
-  // ---------------------------------------------------------------------------
-  // Client interfaces
-  // ---------------------------------------------------------------------------
+public class BasicInstanceCompiler implements InstanceCompiler {
 
-  public static final String     INSTANCE_SOURCE_GENERATOR_ITF_NAME = "instance-source-generator";
+  @Inject
+  protected InstanceSourceGenerator instanceSourceGeneratorItf;
 
-  public InstanceSourceGenerator instanceSourceGeneratorItf;
+  @Inject
+  protected OutputFileLocator       outputFileLocatorItf;
 
-  /** Client interface used to locate output files. */
-  public OutputFileLocator       outputFileLocatorItf;
+  @Inject
+  protected InputResourceLocator    inputResourceLocatorItf;
 
-  public InputResourceLocator    inputResourceLocatorItf;
+  @Inject
+  protected CompilerWrapper         compilerWrapperItf;
 
-  public CompilerWrapper         compilerWrapperItf;
+  @Inject
+  protected MPPWrapper              mppWrapperItf;
 
-  public MPPWrapper              mppWrapperItf;
+  @Inject
+  protected FlagExtractor           flagExtractor;
 
   // ---------------------------------------------------------------------------
   // Implementation of the Visitor interface
@@ -182,9 +174,7 @@ public class BasicInstanceCompiler
     }
 
     // Add definition level C-Flags
-    final CFlags definitionflags = getAnnotation(definition, CFlags.class);
-    if (definitionflags != null)
-      command.addFlags(splitOptionString(definitionflags.value));
+    command.addFlags(flagExtractor.getCFlags(definition, context));
 
     return command;
   }
@@ -216,79 +206,8 @@ public class BasicInstanceCompiler
         DefinitionMacroSourceGenerator.getMacroFileName(definition), context));
 
     // Add definition level C-Flags
-    final CFlags definitionflags = getAnnotation(definition, CFlags.class);
-    if (definitionflags != null)
-      command.addFlags(splitOptionString(definitionflags.value));
+    command.addFlags(flagExtractor.getCFlags(definition, context));
 
     return command;
-  }
-
-  // ---------------------------------------------------------------------------
-  // implementation of the BindingController interface
-  // ---------------------------------------------------------------------------
-
-  public void bindFc(final String itfName, final Object value)
-      throws NoSuchInterfaceException, IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(INSTANCE_SOURCE_GENERATOR_ITF_NAME)) {
-      instanceSourceGeneratorItf = (InstanceSourceGenerator) value;
-    } else if (itfName.equals(OutputFileLocator.ITF_NAME)) {
-      outputFileLocatorItf = (OutputFileLocator) value;
-    } else if (itfName.equals(CompilerWrapper.ITF_NAME)) {
-      compilerWrapperItf = (CompilerWrapper) value;
-    } else if (itfName.equals(MPPWrapper.ITF_NAME)) {
-      mppWrapperItf = (MPPWrapper) value;
-    } else if (itfName.equals(InputResourceLocator.ITF_NAME)) {
-      inputResourceLocatorItf = (InputResourceLocator) value;
-    } else {
-      throw new NoSuchInterfaceException("No client interface named '"
-          + itfName + "'");
-    }
-  }
-
-  public String[] listFc() {
-    return listFcHelper(INSTANCE_SOURCE_GENERATOR_ITF_NAME,
-        OutputFileLocator.ITF_NAME, CompilerWrapper.ITF_NAME,
-        MPPWrapper.ITF_NAME, InputResourceLocator.ITF_NAME);
-  }
-
-  public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
-    checkItfName(itfName);
-
-    if (itfName.equals(INSTANCE_SOURCE_GENERATOR_ITF_NAME)) {
-      return instanceSourceGeneratorItf;
-    } else if (itfName.equals(OutputFileLocator.ITF_NAME)) {
-      return outputFileLocatorItf;
-    } else if (itfName.equals(CompilerWrapper.ITF_NAME)) {
-      return compilerWrapperItf;
-    } else if (itfName.equals(MPPWrapper.ITF_NAME)) {
-      return mppWrapperItf;
-    } else if (itfName.equals(InputResourceLocator.ITF_NAME)) {
-      return inputResourceLocatorItf;
-    } else {
-      throw new NoSuchInterfaceException("No client interface named '"
-          + itfName + "'");
-    }
-  }
-
-  public void unbindFc(final String itfName) throws NoSuchInterfaceException,
-      IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(INSTANCE_SOURCE_GENERATOR_ITF_NAME)) {
-      instanceSourceGeneratorItf = null;
-    } else if (itfName.equals(OutputFileLocator.ITF_NAME)) {
-      outputFileLocatorItf = null;
-    } else if (itfName.equals(CompilerWrapper.ITF_NAME)) {
-      compilerWrapperItf = null;
-    } else if (itfName.equals(MPPWrapper.ITF_NAME)) {
-      mppWrapperItf = null;
-    } else if (itfName.equals(InputResourceLocator.ITF_NAME)) {
-      inputResourceLocatorItf = null;
-    } else {
-      throw new NoSuchInterfaceException("No client interface named '"
-          + itfName + "'");
-    }
   }
 }

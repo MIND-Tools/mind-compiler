@@ -22,8 +22,6 @@
 
 package org.ow2.mind.compilation.gcc;
 
-import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
-import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
 import static org.ow2.mind.compilation.CompilerContextHelper.getCompilerCommand;
 import static org.ow2.mind.compilation.CompilerContextHelper.getLDFlags;
 import static org.ow2.mind.compilation.CompilerContextHelper.getLinkerCommand;
@@ -41,9 +39,6 @@ import java.util.logging.Logger;
 
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.util.FractalADLLogManager;
-import org.objectweb.fractal.api.NoSuchInterfaceException;
-import org.objectweb.fractal.api.control.BindingController;
-import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.ow2.mind.compilation.AbstractCompilerCommand;
 import org.ow2.mind.compilation.AbstractLinkerCommand;
 import org.ow2.mind.compilation.AbstractPreprocessorCommand;
@@ -53,27 +48,26 @@ import org.ow2.mind.compilation.CompilerErrors;
 import org.ow2.mind.compilation.CompilerWrapper;
 import org.ow2.mind.compilation.DependencyHelper;
 import org.ow2.mind.compilation.ExecutionHelper;
+import org.ow2.mind.compilation.ExecutionHelper.ExecutionResult;
 import org.ow2.mind.compilation.LinkerCommand;
 import org.ow2.mind.compilation.PreprocessorCommand;
-import org.ow2.mind.compilation.ExecutionHelper.ExecutionResult;
 import org.ow2.mind.error.ErrorManager;
 import org.ow2.mind.io.OutputFileLocator;
 
-public class GccCompilerWrapper implements CompilerWrapper, BindingController {
+import com.google.inject.Inject;
+
+public class GccCompilerWrapper implements CompilerWrapper {
 
   private static final String TEMP_DIR  = "$TEMP_DIR";
 
   protected static Logger     depLogger = FractalADLLogManager.getLogger("dep");
   protected static Logger     ioLogger  = FractalADLLogManager.getLogger("io");
 
-  // ---------------------------------------------------------------------------
-  // Client interfaces
-  // ---------------------------------------------------------------------------
+  @Inject
+  protected ErrorManager      errorManagerItf;
 
-  /** The {@link ErrorManager} client interface used to log errors. */
-  public ErrorManager         errorManagerItf;
-
-  public OutputFileLocator    outputFileLocatorItf;
+  @Inject
+  protected OutputFileLocator outputFileLocatorItf;
 
   // ---------------------------------------------------------------------------
   // Implementation of the CompilerWrapper interface
@@ -156,14 +150,14 @@ public class GccCompilerWrapper implements CompilerWrapper, BindingController {
       }
 
       if (result.getExitValue() != 0) {
-        errorManagerItf.logError(CompilerErrors.COMPILER_ERROR, outputFile
-            .getPath(), result.getOutput());
+        errorManagerItf.logError(CompilerErrors.COMPILER_ERROR,
+            outputFile.getPath(), result.getOutput());
         return false;
       }
       if (result.getOutput() != null) {
         // command returns 0 and generates an output (warning)
-        errorManagerItf.logWarning(CompilerErrors.COMPILER_WARNING, outputFile
-            .getPath(), result.getOutput());
+        errorManagerItf.logWarning(CompilerErrors.COMPILER_WARNING,
+            outputFile.getPath(), result.getOutput());
       }
       return true;
     }
@@ -238,14 +232,14 @@ public class GccCompilerWrapper implements CompilerWrapper, BindingController {
       }
 
       if (result.getExitValue() != 0) {
-        errorManagerItf.logError(CompilerErrors.COMPILER_ERROR, outputFile
-            .getPath(), result.getOutput());
+        errorManagerItf.logError(CompilerErrors.COMPILER_ERROR,
+            outputFile.getPath(), result.getOutput());
         return false;
       }
       if (result.getOutput() != null) {
         // command returns 0 and generates an output (warning)
-        errorManagerItf.logWarning(CompilerErrors.COMPILER_WARNING, outputFile
-            .getPath(), result.getOutput());
+        errorManagerItf.logWarning(CompilerErrors.COMPILER_WARNING,
+            outputFile.getPath(), result.getOutput());
       }
       return true;
     }
@@ -307,14 +301,14 @@ public class GccCompilerWrapper implements CompilerWrapper, BindingController {
           .exec(getDescription(), cmd);
 
       if (result.getExitValue() != 0) {
-        errorManagerItf.logError(CompilerErrors.LINKER_ERROR, outputFile
-            .getPath(), result.getOutput());
+        errorManagerItf.logError(CompilerErrors.LINKER_ERROR,
+            outputFile.getPath(), result.getOutput());
         return false;
       }
       if (result.getOutput() != null) {
         // command returns 0 and generates an output (warning)
-        errorManagerItf.logWarning(CompilerErrors.LINKER_WARNING, outputFile
-            .getPath(), result.getOutput());
+        errorManagerItf.logWarning(CompilerErrors.LINKER_WARNING,
+            outputFile.getPath(), result.getOutput());
       }
       return true;
     }
@@ -332,11 +326,11 @@ public class GccCompilerWrapper implements CompilerWrapper, BindingController {
 
       final Map<File, List<File>> deps = DependencyHelper
           .parseDepFile(dependencyOutputFile);
-      final Map<File, List<File>> newDeps = new HashMap<File, List<File>>(deps
-          .size());
+      final Map<File, List<File>> newDeps = new HashMap<File, List<File>>(
+          deps.size());
       for (final Map.Entry<File, List<File>> dep : deps.entrySet()) {
-        final File target = new File(dep.getKey().getCanonicalPath().replace(
-            tempDir, TEMP_DIR));
+        final File target = new File(dep.getKey().getCanonicalPath()
+            .replace(tempDir, TEMP_DIR));
         final List<File> depFiles = new ArrayList<File>(dep.getValue().size());
         for (final File depFile : dep.getValue()) {
           depFiles.add(new File(depFile.getCanonicalPath().replace(tempDir,
@@ -427,55 +421,4 @@ public class GccCompilerWrapper implements CompilerWrapper, BindingController {
 
     return depFiles;
   }
-
-  // ---------------------------------------------------------------------------
-  // Overridden BindingController methods
-  // ---------------------------------------------------------------------------
-
-  public void bindFc(final String itfName, final Object value)
-      throws NoSuchInterfaceException, IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(ErrorManager.ITF_NAME)) {
-      errorManagerItf = (ErrorManager) value;
-    } else if (itfName.equals(OutputFileLocator.ITF_NAME)) {
-      outputFileLocatorItf = (OutputFileLocator) value;
-    } else {
-      throw new NoSuchInterfaceException("No client interface named '"
-          + itfName + "'");
-    }
-
-  }
-
-  public String[] listFc() {
-    return listFcHelper(ErrorManager.ITF_NAME, OutputFileLocator.ITF_NAME);
-  }
-
-  public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
-    checkItfName(itfName);
-
-    if (itfName.equals(ErrorManager.ITF_NAME)) {
-      return errorManagerItf;
-    } else if (itfName.equals(OutputFileLocator.ITF_NAME)) {
-      return outputFileLocatorItf;
-    } else {
-      throw new NoSuchInterfaceException("No client interface named '"
-          + itfName + "'");
-    }
-  }
-
-  public void unbindFc(final String itfName) throws NoSuchInterfaceException,
-      IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(ErrorManager.ITF_NAME)) {
-      errorManagerItf = null;
-    } else if (itfName.equals(OutputFileLocator.ITF_NAME)) {
-      outputFileLocatorItf = null;
-    } else {
-      throw new NoSuchInterfaceException("No client interface named '"
-          + itfName + "'");
-    }
-  }
-
 }

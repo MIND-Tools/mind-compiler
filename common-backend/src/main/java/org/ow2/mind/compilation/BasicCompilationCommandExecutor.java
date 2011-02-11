@@ -22,9 +22,6 @@
 
 package org.ow2.mind.compilation;
 
-import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
-import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -44,16 +41,14 @@ import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.CompilerError;
 import org.objectweb.fractal.adl.error.GenericErrors;
 import org.objectweb.fractal.adl.util.FractalADLLogManager;
-import org.objectweb.fractal.api.NoSuchInterfaceException;
-import org.objectweb.fractal.api.control.BindingController;
-import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.ow2.mind.ForceRegenContextHelper;
 import org.ow2.mind.error.ErrorManager;
 
+import com.google.inject.Inject;
+
 public class BasicCompilationCommandExecutor
     implements
-      CompilationCommandExecutor,
-      BindingController {
+      CompilationCommandExecutor {
 
   protected static Logger    depLogger                  = FractalADLLogManager
                                                             .getLogger("dep");
@@ -62,12 +57,8 @@ public class BasicCompilationCommandExecutor
 
   public static final String FAIL_FAST_CONTEXT_KEY      = "fail-fast";
 
-  // ---------------------------------------------------------------------------
-  // Client interfaces
-  // ---------------------------------------------------------------------------
-
-  /** The {@link ErrorManager} client interface used to log errors. */
-  public ErrorManager        errorManagerItf;
+  @Inject
+  protected ErrorManager     errorManagerItf;
 
   // ---------------------------------------------------------------------------
   // Implementation of the CompilationCommandExecutor interface
@@ -628,49 +619,6 @@ public class BasicCompilationCommandExecutor
           }
         }
       }
-    }
-  }
-
-  // ---------------------------------------------------------------------------
-  // Implementation of the BindingController interface
-  // ---------------------------------------------------------------------------
-
-  public String[] listFc() {
-    return listFcHelper(ErrorManager.ITF_NAME);
-  }
-
-  public Object lookupFc(final String s) throws NoSuchInterfaceException {
-    checkItfName(s);
-
-    if (ErrorManager.ITF_NAME.equals(s)) {
-      return errorManagerItf;
-    } else {
-      throw new NoSuchInterfaceException("No client interface named '" + s
-          + "'");
-    }
-  }
-
-  public void bindFc(final String s, final Object o)
-      throws NoSuchInterfaceException, IllegalBindingException {
-    checkItfName(s);
-
-    if (ErrorManager.ITF_NAME.equals(s)) {
-      errorManagerItf = (ErrorManager) o;
-    } else {
-      throw new NoSuchInterfaceException("No client interface named '" + s
-          + "' for binding the interface");
-    }
-  }
-
-  public void unbindFc(final String s) throws IllegalBindingException,
-      NoSuchInterfaceException {
-    checkItfName(s);
-
-    if (ErrorManager.ITF_NAME.equals(s)) {
-      errorManagerItf = null;
-    } else {
-      throw new NoSuchInterfaceException("No client interface named '" + s
-          + "'");
     }
   }
 }

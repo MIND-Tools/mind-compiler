@@ -24,204 +24,84 @@ package org.ow2.mind;
 
 import java.io.File;
 import java.io.PrintStream;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.antlr.stringtemplate.StringTemplateGroupLoader;
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.CompilerError;
-import org.objectweb.fractal.adl.Definition;
-import org.objectweb.fractal.adl.JavaFactory;
-import org.objectweb.fractal.adl.Loader;
-import org.objectweb.fractal.adl.NodeFactory;
 import org.objectweb.fractal.adl.error.Error;
 import org.objectweb.fractal.adl.error.GenericErrors;
 import org.objectweb.fractal.adl.util.FractalADLLogManager;
-import org.objectweb.fractal.cecilia.targetDescriptor.TargetDescriptorException;
-import org.objectweb.fractal.cecilia.targetDescriptor.TargetDescriptorLoader;
-import org.objectweb.fractal.cecilia.targetDescriptor.TargetDescriptorLoaderJavaFactory;
 import org.objectweb.fractal.cecilia.targetDescriptor.ast.ADLMapping;
-import org.objectweb.fractal.cecilia.targetDescriptor.ast.CFlag;
-import org.objectweb.fractal.cecilia.targetDescriptor.ast.LdFlag;
 import org.objectweb.fractal.cecilia.targetDescriptor.ast.Target;
-import org.ow2.mind.adl.ADLBackendFactory;
-import org.ow2.mind.adl.ADLLocator;
-import org.ow2.mind.adl.DefinitionCompiler;
-import org.ow2.mind.adl.DefinitionSourceGenerator;
-import org.ow2.mind.adl.Factory;
-import org.ow2.mind.adl.GraphCompiler;
-import org.ow2.mind.adl.OutputBinaryADLLocator;
-import org.ow2.mind.adl.graph.ComponentGraph;
-import org.ow2.mind.adl.graph.Instantiator;
-import org.ow2.mind.adl.implementation.BasicImplementationLocator;
-import org.ow2.mind.adl.implementation.ImplementationLocator;
-import org.ow2.mind.annotation.AnnotationLocatorHelper;
-import org.ow2.mind.annotation.PredefinedAnnotationsHelper;
-import org.ow2.mind.compilation.CompilationCommand;
-import org.ow2.mind.compilation.CompilationCommandExecutor;
-import org.ow2.mind.compilation.CompilerCommand;
-import org.ow2.mind.compilation.CompilerContextHelper;
-import org.ow2.mind.compilation.CompilerWrapper;
-import org.ow2.mind.compilation.DirectiveHelper;
-import org.ow2.mind.compilation.LinkerCommand;
-import org.ow2.mind.compilation.gcc.GccCompilerWrapper;
+import org.ow2.mind.cli.CmdFlag;
+import org.ow2.mind.cli.CmdOption;
+import org.ow2.mind.cli.CmdOptionBooleanEvaluator;
+import org.ow2.mind.cli.CommandLine;
+import org.ow2.mind.cli.CommandLineOptionExtensionHelper;
+import org.ow2.mind.cli.CommandOptionHandler;
+import org.ow2.mind.cli.InvalidCommandLineException;
+import org.ow2.mind.cli.Options;
+import org.ow2.mind.cli.PrintStackTraceOptionHandler;
+import org.ow2.mind.cli.StageOptionHandler;
+import org.ow2.mind.cli.TargetDescriptorOptionHandler;
 import org.ow2.mind.error.ErrorManager;
-import org.ow2.mind.error.ErrorManagerFactory;
-import org.ow2.mind.idl.IDLBackendFactory;
-import org.ow2.mind.idl.IDLLoader;
-import org.ow2.mind.idl.IDLLoaderChainFactory;
-import org.ow2.mind.idl.IDLLoaderChainFactory.IDLFrontend;
-import org.ow2.mind.idl.IDLLocator;
-import org.ow2.mind.idl.IDLVisitor;
-import org.ow2.mind.idl.OutputBinaryIDLLocator;
-import org.ow2.mind.io.BasicOutputFileLocator;
-import org.ow2.mind.plugin.BasicPluginManager;
+import org.ow2.mind.inject.GuiceModuleExtensionHelper;
+import org.ow2.mind.plugin.PluginLoaderModule;
 import org.ow2.mind.plugin.PluginManager;
-import org.ow2.mind.plugin.SimpleClassPluginFactory;
-import org.ow2.mind.preproc.BasicMPPWrapper;
-import org.ow2.mind.st.STLoaderFactory;
-import org.ow2.mind.st.STNodeFactoryImpl;
 
-public class Launcher extends AbstractLauncher {
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 
-  // System property name for external mind annotation packages
-  protected static final String        MIND_ANNOTATION_PACKAGES = "mind.annotation.packages";
+public class Launcher {
 
-  protected final CmdArgument          targetDescOpt            = new CmdArgument(
-                                                                    "t",
-                                                                    "target-descriptor",
-                                                                    "Specify the target descriptor",
-                                                                    "<name>");
+  protected static final String PROGRAM_NAME_PROPERTY_NAME = "mindc.launcher.name";
+  protected static final String ID_PREFIX                  = "org.ow2.mind.mindc.";
 
-  protected final CmdArgument          compilerCmdOpt           = new CmdArgument(
-                                                                    null,
-                                                                    "compiler-command",
-                                                                    "the command of the C compiler",
-                                                                    "<path>",
-                                                                    "gcc",
-                                                                    false);
+  protected final CmdFlag       helpOpt                    = new CmdFlag(
+                                                               ID_PREFIX
+                                                                   + "Help",
+                                                               "h", "help",
+                                                               "Print this help and exit");
 
-  protected final CmdAppendOption      cFlagsOpt                = new CmdAppendOption(
-                                                                    "c",
-                                                                    "c-flags",
-                                                                    "the c-flags compiler directives",
-                                                                    "<flags>");
+  protected final CmdFlag       versionOpt                 = new CmdFlag(
+                                                               ID_PREFIX
+                                                                   + "Version",
+                                                               "v", "version",
+                                                               "Print version number and exit");
 
-  protected final CmdPathOption        includePathOpt           = new CmdPathOption(
-                                                                    "I",
-                                                                    "inc-path",
-                                                                    "the list of path to be added in compiler include paths",
-                                                                    "<path list>");
+  protected final CmdFlag       extensionPointsListOpt     = new CmdFlag(
+                                                               ID_PREFIX
+                                                                   + "PrintExtensionPoints",
+                                                               null,
+                                                               "extension-points",
+                                                               "Print the list of available extension points and exit.");
 
-  protected final CmdArgument          linkerCmdOpt             = new CmdArgument(
-                                                                    null,
-                                                                    "linker-command",
-                                                                    "the command of the linker",
-                                                                    "<path>",
-                                                                    "gcc",
-                                                                    false);
+  protected final Options       options                    = new Options();
 
-  protected final CmdAppendOption      ldFlagsOpt               = new CmdAppendOption(
-                                                                    "l",
-                                                                    "ld-flags",
-                                                                    "the ld-flags compiler directives",
-                                                                    "<flags>");
+  protected static Logger       logger                     = FractalADLLogManager
+                                                               .getLogger("launcher");
 
-  protected final CmdPathOption        ldPathOpt                = new CmdPathOption(
-                                                                    "L",
-                                                                    "ld-path",
-                                                                    "the list of path to be added to linker library search path",
-                                                                    "<path list>");
-
-  protected final CmdArgument          linkerScriptOpt          = new CmdArgument(
-                                                                    "T",
-                                                                    "linker-script",
-                                                                    "linker script to use (given path is resolved in source path)",
-                                                                    "<path>");
-
-  protected final CmdArgument          concurrentJobCmdOpt      = new CmdArgument(
-                                                                    "j",
-                                                                    "jobs",
-                                                                    "The number of concurrent compilation jobs",
-                                                                    "<number>",
-                                                                    "1", false);
-
-  protected final CmdFlag              printStackTraceOpt       = new CmdFlag(
-                                                                    "e", null,
-                                                                    "Print error stack traces");
-
-  protected final CmdFlag              checkADLModeOpt          = new CmdFlag(
-                                                                    null,
-                                                                    "check-adl",
-                                                                    "Only check input ADL(s), do not compile");
-
-  // command line options
-  protected final CmdFlag              generateDefSrcOpt        = new CmdFlag(
-                                                                    "d",
-                                                                    "def2c",
-                                                                    "Only generate source code of the given definitions");                                               ;
-
-  protected final CmdFlag              compileDefOpt            = new CmdFlag(
-                                                                    "D",
-                                                                    "def2o",
-                                                                    "Generate and compile source code of the given definitions, do not link an executable application");
-
-  protected final CmdFlag              forceOpt                 = new CmdFlag(
-                                                                    "F",
-                                                                    "force",
-                                                                    "Force the regeneration and the recompilation of every output files");
-
-  protected final CmdFlag              keepTempOpt              = new CmdFlag(
-                                                                    "K",
-                                                                    "keep",
-                                                                    "Keep temporary output files in default output directory");
-
-  protected final CmdFlag              noBinASTOpt              = new CmdFlag(
-                                                                    "B",
-                                                                    "no-bin",
-                                                                    "Do not generate binary ADL/IDL ('.def', '.itfdef' and '.idtdef' files).");
-
-  protected final CmdFlag              extensionPointsListOpt   = new CmdFlag(
-                                                                    null,
-                                                                    "extension-points",
-                                                                    "Print the list of available extension points and exit.");
-
-  protected boolean                    generateSrc;
-  protected boolean                    compileDef;
-
-  protected static Logger              logger                   = FractalADLLogManager
-                                                                    .getLogger("launcher");
-
-  protected Map<String, String>        adlToExecName;
-  protected Map<Object, Object>        compilerContext          = new HashMap<Object, Object>();
-
-  protected Target                     targetDescriptor;
-
-  protected boolean                    printStackTrace          = false;
-
-  protected boolean                    checkADLMode             = false;
-
-  protected File                       buildDir;
+  protected Map<String, String> adlToExecName;
+  protected Map<Object, Object> compilerContext            = new HashMap<Object, Object>();
 
   // compiler components :
-  protected ErrorManager               errorManager;
-  protected Loader                     adlLoader;
-  protected IDLLoader                  idlLoader;
-  protected Instantiator               graphInstantiator;
-  protected DefinitionSourceGenerator  definitionSourceGenerator;
-  protected DefinitionCompiler         definitionCompiler;
-  protected GraphCompiler              graphCompiler;
-  protected CompilationCommandExecutor executor;
+  protected Injector            injector;
 
-  protected void init(final String... args) throws InvalidCommandLineException,
-      CompilerInstantiationException {
+  protected ErrorManager        errorManager;
+  protected ADLCompiler         adlCompiler;
+
+  protected void init(final String... args) throws InvalidCommandLineException {
     if (logger.isLoggable(Level.CONFIG)) {
       for (final String arg : args) {
         logger.config("[arg] " + arg);
@@ -229,33 +109,19 @@ public class Launcher extends AbstractLauncher {
     }
 
     /****** Initialization of the PluginManager Component *******/
-    // NodeFactory Component
-    final STNodeFactoryImpl stNodeFactory = new STNodeFactoryImpl();
 
-    final BasicPluginManager pluginManager = new BasicPluginManager();
-    final ClassLoader pluginClassLoader = BasicPluginManager
-        .getPluginClassLoader(compilerContext);
-    if (pluginClassLoader != null) {
-      pluginManager.setClassLoader(pluginClassLoader);
-    }
-    pluginManager.nodeFactoryItf = stNodeFactory;
+    final Injector pluginManagerInjector = getBootstrapInjector();
+    final PluginManager pluginManager = pluginManagerInjector
+        .getInstance(PluginManager.class);
 
-    try {
-      addOptions(pluginManager, compilerContext);
-    } catch (final ADLException e) {
-      throw new CompilerInstantiationException(
-          "Cannot load command line option extensions.", e, 101);
-    }
+    addOptions(pluginManager);
 
     // parse arguments to a CommandLine.
     final CommandLine cmdLine = CommandLine.parseArgs(options, false, args);
-
-    try {
-      invokeOptionHandlers(pluginManager, cmdLine, compilerContext);
-    } catch (final ADLException e) {
-      throw new CompilerInstantiationException(
-          "Cannot invoke command line option handlers.", e, 101);
-    }
+    checkExclusiveGroups(pluginManager, cmdLine);
+    compilerContext
+        .put(CmdOptionBooleanEvaluator.CMD_LINE_CONTEXT_KEY, cmdLine);
+    invokeOptionHandlers(pluginManager, cmdLine, compilerContext);
 
     // If help is asked, print it and exit.
     if (helpOpt.isPresent(cmdLine)) {
@@ -271,287 +137,32 @@ public class Launcher extends AbstractLauncher {
 
     // If the extension points list is asked, print it and exit.
     if (extensionPointsListOpt.isPresent(cmdLine)) {
-      try {
-        printExtensionPoints(pluginManager, compilerContext, System.out);
-      } catch (final ADLException e) {
-        throw new CompilerInstantiationException(
-            "Cannot invoke command line option '"
-                + extensionPointsListOpt.longName + "'.", e, 101);
-      }
+      printExtensionPoints(pluginManager, System.out);
       System.exit(0);
     }
 
     // get list of ADL
-    final List<String> adlList = cmdLine.getArguments();
-    adlToExecName = parserADLList(adlList, cmdLine);
-
-    // add source class loader in context
-    final ClassLoader sourceClassLoader = getSourceClassLoader(cmdLine);
-    compilerContext.put("classloader", sourceClassLoader);
-
-    // load target descriptor (if any)
-    final String targetDesc = targetDescOpt.getValue(cmdLine);
-    if (targetDesc != null) {
-      final TargetDescriptorLoader loader = createTargetDescriptorLoader(compilerContext);
-      try {
-        targetDescriptor = loader.load(targetDesc, compilerContext);
-      } catch (final TargetDescriptorException e) {
-        logger.log(Level.FINE, "Error while loading target descriptor", e);
-        throw new InvalidCommandLineException(
-            "Unable to load target descriptor: " + e.getMessage(), 1);
-      }
-    }
-    if (targetDescriptor != null && targetDescriptor.getLinkerScript() != null) {
-      final URL linkerScriptURL = sourceClassLoader
-          .getResource(targetDescriptor.getLinkerScript().getPath());
-      if (linkerScriptURL == null) {
-        throw new InvalidCommandLineException("Invalid linker script: '"
-            + targetDescriptor.getLinkerScript().getPath()
-            + "'. Cannot find file in the source path", 1);
-      }
-      targetDescriptor.getLinkerScript().setPath(linkerScriptURL.getPath());
-    }
-
-    printStackTrace = printStackTraceOpt.isPresent(cmdLine);
-
-    checkADLMode = checkADLModeOpt.isPresent(cmdLine);
-    generateSrc = generateDefSrcOpt.isPresent(cmdLine);
-    compileDef = compileDefOpt.isPresent(cmdLine);
-
-    if ((checkADLMode && generateSrc) || (checkADLMode && compileDef)
-        || (generateSrc && compileDef)) {
-      if (generateSrc) {
-        throw new InvalidCommandLineException("Flags --"
-            + checkADLModeOpt.getLongName() + ", --"
-            + generateDefSrcOpt.getLongName() + " and --"
-            + compileDefOpt.getLongName()
-            + " can't be specified simultaneously", 1);
-      }
-      compileDef = true;
-    }
-
-    // add build directories to context
-    String optValue = outDirOpt.getValue(cmdLine);
-    if (nullOrEmpty(optValue)) {
-      throw new InvalidCommandLineException("Invalid output directory ''", 1);
-    }
-    buildDir = new File(optValue);
-    checkDir(buildDir);
-    if (!buildDir.exists()) {
-      throw new InvalidCommandLineException("Invalid output directory '"
-          + optValue + "' does not exist.", 1);
-    }
-    compilerContext
-        .put(BasicOutputFileLocator.OUTPUT_DIR_CONTEXT_KEY, buildDir);
-
-    // force mode
-    ForceRegenContextHelper.setForceRegen(compilerContext,
-        forceOpt.isPresent(cmdLine));
-    ForceRegenContextHelper.setKeepTemp(compilerContext,
-        keepTempOpt.isPresent(cmdLine));
-    ForceRegenContextHelper.setNoBinaryAST(compilerContext,
-        noBinASTOpt.isPresent(cmdLine));
-
-    // build c-flags
-    final List<String> cFlagsList = new ArrayList<String>();
-    final List<String> incPaths = new ArrayList<String>();
-    if (srcPathOpt.getPathValue(cmdLine) != null) {
-      incPaths.addAll(srcPathOpt.getPathValue(cmdLine));
-    }
-    if (includePathOpt.getValue(cmdLine) != null) {
-      incPaths.addAll(includePathOpt.getPathValue(cmdLine));
-    }
-    incPaths.add(buildDir.getAbsolutePath());
-
-    for (final String inc : incPaths) {
-      final File incDir = new File(inc);
-      cFlagsList.add("-I");
-      cFlagsList.add(incDir.getAbsolutePath());
-    }
-
-    optValue = cFlagsOpt.getValue(cmdLine);
-    if (!nullOrEmpty(optValue)) {
-      cFlagsList.addAll(DirectiveHelper.splitOptionString(optValue));
-    }
-    CompilerContextHelper.setCFlags(compilerContext, cFlagsList);
-
-    // build ld-flags
-    final List<String> ldPaths = ldPathOpt.getPathValue(cmdLine);
-    final List<String> ldFlagsList = new ArrayList<String>();
-    if (ldPaths != null) {
-      for (final String ld : ldPaths) {
-        final File ldDir = new File(ld);
-        ldFlagsList.add("-L");
-        ldFlagsList.add(ldDir.getAbsolutePath());
-      }
-    }
-    optValue = ldFlagsOpt.getValue(cmdLine);
-    if (!nullOrEmpty(optValue)) {
-      ldFlagsList.addAll(DirectiveHelper.splitOptionString(optValue));
-    }
-    CompilerContextHelper.setLDFlags(compilerContext, ldFlagsList);
-
-    // add compiler arguments to context
-
-    if (compilerCmdOpt.isPresent(cmdLine)) {
-      optValue = compilerCmdOpt.getValue(cmdLine);
-      if (optValue.length() == 0)
-        throw new InvalidCommandLineException("Invalid compiler ''", 1);
-      CompilerContextHelper.setCompilerCommand(compilerContext, optValue);
-    }
-
-    if (linkerCmdOpt.isPresent(cmdLine)) {
-      optValue = linkerCmdOpt.getValue(cmdLine);
-      if (optValue.length() == 0)
-        throw new InvalidCommandLineException("Invalid linker ''", 1);
-      CompilerContextHelper.setLinkerCommand(compilerContext, optValue);
-    }
-
-    Integer jobs = null;
-    try {
-      jobs = Integer.decode(concurrentJobCmdOpt.getValue(cmdLine));
-    } catch (final NumberFormatException e) {
-      throw new InvalidCommandLineException("Invalid jobs value '"
-          + concurrentJobCmdOpt.getValue(cmdLine) + "' is not a valid number",
-          1);
-    }
-    compilerContext.put("jobs", jobs);
-
-    // add linker script to the context
-    final String linkerScript = linkerScriptOpt.getValue(cmdLine);
-    if (linkerScript != null) {
-      final URL linkerScriptURL = sourceClassLoader.getResource(linkerScript);
-      if (linkerScriptURL == null) {
-        throw new InvalidCommandLineException("Invalid linker script: '"
-            + linkerScript + "'. Cannot find file in the source path", 1);
-      }
-
-      CompilerContextHelper.setLinkerScript(compilerContext,
-          linkerScriptURL.getPath());
-    }
-
-    AnnotationLocatorHelper.addDefaultAnnotationPackage(
-        "org.ow2.mind.adl.annotation.predefined", compilerContext);
-    String[] annotationPackages;
-    try {
-      annotationPackages = PredefinedAnnotationsHelper
-          .getPredefinedAnnotations(pluginManager, compilerContext);
-    } catch (final ADLException e) {
-      throw new CompilerInstantiationException(
-          "Cannot load predefined annotations.", e, 101);
-    }
-    for (final String annotationPackage : annotationPackages) {
-      AnnotationLocatorHelper.addDefaultAnnotationPackage(annotationPackage,
-          compilerContext);
-    }
+    adlToExecName = parserADLList(cmdLine.getArguments(), cmdLine);
 
     // initialize compiler
-    try {
-      initCompiler(cmdLine, stNodeFactory, pluginManager, compilerContext);
-    } catch (final ADLException e) {
-      throw new CompilerInstantiationException(
-          "Cannot instantiate the compiler.", e, 101);
-    }
+    initInjector(pluginManager, compilerContext);
+
+    initCompiler();
   }
 
-  private void printExtensionPoints(final PluginManager pluginManager,
-      final Map<Object, Object> context, final PrintStream out)
-      throws ADLException {
-    final Collection<String> extensionPoints = pluginManager
-        .getExtensionPointNames(context);
-    System.out.println("Supported extension points are : ");
-    for (final String extensionPoint : extensionPoints) {
-      System.out.println("\t'" + extensionPoint + "'");
-    }
+  protected Injector getBootstrapInjector() {
+    return Guice.createInjector(new PluginLoaderModule());
   }
 
-  /**
-   * @param cmdLine
-   */
-  protected void initCompiler(final CommandLine cmdLine,
-      final NodeFactory stNodeFactory, final PluginManager pluginManager,
-      final Map<Object, Object> compilerContext) throws ADLException {
-    // error manager
-    errorManager = ErrorManagerFactory.newStreamErrorManager(System.err,
-        printStackTrace);
-
-    // input locators
-    final BasicInputResourceLocator inputResourceLocator = new BasicInputResourceLocator();
-    final OutputBinaryIDLLocator obil = new OutputBinaryIDLLocator();
-    obil.clientLocatorItf = IDLLoaderChainFactory
-        .newIDLLocator(inputResourceLocator);
-    final IDLLocator idlLocator = obil;
-    final ImplementationLocator implementationLocator = new BasicImplementationLocator();
-
-    final ADLLocator frontendLocator = Factory
-        .newADLLocator(inputResourceLocator);
-    final OutputBinaryADLLocator obal = new OutputBinaryADLLocator();
-    obal.clientLocatorItf = frontendLocator;
-    final ADLLocator adlLocator = obal;
-
-    // output locator
-    final BasicOutputFileLocator outputFileLocator = new BasicOutputFileLocator();
-    obal.outputFileLocatorItf = outputFileLocator;
-    obil.outputFileLocatorItf = outputFileLocator;
-
-    // compilation task factory
-    final GccCompilerWrapper gcw = new GccCompilerWrapper();
-    gcw.outputFileLocatorItf = outputFileLocator;
-    final CompilerWrapper compilerWrapper = gcw;
-    final BasicMPPWrapper mppWrapper = new BasicMPPWrapper();
-    mppWrapper.pluginManagerItf = pluginManager;
-
-    gcw.errorManagerItf = errorManager;
-    mppWrapper.errorManagerItf = errorManager;
-
-    // Plugin Factory Component
-    final org.objectweb.fractal.adl.Factory pluginFactory = new SimpleClassPluginFactory();
-
-    // String Template Component Loaders
-    final StringTemplateGroupLoader stcLoader = STLoaderFactory.newSTLoader();
-
-    // loader chains
-    final IDLFrontend idlFrontend = IDLLoaderChainFactory.newLoader(
-        errorManager, idlLocator, inputResourceLocator, pluginFactory);
-
-    idlLoader = idlFrontend.loader;
-
-    adlLoader = Factory.newLoader(errorManager, inputResourceLocator,
-        adlLocator, idlLocator, implementationLocator, idlFrontend.cache,
-        idlFrontend.loader, pluginFactory);
-
-    // instantiator chain
-    graphInstantiator = Factory.newInstantiator(errorManager, adlLoader);
-
-    // Backend
-    final IDLVisitor idlCompiler = IDLBackendFactory.newIDLCompiler(idlLoader,
-        inputResourceLocator, outputFileLocator, stcLoader);
-    definitionSourceGenerator = ADLBackendFactory.newDefinitionSourceGenerator(
-        inputResourceLocator, outputFileLocator, idlLoader, idlCompiler,
-        stcLoader, pluginManager, compilerContext);
-
-    definitionCompiler = ADLBackendFactory.newDefinitionCompiler(
-        definitionSourceGenerator, implementationLocator, outputFileLocator,
-        compilerWrapper, mppWrapper);
-    graphCompiler = ADLBackendFactory.newGraphCompiler(inputResourceLocator,
-        implementationLocator, outputFileLocator, compilerWrapper, mppWrapper,
-        definitionCompiler, adlLoader, stcLoader, pluginManager,
-        compilerContext);
-
-    executor = ADLBackendFactory.newCompilationCommandExecutor(errorManager);
+  protected void initCompiler() {
+    errorManager = injector.getInstance(ErrorManager.class);
+    adlCompiler = injector.getInstance(ADLCompiler.class);
   }
 
-  protected TargetDescriptorLoader createTargetDescriptorLoader(
-      final Map<Object, Object> compilerContext)
-      throws CompilerInstantiationException {
-    try {
-      final JavaFactory factory = new TargetDescriptorLoaderJavaFactory();
-      final Map<?, ?> component = (Map<?, ?>) factory.newComponent();
-      return (TargetDescriptorLoader) component.get("loader");
-    } catch (final Exception e) {
-      throw new CompilerInstantiationException(
-          "Unable to instantiate target descriptor loader", e, 101);
-    }
+  void initInjector(final PluginManager pluginManager,
+      final Map<Object, Object> compilerContext) {
+    injector = Guice.createInjector(GuiceModuleExtensionHelper.getModules(
+        pluginManager, compilerContext));
   }
 
   protected Map<String, String> parserADLList(final List<String> adlList,
@@ -573,136 +184,26 @@ public class Launcher extends AbstractLauncher {
     return adlToExecName;
   }
 
-  protected String processContext(final Target targetDesc,
-      final String inputADL, final Map<Object, Object> context) {
-    processCFlags(targetDesc, context);
-    processLdFlags(targetDesc, context);
-    processCompiler(targetDesc, context);
-    processLinker(targetDesc, context);
-    processLinkerScript(targetDesc, context);
-    return processADLMapping(targetDesc, inputADL, context);
-  }
-
-  protected void processCFlags(final Target target,
-      final Map<Object, Object> context) {
-    if (target != null && target.getCFlags().length > 0) {
-      final CFlag[] flags = target.getCFlags();
-
-      final List<String> targetFlags = new ArrayList<String>();
-      for (final CFlag flag : flags) {
-        targetFlags.addAll(DirectiveHelper.splitOptionString(flag.getValue()));
-      }
-
-      if (logger.isLoggable(Level.FINE))
-        logger.log(Level.FINE, "Adding target c-flags: " + targetFlags);
-
-      CompilerContextHelper.getCFlags(context);
-      List<String> contextFlags = CompilerContextHelper.getCFlags(context);
-      ;
-      if (contextFlags == null) {
-        contextFlags = new ArrayList<String>();
-      }
-      contextFlags.addAll(targetFlags);
-      CompilerContextHelper.setCFlags(context, contextFlags);
-    }
-  }
-
-  protected void processLdFlags(final Target target,
-      final Map<Object, Object> context) {
-    if (target != null && target.getLdFlags().length > 0) {
-      final LdFlag[] flags = target.getLdFlags();
-
-      final List<String> targetFlags = new ArrayList<String>();
-      for (final LdFlag flag : flags) {
-        targetFlags.addAll(DirectiveHelper.splitOptionString(flag.getValue()));
-      }
-
-      if (logger.isLoggable(Level.FINE))
-        logger.log(Level.FINE, "Adding target ld-flags: " + targetFlags);
-
-      List<String> contextFlags = CompilerContextHelper.getLDFlags(context);
-      if (contextFlags == null) {
-        contextFlags = new ArrayList<String>();
-      }
-      contextFlags.addAll(targetFlags);
-      CompilerContextHelper.setLDFlags(context, contextFlags);
-    }
-  }
-
-  protected void processCompiler(final Target target,
-      final Map<Object, Object> context) {
-    final String opt = CompilerContextHelper.getCompilerCommand(context);
-    if (opt == CompilerContextHelper.DEFAULT_COMPILER_COMMAND) {
-      if (target != null && target.getCompiler() != null) {
-        if (logger.isLoggable(Level.FINE)) {
-          logger.log(Level.FINE, "Using target compiler : "
-              + target.getCompiler().getPath());
-        }
-        CompilerContextHelper.setCompilerCommand(context, target.getCompiler()
-            .getPath());
-      } else {
-        CompilerContextHelper.setCompilerCommand(context,
-            compilerCmdOpt.getDefaultValue());
-      }
-    }
-  }
-
-  protected void processLinker(final Target target,
-      final Map<Object, Object> context) {
-    final String opt = CompilerContextHelper.getLinkerCommand(context);
-    if (opt == CompilerContextHelper.DEFAULT_LINKER_COMMAND) {
-      if (target != null && target.getLinker() != null) {
-        if (logger.isLoggable(Level.FINE)) {
-          logger.log(Level.FINE, "Using target linker : "
-              + target.getLinker().getPath());
-        }
-        CompilerContextHelper.setLinkerCommand(context, target.getLinker()
-            .getPath());
-      } else {
-        CompilerContextHelper.setLinkerCommand(context,
-            linkerCmdOpt.getDefaultValue());
-      }
-    }
-  }
-
-  protected void processLinkerScript(final Target target,
-      final Map<Object, Object> context) {
-    if (target != null) {
-      final String opt = CompilerContextHelper.getLinkerScript(context);
-      if (opt == null && target.getLinkerScript() != null) {
-        if (logger.isLoggable(Level.FINE)) {
-          logger.log(Level.FINE, "Using target linker script : "
-              + target.getLinkerScript().getPath());
-        }
-        CompilerContextHelper.setLinkerScript(context, target.getLinkerScript()
-            .getPath());
-      }
-    }
-  }
-
-  protected String processADLMapping(final Target target,
+  protected String processADLNameMapping(final Target target,
       final String inputADL, final Map<Object, Object> context) {
     if (target != null) {
       final ADLMapping mapping = target.getAdlMapping();
-      if (mapping == null) return inputADL;
-
-      if (mapping.getOutputName() != null) {
-        final String outputName = mapping.getOutputName().replace(
-            "${inputADL}", inputADL);
-        if (logger.isLoggable(Level.FINE)) {
-          logger.log(Level.FINE, "Compiling ADL : " + outputName);
-        }
-        CompilerContextHelper.setExecutableName(context, outputName);
-      }
-
       return mapping.getMapping().replace("${inputADL}", inputADL);
     } else {
       return inputADL;
     }
   }
 
-  public List<Object> compile() throws InvalidCommandLineException {
-    return compile(null, null);
+  protected String processOutputNameMapping(final Target target,
+      final String inputADL, final String execName,
+      final Map<Object, Object> context) {
+    if (target != null) {
+      final ADLMapping mapping = target.getAdlMapping();
+      if (mapping != null && mapping.getOutputName() != null) {
+        return mapping.getOutputName().replace("${inputADL}", inputADL);
+      }
+    }
+    return execName;
   }
 
   public List<Object> compile(final List<Error> errors,
@@ -716,7 +217,20 @@ public class Launcher extends AbstractLauncher {
     final List<Object> result = new ArrayList<Object>();
     for (final Map.Entry<String, String> e : adlToExecName.entrySet()) {
       try {
-        compile(e.getKey(), e.getValue(), result);
+        final HashMap<Object, Object> contextMap = new HashMap<Object, Object>(
+            compilerContext);
+        final Target targetDescriptor = TargetDescriptorOptionHandler
+            .getTargetDescriptor(contextMap);
+
+        final String adlName = processADLNameMapping(targetDescriptor,
+            e.getKey(), contextMap);
+        final String execName = processOutputNameMapping(targetDescriptor,
+            e.getKey(), e.getValue(), contextMap);
+
+        final List<Object> l = adlCompiler.compile(adlName, execName,
+            StageOptionHandler.getCompilationStage(contextMap), contextMap);
+        if (l != null) result.addAll(l);
+
       } catch (final InterruptedException e1) {
         throw new CompilerError(GenericErrors.INTERNAL_ERROR, e,
             "Interrupted while executing compilation tasks");
@@ -736,94 +250,124 @@ public class Launcher extends AbstractLauncher {
     return result;
   }
 
-  protected void compile(String adlName, final String execName,
-      final List<Object> result) throws ADLException, InterruptedException {
-    final HashMap<Object, Object> contextMap = new HashMap<Object, Object>(
-        compilerContext);
-    if (execName != null)
-      CompilerContextHelper.setExecutableName(contextMap, execName);
-
-    adlName = processContext(targetDescriptor, adlName, contextMap);
-
-    errorManager.clear();
-    final Definition adlDef = adlLoader.load(adlName, contextMap);
-    if (!errorManager.getErrors().isEmpty()) {
-      // ADL contains errors
-      return;
-    }
-
-    if (checkADLMode) {
-      result.add(adlDef);
-      return;
-    }
-
-    if (generateSrc) {
-      definitionSourceGenerator.visit(adlDef, contextMap);
-      return;
-    }
-
-    if (compileDef) {
-      final Collection<CompilationCommand> commands = definitionCompiler.visit(
-          adlDef, contextMap);
-      final boolean execOK = executor.exec(commands, contextMap);
-      if (execOK) {
-        for (final CompilationCommand command : commands) {
-          if (command instanceof CompilerCommand) {
-            result.addAll(command.getOutputFiles());
-          }
-        }
-      }
-      return;
-    }
-
-    final ComponentGraph graph = graphInstantiator.instantiate(adlDef,
-        contextMap);
-    if (!errorManager.getErrors().isEmpty()) {
-      // ADL contains errors
-      return;
-    }
-
-    final Collection<CompilationCommand> commands = graphCompiler.visit(graph,
-        contextMap);
-    final boolean execOK = executor.exec(commands, contextMap);
-    if (execOK) {
-      for (final CompilationCommand command : commands) {
-        if (command instanceof LinkerCommand) {
-          result.addAll(command.getOutputFiles());
-        }
-      }
-    }
-  }
-
-  protected void addOptions(final PluginManager pluginManagerItf,
-      final Map<Object, Object> context) throws ADLException {
-    options.addOptions(targetDescOpt, compilerCmdOpt, cFlagsOpt,
-        includePathOpt, linkerCmdOpt, ldFlagsOpt, ldPathOpt, linkerScriptOpt,
-        concurrentJobCmdOpt, printStackTraceOpt, checkADLModeOpt,
-        generateDefSrcOpt, compileDefOpt, forceOpt, keepTempOpt, noBinASTOpt,
-        extensionPointsListOpt);
+  protected void addOptions(final PluginManager pluginManagerItf) {
+    options.addOptions(helpOpt, versionOpt, extensionPointsListOpt);
 
     for (final CmdOption option : CommandLineOptionExtensionHelper
-        .getCommandOptions(pluginManagerItf, context)) {
+        .getCommandOptions(pluginManagerItf)) {
       options.addOption(option);
     }
 
   }
 
-  protected void invokeOptionHandlers(final PluginManager pluginManagerItf,
-      final CommandLine cmdLine, final Map<Object, Object> context)
-      throws ADLException {
-    for (final CmdOption option : CommandLineOptionExtensionHelper
-        .getCommandOptions(pluginManagerItf, context)) {
-      if (option.isPresent(cmdLine)) {
-        final CommandOptionHandler handler = CommandLineOptionExtensionHelper
-            .getHandler(option);
-        handler.processCommandOption(option, cmdLine, context);
+  protected void checkExclusiveGroups(final PluginManager pluginManagerItf,
+      final CommandLine cmdLine) throws InvalidCommandLineException {
+    final Collection<Set<String>> exclusiveGroups = CommandLineOptionExtensionHelper
+        .getExclusiveGroups(pluginManagerItf);
+    for (final Set<String> exclusiveGroup : exclusiveGroups) {
+      CmdOption opt = null;
+      for (final String id : exclusiveGroup) {
+        final CmdOption opt1 = cmdLine.getOptions().getById(id);
+        if (opt1.isPresent(cmdLine)) {
+          if (opt != null) {
+            throw new InvalidCommandLineException("Options '"
+                + opt.getPrototype() + "' and '" + opt1.getPrototype()
+                + "' cannot be specified simultaneously on the command line.",
+                1);
+          }
+          opt = opt1;
+        }
       }
     }
   }
 
-  @Override
+  protected void invokeOptionHandlers(final PluginManager pluginManagerItf,
+      final CommandLine cmdLine, final Map<Object, Object> context)
+      throws InvalidCommandLineException {
+    final List<CmdOption> toBeExecuted = new LinkedList<CmdOption>(cmdLine
+        .getOptions().getOptions());
+    final Set<String> executedId = new HashSet<String>(toBeExecuted.size());
+    while (!toBeExecuted.isEmpty()) {
+      final int toBeExecutedSize = toBeExecuted.size();
+      final Iterator<CmdOption> iter = toBeExecuted.iterator();
+      while (iter.hasNext()) {
+        final CmdOption option = iter.next();
+        final List<String> precedenceIds = CommandLineOptionExtensionHelper
+            .getPrecedenceIds(option, pluginManagerItf);
+        if (executedId.containsAll(precedenceIds)) {
+          // task ready to be executed
+          for (final CommandOptionHandler handler : CommandLineOptionExtensionHelper
+              .getHandler(option, pluginManagerItf)) {
+            handler.processCommandOption(option, cmdLine, context);
+          }
+          executedId.add(option.getId());
+          iter.remove();
+        }
+      }
+      if (toBeExecutedSize == toBeExecuted.size()) {
+        // nothing has been executed. there is a circular dependency
+        throw new CompilerError(GenericErrors.GENERIC_ERROR,
+            "Circular dependency in command line option handlers: "
+                + toBeExecuted);
+      }
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Utility methods
+  // ---------------------------------------------------------------------------
+
+  private void printExtensionPoints(final PluginManager pluginManager,
+      final PrintStream out) {
+    final Iterable<String> extensionPoints = pluginManager
+        .getExtensionPointNames();
+    System.out.println("Supported extension points are : ");
+    for (final String extensionPoint : extensionPoints) {
+      System.out.println("\t'" + extensionPoint + "'");
+    }
+  }
+
+  protected static void checkDir(final File d)
+      throws InvalidCommandLineException {
+    if (d.exists() && !d.isDirectory())
+      throw new InvalidCommandLineException("Invalid build directory '"
+          + d.getAbsolutePath() + "' not a directory", 6);
+  }
+
+  protected String getVersion() {
+    final String pkgVersion = this.getClass().getPackage()
+        .getImplementationVersion();
+    return (pkgVersion == null) ? "unknown" : pkgVersion;
+  }
+
+  protected String getProgramName() {
+    return System.getProperty(PROGRAM_NAME_PROPERTY_NAME, getClass().getName());
+  }
+
+  protected void printVersion(final PrintStream ps) {
+    ps.println(getProgramName() + " version " + getVersion());
+  }
+
+  protected void printHelp(final PrintStream ps) {
+    printUsage(ps);
+    ps.println();
+    ps.println("Available options are :");
+    int maxCol = 0;
+
+    for (final CmdOption opt : options.getOptions()) {
+      final int col = 2 + opt.getPrototype().length();
+      if (col > maxCol) maxCol = col;
+    }
+    for (final CmdOption opt : options.getOptions()) {
+      final StringBuffer sb = new StringBuffer("  ");
+      sb.append(opt.getPrototype());
+      while (sb.length() < maxCol)
+        sb.append(' ');
+      sb.append("  ").append(opt.getDescription());
+      ps.println(sb);
+    }
+  }
+
   protected void printUsage(final PrintStream ps) {
     ps.println("Usage: " + getProgramName()
         + " [OPTIONS] (<definition>[:<execname>])+");
@@ -834,19 +378,13 @@ public class Launcher extends AbstractLauncher {
 
   protected void handleException(final InvalidCommandLineException e) {
     logger.log(Level.FINER, "Caught an InvalidCommandLineException", e);
-    if (printStackTrace) {
+    if (PrintStackTraceOptionHandler.getPrintStackTrace(compilerContext)) {
       e.printStackTrace();
     } else {
       System.err.println(e.getMessage());
       printHelp(System.err);
-      System.exit(e.exitValue);
+      System.exit(e.getExitValue());
     }
-  }
-
-  protected void handleException(final CompilerInstantiationException e) {
-    logger.log(Level.FINER, "Caught a CompilerInstantiationException", e);
-    e.printStackTrace();
-    System.exit(e.exitValue);
   }
 
   /**
@@ -858,52 +396,24 @@ public class Launcher extends AbstractLauncher {
     final Launcher l = new Launcher();
     try {
       l.init(args);
-      l.compile();
+      l.compile(null, null);
     } catch (final InvalidCommandLineException e) {
-      l.handleException(e);
-    } catch (final CompilerInstantiationException e) {
       l.handleException(e);
     }
     if (!l.errorManager.getErrors().isEmpty()) System.exit(1);
   }
 
   public static void nonExitMain(final String... args)
-      throws InvalidCommandLineException, CompilerInstantiationException,
-      ADLException {
+      throws InvalidCommandLineException, ADLException {
     nonExitMain(null, null, args);
   }
 
   public static void nonExitMain(final List<Error> errors,
       final List<Error> warnings, final String... args)
-      throws InvalidCommandLineException, CompilerInstantiationException,
-      ADLException {
+      throws InvalidCommandLineException, ADLException {
     final Launcher l = new Launcher();
     l.init(args);
     l.compile(errors, warnings);
-  }
-
-  protected static boolean nullOrEmpty(final String s) {
-    return s == null || s.length() == 0;
-  }
-
-  /**
-   * Exception thrown when the compiler can't be instantiated.
-   */
-  public static class CompilerInstantiationException extends Exception {
-
-    final int exitValue;
-
-    /**
-     * @param message detail message.
-     * @param cause cause.
-     * @param exitValue exit value.
-     */
-    public CompilerInstantiationException(final String message,
-        final Throwable cause, final int exitValue) {
-      super(message, cause);
-      this.exitValue = exitValue;
-    }
-
   }
 
 }

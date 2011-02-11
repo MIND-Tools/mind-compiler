@@ -27,11 +27,24 @@ import java.util.Map;
 import org.objectweb.fractal.adl.ADLException;
 import org.ow2.mind.idl.ast.IDL;
 import org.ow2.mind.idl.ast.Include;
+import org.ow2.mind.inject.InjectDelegate;
 
 public interface IncludeResolver {
 
-  String ITF_NAME = "include-resolver";
-
   IDL resolve(Include include, IDL encapsulatingIDL, Map<Object, Object> context)
       throws ADLException;
+
+  /**
+   * An abstract delegating {@link IncludeResolver} component.
+   */
+  public abstract class AbstractDelegatingIncludeResolver
+      implements
+        IncludeResolver {
+
+    /**
+     * The client {@link IncludeResolver} used by this component.
+     */
+    @InjectDelegate
+    protected IncludeResolver clientResolverItf;
+  }
 }

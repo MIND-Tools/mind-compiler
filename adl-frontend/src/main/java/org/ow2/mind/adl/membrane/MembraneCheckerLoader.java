@@ -23,8 +23,6 @@
 package org.ow2.mind.adl.membrane;
 
 import static org.objectweb.fractal.adl.NodeUtil.castNodeError;
-import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
-import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
 import static org.ow2.mind.adl.membrane.ControllerInterfaceDecorationHelper.setReferencedInterface;
 import static org.ow2.mind.adl.membrane.ast.MembraneASTHelper.isInternalInterface;
 
@@ -36,13 +34,11 @@ import java.util.Map;
 import java.util.Set;
 
 import org.objectweb.fractal.adl.ADLException;
-import org.objectweb.fractal.adl.AbstractLoader;
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.interfaces.Interface;
 import org.objectweb.fractal.adl.interfaces.InterfaceContainer;
-import org.objectweb.fractal.api.NoSuchInterfaceException;
-import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.ow2.mind.adl.ADLErrors;
+import org.ow2.mind.adl.AbstractDelegatingLoader;
 import org.ow2.mind.adl.ast.ASTHelper;
 import org.ow2.mind.adl.ast.ImplementationContainer;
 import org.ow2.mind.adl.membrane.ast.Controller;
@@ -51,16 +47,12 @@ import org.ow2.mind.adl.membrane.ast.ControllerInterface;
 import org.ow2.mind.adl.membrane.ast.InternalInterfaceContainer;
 import org.ow2.mind.error.ErrorManager;
 
-public class MembraneCheckerLoader extends AbstractLoader
-    implements
-      DefaultControllerInterfaceConstants {
+import com.google.inject.Inject;
 
-  // ---------------------------------------------------------------------------
-  // Client interfaces
-  // ---------------------------------------------------------------------------
+public class MembraneCheckerLoader extends AbstractDelegatingLoader {
 
-  /** The {@link ErrorManager} client interface used to log errors. */
-  public ErrorManager errorManagerItf;
+  @Inject
+  protected ErrorManager errorManagerItf;
 
   // ---------------------------------------------------------------------------
   // Implementation of the Loader interface
@@ -160,7 +152,8 @@ public class MembraneCheckerLoader extends AbstractLoader
           itfNames);
     }
 
-    final Interface compItf = externalInterfaces.get(CI);
+    final Interface compItf = externalInterfaces
+        .get(DefaultControllerInterfaceConstants.CI);
     if (compItf != null && externalItfArray[0] != compItf) {
       // the definition has a "component" controller interface that is not the
       // first one in the list of externalArray interfaces.
@@ -172,51 +165,6 @@ public class MembraneCheckerLoader extends AbstractLoader
       for (final Interface itf : externalItfArray) {
         if (itf != compItf) itfContainer.addInterface(itf);
       }
-    }
-  }
-
-  // ---------------------------------------------------------------------------
-  // Overridden BindingController methods
-  // ---------------------------------------------------------------------------
-
-  @Override
-  public void bindFc(final String itfName, final Object value)
-      throws NoSuchInterfaceException, IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(ErrorManager.ITF_NAME)) {
-      errorManagerItf = (ErrorManager) value;
-    } else {
-      super.bindFc(itfName, value);
-    }
-
-  }
-
-  @Override
-  public String[] listFc() {
-    return listFcHelper(super.listFc(), ErrorManager.ITF_NAME);
-  }
-
-  @Override
-  public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
-    checkItfName(itfName);
-
-    if (itfName.equals(ErrorManager.ITF_NAME)) {
-      return errorManagerItf;
-    } else {
-      return super.lookupFc(itfName);
-    }
-  }
-
-  @Override
-  public void unbindFc(final String itfName) throws NoSuchInterfaceException,
-      IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(ErrorManager.ITF_NAME)) {
-      errorManagerItf = null;
-    } else {
-      super.unbindFc(itfName);
     }
   }
 }

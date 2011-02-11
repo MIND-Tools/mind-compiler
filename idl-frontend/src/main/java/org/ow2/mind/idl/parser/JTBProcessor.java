@@ -138,6 +138,9 @@ import org.ow2.mind.value.ast.StringLiteral;
 import org.ow2.mind.value.ast.Value;
 import org.xml.sax.SAXException;
 
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
+
 /**
  * Translate the JTB AST of an IDL file into a "fractal-adl like" AST.
  */
@@ -145,28 +148,33 @@ public class JTBProcessor extends GJDepthFirst<Object, Node>
     implements
       ParserConstants {
 
-  private final String            filename;
+  public static final String      IDL_DTD           = "idl-dtd";
+
   private final XMLNodeFactory    nodeFactory;
   private final String            idlDtd;
   private final BeginTokenVisitor beginTokenVisitor = new BeginTokenVisitor();
   private final EndTokenVisitor   endTokenVisitor   = new EndTokenVisitor();
 
-  /**
-   * @param nodeFactory The node factory to be used for instantiating AST nodes.
-   * @param idlDtd The grammar definition for IDL nodes.
-   * @param filename The name of the parsed file.
-   */
-  public JTBProcessor(final XMLNodeFactory nodeFactory, final String idlDtd,
-      final String filename) {
+  private String                  filename;
+
+  @Inject
+  protected JTBProcessor(final XMLNodeFactory nodeFactory,
+      @Named(IDL_DTD) final String idlDtd) {
     this.nodeFactory = nodeFactory;
     this.idlDtd = idlDtd;
-    this.filename = filename;
     try {
       nodeFactory.checkDTD(idlDtd);
     } catch (final SAXException e) {
       throw new CompilerError(GenericErrors.INTERNAL_ERROR, e,
           "Error in dtd file '" + idlDtd + "'");
     }
+  }
+
+  /**
+   * @param filename the filename to set
+   */
+  public void setFilename(final String filename) {
+    this.filename = filename;
   }
 
   /**

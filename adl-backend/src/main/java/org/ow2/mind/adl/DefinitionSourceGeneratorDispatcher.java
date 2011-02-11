@@ -22,9 +22,16 @@
 
 package org.ow2.mind.adl;
 
+import java.util.Map;
+import java.util.Set;
+
 import org.objectweb.fractal.adl.Definition;
 import org.ow2.mind.AbstractVoidVisitorDispatcher;
 import org.ow2.mind.VoidVisitor;
+import org.ow2.mind.plugin.PluginManager;
+
+import com.google.common.collect.Iterables;
+import com.google.inject.Inject;
 
 public class DefinitionSourceGeneratorDispatcher
     extends
@@ -32,9 +39,15 @@ public class DefinitionSourceGeneratorDispatcher
     implements
       DefinitionSourceGenerator {
 
-  @Override
-  protected VoidVisitor<Definition> castVisitorInterface(final Object serverItf) {
-    return (DefinitionSourceGenerator) serverItf;
-  }
+  @Inject
+  protected Set<DefinitionSourceGenerator> visitorsItf;
+  @Inject
+  protected PluginManager                  pluginManager;
 
+  @Override
+  protected Iterable<? extends VoidVisitor<Definition>> getVisitorsItf(
+      final Map<Object, Object> context) {
+    return Iterables.concat(visitorsItf, VisitorExtensionHelper
+        .getDefinitionSourceGeneratorExtensions(pluginManager, context));
+  }
 }

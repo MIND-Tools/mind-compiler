@@ -22,19 +22,14 @@
 
 package org.ow2.mind.adl.factory;
 
-import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
-import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
-
 import java.util.Map;
 
 import org.objectweb.fractal.adl.ADLException;
-import org.objectweb.fractal.adl.AbstractLoader;
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.NodeFactory;
 import org.objectweb.fractal.adl.interfaces.InterfaceContainer;
-import org.objectweb.fractal.api.NoSuchInterfaceException;
-import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.ow2.mind.CommonASTHelper;
+import org.ow2.mind.adl.AbstractDelegatingLoader;
 import org.ow2.mind.adl.ast.ASTHelper;
 import org.ow2.mind.adl.ast.Data;
 import org.ow2.mind.adl.ast.ImplementationContainer;
@@ -52,10 +47,12 @@ import org.ow2.mind.annotation.ast.AnnotationASTHelper;
 import org.ow2.mind.annotation.ast.AnnotationContainer;
 import org.ow2.mind.annotation.ast.AnnotationNode;
 
+import com.google.inject.Inject;
+
 /**
  * This loader component creates the AST of the special "Factory" definition.
  */
-public class FactoryLoader extends AbstractLoader {
+public class FactoryLoader extends AbstractDelegatingLoader {
 
   public static final String  FORMAL_TYPE_PARAMETER_NAME         = "InstantiatedDefinition";
   public static final String  FACTORY_DEFINITION_NAME            = "Factory";
@@ -66,12 +63,8 @@ public class FactoryLoader extends AbstractLoader {
   private static final String ALLOCATOR_SIGNATURE                = "memory.api.Allocator";
   private static final String ALLOCATOR_ITF_NAME                 = "allocator";
 
-  // ---------------------------------------------------------------------------
-  // Client interfaces
-  // ---------------------------------------------------------------------------
-
-  /** The {@link NodeFactory} interface used by this component. */
-  public NodeFactory          nodeFactoryItf;
+  @Inject
+  protected NodeFactory       nodeFactoryItf;
 
   // ---------------------------------------------------------------------------
   // Implementation of the Loader interface
@@ -146,50 +139,5 @@ public class FactoryLoader extends AbstractLoader {
     ((AnnotationContainer) d).addAnnotation(bcCtrl);
 
     return d;
-  }
-
-  // ---------------------------------------------------------------------------
-  // Overridden BindingController methods
-  // ---------------------------------------------------------------------------
-
-  @Override
-  public void bindFc(final String itfName, final Object value)
-      throws NoSuchInterfaceException, IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(NodeFactory.ITF_NAME)) {
-      nodeFactoryItf = (NodeFactory) value;
-    } else {
-      super.bindFc(itfName, value);
-    }
-
-  }
-
-  @Override
-  public String[] listFc() {
-    return listFcHelper(super.listFc(), NodeFactory.ITF_NAME);
-  }
-
-  @Override
-  public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
-    checkItfName(itfName);
-
-    if (itfName.equals(NodeFactory.ITF_NAME)) {
-      return nodeFactoryItf;
-    } else {
-      return super.lookupFc(itfName);
-    }
-  }
-
-  @Override
-  public void unbindFc(final String itfName) throws NoSuchInterfaceException,
-      IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(NodeFactory.ITF_NAME)) {
-      nodeFactoryItf = null;
-    } else {
-      super.unbindFc(itfName);
-    }
   }
 }

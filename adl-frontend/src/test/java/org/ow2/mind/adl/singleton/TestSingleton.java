@@ -6,15 +6,19 @@ import java.util.Map;
 
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.Loader;
+import org.ow2.mind.CommonFrontendModule;
+import org.ow2.mind.adl.ADLFrontendModule;
 import org.ow2.mind.adl.ASTChecker;
 import org.ow2.mind.adl.ErrorLoader;
-import org.ow2.mind.adl.Factory;
-import org.ow2.mind.adl.annotation.predefined.Singleton;
-import org.ow2.mind.annotation.AnnotationLocatorHelper;
-import org.ow2.mind.error.ErrorManager;
-import org.ow2.mind.error.ErrorManagerFactory;
+import org.ow2.mind.idl.IDLFrontendModule;
+import org.ow2.mind.plugin.PluginLoaderModule;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.google.inject.Key;
+import com.google.inject.name.Names;
 
 public class TestSingleton {
 
@@ -25,18 +29,20 @@ public class TestSingleton {
 
   @BeforeMethod(alwaysRun = true)
   protected void setUp() throws Exception {
-    final ErrorManager errorManager = ErrorManagerFactory
-        .newSimpleErrorManager();
-
-    final ErrorLoader errL = new ErrorLoader();
-    errL.errorManagerItf = errorManager;
-    errL.clientLoader = Factory.newLoader(errorManager);
-    loader = errL;
+    final Injector injector = Guice.createInjector(new CommonFrontendModule(),
+        new PluginLoaderModule(), new IDLFrontendModule(),
+        new ADLFrontendModule() {
+          protected void configureErrorLoader() {
+            bind(Loader.class).annotatedWith(Names.named("ErrorLoader"))
+                .toChainStartingWith(ErrorLoader.class)
+                .endingWith(Loader.class);
+          }
+        });
+    loader = injector.getInstance(Key.get(Loader.class,
+        Names.named("ErrorLoader")));
 
     checker = new ASTChecker();
     context = new HashMap<Object, Object>();
-    AnnotationLocatorHelper.addDefaultAnnotationPackage(Singleton.class
-        .getPackage().getName(), context);
   }
 
   @Test(groups = {"functional", "checkin"})

@@ -38,158 +38,87 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.antlr.stringtemplate.StringTemplateGroupLoader;
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.Loader;
 import org.objectweb.fractal.adl.error.Error;
-import org.ow2.mind.adl.ADLBackendFactory;
-import org.ow2.mind.adl.ADLLocator;
+import org.ow2.mind.adl.ADLBackendModule;
+import org.ow2.mind.adl.ADLFrontendModule;
 import org.ow2.mind.adl.DefinitionCompiler;
-import org.ow2.mind.adl.DefinitionSourceGenerator;
-import org.ow2.mind.adl.Factory;
 import org.ow2.mind.adl.GraphCompiler;
-import org.ow2.mind.adl.OutputBinaryADLLocator;
 import org.ow2.mind.adl.graph.ComponentGraph;
 import org.ow2.mind.adl.graph.Instantiator;
-import org.ow2.mind.adl.implementation.BasicImplementationLocator;
-import org.ow2.mind.adl.implementation.ImplementationLocator;
-import org.ow2.mind.annotation.AnnotationLocatorHelper;
-import org.ow2.mind.annotation.PredefinedAnnotationsHelper;
 import org.ow2.mind.compilation.CompilationCommand;
 import org.ow2.mind.compilation.CompilationCommandExecutor;
 import org.ow2.mind.compilation.CompilerCommand;
 import org.ow2.mind.compilation.CompilerContextHelper;
-import org.ow2.mind.compilation.CompilerWrapper;
-import org.ow2.mind.compilation.gcc.GccCompilerWrapper;
 import org.ow2.mind.error.ErrorCollection;
 import org.ow2.mind.error.ErrorManager;
-import org.ow2.mind.error.ErrorManagerFactory;
-import org.ow2.mind.idl.IDLBackendFactory;
-import org.ow2.mind.idl.IDLLoader;
-import org.ow2.mind.idl.IDLLoaderChainFactory;
-import org.ow2.mind.idl.IDLLoaderChainFactory.IDLFrontend;
-import org.ow2.mind.idl.IDLLocator;
-import org.ow2.mind.idl.IDLVisitor;
-import org.ow2.mind.idl.OutputBinaryIDLLocator;
+import org.ow2.mind.idl.IDLBackendModule;
+import org.ow2.mind.idl.IDLFrontendModule;
 import org.ow2.mind.io.BasicOutputFileLocator;
 import org.ow2.mind.io.OutputFileLocator;
-import org.ow2.mind.plugin.BasicPluginManager;
+import org.ow2.mind.plugin.PluginLoaderModule;
 import org.ow2.mind.plugin.PluginManager;
-import org.ow2.mind.plugin.SimpleClassPluginFactory;
-import org.ow2.mind.preproc.BasicMPPWrapper;
-import org.ow2.mind.st.STLoaderFactory;
-import org.ow2.mind.st.STNodeFactoryImpl;
+import org.ow2.mind.preproc.MPPModule;
 import org.testng.Assert;
+
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.google.inject.util.Modules;
 
 public class CompilerRunner {
 
-  public static final String        DEFAULT_CFLAGS    = "-g -Wall -Werror -Wredundant-decls -Wunreachable-code -Wstrict-prototypes -Wwrite-strings";
-  public static final String        CFLAGS_PROPERTY   = "mind.test.cflags";
+  public static final String                 DEFAULT_CFLAGS    = "-g -Wall -Werror -Wredundant-decls -Wunreachable-code -Wstrict-prototypes -Wwrite-strings";
+  public static final String                 CFLAGS_PROPERTY   = "mind.test.cflags";
 
-  public static final String        COMPILER_PROPERTY = "mind.test.compiler";
+  public static final String                 COMPILER_PROPERTY = "mind.test.compiler";
 
-  public ErrorManager               errorManager;
-  public Loader                     adlLoader;
-  public IDLLoader                  idlLoader;
+  protected final ErrorManager               errorManager;
+  protected final Loader                     adlLoader;
 
-  public Instantiator               graphInstantiator;
+  protected final Instantiator               graphInstantiator;
 
-  private final OutputFileLocator   outputFileLocator;
-  public DefinitionCompiler         definitionCompiler;
-  public GraphCompiler              graphCompiler;
+  protected final OutputFileLocator          outputFileLocator;
+  protected final DefinitionCompiler         definitionCompiler;
+  protected final GraphCompiler              graphCompiler;
 
-  public CompilationCommandExecutor executor;
+  protected final CompilationCommandExecutor executor;
 
-  final PluginManager               pluginManager;
+  protected final PluginManager              pluginManager;
 
-  public File                       buildDir;
-  public Map<Object, Object>        context;
+  protected final File                       buildDir;
+  protected Map<Object, Object>              context;
 
   public CompilerRunner() throws ADLException {
-    errorManager = ErrorManagerFactory.newStreamErrorManager();
+    final Injector injector = Guice.createInjector(
+        Modules.override(
+            Modules.combine(new CommonFrontendModule(),
+                new ADLFrontendModule(), new IDLFrontendModule())).with(
+            new ADLBackendModule()), new CommonBackendModule(),
+        new MPPModule(), new IDLBackendModule(), new PluginLoaderModule());
 
-    // input locators
-    final BasicInputResourceLocator inputResourceLocator = new BasicInputResourceLocator();
-    final OutputBinaryIDLLocator obil = new OutputBinaryIDLLocator();
-    obil.clientLocatorItf = IDLLoaderChainFactory
-        .newIDLLocator(inputResourceLocator);
-    final IDLLocator idlLocator = obil;
-    final ImplementationLocator implementationLocator = new BasicImplementationLocator();
+    errorManager = injector.getInstance(ErrorManager.class);
+    adlLoader = injector.getInstance(Loader.class);
+    graphInstantiator = injector.getInstance(Instantiator.class);
+    graphCompiler = injector.getInstance(GraphCompiler.class);
+    outputFileLocator = injector.getInstance(OutputFileLocator.class);
+    definitionCompiler = injector.getInstance(DefinitionCompiler.class);
+    executor = injector.getInstance(CompilationCommandExecutor.class);
+    pluginManager = injector.getInstance(PluginManager.class);
 
-    final OutputBinaryADLLocator obal = new OutputBinaryADLLocator();
-    obal.clientLocatorItf = Factory.newADLLocator(inputResourceLocator);
-    final ADLLocator adlLocator = obal;
-
-    // NodeFactory Component
-    final STNodeFactoryImpl stNodeFactory = new STNodeFactoryImpl();
-
-    // Plugin Manager Components
-    final org.objectweb.fractal.adl.Factory pluginFactory = new SimpleClassPluginFactory();
-    final BasicPluginManager bpm = new BasicPluginManager();
-    bpm.nodeFactoryItf = stNodeFactory;
-    pluginManager = bpm;
-
-    outputFileLocator = new BasicOutputFileLocator();
-    obal.outputFileLocatorItf = outputFileLocator;
-    obil.outputFileLocatorItf = outputFileLocator;
-
-    // compiler wrapper
-    final GccCompilerWrapper gcw = new GccCompilerWrapper();
-    gcw.outputFileLocatorItf = outputFileLocator;
-    final CompilerWrapper compilerWrapper = gcw;
-    final BasicMPPWrapper mppWrapper = new BasicMPPWrapper();
-    mppWrapper.pluginManagerItf = pluginManager;
-
-    gcw.errorManagerItf = errorManager;
-    mppWrapper.errorManagerItf = errorManager;
-
-    // String Template Component Loaders
-    final StringTemplateGroupLoader stcLoader = STLoaderFactory.newSTLoader();
-
-    // loader chains
-    final IDLFrontend idlFrontend = IDLLoaderChainFactory.newLoader(
-        errorManager, idlLocator, inputResourceLocator, pluginFactory);
-
-    idlLoader = idlFrontend.loader;
-
-    adlLoader = Factory.newLoader(errorManager, inputResourceLocator,
-        adlLocator, idlLocator, implementationLocator, idlFrontend.cache,
-        idlFrontend.loader, pluginFactory);
-
-    // instantiator chain
-    graphInstantiator = Factory.newInstantiator(errorManager, adlLoader);
-
-    // Backend
-    final IDLVisitor idlCompiler = IDLBackendFactory.newIDLCompiler(idlLoader,
-        inputResourceLocator, outputFileLocator, stcLoader);
-    final DefinitionSourceGenerator definitionSourceGenerator = ADLBackendFactory
-        .newDefinitionSourceGenerator(inputResourceLocator, outputFileLocator,
-            idlLoader, idlCompiler, stcLoader, pluginManager, context);
-    definitionCompiler = ADLBackendFactory.newDefinitionCompiler(
-        definitionSourceGenerator, implementationLocator, outputFileLocator,
-        compilerWrapper, mppWrapper);
-    graphCompiler = ADLBackendFactory.newGraphCompiler(inputResourceLocator,
-        implementationLocator, outputFileLocator, compilerWrapper, mppWrapper,
-        definitionCompiler, adlLoader, stcLoader, pluginManager, context);
-
-    // compilation executor
-    executor = ADLBackendFactory.newCompilationCommandExecutor(errorManager);
+    buildDir = new File("target/build");
 
     // init context
     initContext();
-
   }
 
   public void initContext() throws ADLException {
     context = new HashMap<Object, Object>();
-    buildDir = new File("target/build");
     if (!buildDir.exists()) {
       buildDir.mkdirs();
     }
     context.put(BasicOutputFileLocator.OUTPUT_DIR_CONTEXT_KEY, buildDir);
-    AnnotationLocatorHelper.addDefaultAnnotationPackage(
-        "org.ow2.mind.adl.annotation.predefined", context);
 
     final String cFlags = System.getProperty(CFLAGS_PROPERTY, DEFAULT_CFLAGS);
     CompilerContextHelper.setCFlags(context, splitOptionString(cFlags));
@@ -198,13 +127,6 @@ public class CompilerRunner {
     if (compiler != null) {
       CompilerContextHelper.setCompilerCommand(context, compiler);
       CompilerContextHelper.setLinkerCommand(context, compiler);
-    }
-
-    // Add additional predefined annotation packages
-    for (final String annotationPackage : PredefinedAnnotationsHelper
-        .getPredefinedAnnotations(pluginManager, context)) {
-      AnnotationLocatorHelper.addDefaultAnnotationPackage(annotationPackage,
-          context);
     }
 
   }
@@ -253,15 +175,11 @@ public class CompilerRunner {
     final File outputFile = outputFileLocator.getCExecutableOutputFile(
         outputPath, context);
 
-    errorManager.clear();
-    final Definition d = adlLoader.load(adlName, context);
-    List<Error> errors = errorManager.getErrors();
-    if (!errors.isEmpty()) {
-      throw new ADLException(new ErrorCollection(errors));
-    }
+    final Definition d = load(adlName);
+
     final ComponentGraph componentGraph = graphInstantiator.instantiate(d,
         context);
-    errors = errorManager.getErrors();
+    List<Error> errors = errorManager.getErrors();
     if (!errors.isEmpty()) {
       throw new ADLException(new ErrorCollection(errors));
     }

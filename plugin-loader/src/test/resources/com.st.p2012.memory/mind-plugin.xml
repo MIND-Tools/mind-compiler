@@ -1,5 +1,19 @@
 <plugin id="com.st.p2012.memory" name="Memory Banks Extension">
+  <extension point="org.ow2.mind.plugin.BooleanEvaluator" name="Or evaluator">
+    <evaluator name="cmdFlag" class="org.ow2.mind.plugin.CmdFlagBooleanEvaluator"/>
+  </extension>
+
   <extension point="org.ow2.mind.mindc.cpl">
-    <cpl class="foo.bar"/>
+    <cpl class="foo.bar">
+        <enableWhen>
+            <or>
+                <and>
+                    <cmdFlag id="toto.bar"/>
+                    <cmdFlag id="toto.titi"/>
+                </and>
+                <cmdFlag id="foo.bar"/>
+            </or>
+        </enableWhen>
+    </cpl>
   </extension>
 </plugin>

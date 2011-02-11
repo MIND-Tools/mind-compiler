@@ -30,14 +30,14 @@ import java.util.Map;
 
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.Definition;
-import org.objectweb.fractal.api.NoSuchInterfaceException;
-import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.ow2.mind.adl.ADLLocator;
-import org.ow2.mind.adl.AbstractDefinitionReferenceResolver;
 import org.ow2.mind.adl.DefinitionReferenceResolver;
+import org.ow2.mind.adl.DefinitionReferenceResolver.AbstractDelegatingDefinitionReferenceResolver;
 import org.ow2.mind.adl.ast.DefinitionReference;
 import org.ow2.mind.adl.imports.ast.Import;
 import org.ow2.mind.adl.imports.ast.ImportContainer;
+
+import com.google.inject.Inject;
 
 /**
  * Delegating {@link DefinitionReferenceResolver} that uses {@link Import} nodes
@@ -46,14 +46,10 @@ import org.ow2.mind.adl.imports.ast.ImportContainer;
  */
 public class ImportDefinitionReferenceResolver
     extends
-      AbstractDefinitionReferenceResolver {
+      AbstractDelegatingDefinitionReferenceResolver {
 
-  // ---------------------------------------------------------------------------
-  // Client interface
-  // ---------------------------------------------------------------------------
-
-  /** Client interface used to resolve on-demand import. */
-  public ADLLocator adlLocatorItf;
+  @Inject
+  protected ADLLocator adlLocatorItf;
 
   // ---------------------------------------------------------------------------
   // Implementation of the DefinitionReferenceResolver interface
@@ -116,63 +112,4 @@ public class ImportDefinitionReferenceResolver
     // an ADL in the 'default package').
     return name;
   }
-
-  // ---------------------------------------------------------------------------
-  // Overridden BindingController methods
-  // ---------------------------------------------------------------------------
-
-  @Override
-  public void bindFc(final String itfName, final Object value)
-      throws NoSuchInterfaceException, IllegalBindingException {
-
-    if (itfName == null) {
-      throw new IllegalArgumentException("Interface name can't be null");
-    }
-
-    if (itfName.equals(ADLLocator.ITF_NAME)) {
-      adlLocatorItf = (ADLLocator) value;
-    } else {
-      super.bindFc(itfName, value);
-    }
-
-  }
-
-  @Override
-  public String[] listFc() {
-    final String[] superList = super.listFc();
-    final String[] list = new String[superList.length + 1];
-    list[0] = ADLLocator.ITF_NAME;
-    System.arraycopy(superList, 0, list, 1, superList.length);
-    return list;
-  }
-
-  @Override
-  public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
-
-    if (itfName == null) {
-      throw new IllegalArgumentException("Interface name can't be null");
-    }
-
-    if (itfName.equals(ADLLocator.ITF_NAME)) {
-      return adlLocatorItf;
-    } else {
-      return super.lookupFc(itfName);
-    }
-  }
-
-  @Override
-  public void unbindFc(final String itfName) throws NoSuchInterfaceException,
-      IllegalBindingException {
-
-    if (itfName == null) {
-      throw new IllegalArgumentException("Interface name can't be null");
-    }
-
-    if (itfName.equals(ADLLocator.ITF_NAME)) {
-      adlLocatorItf = null;
-    } else {
-      super.unbindFc(itfName);
-    }
-  }
-
 }

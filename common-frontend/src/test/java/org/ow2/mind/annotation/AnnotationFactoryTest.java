@@ -22,7 +22,6 @@
 
 package org.ow2.mind.annotation;
 
-import static org.ow2.mind.BCImplChecker.checkBCImplementation;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertSame;
@@ -32,30 +31,25 @@ import static org.testng.Assert.fail;
 import java.util.HashMap;
 
 import org.ow2.mind.AbstractTestcase;
-import org.ow2.mind.annotation.Annotation;
-import org.ow2.mind.annotation.AnnotationChainFactory;
-import org.ow2.mind.annotation.AnnotationFactory;
-import org.ow2.mind.annotation.AnnotationInitializationException;
-import org.ow2.mind.annotation.AnnotationValueEvaluator;
-import org.ow2.mind.annotation.BasicAnnotationChecker;
-import org.ow2.mind.annotation.BasicAnnotationFactory;
 import org.ow2.mind.annotation.ast.AnnotationNode;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import com.google.inject.Injector;
 
 public class AnnotationFactoryTest extends AbstractTestcase {
 
   AnnotationFactory annotationFactory;
 
-  @BeforeMethod(alwaysRun = true)
-  public void setUp() throws Exception {
-    annotationFactory = AnnotationChainFactory.newAnnotationFactory();
+  @Override
+  protected void setUp(final Injector injector) {
+    annotationFactory = injector.getInstance(AnnotationFactory.class);
   }
 
   @Test(groups = {"functional"})
   public void testAnnotationFactory1() throws Exception {
-    final AnnotationNode annoAST = newAnnotationNode(FooAnnotation.class
-        .getName(), newAnnotationArgument("foo", newStringLiteral("hello")));
+    final AnnotationNode annoAST = newAnnotationNode(
+        FooAnnotation.class.getName(),
+        newAnnotationArgument("foo", newStringLiteral("hello")));
 
     final Annotation annotation = annotationFactory.newAnnotation(annoAST,
         new HashMap<Object, Object>());
@@ -69,8 +63,9 @@ public class AnnotationFactoryTest extends AbstractTestcase {
 
   @Test(groups = {"functional"})
   public void testAnnotationFactory2() throws Exception {
-    final AnnotationNode annoAST = newAnnotationNode(FooAnnotation.class
-        .getName(), newAnnotationArgument("foo", newStringLiteral("hello")),
+    final AnnotationNode annoAST = newAnnotationNode(
+        FooAnnotation.class.getName(),
+        newAnnotationArgument("foo", newStringLiteral("hello")),
         newAnnotationArgument("count", newNumberLiteral(3)));
 
     final Annotation annotation = annotationFactory.newAnnotation(annoAST,
@@ -85,21 +80,18 @@ public class AnnotationFactoryTest extends AbstractTestcase {
 
   @Test(groups = {"functional"})
   public void testAnnotationFactory3() throws Exception {
-    final AnnotationNode annoAST = newAnnotationNode(BarAnnotation.class
-        .getName(),
+    final AnnotationNode annoAST = newAnnotationNode(
+        BarAnnotation.class.getName(),
+        newAnnotationArgument(
+            "bar",
+            newArray(
+                newAnnotationValue(FooAnnotation.class.getName(),
+                    newAnnotationArgument("foo", newStringLiteral("hello"))),
+                newAnnotationValue(FooAnnotation.class.getName(),
+                    newAnnotationArgument("foo", newStringLiteral("world")),
+                    newAnnotationArgument("count", newNumberLiteral(3))))
 
-    newAnnotationArgument("bar",
-
-    newArray(
-
-    newAnnotationValue(FooAnnotation.class.getName(), newAnnotationArgument(
-        "foo", newStringLiteral("hello"))),
-
-    newAnnotationValue(FooAnnotation.class.getName(), newAnnotationArgument(
-        "foo", newStringLiteral("world")), newAnnotationArgument("count",
-        newNumberLiteral(3))))
-
-    ));
+        ));
 
     final Annotation annotation = annotationFactory.newAnnotation(annoAST,
         new HashMap<Object, Object>());
@@ -123,8 +115,9 @@ public class AnnotationFactoryTest extends AbstractTestcase {
 
   @Test(groups = {"functional"})
   public void testAnnotationFactoryError1() throws Exception {
-    final AnnotationNode annoAST = newAnnotationNode(FooAnnotation.class
-        .getName(), newAnnotationArgument("count", newNumberLiteral(3)));
+    final AnnotationNode annoAST = newAnnotationNode(
+        FooAnnotation.class.getName(),
+        newAnnotationArgument("count", newNumberLiteral(3)));
 
     try {
       annotationFactory.newAnnotation(annoAST, new HashMap<Object, Object>());
@@ -132,20 +125,5 @@ public class AnnotationFactoryTest extends AbstractTestcase {
     } catch (final AnnotationInitializationException e) {
       assertSame(annoAST, e.getLocation());
     }
-  }
-
-  @Test(groups = {"functional", "checkin"})
-  public void testBasicAnnotationFactoryBC() throws Exception {
-    checkBCImplementation(new BasicAnnotationFactory());
-  }
-
-  @Test(groups = {"functional", "checkin"})
-  public void testAnnotationValueEvaluatorBC() throws Exception {
-    checkBCImplementation(new AnnotationValueEvaluator());
-  }
-
-  @Test(groups = {"functional", "checkin"})
-  public void testBasicAnnotationCheckerBC() throws Exception {
-    checkBCImplementation(new BasicAnnotationChecker());
   }
 }

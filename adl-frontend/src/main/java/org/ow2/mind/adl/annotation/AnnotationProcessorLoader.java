@@ -22,44 +22,34 @@
 
 package org.ow2.mind.adl.annotation;
 
-import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
-import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
-
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
 import org.objectweb.fractal.adl.ADLException;
-import org.objectweb.fractal.adl.AbstractLoader;
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.Node;
-import org.objectweb.fractal.api.NoSuchInterfaceException;
-import org.objectweb.fractal.api.control.BindingController;
-import org.objectweb.fractal.api.control.IllegalBindingException;
-import org.objectweb.fractal.cecilia.adl.plugin.PluginManager;
+import org.ow2.mind.adl.AbstractDelegatingLoader;
 import org.ow2.mind.adl.ast.ASTHelper;
 import org.ow2.mind.adl.ast.Component;
 import org.ow2.mind.adl.ast.ComponentContainer;
 import org.ow2.mind.annotation.Annotation;
 import org.ow2.mind.annotation.AnnotationHelper;
 
-public class AnnotationProcessorLoader extends AbstractLoader
-    implements
-      AnnotationProcessorLoaderAttributes,
-      BindingController {
+import com.google.inject.Inject;
+import com.google.inject.Injector;
 
-  ADLLoaderPhase             phase;
+public class AnnotationProcessorLoader extends AbstractDelegatingLoader {
 
-  // ---------------------------------------------------------------------------
-  // Client interfaces
-  // ---------------------------------------------------------------------------
+  protected ADLLoaderPhase phase;
 
-  /** The name of the {@link #pluginManagerItf} client interface */
-  public final static String PLUGIN_MANAGER_ITF_NAME = "plugin-manager";
+  @Inject
+  protected Injector       injector;
 
-  /** Plugin manager client interface */
-  public PluginManager       pluginManagerItf;
+  public void setPhase(final ADLLoaderPhase phase) {
+    this.phase = phase;
+  }
 
   // ---------------------------------------------------------------------------
   // Implementation of the Loader interface
@@ -183,68 +173,11 @@ public class AnnotationProcessorLoader extends AbstractLoader
       final Annotation annotation, final Node node,
       final Definition definition, final Map<Object, Object> context)
       throws ADLException {
-    final ADLLoaderAnnotationProcessor processor = pluginManagerItf.getPlugin(
-        processorAnnotation.processor().getName(), context,
-        ADLLoaderAnnotationProcessor.class);
+    final ADLLoaderAnnotationProcessor processor = injector
+        .getInstance(processorAnnotation.processor());
     final Definition result = processor.processAnnotation(annotation, node,
         definition, phase, context);
     return (result != null) ? result : definition;
   }
 
-  // ---------------------------------------------------------------------------
-  // Implementation of the AnnotationProcessorLoaderAttributes interface
-  // ---------------------------------------------------------------------------
-
-  public String getPhase() {
-    return phase.name();
-  }
-
-  public void setPhase(final String phase) {
-    this.phase = ADLLoaderPhase.valueOf(phase);
-  }
-
-  // ---------------------------------------------------------------------------
-  // Implementation of the BindingController interface
-  // ---------------------------------------------------------------------------
-
-  @Override
-  public void bindFc(final String clientItfName, final Object serverItf)
-      throws NoSuchInterfaceException, IllegalBindingException {
-    checkItfName(clientItfName);
-
-    if (clientItfName.startsWith(PLUGIN_MANAGER_ITF_NAME)) {
-      pluginManagerItf = (PluginManager) serverItf;
-    } else {
-      super.bindFc(clientItfName, serverItf);
-    }
-  }
-
-  @Override
-  public String[] listFc() {
-    return listFcHelper(super.listFc(), PLUGIN_MANAGER_ITF_NAME);
-  }
-
-  @Override
-  public Object lookupFc(final String clientItfName)
-      throws NoSuchInterfaceException {
-    checkItfName(clientItfName);
-
-    if (PLUGIN_MANAGER_ITF_NAME.equals(clientItfName)) {
-      return pluginManagerItf;
-    } else {
-      return super.lookupFc(clientItfName);
-    }
-  }
-
-  @Override
-  public void unbindFc(final String clientItfName)
-      throws NoSuchInterfaceException, IllegalBindingException {
-    checkItfName(clientItfName);
-
-    if (clientItfName.startsWith(PLUGIN_MANAGER_ITF_NAME)) {
-      pluginManagerItf = null;
-    } else {
-      super.unbindFc(clientItfName);
-    }
-  }
 }

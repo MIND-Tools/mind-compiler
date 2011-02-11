@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!ELEMENT extension (cpl+) >
+<!ATTLIST extension
+  point CDATA #REQUIRED
+  id CDATA #IMPLIED
+  name CDATA #IMPLIED
+>
+
+<!ELEMENT cpl (enableWhen?) >
+<!ATTLIST cpl
+  class CDATA #REQUIRED
+>
+
+<!ELEMENT enableWhen (or | and | not | cmdFlag)>
+<!ATTLIST enableWhen >
+
+<!ELEMENT or ((or | and | not | cmdFlag), (or | and | not | cmdFlag)+)>
+<!ATTLIST or >
+
+<!ELEMENT and ((or | and | not | cmdFlag), (or | and | not | cmdFlag)+)>
+<!ATTLIST and >
+
+<!ELEMENT not (or | and | not | cmdFlag)>
+<!ATTLIST not >
+
+<!ELEMENT cmdFlag EMPTY >
+<!ATTLIST cmdFlag
+  id CDATA #REQUIRED
+>

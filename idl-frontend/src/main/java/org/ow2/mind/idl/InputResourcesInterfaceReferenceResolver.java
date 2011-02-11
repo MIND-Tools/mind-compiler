@@ -28,12 +28,13 @@ import static org.ow2.mind.InputResourcesHelper.getInputResources;
 import java.util.Map;
 
 import org.objectweb.fractal.adl.ADLException;
+import org.ow2.mind.idl.InterfaceReferenceResolver.AbstractDelegatingInterfaceReferenceResolver;
 import org.ow2.mind.idl.ast.IDL;
 import org.ow2.mind.idl.ast.InterfaceDefinition;
 
 public class InputResourcesInterfaceReferenceResolver
     extends
-      AbstractInterfaceReferenceResolver {
+      AbstractDelegatingInterfaceReferenceResolver {
 
   // ---------------------------------------------------------------------------
   // Implementation of the InterfaceReferenceResolver interface

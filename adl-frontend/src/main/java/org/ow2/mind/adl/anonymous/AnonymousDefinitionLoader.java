@@ -22,24 +22,21 @@
 
 package org.ow2.mind.adl.anonymous;
 
-import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
-import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
-
 import java.util.HashMap;
 import java.util.Map;
 
 import org.objectweb.fractal.adl.ADLException;
-import org.objectweb.fractal.adl.AbstractLoader;
 import org.objectweb.fractal.adl.ContextLocal;
 import org.objectweb.fractal.adl.Definition;
-import org.objectweb.fractal.api.NoSuchInterfaceException;
-import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.ow2.mind.adl.ADLErrors;
+import org.ow2.mind.adl.AbstractDelegatingLoader;
 import org.ow2.mind.adl.anonymous.ast.AnonymousDefinitionContainer;
 import org.ow2.mind.adl.ast.Component;
 import org.ow2.mind.adl.ast.ComponentContainer;
 import org.ow2.mind.adl.generic.ast.FormalTypeParameterReference;
 import org.ow2.mind.error.ErrorManager;
+
+import com.google.inject.Inject;
 
 /**
  * Delegating loader that {@link AnonymousDefinitionExtractor resolves}
@@ -49,19 +46,15 @@ import org.ow2.mind.error.ErrorManager;
  * sub-components are resolved), this loader is able to intercept the loading
  * operation and return them.
  */
-public class AnonymousDefinitionLoader extends AbstractLoader {
+public class AnonymousDefinitionLoader extends AbstractDelegatingLoader {
 
   protected ContextLocal<Map<String, Definition>> contextualAnonymousDefinitions = new ContextLocal<Map<String, Definition>>();
 
-  // ---------------------------------------------------------------------------
-  // Client interfaces
-  // ---------------------------------------------------------------------------
+  @Inject
+  protected ErrorManager                          errorManagerItf;
 
-  /** The {@link ErrorManager} client interface used to log errors. */
-  public ErrorManager                             errorManagerItf;
-
-  /** The {@link AnonymousDefinitionExtractor} interface. */
-  public AnonymousDefinitionExtractor             anonymousDefinitionExtractorItf;
+  @Inject
+  protected AnonymousDefinitionExtractor          anonymousDefinitionExtractorItf;
 
   // ---------------------------------------------------------------------------
   // Implementation of the Loader interface
@@ -142,57 +135,5 @@ public class AnonymousDefinitionLoader extends AbstractLoader {
 
     anonymousDefinitions
         .put(anonymousDefinition.getName(), anonymousDefinition);
-  }
-
-  // ---------------------------------------------------------------------------
-  // Overridden BindingController methods
-  // ---------------------------------------------------------------------------
-
-  @Override
-  public void bindFc(final String itfName, final Object value)
-      throws NoSuchInterfaceException, IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(ErrorManager.ITF_NAME)) {
-      errorManagerItf = (ErrorManager) value;
-    } else if (itfName.equals(AnonymousDefinitionExtractor.ITF_NAME)) {
-      anonymousDefinitionExtractorItf = (AnonymousDefinitionExtractor) value;
-    } else {
-      super.bindFc(itfName, value);
-    }
-
-  }
-
-  @Override
-  public String[] listFc() {
-    return listFcHelper(super.listFc(), ErrorManager.ITF_NAME,
-        AnonymousDefinitionExtractor.ITF_NAME);
-  }
-
-  @Override
-  public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
-    checkItfName(itfName);
-
-    if (itfName.equals(ErrorManager.ITF_NAME)) {
-      return errorManagerItf;
-    } else if (itfName.equals(AnonymousDefinitionExtractor.ITF_NAME)) {
-      return anonymousDefinitionExtractorItf;
-    } else {
-      return super.lookupFc(itfName);
-    }
-  }
-
-  @Override
-  public void unbindFc(final String itfName) throws NoSuchInterfaceException,
-      IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(ErrorManager.ITF_NAME)) {
-      errorManagerItf = null;
-    } else if (itfName.equals(AnonymousDefinitionExtractor.ITF_NAME)) {
-      anonymousDefinitionExtractorItf = null;
-    } else {
-      super.unbindFc(itfName);
-    }
   }
 }

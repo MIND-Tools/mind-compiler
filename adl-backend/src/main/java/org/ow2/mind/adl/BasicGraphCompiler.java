@@ -22,9 +22,6 @@
 
 package org.ow2.mind.adl;
 
-import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
-import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -33,23 +30,18 @@ import java.util.Map;
 
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.Definition;
-import org.objectweb.fractal.api.NoSuchInterfaceException;
-import org.objectweb.fractal.api.control.BindingController;
-import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.ow2.mind.adl.graph.ComponentGraph;
 import org.ow2.mind.compilation.CompilationCommand;
 
-public class BasicGraphCompiler implements GraphCompiler, BindingController {
+import com.google.inject.Inject;
 
-  // ---------------------------------------------------------------------------
-  // Client interfaces
-  // ---------------------------------------------------------------------------
+public class BasicGraphCompiler implements GraphCompiler {
 
-  public static final String DEFINITION_COMPILER_ITF_NAME = "definition-compiler";
-  public DefinitionCompiler  definitionCompilerItf;
+  @Inject
+  protected DefinitionCompiler definitionCompilerItf;
 
-  public static final String INSTANCE_COMPILER_ITF_NAME   = "instance-compiler";
-  public InstanceCompiler    instanceCompilerItf;
+  @Inject
+  protected InstanceCompiler   instanceCompilerItf;
 
   // ---------------------------------------------------------------------------
   // Implementation of the Visitor interface
@@ -104,57 +96,6 @@ public class BasicGraphCompiler implements GraphCompiler, BindingController {
     for (final ComponentGraph subComp : graph.getSubComponents()) {
       // TODO handle shared components
       visitGraph(subComp, instanceMap, definitionList, result, context);
-    }
-  }
-
-  // ---------------------------------------------------------------------------
-  // Implementation of the BindingController interface
-  // ---------------------------------------------------------------------------
-
-  public void bindFc(final String itfName, final Object value)
-      throws NoSuchInterfaceException, IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(DEFINITION_COMPILER_ITF_NAME)) {
-      definitionCompilerItf = (DefinitionCompiler) value;
-    } else if (itfName.equals(INSTANCE_COMPILER_ITF_NAME)) {
-      instanceCompilerItf = (InstanceCompiler) value;
-    } else {
-      throw new NoSuchInterfaceException("No client interface named '"
-          + itfName + "'");
-    }
-
-  }
-
-  public String[] listFc() {
-    return listFcHelper(DEFINITION_COMPILER_ITF_NAME,
-        INSTANCE_COMPILER_ITF_NAME);
-  }
-
-  public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
-    checkItfName(itfName);
-
-    if (itfName.equals(DEFINITION_COMPILER_ITF_NAME)) {
-      return definitionCompilerItf;
-    } else if (itfName.equals(INSTANCE_COMPILER_ITF_NAME)) {
-      return instanceCompilerItf;
-    } else {
-      throw new NoSuchInterfaceException("No client interface named '"
-          + itfName + "'");
-    }
-  }
-
-  public void unbindFc(final String itfName) throws NoSuchInterfaceException,
-      IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(DEFINITION_COMPILER_ITF_NAME)) {
-      definitionCompilerItf = null;
-    } else if (itfName.equals(INSTANCE_COMPILER_ITF_NAME)) {
-      instanceCompilerItf = null;
-    } else {
-      throw new NoSuchInterfaceException("No client interface named '"
-          + itfName + "'");
     }
   }
 }
