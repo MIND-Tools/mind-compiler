@@ -51,6 +51,9 @@ public class BasicIncludeResolver implements IncludeResolver {
   protected RecursiveIDLLoader recursiveIdlLoaderItf;
 
   @Inject
+  protected IDLLoader          idlLoaderItf;
+
+  @Inject
   protected IDLLocator         idlLocatorItf;
 
   // ---------------------------------------------------------------------------
@@ -58,7 +61,18 @@ public class BasicIncludeResolver implements IncludeResolver {
   // ---------------------------------------------------------------------------
 
   public IDL resolve(final Include include, final IDL encapsulatingIDL,
-      final Map<Object, Object> context) throws ADLException {
+      final String encapsulatingName, final Map<Object, Object> context)
+      throws ADLException {
+    final String encapsulatingIDLName;
+    if (encapsulatingName == null) {
+      if (encapsulatingIDL == null) {
+        throw new IllegalArgumentException(
+            "encapsulatingIDL and encapsulatingName cannot be both null");
+      }
+      encapsulatingIDLName = encapsulatingIDL.getName();
+    } else {
+      encapsulatingIDLName = encapsulatingName;
+    }
 
     String path = getIncludedPath(include);
     if (!PathHelper.isValid(path)) {
@@ -66,7 +80,6 @@ public class BasicIncludeResolver implements IncludeResolver {
       return IDLASTHelper.newUnresolvedIDLNode(nodeFactoryItf, path);
     }
 
-    final String encapsulatingIDLName = encapsulatingIDL.getName();
     final String encapsulatingDir;
     if (encapsulatingIDLName.startsWith("/")) {
       encapsulatingDir = PathHelper.getParent(encapsulatingIDLName);
@@ -114,7 +127,11 @@ public class BasicIncludeResolver implements IncludeResolver {
     IDLASTHelper.setIncludePathPreserveDelimiter(include, path);
 
     try {
-      return recursiveIdlLoaderItf.load(encapsulatingIDL, path, context);
+      if (encapsulatingIDL != null) {
+        return recursiveIdlLoaderItf.load(encapsulatingIDL, path, context);
+      } else {
+        return idlLoaderItf.load(path, context);
+      }
     } catch (final ADLException e) {
       // Log an error only if the exception is IDL_NOT_FOUND
       if (e.getError().getTemplate() == IDLErrors.IDL_NOT_FOUND) {

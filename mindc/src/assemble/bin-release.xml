@@ -69,6 +69,12 @@
             <filtered>true</filtered>
         </file>
         <file>
+            <source>src/assemble/resources/ext/README.txt</source>
+            <fileMode>0644</fileMode>
+            <outputDirectory>ext</outputDirectory>
+            <filtered>true</filtered>
+        </file>
+        <file>
             <source>LICENSES.txt</source>
             <fileMode>0644</fileMode>
             <outputDirectory></outputDirectory>

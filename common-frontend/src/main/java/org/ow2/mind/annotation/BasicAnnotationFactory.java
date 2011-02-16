@@ -38,10 +38,10 @@ import com.google.inject.Inject;
 public class BasicAnnotationFactory implements AnnotationFactory {
 
   @Inject
-  public ValueEvaluator    evaluatorItf;
+  protected ValueEvaluator    evaluatorItf;
 
   @Inject
-  public AnnotationLocator annotationLocatorItf;
+  protected AnnotationLocator annotationLocatorItf;
 
   // ---------------------------------------------------------------------------
   // Implementation of the AnnotationFactory interface

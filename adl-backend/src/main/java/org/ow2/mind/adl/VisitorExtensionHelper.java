@@ -33,7 +33,7 @@ import org.ow2.mind.plugin.util.BooleanEvaluatorHelper;
 public class VisitorExtensionHelper {
 
   public static final String  DEFINITION_SOURCE_GENERATOR_EXTENSION = "org.ow2.mind.adl.definition-source-generators";
-  public static final String  INSTANCE_SOURCE_GENERATOR             = "org.ow2.mind.adl.instance-source-generators";
+  public static final String  INSTANCE_SOURCE_GENERATOR_EXTENSION   = "org.ow2.mind.adl.instance-source-generators";
 
   private static final String CLASS                                 = "class";
   private static final String VISITOR                               = "visitor";
@@ -61,8 +61,7 @@ public class VisitorExtensionHelper {
       final PluginManager pluginManagerItf, final Map<Object, Object> context) {
     final Collection<InstanceSourceGenerator> generators = new ArrayList<InstanceSourceGenerator>();
     for (final ConfigurationElement configElement : pluginManagerItf
-        .getConfigurationElements(DEFINITION_SOURCE_GENERATOR_EXTENSION,
-            VISITOR)) {
+        .getConfigurationElements(INSTANCE_SOURCE_GENERATOR_EXTENSION, VISITOR)) {
       final ConfigurationElement condition = configElement
           .getChild(ENABLE_WHEN);
       if (condition == null

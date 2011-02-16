@@ -92,8 +92,14 @@ public class StringTemplateLoader implements Loader {
 
   protected URL locateTemplateComponent(final String name,
       final Map<Object, Object> context) {
-    return ClassLoaderHelper.getClassLoader(this, context).getResource(
-        (name.replace('.', '/') + TEMPLATE_EXTENSION));
+    final String templateFileName = name.replace('.', '/') + TEMPLATE_EXTENSION;
+    final URL templateURL = ClassLoaderHelper.getClassLoader(this, context)
+        .getResource(templateFileName);
+    if (templateURL == null) {
+      throw new CompilerError(ADLErrors.IO_ERROR, templateFileName);
+    }
+    return templateURL;
+
   }
 
   protected TemplateComponent readTemplate(final URL srcFile)

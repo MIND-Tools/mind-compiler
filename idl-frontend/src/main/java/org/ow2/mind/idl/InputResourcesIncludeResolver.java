@@ -48,9 +48,10 @@ public class InputResourcesIncludeResolver
   // ---------------------------------------------------------------------------
 
   public IDL resolve(final Include include, final IDL encapsulatingContainer,
-      final Map<Object, Object> context) throws ADLException {
+      final String encapsulatingName, final Map<Object, Object> context)
+      throws ADLException {
     final IDL idl = clientResolverItf.resolve(include, encapsulatingContainer,
-        context);
+        encapsulatingName, context);
 
     if (encapsulatingContainer != null) {
       addInputResources(encapsulatingContainer, getInputResources(idl));

@@ -197,7 +197,7 @@ InitializeComponent(definition, component) ::= <<
       &<component.name>, 
       allocItf <InitializeComponentParameters(definition=definition, component=component)>);
     if (err != 0) goto error_<component.name>;
-    newInstance->__component_internal_data.components.<component.name> = <component.name>;
+    newInstance->__component_internal_data.components.<component.name> = (__component_<component.definitionReference.name;format="toCName">_t *)<component.name>;
   }
 >>
 

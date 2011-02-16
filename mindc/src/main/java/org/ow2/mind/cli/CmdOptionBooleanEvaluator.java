@@ -61,7 +61,7 @@ public class CmdOptionBooleanEvaluator implements BooleanEvaluator {
     Assert.assertNotNull(context,
         "CmdOptionBooleanEvaluator requires a context");
     final CommandLine cmdLine = getCommandLine(context);
-    Assert.assertNotNull(context,
+    Assert.assertNotNull(cmdLine,
         "CmdOptionBooleanEvaluator cannot find command-line in the context");
 
     final String id = configurationElement.getAttribute(ID);

@@ -253,11 +253,8 @@ public class Launcher {
   protected void addOptions(final PluginManager pluginManagerItf) {
     options.addOptions(helpOpt, versionOpt, extensionPointsListOpt);
 
-    for (final CmdOption option : CommandLineOptionExtensionHelper
-        .getCommandOptions(pluginManagerItf)) {
-      options.addOption(option);
-    }
-
+    options.addOptions(CommandLineOptionExtensionHelper
+        .getCommandOptions(pluginManagerItf));
   }
 
   protected void checkExclusiveGroups(final PluginManager pluginManagerItf,

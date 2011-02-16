@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2009 STMicroelectronics
+ * Copyright (C) 2010 STMicroelectronics
  *
  * This file is part of "Mind Compiler" is free software: you can redistribute 
  * it and/or modify it under the terms of the GNU Lesser General Public License 
@@ -20,24 +20,15 @@
  * Contributors: 
  */
 
-package org.ow2.mind.annotation;
+package org.ow2.mind.adl.parser;
 
-import java.util.Map;
+import java.io.InputStream;
 
 import org.objectweb.fractal.adl.ADLException;
-import org.objectweb.fractal.adl.Node;
-import org.ow2.mind.inject.InjectDelegate;
+import org.objectweb.fractal.adl.Definition;
 
-public interface AnnotationChecker {
+public interface ADLJTBParser {
 
-  void checkAnnotations(Node container, Map<Object, Object> context)
-      throws ADLException;
-
-  public abstract class AbstractDelegatingAnnotationChecker
-      implements
-        AnnotationChecker {
-
-    @InjectDelegate
-    protected AnnotationChecker clientAnnotationCheckerItf;
-  }
+  Definition parseADL(final InputStream is, String definitionName,
+      final String fileName) throws ADLException;
 }

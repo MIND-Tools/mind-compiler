@@ -60,7 +60,8 @@ public class IncludeHeaderResolver extends AbstractDelegatingIncludeResolver {
   // ---------------------------------------------------------------------------
 
   public IDL resolve(final Include include, final IDL encapsulatingIDL,
-      final Map<Object, Object> context) throws ADLException {
+      final String encapsulatingName, final Map<Object, Object> context)
+      throws ADLException {
     String path = getIncludedPath(include);
     if (getExtension(path).equals(HEADER_EXTENSION)) {
       // include node references a header C file.
@@ -113,7 +114,8 @@ public class IncludeHeaderResolver extends AbstractDelegatingIncludeResolver {
       header.setName(path);
       return header;
     } else {
-      return clientResolverItf.resolve(include, encapsulatingIDL, context);
+      return clientResolverItf.resolve(include, encapsulatingIDL,
+          encapsulatingName, context);
     }
   }
 }

@@ -42,8 +42,6 @@ import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.Loader;
 import org.objectweb.fractal.adl.error.Error;
-import org.ow2.mind.adl.ADLBackendModule;
-import org.ow2.mind.adl.ADLFrontendModule;
 import org.ow2.mind.adl.DefinitionCompiler;
 import org.ow2.mind.adl.GraphCompiler;
 import org.ow2.mind.adl.graph.ComponentGraph;
@@ -54,49 +52,53 @@ import org.ow2.mind.compilation.CompilerCommand;
 import org.ow2.mind.compilation.CompilerContextHelper;
 import org.ow2.mind.error.ErrorCollection;
 import org.ow2.mind.error.ErrorManager;
-import org.ow2.mind.idl.IDLBackendModule;
-import org.ow2.mind.idl.IDLFrontendModule;
+import org.ow2.mind.inject.GuiceModuleExtensionHelper;
 import org.ow2.mind.io.BasicOutputFileLocator;
 import org.ow2.mind.io.OutputFileLocator;
 import org.ow2.mind.plugin.PluginLoaderModule;
 import org.ow2.mind.plugin.PluginManager;
-import org.ow2.mind.preproc.MPPModule;
 import org.testng.Assert;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.google.inject.util.Modules;
 
 public class CompilerRunner {
 
-  public static final String                 DEFAULT_CFLAGS    = "-g -Wall -Werror -Wredundant-decls -Wunreachable-code -Wstrict-prototypes -Wwrite-strings";
-  public static final String                 CFLAGS_PROPERTY   = "mind.test.cflags";
+  public static final String              DEFAULT_CFLAGS    = "-g -Wall -Werror -Wredundant-decls -Wunreachable-code -Wstrict-prototypes -Wwrite-strings";
+  public static final String              CFLAGS_PROPERTY   = "mind.test.cflags";
 
-  public static final String                 COMPILER_PROPERTY = "mind.test.compiler";
+  public static final String              COMPILER_PROPERTY = "mind.test.compiler";
 
-  protected final ErrorManager               errorManager;
-  protected final Loader                     adlLoader;
+  public final ErrorManager               errorManager;
+  public final Loader                     adlLoader;
 
-  protected final Instantiator               graphInstantiator;
+  public final Instantiator               graphInstantiator;
 
-  protected final OutputFileLocator          outputFileLocator;
-  protected final DefinitionCompiler         definitionCompiler;
-  protected final GraphCompiler              graphCompiler;
+  public final OutputFileLocator          outputFileLocator;
+  public final DefinitionCompiler         definitionCompiler;
+  public final GraphCompiler              graphCompiler;
 
-  protected final CompilationCommandExecutor executor;
+  public final CompilationCommandExecutor executor;
 
-  protected final PluginManager              pluginManager;
+  public final PluginManager              pluginManager;
 
-  protected final File                       buildDir;
-  protected Map<Object, Object>              context;
+  public final File                       buildDir;
+  public Map<Object, Object>              context;
+  private final Map<Object, Object>       initialContext;
 
   public CompilerRunner() throws ADLException {
-    final Injector injector = Guice.createInjector(
-        Modules.override(
-            Modules.combine(new CommonFrontendModule(),
-                new ADLFrontendModule(), new IDLFrontendModule())).with(
-            new ADLBackendModule()), new CommonBackendModule(),
-        new MPPModule(), new IDLBackendModule(), new PluginLoaderModule());
+    this(new HashMap<Object, Object>());
+  }
+
+  public CompilerRunner(final Map<Object, Object> initialContext)
+      throws ADLException {
+    this.initialContext = initialContext;
+    final Injector pluginManagerInjector = Guice
+        .createInjector(new PluginLoaderModule());
+    pluginManager = pluginManagerInjector.getInstance(PluginManager.class);
+
+    final Injector injector = Guice.createInjector(GuiceModuleExtensionHelper
+        .getModules(pluginManager, initialContext));
 
     errorManager = injector.getInstance(ErrorManager.class);
     adlLoader = injector.getInstance(Loader.class);
@@ -105,7 +107,6 @@ public class CompilerRunner {
     outputFileLocator = injector.getInstance(OutputFileLocator.class);
     definitionCompiler = injector.getInstance(DefinitionCompiler.class);
     executor = injector.getInstance(CompilationCommandExecutor.class);
-    pluginManager = injector.getInstance(PluginManager.class);
 
     buildDir = new File("target/build");
 
@@ -114,7 +115,7 @@ public class CompilerRunner {
   }
 
   public void initContext() throws ADLException {
-    context = new HashMap<Object, Object>();
+    context = new HashMap<Object, Object>(initialContext);
     if (!buildDir.exists()) {
       buildDir.mkdirs();
     }

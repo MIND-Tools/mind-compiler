@@ -84,23 +84,9 @@ Setting the verbosity level of the mindc compiler
 Addition of extension modules to the mindc compiler
 ========================================================
 
-  Set the MIND_CLASSPATH environment variable to include the .jar files or 
-  the classes of the extension module(s).
+  Extensions JARs can be either copied in the 'ext' folder or added to the 
+  MIND_CLASSPATH environment variable
 
 # export MIND_CLASSPATH="MyModule1.jar:MyModule2.jar"
-
-Addition of extension modules based on annotations
-========================================================
-  First, add the jar file of your extension module by adding it to the
-  MIND_CLASSPATH environment variable as explained above.
-  
-  If you want your annotations to be usable with simple names 
-  (e.g. @MyAnnotation rather then @foo.bar.MyAnnotation) you need 
-  to add the set of annotation packages to the system property called
-  "mind.annotation.packages". For instance, you can do
-  
-# set MIND_OPTS=-Dmind.annotation.packages=foo.bar
-  
-  It is possible to define multiple packages using path separators.
   
  

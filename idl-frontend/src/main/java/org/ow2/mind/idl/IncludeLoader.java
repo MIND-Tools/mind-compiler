@@ -73,7 +73,7 @@ public class IncludeLoader extends AbstractDelegatingIDLLoader {
         errorManagerItf.logError(IDLErrors.INVALID_INCLUDE, include, path);
       }
 
-      idlResolverItf.resolve(include, container, context);
+      idlResolverItf.resolve(include, container, null, context);
     }
   }
 }

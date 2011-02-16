@@ -30,6 +30,7 @@ import org.ow2.mind.adl.annotation.ADLLoaderPhase;
 import org.ow2.mind.adl.annotation.AnnotationProcessorLoader;
 import org.ow2.mind.adl.implementation.BasicImplementationLocator;
 import org.ow2.mind.adl.implementation.ImplementationLocator;
+import org.ow2.mind.adl.parser.ADLJTBParser;
 import org.ow2.mind.adl.parser.JTBProcessor;
 import org.ow2.mind.inject.AbstractMindModule;
 
@@ -49,7 +50,7 @@ public abstract class AbstractADLFrontendModule extends AbstractMindModule {
   protected static final String DEFAULT_ADL_DTD = "classpath://org/ow2/mind/adl/mind_v1.dtd";
 
   protected void configureJTBProcessor() {
-    bind(JTBProcessor.class);
+    bind(ADLJTBParser.class).to(JTBProcessor.class);
     bind(String.class).annotatedWith(Names.named(JTBProcessor.ADL_DTD))
         .toInstance(DEFAULT_ADL_DTD);
   }

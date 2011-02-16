@@ -32,7 +32,9 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.testng.annotations.BeforeMethod;
 
@@ -40,9 +42,13 @@ public abstract class AbstractFunctionalTest {
 
   protected CompilerRunner runner;
 
+  protected Map<Object, Object> getInitialContext() throws Exception {
+    return new HashMap<Object, Object>();
+  }
+
   @BeforeMethod(alwaysRun = true)
   protected void setup() throws Exception {
-    runner = new CompilerRunner();
+    runner = new CompilerRunner(getInitialContext());
   }
 
   protected void initSourcePath(final String... rootDirs) {
@@ -97,8 +103,8 @@ public abstract class AbstractFunctionalTest {
     }
 
     System.out.println("Init src path : " + rootDirList);
-    final ClassLoader srcLoader = new URLClassLoader(rootDirList
-        .toArray(new URL[0]), null);
+    final ClassLoader srcLoader = new URLClassLoader(
+        rootDirList.toArray(new URL[0]), null);
 
     runner.context.put("classloader", srcLoader);
   }

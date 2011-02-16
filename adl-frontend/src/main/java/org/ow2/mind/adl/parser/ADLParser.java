@@ -33,20 +33,13 @@ import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.CompilerError;
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.Loader;
-import org.objectweb.fractal.adl.error.BasicErrorLocator;
-import org.objectweb.fractal.adl.error.ErrorLocator;
 import org.objectweb.fractal.adl.error.GenericErrors;
 import org.objectweb.fractal.adl.xml.XMLNodeFactory;
 import org.ow2.mind.InputResourcesHelper;
 import org.ow2.mind.adl.ADLLocator;
-import org.ow2.mind.adl.jtb.ParseException;
-import org.ow2.mind.adl.jtb.Parser;
-import org.ow2.mind.adl.jtb.TokenMgrError;
-import org.ow2.mind.adl.jtb.syntaxtree.ADLFile;
 import org.ow2.mind.error.ErrorManager;
 
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 
 /**
  * Parser the ADL source file located by the {@link #adlLocatorItf}.
@@ -54,16 +47,16 @@ import com.google.inject.Provider;
 public class ADLParser implements Loader {
 
   @Inject
-  protected ErrorManager           errorManagerItf;
+  protected ErrorManager   errorManagerItf;
 
   @Inject
-  protected XMLNodeFactory         nodeFactoryItf;
+  protected XMLNodeFactory nodeFactoryItf;
 
   @Inject
-  protected ADLLocator             adlLocatorItf;
+  protected ADLLocator     adlLocatorItf;
 
   @Inject
-  protected Provider<JTBProcessor> processorProvider;
+  protected ADLJTBParser   jtbParser;
 
   // ---------------------------------------------------------------------------
   // Implementation of the Loader interface
@@ -98,27 +91,7 @@ public class ADLParser implements Loader {
       }
     }
 
-    Definition d;
-    try {
-      d = readADL(is, path);
-    } catch (final IOException e) {
-      errorManagerItf.logFatal(ADLErrors.IO_ERROR, e, path);
-      // never executed (logFatal throw an ADLException).
-      return null;
-    } catch (final ParseException e) {
-      final ErrorLocator locator = new BasicErrorLocator(path,
-          e.currentToken.next.beginLine, e.currentToken.next.endLine,
-          e.currentToken.next.beginColumn, e.currentToken.next.endColumn);
-      errorManagerItf.logFatal(ADLErrors.PARSE_ERROR, locator, e.getMessage());
-      // never executed (logFatal throw an ADLException).
-      return null;
-    } catch (final TokenMgrError e) {
-      // TokenMgrError do not have location info.
-      final ErrorLocator locator = new BasicErrorLocator(path, -1, -1);
-      errorManagerItf.logFatal(ADLErrors.PARSE_ERROR, locator, e.getMessage());
-      // never executed (logFatal throw an ADLException).
-      return null;
-    }
+    final Definition d = jtbParser.parseADL(is, name, path);
 
     InputResourcesHelper.addInputResource(d,
         adlLocatorItf.toInputResource(name));
@@ -137,15 +110,5 @@ public class ADLParser implements Loader {
       throw new ADLException(ADLErrors.ADL_NOT_FOUND, name);
     }
     return srcFile;
-  }
-
-  protected Definition readADL(final InputStream is, final String fileName)
-      throws IOException, ParseException, ADLException {
-    final Parser parser = new Parser(is);
-    final ADLFile content = parser.ADLFile();
-
-    final JTBProcessor processor = processorProvider.get();
-    processor.setFilename(fileName);
-    return processor.toDefinition(content);
   }
 }

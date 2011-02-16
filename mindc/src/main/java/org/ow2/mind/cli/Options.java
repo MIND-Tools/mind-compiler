@@ -67,6 +67,17 @@ public class Options {
     }
   }
 
+  /**
+   * Add a set of options
+   * 
+   * @param options the options to add.
+   */
+  public void addOptions(final Iterable<CmdOption> options) {
+    for (final CmdOption option : options) {
+      addOption(option);
+    }
+  }
+
   /** @return the available options. */
   public Collection<CmdOption> getOptions() {
     return optionSet;
