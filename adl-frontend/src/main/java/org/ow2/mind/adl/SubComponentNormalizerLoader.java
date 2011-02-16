@@ -22,12 +22,8 @@
 
 package org.ow2.mind.adl;
 
-import java.util.Map;
-
 import org.objectweb.fractal.adl.ADLException;
-import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.Node;
-import org.objectweb.fractal.adl.NodeUtil;
 import org.objectweb.fractal.adl.components.ComponentErrors;
 import org.objectweb.fractal.adl.error.NodeErrorLocator;
 import org.ow2.mind.adl.ast.Component;
@@ -39,44 +35,6 @@ import org.ow2.mind.adl.ast.ComponentContainer;
 public class SubComponentNormalizerLoader
     extends
       AbstractNormalizerLoader<Component> {
-
-  // ---------------------------------------------------------------------------
-  // Implementation of the Loader interface
-  // ---------------------------------------------------------------------------
-
-  @Override
-  public Definition load(final String name, final Map<Object, Object> context)
-      throws ADLException {
-    final Definition d = clientLoader.load(name, context);
-    expandMultiComponents(d);
-    normalize(d);
-    return d;
-  }
-
-  protected void expandMultiComponents(final Definition d) {
-    if (!(d instanceof ComponentContainer)) return;
-    final ComponentContainer componentContainer = (ComponentContainer) d;
-    final Component[] subComponents = componentContainer.getComponents();
-    if (subComponents == null) return;
-
-    for (final Component subComp : subComponents) {
-      // first remove subComp. will be readded later
-      componentContainer.removeComponent(subComp);
-
-      // split subComp name around comma
-      final String[] names = subComp.getName().split(",");
-
-      // re-add first name (assuming that it as at least one name
-      subComp.setName(names[0]);
-      componentContainer.addComponent(subComp);
-      // add clones to subsequent names
-      for (int i = 1; i < names.length; i++) {
-        final Component newSubComp = NodeUtil.cloneTree(subComp);
-        newSubComp.setName(names[i]);
-        componentContainer.addComponent(newSubComp);
-      }
-    }
-  }
 
   // ---------------------------------------------------------------------------
   // Implementation of the abstract methods of AbstractNormalizerLoader
