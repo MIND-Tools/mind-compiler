@@ -32,6 +32,7 @@ import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.Loader;
 import org.objectweb.fractal.adl.NodeFactory;
+import org.objectweb.fractal.adl.components.ComponentErrors;
 import org.objectweb.fractal.api.NoSuchInterfaceException;
 import org.objectweb.fractal.api.control.BindingController;
 import org.objectweb.fractal.api.control.IllegalBindingException;
@@ -82,9 +83,16 @@ public class BasicDefinitionReferenceResolver
       if (e.getError().getTemplate() == ADLErrors.ADL_NOT_FOUND) {
         errorManagerItf.logError(ADLErrors.ADL_NOT_FOUND, reference,
             reference.getName());
+        return ASTHelper.newUnresolvedDefinitionNode(nodeFactoryItf,
+            reference.getName());
+      } else if (e.getError().getTemplate() == ComponentErrors.DEFINITION_CYCLE) {
+        errorManagerItf.logError(ComponentErrors.DEFINITION_CYCLE, reference,
+            reference.getName());
+        return ASTHelper.newUnresolvedDefinitionNode(nodeFactoryItf,
+            reference.getName());
+      } else {
+        throw e;
       }
-      return ASTHelper.newUnresolvedDefinitionNode(nodeFactoryItf,
-          reference.getName());
     }
 
     return d;

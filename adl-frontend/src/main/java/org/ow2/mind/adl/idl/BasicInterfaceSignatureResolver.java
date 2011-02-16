@@ -76,9 +76,11 @@ public class BasicInterfaceSignatureResolver
       if (e.getError().getTemplate() == IDLErrors.IDL_NOT_FOUND) {
         errorManagerItf.logError(IDLErrors.IDL_NOT_FOUND, itf,
             itf.getSignature());
+        itfDefinition = IDLASTHelper.newUnresolvedInterfaceDefinitionNode(
+            nodeFactoryItf, itf.getSignature());
+      } else {
+        throw e;
       }
-      itfDefinition = IDLASTHelper.newUnresolvedInterfaceDefinitionNode(
-          nodeFactoryItf, itf.getSignature());
     }
     if (!(itfDefinition instanceof InterfaceDefinition)) {
       throw new CompilerError(GenericErrors.INTERNAL_ERROR,

@@ -408,7 +408,7 @@ public class TestGeneric {
       assertTrue(e.getError() instanceof ErrorCollection);
       final Collection<Error> errors = ((ErrorCollection) e.getError())
           .getErrors();
-      assertEquals(errors.size(), 1);
+      assertEquals(errors.size(), 2);
       final Error err = errors.iterator().next();
       assertEquals(err.getTemplate(), ComponentErrors.DEFINITION_CYCLE);
     }
