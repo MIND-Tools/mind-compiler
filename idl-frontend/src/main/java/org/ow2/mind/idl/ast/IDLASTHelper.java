@@ -134,6 +134,57 @@ public final class IDLASTHelper {
     return null;
   }
 
+  /**
+   * Returns <code>true</code> if the given method has a variable number of
+   * argument.
+   * 
+   * @param method the method to test.
+   * @return <code>true</code> if the given method has a variable number of
+   *         argument.
+   */
+  public static boolean isVaArgs(final Method method) {
+    return Method.TRUE.equals(method.getVaArgs());
+  }
+
+  /**
+   * Returns <code>true</code> if the given parameter is a <code>out</code>
+   * parameter.
+   * 
+   * @param parameter a parameter.
+   * @return <code>true</code> if the given parameter is a <code>out</code>
+   *         parameter.
+   */
+  public static boolean isOut(final Parameter parameter) {
+    return Parameter.TRUE.equals(parameter.getIsOut())
+        && !Parameter.TRUE.equals(parameter.getIsIn());
+  }
+
+  /**
+   * Returns <code>true</code> if the given parameter is a <code>in out</code>
+   * parameter.
+   * 
+   * @param parameter a parameter.
+   * @return <code>true</code> if the given parameter is a <code>inout</code>
+   *         parameter.
+   */
+  public static boolean isInOut(final Parameter parameter) {
+    return Parameter.TRUE.equals(parameter.getIsOut())
+        && Parameter.TRUE.equals(parameter.getIsIn());
+  }
+
+  /**
+   * Returns <code>true</code> if the given parameter is a <code>in</code>
+   * parameter.
+   * 
+   * @param parameter a parameter.
+   * @return <code>true</code> if the given parameter is a <code>in</code>
+   *         parameter.
+   */
+  public static boolean isIn(final Parameter parameter) {
+    return !Parameter.TRUE.equals(parameter.getIsOut())
+        && (Parameter.TRUE.equals(parameter.getIsIn()) || parameter.getIsIn() == null);
+  }
+
   // ---------------------------------------------------------------------------
   // IDT helper methods
   // ---------------------------------------------------------------------------
