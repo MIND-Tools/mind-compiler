@@ -60,20 +60,24 @@ CONTEXT_PTR(definition) ::= <<
 MultiCONTEXT_PTR(definition) ::= <<
 #define CONTEXT_PTR_DECL <ComponentTypeName(definitionName=definition.name)> *_mind_this
 #define CONTEXT_PTR_DECL_OR_VOID <ComponentTypeName(definitionName=definition.name)> *_mind_this
+#define CONTEXT_PTR_DECL_FROM_ARG(arg) <ComponentTypeName(definitionName=definition.name)> *_mind_this = ((<ComponentTypeName(definitionName=definition.name)> *) (arg))
 #define CONTEXT_PTR_DECL_COMMA  CONTEXT_PTR_DECL,
 
 #define CONTEXT_PTR_ACCESS _mind_this
 #define CONTEXT_PTR_ACCESS_OR_VOID _mind_this
+#define CONTEXT_PTR_ACCESS_OR_NULL _mind_this
 #define CONTEXT_PTR_ACCESS_COMMA CONTEXT_PTR_ACCESS,
 >>
 
 SingletonCONTEXT_PTR(definition) ::= <<
 #define CONTEXT_PTR_DECL
 #define CONTEXT_PTR_DECL_OR_VOID void
+#define CONTEXT_PTR_DECL_FROM_ARG(arg)
 #define CONTEXT_PTR_DECL_COMMA
 
 #define CONTEXT_PTR_ACCESS (&__component_<definition.name;format="toCName">_singleton_instance)
 #define CONTEXT_PTR_ACCESS_OR_VOID
+#define CONTEXT_PTR_ACCESS_OR_NULL NULL
 #define CONTEXT_PTR_ACCESS_COMMA
 >>
 
