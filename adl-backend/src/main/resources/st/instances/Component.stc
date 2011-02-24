@@ -10,8 +10,7 @@ ComponentInstances(topLevelDefinition, definition, instances) ::= <<
 
 /* Generated file: <topLevelDefinition;format="nameToPath">_<definition.name;format="toCName">_instances.c */
 
-#define __COMPONENT_IN_<definition.name;format="toUpperCName">
-#include "<definition.name;format="nameToPath">.adl.h"
+#include "<definition.name;format="nameToPath">.inc"
 
 <if (definition.astNodeTypes.("source"))>
 <if (definition.sources)>

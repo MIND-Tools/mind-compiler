@@ -34,6 +34,7 @@ import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.Loader;
 import org.objectweb.fractal.adl.error.BasicErrorLocator;
 import org.objectweb.fractal.adl.error.ErrorLocator;
+import org.objectweb.fractal.adl.error.NodeErrorLocator;
 import org.objectweb.fractal.adl.util.ClassLoaderHelper;
 import org.objectweb.fractal.adl.xml.XMLNodeFactory;
 import org.ow2.mind.st.templates.ast.TemplateComponent;
@@ -73,8 +74,8 @@ public class StringTemplateLoader implements Loader {
     }
 
     if (!tc.getName().equals(name)) {
-      throw new CompilerError(ADLErrors.WRONG_DEFINITION_NAME, tc, name,
-          tc.getName());
+      throw new CompilerError(ADLErrors.WRONG_DEFINITION_NAME,
+          new NodeErrorLocator(tc), name, tc.getName());
     }
 
     String content = tc.getContent();

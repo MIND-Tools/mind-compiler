@@ -83,7 +83,7 @@ public class BasicCompilationCommandExecutor
     if (o instanceof Integer) {
       jobs = (Integer) o;
     }
-    boolean failFast = false;
+    boolean failFast = true;
     o = context.get(FAIL_FAST_CONTEXT_KEY);
     if (o instanceof Boolean) {
       failFast = (Boolean) o;
