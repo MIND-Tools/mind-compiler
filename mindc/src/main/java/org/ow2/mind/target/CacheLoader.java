@@ -69,7 +69,7 @@ public class CacheLoader extends AbstractDelegatingTargetDescriptorLoader {
       }
       cache.put(name, target);
     }
-    return null;
+    return target;
   }
 
   protected Map<String, Target> getCache(final Map<Object, Object> context) {

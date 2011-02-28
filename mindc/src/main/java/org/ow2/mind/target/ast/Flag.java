@@ -24,10 +24,14 @@ package org.ow2.mind.target.ast;
 
 import org.objectweb.fractal.adl.Node;
 
-public interface LdFlag extends Node {
+public interface Flag extends Node {
   String getId();
 
   void setId(String id);
+
+  String getIndex();
+
+  void setIndex(String index);
 
   String getValue();
 

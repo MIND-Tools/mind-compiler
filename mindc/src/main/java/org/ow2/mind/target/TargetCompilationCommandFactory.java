@@ -37,9 +37,7 @@ import org.ow2.mind.compilation.LinkerCommand;
 import org.ow2.mind.compilation.PreprocessorCommand;
 import org.ow2.mind.error.ErrorManager;
 import org.ow2.mind.preproc.MPPCommand;
-import org.ow2.mind.target.ast.CFlag;
-import org.ow2.mind.target.ast.CPPFlag;
-import org.ow2.mind.target.ast.LdFlag;
+import org.ow2.mind.target.ast.Flag;
 import org.ow2.mind.target.ast.Target;
 
 import com.google.inject.Inject;
@@ -140,12 +138,12 @@ public class TargetCompilationCommandFactory
         command.setCommand(target.getCompiler().getPath());
       }
       if (target.getCFlags() != null) {
-        for (final CFlag flag : target.getCFlags()) {
+        for (final Flag flag : target.getCFlags()) {
           command.addFlags(DirectiveHelper.splitOptionString(flag.getValue()));
         }
       }
       if (target.getCppFlags() != null) {
-        for (final CPPFlag flag : target.getCppFlags()) {
+        for (final Flag flag : target.getCppFlags()) {
           command.addFlags(DirectiveHelper.splitOptionString(flag.getValue()));
         }
       }
@@ -160,12 +158,12 @@ public class TargetCompilationCommandFactory
         command.setCommand(target.getCompiler().getPath());
       }
       if (target.getCFlags() != null) {
-        for (final CFlag flag : target.getCFlags()) {
+        for (final Flag flag : target.getCFlags()) {
           command.addFlags(DirectiveHelper.splitOptionString(flag.getValue()));
         }
       }
       if (!preprocessedFile && target.getCppFlags() != null) {
-        for (final CPPFlag flag : target.getCppFlags()) {
+        for (final Flag flag : target.getCppFlags()) {
           command.addFlags(DirectiveHelper.splitOptionString(flag.getValue()));
         }
       }
@@ -180,7 +178,7 @@ public class TargetCompilationCommandFactory
         command.setCommand(target.getLinker().getPath());
       }
       if (target.getLdFlags() != null) {
-        for (final LdFlag flag : target.getLdFlags()) {
+        for (final Flag flag : target.getLdFlags()) {
           command.addFlags(DirectiveHelper.splitOptionString(flag.getValue()));
         }
       }

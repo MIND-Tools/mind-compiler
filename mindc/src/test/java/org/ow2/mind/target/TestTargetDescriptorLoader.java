@@ -14,8 +14,8 @@ import java.util.Map;
 import org.ow2.mind.CommonFrontendModule;
 import org.ow2.mind.inject.AbstractMindModule;
 import org.ow2.mind.plugin.PluginLoaderModule;
-import org.ow2.mind.target.ast.CFlag;
 import org.ow2.mind.target.ast.Compiler;
+import org.ow2.mind.target.ast.Flag;
 import org.ow2.mind.target.ast.Linker;
 import org.ow2.mind.target.ast.Target;
 import org.testng.annotations.BeforeMethod;
@@ -63,7 +63,7 @@ public class TestTargetDescriptorLoader {
     assertNotNull(linker);
     assertEquals("gcc", linker.getPath());
 
-    final CFlag[] cFlags = target.getCFlags();
+    final Flag[] cFlags = target.getCFlags();
     assertEquals(2, cFlags.length);
 
     assertNull(cFlags[0].getId());

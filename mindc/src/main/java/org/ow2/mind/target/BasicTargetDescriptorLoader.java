@@ -28,10 +28,13 @@ import java.util.Map;
 
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.ParserException;
+import org.objectweb.fractal.adl.error.BasicErrorLocator;
+import org.objectweb.fractal.adl.error.ErrorLocator;
 import org.objectweb.fractal.adl.xml.XMLNodeFactory;
 import org.objectweb.fractal.adl.xml.XMLParser;
 import org.ow2.mind.error.ErrorManager;
 import org.ow2.mind.target.ast.Target;
+import org.xml.sax.SAXParseException;
 
 import com.google.inject.Inject;
 
@@ -66,8 +69,17 @@ public class BasicTargetDescriptorLoader implements TargetDescriptorLoader {
           e.getMessage());
       return null;
     } catch (final ParserException e) {
-      errorManager.logFatal(TargetDescErrors.PARSE_ERROR_FATAL, name,
-          e.getMessage());
+      final Throwable cause = e.getCause();
+      if (cause instanceof SAXParseException) {
+        final SAXParseException parseException = (SAXParseException) cause;
+        final ErrorLocator locator = new BasicErrorLocator(url.getPath(),
+            parseException.getLineNumber(), parseException.getColumnNumber());
+        errorManager.logFatal(TargetDescErrors.PARSE_ERROR_FATAL, locator,
+            name, parseException.getMessage());
+      } else {
+        errorManager.logFatal(TargetDescErrors.PARSE_ERROR_FATAL, name,
+            e.getMessage());
+      }
       return null;
     }
     if (!target.getName().equals(name)) {

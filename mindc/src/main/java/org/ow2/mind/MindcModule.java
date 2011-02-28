@@ -30,6 +30,7 @@ import org.ow2.mind.inject.AbstractMindModule;
 import org.ow2.mind.target.BasicTargetDescriptorLoader;
 import org.ow2.mind.target.CacheLoader;
 import org.ow2.mind.target.ExtensionLoader;
+import org.ow2.mind.target.FlagSorterLoader;
 import org.ow2.mind.target.InterpolationLoader;
 import org.ow2.mind.target.LinkerScriptLoader;
 import org.ow2.mind.target.TargetCompilationCommandFactory;
@@ -45,7 +46,7 @@ public class MindcModule extends AbstractMindModule {
     bind(TargetDescriptorLoader.class).toChainStartingWith(CacheLoader.class)
         .followedBy(LinkerScriptLoader.class)
         .followedBy(InterpolationLoader.class)
-        .followedBy(ExtensionLoader.class)
+        .followedBy(FlagSorterLoader.class).followedBy(ExtensionLoader.class)
         .endingWith(BasicTargetDescriptorLoader.class);
   }
 

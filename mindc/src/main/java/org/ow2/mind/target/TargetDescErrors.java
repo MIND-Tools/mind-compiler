@@ -33,11 +33,15 @@ public enum TargetDescErrors implements ErrorTemplate {
   PARSE_ERROR_FATAL(1, "Parse error in target descriptor '%s': %s", "<path>",
       "<msg>"),
 
-  CYCLE_FATAL(1, "Cycle in target descriptors: %s.", "cycle"),
+  CYCLE_FATAL(2, "Cycle in target descriptors: %s.", "cycle"),
 
-  INVALID_NAME(2,
+  INVALID_NAME(3,
       "Invalid target descriptor name. Found '%s', where '%s' was expected.",
       "<found>", "<expected>"),
+
+  INVALID_INDEX(4,
+      "Invalid target descriptor index. \"%s\" is not a valid number.",
+      "<index>"),
 
   INVALID_LINKER_SCRIPT(9, "Invalid Linker script path '%s'.", "<link-script>"),
 

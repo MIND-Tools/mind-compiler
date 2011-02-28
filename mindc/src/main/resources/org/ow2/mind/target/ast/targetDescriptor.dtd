@@ -12,9 +12,9 @@
 <?add ast="linker"       itf="org.ow2.mind.target.ast.Linker" ?>
 <?add ast="archiver"     itf="org.ow2.mind.target.ast.Archiver" ?>
 <?add ast="linkerScript" itf="org.ow2.mind.target.ast.LinkerScript" ?>
-<?add ast="cppFlag"      itf="org.ow2.mind.target.ast.CPPFlag" ?>
-<?add ast="cFlag"        itf="org.ow2.mind.target.ast.CFlag" ?>
-<?add ast="ldFlag"       itf="org.ow2.mind.target.ast.LdFlag" ?>
+<?add ast="cppFlag"      itf="org.ow2.mind.target.ast.Flag" ?>
+<?add ast="cFlag"        itf="org.ow2.mind.target.ast.Flag" ?>
+<?add ast="ldFlag"       itf="org.ow2.mind.target.ast.Flag" ?>
 
 <!ELEMENT target (extends*, adlMapping?, compiler?, linker?, archiver?, linkerScript?, (cppFlag | cFlag | ldFlag)*) >
 <!ATTLIST target
@@ -55,17 +55,20 @@
 <!ELEMENT cppFlag EMPTY>
 <!ATTLIST cppFlag
   id CDATA #IMPLIED
+  index CDATA #IMPLIED
   value CDATA #REQUIRED
 >
 
 <!ELEMENT cFlag EMPTY>
 <!ATTLIST cFlag
   id CDATA #IMPLIED
+  index CDATA #IMPLIED
   value CDATA #REQUIRED
 >
 
 <!ELEMENT ldFlag EMPTY>
 <!ATTLIST ldFlag
   id CDATA #IMPLIED
+  index CDATA #IMPLIED
   value CDATA #REQUIRED
 >

@@ -56,21 +56,21 @@ public interface Target extends Node {
 
   void setArchiver(Archiver archiver);
 
-  void addCppFlag(CPPFlag flag);
+  void addCppFlag(Flag flag);
 
-  void removeCppFlag(CPPFlag flag);
+  void removeCppFlag(Flag flag);
 
-  CPPFlag[] getCppFlags();
+  Flag[] getCppFlags();
 
-  void addCFlag(CFlag flag);
+  void addCFlag(Flag flag);
 
-  void removeCFlag(CFlag flag);
+  void removeCFlag(Flag flag);
 
-  CFlag[] getCFlags();
+  Flag[] getCFlags();
 
-  void addLdFlag(LdFlag flag);
+  void addLdFlag(Flag flag);
 
-  void removeLdFlag(LdFlag flag);
+  void removeLdFlag(Flag flag);
 
-  LdFlag[] getLdFlags();
+  Flag[] getLdFlags();
 }
