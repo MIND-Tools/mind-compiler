@@ -22,6 +22,10 @@
 
 package org.ow2.mind.adl;
 
+import org.ow2.mind.adl.compilation.AnnotationFlagsCompilationCommandFactory;
+import org.ow2.mind.adl.compilation.BasicCompilationCommandFactory;
+import org.ow2.mind.adl.compilation.CompilationCommandFactory;
+import org.ow2.mind.adl.compilation.ContextFlagsCompilationCommandFactory;
 import org.ow2.mind.adl.factory.FactoryFlagExtractor;
 import org.ow2.mind.adl.factory.FactoryGraphCompiler;
 import org.ow2.mind.adl.generic.GenericDefinitionNameSourceGenerator;
@@ -132,6 +136,13 @@ public class ADLBackendModule extends AbstractMindModule {
     bind(GraphCompiler.class).toChainStartingWith(BasicGraphLinker.class)
         .followedBy(FactoryGraphCompiler.class)
         .endingWith(BasicGraphCompiler.class);
+  }
+
+  protected void configureCompilationCommandFactory() {
+    bind(CompilationCommandFactory.class)
+        .toChainStartingWith(AnnotationFlagsCompilationCommandFactory.class)
+        .followedBy(ContextFlagsCompilationCommandFactory.class)
+        .endingWith(BasicCompilationCommandFactory.class);
   }
 
   protected void configureFlagExtractor() {

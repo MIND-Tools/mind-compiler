@@ -32,6 +32,12 @@ import org.ow2.mind.inject.InjectDelegate;
 
 public interface FlagExtractor {
 
+  Collection<String> getCPPFlags(Definition definition,
+      final Map<Object, Object> context) throws ADLException;
+
+  Collection<String> getCPPFlags(Source source,
+      final Map<Object, Object> context) throws ADLException;
+
   Collection<String> getCFlags(Definition definition,
       final Map<Object, Object> context) throws ADLException;
 

@@ -86,6 +86,14 @@ public class BasicMPPWrapper implements MPPWrapper {
       this.context = context;
     }
 
+    public String getCommand() {
+      return null;
+    }
+
+    public void setCommand(final String command) {
+      throw new UnsupportedOperationException();
+    }
+
     public MPPCommand setSingletonMode() {
       singletonMode = true;
       return this;

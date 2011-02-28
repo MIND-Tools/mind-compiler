@@ -131,8 +131,8 @@ argDesc      : The description of the argument value (used to generate help
 <!ATTLIST cmdAppendOption
   id CDATA #REQUIRED
   handler CDATA #IMPLIED
-  shortName CDATA #REQUIRED
-  longName CDATA #REQUIRED
+  shortName CDATA #IMPLIED
+  longName CDATA #IMPLIED
   separator CDATA #IMPLIED
   defaultValue CDATA #IMPLIED
   description CDATA #REQUIRED
@@ -160,8 +160,8 @@ argDesc      : The description of the argument value (used to generate help
 <!ATTLIST cmdPathOption
   id CDATA #REQUIRED
   handler CDATA #IMPLIED
-  shortName CDATA #REQUIRED
-  longName CDATA #REQUIRED
+  shortName CDATA #IMPLIED
+  longName CDATA #IMPLIED
   description CDATA #REQUIRED
   argDesc CDATA #REQUIRED
 >

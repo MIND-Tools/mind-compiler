@@ -25,8 +25,6 @@ package org.ow2.mind.adl;
 import static org.ow2.mind.PathHelper.replaceExtension;
 
 import java.io.File;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -34,41 +32,33 @@ import java.util.Map;
 
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.CompilerError;
-import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.error.GenericErrors;
 import org.ow2.mind.InputResourceLocator;
 import org.ow2.mind.adl.ast.ASTHelper;
 import org.ow2.mind.adl.ast.ImplementationContainer;
 import org.ow2.mind.adl.ast.Source;
+import org.ow2.mind.adl.compilation.CompilationCommandFactory;
 import org.ow2.mind.compilation.CompilationCommand;
 import org.ow2.mind.compilation.CompilerCommand;
-import org.ow2.mind.compilation.CompilerWrapper;
 import org.ow2.mind.compilation.PreprocessorCommand;
 import org.ow2.mind.io.OutputFileLocator;
 import org.ow2.mind.preproc.MPPCommand;
-import org.ow2.mind.preproc.MPPWrapper;
 
 import com.google.inject.Inject;
 
 public class BasicInstanceCompiler implements InstanceCompiler {
 
   @Inject
-  protected InstanceSourceGenerator instanceSourceGeneratorItf;
+  protected InstanceSourceGenerator   instanceSourceGeneratorItf;
 
   @Inject
-  protected OutputFileLocator       outputFileLocatorItf;
+  protected OutputFileLocator         outputFileLocatorItf;
 
   @Inject
-  protected InputResourceLocator    inputResourceLocatorItf;
+  protected InputResourceLocator      inputResourceLocatorItf;
 
   @Inject
-  protected CompilerWrapper         compilerWrapperItf;
-
-  @Inject
-  protected MPPWrapper              mppWrapperItf;
-
-  @Inject
-  protected FlagExtractor           flagExtractor;
+  protected CompilationCommandFactory compilationCommandFactory;
 
   // ---------------------------------------------------------------------------
   // Implementation of the Visitor interface
@@ -122,13 +112,20 @@ public class BasicInstanceCompiler implements InstanceCompiler {
     final File depFile = outputFileLocatorItf.getCCompiledOutputFile(
         replaceExtension(instancesFileName, ".d"), context);
 
-    final PreprocessorCommand cppCommand = newPreprocessorCommand(
-        instanceDesc.instanceDefinition, srcFile, dependencies, depFile,
-        cppFile, context);
-    final MPPCommand mppCommand = newMPPCommand(
-        instanceDesc.instanceDefinition, cppFile, mppFile, context);
-    final CompilerCommand gccCommand = newCompilerCommand(
-        instanceDesc.instanceDefinition, mppFile, objectFile, context);
+    final PreprocessorCommand cppCommand = compilationCommandFactory
+        .newPreprocessorCommand(instanceDesc.instanceDefinition, null, srcFile,
+            dependencies, depFile, cppFile, context);
+    final MPPCommand mppCommand = compilationCommandFactory.newMPPCommand(
+        instanceDesc.instanceDefinition, null, cppFile, mppFile, null, context);
+
+    final CompilerCommand gccCommand = compilationCommandFactory
+        .newCompilerCommand(instanceDesc.instanceDefinition, null, mppFile,
+            true, null, null, objectFile, context);
+
+    gccCommand.addIncludeFile(outputFileLocatorItf.getCSourceOutputFile(
+        DefinitionMacroSourceGenerator
+            .getMacroFileName(instanceDesc.instanceDefinition), context));
+    gccCommand.setAllDependenciesManaged(true);
 
     final List<CompilationCommand> compilationTasks = new ArrayList<CompilationCommand>();
     compilationTasks.add(cppCommand);
@@ -136,78 +133,5 @@ public class BasicInstanceCompiler implements InstanceCompiler {
     compilationTasks.add(gccCommand);
 
     return compilationTasks;
-  }
-
-  protected PreprocessorCommand newPreprocessorCommand(
-      final Definition definition, final File inputFile,
-      final Collection<File> dependencies, final File depFile,
-      final File outputFile, final Map<Object, Object> context)
-      throws ADLException {
-    final PreprocessorCommand command = compilerWrapperItf
-        .newPreprocessorCommand(context);
-    command.setOutputFile(outputFile).setInputFile(inputFile)
-        .setDependencyOutputFile(depFile);
-
-    if (dependencies != null) {
-      for (final File dep : dependencies) {
-        command.addDependency(dep);
-      }
-    }
-
-    command.addIncludeDir(outputFileLocatorItf.getCSourceOutputDir(context));
-    command.addIncludeDir(outputFileLocatorItf
-        .getCSourceTemporaryOutputDir(context));
-
-    final URL[] inputResourceRoots = inputResourceLocatorItf
-        .getInputResourcesRoot(context);
-    if (inputResourceRoots != null) {
-      for (final URL inputResourceRoot : inputResourceRoots) {
-        try {
-          final File inputDir = new File(inputResourceRoot.toURI());
-          if (inputDir.isDirectory()) {
-            command.addIncludeDir(inputDir);
-          }
-        } catch (final URISyntaxException e) {
-          continue;
-        }
-      }
-    }
-
-    // Add definition level C-Flags
-    command.addFlags(flagExtractor.getCFlags(definition, context));
-
-    return command;
-  }
-
-  protected MPPCommand newMPPCommand(final Definition definition,
-      final File inputFile, final File outputFile,
-      final Map<Object, Object> context) throws ADLException {
-    final MPPCommand command = mppWrapperItf.newMPPCommand(definition, context);
-    command.setOutputFile(outputFile).setInputFile(inputFile);
-
-    if (ASTHelper.isSingleton(definition)) {
-      command.setSingletonMode();
-    }
-
-    return command;
-  }
-
-  protected CompilerCommand newCompilerCommand(final Definition definition,
-      final File inputFile, final File outputFile,
-      final Map<Object, Object> context) throws ADLException {
-    final CompilerCommand command = compilerWrapperItf
-        .newCompilerCommand(context);
-    command.setOutputFile(outputFile).setInputFile(inputFile)
-        .setAllDependenciesManaged(true);
-
-    command.addIncludeDir(outputFileLocatorItf.getCSourceOutputDir(context));
-
-    command.addIncludeFile(outputFileLocatorItf.getCSourceOutputFile(
-        DefinitionMacroSourceGenerator.getMacroFileName(definition), context));
-
-    // Add definition level C-Flags
-    command.addFlags(flagExtractor.getCFlags(definition, context));
-
-    return command;
   }
 }

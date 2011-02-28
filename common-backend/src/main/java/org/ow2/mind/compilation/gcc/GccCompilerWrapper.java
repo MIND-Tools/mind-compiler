@@ -22,11 +22,6 @@
 
 package org.ow2.mind.compilation.gcc;
 
-import static org.ow2.mind.compilation.CompilerContextHelper.getCompilerCommand;
-import static org.ow2.mind.compilation.CompilerContextHelper.getLDFlags;
-import static org.ow2.mind.compilation.CompilerContextHelper.getLinkerCommand;
-import static org.ow2.mind.compilation.CompilerContextHelper.getLinkerScript;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -89,7 +84,7 @@ public class GccCompilerWrapper implements CompilerWrapper {
   protected class GccPreprocessorCommand extends AbstractPreprocessorCommand {
 
     protected GccPreprocessorCommand(final Map<Object, Object> context) {
-      super(getCompilerCommand(context), context);
+      super(CompilerContextHelper.getCompilerCommand(context), context);
     }
 
     public PreprocessorCommand addDebugFlag() {
@@ -126,7 +121,6 @@ public class GccCompilerWrapper implements CompilerWrapper {
       cmd.add(this.cmd);
       cmd.add("-E");
 
-      cmd.addAll(CompilerContextHelper.getCFlags(context));
       cmd.addAll(flags);
 
       if (dependencyOutputFile != null) {
@@ -170,7 +164,7 @@ public class GccCompilerWrapper implements CompilerWrapper {
   protected class GccCompilerCommand extends AbstractCompilerCommand {
 
     protected GccCompilerCommand(final Map<Object, Object> context) {
-      super(getCompilerCommand(context), context);
+      super(CompilerContextHelper.getCompilerCommand(context), context);
     }
 
     public CompilerCommand addDebugFlag() {
@@ -208,7 +202,6 @@ public class GccCompilerWrapper implements CompilerWrapper {
       cmd.add(this.cmd);
       cmd.add("-c");
 
-      cmd.addAll(CompilerContextHelper.getCFlags(context));
       cmd.addAll(flags);
 
       if (dependencyOutputFile != null) {
@@ -253,7 +246,7 @@ public class GccCompilerWrapper implements CompilerWrapper {
   protected class GccLinkerCommand extends AbstractLinkerCommand {
 
     protected GccLinkerCommand(final Map<Object, Object> context) {
-      super(getLinkerCommand(context), context);
+      super(CompilerContextHelper.getLinkerCommand(context), context);
     }
 
     public LinkerCommand addDebugFlag() {
@@ -286,13 +279,10 @@ public class GccCompilerWrapper implements CompilerWrapper {
         }
       }
 
-      final String linkerScript = getLinkerScript(context);
       if (linkerScript != null) {
         cmd.add("-T");
         cmd.add(linkerScript);
       }
-
-      cmd.addAll(getLDFlags(context));
 
       cmd.addAll(flags);
 

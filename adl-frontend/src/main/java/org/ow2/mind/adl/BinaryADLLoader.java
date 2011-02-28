@@ -98,7 +98,13 @@ public class BinaryADLLoader extends AbstractDelegatingLoader {
       if (logger.isLoggable(Level.FINE))
         logger.log(Level.FINE, "Load ADL \"" + name
             + "\". source unavailable, load binary");
-      return loadBinaryADL(name, binADL, context);
+      try {
+        return loadBinaryADL(name, binADL, context);
+      } catch (final IOException e) {
+        errorManagerItf.logFatal(GenericErrors.INTERNAL_ERROR, e,
+            "Can't read binary ADL " + binADL + ".");
+        return null;
+      }
     }
 
     // both binary and source file are available, check timestamps:
@@ -121,22 +127,31 @@ public class BinaryADLLoader extends AbstractDelegatingLoader {
       // if binary file is more recent than source file, check dependencies.
 
       // load binary ADL to retrieve list of input resources.
-      final Definition binDef = loadBinaryADL(name, binADL, context);
+      Definition binDef;
+      try {
+        binDef = loadBinaryADL(name, binADL, context);
+      } catch (final IOException e) {
+        errorManagerItf.logWarning(GenericErrors.INTERNAL_ERROR, e,
+            "Can't read binary ADL " + binADL + ". Use source ADL.");
+        return null;
+      }
 
-      final Set<InputResource> dependencies = InputResourcesHelper
-          .getInputResources(binDef);
-      if (logger.isLoggable(Level.FINEST))
-        logger.log(Level.FINEST, "Load ADL \"" + name
-            + "\". check dependencies=" + dependencies);
-      if (dependencies != null
-          && inputResourceLocatorItf.isUpToDate(binTimestamp, dependencies,
-              context)) {
+      if (binDef != null) {
+        final Set<InputResource> dependencies = InputResourcesHelper
+            .getInputResources(binDef);
         if (logger.isLoggable(Level.FINEST))
           logger.log(Level.FINEST, "Load ADL \"" + name
-              + "\". Binary version is up-to-date");
+              + "\". check dependencies=" + dependencies);
+        if (dependencies != null
+            && inputResourceLocatorItf.isUpToDate(binTimestamp, dependencies,
+                context)) {
+          if (logger.isLoggable(Level.FINEST))
+            logger.log(Level.FINEST, "Load ADL \"" + name
+                + "\". Binary version is up-to-date");
 
-        // binary version is up to date, return it
-        return binDef;
+          // binary version is up to date, return it
+          return binDef;
+        }
       }
     }
 
@@ -164,7 +179,7 @@ public class BinaryADLLoader extends AbstractDelegatingLoader {
   }
 
   protected Definition loadBinaryADL(final String name, final URL location,
-      final Map<Object, Object> context) throws ADLException {
+      final Map<Object, Object> context) throws ADLException, IOException {
     try {
       final InputStream is = location.openStream();
       final NodeInputStream nis = new NodeInputStream(is,
@@ -188,10 +203,6 @@ public class BinaryADLLoader extends AbstractDelegatingLoader {
       nis.close();
 
       return d;
-    } catch (final IOException e) {
-      errorManagerItf.logFatal(GenericErrors.INTERNAL_ERROR, e,
-          "Can't read binary ADL " + location);
-      return null;
     } catch (final ClassNotFoundException e) {
       errorManagerItf.logFatal(GenericErrors.INTERNAL_ERROR, e,
           "Can't read binary ADL " + location);

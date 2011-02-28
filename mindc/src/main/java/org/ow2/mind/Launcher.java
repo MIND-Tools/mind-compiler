@@ -42,8 +42,6 @@ import org.objectweb.fractal.adl.CompilerError;
 import org.objectweb.fractal.adl.error.Error;
 import org.objectweb.fractal.adl.error.GenericErrors;
 import org.objectweb.fractal.adl.util.FractalADLLogManager;
-import org.objectweb.fractal.cecilia.targetDescriptor.ast.ADLMapping;
-import org.objectweb.fractal.cecilia.targetDescriptor.ast.Target;
 import org.ow2.mind.cli.CmdFlag;
 import org.ow2.mind.cli.CmdOption;
 import org.ow2.mind.cli.CmdOptionBooleanEvaluator;
@@ -54,7 +52,6 @@ import org.ow2.mind.cli.InvalidCommandLineException;
 import org.ow2.mind.cli.Options;
 import org.ow2.mind.cli.PrintStackTraceOptionHandler;
 import org.ow2.mind.cli.StageOptionHandler;
-import org.ow2.mind.cli.TargetDescriptorOptionHandler;
 import org.ow2.mind.error.ErrorManager;
 import org.ow2.mind.inject.GuiceModuleExtensionHelper;
 import org.ow2.mind.plugin.PluginLoaderModule;
@@ -110,8 +107,8 @@ public class Launcher {
 
     /****** Initialization of the PluginManager Component *******/
 
-    final Injector pluginManagerInjector = getBootstrapInjector();
-    final PluginManager pluginManager = pluginManagerInjector
+    final Injector bootStrapPluginManagerInjector = getBootstrapInjector();
+    final PluginManager pluginManager = bootStrapPluginManagerInjector
         .getInstance(PluginManager.class);
 
     addOptions(pluginManager);
@@ -159,7 +156,7 @@ public class Launcher {
     adlCompiler = injector.getInstance(ADLCompiler.class);
   }
 
-  void initInjector(final PluginManager pluginManager,
+  protected void initInjector(final PluginManager pluginManager,
       final Map<Object, Object> compilerContext) {
     injector = Guice.createInjector(GuiceModuleExtensionHelper.getModules(
         pluginManager, compilerContext));
@@ -184,28 +181,6 @@ public class Launcher {
     return adlToExecName;
   }
 
-  protected String processADLNameMapping(final Target target,
-      final String inputADL, final Map<Object, Object> context) {
-    if (target != null) {
-      final ADLMapping mapping = target.getAdlMapping();
-      return mapping.getMapping().replace("${inputADL}", inputADL);
-    } else {
-      return inputADL;
-    }
-  }
-
-  protected String processOutputNameMapping(final Target target,
-      final String inputADL, final String execName,
-      final Map<Object, Object> context) {
-    if (target != null) {
-      final ADLMapping mapping = target.getAdlMapping();
-      if (mapping != null && mapping.getOutputName() != null) {
-        return mapping.getOutputName().replace("${inputADL}", inputADL);
-      }
-    }
-    return execName;
-  }
-
   public List<Object> compile(final List<Error> errors,
       final List<Error> warnings) throws InvalidCommandLineException {
     // Check if at least 1 adlName is specified
@@ -219,13 +194,8 @@ public class Launcher {
       try {
         final HashMap<Object, Object> contextMap = new HashMap<Object, Object>(
             compilerContext);
-        final Target targetDescriptor = TargetDescriptorOptionHandler
-            .getTargetDescriptor(contextMap);
-
-        final String adlName = processADLNameMapping(targetDescriptor,
-            e.getKey(), contextMap);
-        final String execName = processOutputNameMapping(targetDescriptor,
-            e.getKey(), e.getValue(), contextMap);
+        final String adlName = e.getKey();
+        final String execName = e.getValue();
 
         final List<Object> l = adlCompiler.compile(adlName, execName,
             StageOptionHandler.getCompilationStage(contextMap), contextMap);

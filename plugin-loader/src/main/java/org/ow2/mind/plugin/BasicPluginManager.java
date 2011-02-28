@@ -47,11 +47,13 @@ import org.xml.sax.SAXException;
 import com.google.common.collect.Iterables;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
 /**
  * Basic implementation of the {@link PluginManager} interface.
  */
+@Singleton
 public class BasicPluginManager implements PluginManager {
 
   public final static String  PLUGIN_CLASS_LOADER          = "plugin-class-loader";

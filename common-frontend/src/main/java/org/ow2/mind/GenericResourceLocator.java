@@ -29,7 +29,5 @@ public interface GenericResourceLocator {
 
   Iterable<String> getResourceKind();
 
-  URL[] getInputResourcesRoot(Map<Object, Object> context);
-
   URL findResource(String name, final Map<Object, Object> context);
 }

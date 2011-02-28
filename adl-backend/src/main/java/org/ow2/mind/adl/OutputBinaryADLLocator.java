@@ -28,10 +28,6 @@ public class OutputBinaryADLLocator implements ADLLocator {
     return clientLocatorItf.getResourceKind();
   }
 
-  public URL[] getInputResourcesRoot(final Map<Object, Object> context) {
-    return clientLocatorItf.getInputResourcesRoot(context);
-  }
-
   public URL findBinaryADL(final String name, final Map<Object, Object> context) {
     URL binADL = null;
     try {

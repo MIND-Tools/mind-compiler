@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+
+<!-- ********************************************************************** -->
+<!--                          AST nodes definitions                         -->
+<!-- ********************************************************************** -->
+
+<?add ast="target" itf="org.ow2.mind.target.ast.Target" ?>
+
+<?add ast="extends"      itf="org.ow2.mind.target.ast.Extends" ?>
+<?add ast="adlMapping"   itf="org.ow2.mind.target.ast.ADLMapping" ?>
+<?add ast="compiler"     itf="org.ow2.mind.target.ast.Compiler" ?>
+<?add ast="linker"       itf="org.ow2.mind.target.ast.Linker" ?>
+<?add ast="archiver"     itf="org.ow2.mind.target.ast.Archiver" ?>
+<?add ast="linkerScript" itf="org.ow2.mind.target.ast.LinkerScript" ?>
+<?add ast="cppFlag"      itf="org.ow2.mind.target.ast.CPPFlag" ?>
+<?add ast="cFlag"        itf="org.ow2.mind.target.ast.CFlag" ?>
+<?add ast="ldFlag"       itf="org.ow2.mind.target.ast.LdFlag" ?>
+
+<!ELEMENT target (extends*, adlMapping?, compiler?, linker?, archiver?, linkerScript?, (cppFlag | cFlag | ldFlag)*) >
+<!ATTLIST target
+  name CDATA #REQUIRED
+>
+
+<!ELEMENT extends EMPTY>
+<!ATTLIST extends
+  name CDATA #REQUIRED
+>
+
+<!ELEMENT adlMapping EMPTY>
+<!ATTLIST adlMapping
+  mapping CDATA #REQUIRED
+  outputName CDATA #IMPLIED
+>
+
+<!ELEMENT compiler EMPTY>
+<!ATTLIST compiler
+  path CDATA #REQUIRED
+>
+
+<!ELEMENT linker EMPTY>
+<!ATTLIST linker
+  path CDATA #REQUIRED
+>
+
+<!ELEMENT archiver EMPTY>
+<!ATTLIST archiver
+  path CDATA #REQUIRED
+>
+
+<!ELEMENT linkerScript EMPTY>
+<!ATTLIST linkerScript
+  path CDATA #REQUIRED
+>
+
+<!ELEMENT cppFlag EMPTY>
+<!ATTLIST cppFlag
+  id CDATA #IMPLIED
+  value CDATA #REQUIRED
+>
+
+<!ELEMENT cFlag EMPTY>
+<!ATTLIST cFlag
+  id CDATA #IMPLIED
+  value CDATA #REQUIRED
+>
+
+<!ELEMENT ldFlag EMPTY>
+<!ATTLIST ldFlag
+  id CDATA #IMPLIED
+  value CDATA #REQUIRED
+>

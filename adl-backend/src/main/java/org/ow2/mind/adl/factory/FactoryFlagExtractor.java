@@ -41,6 +41,26 @@ public class FactoryFlagExtractor extends AbstractDelegatingFlagExtractor {
   @Inject
   protected Loader loaderItf;
 
+  public Collection<String> getCPPFlags(final Definition definition,
+      final Map<Object, Object> context) throws ADLException {
+    final Definition instanciatedDefinition = ASTHelper
+        .getFactoryInstantiatedDefinition(definition, loaderItf, context);
+    if (instanciatedDefinition == null) {
+      return clientExtractorItf.getCPPFlags(definition, context);
+    } else {
+      final List<String> flags = new ArrayList<String>(
+          clientExtractorItf.getCPPFlags(definition, context));
+      flags.addAll(clientExtractorItf.getCPPFlags(instanciatedDefinition,
+          context));
+      return flags;
+    }
+  }
+
+  public Collection<String> getCPPFlags(final Source source,
+      final Map<Object, Object> context) throws ADLException {
+    return clientExtractorItf.getCPPFlags(source, context);
+  }
+
   public Collection<String> getCFlags(final Definition definition,
       final Map<Object, Object> context) throws ADLException {
     final Definition instanciatedDefinition = ASTHelper

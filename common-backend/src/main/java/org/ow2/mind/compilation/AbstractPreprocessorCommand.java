@@ -34,7 +34,7 @@ public abstract class AbstractPreprocessorCommand
       PreprocessorCommand {
 
   protected final Map<Object, Object> context;
-  protected final String              cmd;
+  protected String                    cmd;
   protected final List<String>        flags             = new ArrayList<String>();
   protected File                      inputFile;
   protected File                      outputFile;
@@ -50,6 +50,14 @@ public abstract class AbstractPreprocessorCommand
       final Map<Object, Object> context) {
     this.cmd = cmd;
     this.context = context;
+  }
+
+  public String getCommand() {
+    return cmd;
+  }
+
+  public void setCommand(final String command) {
+    this.cmd = command;
   }
 
   public PreprocessorCommand addFlag(final String flag) {

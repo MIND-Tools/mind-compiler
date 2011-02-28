@@ -32,12 +32,13 @@ import java.util.Map;
 public abstract class AbstractLinkerCommand implements LinkerCommand {
 
   protected final Map<Object, Object> context;
-  protected final String              cmd;
+  protected String                    cmd;
   protected final List<String>        flags      = new ArrayList<String>();
   protected final List<File>          inputFiles = new ArrayList<File>();
   protected final List<String>        libs       = new ArrayList<String>();
   protected File                      outputFile;
   protected String                    optimizationLevel;
+  protected String                    linkerScript;
   protected boolean                   forced;
 
   private List<File>                  outputFiles;
@@ -46,6 +47,14 @@ public abstract class AbstractLinkerCommand implements LinkerCommand {
       final Map<Object, Object> context) {
     this.cmd = cmd;
     this.context = context;
+  }
+
+  public String getCommand() {
+    return cmd;
+  }
+
+  public void setCommand(final String command) {
+    this.cmd = command;
   }
 
   public LinkerCommand addFlag(final String flag) {
@@ -87,6 +96,11 @@ public abstract class AbstractLinkerCommand implements LinkerCommand {
 
   public LinkerCommand addLib(final String libName) {
     libs.add(libName);
+    return this;
+  }
+
+  public LinkerCommand setLinkerScript(final String linkerScript) {
+    this.linkerScript = linkerScript;
     return this;
   }
 

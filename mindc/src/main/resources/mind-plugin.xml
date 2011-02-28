@@ -31,9 +31,12 @@
     <extension
         point="org.ow2.mind.plugin.guice-module">
         <module
-            class="org.ow2.mind.MindcModule" />
+            class="org.ow2.mind.MindcModule">
+            <override
+                class="org.ow2.mind.adl.ADLBackendModule" />
+        </module>
     </extension>
-    
+
     <extension
         point="org.ow2.mind.mindc.command-line-options">
 
@@ -57,7 +60,7 @@
 
         <cmdArgument
             id="org.ow2.mind.mindc.TargetDescriptor"
-            handler="org.ow2.mind.cli.TargetDescriptorOptionHandler"
+            handler="org.ow2.mind.target.TargetDescriptorOptionHandler"
             shortName="t"
             longName="target-descriptor"
             allowMultiple="false"
@@ -65,16 +68,6 @@
             argDesc="&lt;name&gt;">
             <processAfter
                 id="org.ow2.mind.mindc.SrcPath" />
-            <processAfter
-                id="org.ow2.mind.mindc.CFlags" />
-            <processAfter
-                id="org.ow2.mind.mindc.IncPath" />
-            <processAfter
-                id="org.ow2.mind.mindc.LDFlags" />
-            <processAfter
-                id="org.ow2.mind.mindc.LDPath" />
-            <processAfter
-                id="org.ow2.mind.mindc.LinkerScript" />
         </cmdArgument>
 
         <!-- =============================== -->
@@ -105,6 +98,17 @@
         <!-- ============= -->
         <!-- Flags options -->
         <!-- ============= -->
+
+        <cmdAppendOption
+            id="org.ow2.mind.mindc.CPPFlags"
+            handler="org.ow2.mind.cli.FlagsOptionHandler"
+            shortName="C"
+            longName="cpp-flags"
+            description="The cpp-flags preprocessor directives"
+            argDesc="&lt;flags&gt;">
+            <processAfter
+                id="org.ow2.mind.mindc.IncPath" />
+        </cmdAppendOption>
 
         <cmdAppendOption
             id="org.ow2.mind.mindc.CFlags"
@@ -222,7 +226,7 @@
             handler="org.ow2.mind.cli.PrintStackTraceOptionHandler"
             shortName="e"
             description="Print error stack traces" />
-        
+
         <exclusiveGroup>
             <exclusiveOption
                 id="org.ow2.mind.mindc.CheckADL" />

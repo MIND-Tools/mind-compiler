@@ -33,13 +33,15 @@ import org.ow2.mind.compilation.DirectiveHelper;
 import org.ow2.mind.plugin.util.Assert;
 
 /**
- * Handles "c-flags", "inc-path", "ld-flags", "ld-path" and "linker-script"
- * options.
+ * Handles "cpp-flags", "c-flags", "inc-path", "ld-flags", "ld-path" and
+ * "linker-script" options.
  * 
  * @see CompilerContextHelper
  */
 public class FlagsOptionHandler implements CommandOptionHandler {
 
+  /** The ID of the "cpp-flags" option. */
+  public static final String CPPFLAGS_ID      = "org.ow2.mind.mindc.CPPFlags";
   /** The ID of the "c-flags" option. */
   public static final String CFLAGS_ID        = "org.ow2.mind.mindc.CFlags";
   /** The ID of the "inc-path" option. */
@@ -56,7 +58,19 @@ public class FlagsOptionHandler implements CommandOptionHandler {
   public void processCommandOption(final CmdOption cmdOption,
       final CommandLine cmdLine, final Map<Object, Object> context)
       throws InvalidCommandLineException {
-    if (CFLAGS_ID.equals(cmdOption.getId())) {
+    if (CPPFLAGS_ID.equals(cmdOption.getId())) {
+      // process CFlags
+      final CmdAppendOption cppFlagsOpt = Assert.assertInstanceof(cmdOption,
+          CmdAppendOption.class);
+
+      final List<String> cppFlagsList = new ArrayList<String>(
+          CompilerContextHelper.getCPPFlags(context));
+      final String value = cppFlagsOpt.getValue(cmdLine);
+      if (value != null && value.length() > 0) {
+        cppFlagsList.addAll(DirectiveHelper.splitOptionString(value));
+      }
+      CompilerContextHelper.setCPPFlags(context, cppFlagsList);
+    } else if (CFLAGS_ID.equals(cmdOption.getId())) {
       // process CFlags
       final CmdAppendOption cFlagsOpt = Assert.assertInstanceof(cmdOption,
           CmdAppendOption.class);
@@ -96,7 +110,7 @@ public class FlagsOptionHandler implements CommandOptionHandler {
         cFlagsList.add(incDir.getAbsolutePath());
       }
 
-      CompilerContextHelper.setCFlags(context, cFlagsList);
+      CompilerContextHelper.setCPPFlags(context, cFlagsList);
 
     } else if (LDFLAGS_ID.equals(cmdOption.getId())) {
       // process LDFlags

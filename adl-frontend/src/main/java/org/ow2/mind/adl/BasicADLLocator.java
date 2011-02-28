@@ -25,7 +25,6 @@ package org.ow2.mind.adl;
 import static org.ow2.mind.PathHelper.fullyQualifiedNameToPath;
 
 import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.Map;
 
 import org.objectweb.fractal.adl.Definition;
@@ -78,14 +77,6 @@ public class BasicADLLocator implements ADLLocator {
   // ---------------------------------------------------------------------------
   // Implementation of the ADLLocator interface
   // ---------------------------------------------------------------------------
-
-  public URL[] getInputResourcesRoot(final Map<Object, Object> context) {
-    final ClassLoader cl = ClassLoaderHelper.getClassLoader(this, context);
-    if (cl instanceof URLClassLoader) {
-      return ((URLClassLoader) cl).getURLs();
-    }
-    return null;
-  }
 
   public URL findBinaryADL(final String name, final Map<Object, Object> context) {
     return ClassLoaderHelper.getClassLoader(this, context).getResource(

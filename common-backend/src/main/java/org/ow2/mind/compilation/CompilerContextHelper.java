@@ -36,10 +36,33 @@ public final class CompilerContextHelper {
   public static final String EXECUTABLE_NAME_CONTEXT_KEY  = "executable-name";
 
   public static final String C_FLAGS_CONTEXT_KEY          = "c-flags";
+  public static final String CPP_FLAGS_CONTEXT_KEY        = "cpp-flags";
   public static final String LD_FLAGS_CONTEXT_KEY         = "ld-flags";
   public static final String LINKER_SCRIPT_CONTEXT_KEY    = "linker-script";
 
   private CompilerContextHelper() {
+  }
+
+  public static void setCPPFlags(final Map<Object, Object> context,
+      final List<String> flags) {
+    context.put(CPP_FLAGS_CONTEXT_KEY, flags);
+  }
+
+  public static void addCPPFlags(final Map<Object, Object> context,
+      final List<String> flags) {
+    final List<String> f = getCPPFlags(context);
+    if (f.isEmpty()) {
+      setCPPFlags(context, flags);
+    } else {
+      f.addAll(flags);
+    }
+  }
+
+  @SuppressWarnings("unchecked")
+  public static List<String> getCPPFlags(final Map<Object, Object> context) {
+    List<String> flags = (List<String>) context.get(CPP_FLAGS_CONTEXT_KEY);
+    if (flags == null) flags = Collections.emptyList();
+    return flags;
   }
 
   public static void setCFlags(final Map<Object, Object> context,

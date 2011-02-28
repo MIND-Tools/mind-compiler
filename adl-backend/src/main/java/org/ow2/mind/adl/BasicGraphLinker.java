@@ -37,17 +37,14 @@ import java.util.Set;
 
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.CompilerError;
-import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.error.GenericErrors;
-import org.ow2.mind.adl.ast.ImplementationContainer;
-import org.ow2.mind.adl.ast.Source;
+import org.ow2.mind.adl.compilation.CompilationCommandFactory;
 import org.ow2.mind.adl.graph.ComponentGraph;
 import org.ow2.mind.adl.implementation.ImplementationLocator;
 import org.ow2.mind.adl.implementation.SharedImplementationDecorationHelper;
 import org.ow2.mind.compilation.CompilationCommand;
 import org.ow2.mind.compilation.CompilerCommand;
 import org.ow2.mind.compilation.CompilerContextHelper;
-import org.ow2.mind.compilation.CompilerWrapper;
 import org.ow2.mind.compilation.LinkerCommand;
 import org.ow2.mind.inject.InjectDelegate;
 import org.ow2.mind.io.OutputFileLocator;
@@ -57,19 +54,16 @@ import com.google.inject.Inject;
 public class BasicGraphLinker implements GraphCompiler {
 
   @InjectDelegate
-  protected GraphCompiler         clientCompilerItf;
+  protected GraphCompiler             clientCompilerItf;
 
   @Inject
-  protected CompilerWrapper       compilerWrapperItf;
+  protected OutputFileLocator         outputFileLocatorItf;
 
   @Inject
-  protected OutputFileLocator     outputFileLocatorItf;
+  protected ImplementationLocator     implementationLocatorItf;
 
   @Inject
-  protected ImplementationLocator implementationLocatorItf;
-
-  @Inject
-  protected FlagExtractor         flagExtractor;
+  protected CompilationCommandFactory compilationCommandFactory;
 
   // ---------------------------------------------------------------------------
   // Implementation of the Visitor interface
@@ -91,7 +85,9 @@ public class BasicGraphLinker implements GraphCompiler {
     final File outputFile = outputFileLocatorItf.getCExecutableOutputFile(
         outputPath, context);
 
-    final LinkerCommand command = compilerWrapperItf.newLinkerCommand(context);
+    final LinkerCommand command = compilationCommandFactory.newLinkerCommand(
+        graph, outputFile, context);
+
     for (final CompilationCommand compilationCommand : compilationTasks) {
       result.add(compilationCommand);
       if (compilationCommand instanceof CompilerCommand) {
@@ -99,10 +95,6 @@ public class BasicGraphLinker implements GraphCompiler {
             .getOutputFile());
       }
     }
-    command.setOutputFile(outputFile);
-
-    addLDFlags(graph, new HashSet<Definition>(), command, context);
-
     result.add(command);
 
     return result;
@@ -140,29 +132,9 @@ public class BasicGraphLinker implements GraphCompiler {
           replaceExtension(sharedImplementation, ".o"), context);
       final File depFile = outputFileLocatorItf.getCCompiledOutputFile(
           replaceExtension(sharedImplementation, ".d"), context);
-      final CompilerCommand command = compilerWrapperItf
-          .newCompilerCommand(context);
-      command.setInputFile(sharedImpl).setOutputFile(outFile)
-          .setDependencyOutputFile(depFile);
-
-      command.addIncludeDir(outputFileLocatorItf.getCSourceOutputDir(context));
-      command.addIncludeDir(outputFileLocatorItf
-          .getCSourceTemporaryOutputDir(context));
-
-      final URL[] inputResourceRoots = implementationLocatorItf
-          .getInputResourcesRoot(context);
-      if (inputResourceRoots != null) {
-        for (final URL inputResourceRoot : inputResourceRoots) {
-          try {
-            final File inputDir = new File(inputResourceRoot.toURI());
-            if (inputDir.isDirectory()) {
-              command.addIncludeDir(inputDir);
-            }
-          } catch (final URISyntaxException e) {
-            continue;
-          }
-        }
-      }
+      final CompilerCommand command = compilationCommandFactory
+          .newCompilerCommand(null, null, sharedImpl, false, null, depFile,
+              outFile, context);
 
       result.add(command);
     }
@@ -175,27 +147,6 @@ public class BasicGraphLinker implements GraphCompiler {
 
     for (final ComponentGraph subComp : graph.getSubComponents()) {
       findSharedImplementations(subComp, sharedImplementations);
-    }
-  }
-
-  protected void addLDFlags(final ComponentGraph graph,
-      final Set<Definition> visitedDefinitions, final LinkerCommand command,
-      final Map<Object, Object> context) throws ADLException {
-    final Definition def = graph.getDefinition();
-    if (visitedDefinitions.add(def)) {
-      // get LDFlags annotation at definition level.
-      command.addFlags(flagExtractor.getLDFlags(def, context));
-
-      // get LDFlags annotation at source level.
-      if (def instanceof ImplementationContainer) {
-        for (final Source src : ((ImplementationContainer) def).getSources()) {
-          command.addFlags(flagExtractor.getLDFlags(src, context));
-        }
-      }
-    }
-
-    for (final ComponentGraph subComp : graph.getSubComponents()) {
-      addLDFlags(subComp, visitedDefinitions, command, context);
     }
   }
 }

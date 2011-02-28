@@ -83,8 +83,4 @@ public class OutputBinaryIDLLocator implements IDLLocator {
   public URL findResource(final String name, final Map<Object, Object> context) {
     return clientLocatorItf.findResource(name, context);
   }
-
-  public URL[] getInputResourcesRoot(final Map<Object, Object> context) {
-    return clientLocatorItf.getInputResourcesRoot(context);
-  }
 }

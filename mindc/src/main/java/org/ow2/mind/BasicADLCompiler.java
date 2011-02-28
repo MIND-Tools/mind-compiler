@@ -35,6 +35,10 @@ import org.ow2.mind.adl.graph.ComponentGraph;
 import org.ow2.mind.adl.graph.Instantiator;
 import org.ow2.mind.compilation.CompilationCommand;
 import org.ow2.mind.compilation.CompilerContextHelper;
+import org.ow2.mind.target.TargetDescriptorLoader;
+import org.ow2.mind.target.TargetDescriptorOptionHandler;
+import org.ow2.mind.target.ast.ADLMapping;
+import org.ow2.mind.target.ast.Target;
 
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
@@ -54,6 +58,8 @@ public class BasicADLCompiler extends AbstractADLCompiler {
   protected Instantiator              graphInstantiator;
   @Inject
   protected GraphCompiler             graphCompiler;
+  @Inject
+  protected TargetDescriptorLoader    targetDescriptorLoader;
 
   @Override
   protected void initContext(final String adlName, final String execName,
@@ -62,8 +68,19 @@ public class BasicADLCompiler extends AbstractADLCompiler {
   }
 
   @Override
-  protected Iterable<Definition> load(final String adlName,
+  protected Iterable<Definition> load(String adlName,
       final Map<Object, Object> context) throws ADLException {
+    final String targetDescName = TargetDescriptorOptionHandler
+        .getTargetDescriptor(context);
+    if (targetDescName != null) {
+      final Target target = targetDescriptorLoader
+          .load(targetDescName, context);
+      final ADLMapping adlMapping = target.getAdlMapping();
+      if (adlMapping != null && adlMapping.getMapping() != null) {
+        adlName = adlMapping.getMapping().replace("${inputADL}", adlName);
+      }
+    }
+
     return Lists.newArrayList(adlLoader.load(adlName, context));
   }
 
@@ -89,9 +106,22 @@ public class BasicADLCompiler extends AbstractADLCompiler {
   @Override
   protected Collection<CompilationCommand> compileGraph(
       final Map<Object, Object> context, final ComponentGraph graph,
-      final String execName) throws ADLException {
-    if (execName != null)
+      String execName) throws ADLException {
+    if (execName != null) {
       CompilerContextHelper.setExecutableName(context, execName);
+    } else {
+      final String targetDescName = TargetDescriptorOptionHandler
+          .getTargetDescriptor(context);
+      if (targetDescName != null) {
+        final Target target = targetDescriptorLoader.load(targetDescName,
+            context);
+        final ADLMapping adlMapping = target.getAdlMapping();
+        if (adlMapping != null && adlMapping.getOutputName() != null) {
+          execName = adlMapping.getMapping().replace("${inputADL}",
+              graph.getDefinition().getName());
+        }
+      }
+    }
 
     return graphCompiler.visit(graph, context);
   }

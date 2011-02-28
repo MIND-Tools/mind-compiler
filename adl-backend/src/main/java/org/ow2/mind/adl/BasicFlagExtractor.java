@@ -32,10 +32,29 @@ import java.util.Map;
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.Definition;
 import org.ow2.mind.adl.annotation.predefined.CFlags;
+import org.ow2.mind.adl.annotation.predefined.CPPFlags;
 import org.ow2.mind.adl.annotation.predefined.LDFlags;
 import org.ow2.mind.adl.ast.Source;
 
 public class BasicFlagExtractor implements FlagExtractor {
+
+  public Collection<String> getCPPFlags(final Definition definition,
+      final Map<Object, Object> context) throws ADLException {
+    final CPPFlags flags = getAnnotation(definition, CPPFlags.class);
+    if (flags != null)
+      return splitOptionString(flags.value);
+    else
+      return Collections.emptyList();
+  }
+
+  public Collection<String> getCPPFlags(final Source source,
+      final Map<Object, Object> context) throws ADLException {
+    final CPPFlags flags = getAnnotation(source, CPPFlags.class);
+    if (flags != null)
+      return splitOptionString(flags.value);
+    else
+      return Collections.emptyList();
+  }
 
   public Collection<String> getCFlags(final Definition definition,
       final Map<Object, Object> context) throws ADLException {
