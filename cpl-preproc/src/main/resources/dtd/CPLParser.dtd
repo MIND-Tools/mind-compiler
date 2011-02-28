@@ -40,8 +40,8 @@ If not specified the factory is always used.
 class: The factory class. Must implement 
     "org.ow2.mind.preproc.CPLPreprocessorFactory".
 -->
-<!ELEMENT visitor (enableWhen?) >
-<!ATTLIST visitor
+<!ELEMENT factory (enableWhen?) >
+<!ATTLIST factory
   class CDATA #REQUIRED
 >
 
