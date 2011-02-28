@@ -25,12 +25,13 @@ package org.ow2.mind.adl;
 import static org.ow2.mind.PathHelper.fullyQualifiedNameToPath;
 
 import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.Map;
 
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.util.ClassLoaderHelper;
 import org.ow2.mind.InputResource;
+
+import com.google.common.collect.Lists;
 
 /**
  * Basic implementation of the {@link ADLLocator} interface for STCF ADL.
@@ -43,6 +44,10 @@ public class BasicADLLocator implements ADLLocator {
   // ---------------------------------------------------------------------------
   // public static methods
   // ---------------------------------------------------------------------------
+
+  public Iterable<String> getResourceKind() {
+    return Lists.newArrayList(ADLLocator.ADL_RESOURCE_KIND);
+  };
 
   public static String getADLSourceName(final Definition definition) {
     return getADLSourceName(definition.getName());
@@ -72,14 +77,6 @@ public class BasicADLLocator implements ADLLocator {
   // ---------------------------------------------------------------------------
   // Implementation of the ADLLocator interface
   // ---------------------------------------------------------------------------
-
-  public URL[] getInputResourcesRoot(final Map<Object, Object> context) {
-    final ClassLoader cl = ClassLoaderHelper.getClassLoader(this, context);
-    if (cl instanceof URLClassLoader) {
-      return ((URLClassLoader) cl).getURLs();
-    }
-    return null;
-  }
 
   public URL findBinaryADL(final String name, final Map<Object, Object> context) {
     return ClassLoaderHelper.getClassLoader(this, context).getResource(

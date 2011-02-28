@@ -1,0 +1,100 @@
+<!--
+  Copyright (C) 2011 STMicroelectronics
+
+ This file is part of "Mind Compiler" is free software: you can redistribute 
+ it and/or modify it under the terms of the GNU Lesser General Public License 
+ as published by the Free Software Foundation, either version 3 of the 
+ License, or (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful, but WITHOUT 
+ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ details.
+
+ You should have received a copy of the GNU Lesser General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+ Contact: mind@ow2.org
+
+ Authors: Matthieu Leclercq
+ Contributors: 
+
+ -->
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!--
+The Predefined Annotations extension point allows to defines Java packages that
+contain annotation classes. This allows to reference these annotations in 
+ADL/IDL without using the Java fully-qualified name.
+-->
+<!ELEMENT extension (annotation+) >
+<!ATTLIST extension
+  point CDATA #REQUIRED
+  id CDATA #IMPLIED
+  name CDATA #IMPLIED
+>
+
+<!--
+Specify a Java package that contains ADL/IDL annotation classes.
+
+package: the fully qualified name of the Java-package that contains ADL/IDL
+    annotation classes.
+-->
+<!ELEMENT annotation (enableWhen?) >
+<!ATTLIST annotation
+  package CDATA #REQUIRED
+>
+
+<!--
+The condition used to determine if the annotation package should be used.
+-->
+<!ELEMENT enableWhen (or | and | not | cmdOption | contextContains)>
+<!ATTLIST enableWhen >
+
+<!-- Lazy or -->
+<!ELEMENT or (or | and | not | cmdOption | contextContains)+>
+<!ATTLIST or >
+
+<!-- Lazy and -->
+<!ELEMENT and (or | and | not | cmdOption | contextContains)+>
+<!ATTLIST and >
+
+<!-- not -->
+<!ELEMENT not (or | and | not | cmdOption | contextContains)>
+<!ATTLIST not >
+
+<!--
+Tests if a given option has been specified on the command-line.
+
+id: The identifier of a command-line option.
+value: If specified, checks that the value of the command-line option matches 
+    the given string. This attribute can be used only if the command-line 
+    option is a cmdArgument, a cmdAppendOption or a cmdPathOption.
+valueRegExp: If specified, checks that the value of the command-line option 
+    matches the given regular expression. This attribute can be used only if the
+    command-line option is a cmdArgument, a cmdAppendOption or a cmdPathOption.
+-->
+<!ELEMENT cmdOption EMPTY >
+<!ATTLIST cmdOption
+  id CDATA #REQUIRED
+  value CDATA #IMPLIED
+  valueRegExp CDATA #IMPLIED
+>
+
+<!--
+Tests if the compilation context contains a given key.
+
+key: The key to search in the compilation context.
+value: If specified, checks that the value associated with the given key matches 
+    the given string. If the value in the context is not a string, its string 
+    representation is obtained using "toString()"
+valueRegExp: If specified, checks that the value associated with the given key
+    matches the given regular expression. If the value in the context is not a 
+    string, its string representation is obtained using "toString()"
+-->
+<!ELEMENT contextContains EMPTY>
+<!ATTLIST contextContains
+  key CDATA #REQUIRED
+  value CDATA #IMPLIED
+  valueRegExp CDATA #IMPLIED
+>

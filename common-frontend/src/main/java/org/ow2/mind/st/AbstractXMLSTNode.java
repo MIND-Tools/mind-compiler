@@ -39,6 +39,14 @@ public abstract class AbstractXMLSTNode extends XMLNode {
     super(type);
   }
 
+  // Workaround to a bug in XMLNodeClassLoader.
+  public abstract void xmlAddNode(String xmlName, AbstractXMLSTNode node);
+
+  @Override
+  public void xmlAddNode(final String xmlName, final XMLNode node) {
+    xmlAddNode(xmlName, (AbstractXMLSTNode) node);
+  }
+
   /**
    * Returns the type of this node. This method allows to access the node type
    * in a StringTemplate using the <code>astType</code> attribute.

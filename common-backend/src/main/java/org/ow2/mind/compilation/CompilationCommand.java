@@ -31,6 +31,10 @@ public interface CompilationCommand {
 
   void prepare();
 
+  String getCommand();
+
+  void setCommand(final String command);
+
   Collection<File> getInputFiles();
 
   Collection<File> getOutputFiles();

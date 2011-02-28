@@ -22,21 +22,22 @@
 
 package org.ow2.mind.adl.graph;
 
-import static org.ow2.mind.BCImplChecker.checkBCImplementation;
-
 import java.util.HashMap;
 import java.util.Map;
 
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.Loader;
+import org.ow2.mind.CommonFrontendModule;
+import org.ow2.mind.adl.ADLFrontendModule;
 import org.ow2.mind.adl.ASTChecker;
-import org.ow2.mind.adl.ErrorLoader;
-import org.ow2.mind.adl.Factory;
 import org.ow2.mind.adl.GraphChecker;
-import org.ow2.mind.error.ErrorManager;
-import org.ow2.mind.error.ErrorManagerFactory;
+import org.ow2.mind.idl.IDLFrontendModule;
+import org.ow2.mind.plugin.PluginLoaderModule;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 
 public class TestGraph {
 
@@ -51,35 +52,16 @@ public class TestGraph {
 
   @BeforeMethod(alwaysRun = true)
   protected void setUp() throws Exception {
-    final ErrorManager errorManager = ErrorManagerFactory
-        .newSimpleErrorManager();
-
-    final ErrorLoader errL = new ErrorLoader();
-    errL.errorManagerItf = errorManager;
-    errL.clientLoader = Factory.newLoader(errorManager);
-    loader = errL;
-
-    final BasicInstantiator bi = new BasicInstantiator();
-    final AttributeInstantiator ai = new AttributeInstantiator();
-
-    ai.clientInstantiatorItf = bi;
-    bi.loaderItf = loader;
-    instantiator = ai;
+    final Injector injector = Guice.createInjector(new CommonFrontendModule(),
+        new PluginLoaderModule(), new IDLFrontendModule(),
+        new ADLFrontendModule());
+    loader = injector.getInstance(Loader.class);
+    instantiator = injector.getInstance(Instantiator.class);
 
     context = new HashMap<Object, Object>();
 
     astChecker = new ASTChecker();
     graphChecker = new GraphChecker(astChecker);
-  }
-
-  @Test(groups = {"functional", "checkin"})
-  public void testBasicInstantiatorBC() throws Exception {
-    checkBCImplementation(new BasicInstantiator());
-  }
-
-  @Test(groups = {"functional", "checkin"})
-  public void testAttributeInstantiatorBC() throws Exception {
-    checkBCImplementation(new AttributeInstantiator());
   }
 
   @Test(groups = {"functional"})

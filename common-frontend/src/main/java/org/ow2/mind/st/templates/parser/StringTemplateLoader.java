@@ -22,9 +22,6 @@
 
 package org.ow2.mind.st.templates.parser;
 
-import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
-import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -37,30 +34,23 @@ import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.Loader;
 import org.objectweb.fractal.adl.error.BasicErrorLocator;
 import org.objectweb.fractal.adl.error.ErrorLocator;
+import org.objectweb.fractal.adl.error.NodeErrorLocator;
 import org.objectweb.fractal.adl.util.ClassLoaderHelper;
 import org.objectweb.fractal.adl.xml.XMLNodeFactory;
-import org.objectweb.fractal.api.NoSuchInterfaceException;
-import org.objectweb.fractal.api.control.BindingController;
-import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.ow2.mind.st.templates.ast.TemplateComponent;
 import org.ow2.mind.st.templates.jtb.ParseException;
 import org.ow2.mind.st.templates.jtb.Parser;
 import org.ow2.mind.st.templates.jtb.syntaxtree.TemplateComponentDefinition;
 
-public class StringTemplateLoader implements Loader, BindingController {
+import com.google.inject.Inject;
+
+public class StringTemplateLoader implements Loader {
 
   protected static final String DTD                = "classpath://org/ow2/mind/st/xml/template-component.dtd";
 
   public static final String    TEMPLATE_EXTENSION = ".stc";
 
-  // ---------------------------------------------------------------------------
-  // Client interfaces
-  // ---------------------------------------------------------------------------
-
-  /**
-   * Client interface bound to the {@link XMLNodeFactory node factory}
-   * component.
-   */
+  @Inject
   public XMLNodeFactory         nodeFactoryItf;
 
   // ---------------------------------------------------------------------------
@@ -84,8 +74,8 @@ public class StringTemplateLoader implements Loader, BindingController {
     }
 
     if (!tc.getName().equals(name)) {
-      throw new CompilerError(ADLErrors.WRONG_DEFINITION_NAME, tc, name,
-          tc.getName());
+      throw new CompilerError(ADLErrors.WRONG_DEFINITION_NAME,
+          new NodeErrorLocator(tc), name, tc.getName());
     }
 
     String content = tc.getContent();
@@ -103,8 +93,14 @@ public class StringTemplateLoader implements Loader, BindingController {
 
   protected URL locateTemplateComponent(final String name,
       final Map<Object, Object> context) {
-    return ClassLoaderHelper.getClassLoader(this, context).getResource(
-        (name.replace('.', '/') + TEMPLATE_EXTENSION));
+    final String templateFileName = name.replace('.', '/') + TEMPLATE_EXTENSION;
+    final URL templateURL = ClassLoaderHelper.getClassLoader(this, context)
+        .getResource(templateFileName);
+    if (templateURL == null) {
+      throw new CompilerError(ADLErrors.IO_ERROR, templateFileName);
+    }
+    return templateURL;
+
   }
 
   protected TemplateComponent readTemplate(final URL srcFile)
@@ -117,49 +113,4 @@ public class StringTemplateLoader implements Loader, BindingController {
         .TemplateComponentDefinition();
     return processor.toTemplateComponent(content);
   }
-
-  // ---------------------------------------------------------------------------
-  // Implementation of the BindingController interface
-  // ---------------------------------------------------------------------------
-
-  public void bindFc(final String itfName, final Object value)
-      throws NoSuchInterfaceException, IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(XMLNodeFactory.ITF_NAME)) {
-      this.nodeFactoryItf = (XMLNodeFactory) value;
-    } else {
-      throw new NoSuchInterfaceException("There is no interface named '"
-          + itfName + "'");
-    }
-
-  }
-
-  public String[] listFc() {
-    return listFcHelper(XMLNodeFactory.ITF_NAME);
-  }
-
-  public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
-    checkItfName(itfName);
-
-    if (itfName.equals(XMLNodeFactory.ITF_NAME)) {
-      return this.nodeFactoryItf;
-    } else {
-      throw new NoSuchInterfaceException("There is no interface named '"
-          + itfName + "'");
-    }
-  }
-
-  public void unbindFc(final String itfName) throws NoSuchInterfaceException,
-      IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(XMLNodeFactory.ITF_NAME)) {
-      this.nodeFactoryItf = null;
-    } else {
-      throw new NoSuchInterfaceException("There is no interface named '"
-          + itfName + "'");
-    }
-  }
-
 }

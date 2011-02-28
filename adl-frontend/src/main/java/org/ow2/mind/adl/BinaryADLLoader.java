@@ -23,8 +23,6 @@
 package org.ow2.mind.adl;
 
 import static java.lang.System.currentTimeMillis;
-import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
-import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
 import static org.ow2.mind.InputResourcesHelper.getTimestamp;
 
 import java.io.IOException;
@@ -37,54 +35,40 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.objectweb.fractal.adl.ADLException;
-import org.objectweb.fractal.adl.AbstractLoader;
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.NodeFactory;
 import org.objectweb.fractal.adl.NodeUtil;
 import org.objectweb.fractal.adl.error.GenericErrors;
 import org.objectweb.fractal.adl.io.NodeInputStream;
 import org.objectweb.fractal.adl.util.FractalADLLogManager;
-import org.objectweb.fractal.api.NoSuchInterfaceException;
-import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.ow2.mind.ForceRegenContextHelper;
 import org.ow2.mind.InputResource;
 import org.ow2.mind.InputResourceLocator;
 import org.ow2.mind.InputResourcesHelper;
 import org.ow2.mind.error.ErrorManager;
 
+import com.google.inject.Inject;
+
 /**
  * Delegating loader that tries to load ADL definition from binary files (if
  * presents and up to date).
  */
-public class BinaryADLLoader extends AbstractLoader {
+public class BinaryADLLoader extends AbstractDelegatingLoader {
 
-  protected static Logger     logger = FractalADLLogManager
-                                         .getLogger("loader.BinaryLoader");
+  protected static Logger        logger = FractalADLLogManager
+                                            .getLogger("loader.BinaryLoader");
 
-  // ---------------------------------------------------------------------------
-  // Client interfaces
-  // ---------------------------------------------------------------------------
+  @Inject
+  protected ErrorManager         errorManagerItf;
 
-  /** The {@link ErrorManager} client interface used to log errors. */
-  public ErrorManager         errorManagerItf;
+  @Inject
+  protected ADLLocator           adlLocatorItf;
 
-  /**
-   * The {@link ADLLocator} client interface used to locate binary and source
-   * ADL files.
-   */
-  public ADLLocator           adlLocatorItf;
+  @Inject
+  protected InputResourceLocator inputResourceLocatorItf;
 
-  /**
-   * The {@link InputResourceLocator} client interface used to locate and check
-   * timestamps of dependencies of ADL AST.
-   */
-  public InputResourceLocator inputResourceLocatorItf;
-
-  /**
-   * The {@link NodeFactory} client interface used to retrieve the class-loader
-   * to be used to load node classes.
-   */
-  public NodeFactory          nodeFactoryItf;
+  @Inject
+  protected NodeFactory          nodeFactoryItf;
 
   // ---------------------------------------------------------------------------
   // Implementation of the Loader interface
@@ -114,7 +98,13 @@ public class BinaryADLLoader extends AbstractLoader {
       if (logger.isLoggable(Level.FINE))
         logger.log(Level.FINE, "Load ADL \"" + name
             + "\". source unavailable, load binary");
-      return loadBinaryADL(name, binADL, context);
+      try {
+        return loadBinaryADL(name, binADL, context);
+      } catch (final IOException e) {
+        errorManagerItf.logFatal(GenericErrors.INTERNAL_ERROR, e,
+            "Can't read binary ADL " + binADL + ".");
+        return null;
+      }
     }
 
     // both binary and source file are available, check timestamps:
@@ -137,22 +127,31 @@ public class BinaryADLLoader extends AbstractLoader {
       // if binary file is more recent than source file, check dependencies.
 
       // load binary ADL to retrieve list of input resources.
-      final Definition binDef = loadBinaryADL(name, binADL, context);
+      Definition binDef;
+      try {
+        binDef = loadBinaryADL(name, binADL, context);
+      } catch (final IOException e) {
+        errorManagerItf.logWarning(GenericErrors.INTERNAL_ERROR, e,
+            "Can't read binary ADL " + binADL + ". Use source ADL.");
+        return null;
+      }
 
-      final Set<InputResource> dependencies = InputResourcesHelper
-          .getInputResources(binDef);
-      if (logger.isLoggable(Level.FINEST))
-        logger.log(Level.FINEST, "Load ADL \"" + name
-            + "\". check dependencies=" + dependencies);
-      if (dependencies != null
-          && inputResourceLocatorItf.isUpToDate(binTimestamp, dependencies,
-              context)) {
+      if (binDef != null) {
+        final Set<InputResource> dependencies = InputResourcesHelper
+            .getInputResources(binDef);
         if (logger.isLoggable(Level.FINEST))
           logger.log(Level.FINEST, "Load ADL \"" + name
-              + "\". Binary version is up-to-date");
+              + "\". check dependencies=" + dependencies);
+        if (dependencies != null
+            && inputResourceLocatorItf.isUpToDate(binTimestamp, dependencies,
+                context)) {
+          if (logger.isLoggable(Level.FINEST))
+            logger.log(Level.FINEST, "Load ADL \"" + name
+                + "\". Binary version is up-to-date");
 
-        // binary version is up to date, return it
-        return binDef;
+          // binary version is up to date, return it
+          return binDef;
+        }
       }
     }
 
@@ -180,7 +179,7 @@ public class BinaryADLLoader extends AbstractLoader {
   }
 
   protected Definition loadBinaryADL(final String name, final URL location,
-      final Map<Object, Object> context) throws ADLException {
+      final Map<Object, Object> context) throws ADLException, IOException {
     try {
       final InputStream is = location.openStream();
       final NodeInputStream nis = new NodeInputStream(is,
@@ -204,79 +203,10 @@ public class BinaryADLLoader extends AbstractLoader {
       nis.close();
 
       return d;
-    } catch (final IOException e) {
-      errorManagerItf.logFatal(GenericErrors.INTERNAL_ERROR, e,
-          "Can't read binary ADL " + location);
-      return null;
     } catch (final ClassNotFoundException e) {
       errorManagerItf.logFatal(GenericErrors.INTERNAL_ERROR, e,
           "Can't read binary ADL " + location);
       return null;
-    }
-  }
-
-  // ---------------------------------------------------------------------------
-  // Overridden BindingController methods
-  // ---------------------------------------------------------------------------
-
-  @Override
-  public void bindFc(final String itfName, final Object value)
-      throws NoSuchInterfaceException, IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(ErrorManager.ITF_NAME)) {
-      errorManagerItf = (ErrorManager) value;
-    } else if (itfName.equals(ADLLocator.ITF_NAME)) {
-      adlLocatorItf = (ADLLocator) value;
-    } else if (itfName.equals(InputResourceLocator.ITF_NAME)) {
-      inputResourceLocatorItf = (InputResourceLocator) value;
-    } else if (itfName.equals(NodeFactory.ITF_NAME)) {
-      nodeFactoryItf = (NodeFactory) value;
-    } else {
-      super.bindFc(itfName, value);
-    }
-
-  }
-
-  @Override
-  public String[] listFc() {
-    return listFcHelper(super.listFc(), ErrorManager.ITF_NAME,
-        ADLLocator.ITF_NAME, InputResourceLocator.ITF_NAME,
-        NodeFactory.ITF_NAME);
-  }
-
-  @Override
-  public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
-    checkItfName(itfName);
-
-    if (itfName.equals(ErrorManager.ITF_NAME)) {
-      return errorManagerItf;
-    } else if (itfName.equals(ADLLocator.ITF_NAME)) {
-      return adlLocatorItf;
-    } else if (itfName.equals(InputResourceLocator.ITF_NAME)) {
-      return inputResourceLocatorItf;
-    } else if (itfName.equals(NodeFactory.ITF_NAME)) {
-      return nodeFactoryItf;
-    } else {
-      return super.lookupFc(itfName);
-    }
-  }
-
-  @Override
-  public void unbindFc(final String itfName) throws NoSuchInterfaceException,
-      IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(ErrorManager.ITF_NAME)) {
-      errorManagerItf = null;
-    } else if (itfName.equals(ADLLocator.ITF_NAME)) {
-      adlLocatorItf = null;
-    } else if (itfName.equals(InputResourceLocator.ITF_NAME)) {
-      inputResourceLocatorItf = null;
-    } else if (itfName.equals(NodeFactory.ITF_NAME)) {
-      nodeFactoryItf = null;
-    } else {
-      super.unbindFc(itfName);
     }
   }
 }

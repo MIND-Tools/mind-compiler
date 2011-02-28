@@ -91,6 +91,7 @@ fi
 
 MIND_RUNTIME="$MIND_HOME"/runtime
 MIND_LIB="$MIND_HOME"/lib
+MIND_EXT="$MIND_HOME"/ext
 
 # For Cygwin, ensure paths are in UNIX format before anything is touched
 if $cygwin ; then
@@ -100,6 +101,8 @@ if $cygwin ; then
     JAVA_HOME=`cygpath --unix "$JAVA_HOME"`
   [ -n "$MIND_LIB" ] &&
     MIND_LIB=`cygpath --path --unix "$MIND_LIB"`
+  [ -n "$MIND_EXT" ] &&
+    MIND_EXT=`cygpath --path --unix "$MIND_EXT"`
   [ -n "$MIND_RUNTIME" ] &&
     MIND_RUNTIME=`cygpath --path --unix "$MIND_RUNTIME"`
 fi
@@ -151,6 +154,8 @@ if $cygwin; then
     HOME=`cygpath --path --windows "$HOME"`
   [ -n "$MIND_LIB" ] &&
     MIND_LIB=`cygpath --path --windows "$MIND_LIB"`
+  [ -n "$MIND_EXT" ] &&
+    MIND_EXT=`cygpath --path --windows "$MIND_EXT"`
   [ -n "$MIND_RUNTIME" ] &&
     MIND_RUNTIME=`cygpath --path --windows "$MIND_RUNTIME"`
 fi
@@ -158,19 +163,20 @@ fi
 
 
 
-JAR_SET=`ls "$MIND_LIB"`
-for i in $JAR_SET; do
+for i in "${MIND_LIB}"/*.jar "${MIND_EXT}"/*.jar; do
   if [ -z "$MIND_CLASSPATH" ] ; then
     if $cygwin; then
-      MIND_CLASSPATH="${MIND_LIB}\\${i}"
+      lib=`cygpath --path --windows "${i}"`
+      MIND_CLASSPATH="${lib}"
     else
-      MIND_CLASSPATH="${MIND_LIB}/${i}"
+      MIND_CLASSPATH="${i}"
     fi
   else
     if $cygwin; then
-      MIND_CLASSPATH="${MIND_CLASSPATH};${MIND_LIB}\\${i}"
+      lib=`cygpath --path --windows "${i}"`
+      MIND_CLASSPATH="${MIND_CLASSPATH};${lib}"
     else
-      MIND_CLASSPATH="${MIND_CLASSPATH}:${MIND_LIB}/${i}"
+      MIND_CLASSPATH="${MIND_CLASSPATH}:${i}"
     fi
   fi
 done
@@ -185,7 +191,7 @@ done
 exec "$JAVACMD" \
   -classpath "${MIND_CLASSPATH}" \
   ${MIND_OPTS} \
-  -Dcecilia.launcher.name=mindc \
+  -Dmindc.launcher.name=mindc \
   ${LAUNCHER} \
   -src-path="${MIND_RUNTIME}" \
   "$@"

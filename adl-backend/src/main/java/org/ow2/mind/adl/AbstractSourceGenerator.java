@@ -22,9 +22,6 @@
 
 package org.ow2.mind.adl;
 
-import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
-import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
-
 import java.io.File;
 import java.util.Map;
 import java.util.logging.Level;
@@ -32,13 +29,13 @@ import java.util.logging.Logger;
 
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.util.FractalADLLogManager;
-import org.objectweb.fractal.api.NoSuchInterfaceException;
-import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.ow2.mind.ForceRegenContextHelper;
 import org.ow2.mind.InputResourceLocator;
 import org.ow2.mind.InputResourcesHelper;
 import org.ow2.mind.io.OutputFileLocator;
 import org.ow2.mind.st.AbstractStringTemplateProcessor;
+
+import com.google.inject.Inject;
 
 /**
  * @author ozcane
@@ -48,17 +45,14 @@ public abstract class AbstractSourceGenerator
       AbstractStringTemplateProcessor {
 
   // The dep logger
-  protected static Logger     depLogger = FractalADLLogManager.getLogger("dep");
+  protected static Logger        depLogger = FractalADLLogManager
+                                               .getLogger("dep");
 
-  // ---------------------------------------------------------------------------
-  // Client Interfaces
-  // ---------------------------------------------------------------------------
+  @Inject
+  protected OutputFileLocator    outputFileLocatorItf;
 
-  /** Client interface used to locate output files. */
-  public OutputFileLocator    outputFileLocatorItf;
-
-  /** client interface used to checks timestamps of input resources. */
-  public InputResourceLocator inputResourceLocatorItf;
+  @Inject
+  protected InputResourceLocator inputResourceLocatorItf;
 
   // ---------------------------------------------------------------------------
   // Constructor
@@ -84,8 +78,8 @@ public abstract class AbstractSourceGenerator
       return true;
     }
 
-    if (!inputResourceLocatorItf.isUpToDate(outputFile, InputResourcesHelper
-        .getInputResources(definition), context)) {
+    if (!inputResourceLocatorItf.isUpToDate(outputFile,
+        InputResourcesHelper.getInputResources(definition), context)) {
       if (depLogger.isLoggable(Level.FINE)) {
         depLogger.fine("Generated source file '" + outputFile
             + "' is out-of-date, regenerate.");
@@ -99,57 +93,5 @@ public abstract class AbstractSourceGenerator
       return false;
     }
 
-  }
-
-  // ---------------------------------------------------------------------------
-  // Implementation of the BindingController interface
-  // ---------------------------------------------------------------------------
-
-  @Override
-  public void bindFc(final String itfName, final Object value)
-      throws NoSuchInterfaceException, IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(OutputFileLocator.ITF_NAME)) {
-      outputFileLocatorItf = (OutputFileLocator) value;
-    } else if (itfName.equals(InputResourceLocator.ITF_NAME)) {
-      inputResourceLocatorItf = (InputResourceLocator) value;
-    } else {
-      super.bindFc(itfName, value);
-    }
-
-  }
-
-  @Override
-  public String[] listFc() {
-    return listFcHelper(super.listFc(), OutputFileLocator.ITF_NAME,
-        InputResourceLocator.ITF_NAME);
-  }
-
-  @Override
-  public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
-    checkItfName(itfName);
-
-    if (itfName.equals(OutputFileLocator.ITF_NAME)) {
-      return outputFileLocatorItf;
-    } else if (itfName.equals(InputResourceLocator.ITF_NAME)) {
-      return inputResourceLocatorItf;
-    } else {
-      return super.lookupFc(itfName);
-    }
-  }
-
-  @Override
-  public void unbindFc(final String itfName) throws NoSuchInterfaceException,
-      IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(OutputFileLocator.ITF_NAME)) {
-      outputFileLocatorItf = null;
-    } else if (itfName.equals(InputResourceLocator.ITF_NAME)) {
-      inputResourceLocatorItf = null;
-    } else {
-      super.unbindFc(itfName);
-    }
   }
 }

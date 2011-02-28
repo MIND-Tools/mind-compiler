@@ -22,8 +22,6 @@
 
 package org.ow2.mind.adl;
 
-import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
-import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
 import static org.ow2.mind.NameHelper.toValidName;
 import static org.ow2.mind.PathHelper.fullyQualifiedNameToPath;
 
@@ -34,43 +32,35 @@ import java.util.Map;
 import java.util.Set;
 
 import org.antlr.stringtemplate.StringTemplate;
-import org.antlr.stringtemplate.StringTemplateGroupLoader;
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.CompilerError;
 import org.objectweb.fractal.adl.Definition;
-import org.objectweb.fractal.api.NoSuchInterfaceException;
-import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.ow2.mind.SourceFileWriter;
 import org.ow2.mind.adl.graph.ComponentGraph;
 import org.ow2.mind.io.IOErrors;
-import org.ow2.mind.st.StringTemplateComponentLoader;
+
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
 
 /**
  * {@link InstanceSourceGenerator} component that generated {@value #FILE_EXT}
- * files using the {@value #INSTANCE_TEMPLATE_NAME} template.
+ * files using the {@value #DEFAULT_TEMPLATE} template.
  */
 public class BasicInstanceSourceGenerator extends AbstractSourceGenerator
     implements
       InstanceSourceGenerator {
 
-  protected static final String INSTANCE_TEMPLATE_NAME = "st.instances.Component";
-  protected static final String FILE_EXT               = ".c";
+  /** The name to be used to inject the templateGroupName used by this class. */
+  public static final String    TEMPLATE_NAME    = "instances";
 
-  // ---------------------------------------------------------------------------
-  // Constructors
-  // ---------------------------------------------------------------------------
+  /** The default templateGroupName used by this class. */
+  public static final String    DEFAULT_TEMPLATE = "st.instances.Component";
 
-  /**
-   * Public constructor.
-   */
-  public BasicInstanceSourceGenerator() {
-    super(INSTANCE_TEMPLATE_NAME);
-  }
+  protected static final String FILE_EXT         = ".c";
 
-  /**
-   * Protected constructor can be used by sub-class.
-   */
-  protected BasicInstanceSourceGenerator(final String templateGroupName) {
+  @Inject
+  protected BasicInstanceSourceGenerator(
+      @Named(TEMPLATE_NAME) final String templateGroupName) {
     super(templateGroupName);
   }
 
@@ -133,8 +123,8 @@ public class BasicInstanceSourceGenerator extends AbstractSourceGenerator
       try {
         SourceFileWriter.writeToFile(outputFile, st.toString());
       } catch (final IOException e) {
-        throw new CompilerError(IOErrors.WRITE_ERROR, e, outputFile
-            .getAbsolutePath());
+        throw new CompilerError(IOErrors.WRITE_ERROR, e,
+            outputFile.getAbsolutePath());
       }
     }
   }
@@ -147,49 +137,4 @@ public class BasicInstanceSourceGenerator extends AbstractSourceGenerator
       addDefinitions(subComp, definitions);
     }
   }
-
-  // ---------------------------------------------------------------------------
-  // Implementation of the BindingController interface
-  // ---------------------------------------------------------------------------
-  @Override
-  public void bindFc(final String itfName, final Object value)
-      throws NoSuchInterfaceException, IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(StringTemplateComponentLoader.ITF_NAME)) {
-      templateGroupLoaderItf = (StringTemplateGroupLoader) value;
-    } else {
-      super.bindFc(itfName, value);
-    }
-
-  }
-
-  @Override
-  public String[] listFc() {
-    return listFcHelper(super.listFc(), StringTemplateComponentLoader.ITF_NAME);
-  }
-
-  @Override
-  public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
-    checkItfName(itfName);
-
-    if (itfName.equals(StringTemplateComponentLoader.ITF_NAME)) {
-      return templateGroupLoaderItf;
-    } else {
-      return super.lookupFc(itfName);
-    }
-  }
-
-  @Override
-  public void unbindFc(final String itfName) throws NoSuchInterfaceException,
-      IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(StringTemplateComponentLoader.ITF_NAME)) {
-      templateGroupLoaderItf = null;
-    } else {
-      super.unbindFc(itfName);
-    }
-  }
-
 }

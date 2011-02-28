@@ -22,102 +22,56 @@
 
 package org.ow2.mind.adl;
 
-import static org.ow2.mind.plugin.ast.PluginASTHelper.getExtensionConfig;
-
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
 
-import org.objectweb.fractal.adl.ADLException;
-import org.objectweb.fractal.adl.CompilerError;
-import org.objectweb.fractal.adl.Definition;
-import org.objectweb.fractal.adl.error.GenericErrors;
-import org.ow2.mind.VoidVisitor;
+import org.ow2.mind.plugin.ConfigurationElement;
 import org.ow2.mind.plugin.PluginManager;
-import org.ow2.mind.plugin.ast.Extension;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
+import org.ow2.mind.plugin.util.BooleanEvaluatorHelper;
 
 public class VisitorExtensionHelper {
 
-  public static final String                                 DEFINITION_SOURCE_GENERATOR_EXTENSION = "org.ow2.mind.adl.definition-source-generators";
-  public static final String                                 INSTANCE_SOURCE_GENERATOR             = "org.ow2.mind.adl.instance-source-generators";
+  public static final String  DEFINITION_SOURCE_GENERATOR_EXTENSION = "org.ow2.mind.adl.definition-source-generators";
+  public static final String  INSTANCE_SOURCE_GENERATOR_EXTENSION   = "org.ow2.mind.adl.instance-source-generators";
 
-  public static final String[]                               extensionPoints                       = {
-      DEFINITION_SOURCE_GENERATOR_EXTENSION, INSTANCE_SOURCE_GENERATOR                             };
+  private static final String CLASS                                 = "class";
+  private static final String VISITOR                               = "visitor";
+  private static final String ENABLE_WHEN                           = "enableWhen";
 
-  protected static Map<String, Collection<VisitorExtension>> visitorExtensions                     = null;
-
-  public static Collection<VisitorExtension> getVisitorExtensions(
-      final String extensionPoint, final PluginManager pluginManagerItf,
-      final Map<Object, Object> context) throws ADLException {
-    if (visitorExtensions == null) {
-      initVisitorExtensions(pluginManagerItf, context);
-    }
-    return visitorExtensions.get(extensionPoint);
-  }
-
-  protected static void initVisitorExtensions(
-      final PluginManager pluginManagerItf, final Map<Object, Object> context)
-      throws ADLException {
-    visitorExtensions = new HashMap<String, Collection<VisitorExtension>>();
-    for (final String extensionPoint : extensionPoints) {
-      final Collection<VisitorExtension> extPointExtensions = new ArrayList<VisitorExtension>();
-      visitorExtensions.put(extensionPoint, extPointExtensions);
-      final Collection<Extension> extensions = pluginManagerItf.getExtensions(
-          extensionPoint, context);
-      for (final Extension extension : extensions) {
-        final VisitorExtension visitorExtension = new VisitorExtension();
-        extPointExtensions.add(visitorExtension);
-        final NodeList nodes = getExtensionConfig(extension).getChildNodes();
-        for (int i = 0; i < nodes.getLength(); i++) {
-          final Node node = nodes.item(i);
-          if (node instanceof Element) {
-            final Element element = (Element) node;
-            if (element.getNodeName().equals("visitor")) {
-              visitorExtension.setVisitor(element.getAttribute("class"));
-              visitorExtension.setVisitorName(element.getAttribute("name"));
-            }
-          }
-        }
+  public static Collection<DefinitionSourceGenerator> getDefinitionSourceGeneratorExtensions(
+      final PluginManager pluginManagerItf, final Map<Object, Object> context) {
+    final Collection<DefinitionSourceGenerator> generators = new ArrayList<DefinitionSourceGenerator>();
+    for (final ConfigurationElement configElement : pluginManagerItf
+        .getConfigurationElements(DEFINITION_SOURCE_GENERATOR_EXTENSION,
+            VISITOR)) {
+      final ConfigurationElement condition = configElement
+          .getChild(ENABLE_WHEN);
+      if (condition == null
+          || BooleanEvaluatorHelper.evaluate(condition.getChild(),
+              pluginManagerItf, context)) {
+        generators.add(configElement.createInstance(CLASS,
+            DefinitionSourceGenerator.class));
       }
     }
+    return generators;
   }
 
-  protected static final class VisitorExtension {
-    private VoidVisitor<Definition> visitor     = null;
-    private String                  visitorName = null;
-
-    public VoidVisitor<?> getVisitor() {
-      return visitor;
-    }
-
-    public void setVisitor(final String visitorClass) throws ADLException {
-      try {
-        visitor = VisitorExtension.class.getClassLoader()
-            .loadClass(visitorClass).asSubclass(VoidVisitor.class)
-            .newInstance();
-      } catch (final InstantiationException e) {
-        throw new CompilerError(GenericErrors.GENERIC_ERROR, e,
-            "Extension class '" + visitorClass + "' cannot be instantiated.");
-      } catch (final IllegalAccessException e) {
-        throw new CompilerError(GenericErrors.GENERIC_ERROR, e,
-            "Illegal access to the extension class '" + visitorClass + "'.");
-      } catch (final ClassNotFoundException e) {
-        throw new CompilerError(GenericErrors.GENERIC_ERROR, e,
-            "Extension class '" + visitorClass + "' not found.");
+  public static Collection<InstanceSourceGenerator> getInstanceSourceGeneratorExtensions(
+      final PluginManager pluginManagerItf, final Map<Object, Object> context) {
+    final Collection<InstanceSourceGenerator> generators = new ArrayList<InstanceSourceGenerator>();
+    for (final ConfigurationElement configElement : pluginManagerItf
+        .getConfigurationElements(INSTANCE_SOURCE_GENERATOR_EXTENSION, VISITOR)) {
+      final ConfigurationElement condition = configElement
+          .getChild(ENABLE_WHEN);
+      if (condition == null
+          || BooleanEvaluatorHelper.evaluate(condition.getChild(),
+              pluginManagerItf, context)) {
+        generators.add(configElement.createInstance(CLASS,
+            InstanceSourceGenerator.class));
       }
     }
 
-    public String getVisitorName() {
-      return visitorName;
-    }
-
-    public void setVisitorName(final String visitorName) {
-      this.visitorName = visitorName;
-    }
-
+    return generators;
   }
 }

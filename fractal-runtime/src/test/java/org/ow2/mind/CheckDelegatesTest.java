@@ -34,24 +34,25 @@ import java.util.Map;
 
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.error.Error;
-import org.ow2.mind.compilation.BasicCompilationCommandExecutor;
 import org.ow2.mind.compilation.CompilationCommand;
 import org.ow2.mind.compilation.CompilationCommandExecutor;
 import org.ow2.mind.compilation.CompilerCommand;
 import org.ow2.mind.compilation.CompilerContextHelper;
 import org.ow2.mind.compilation.CompilerWrapper;
-import org.ow2.mind.compilation.gcc.GccCompilerWrapper;
 import org.ow2.mind.error.ErrorCollection;
 import org.ow2.mind.error.ErrorManager;
-import org.ow2.mind.error.ErrorManagerFactory;
-import org.ow2.mind.idl.IDLBackendFactory;
+import org.ow2.mind.idl.IDLBackendModule;
+import org.ow2.mind.idl.IDLFrontendModule;
 import org.ow2.mind.idl.IDLLoader;
-import org.ow2.mind.idl.IDLLoaderChainFactory;
 import org.ow2.mind.idl.IDLVisitor;
 import org.ow2.mind.idl.ast.IDL;
 import org.ow2.mind.io.BasicOutputFileLocator;
+import org.ow2.mind.plugin.PluginLoaderModule;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
+
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 
 public class CheckDelegatesTest {
 
@@ -69,16 +70,15 @@ public class CheckDelegatesTest {
 
   @BeforeTest(alwaysRun = true)
   public void setUp() {
-    errorManager = ErrorManagerFactory.newSimpleErrorManager();
-    idlLoader = IDLLoaderChainFactory.newLoader(errorManager).loader;
-    idlCompiler = IDLBackendFactory.newIDLCompiler(idlLoader);
+    final Injector injector = Guice.createInjector(new CommonFrontendModule(),
+        new PluginLoaderModule(), new IDLFrontendModule(),
+        new CommonBackendModule(), new IDLBackendModule());
 
-    final GccCompilerWrapper gcw = new GccCompilerWrapper();
-    gcw.errorManagerItf = errorManager;
-    compilerWrapper = gcw;
-    final BasicCompilationCommandExecutor bcce = new BasicCompilationCommandExecutor();
-    bcce.errorManagerItf = errorManager;
-    commandExecutor = bcce;
+    errorManager = injector.getInstance(ErrorManager.class);
+    idlLoader = injector.getInstance(IDLLoader.class);
+    idlCompiler = injector.getInstance(IDLVisitor.class);
+    compilerWrapper = injector.getInstance(CompilerWrapper.class);
+    commandExecutor = injector.getInstance(CompilationCommandExecutor.class);
 
     context = new HashMap<Object, Object>();
     buildDir = new File("target/build");
@@ -126,11 +126,15 @@ public class CheckDelegatesTest {
   private void compileIDL(final String idlName) throws ADLException {
     errorManager.clear();
     final IDL idl = idlLoader.load(idlName, context);
-    final List<Error> errors = errorManager.getErrors();
+    List<Error> errors = errorManager.getErrors();
     if (!errors.isEmpty()) {
       throw new ADLException(new ErrorCollection(errors));
     }
     idlCompiler.visit(idl, context);
+    errors = errorManager.getErrors();
+    if (!errors.isEmpty()) {
+      throw new ADLException(new ErrorCollection(errors));
+    }
   }
 
   private void compileDelegate(final String delegateName)

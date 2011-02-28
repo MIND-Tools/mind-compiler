@@ -24,6 +24,7 @@ package org.ow2.mind.adl.parser;
 
 import static org.objectweb.fractal.adl.NodeUtil.castNodeError;
 
+import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -32,6 +33,8 @@ import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.CompilerError;
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.Node;
+import org.objectweb.fractal.adl.error.BasicErrorLocator;
+import org.objectweb.fractal.adl.error.ErrorLocator;
 import org.objectweb.fractal.adl.error.GenericErrors;
 import org.objectweb.fractal.adl.error.NodeErrorLocator;
 import org.objectweb.fractal.adl.interfaces.InterfaceContainer;
@@ -59,8 +62,10 @@ import org.ow2.mind.adl.generic.ast.TypeArgument;
 import org.ow2.mind.adl.generic.ast.TypeArgumentContainer;
 import org.ow2.mind.adl.imports.ast.Import;
 import org.ow2.mind.adl.imports.ast.ImportContainer;
+import org.ow2.mind.adl.jtb.ParseException;
 import org.ow2.mind.adl.jtb.Parser;
 import org.ow2.mind.adl.jtb.ParserConstants;
+import org.ow2.mind.adl.jtb.TokenMgrError;
 import org.ow2.mind.adl.jtb.syntaxtree.ADLFile;
 import org.ow2.mind.adl.jtb.syntaxtree.AnnotationAnnotationValue;
 import org.ow2.mind.adl.jtb.syntaxtree.AnnotationParameters;
@@ -125,65 +130,71 @@ import org.ow2.mind.value.ast.StringLiteral;
 import org.ow2.mind.value.ast.Value;
 import org.xml.sax.SAXException;
 
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
+
 /**
  * Translate the JTB AST of an ADL file into a "fractal-adl like" AST.
  */
 public class JTBProcessor extends GJDepthFirst<Node, Node>
     implements
+      ADLJTBParser,
       ParserConstants {
 
-  private final String            filename;
-  private final XMLNodeFactory    nodeFactory;
-  private final ErrorManager      errorManager;
-  private final String            adlDtd;
+  public static final String  ADL_DTD = "adl-dtd";
 
-  private final Set<String>       typeParameters    = new HashSet<String>();
-  private final BeginTokenVisitor beginTokenVisitor = new BeginTokenVisitor();
-  private final EndTokenVisitor   endTokenVisitor   = new EndTokenVisitor();
+  @Inject
+  protected XMLNodeFactory    nodeFactory;
+  @Inject
+  protected ErrorManager      errorManager;
+  @Inject
+  protected BeginTokenVisitor beginTokenVisitor;
+  @Inject
+  protected EndTokenVisitor   endTokenVisitor;
 
-  /**
-   * @param errorManager The error manager to be used to report errors.
-   * @param nodeFactory The node factory to be used for instantiating AST nodes.
-   * @param adlDtd The grammar definition for ADL nodes.
-   * @param filename The name of the parsed file.
-   */
-  public JTBProcessor(final ErrorManager errorManager,
-      final XMLNodeFactory nodeFactory, final String adlDtd,
-      final String filename) {
-    this.errorManager = errorManager;
-    this.nodeFactory = nodeFactory;
-    this.adlDtd = adlDtd;
-    this.filename = filename;
+  @Inject
+  @Named(ADL_DTD)
+  protected String            adlDtd;
+
+  protected Set<String>       typeParameters;
+  protected String            definitionName;
+  protected String            filename;
+
+  public Definition parseADL(final InputStream is, final String definitionName,
+      final String filename) throws ADLException {
+    final Parser parser = new Parser(is);
+    ADLFile content;
     try {
-      nodeFactory.checkDTD(adlDtd);
-    } catch (final SAXException e) {
-      throw new CompilerError(GenericErrors.INTERNAL_ERROR, e,
-          "Error in dtd file '" + adlDtd + "'");
+      content = parser.ADLFile();
+    } catch (final ParseException e) {
+      final ErrorLocator locator = new BasicErrorLocator(filename,
+          e.currentToken.next.beginLine, e.currentToken.next.endLine,
+          e.currentToken.next.beginColumn, e.currentToken.next.endColumn);
+      errorManager.logFatal(ADLErrors.PARSE_ERROR, locator, e.getMessage());
+      return null;
+    } catch (final TokenMgrError e) {
+      // TokenMgrError do not have location info.
+      final ErrorLocator locator = new BasicErrorLocator(filename, -1, -1);
+      errorManager.logFatal(ADLErrors.PARSE_ERROR, locator, e.getMessage());
+      // never executed (logFatal throw an ADLException).
+      return null;
     }
+
+    this.definitionName = definitionName;
+    this.filename = filename;
+    typeParameters = new HashSet<String>();
+    return (Definition) visit(content, null);
   }
 
-  /**
-   * Translate the given JTB AST into a "fractal-adl like" AST.
-   * 
-   * @param fileContent a JTB AST obtained by the {@link Parser ADL Parser}.
-   * @return the top level Definition {@link Node} corresponding to the given
-   *         JTB AST.
-   * @throws ADLException If an error occurs.
-   */
-  public Definition toDefinition(final ADLFile fileContent) throws ADLException {
-    typeParameters.clear();
-    return (Definition) visit(fileContent, null);
-  }
-
-  private Node newNode(final String name) {
+  protected Node newNode(final String name) {
     return newNode(name, null);
   }
 
-  private Node newNode(final String name, final NodeToken source) {
+  protected Node newNode(final String name, final NodeToken source) {
     return newNode(name, source, source);
   }
 
-  private Node newNode(final String name, final NodeToken beginToken,
+  protected Node newNode(final String name, final NodeToken beginToken,
       final NodeToken endToken) {
     Node node;
     try {
@@ -197,17 +208,17 @@ public class JTBProcessor extends GJDepthFirst<Node, Node>
     return node;
   }
 
-  private Node newNode(final String name,
+  protected Node newNode(final String name,
       final org.ow2.mind.adl.jtb.syntaxtree.Node syntaxNode) {
     return newNode(name, syntaxNode.accept(beginTokenVisitor),
         syntaxNode.accept(endTokenVisitor));
   }
 
-  private void setSource(final Node node, final NodeToken source) {
+  protected void setSource(final Node node, final NodeToken source) {
     setSource(node, source, source);
   }
 
-  private void setSource(final Node node, final NodeToken beginToken,
+  protected void setSource(final Node node, final NodeToken beginToken,
       final NodeToken endToken) {
     if (beginToken == null)
       node.astSetSource(filename);
@@ -218,13 +229,13 @@ public class JTBProcessor extends GJDepthFirst<Node, Node>
 
   }
 
-  private void setSource(final Node node,
+  protected void setSource(final Node node,
       final org.ow2.mind.adl.jtb.syntaxtree.Node syntaxNode) {
     setSource(node, syntaxNode.accept(beginTokenVisitor),
         syntaxNode.accept(endTokenVisitor));
   }
 
-  private void copySource(final Node node, final Node from) {
+  protected void copySource(final Node node, final Node from) {
     if (from == null)
       node.astSetSource(filename);
     else

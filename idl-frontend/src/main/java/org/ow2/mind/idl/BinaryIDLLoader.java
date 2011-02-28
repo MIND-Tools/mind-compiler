@@ -23,8 +23,6 @@
 package org.ow2.mind.idl;
 
 import static java.lang.System.currentTimeMillis;
-import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
-import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
 import static org.ow2.mind.InputResourcesHelper.getTimestamp;
 
 import java.io.IOException;
@@ -41,34 +39,29 @@ import org.objectweb.fractal.adl.NodeUtil;
 import org.objectweb.fractal.adl.error.GenericErrors;
 import org.objectweb.fractal.adl.io.NodeInputStream;
 import org.objectweb.fractal.adl.util.FractalADLLogManager;
-import org.objectweb.fractal.api.NoSuchInterfaceException;
-import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.ow2.mind.ForceRegenContextHelper;
 import org.ow2.mind.InputResource;
 import org.ow2.mind.InputResourceLocator;
 import org.ow2.mind.InputResourcesHelper;
+import org.ow2.mind.error.ErrorManager;
+import org.ow2.mind.idl.IDLLoader.AbstractDelegatingIDLLoader;
 import org.ow2.mind.idl.ast.IDL;
 
-public class BinaryIDLLoader extends AbstractIDLLoader {
+import com.google.inject.Inject;
 
-  protected static Logger     logger = FractalADLLogManager
-                                         .getLogger("loader.BinaryLoader");
+public class BinaryIDLLoader extends AbstractDelegatingIDLLoader {
 
-  // ---------------------------------------------------------------------------
-  // Client interfaces
-  // ---------------------------------------------------------------------------
+  protected static Logger        logger = FractalADLLogManager
+                                            .getLogger("loader.BinaryLoader");
 
-  /**
-   * The {@link IDLLocator} client interface used to locate binary and source
-   * IDL files.
-   */
-  public IDLLocator           idlLocatorItf;
+  @Inject
+  protected ErrorManager         errorManagerItf;
 
-  /**
-   * The {@link InputResourceLocator} client interface used to locate and check
-   * timestamps of dependencies of ADL AST.
-   */
-  public InputResourceLocator inputResourceLocatorItf;
+  @Inject
+  protected IDLLocator           idlLocatorItf;
+
+  @Inject
+  protected InputResourceLocator inputResourceLocatorItf;
 
   // ---------------------------------------------------------------------------
   // Implementation of the Loader interface
@@ -198,58 +191,6 @@ public class BinaryIDLLoader extends AbstractIDLLoader {
       errorManagerItf.logFatal(GenericErrors.INTERNAL_ERROR, e,
           "Can't read binary IDL " + location);
       return null;
-    }
-  }
-
-  // ---------------------------------------------------------------------------
-  // Overridden BindingController methods
-  // ---------------------------------------------------------------------------
-
-  @Override
-  public void bindFc(final String itfName, final Object value)
-      throws NoSuchInterfaceException, IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(IDLLocator.ITF_NAME)) {
-      idlLocatorItf = (IDLLocator) value;
-    } else if (itfName.equals(InputResourceLocator.ITF_NAME)) {
-      inputResourceLocatorItf = (InputResourceLocator) value;
-    } else {
-      super.bindFc(itfName, value);
-    }
-
-  }
-
-  @Override
-  public String[] listFc() {
-    return listFcHelper(super.listFc(), IDLLocator.ITF_NAME,
-        InputResourceLocator.ITF_NAME);
-  }
-
-  @Override
-  public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
-    checkItfName(itfName);
-
-    if (itfName.equals(IDLLocator.ITF_NAME)) {
-      return idlLocatorItf;
-    } else if (itfName.equals(InputResourceLocator.ITF_NAME)) {
-      return inputResourceLocatorItf;
-    } else {
-      return super.lookupFc(itfName);
-    }
-  }
-
-  @Override
-  public void unbindFc(final String itfName) throws NoSuchInterfaceException,
-      IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(IDLLocator.ITF_NAME)) {
-      idlLocatorItf = null;
-    } else if (itfName.equals(InputResourceLocator.ITF_NAME)) {
-      inputResourceLocatorItf = null;
-    } else {
-      super.unbindFc(itfName);
     }
   }
 }

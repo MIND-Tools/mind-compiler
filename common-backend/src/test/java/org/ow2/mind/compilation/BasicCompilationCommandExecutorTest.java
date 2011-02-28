@@ -115,12 +115,20 @@ public class BasicCompilationCommandExecutorTest {
   class CPPTask implements CompilationCommand {
 
     Collection<File> inputFiles, outputFiles;
-    final String     name;
+    String           name;
 
     CPPTask(final String name) {
       this.name = name;
       inputFiles = Arrays.asList(new File(name + ".c"));
       outputFiles = Arrays.asList(new File(name + ".i"));
+    }
+
+    public String getCommand() {
+      return name;
+    }
+
+    public void setCommand(final String command) {
+      this.name = command;
     }
 
     public Collection<File> getInputFiles() {
@@ -163,12 +171,20 @@ public class BasicCompilationCommandExecutorTest {
   class GCCTask implements CompilationCommand {
 
     Collection<File> inputFiles, outputFiles;
-    final String     name;
+    String           name;
 
     GCCTask(final String name) {
       this.name = name;
       inputFiles = Arrays.asList(new File(name + ".mpp"));
       outputFiles = Arrays.asList(new File(name + ".o"));
+    }
+
+    public String getCommand() {
+      return name;
+    }
+
+    public void setCommand(final String command) {
+      this.name = command;
     }
 
     public Collection<File> getInputFiles() {
@@ -232,6 +248,13 @@ public class BasicCompilationCommandExecutorTest {
 
     Collection<File> inputFiles  = new ArrayList<File>();
     Collection<File> outputFiles = Arrays.asList(new File("exec"));
+
+    public String getCommand() {
+      return null;
+    }
+
+    public void setCommand(final String command) {
+    }
 
     public Collection<File> getInputFiles() {
       return inputFiles;

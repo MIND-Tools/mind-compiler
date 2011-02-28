@@ -22,30 +22,32 @@
 
 package org.ow2.mind.adl.parameter;
 
-import static org.ow2.mind.BCImplChecker.checkBCImplementation;
-
 import java.util.HashMap;
 import java.util.Map;
 
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.Loader;
-import org.objectweb.fractal.adl.NodeFactoryImpl;
-import org.objectweb.fractal.adl.xml.XMLNodeFactoryImpl;
+import org.objectweb.fractal.adl.merger.NodeMerger;
+import org.ow2.mind.CommonFrontendModule;
 import org.ow2.mind.adl.ASTChecker;
-import org.ow2.mind.adl.BasicADLLocator;
+import org.ow2.mind.adl.AbstractADLFrontendModule;
 import org.ow2.mind.adl.BasicDefinitionReferenceResolver;
 import org.ow2.mind.adl.CacheLoader;
 import org.ow2.mind.adl.CachingDefinitionReferenceResolver;
+import org.ow2.mind.adl.DefinitionReferenceResolver;
 import org.ow2.mind.adl.ErrorLoader;
 import org.ow2.mind.adl.ExtendsLoader;
 import org.ow2.mind.adl.STCFNodeMerger;
 import org.ow2.mind.adl.SubComponentResolverLoader;
 import org.ow2.mind.adl.imports.ImportDefinitionReferenceResolver;
 import org.ow2.mind.adl.parser.ADLParser;
-import org.ow2.mind.error.ErrorManager;
-import org.ow2.mind.error.ErrorManagerFactory;
+import org.ow2.mind.plugin.PluginLoaderModule;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.google.inject.name.Names;
 
 public class TestParameter {
 
@@ -57,87 +59,42 @@ public class TestParameter {
 
   @BeforeMethod(alwaysRun = true)
   protected void setUp() throws Exception {
-    final ErrorManager errorManager = ErrorManagerFactory
-        .newSimpleErrorManager();
 
-    // Loader chain components
-    final ADLParser adlLoader = new ADLParser();
-    final SubComponentResolverLoader scrl = new SubComponentResolverLoader();
-    final ExtendsLoader el = new ExtendsLoader();
-    final CacheLoader cl = new CacheLoader();
-    final ErrorLoader errl = new ErrorLoader();
+    final Injector injector = Guice.createInjector(new CommonFrontendModule(),
+        new PluginLoaderModule(), new AbstractADLFrontendModule() {
 
-    errl.clientLoader = cl;
-    cl.clientLoader = el;
-    el.clientLoader = scrl;
-    scrl.clientLoader = adlLoader;
+          protected void configureTest() {
+            bind(Loader.class).toChainStartingWith(ErrorLoader.class)
+                .followedBy(CacheLoader.class).followedBy(ExtendsLoader.class)
+                .followedBy(SubComponentResolverLoader.class)
+                .endingWith(ADLParser.class);
 
-    errl.errorManagerItf = errorManager;
-    cl.errorManagerItf = errorManager;
-    el.errorManagerItf = errorManager;
-    scrl.errorManagerItf = errorManager;
-    adlLoader.errorManagerItf = errorManager;
+            bind(DefinitionReferenceResolver.class)
+                .toChainStartingWith(CachingDefinitionReferenceResolver.class)
+                .followedBy(ImportDefinitionReferenceResolver.class)
+                .followedBy(ParametricDefinitionReferenceResolver.class)
+                .endingWith(BasicDefinitionReferenceResolver.class);
 
-    // definition reference resolver chain
-    final BasicDefinitionReferenceResolver bdrr = new BasicDefinitionReferenceResolver();
-    final ParametricDefinitionReferenceResolver pdrr = new ParametricDefinitionReferenceResolver();
-    final ImportDefinitionReferenceResolver idrr = new ImportDefinitionReferenceResolver();
-    final CachingDefinitionReferenceResolver cdrr = new CachingDefinitionReferenceResolver();
+            bind(DefinitionReferenceResolver.class)
+                .annotatedWith(
+                    Names.named(ExtendsLoader.EXTENDS_DEFINITION_RESOLVER))
+                .toChainStartingWith(
+                    ExtendsParametricDefinitionReferenceResolver.class)
+                .endingWith(DefinitionReferenceResolver.class);
 
-    cdrr.clientResolverItf = idrr;
-    idrr.clientResolverItf = pdrr;
-    pdrr.clientResolverItf = bdrr;
-    bdrr.loaderItf = cl;
-    cdrr.loaderItf = cl;
+            bind(NodeMerger.class).annotatedWith(
+                Names.named(ExtendsLoader.EXTENDS_NODE_MERGER)).to(
+                STCFNodeMerger.class);
 
-    scrl.definitionReferenceResolverItf = cdrr;
+            setDefaultSubComponentLoaderConfig();
+          }
+        });
 
-    bdrr.errorManagerItf = errorManager;
-    pdrr.errorManagerItf = errorManager;
-
-    final ExtendsParametricDefinitionReferenceResolver epdrr = new ExtendsParametricDefinitionReferenceResolver();
-
-    epdrr.clientResolverItf = cdrr;
-    el.definitionReferenceResolverItf = epdrr;
-
-    // additional components
-    final STCFNodeMerger stcfNodeMerger = new STCFNodeMerger();
-    final BasicADLLocator adlLocator = new BasicADLLocator();
-    final XMLNodeFactoryImpl xmlNodeFactory = new XMLNodeFactoryImpl();
-    final NodeFactoryImpl nodeFactory = new NodeFactoryImpl();
-
-    el.nodeMergerItf = stcfNodeMerger;
-    idrr.adlLocatorItf = adlLocator;
-    adlLoader.adlLocatorItf = adlLocator;
-    adlLoader.nodeFactoryItf = xmlNodeFactory;
-    bdrr.nodeFactoryItf = nodeFactory;
-
-    loader = errl;
+    loader = injector.getInstance(Loader.class);
 
     context = new HashMap<Object, Object>();
 
     checker = new ASTChecker();
-  }
-
-  @Test(groups = {"functional", "checkin"})
-  public void testExtendsParametricDefinitionReferenceResolverBC()
-      throws Exception {
-    checkBCImplementation(new ExtendsParametricDefinitionReferenceResolver());
-  }
-
-  @Test(groups = {"functional", "checkin"})
-  public void testParametricAnonymousDefinitionResolverBC() throws Exception {
-    checkBCImplementation(new ParametricAnonymousDefinitionExtractor());
-  }
-
-  @Test(groups = {"functional", "checkin"})
-  public void testParametricDefinitionReferenceResolverBC() throws Exception {
-    checkBCImplementation(new ParametricDefinitionReferenceResolver());
-  }
-
-  @Test(groups = {"functional", "checkin"})
-  public void testParametricTemplateInstantiatorBC() throws Exception {
-    checkBCImplementation(new ParametricTemplateInstantiator());
   }
 
   @Test(groups = {"functional"})

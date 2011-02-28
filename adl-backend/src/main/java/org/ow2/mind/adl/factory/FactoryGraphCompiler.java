@@ -22,9 +22,6 @@
 
 package org.ow2.mind.adl.factory;
 
-import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
-import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
-
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
@@ -33,9 +30,6 @@ import java.util.Set;
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.Loader;
-import org.objectweb.fractal.api.NoSuchInterfaceException;
-import org.objectweb.fractal.api.control.BindingController;
-import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.ow2.mind.adl.DefinitionCompiler;
 import org.ow2.mind.adl.GraphCompiler;
 import org.ow2.mind.adl.ast.ASTHelper;
@@ -43,21 +37,20 @@ import org.ow2.mind.adl.ast.Component;
 import org.ow2.mind.adl.ast.ComponentContainer;
 import org.ow2.mind.adl.graph.ComponentGraph;
 import org.ow2.mind.compilation.CompilationCommand;
+import org.ow2.mind.inject.InjectDelegate;
 
-public class FactoryGraphCompiler implements GraphCompiler, BindingController {
+import com.google.inject.Inject;
 
-  // ---------------------------------------------------------------------------
-  // Client interfaces
-  // ---------------------------------------------------------------------------
+public class FactoryGraphCompiler implements GraphCompiler {
 
-  public static final String CLIENT_LOADER_ITF_NAME       = "loader";
-  public Loader              loaderItf;
+  @InjectDelegate
+  protected GraphCompiler      clientCompilerItf;
 
-  public static final String CLIENT_COMPILER_ITF_NAME     = "client-compiler";
-  public GraphCompiler       clientCompilerItf;
+  @Inject
+  protected Loader             loaderItf;
 
-  public static final String DEFINITION_COMPILER_ITF_NAME = "definition-compiler";
-  public DefinitionCompiler  definitionCompilerItf;
+  @Inject
+  protected DefinitionCompiler definitionCompilerItf;
 
   // ---------------------------------------------------------------------------
   // Implementation of the Visitor interface
@@ -147,63 +140,6 @@ public class FactoryGraphCompiler implements GraphCompiler, BindingController {
       for (final ComponentGraph subComponent : graph.getSubComponents()) {
         initCompiledDefs(subComponent, compiledDefs);
       }
-    }
-  }
-
-  // ---------------------------------------------------------------------------
-  // Implementation of the BindingController interface
-  // ---------------------------------------------------------------------------
-
-  public void bindFc(final String itfName, final Object value)
-      throws NoSuchInterfaceException, IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(CLIENT_LOADER_ITF_NAME)) {
-      loaderItf = (Loader) value;
-    } else if (itfName.equals(CLIENT_COMPILER_ITF_NAME)) {
-      clientCompilerItf = (GraphCompiler) value;
-    } else if (itfName.equals(DEFINITION_COMPILER_ITF_NAME)) {
-      definitionCompilerItf = (DefinitionCompiler) value;
-    } else {
-      throw new NoSuchInterfaceException("No client interface named '"
-          + itfName + "'");
-    }
-
-  }
-
-  public String[] listFc() {
-    return listFcHelper(CLIENT_LOADER_ITF_NAME, CLIENT_COMPILER_ITF_NAME,
-        DEFINITION_COMPILER_ITF_NAME);
-  }
-
-  public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
-    checkItfName(itfName);
-
-    if (itfName.equals(CLIENT_LOADER_ITF_NAME)) {
-      return loaderItf;
-    } else if (itfName.equals(CLIENT_COMPILER_ITF_NAME)) {
-      return clientCompilerItf;
-    } else if (itfName.equals(DEFINITION_COMPILER_ITF_NAME)) {
-      return definitionCompilerItf;
-    } else {
-      throw new NoSuchInterfaceException("No client interface named '"
-          + itfName + "'");
-    }
-  }
-
-  public void unbindFc(final String itfName) throws NoSuchInterfaceException,
-      IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(CLIENT_LOADER_ITF_NAME)) {
-      loaderItf = null;
-    } else if (itfName.equals(CLIENT_COMPILER_ITF_NAME)) {
-      clientCompilerItf = null;
-    } else if (itfName.equals(DEFINITION_COMPILER_ITF_NAME)) {
-      definitionCompilerItf = null;
-    } else {
-      throw new NoSuchInterfaceException("No client interface named '"
-          + itfName + "'");
     }
   }
 }

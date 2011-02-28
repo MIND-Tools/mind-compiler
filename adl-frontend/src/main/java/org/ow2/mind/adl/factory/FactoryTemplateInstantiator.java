@@ -22,8 +22,6 @@
 
 package org.ow2.mind.adl.factory;
 
-import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
-import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
 import static org.ow2.mind.adl.ast.ASTHelper.getResolvedComponentDefinition;
 import static org.ow2.mind.adl.generic.ast.GenericASTHelper.getTemplateName;
 import static org.ow2.mind.adl.generic.ast.GenericASTHelper.setPartiallyInstiantedTemplate;
@@ -36,9 +34,6 @@ import java.util.Set;
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.Loader;
-import org.objectweb.fractal.api.NoSuchInterfaceException;
-import org.objectweb.fractal.api.control.BindingController;
-import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.ow2.mind.adl.ADLErrors;
 import org.ow2.mind.adl.DefinitionReferenceResolver;
 import org.ow2.mind.adl.annotation.predefined.Singleton;
@@ -46,39 +41,27 @@ import org.ow2.mind.adl.ast.ASTHelper;
 import org.ow2.mind.adl.ast.Component;
 import org.ow2.mind.adl.ast.ComponentContainer;
 import org.ow2.mind.adl.ast.DefinitionReference;
-import org.ow2.mind.adl.generic.TemplateInstantiator;
+import org.ow2.mind.adl.generic.TemplateInstantiator.AbstractDelegatingTemplateInstantiator;
 import org.ow2.mind.adl.generic.ast.FormalTypeParameter;
 import org.ow2.mind.adl.generic.ast.TypeArgument;
 import org.ow2.mind.adl.implementation.SharedImplementationDecorationHelper;
 import org.ow2.mind.annotation.AnnotationHelper;
 import org.ow2.mind.error.ErrorManager;
 
+import com.google.inject.Inject;
+
 public class FactoryTemplateInstantiator
-    implements
-      TemplateInstantiator,
-      BindingController {
+    extends
+      AbstractDelegatingTemplateInstantiator {
 
-  // ---------------------------------------------------------------------------
-  // Client interfaces
-  // ---------------------------------------------------------------------------
+  @Inject
+  protected ErrorManager                errorManagerItf;
 
-  /** The {@link ErrorManager} client interface used to log errors. */
-  public ErrorManager                errorManagerItf;
+  @Inject
+  protected DefinitionReferenceResolver definitionReferenceResolverItf;
 
-  /** The name of the {@link #clientInstantiatorItf} client interface. */
-  public static final String         CLIENT_INSTANTIATOR_ITF_NAME = "client-instantiator";
-
-  /** The client {@link TemplateInstantiator} interface. */
-  public TemplateInstantiator        clientInstantiatorItf;
-
-  /** The interface used to resolve referenced definitions. */
-  public DefinitionReferenceResolver definitionReferenceResolverItf;
-
-  /** The name of the {@link #loaderItf} client interface. */
-  public static final String         LOADER_ITF_NAME              = "loader";
-
-  /** The Loader interface used to load referenced definitions. */
-  public Loader                      loaderItf;
+  @Inject
+  protected Loader                      loaderItf;
 
   // ---------------------------------------------------------------------------
   // Implementation of the TemplateInstantiator interface
@@ -191,68 +174,4 @@ public class FactoryTemplateInstantiator
       }
     }
   }
-
-  // ---------------------------------------------------------------------------
-  // Implementation of the BindingController interface
-  // ---------------------------------------------------------------------------
-
-  public void bindFc(final String itfName, final Object value)
-      throws NoSuchInterfaceException, IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(ErrorManager.ITF_NAME)) {
-      errorManagerItf = (ErrorManager) value;
-    } else if (itfName.equals(DefinitionReferenceResolver.ITF_NAME)) {
-      definitionReferenceResolverItf = (DefinitionReferenceResolver) value;
-    } else if (itfName.equals(CLIENT_INSTANTIATOR_ITF_NAME)) {
-      clientInstantiatorItf = (TemplateInstantiator) value;
-    } else if (LOADER_ITF_NAME.equals(itfName)) {
-      loaderItf = (Loader) value;
-    } else {
-      throw new NoSuchInterfaceException("No client interface named '"
-          + itfName + "' for binding the interface");
-    }
-  }
-
-  public String[] listFc() {
-    return listFcHelper(ErrorManager.ITF_NAME,
-        DefinitionReferenceResolver.ITF_NAME, CLIENT_INSTANTIATOR_ITF_NAME,
-        LOADER_ITF_NAME);
-  }
-
-  public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
-    checkItfName(itfName);
-
-    if (itfName.equals(ErrorManager.ITF_NAME)) {
-      return errorManagerItf;
-    } else if (itfName.equals(DefinitionReferenceResolver.ITF_NAME)) {
-      return definitionReferenceResolverItf;
-    } else if (itfName.equals(CLIENT_INSTANTIATOR_ITF_NAME)) {
-      return clientInstantiatorItf;
-    } else if (LOADER_ITF_NAME.equals(itfName)) {
-      return loaderItf;
-    } else {
-      throw new NoSuchInterfaceException("No client interface named '"
-          + itfName + "'");
-    }
-  }
-
-  public void unbindFc(final String itfName) throws IllegalBindingException,
-      NoSuchInterfaceException {
-    checkItfName(itfName);
-
-    if (itfName.equals(ErrorManager.ITF_NAME)) {
-      errorManagerItf = null;
-    } else if (itfName.equals(DefinitionReferenceResolver.ITF_NAME)) {
-      definitionReferenceResolverItf = null;
-    } else if (itfName.equals(CLIENT_INSTANTIATOR_ITF_NAME)) {
-      clientInstantiatorItf = null;
-    } else if (LOADER_ITF_NAME.equals(itfName)) {
-      loaderItf = null;
-    } else {
-      throw new NoSuchInterfaceException("No client interface named '"
-          + itfName + "'");
-    }
-  }
-
 }

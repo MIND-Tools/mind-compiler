@@ -22,35 +22,25 @@
 
 package org.ow2.mind.adl.interfaces;
 
-import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
-import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
-
 import java.util.Map;
 
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.interfaces.Interface;
 import org.objectweb.fractal.adl.interfaces.InterfaceContainer;
-import org.objectweb.fractal.api.NoSuchInterfaceException;
-import org.objectweb.fractal.api.control.BindingController;
-import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.ow2.mind.adl.DefinitionSourceGenerator;
 import org.ow2.mind.adl.ast.ASTHelper;
 import org.ow2.mind.adl.membrane.ast.InternalInterfaceContainer;
+import org.ow2.mind.inject.InjectDelegate;
 
 public class CollectionInterfaceDefinitionSourceGenerator
     implements
-      DefinitionSourceGenerator,
-      BindingController {
+      DefinitionSourceGenerator {
 
-  public static final String       INDEXES_DECORATION_NAME          = "collectionIndexes";
+  public static final String          INDEXES_DECORATION_NAME = "collectionIndexes";
 
-  // ---------------------------------------------------------------------------
-  // Client interfaces
-  // ---------------------------------------------------------------------------
-  public static final String       CLIENT_SOURCE_GENERATOR_ITF_NAME = "client-source-generator";
-  /** The {@link DefinitionSourceGenerator} client interface. */
-  public DefinitionSourceGenerator clientSourceGeneratorItf;
+  @InjectDelegate
+  protected DefinitionSourceGenerator clientSourceGeneratorItf;
 
   // ---------------------------------------------------------------------------
   // Implementation of the Visitor interface
@@ -89,49 +79,4 @@ public class CollectionInterfaceDefinitionSourceGenerator
     itf.astSetDecoration(INDEXES_DECORATION_NAME, indexes);
     return indexes;
   }
-
-  // ---------------------------------------------------------------------------
-  // Implementation of the BindingController interface
-  // ---------------------------------------------------------------------------
-
-  public void bindFc(final String itfName, final Object value)
-      throws NoSuchInterfaceException, IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(CLIENT_SOURCE_GENERATOR_ITF_NAME)) {
-      clientSourceGeneratorItf = (DefinitionSourceGenerator) value;
-    } else {
-      throw new NoSuchInterfaceException("No client interface named '"
-          + itfName + "'");
-    }
-
-  }
-
-  public String[] listFc() {
-    return listFcHelper(CLIENT_SOURCE_GENERATOR_ITF_NAME);
-  }
-
-  public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
-    checkItfName(itfName);
-
-    if (itfName.equals(CLIENT_SOURCE_GENERATOR_ITF_NAME)) {
-      return clientSourceGeneratorItf;
-    } else {
-      throw new NoSuchInterfaceException("No client interface named '"
-          + itfName + "'");
-    }
-  }
-
-  public void unbindFc(final String itfName) throws NoSuchInterfaceException,
-      IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(CLIENT_SOURCE_GENERATOR_ITF_NAME)) {
-      clientSourceGeneratorItf = null;
-    } else {
-      throw new NoSuchInterfaceException("No client interface named '"
-          + itfName + "'");
-    }
-  }
-
 }

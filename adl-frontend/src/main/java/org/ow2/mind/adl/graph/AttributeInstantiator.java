@@ -35,18 +35,25 @@ import org.ow2.mind.adl.ast.AttributeContainer;
 import org.ow2.mind.adl.ast.Component;
 import org.ow2.mind.adl.ast.ComponentContainer;
 import org.ow2.mind.adl.ast.DefinitionReference;
+import org.ow2.mind.adl.graph.Instantiator.AbstractDelegatingInstantiator;
 import org.ow2.mind.adl.parameter.ast.Argument;
 import org.ow2.mind.adl.parameter.ast.ArgumentContainer;
 import org.ow2.mind.adl.parameter.ast.FormalParameterContainer;
+import org.ow2.mind.error.ErrorManager;
 import org.ow2.mind.value.ast.NullLiteral;
 import org.ow2.mind.value.ast.NumberLiteral;
 import org.ow2.mind.value.ast.Reference;
 import org.ow2.mind.value.ast.StringLiteral;
 import org.ow2.mind.value.ast.Value;
 
-public class AttributeInstantiator extends AbstractInstantiator {
+import com.google.inject.Inject;
+
+public class AttributeInstantiator extends AbstractDelegatingInstantiator {
 
   private static final Map<String, Value> EMPTY_NAME_VALUE_MAP = new HashMap<String, Value>();
+
+  @Inject
+  protected ErrorManager                  errorManagerItf;
 
   // ---------------------------------------------------------------------------
   // Implementation of the Instantiator interface

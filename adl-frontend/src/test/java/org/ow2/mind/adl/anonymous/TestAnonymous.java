@@ -22,30 +22,28 @@
 
 package org.ow2.mind.adl.anonymous;
 
-import static org.ow2.mind.BCImplChecker.checkBCImplementation;
-
 import java.util.HashMap;
 
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.Loader;
-import org.objectweb.fractal.adl.NodeFactoryImpl;
-import org.objectweb.fractal.adl.merger.NodeMergerImpl;
-import org.objectweb.fractal.adl.xml.XMLNodeFactoryImpl;
+import org.ow2.mind.CommonFrontendModule;
 import org.ow2.mind.adl.ASTChecker;
-import org.ow2.mind.adl.BasicADLLocator;
+import org.ow2.mind.adl.AbstractADLFrontendModule;
 import org.ow2.mind.adl.BasicDefinitionReferenceResolver;
 import org.ow2.mind.adl.CacheLoader;
 import org.ow2.mind.adl.CachingDefinitionReferenceResolver;
+import org.ow2.mind.adl.DefinitionReferenceResolver;
 import org.ow2.mind.adl.ErrorLoader;
 import org.ow2.mind.adl.ExtendsLoader;
-import org.ow2.mind.adl.STCFNodeMerger;
 import org.ow2.mind.adl.SubComponentResolverLoader;
 import org.ow2.mind.adl.imports.ImportDefinitionReferenceResolver;
 import org.ow2.mind.adl.parser.ADLParser;
-import org.ow2.mind.error.ErrorManager;
-import org.ow2.mind.error.ErrorManagerFactory;
+import org.ow2.mind.plugin.PluginLoaderModule;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 
 public class TestAnonymous {
 
@@ -57,88 +55,35 @@ public class TestAnonymous {
 
   @BeforeMethod(alwaysRun = true)
   protected void setUp() throws Exception {
-    final ErrorManager errorManager = ErrorManagerFactory
-        .newSimpleErrorManager();
 
-    // Loader chain components
-    final ADLParser adlLoader = new ADLParser();
-    final AnonymousDefinitionLoader adl = new AnonymousDefinitionLoader();
-    final SubComponentResolverLoader scrl = new SubComponentResolverLoader();
-    final ExtendsLoader el = new ExtendsLoader();
-    final CacheLoader cl = new CacheLoader();
-    final ErrorLoader errl = new ErrorLoader();
+    final Injector injector = Guice.createInjector(new CommonFrontendModule(),
+        new PluginLoaderModule(), new AbstractADLFrontendModule() {
 
-    errl.clientLoader = cl;
-    cl.clientLoader = el;
-    el.clientLoader = scrl;
-    scrl.clientLoader = adl;
-    adl.clientLoader = adlLoader;
+          protected void configureTest() {
+            bind(Loader.class).toChainStartingWith(ErrorLoader.class)
+                .followedBy(CacheLoader.class).followedBy(ExtendsLoader.class)
+                .followedBy(SubComponentResolverLoader.class)
+                .followedBy(AnonymousDefinitionLoader.class)
+                .endingWith(ADLParser.class);
 
-    adlLoader.errorManagerItf = errorManager;
-    adl.errorManagerItf = errorManager;
-    scrl.errorManagerItf = errorManager;
-    el.errorManagerItf = errorManager;
-    cl.errorManagerItf = errorManager;
-    errl.errorManagerItf = errorManager;
+            bind(DefinitionReferenceResolver.class)
+                .toChainStartingWith(CachingDefinitionReferenceResolver.class)
+                .followedBy(ImportDefinitionReferenceResolver.class)
+                .endingWith(BasicDefinitionReferenceResolver.class);
 
-    // definition reference resolver chain
-    final BasicDefinitionReferenceResolver bdrr = new BasicDefinitionReferenceResolver();
-    final ImportDefinitionReferenceResolver idrr = new ImportDefinitionReferenceResolver();
-    final CachingDefinitionReferenceResolver cdrr = new CachingDefinitionReferenceResolver();
+            bind(AnonymousDefinitionExtractor.class).toChainStartingWith(
+                ImportAnonymousDefinitionExtractor.class).endingWith(
+                AnonymousDefinitionExtractorImpl.class);
 
-    cdrr.clientResolverItf = idrr;
-    idrr.clientResolverItf = bdrr;
-    bdrr.loaderItf = cl;
-    cdrr.loaderItf = cl;
+            setDefaultExtendsLoaderConfig();
+            setDefaultSubComponentLoaderConfig();
+          }
+        });
 
-    el.definitionReferenceResolverItf = cdrr;
-    scrl.definitionReferenceResolverItf = cdrr;
-
-    bdrr.errorManagerItf = errorManager;
-
-    // anonymous definition resolver chain
-    final AnonymousDefinitionExtractorImpl adr = new AnonymousDefinitionExtractorImpl();
-    final ImportAnonymousDefinitionExtractor iadr = new ImportAnonymousDefinitionExtractor();
-
-    iadr.clientExtractorItf = adr;
-    adl.anonymousDefinitionExtractorItf = iadr;
-
-    // additional components
-    final STCFNodeMerger stcfNodeMerger = new STCFNodeMerger();
-    final BasicADLLocator adlLocator = new BasicADLLocator();
-    final XMLNodeFactoryImpl xmlNodeFactory = new XMLNodeFactoryImpl();
-    final NodeFactoryImpl nodeFactory = new NodeFactoryImpl();
-    final NodeMergerImpl nodeMerger = new NodeMergerImpl();
-
-    el.nodeMergerItf = stcfNodeMerger;
-    idrr.adlLocatorItf = adlLocator;
-    adlLoader.adlLocatorItf = adlLocator;
-    adlLoader.nodeFactoryItf = xmlNodeFactory;
-
-    adr.nodeFactoryItf = nodeFactory;
-    iadr.nodeFactoryItf = nodeFactory;
-    iadr.nodeMergerItf = nodeMerger;
-    bdrr.nodeFactoryItf = nodeFactory;
-
-    loader = errl;
+    loader = injector.getInstance(Loader.class);
 
     context = new HashMap<Object, Object>();
     checker = new ASTChecker();
-  }
-
-  @Test(groups = {"functional", "checkin"})
-  public void testAnonymousDefinitionLoaderBC() throws Exception {
-    checkBCImplementation(new AnonymousDefinitionLoader());
-  }
-
-  @Test(groups = {"functional", "checkin"})
-  public void testAnonymousDefinitionResolverImplBC() throws Exception {
-    checkBCImplementation(new AnonymousDefinitionExtractorImpl());
-  }
-
-  @Test(groups = {"functional", "checkin"})
-  public void testImportAnonymousDefinitionResolverBC() throws Exception {
-    checkBCImplementation(new ImportAnonymousDefinitionExtractor());
   }
 
   @Test(groups = {"functional"})

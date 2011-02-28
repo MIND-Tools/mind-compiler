@@ -28,34 +28,23 @@ import java.util.Set;
 
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.Definition;
-import org.objectweb.fractal.api.NoSuchInterfaceException;
-import org.objectweb.fractal.api.control.BindingController;
-import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.ow2.mind.InputResource;
 import org.ow2.mind.InputResourcesHelper;
 import org.ow2.mind.adl.DefinitionReferenceResolver;
 import org.ow2.mind.adl.ast.DefinitionReference;
+import org.ow2.mind.adl.generic.TemplateInstantiator.AbstractDelegatingTemplateInstantiator;
 import org.ow2.mind.adl.generic.ast.FormalTypeParameter;
 import org.ow2.mind.adl.generic.ast.FormalTypeParameterContainer;
 import org.ow2.mind.adl.generic.ast.TypeArgument;
 
+import com.google.inject.Inject;
+
 public class InputResourceTemplateInstantiator
-    implements
-      TemplateInstantiator,
-      BindingController {
+    extends
+      AbstractDelegatingTemplateInstantiator {
 
-  // ---------------------------------------------------------------------------
-  // Client interfaces
-  // ---------------------------------------------------------------------------
-
-  /** The name of the {@link #clientInstantiatorItf} client interface. */
-  public static final String         CLIENT_INSTANTIATOR_ITF_NAME = "client-instantiator";
-
-  /** The client {@link TemplateInstantiator} interface. */
-  public TemplateInstantiator        clientInstantiatorItf;
-
-  /** The interface used to resolve referenced definitions. */
-  public DefinitionReferenceResolver definitionReferenceResolverItf;
+  @Inject
+  protected DefinitionReferenceResolver definitionReferenceResolverItf;
 
   // ---------------------------------------------------------------------------
   // Implementation of the TemplateInstantiator interface
@@ -97,64 +86,5 @@ public class InputResourceTemplateInstantiator
     InputResourcesHelper.addInputResources(templateInstance, inputResources);
 
     return templateInstance;
-  }
-
-  // ---------------------------------------------------------------------------
-  // Implementation of the BindingController interface
-  // ---------------------------------------------------------------------------
-
-  public void bindFc(final String itfName, final Object value)
-      throws NoSuchInterfaceException, IllegalBindingException {
-
-    if (itfName == null) {
-      throw new IllegalArgumentException("Interface name can't be null");
-    }
-
-    if (itfName.equals(DefinitionReferenceResolver.ITF_NAME)) {
-      definitionReferenceResolverItf = (DefinitionReferenceResolver) value;
-    } else if (itfName.equals(CLIENT_INSTANTIATOR_ITF_NAME)) {
-      clientInstantiatorItf = (TemplateInstantiator) value;
-    } else {
-      throw new NoSuchInterfaceException("No client interface named '"
-          + itfName + "' for binding the interface");
-    }
-  }
-
-  public String[] listFc() {
-    return new String[]{DefinitionReferenceResolver.ITF_NAME,
-        CLIENT_INSTANTIATOR_ITF_NAME};
-  }
-
-  public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
-
-    if (itfName == null) {
-      throw new IllegalArgumentException("Interface name can't be null");
-    }
-
-    if (itfName.equals(DefinitionReferenceResolver.ITF_NAME)) {
-      return definitionReferenceResolverItf;
-    } else if (itfName.equals(CLIENT_INSTANTIATOR_ITF_NAME)) {
-      return clientInstantiatorItf;
-    } else {
-      throw new NoSuchInterfaceException("No client interface named '"
-          + itfName + "'");
-    }
-  }
-
-  public void unbindFc(final String itfName) throws IllegalBindingException,
-      NoSuchInterfaceException {
-
-    if (itfName == null) {
-      throw new IllegalArgumentException("Interface name can't be null");
-    }
-
-    if (itfName.equals(DefinitionReferenceResolver.ITF_NAME)) {
-      definitionReferenceResolverItf = null;
-    } else if (itfName.equals(CLIENT_INSTANTIATOR_ITF_NAME)) {
-      clientInstantiatorItf = null;
-    } else {
-      throw new NoSuchInterfaceException("No client interface named '"
-          + itfName + "'");
-    }
   }
 }

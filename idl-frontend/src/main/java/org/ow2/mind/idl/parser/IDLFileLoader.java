@@ -22,9 +22,6 @@
 
 package org.ow2.mind.idl.parser;
 
-import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
-import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -38,9 +35,6 @@ import org.objectweb.fractal.adl.error.BasicErrorLocator;
 import org.objectweb.fractal.adl.error.ErrorLocator;
 import org.objectweb.fractal.adl.error.GenericErrors;
 import org.objectweb.fractal.adl.xml.XMLNodeFactory;
-import org.objectweb.fractal.api.NoSuchInterfaceException;
-import org.objectweb.fractal.api.control.BindingController;
-import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.ow2.mind.InputResourcesHelper;
 import org.ow2.mind.error.ErrorManager;
 import org.ow2.mind.idl.IDLErrors;
@@ -55,28 +49,22 @@ import org.ow2.mind.idl.jtb.TokenMgrError;
 import org.ow2.mind.idl.jtb.syntaxtree.IDTFile;
 import org.ow2.mind.idl.jtb.syntaxtree.ITFFile;
 
-public class IDLFileLoader implements IDLLoader, BindingController {
+import com.google.inject.Inject;
+import com.google.inject.Provider;
 
-  protected static final String DTD = "classpath://org/ow2/mind/idl/mind_v1.dtd";
+public class IDLFileLoader implements IDLLoader {
 
-  // ---------------------------------------------------------------------------
-  // Client interfaces
-  // ---------------------------------------------------------------------------
+  @Inject
+  protected ErrorManager           errorManagerItf;
 
-  /** The {@link ErrorManager} client interface used to log errors. */
-  public ErrorManager           errorManagerItf;
+  @Inject
+  protected XMLNodeFactory         nodeFactoryItf;
 
-  /**
-   * Client interface bound to the {@link XMLNodeFactory node factory}
-   * component.
-   */
-  public XMLNodeFactory         nodeFactoryItf;
+  @Inject
+  protected IDLLocator             idlLocatorItf;
 
-  /**
-   * The {@link IDLLocator} client interface used to locate IDL source files to
-   * parse.
-   */
-  public IDLLocator             idlLocatorItf;
+  @Inject
+  protected Provider<JTBProcessor> processorProvider;
 
   // ---------------------------------------------------------------------------
   // Implementation of the Loader interface
@@ -116,15 +104,16 @@ public class IDLFileLoader implements IDLLoader, BindingController {
       try {
         is = idlFile.openStream();
       } catch (final IOException e) {
-      errorManagerItf.logFatal(IDLErrors.IO_ERROR, e, idlFile.getPath());
-      // never executed (logFatal throw an ADLException).
-      return null;
+        errorManagerItf.logFatal(IDLErrors.IO_ERROR, e, idlFile.getPath());
+        // never executed (logFatal throw an ADLException).
+        return null;
       }
     }
     InterfaceDefinition itf;
     try {
       final Parser parser = new Parser(is);
-      final JTBProcessor processor = new JTBProcessor(nodeFactoryItf, DTD, path);
+      final JTBProcessor processor = processorProvider.get();
+      processor.setFilename(path);
       final ITFFile content = parser.ITFFile();
       itf = processor.toInterfaceDefinition(content);
     } catch (final ParseException e) {
@@ -191,7 +180,8 @@ public class IDLFileLoader implements IDLLoader, BindingController {
 
     try {
       final Parser parser = new Parser(is);
-      final JTBProcessor processor = new JTBProcessor(nodeFactoryItf, DTD, path);
+      final JTBProcessor processor = processorProvider.get();
+      processor.setFilename(path);
       final IDTFile content = parser.IDTFile();
       idt = processor.toSharedTypeDefinition(content);
     } catch (final ParseException e) {
@@ -218,72 +208,5 @@ public class IDLFileLoader implements IDLLoader, BindingController {
       throw new ADLException(IDLErrors.IDL_NOT_FOUND, name);
     }
     return srcFile;
-  }
-
-  protected SharedTypeDefinition readIdt(final URL srcFile) throws IOException,
-      ParseException {
-    final InputStream is = srcFile.openStream();
-    final Parser parser = new Parser(is);
-    final JTBProcessor processor = new JTBProcessor(nodeFactoryItf, DTD,
-        srcFile.getPath());
-    final IDTFile content = parser.IDTFile();
-    return processor.toSharedTypeDefinition(content);
-  }
-
-  // ---------------------------------------------------------------------------
-  // Implementation of the BindingController interface
-  // ---------------------------------------------------------------------------
-
-  public void bindFc(final String itfName, final Object value)
-      throws NoSuchInterfaceException, IllegalBindingException {
-    checkItfName(itfName);
-
-    if (ErrorManager.ITF_NAME.equals(itfName)) {
-      errorManagerItf = (ErrorManager) value;
-    } else if (itfName.equals(XMLNodeFactory.ITF_NAME)) {
-      this.nodeFactoryItf = (XMLNodeFactory) value;
-    } else if (itfName.equals(IDLLocator.ITF_NAME)) {
-      this.idlLocatorItf = (IDLLocator) value;
-    } else {
-      throw new NoSuchInterfaceException("There is no interface named '"
-          + itfName + "'");
-    }
-
-  }
-
-  public String[] listFc() {
-    return listFcHelper(ErrorManager.ITF_NAME, XMLNodeFactory.ITF_NAME,
-        IDLLocator.ITF_NAME);
-  }
-
-  public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
-    checkItfName(itfName);
-
-    if (ErrorManager.ITF_NAME.equals(itfName)) {
-      return errorManagerItf;
-    } else if (itfName.equals(XMLNodeFactory.ITF_NAME)) {
-      return this.nodeFactoryItf;
-    } else if (itfName.equals(IDLLocator.ITF_NAME)) {
-      return this.idlLocatorItf;
-    } else {
-      throw new NoSuchInterfaceException("There is no interface named '"
-          + itfName + "'");
-    }
-  }
-
-  public void unbindFc(final String itfName) throws NoSuchInterfaceException,
-      IllegalBindingException {
-    checkItfName(itfName);
-
-    if (ErrorManager.ITF_NAME.equals(itfName)) {
-      errorManagerItf = null;
-    } else if (itfName.equals(XMLNodeFactory.ITF_NAME)) {
-      this.nodeFactoryItf = null;
-    } else if (itfName.equals(IDLLocator.ITF_NAME)) {
-      this.idlLocatorItf = null;
-    } else {
-      throw new NoSuchInterfaceException("There is no interface named '"
-          + itfName + "'");
-    }
   }
 }

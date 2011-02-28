@@ -22,26 +22,19 @@
 
 package org.ow2.mind.idl.annotation;
 
-import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
-import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
-
 import java.util.Map;
 
 import org.objectweb.fractal.adl.ADLException;
-import org.objectweb.fractal.api.NoSuchInterfaceException;
-import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.ow2.mind.annotation.AnnotationChecker;
-import org.ow2.mind.idl.AbstractIDLLoader;
+import org.ow2.mind.idl.IDLLoader.AbstractDelegatingIDLLoader;
 import org.ow2.mind.idl.ast.IDL;
 
-public class AnnotationLoader extends AbstractIDLLoader {
+import com.google.inject.Inject;
 
-  // ---------------------------------------------------------------------------
-  // Client interfaces
-  // ---------------------------------------------------------------------------
+public class AnnotationLoader extends AbstractDelegatingIDLLoader {
 
-  /** The client interface used to check annotations of the loaded definition. */
-  public AnnotationChecker annotationCheckerItf;
+  @Inject
+  protected AnnotationChecker annotationCheckerItf;
 
   // ---------------------------------------------------------------------------
   // Implementation of the Loader interface
@@ -52,50 +45,5 @@ public class AnnotationLoader extends AbstractIDLLoader {
     final IDL idl = clientIDLLoaderItf.load(name, context);
     annotationCheckerItf.checkAnnotations(idl, context);
     return idl;
-  }
-
-  // ---------------------------------------------------------------------------
-  // Overridden BindingController methods
-  // ---------------------------------------------------------------------------
-
-  @Override
-  public void bindFc(final String itfName, final Object value)
-      throws NoSuchInterfaceException, IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(AnnotationChecker.ITF_NAME)) {
-      annotationCheckerItf = (AnnotationChecker) value;
-    } else {
-      super.bindFc(itfName, value);
-    }
-
-  }
-
-  @Override
-  public String[] listFc() {
-    return listFcHelper(super.listFc(), AnnotationChecker.ITF_NAME);
-  }
-
-  @Override
-  public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
-    checkItfName(itfName);
-
-    if (itfName.equals(AnnotationChecker.ITF_NAME)) {
-      return annotationCheckerItf;
-    } else {
-      return super.lookupFc(itfName);
-    }
-  }
-
-  @Override
-  public void unbindFc(final String itfName) throws NoSuchInterfaceException,
-      IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(AnnotationChecker.ITF_NAME)) {
-      annotationCheckerItf = null;
-    } else {
-      super.unbindFc(itfName);
-    }
   }
 }

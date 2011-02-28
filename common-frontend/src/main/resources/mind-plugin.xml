@@ -1,3 +1,35 @@
-<plugin id="org.ow2.mind" name="The MIND Compiler.">
-	<extension-point id="predefined-annotations"/>
+<!--
+  Copyright (C) 2011 STMicroelectronics
+
+ This file is part of "Mind Compiler" is free software: you can redistribute 
+ it and/or modify it under the terms of the GNU Lesser General Public License 
+ as published by the Free Software Foundation, either version 3 of the 
+ License, or (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful, but WITHOUT 
+ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ details.
+
+ You should have received a copy of the GNU Lesser General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+ Contact: mind@ow2.org
+
+ Authors: Ali Erdem Ozcan
+ Contributors: Matthieu Leclercq
+
+ -->
+<plugin
+    id="org.ow2.mind"
+    name="The MIND Compiler.">
+    <extension-point
+        id="predefined-annotations"
+        dtd="dtd/AnnotationPackage.dtd" />
+
+    <extension
+        point="org.ow2.mind.plugin.guice-module">
+        <module
+            class="org.ow2.mind.CommonFrontendModule" />
+    </extension>
 </plugin>

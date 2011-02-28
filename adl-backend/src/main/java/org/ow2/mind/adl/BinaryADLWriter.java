@@ -43,14 +43,7 @@ public class BinaryADLWriter extends AbstractSourceGenerator
 
   protected static Logger logger = FractalADLLogManager.getLogger("io");
 
-  // ---------------------------------------------------------------------------
-  // Constructor
-  // ---------------------------------------------------------------------------
-
-  /**
-   * Public constructor.
-   */
-  public BinaryADLWriter() {
+  protected BinaryADLWriter() {
     super(null);
   }
 
@@ -62,7 +55,8 @@ public class BinaryADLWriter extends AbstractSourceGenerator
       final Map<Object, Object> context) throws ADLException {
     if (ForceRegenContextHelper.getNoBinaryAST(context)) {
       if (logger.isLoggable(Level.FINE))
-        logger.log(Level.FINE,
+        logger.log(
+            Level.FINE,
             "No-binary-AST mode. Do not write binary ADL for "
                 + definition.getName());
       return;

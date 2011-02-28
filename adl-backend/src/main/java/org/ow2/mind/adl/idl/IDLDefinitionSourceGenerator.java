@@ -22,9 +22,6 @@
 
 package org.ow2.mind.adl.idl;
 
-import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
-import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
-
 import java.util.Map;
 
 import org.objectweb.fractal.adl.ADLException;
@@ -32,28 +29,21 @@ import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.interfaces.Interface;
 import org.objectweb.fractal.adl.interfaces.InterfaceContainer;
 import org.objectweb.fractal.adl.types.TypeInterface;
-import org.objectweb.fractal.api.NoSuchInterfaceException;
-import org.objectweb.fractal.api.control.BindingController;
-import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.ow2.mind.adl.DefinitionSourceGenerator;
 import org.ow2.mind.idl.IDLLoader;
 import org.ow2.mind.idl.IDLVisitor;
 import org.ow2.mind.idl.ast.IDL;
 import org.ow2.mind.idl.ast.InterfaceDefinition;
 
-public class IDLDefinitionSourceGenerator
-    implements
-      DefinitionSourceGenerator,
-      BindingController {
+import com.google.inject.Inject;
 
-  // ---------------------------------------------------------------------------
-  // Client interfaces
-  // ---------------------------------------------------------------------------
+public class IDLDefinitionSourceGenerator implements DefinitionSourceGenerator {
 
-  public IDLLoader           idlLoaderItf;
+  @Inject
+  protected IDLLoader  idlLoaderItf;
 
-  public static final String IDL_COMPILER_ITF_NAME = "idl-compiler";
-  public IDLVisitor          idlCompilerItf;
+  @Inject
+  protected IDLVisitor idlCompilerItf;
 
   // ---------------------------------------------------------------------------
   // Implementation of the Visitor interface
@@ -81,54 +71,5 @@ public class IDLDefinitionSourceGenerator
     // ensure that the "memory.api.Allocator" interface is compiled
     final IDL itfDef = idlLoaderItf.load("memory.api.Allocator", context);
     idlCompilerItf.visit(itfDef, context);
-  }
-
-  // ---------------------------------------------------------------------------
-  // implementation of the BindingController interface
-  // ---------------------------------------------------------------------------
-
-  public void bindFc(final String itfName, final Object value)
-      throws NoSuchInterfaceException, IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(IDLLoader.ITF_NAME)) {
-      idlLoaderItf = (IDLLoader) value;
-    } else if (itfName.equals(IDL_COMPILER_ITF_NAME)) {
-      idlCompilerItf = (IDLVisitor) value;
-    } else {
-      throw new NoSuchInterfaceException("There is no interface named '"
-          + itfName + "'");
-    }
-  }
-
-  public String[] listFc() {
-    return listFcHelper(IDLLoader.ITF_NAME, IDL_COMPILER_ITF_NAME);
-  }
-
-  public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
-    checkItfName(itfName);
-
-    if (itfName.equals(IDLLoader.ITF_NAME)) {
-      return idlLoaderItf;
-    } else if (itfName.equals(IDL_COMPILER_ITF_NAME)) {
-      return idlCompilerItf;
-    } else {
-      throw new NoSuchInterfaceException("There is no interface named '"
-          + itfName + "'");
-    }
-  }
-
-  public void unbindFc(final String itfName) throws NoSuchInterfaceException,
-      IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(IDLLoader.ITF_NAME)) {
-      idlLoaderItf = null;
-    } else if (itfName.equals(IDL_COMPILER_ITF_NAME)) {
-      idlCompilerItf = null;
-    } else {
-      throw new NoSuchInterfaceException("There is no interface named '"
-          + itfName + "'");
-    }
   }
 }

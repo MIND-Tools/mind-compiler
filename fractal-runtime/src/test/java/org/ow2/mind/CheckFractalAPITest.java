@@ -36,12 +36,15 @@ import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.error.Error;
 import org.ow2.mind.error.ErrorCollection;
 import org.ow2.mind.error.ErrorManager;
-import org.ow2.mind.error.ErrorManagerFactory;
+import org.ow2.mind.idl.IDLFrontendModule;
 import org.ow2.mind.idl.IDLLoader;
-import org.ow2.mind.idl.IDLLoaderChainFactory;
+import org.ow2.mind.plugin.PluginLoaderModule;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 
 public class CheckFractalAPITest {
 
@@ -51,8 +54,12 @@ public class CheckFractalAPITest {
 
   @BeforeTest(alwaysRun = true)
   public void setUp() {
-    errorManager = ErrorManagerFactory.newSimpleErrorManager();
-    idlLoader = IDLLoaderChainFactory.newLoader(errorManager).loader;
+    final Injector injector = Guice.createInjector(new CommonFrontendModule(),
+        new PluginLoaderModule(), new IDLFrontendModule());
+
+    errorManager = injector.getInstance(ErrorManager.class);
+    idlLoader = injector.getInstance(IDLLoader.class);
+
     context = new HashMap<Object, Object>();
   }
 

@@ -22,8 +22,6 @@
 
 package org.ow2.mind.adl;
 
-import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
-import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
 import static org.ow2.mind.adl.ast.ASTHelper.isAbstract;
 import static org.ow2.mind.adl.ast.ASTHelper.isType;
 import static org.ow2.mind.adl.ast.ASTHelper.isUnresolvedDefinitionNode;
@@ -32,30 +30,33 @@ import static org.ow2.mind.adl.ast.ASTHelper.setResolvedComponentDefinition;
 import java.util.Map;
 
 import org.objectweb.fractal.adl.ADLException;
-import org.objectweb.fractal.adl.AbstractLoader;
 import org.objectweb.fractal.adl.Definition;
-import org.objectweb.fractal.api.NoSuchInterfaceException;
-import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.ow2.mind.adl.ast.Component;
 import org.ow2.mind.adl.ast.ComponentContainer;
 import org.ow2.mind.adl.ast.DefinitionReference;
 import org.ow2.mind.error.ErrorManager;
 
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
+
 /**
  * Delegating loader component that resolves {@link DefinitionReference} of sub
  * components contained in the loaded definition
  */
-public class SubComponentResolverLoader extends AbstractLoader {
+public class SubComponentResolverLoader extends AbstractDelegatingLoader {
 
-  // ---------------------------------------------------------------------------
-  // Client interfaces
-  // ---------------------------------------------------------------------------
+  @Inject
+  protected ErrorManager                errorManagerItf;
 
-  /** The {@link ErrorManager} client interface used to log errors. */
-  public ErrorManager                errorManagerItf;
+  /**
+   * The name of the {@link DefinitionReferenceResolver} to be injected in this
+   * class.
+   */
+  public static final String            SUB_COMPONENT_DEFINITION_RESOLVER = "SubComponentDefinitionResolver";
 
-  /** The interface used to resolve referenced definitions. */
-  public DefinitionReferenceResolver definitionReferenceResolverItf;
+  @Inject
+  @Named(SUB_COMPONENT_DEFINITION_RESOLVER)
+  protected DefinitionReferenceResolver definitionReferenceResolverItf;
 
   // ---------------------------------------------------------------------------
   // Implementation of the Loader interface
@@ -89,57 +90,5 @@ public class SubComponentResolverLoader extends AbstractLoader {
     }
 
     return d;
-  }
-
-  // ---------------------------------------------------------------------------
-  // Overridden BindingController methods
-  // ---------------------------------------------------------------------------
-
-  @Override
-  public void bindFc(final String itfName, final Object value)
-      throws NoSuchInterfaceException, IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(ErrorManager.ITF_NAME)) {
-      errorManagerItf = (ErrorManager) value;
-    } else if (itfName.equals(DefinitionReferenceResolver.ITF_NAME)) {
-      definitionReferenceResolverItf = (DefinitionReferenceResolver) value;
-    } else {
-      super.bindFc(itfName, value);
-    }
-
-  }
-
-  @Override
-  public String[] listFc() {
-    return listFcHelper(super.listFc(), ErrorManager.ITF_NAME,
-        DefinitionReferenceResolver.ITF_NAME);
-  }
-
-  @Override
-  public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
-    checkItfName(itfName);
-
-    if (itfName.equals(ErrorManager.ITF_NAME)) {
-      return errorManagerItf;
-    } else if (itfName.equals(DefinitionReferenceResolver.ITF_NAME)) {
-      return definitionReferenceResolverItf;
-    } else {
-      return super.lookupFc(itfName);
-    }
-  }
-
-  @Override
-  public void unbindFc(final String itfName) throws NoSuchInterfaceException,
-      IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(ErrorManager.ITF_NAME)) {
-      errorManagerItf = null;
-    } else if (itfName.equals(DefinitionReferenceResolver.ITF_NAME)) {
-      definitionReferenceResolverItf = null;
-    } else {
-      super.unbindFc(itfName);
-    }
   }
 }

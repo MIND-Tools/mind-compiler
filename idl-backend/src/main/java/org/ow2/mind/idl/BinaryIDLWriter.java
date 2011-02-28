@@ -22,9 +22,6 @@
 
 package org.ow2.mind.idl;
 
-import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
-import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -36,9 +33,6 @@ import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.CompilerError;
 import org.objectweb.fractal.adl.io.NodeOutputStream;
 import org.objectweb.fractal.adl.util.FractalADLLogManager;
-import org.objectweb.fractal.api.NoSuchInterfaceException;
-import org.objectweb.fractal.api.control.BindingController;
-import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.ow2.mind.ForceRegenContextHelper;
 import org.ow2.mind.InputResourceLocator;
 import org.ow2.mind.InputResourcesHelper;
@@ -46,20 +40,20 @@ import org.ow2.mind.idl.ast.IDL;
 import org.ow2.mind.io.IOErrors;
 import org.ow2.mind.io.OutputFileLocator;
 
-public class BinaryIDLWriter implements IDLVisitor, BindingController {
+import com.google.inject.Inject;
 
-  protected static Logger     ioLogger  = FractalADLLogManager.getLogger("io");
-  protected static Logger     depLogger = FractalADLLogManager.getLogger("dep");
+public class BinaryIDLWriter implements IDLVisitor {
 
-  // ---------------------------------------------------------------------------
-  // Client interfaces
-  // ---------------------------------------------------------------------------
+  protected static Logger        ioLogger  = FractalADLLogManager
+                                               .getLogger("io");
+  protected static Logger        depLogger = FractalADLLogManager
+                                               .getLogger("dep");
 
-  /** Client interface used to locate output files. */
-  public OutputFileLocator    outputFileLocatorItf;
+  @Inject
+  protected OutputFileLocator    outputFileLocatorItf;
 
-  /** client interface used to checks timestamps of input resources. */
-  public InputResourceLocator inputResourceLocatorItf;
+  @Inject
+  protected InputResourceLocator inputResourceLocatorItf;
 
   // ---------------------------------------------------------------------------
   // Implementation of the Visitor interface
@@ -75,11 +69,11 @@ public class BinaryIDLWriter implements IDLVisitor, BindingController {
     }
     final File outputFile;
     if (idl.getName().startsWith("/"))
-      outputFile = outputFileLocatorItf.getMetadataOutputFile(BasicIDLLocator
-          .getHeaderBinaryName(idl.getName()), context);
+      outputFile = outputFileLocatorItf.getMetadataOutputFile(
+          BasicIDLLocator.getHeaderBinaryName(idl.getName()), context);
     else
-      outputFile = outputFileLocatorItf.getMetadataOutputFile(BasicIDLLocator
-          .getItfBinaryName(idl.getName()), context);
+      outputFile = outputFileLocatorItf.getMetadataOutputFile(
+          BasicIDLLocator.getItfBinaryName(idl.getName()), context);
 
     if (regenerate(outputFile, idl, context)) {
 
@@ -122,8 +116,8 @@ public class BinaryIDLWriter implements IDLVisitor, BindingController {
       return true;
     }
 
-    if (!inputResourceLocatorItf.isUpToDate(outputFile, InputResourcesHelper
-        .getInputResources(idl), context)) {
+    if (!inputResourceLocatorItf.isUpToDate(outputFile,
+        InputResourcesHelper.getInputResources(idl), context)) {
       if (depLogger.isLoggable(Level.FINE)) {
         depLogger.fine("Generated source file '" + outputFile
             + "' is out-of-date, regenerate.");
@@ -138,55 +132,4 @@ public class BinaryIDLWriter implements IDLVisitor, BindingController {
     }
 
   }
-
-  // ---------------------------------------------------------------------------
-  // Overridden BindingController methods
-  // ---------------------------------------------------------------------------
-
-  public void bindFc(final String itfName, final Object value)
-      throws NoSuchInterfaceException, IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(OutputFileLocator.ITF_NAME)) {
-      outputFileLocatorItf = (OutputFileLocator) value;
-    } else if (itfName.equals(InputResourceLocator.ITF_NAME)) {
-      inputResourceLocatorItf = (InputResourceLocator) value;
-    } else {
-      throw new NoSuchInterfaceException("There is no interface named '"
-          + itfName + "'");
-    }
-  }
-
-  public String[] listFc() {
-    return listFcHelper(OutputFileLocator.ITF_NAME,
-        InputResourceLocator.ITF_NAME);
-  }
-
-  public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
-    checkItfName(itfName);
-
-    if (itfName.equals(OutputFileLocator.ITF_NAME)) {
-      return outputFileLocatorItf;
-    } else if (itfName.equals(InputResourceLocator.ITF_NAME)) {
-      return inputResourceLocatorItf;
-    } else {
-      throw new NoSuchInterfaceException("There is no interface named '"
-          + itfName + "'");
-    }
-  }
-
-  public void unbindFc(final String itfName) throws NoSuchInterfaceException,
-      IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(OutputFileLocator.ITF_NAME)) {
-      outputFileLocatorItf = null;
-    } else if (itfName.equals(InputResourceLocator.ITF_NAME)) {
-      inputResourceLocatorItf = null;
-    } else {
-      throw new NoSuchInterfaceException("There is no interface named '"
-          + itfName + "'");
-    }
-  }
-
 }

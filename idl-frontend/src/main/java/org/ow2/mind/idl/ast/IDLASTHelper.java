@@ -40,6 +40,7 @@ import org.objectweb.fractal.adl.NodeFactory;
 import org.ow2.mind.CommonASTHelper;
 import org.ow2.mind.NodeContainerDecoration;
 import org.ow2.mind.idl.IDLLoader;
+import org.ow2.mind.idl.ast.PrimitiveType.PrimitiveTypeEnum;
 
 public final class IDLASTHelper {
   private IDLASTHelper() {
@@ -131,6 +132,57 @@ public final class IDLASTHelper {
       if (param.getName().equals(parameterName)) return param;
     }
     return null;
+  }
+
+  /**
+   * Returns <code>true</code> if the given method has a variable number of
+   * argument.
+   * 
+   * @param method the method to test.
+   * @return <code>true</code> if the given method has a variable number of
+   *         argument.
+   */
+  public static boolean isVaArgs(final Method method) {
+    return Method.TRUE.equals(method.getVaArgs());
+  }
+
+  /**
+   * Returns <code>true</code> if the given parameter is a <code>out</code>
+   * parameter.
+   * 
+   * @param parameter a parameter.
+   * @return <code>true</code> if the given parameter is a <code>out</code>
+   *         parameter.
+   */
+  public static boolean isOut(final Parameter parameter) {
+    return Parameter.TRUE.equals(parameter.getIsOut())
+        && !Parameter.TRUE.equals(parameter.getIsIn());
+  }
+
+  /**
+   * Returns <code>true</code> if the given parameter is a <code>in out</code>
+   * parameter.
+   * 
+   * @param parameter a parameter.
+   * @return <code>true</code> if the given parameter is a <code>inout</code>
+   *         parameter.
+   */
+  public static boolean isInOut(final Parameter parameter) {
+    return Parameter.TRUE.equals(parameter.getIsOut())
+        && Parameter.TRUE.equals(parameter.getIsIn());
+  }
+
+  /**
+   * Returns <code>true</code> if the given parameter is a <code>in</code>
+   * parameter.
+   * 
+   * @param parameter a parameter.
+   * @return <code>true</code> if the given parameter is a <code>in</code>
+   *         parameter.
+   */
+  public static boolean isIn(final Parameter parameter) {
+    return !Parameter.TRUE.equals(parameter.getIsOut())
+        && (Parameter.TRUE.equals(parameter.getIsIn()) || parameter.getIsIn() == null);
   }
 
   // ---------------------------------------------------------------------------
@@ -297,6 +349,36 @@ public final class IDLASTHelper {
   // ---------------------------------------------------------------------------
 
   /**
+   * Create a new {@link TypeDefReference} node using the given
+   * {@link NodeFactory}
+   * 
+   * @param nodeFactory the {@link NodeFactory} to use to create the node.
+   * @param name the name of the {@link TypeDefReference}.
+   * @return a new {@link TypeDefReference} node.
+   */
+  public static TypeDefReference newTypeDefReferenceNode(
+      final NodeFactory nodeFactory, final String name) {
+
+    final TypeDefReference node = newNode(nodeFactory, "type",
+        TypeDefReference.class);
+    setKindDecorations(node);
+    node.setName(name);
+    return node;
+  }
+
+  /**
+   * Create a new {@link PrimitiveType} node using the given {@link NodeFactory}
+   * 
+   * @param nodeFactory the {@link NodeFactory} to use to create the node.
+   * @param primitiveType the name of the {@link PrimitiveType}.
+   * @return a new {@link PrimitiveType} node.
+   */
+  public static PrimitiveType newPrimitiveTypeNode(
+      final NodeFactory nodeFactory, final PrimitiveTypeEnum primitiveType) {
+    return newPrimitiveTypeNode(nodeFactory, primitiveType.getIdlTypeName());
+  }
+
+  /**
    * Create a new {@link PrimitiveType} node using the given {@link NodeFactory}
    * 
    * @param nodeFactory the {@link NodeFactory} to use to create the node.
@@ -420,10 +502,10 @@ public final class IDLASTHelper {
    * @return a new {@link Include} node.
    */
   public static Include newIncludeNode(final NodeFactory nodeFactory,
-      final String path) {
+      final String path, final IncludeDelimiter delimiter) {
     final Include node = newNode(nodeFactory, "include", Include.class);
     setKindDecorations(node);
-    node.setPath(path);
+    setIncludePath(node, path, delimiter);
     return node;
   }
 

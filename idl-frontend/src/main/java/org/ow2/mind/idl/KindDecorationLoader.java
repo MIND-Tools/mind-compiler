@@ -25,10 +25,11 @@ package org.ow2.mind.idl;
 import java.util.Map;
 
 import org.objectweb.fractal.adl.ADLException;
+import org.ow2.mind.idl.IDLLoader.AbstractDelegatingIDLLoader;
 import org.ow2.mind.idl.ast.IDL;
 import org.ow2.mind.idl.ast.IDLASTHelper;
 
-public class KindDecorationLoader extends AbstractIDLLoader {
+public class KindDecorationLoader extends AbstractDelegatingIDLLoader {
 
   public IDL load(final String name, final Map<Object, Object> context)
       throws ADLException {

@@ -22,8 +22,6 @@
 
 package org.ow2.mind;
 
-import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
-
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -39,26 +37,27 @@ import org.objectweb.fractal.adl.CompilerError;
 import org.objectweb.fractal.adl.error.GenericErrors;
 import org.objectweb.fractal.adl.util.ClassLoaderHelper;
 import org.objectweb.fractal.adl.util.FractalADLLogManager;
-import org.objectweb.fractal.api.NoSuchInterfaceException;
-import org.objectweb.fractal.api.control.BindingController;
-import org.objectweb.fractal.api.control.IllegalBindingException;
-import org.objectweb.fractal.api.control.IllegalLifeCycleException;
 
-public class BasicInputResourceLocator
-    implements
-      InputResourceLocator,
-      BindingController {
+import com.google.inject.Inject;
 
-  protected static Logger                          logger                                   = FractalADLLogManager
-                                                                                                .getLogger("loader.InputResourceLocator");
+public class BasicInputResourceLocator implements InputResourceLocator {
 
-  // ---------------------------------------------------------------------------
-  // Client interfaces
-  // ---------------------------------------------------------------------------
+  protected static Logger                       logger = FractalADLLogManager
+                                                           .getLogger("loader.InputResourceLocator");
 
-  public static final String                       GENERIC_RESOURCE_LOCATOR_PREFIX_ITF_NAME = "resource-locator";
+  protected Map<String, GenericResourceLocator> genericResourceLocators;
 
-  public final Map<String, GenericResourceLocator> genericResourceLocators                  = new HashMap<String, GenericResourceLocator>();
+  @Inject
+  protected void setGenericResourceLocators(
+      final Set<GenericResourceLocator> locators) {
+    genericResourceLocators = new HashMap<String, GenericResourceLocator>(
+        locators.size());
+    for (final GenericResourceLocator locator : locators) {
+      for (final String resourceKing : locator.getResourceKind()) {
+        genericResourceLocators.put(resourceKing, locator);
+      }
+    }
+  }
 
   // ---------------------------------------------------------------------------
   // Implementation of the InputResourceLocator interface
@@ -153,65 +152,5 @@ public class BasicInputResourceLocator
       resource.setTimestamp(timestamp);
     }
     return timestamp;
-  }
-
-  // ---------------------------------------------------------------------------
-  // Implementation of the BindingController interface
-  // ---------------------------------------------------------------------------
-
-  public void bindFc(final String clientItfName, final Object serverItf)
-      throws NoSuchInterfaceException, IllegalBindingException,
-      IllegalLifeCycleException {
-    checkItfName(clientItfName);
-
-    if (clientItfName.startsWith(GENERIC_RESOURCE_LOCATOR_PREFIX_ITF_NAME)) {
-      final String resourceKind = clientItfName
-          .substring(GENERIC_RESOURCE_LOCATOR_PREFIX_ITF_NAME.length());
-      genericResourceLocators.put(resourceKind,
-          (GenericResourceLocator) serverItf);
-    } else {
-      throw new NoSuchInterfaceException("No client interface named '"
-          + clientItfName + "' for binding the interface");
-    }
-  }
-
-  public String[] listFc() {
-    final Set<String> kinds = genericResourceLocators.keySet();
-    final String[] itfNames = new String[kinds.size()];
-    int i = 0;
-    for (final String kind : kinds) {
-      itfNames[i] = GENERIC_RESOURCE_LOCATOR_PREFIX_ITF_NAME + kind;
-      i++;
-    }
-    return itfNames;
-  }
-
-  public Object lookupFc(final String clientItfName)
-      throws NoSuchInterfaceException {
-    checkItfName(clientItfName);
-
-    if (clientItfName.startsWith(GENERIC_RESOURCE_LOCATOR_PREFIX_ITF_NAME)) {
-      final String resourceKind = clientItfName
-          .substring(GENERIC_RESOURCE_LOCATOR_PREFIX_ITF_NAME.length());
-      final GenericResourceLocator itf = genericResourceLocators
-          .get(resourceKind);
-      if (itf != null) return itf;
-    }
-    throw new NoSuchInterfaceException("No client interface named '"
-        + clientItfName + "' for binding the interface");
-  }
-
-  public void unbindFc(final String clientItfName)
-      throws NoSuchInterfaceException, IllegalBindingException,
-      IllegalLifeCycleException {
-    if (clientItfName.startsWith(GENERIC_RESOURCE_LOCATOR_PREFIX_ITF_NAME)) {
-      final String resourceKind = clientItfName
-          .substring(GENERIC_RESOURCE_LOCATOR_PREFIX_ITF_NAME.length());
-      final GenericResourceLocator itf = genericResourceLocators
-          .remove(resourceKind);
-      if (itf != null) return;
-    }
-    throw new NoSuchInterfaceException("No client interface named '"
-        + clientItfName + "' for binding the interface");
   }
 }

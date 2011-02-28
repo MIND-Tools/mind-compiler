@@ -26,11 +26,18 @@ import java.util.Map;
 
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.Node;
+import org.ow2.mind.inject.InjectDelegate;
 
 public interface AnnotationChecker {
 
-  String ITF_NAME = "annotation-checker";
-
   void checkAnnotations(Node container, Map<Object, Object> context)
       throws ADLException;
+
+  public abstract class AbstractDelegatingAnnotationChecker
+      implements
+        AnnotationChecker {
+
+    @InjectDelegate
+    protected AnnotationChecker clientAnnotationCheckerItf;
+  }
 }

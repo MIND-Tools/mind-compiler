@@ -22,8 +22,15 @@
 
 package org.ow2.mind.adl;
 
+import java.util.Map;
+import java.util.Set;
+
 import org.ow2.mind.AbstractVoidVisitorDispatcher;
 import org.ow2.mind.VoidVisitor;
+import org.ow2.mind.plugin.PluginManager;
+
+import com.google.common.collect.Iterables;
+import com.google.inject.Inject;
 
 public class InstanceSourceGeneratorDispatcher
     extends
@@ -31,10 +38,15 @@ public class InstanceSourceGeneratorDispatcher
     implements
       InstanceSourceGenerator {
 
-  @Override
-  protected VoidVisitor<InstancesDescriptor> castVisitorInterface(
-      final Object serverItf) {
-    return (InstanceSourceGenerator) serverItf;
-  }
+  @Inject
+  protected Set<InstanceSourceGenerator> visitorsItf;
+  @Inject
+  protected PluginManager                pluginManager;
 
+  @Override
+  protected Iterable<? extends VoidVisitor<InstancesDescriptor>> getVisitorsItf(
+      final Map<Object, Object> context) {
+    return Iterables.concat(visitorsItf, VisitorExtensionHelper
+        .getInstanceSourceGeneratorExtensions(pluginManager, context));
+  }
 }

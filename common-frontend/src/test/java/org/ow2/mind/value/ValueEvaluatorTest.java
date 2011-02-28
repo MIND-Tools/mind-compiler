@@ -22,7 +22,6 @@
 
 package org.ow2.mind.value;
 
-import static org.ow2.mind.BCImplChecker.checkBCImplementation;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertSame;
@@ -35,27 +34,19 @@ import org.ow2.mind.AbstractTestcase;
 import org.ow2.mind.value.ast.Array;
 import org.ow2.mind.value.ast.NumberLiteral;
 import org.ow2.mind.value.ast.StringLiteral;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import com.google.inject.Injector;
 
 public class ValueEvaluatorTest extends AbstractTestcase {
 
   ValueEvaluator      evaluator;
   Map<Object, Object> context;
 
-  @BeforeMethod(alwaysRun = true)
-  public void setUp() {
-    final BasicValueEvaluator bve = new BasicValueEvaluator();
-
-    evaluator = bve;
-    bve.recursiveEvaluatorItf = bve;
-
+  @Override
+  protected void setUp(final Injector injector) {
+    evaluator = injector.getInstance(ValueEvaluator.class);
     context = new HashMap<Object, Object>();
-  }
-
-  @Test(groups = {"functional", "checkin"})
-  public void testBasicValueEvaluatorBC() throws Exception {
-    checkBCImplementation(new BasicValueEvaluator());
   }
 
   @Test(groups = {"functional"})

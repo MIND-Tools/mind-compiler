@@ -33,12 +33,18 @@ import java.util.Map;
 
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.Loader;
+import org.ow2.mind.CommonFrontendModule;
 import org.ow2.mind.adl.graph.ComponentGraph;
 import org.ow2.mind.adl.graph.Instantiator;
-import org.ow2.mind.error.ErrorManager;
-import org.ow2.mind.error.ErrorManagerFactory;
+import org.ow2.mind.idl.IDLFrontendModule;
+import org.ow2.mind.plugin.PluginLoaderModule;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.google.inject.Key;
+import com.google.inject.name.Names;
 
 public class TestBinaryLoader {
 
@@ -51,14 +57,19 @@ public class TestBinaryLoader {
 
   @BeforeMethod(alwaysRun = true)
   protected void setUp() throws Exception {
-    final ErrorManager errorManager = ErrorManagerFactory
-        .newStreamErrorManager();
-    final ErrorLoader errorLoader = new ErrorLoader();
-    errorLoader.clientLoader = Factory.newLoader(errorManager);
-    errorLoader.errorManagerItf = errorManager;
-    loader = errorLoader;
+    final Injector injector = Guice.createInjector(new CommonFrontendModule(),
+        new PluginLoaderModule(), new IDLFrontendModule(),
+        new ADLFrontendModule() {
+          protected void configureErrorLoader() {
+            bind(Loader.class).annotatedWith(Names.named("ErrorLoader"))
+                .toChainStartingWith(ErrorLoader.class)
+                .endingWith(Loader.class);
+          }
+        });
 
-    instantiator = Factory.newInstantiator(errorManager, loader);
+    loader = injector.getInstance(Key.get(Loader.class,
+        Names.named("ErrorLoader")));
+    instantiator = injector.getInstance(Instantiator.class);
 
     binADLDir = new File("target/test/defs");
     rm(binADLDir);

@@ -29,6 +29,7 @@ import java.util.Map;
 
 import org.objectweb.fractal.adl.ADLException;
 import org.ow2.mind.InputResourcesHelper;
+import org.ow2.mind.idl.IncludeResolver.AbstractDelegatingIncludeResolver;
 import org.ow2.mind.idl.ast.IDL;
 import org.ow2.mind.idl.ast.Include;
 
@@ -38,16 +39,19 @@ import org.ow2.mind.idl.ast.Include;
  * 
  * @see InputResourcesHelper
  */
-public class InputResourcesIncludeResolver extends AbstractIncludeResolver {
+public class InputResourcesIncludeResolver
+    extends
+      AbstractDelegatingIncludeResolver {
 
   // ---------------------------------------------------------------------------
   // Implementation of the IncludeResolver interface
   // ---------------------------------------------------------------------------
 
   public IDL resolve(final Include include, final IDL encapsulatingContainer,
-      final Map<Object, Object> context) throws ADLException {
+      final String encapsulatingName, final Map<Object, Object> context)
+      throws ADLException {
     final IDL idl = clientResolverItf.resolve(include, encapsulatingContainer,
-        context);
+        encapsulatingName, context);
 
     if (encapsulatingContainer != null) {
       addInputResources(encapsulatingContainer, getInputResources(idl));

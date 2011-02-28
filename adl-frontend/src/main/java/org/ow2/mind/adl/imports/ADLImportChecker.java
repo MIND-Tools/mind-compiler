@@ -22,22 +22,16 @@
 
 package org.ow2.mind.adl.imports;
 
-import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
-import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
-
 import java.util.Map;
 
-import org.objectweb.fractal.api.NoSuchInterfaceException;
-import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.ow2.mind.adl.ADLLocator;
+
+import com.google.inject.Inject;
 
 public class ADLImportChecker extends AbstractDelegatingImportChecker {
 
-  // ---------------------------------------------------------------------------
-  // Client interfaces
-  // ---------------------------------------------------------------------------
-
-  public ADLLocator adlLocatorItf;
+  @Inject
+  protected ADLLocator adlLocatorItf;
 
   // ---------------------------------------------------------------------------
   // Implementation of abstract methods of AbstractDelegatingImportChecker
@@ -57,50 +51,5 @@ public class ADLImportChecker extends AbstractDelegatingImportChecker {
     // Always return true since this import checker is not able to check package
     // name.
     return true;
-  }
-
-  // ---------------------------------------------------------------------------
-  // Overridden BindingController methods
-  // ---------------------------------------------------------------------------
-
-  @Override
-  public void bindFc(final String itfName, final Object value)
-      throws NoSuchInterfaceException, IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(ADLLocator.ITF_NAME)) {
-      adlLocatorItf = (ADLLocator) value;
-    } else {
-      super.bindFc(itfName, value);
-    }
-
-  }
-
-  @Override
-  public String[] listFc() {
-    return listFcHelper(super.listFc(), ADLLocator.ITF_NAME);
-  }
-
-  @Override
-  public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
-    checkItfName(itfName);
-
-    if (itfName.equals(ADLLocator.ITF_NAME)) {
-      return adlLocatorItf;
-    } else {
-      return super.lookupFc(itfName);
-    }
-  }
-
-  @Override
-  public void unbindFc(final String itfName) throws NoSuchInterfaceException,
-      IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(ADLLocator.ITF_NAME)) {
-      adlLocatorItf = null;
-    } else {
-      super.unbindFc(itfName);
-    }
   }
 }

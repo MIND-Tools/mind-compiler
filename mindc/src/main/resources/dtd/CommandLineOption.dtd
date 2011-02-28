@@ -1,0 +1,209 @@
+<!--
+  Copyright (C) 2011 STMicroelectronics
+
+ This file is part of "Mind Compiler" is free software: you can redistribute 
+ it and/or modify it under the terms of the GNU Lesser General Public License 
+ as published by the Free Software Foundation, either version 3 of the 
+ License, or (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful, but WITHOUT 
+ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ details.
+
+ You should have received a copy of the GNU Lesser General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+ Contact: mind@ow2.org
+
+ Authors: Matthieu Leclercq
+ Contributors: 
+
+ -->
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!--
+The Command Line Option extension point allows to defines command line options 
+that can be used on the mindc command line.
+-->
+
+<!ELEMENT extension (cmdFlag | cmdProperties | cmdArgument | cmdAppendOption | cmdPathOption | exclusiveGroup)+ >
+<!ATTLIST extension
+  point CDATA #REQUIRED
+  id CDATA #IMPLIED
+  name CDATA #IMPLIED
+>
+
+<!--
+Command Flag : A command line option that can be present of not on the command 
+line.
+
+id          : Identifier of this command line option. Must be unique.
+handler     : The handler class. Must implement 
+              org.ow2.mind.CommandOptionHandler
+shortName   : The short name of the command option. Must contains only one 
+              character. One on shortName or longName must be specified.
+longName    : The long name of the command option. Must contains at least two 
+              characters. One on shortName or longName must be specified.
+description : The description of the option (used to generate help message).
+-->
+<!ELEMENT cmdFlag (processAfter | processBefore)* >
+<!ATTLIST cmdFlag
+  id CDATA #REQUIRED
+  handler CDATA #IMPLIED
+  shortName CDATA #IMPLIED
+  longName CDATA #IMPLIED
+  description CDATA #REQUIRED
+>
+
+<!--
+Command Property : A command line option that associate a name to a value
+
+id          : Identifier of this command line option. Must be unique.
+handler     : The handler class. Must implement 
+              org.ow2.mind.CommandOptionHandler
+shortName   : The short name of the command option. Must contains only one 
+              character.
+description : The description of the option (used to generate help message).
+argNameDesc : The description of the argument name (used to generate help 
+              message).
+argValueDesc: The description of the argument value (used to generate help 
+              message).
+-->
+<!ELEMENT cmdProperties (processAfter | processBefore)* >
+<!ATTLIST cmdProperties
+  id CDATA #REQUIRED
+  handler CDATA #IMPLIED
+  shortName CDATA #REQUIRED
+  description CDATA #REQUIRED
+  argNameDesc CDATA #REQUIRED
+  argValueDesc CDATA #REQUIRED
+>
+
+<!--
+Command Argument : A command line option that have a value
+
+id           : Identifier of this command line option. Must be unique.
+handler      : The handler class. Must implement 
+               org.ow2.mind.CommandOptionHandler
+shortName    : The short name of the command option. Must contains only one 
+               character. One on shortName or longName must be specified.
+longName     : The long name of the command option. Must contains at least two 
+               characters. One on shortName or longName must be specified.
+allowMultiple: If <code>true</code>, this option can be specified several time
+               on a command-line. In that case, the last occurrence is used.
+defaultValue : The default value of this option.
+description  : The description of the option (used to generate help message).
+argDesc      : The description of the argument value (used to generate help 
+               message).
+-->
+<!ELEMENT cmdArgument (processAfter | processBefore)* >
+<!ATTLIST cmdArgument
+  id CDATA #REQUIRED
+  handler CDATA #IMPLIED
+  shortName CDATA #IMPLIED
+  longName CDATA #IMPLIED
+  allowMultiple (true | false) #REQUIRED
+  defaultValue CDATA #IMPLIED
+  description CDATA #REQUIRED
+  argDesc CDATA #REQUIRED
+>
+
+<!--
+Command Append Option : A command line option that have a value and that may be
+specified several time on a command-line. The resulting option value is the 
+concatenation of the values of each occurrence of this option.
+
+id           : Identifier of this command line option. Must be unique.
+handler      : The handler class. Must implement 
+               org.ow2.mind.CommandOptionHandler
+shortName    : The short name of the command option. Must contains only one 
+               character. One on shortName or longName must be specified.
+longName     : The long name of the command option. Must contains at least two 
+               characters. One on shortName or longName must be specified.
+separator    : The string used to separate individual value. Default is " ".
+defaultValue : The default value of this option.
+description  : The description of the option (used to generate help message).
+argDesc      : The description of the argument value (used to generate help 
+               message).
+-->
+<!ELEMENT cmdAppendOption (processAfter | processBefore)* >
+<!ATTLIST cmdAppendOption
+  id CDATA #REQUIRED
+  handler CDATA #IMPLIED
+  shortName CDATA #IMPLIED
+  longName CDATA #IMPLIED
+  separator CDATA #IMPLIED
+  defaultValue CDATA #IMPLIED
+  description CDATA #REQUIRED
+  argDesc CDATA #REQUIRED
+>
+
+<!--
+Command Path Option : A command line option that have a value and that may be 
+specified several time on a command-line. The resulting option value is the 
+concatenation of the values of each occurrence of this option separated by 
+path separator (';' on Windows, ':' on Unix).
+
+id           : Identifier of this command line option. Must be unique.
+handler      : The handler class. Must implement 
+               org.ow2.mind.CommandOptionHandler
+shortName    : The short name of the command option. Must contains only one 
+               character. One on shortName or longName must be specified.
+longName     : The long name of the command option. Must contains at least two 
+               characters. One on shortName or longName must be specified.
+description  : The description of the option (used to generate help message).
+argDesc      : The description of the argument value (used to generate help 
+               message).
+-->
+<!ELEMENT cmdPathOption (processAfter | processBefore)* >
+<!ATTLIST cmdPathOption
+  id CDATA #REQUIRED
+  handler CDATA #IMPLIED
+  shortName CDATA #IMPLIED
+  longName CDATA #IMPLIED
+  description CDATA #REQUIRED
+  argDesc CDATA #REQUIRED
+>
+
+<!--
+Specify that the handler of the surrounding command-line option must be processed
+after the command line option with the given id.
+
+id : The identifier of the command line option that must be processed before the
+     the surrounding command-line.
+-->
+<!ELEMENT processAfter EMPTY >
+<!ATTLIST processAfter
+  id CDATA #REQUIRED
+>
+
+<!--
+Specify that the handler of the surrounding command-line option must be processed
+before the command line option with the given id.
+
+id : The identifier of the command line option that must be processed after the
+     the surrounding command-line.
+-->
+<!ELEMENT processBefore EMPTY >
+<!ATTLIST processBefore
+  id CDATA #REQUIRED
+>
+
+<!--
+Specify a group of exclusive options. several command-line options belonging to
+a given exclusive group cannot be specified simultaneously.
+-->
+<!ELEMENT exclusiveGroup (exclusiveOption+) >
+<!ATTLIST exclusiveGroup
+>
+
+<!--
+An exclusive option.
+
+id : The identifier of the exclusive option.
+-->
+<!ELEMENT exclusiveOption EMPTY>
+<!ATTLIST exclusiveOption
+  id CDATA #REQUIRED
+>

@@ -22,37 +22,20 @@
 
 package org.ow2.mind.st;
 
-import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
-import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
-
 import org.antlr.stringtemplate.StringTemplate;
 import org.antlr.stringtemplate.StringTemplateGroup;
 import org.antlr.stringtemplate.StringTemplateGroupLoader;
 import org.antlr.stringtemplate.language.AngleBracketTemplateLexer;
-import org.objectweb.fractal.adl.xml.XMLNodeFactory;
-import org.objectweb.fractal.api.NoSuchInterfaceException;
-import org.objectweb.fractal.api.control.BindingController;
-import org.objectweb.fractal.api.control.IllegalBindingException;
 
-public abstract class AbstractStringTemplateProcessor
-    implements
-      BindingController {
+import com.google.inject.Inject;
 
-  protected final String           templateGroupName;
-  private StringTemplateGroup      templateGroup   = null;
+public abstract class AbstractStringTemplateProcessor {
 
-  // ---------------------------------------------------------------------------
-  // Client interfaces
-  // ---------------------------------------------------------------------------
+  protected final String              templateGroupName;
+  private StringTemplateGroup         templateGroup = null;
 
-  /** The name of the {@link #templateGroupLoaderItf} client interface. */
-  public static final String       LOADER_ITF_NAME = "template-loader";
-
-  /**
-   * Client interface bound to the {@link XMLNodeFactory node factory}
-   * component.
-   */
-  public StringTemplateGroupLoader templateGroupLoaderItf;
+  @Inject
+  protected StringTemplateGroupLoader templateGroupLoaderItf;
 
   // ---------------------------------------------------------------------------
   // Constructor
@@ -85,49 +68,5 @@ public abstract class AbstractStringTemplateProcessor
   }
 
   protected void registerCustomRenderer(final StringTemplateGroup templateGroup) {
-  }
-
-  // ---------------------------------------------------------------------------
-  // Implementation of the BindingController interface
-  // ---------------------------------------------------------------------------
-
-  public void bindFc(final String itfName, final Object value)
-      throws NoSuchInterfaceException, IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(LOADER_ITF_NAME)) {
-      this.templateGroupLoaderItf = (StringTemplateGroupLoader) value;
-    } else {
-      throw new NoSuchInterfaceException("There is no interface named '"
-          + itfName + "'");
-    }
-
-  }
-
-  public String[] listFc() {
-    return listFcHelper(LOADER_ITF_NAME);
-  }
-
-  public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
-    checkItfName(itfName);
-
-    if (itfName.equals(LOADER_ITF_NAME)) {
-      return this.templateGroupLoaderItf;
-    } else {
-      throw new NoSuchInterfaceException("There is no interface named '"
-          + itfName + "'");
-    }
-  }
-
-  public void unbindFc(final String itfName) throws NoSuchInterfaceException,
-      IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(LOADER_ITF_NAME)) {
-      this.templateGroupLoaderItf = null;
-    } else {
-      throw new NoSuchInterfaceException("There is no interface named '"
-          + itfName + "'");
-    }
   }
 }

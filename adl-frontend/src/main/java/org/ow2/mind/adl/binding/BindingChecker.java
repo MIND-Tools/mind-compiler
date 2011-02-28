@@ -26,10 +26,9 @@ import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.Node;
 import org.objectweb.fractal.adl.interfaces.Interface;
 import org.ow2.mind.adl.ast.Binding;
+import org.ow2.mind.inject.InjectDelegate;
 
 public interface BindingChecker {
-
-  String ITF_NAME = "binding-checker";
 
   void checkFromCompositeToSubcomponentBinding(Interface compositeInterface,
       Interface subComponentInterface, Binding binding, Node locator)
@@ -44,4 +43,18 @@ public interface BindingChecker {
 
   void checkCompatibility(Interface from, Interface to, Node locator)
       throws ADLException;
+
+  /**
+   * An abstract delegating {@link BindingChecker} component.
+   */
+  public abstract class AbstractDelegatingBindingChecker
+      implements
+        BindingChecker {
+
+    /**
+     * The client {@link BindingChecker} used by this component.
+     */
+    @InjectDelegate
+    protected BindingChecker clientBindingCheckerItf;
+  }
 }

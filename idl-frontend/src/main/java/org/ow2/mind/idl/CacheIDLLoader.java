@@ -27,14 +27,20 @@ import java.util.Map;
 
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.ContextLocal;
+import org.ow2.mind.idl.IDLLoader.AbstractDelegatingIDLLoader;
 import org.ow2.mind.idl.ast.IDL;
+
+import com.google.inject.Singleton;
 
 /**
  * Simple delegating loader that manage a cache of already loaded definitions.
  * The cache is different for each given <code>context</code> (see
  * {@link ContextLocal}).
  */
-public class CacheIDLLoader extends AbstractIDLLoader implements IDLCache {
+@Singleton
+public class CacheIDLLoader extends AbstractDelegatingIDLLoader
+    implements
+      IDLCache {
 
   protected final ContextLocal<Map<String, IDL>> contextualCache = new ContextLocal<Map<String, IDL>>();
 

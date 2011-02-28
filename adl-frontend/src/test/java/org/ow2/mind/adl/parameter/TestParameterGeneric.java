@@ -22,37 +22,41 @@
 
 package org.ow2.mind.adl.parameter;
 
-import static org.ow2.mind.BCImplChecker.checkBCImplementation;
-
 import java.util.HashMap;
 
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.Loader;
-import org.objectweb.fractal.adl.NodeFactoryImpl;
-import org.objectweb.fractal.adl.merger.NodeMergerImpl;
-import org.objectweb.fractal.adl.xml.XMLNodeFactoryImpl;
+import org.objectweb.fractal.adl.merger.NodeMerger;
+import org.ow2.mind.CommonFrontendModule;
 import org.ow2.mind.adl.ASTChecker;
 import org.ow2.mind.adl.ASTChecker.DefinitionChecker;
-import org.ow2.mind.adl.BasicADLLocator;
+import org.ow2.mind.adl.AbstractADLFrontendModule;
 import org.ow2.mind.adl.BasicDefinitionReferenceResolver;
 import org.ow2.mind.adl.CacheLoader;
 import org.ow2.mind.adl.CachingDefinitionReferenceResolver;
+import org.ow2.mind.adl.DefinitionCache;
+import org.ow2.mind.adl.DefinitionReferenceResolver;
 import org.ow2.mind.adl.ErrorLoader;
 import org.ow2.mind.adl.ExtendsLoader;
 import org.ow2.mind.adl.GraphChecker;
 import org.ow2.mind.adl.STCFNodeMerger;
 import org.ow2.mind.adl.SubComponentResolverLoader;
 import org.ow2.mind.adl.binding.BasicBindingChecker;
+import org.ow2.mind.adl.binding.BindingChecker;
 import org.ow2.mind.adl.generic.CachingTemplateInstantiator;
 import org.ow2.mind.adl.generic.GenericDefinitionLoader;
 import org.ow2.mind.adl.generic.GenericDefinitionReferenceResolver;
+import org.ow2.mind.adl.generic.TemplateInstantiator;
 import org.ow2.mind.adl.generic.TemplateInstantiatorImpl;
 import org.ow2.mind.adl.imports.ImportDefinitionReferenceResolver;
 import org.ow2.mind.adl.parser.ADLParser;
-import org.ow2.mind.error.ErrorManager;
-import org.ow2.mind.error.ErrorManagerFactory;
+import org.ow2.mind.plugin.PluginLoaderModule;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.google.inject.name.Names;
 
 public class TestParameterGeneric {
 
@@ -65,105 +69,53 @@ public class TestParameterGeneric {
 
   @BeforeMethod(alwaysRun = true)
   protected void setUp() throws Exception {
-    final ErrorManager errorManager = ErrorManagerFactory
-        .newSimpleErrorManager();
+    final Injector injector = Guice.createInjector(new CommonFrontendModule(),
+        new PluginLoaderModule(), new AbstractADLFrontendModule() {
 
-    // Loader chain components
-    final ADLParser adlLoader = new ADLParser();
-    final GenericDefinitionLoader gdl = new GenericDefinitionLoader();
-    final SubComponentResolverLoader scrl = new SubComponentResolverLoader();
-    final ExtendsLoader el = new ExtendsLoader();
-    final CacheLoader cl = new CacheLoader();
-    final ErrorLoader errl = new ErrorLoader();
+          protected void configureTest() {
+            bind(Loader.class).toChainStartingWith(ErrorLoader.class)
+                .followedBy(CacheLoader.class).followedBy(ExtendsLoader.class)
+                .followedBy(SubComponentResolverLoader.class)
+                .followedBy(GenericDefinitionLoader.class)
+                .endingWith(ADLParser.class);
 
-    errl.clientLoader = cl;
-    cl.clientLoader = el;
-    el.clientLoader = scrl;
-    scrl.clientLoader = gdl;
-    gdl.clientLoader = adlLoader;
+            bind(DefinitionReferenceResolver.class)
+                .toChainStartingWith(CachingDefinitionReferenceResolver.class)
+                .followedBy(ImportDefinitionReferenceResolver.class)
+                .followedBy(ParametricGenericDefinitionReferenceResolver.class)
+                .followedBy(GenericDefinitionReferenceResolver.class)
+                .followedBy(ParametricDefinitionReferenceResolver.class)
+                .endingWith(BasicDefinitionReferenceResolver.class);
 
-    errl.errorManagerItf = errorManager;
-    cl.errorManagerItf = errorManager;
-    el.errorManagerItf = errorManager;
-    scrl.errorManagerItf = errorManager;
-    gdl.errorManagerItf = errorManager;
-    adlLoader.errorManagerItf = errorManager;
+            bind(DefinitionReferenceResolver.class)
+                .annotatedWith(
+                    Names.named(ExtendsLoader.EXTENDS_DEFINITION_RESOLVER))
+                .toChainStartingWith(
+                    ExtendsParametricDefinitionReferenceResolver.class)
+                .endingWith(DefinitionReferenceResolver.class);
 
-    // definition reference resolver chain
-    final BasicDefinitionReferenceResolver bdrr = new BasicDefinitionReferenceResolver();
-    final ParametricDefinitionReferenceResolver pdrr = new ParametricDefinitionReferenceResolver();
-    final GenericDefinitionReferenceResolver gdrr = new GenericDefinitionReferenceResolver();
-    final ParametricGenericDefinitionReferenceResolver pgdrr = new ParametricGenericDefinitionReferenceResolver();
-    final ImportDefinitionReferenceResolver idrr = new ImportDefinitionReferenceResolver();
-    final CachingDefinitionReferenceResolver cdrr = new CachingDefinitionReferenceResolver();
+            bind(NodeMerger.class).annotatedWith(
+                Names.named(ExtendsLoader.EXTENDS_NODE_MERGER)).to(
+                STCFNodeMerger.class);
 
-    cdrr.clientResolverItf = idrr;
-    idrr.clientResolverItf = pgdrr;
-    pgdrr.clientResolverItf = gdrr;
-    gdrr.clientResolverItf = pdrr;
-    pdrr.clientResolverItf = bdrr;
-    bdrr.loaderItf = cl;
-    cdrr.loaderItf = cl;
+            setDefaultSubComponentLoaderConfig();
 
-    scrl.definitionReferenceResolverItf = cdrr;
+            bind(TemplateInstantiator.class)
+                .toChainStartingWith(CachingTemplateInstantiator.class)
+                .followedBy(ParametricTemplateInstantiator.class)
+                .endingWith(TemplateInstantiatorImpl.class);
 
-    bdrr.errorManagerItf = errorManager;
-    pdrr.errorManagerItf = errorManager;
-    gdrr.errorManagerItf = errorManager;
+            bind(BindingChecker.class).to(BasicBindingChecker.class);
+            bind(DefinitionCache.class).to(CacheLoader.class);
+          }
+        });
 
-    final ExtendsParametricDefinitionReferenceResolver epdrr = new ExtendsParametricDefinitionReferenceResolver();
-
-    epdrr.clientResolverItf = cdrr;
-    el.definitionReferenceResolverItf = epdrr;
-
-    gdl.definitionReferenceResolverItf = cdrr;
-    gdrr.recursiveResolverItf = cdrr;
-
-    // template instantiator chain
-    final TemplateInstantiatorImpl ti = new TemplateInstantiatorImpl();
-    final ParametricTemplateInstantiator pti = new ParametricTemplateInstantiator();
-    final CachingTemplateInstantiator cti = new CachingTemplateInstantiator();
-
-    cti.clientInstantiatorItf = pti;
-    pti.clientInstantiatorItf = ti;
-
-    cti.definitionCacheItf = cl;
-    cti.definitionReferenceResolverItf = cdrr;
-    pti.definitionReferenceResolverItf = cdrr;
-    ti.definitionReferenceResolverItf = cdrr;
-
-    gdrr.templateInstantiatorItf = cti;
-
-    // additional components
-    final STCFNodeMerger stcfNodeMerger = new STCFNodeMerger();
-    final BasicADLLocator adlLocator = new BasicADLLocator();
-    final XMLNodeFactoryImpl xmlNodeFactory = new XMLNodeFactoryImpl();
-    final NodeFactoryImpl nodeFactory = new NodeFactoryImpl();
-    final NodeMergerImpl nodeMerger = new NodeMergerImpl();
-    final BasicBindingChecker bindingChecker = new BasicBindingChecker();
-
-    el.nodeMergerItf = stcfNodeMerger;
-    idrr.adlLocatorItf = adlLocator;
-    adlLoader.adlLocatorItf = adlLocator;
-    adlLoader.nodeFactoryItf = xmlNodeFactory;
-    gdrr.bindingCheckerItf = bindingChecker;
-    pti.nodeFactoryItf = nodeFactory;
-    pti.nodeMergerItf = nodeMerger;
-    bdrr.nodeFactoryItf = nodeFactory;
-    gdrr.nodeFactoryItf = nodeFactory;
-
-    loader = errl;
+    loader = injector.getInstance(Loader.class);
 
     context = new HashMap<Object, Object>();
 
     checker = new ASTChecker();
     graphChecker = new GraphChecker();
-  }
-
-  @Test(groups = {"functional", "checkin"})
-  public void testParametricGenericDefinitionReferenceResolverBC()
-      throws Exception {
-    checkBCImplementation(new ParametricGenericDefinitionReferenceResolver());
   }
 
   @Test(groups = {"functional"})

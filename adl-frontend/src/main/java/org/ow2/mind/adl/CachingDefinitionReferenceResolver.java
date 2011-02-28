@@ -22,8 +22,6 @@
 
 package org.ow2.mind.adl;
 
-import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
-import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
 import static org.ow2.mind.adl.ast.ASTHelper.getResolvedDefinition;
 import static org.ow2.mind.adl.ast.ASTHelper.setResolvedDefinition;
 
@@ -32,9 +30,10 @@ import java.util.Map;
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.Loader;
-import org.objectweb.fractal.api.NoSuchInterfaceException;
-import org.objectweb.fractal.api.control.IllegalBindingException;
+import org.ow2.mind.adl.DefinitionReferenceResolver.AbstractDelegatingDefinitionReferenceResolver;
 import org.ow2.mind.adl.ast.DefinitionReference;
+
+import com.google.inject.Inject;
 
 /**
  * Simple delegating {@link DefinitionReferenceResolver} that attaches resolved
@@ -50,17 +49,10 @@ import org.ow2.mind.adl.ast.DefinitionReference;
  */
 public class CachingDefinitionReferenceResolver
     extends
-      AbstractDefinitionReferenceResolver {
+      AbstractDelegatingDefinitionReferenceResolver {
 
-  // ---------------------------------------------------------------------------
-  // Client interfaces
-  // ---------------------------------------------------------------------------
-
-  /** The name of the {@link #loaderItf} client interface. */
-  public static final String LOADER_ITF_NAME = "loader";
-
-  /** The Loader interface used to load referenced definitions. */
-  public Loader              loaderItf;
+  @Inject
+  protected Loader loaderItf;
 
   // ---------------------------------------------------------------------------
   // Implementation of the DefinitionReferenceResolver interface
@@ -77,50 +69,5 @@ public class CachingDefinitionReferenceResolver
       setResolvedDefinition(reference, d);
     }
     return d;
-  }
-
-  // ---------------------------------------------------------------------------
-  // Overridden BindingController methods
-  // ---------------------------------------------------------------------------
-
-  @Override
-  public void bindFc(final String itfName, final Object value)
-      throws NoSuchInterfaceException, IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(LOADER_ITF_NAME)) {
-      loaderItf = (Loader) value;
-    } else {
-      super.bindFc(itfName, value);
-    }
-
-  }
-
-  @Override
-  public String[] listFc() {
-    return listFcHelper(super.listFc(), LOADER_ITF_NAME);
-  }
-
-  @Override
-  public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
-    checkItfName(itfName);
-
-    if (itfName.equals(LOADER_ITF_NAME)) {
-      return loaderItf;
-    } else {
-      return super.lookupFc(itfName);
-    }
-  }
-
-  @Override
-  public void unbindFc(final String itfName) throws NoSuchInterfaceException,
-      IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(LOADER_ITF_NAME)) {
-      loaderItf = null;
-    } else {
-      super.unbindFc(itfName);
-    }
   }
 }

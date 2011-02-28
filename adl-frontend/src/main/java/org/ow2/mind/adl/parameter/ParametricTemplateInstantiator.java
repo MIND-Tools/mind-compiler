@@ -36,12 +36,10 @@ import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.NodeFactory;
 import org.objectweb.fractal.adl.error.GenericErrors;
 import org.objectweb.fractal.adl.merger.NodeMerger;
-import org.objectweb.fractal.api.NoSuchInterfaceException;
-import org.objectweb.fractal.api.control.BindingController;
-import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.ow2.mind.adl.DefinitionReferenceResolver;
 import org.ow2.mind.adl.ast.DefinitionReference;
 import org.ow2.mind.adl.generic.TemplateInstantiator;
+import org.ow2.mind.adl.generic.TemplateInstantiator.AbstractDelegatingTemplateInstantiator;
 import org.ow2.mind.adl.generic.ast.FormalTypeParameter;
 import org.ow2.mind.adl.generic.ast.FormalTypeParameterContainer;
 import org.ow2.mind.adl.generic.ast.TypeArgument;
@@ -51,34 +49,25 @@ import org.ow2.mind.adl.parameter.ast.FormalParameter;
 import org.ow2.mind.adl.parameter.ast.FormalParameterContainer;
 import org.ow2.mind.value.ast.Reference;
 
+import com.google.inject.Inject;
+
 /**
  * This delegating {@link TemplateInstantiator} adds {@link FormalParameter
  * formal parameters} contained by the definitions designated by type arguments
  * to the instantiated template.
  */
 public class ParametricTemplateInstantiator
-    implements
-      TemplateInstantiator,
-      BindingController {
+    extends
+      AbstractDelegatingTemplateInstantiator {
 
-  // ---------------------------------------------------------------------------
-  // Client interfaces
-  // ---------------------------------------------------------------------------
+  @Inject
+  protected DefinitionReferenceResolver definitionReferenceResolverItf;
 
-  /** The name of the {@link #clientInstantiatorItf} client interface. */
-  public static final String         CLIENT_INSTANTIATOR_ITF_NAME = "client-instantiator";
+  @Inject
+  protected NodeFactory                 nodeFactoryItf;
 
-  /** The client {@link TemplateInstantiator} interface. */
-  public TemplateInstantiator        clientInstantiatorItf;
-
-  /** The interface used to resolve referenced definitions. */
-  public DefinitionReferenceResolver definitionReferenceResolverItf;
-
-  /** The node factory interface */
-  public NodeFactory                 nodeFactoryItf;
-
-  /** The node merger interface */
-  public NodeMerger                  nodeMergerItf;
+  @Inject
+  protected NodeMerger                  nodeMergerItf;
 
   // ---------------------------------------------------------------------------
   // Implementation of the TemplateInstantiator interface
@@ -178,8 +167,8 @@ public class ParametricTemplateInstantiator
 
   protected Argument newArgumentNode() {
     try {
-      return (Argument) nodeFactoryItf.newNode("argument", Argument.class
-          .getName());
+      return (Argument) nodeFactoryItf.newNode("argument",
+          Argument.class.getName());
     } catch (final ClassNotFoundException e) {
       throw new CompilerError(GenericErrors.INTERNAL_ERROR, e,
           "Node factory error");
@@ -188,82 +177,11 @@ public class ParametricTemplateInstantiator
 
   protected Reference newReferenceNode() {
     try {
-      return (Reference) nodeFactoryItf.newNode("value", Reference.class
-          .getName());
+      return (Reference) nodeFactoryItf.newNode("value",
+          Reference.class.getName());
     } catch (final ClassNotFoundException e) {
       throw new CompilerError(GenericErrors.INTERNAL_ERROR, e,
           "Node factory error");
-    }
-  }
-
-  // ---------------------------------------------------------------------------
-  // Implementation of the BindingController interface
-  // ---------------------------------------------------------------------------
-
-  public void bindFc(final String itfName, final Object value)
-      throws NoSuchInterfaceException, IllegalBindingException {
-
-    if (itfName == null) {
-      throw new IllegalArgumentException("Interface name can't be null");
-    }
-
-    if (itfName.equals(DefinitionReferenceResolver.ITF_NAME)) {
-      definitionReferenceResolverItf = (DefinitionReferenceResolver) value;
-    } else if (itfName.equals(NodeFactory.ITF_NAME)) {
-      nodeFactoryItf = (NodeFactory) value;
-    } else if (itfName.equals(NodeMerger.ITF_NAME)) {
-      nodeMergerItf = (NodeMerger) value;
-    } else if (itfName.equals(CLIENT_INSTANTIATOR_ITF_NAME)) {
-      clientInstantiatorItf = (TemplateInstantiator) value;
-    } else {
-      throw new NoSuchInterfaceException("No client interface named '"
-          + itfName + "' for binding the interface");
-    }
-  }
-
-  public String[] listFc() {
-    return new String[]{DefinitionReferenceResolver.ITF_NAME,
-        CLIENT_INSTANTIATOR_ITF_NAME, NodeFactory.ITF_NAME, NodeMerger.ITF_NAME};
-  }
-
-  public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
-
-    if (itfName == null) {
-      throw new IllegalArgumentException("Interface name can't be null");
-    }
-
-    if (itfName.equals(DefinitionReferenceResolver.ITF_NAME)) {
-      return definitionReferenceResolverItf;
-    } else if (itfName.equals(NodeFactory.ITF_NAME)) {
-      return nodeFactoryItf;
-    } else if (itfName.equals(NodeMerger.ITF_NAME)) {
-      return nodeMergerItf;
-    } else if (itfName.equals(CLIENT_INSTANTIATOR_ITF_NAME)) {
-      return clientInstantiatorItf;
-    } else {
-      throw new NoSuchInterfaceException("No client interface named '"
-          + itfName + "'");
-    }
-  }
-
-  public void unbindFc(final String itfName) throws IllegalBindingException,
-      NoSuchInterfaceException {
-
-    if (itfName == null) {
-      throw new IllegalArgumentException("Interface name can't be null");
-    }
-
-    if (itfName.equals(DefinitionReferenceResolver.ITF_NAME)) {
-      definitionReferenceResolverItf = null;
-    } else if (itfName.equals(NodeFactory.ITF_NAME)) {
-      nodeFactoryItf = null;
-    } else if (itfName.equals(NodeMerger.ITF_NAME)) {
-      nodeMergerItf = null;
-    } else if (itfName.equals(CLIENT_INSTANTIATOR_ITF_NAME)) {
-      clientInstantiatorItf = null;
-    } else {
-      throw new NoSuchInterfaceException("No client interface named '"
-          + itfName + "'");
     }
   }
 }

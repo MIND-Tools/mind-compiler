@@ -22,7 +22,6 @@
 
 package org.ow2.mind.adl.factory;
 
-import static org.ow2.mind.BCImplChecker.checkBCImplementation;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertSame;
@@ -32,30 +31,39 @@ import java.util.Map;
 
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.Loader;
-import org.objectweb.fractal.adl.NodeFactoryImpl;
-import org.objectweb.fractal.adl.xml.XMLNodeFactoryImpl;
+import org.objectweb.fractal.adl.merger.NodeMerger;
+import org.ow2.mind.CommonFrontendModule;
 import org.ow2.mind.adl.ASTChecker;
-import org.ow2.mind.adl.BasicADLLocator;
+import org.ow2.mind.adl.AbstractADLFrontendModule;
 import org.ow2.mind.adl.BasicDefinitionReferenceResolver;
 import org.ow2.mind.adl.CacheLoader;
 import org.ow2.mind.adl.CachingDefinitionReferenceResolver;
+import org.ow2.mind.adl.DefinitionCache;
+import org.ow2.mind.adl.DefinitionReferenceResolver;
 import org.ow2.mind.adl.ErrorLoader;
 import org.ow2.mind.adl.ExtendsLoader;
 import org.ow2.mind.adl.STCFNodeMerger;
 import org.ow2.mind.adl.SubComponentResolverLoader;
 import org.ow2.mind.adl.ast.ASTHelper;
 import org.ow2.mind.adl.binding.BasicBindingChecker;
+import org.ow2.mind.adl.binding.BindingChecker;
+import org.ow2.mind.adl.binding.IDLBindingChecker;
 import org.ow2.mind.adl.generic.CachingTemplateInstantiator;
 import org.ow2.mind.adl.generic.ExtendsGenericDefinitionReferenceResolver;
 import org.ow2.mind.adl.generic.GenericDefinitionLoader;
 import org.ow2.mind.adl.generic.GenericDefinitionReferenceResolver;
+import org.ow2.mind.adl.generic.TemplateInstantiator;
 import org.ow2.mind.adl.generic.TemplateInstantiatorImpl;
 import org.ow2.mind.adl.imports.ImportDefinitionReferenceResolver;
 import org.ow2.mind.adl.parser.ADLParser;
-import org.ow2.mind.error.ErrorManager;
-import org.ow2.mind.error.ErrorManagerFactory;
+import org.ow2.mind.idl.IDLFrontendModule;
+import org.ow2.mind.plugin.PluginLoaderModule;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.google.inject.name.Names;
 
 public class TestFactory {
 
@@ -67,102 +75,52 @@ public class TestFactory {
 
   @BeforeMethod(alwaysRun = true)
   protected void setUp() throws Exception {
-    final ErrorManager errorManager = ErrorManagerFactory
-        .newSimpleErrorManager();
+    final Injector injector = Guice.createInjector(new CommonFrontendModule(),
+        new PluginLoaderModule(), new IDLFrontendModule(),
+        new AbstractADLFrontendModule() {
+          protected void configureTest() {
+            bind(Loader.class).toChainStartingWith(ErrorLoader.class)
+                .followedBy(CacheLoader.class).followedBy(ExtendsLoader.class)
+                .followedBy(SubComponentResolverLoader.class)
+                .followedBy(GenericDefinitionLoader.class)
+                .followedBy(FactoryLoader.class).endingWith(ADLParser.class);
 
-    // Loader chain components
-    final ADLParser adlLoader = new ADLParser();
-    final FactoryLoader fl = new FactoryLoader();
-    final GenericDefinitionLoader gdl = new GenericDefinitionLoader();
-    final SubComponentResolverLoader scrl = new SubComponentResolverLoader();
-    final ExtendsLoader el = new ExtendsLoader();
-    final CacheLoader cl = new CacheLoader();
-    final ErrorLoader errl = new ErrorLoader();
+            bind(DefinitionReferenceResolver.class)
+                .toChainStartingWith(CachingDefinitionReferenceResolver.class)
+                .followedBy(ImportDefinitionReferenceResolver.class)
+                .followedBy(GenericDefinitionReferenceResolver.class)
+                .endingWith(BasicDefinitionReferenceResolver.class);
 
-    errl.clientLoader = cl;
-    cl.clientLoader = el;
-    el.clientLoader = scrl;
-    scrl.clientLoader = gdl;
-    gdl.clientLoader = fl;
-    fl.clientLoader = adlLoader;
+            bind(BindingChecker.class).toChainStartingWith(
+                IDLBindingChecker.class).endingWith(BasicBindingChecker.class);
 
-    errl.errorManagerItf = errorManager;
-    cl.errorManagerItf = errorManager;
-    el.errorManagerItf = errorManager;
-    scrl.errorManagerItf = errorManager;
-    gdl.errorManagerItf = errorManager;
-    adlLoader.errorManagerItf = errorManager;
+            bind(DefinitionReferenceResolver.class)
+                .annotatedWith(
+                    Names.named(ExtendsLoader.EXTENDS_DEFINITION_RESOLVER))
+                .toChainStartingWith(
+                    ExtendsGenericDefinitionReferenceResolver.class)
+                .endingWith(DefinitionReferenceResolver.class);
 
-    // definition reference resolver chain
-    final BasicDefinitionReferenceResolver bdrr = new BasicDefinitionReferenceResolver();
-    final GenericDefinitionReferenceResolver gdrr = new GenericDefinitionReferenceResolver();
-    final ImportDefinitionReferenceResolver idrr = new ImportDefinitionReferenceResolver();
-    final CachingDefinitionReferenceResolver cdrr = new CachingDefinitionReferenceResolver();
+            bind(NodeMerger.class).annotatedWith(
+                Names.named(ExtendsLoader.EXTENDS_NODE_MERGER)).to(
+                STCFNodeMerger.class);
 
-    cdrr.clientResolverItf = idrr;
-    idrr.clientResolverItf = gdrr;
-    gdrr.clientResolverItf = bdrr;
-    gdrr.recursiveResolverItf = cdrr;
-    bdrr.loaderItf = cl;
-    cdrr.loaderItf = cl;
+            setDefaultSubComponentLoaderConfig();
 
-    scrl.definitionReferenceResolverItf = cdrr;
+            bind(TemplateInstantiator.class)
+                .toChainStartingWith(CachingTemplateInstantiator.class)
+                .followedBy(FactoryTemplateInstantiator.class)
+                .endingWith(TemplateInstantiatorImpl.class);
 
-    bdrr.errorManagerItf = errorManager;
-    gdrr.errorManagerItf = errorManager;
+            bind(DefinitionCache.class).to(CacheLoader.class);
+          }
+        });
 
-    final ExtendsGenericDefinitionReferenceResolver egdrr = new ExtendsGenericDefinitionReferenceResolver();
-
-    egdrr.clientResolverItf = cdrr;
-    el.definitionReferenceResolverItf = egdrr;
-
-    gdl.definitionReferenceResolverItf = cdrr;
-
-    // template instantiator chain
-    final TemplateInstantiatorImpl ti = new TemplateInstantiatorImpl();
-    final FactoryTemplateInstantiator fti = new FactoryTemplateInstantiator();
-    final CachingTemplateInstantiator cti = new CachingTemplateInstantiator();
-
-    cti.clientInstantiatorItf = fti;
-    fti.clientInstantiatorItf = ti;
-
-    ti.definitionReferenceResolverItf = cdrr;
-    fti.definitionReferenceResolverItf = cdrr;
-    cti.definitionCacheItf = cl;
-    cti.definitionReferenceResolverItf = cdrr;
-
-    gdrr.templateInstantiatorItf = cti;
-
-    // additional components
-    final STCFNodeMerger stcfNodeMerger = new STCFNodeMerger();
-    final BasicADLLocator adlLocator = new BasicADLLocator();
-    final XMLNodeFactoryImpl xmlNodeFactory = new XMLNodeFactoryImpl();
-    final BasicBindingChecker bindingChecker = new BasicBindingChecker();
-    final NodeFactoryImpl nodeFactory = new NodeFactoryImpl();
-
-    el.nodeMergerItf = stcfNodeMerger;
-    idrr.adlLocatorItf = adlLocator;
-    adlLoader.adlLocatorItf = adlLocator;
-    adlLoader.nodeFactoryItf = xmlNodeFactory;
-    gdrr.bindingCheckerItf = bindingChecker;
-    fl.nodeFactoryItf = nodeFactory;
-    bdrr.nodeFactoryItf = nodeFactory;
-
-    loader = errl;
+    loader = injector.getInstance(Loader.class);
 
     context = new HashMap<Object, Object>();
 
     checker = new ASTChecker();
-  }
-
-  @Test(groups = {"functional", "checkin"})
-  public void testFactoryLoaderBC() throws Exception {
-    checkBCImplementation(new FactoryLoader());
-  }
-
-  @Test(groups = {"functional", "checkin"})
-  public void testFactoryTemplateInstantiatorBC() throws Exception {
-    checkBCImplementation(new FactoryTemplateInstantiator());
   }
 
   @Test(groups = {"functional"})

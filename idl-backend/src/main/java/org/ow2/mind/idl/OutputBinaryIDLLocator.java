@@ -1,33 +1,32 @@
 
 package org.ow2.mind.idl;
 
-import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
-import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Map;
 
-import org.objectweb.fractal.api.NoSuchInterfaceException;
-import org.objectweb.fractal.api.control.BindingController;
-import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.ow2.mind.InputResource;
+import org.ow2.mind.inject.InjectDelegate;
 import org.ow2.mind.io.OutputFileLocator;
 
-public class OutputBinaryIDLLocator implements IDLLocator, BindingController {
+import com.google.inject.Inject;
 
-  // ---------------------------------------------------------------------------
-  // Client interfaces
-  // ---------------------------------------------------------------------------
+public class OutputBinaryIDLLocator implements IDLLocator {
 
-  public static final String CLIENT_LOCATOR_ITF_NAME = "client-locaotr";
-  public IDLLocator          clientLocatorItf;
-  public OutputFileLocator   outputFileLocatorItf;
+  @InjectDelegate
+  protected IDLLocator        clientLocatorItf;
+
+  @Inject
+  protected OutputFileLocator outputFileLocatorItf;
 
   // ---------------------------------------------------------------------------
   // Implementation of the IDLLocator interface
   // ---------------------------------------------------------------------------
+
+  public Iterable<String> getResourceKind() {
+    return clientLocatorItf.getResourceKind();
+  }
 
   public URL findSourceItf(final String name, final Map<Object, Object> context) {
     return clientLocatorItf.findSourceItf(name, context);
@@ -83,58 +82,5 @@ public class OutputBinaryIDLLocator implements IDLLocator, BindingController {
 
   public URL findResource(final String name, final Map<Object, Object> context) {
     return clientLocatorItf.findResource(name, context);
-  }
-
-  public URL[] getInputResourcesRoot(final Map<Object, Object> context) {
-    return clientLocatorItf.getInputResourcesRoot(context);
-  }
-
-  // ---------------------------------------------------------------------------
-  // Implementation of the BindingController interface
-  // ---------------------------------------------------------------------------
-
-  public String[] listFc() {
-    return listFcHelper(CLIENT_LOCATOR_ITF_NAME, OutputFileLocator.ITF_NAME);
-  }
-
-  public Object lookupFc(final String s) throws NoSuchInterfaceException {
-    checkItfName(s);
-
-    if (s.equals(CLIENT_LOCATOR_ITF_NAME)) {
-      return clientLocatorItf;
-    } else if (s.equals(OutputFileLocator.ITF_NAME)) {
-      return outputFileLocatorItf;
-    } else {
-      throw new NoSuchInterfaceException("No client interface named '" + s
-          + "'");
-    }
-  }
-
-  public void bindFc(final String s, final Object o)
-      throws NoSuchInterfaceException, IllegalBindingException {
-    checkItfName(s);
-
-    if (s.equals(CLIENT_LOCATOR_ITF_NAME)) {
-      clientLocatorItf = (IDLLocator) o;
-    } else if (s.equals(OutputFileLocator.ITF_NAME)) {
-      outputFileLocatorItf = (OutputFileLocator) o;
-    } else {
-      throw new NoSuchInterfaceException("No client interface named '" + s
-          + "' for binding the interface");
-    }
-  }
-
-  public void unbindFc(final String s) throws IllegalBindingException,
-      NoSuchInterfaceException {
-    checkItfName(s);
-
-    if (s.equals(CLIENT_LOCATOR_ITF_NAME)) {
-      clientLocatorItf = null;
-    } else if (s.equals(OutputFileLocator.ITF_NAME)) {
-      outputFileLocatorItf = null;
-    } else {
-      throw new NoSuchInterfaceException("No client interface named '" + s
-          + "'");
-    }
   }
 }

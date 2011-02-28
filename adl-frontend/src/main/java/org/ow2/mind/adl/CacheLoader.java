@@ -22,22 +22,19 @@
 
 package org.ow2.mind.adl;
 
-import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
-import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
-
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
 import org.objectweb.fractal.adl.ADLException;
-import org.objectweb.fractal.adl.AbstractLoader;
 import org.objectweb.fractal.adl.ContextLocal;
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.components.ComponentErrors;
-import org.objectweb.fractal.api.NoSuchInterfaceException;
-import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.ow2.mind.error.ErrorManager;
+
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 /**
  * Simple delegating loader that manage a cache of already loaded definitions.
@@ -45,18 +42,17 @@ import org.ow2.mind.error.ErrorManager;
  * be used to add/get definitions to/from the cache. The cache is different for
  * each given <code>context</code> (see {@link ContextLocal}).
  */
-public class CacheLoader extends AbstractLoader implements DefinitionCache {
+@Singleton
+public class CacheLoader extends AbstractDelegatingLoader
+    implements
+      DefinitionCache {
 
   protected final ContextLocal<Map<String, Definition>> contextualCache    = new ContextLocal<Map<String, Definition>>();
 
   protected ThreadLocal<Set<String>>                    loadingDefinitions = new ThreadLocal<Set<String>>();
 
-  // ---------------------------------------------------------------------------
-  // Client interfaces
-  // ---------------------------------------------------------------------------
-
-  /** The {@link ErrorManager} client interface used to log errors. */
-  public ErrorManager                                   errorManagerItf;
+  @Inject
+  protected ErrorManager                                errorManagerItf;
 
   // ---------------------------------------------------------------------------
   // Implementation of the Loader interface
@@ -113,50 +109,5 @@ public class CacheLoader extends AbstractLoader implements DefinitionCache {
       contextualCache.set(context, cache);
     }
     return cache;
-  }
-
-  // ---------------------------------------------------------------------------
-  // Overridden BindingController methods
-  // ---------------------------------------------------------------------------
-
-  @Override
-  public void bindFc(final String itfName, final Object value)
-      throws NoSuchInterfaceException, IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(ErrorManager.ITF_NAME)) {
-      errorManagerItf = (ErrorManager) value;
-    } else {
-      super.bindFc(itfName, value);
-    }
-
-  }
-
-  @Override
-  public String[] listFc() {
-    return listFcHelper(super.listFc(), ErrorManager.ITF_NAME);
-  }
-
-  @Override
-  public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
-    checkItfName(itfName);
-
-    if (itfName.equals(ErrorManager.ITF_NAME)) {
-      return errorManagerItf;
-    } else {
-      return super.lookupFc(itfName);
-    }
-  }
-
-  @Override
-  public void unbindFc(final String itfName) throws NoSuchInterfaceException,
-      IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(ErrorManager.ITF_NAME)) {
-      errorManagerItf = null;
-    } else {
-      super.unbindFc(itfName);
-    }
   }
 }

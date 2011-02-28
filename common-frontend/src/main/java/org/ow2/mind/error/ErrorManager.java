@@ -36,8 +36,6 @@ import org.objectweb.fractal.adl.error.ErrorTemplate;
  */
 public interface ErrorManager {
 
-  String ITF_NAME = "error-manager";
-
   /**
    * Log an error.
    * 

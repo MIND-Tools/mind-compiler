@@ -26,8 +26,6 @@ import java.util.Map;
 
 public interface CompilerWrapper {
 
-  String ITF_NAME = "compiler-wrapper";
-
   PreprocessorCommand newPreprocessorCommand(final Map<Object, Object> context);
 
   CompilerCommand newCompilerCommand(final Map<Object, Object> context);

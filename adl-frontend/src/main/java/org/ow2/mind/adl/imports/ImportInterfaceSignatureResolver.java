@@ -22,8 +22,6 @@
 
 package org.ow2.mind.adl.imports;
 
-import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
-import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
 import static org.ow2.mind.NameHelper.getPackageName;
 import static org.ow2.mind.adl.imports.ast.ImportASTHelper.isOnDemandImport;
 import static org.ow2.mind.adl.imports.ast.ImportASTHelper.setUsedImport;
@@ -33,23 +31,20 @@ import java.util.Map;
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.types.TypeInterface;
-import org.objectweb.fractal.api.NoSuchInterfaceException;
-import org.objectweb.fractal.api.control.IllegalBindingException;
-import org.ow2.mind.adl.idl.AbstractInterfaceSignatureResolver;
+import org.ow2.mind.adl.idl.InterfaceSignatureResolver.AbstractDelegatingInterfaceSignatureResolver;
 import org.ow2.mind.adl.imports.ast.Import;
 import org.ow2.mind.adl.imports.ast.ImportContainer;
 import org.ow2.mind.idl.IDLLocator;
 import org.ow2.mind.idl.ast.InterfaceDefinition;
 
+import com.google.inject.Inject;
+
 public class ImportInterfaceSignatureResolver
     extends
-      AbstractInterfaceSignatureResolver {
+      AbstractDelegatingInterfaceSignatureResolver {
 
-  // ---------------------------------------------------------------------------
-  // Client interfaces
-  // ---------------------------------------------------------------------------
-
-  public IDLLocator idlLocatorItf;
+  @Inject
+  protected IDLLocator idlLocatorItf;
 
   // ---------------------------------------------------------------------------
   // Implementation of the InterfaceSignatureResolver interface
@@ -114,50 +109,5 @@ public class ImportInterfaceSignatureResolver
     // no import match, return the name as it is (i.e. assume that it refers to
     // an ADL in the 'default package').
     return name;
-  }
-
-  // ---------------------------------------------------------------------------
-  // Overridden BindingController methods
-  // ---------------------------------------------------------------------------
-
-  @Override
-  public void bindFc(final String itfName, final Object value)
-      throws NoSuchInterfaceException, IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(IDLLocator.ITF_NAME)) {
-      idlLocatorItf = (IDLLocator) value;
-    } else {
-      super.bindFc(itfName, value);
-    }
-
-  }
-
-  @Override
-  public String[] listFc() {
-    return listFcHelper(super.listFc(), IDLLocator.ITF_NAME);
-  }
-
-  @Override
-  public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
-    checkItfName(itfName);
-
-    if (itfName.equals(IDLLocator.ITF_NAME)) {
-      return idlLocatorItf;
-    } else {
-      return super.lookupFc(itfName);
-    }
-  }
-
-  @Override
-  public void unbindFc(final String itfName) throws NoSuchInterfaceException,
-      IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(IDLLocator.ITF_NAME)) {
-      idlLocatorItf = null;
-    } else {
-      super.unbindFc(itfName);
-    }
   }
 }

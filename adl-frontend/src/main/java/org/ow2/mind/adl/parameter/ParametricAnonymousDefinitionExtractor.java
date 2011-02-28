@@ -31,10 +31,8 @@ import org.objectweb.fractal.adl.NodeFactory;
 import org.objectweb.fractal.adl.error.GenericErrors;
 import org.objectweb.fractal.adl.merger.MergeException;
 import org.objectweb.fractal.adl.merger.NodeMerger;
-import org.objectweb.fractal.api.NoSuchInterfaceException;
-import org.objectweb.fractal.api.control.IllegalBindingException;
-import org.ow2.mind.adl.anonymous.AbstractAnonymousDefinitionExtractor;
 import org.ow2.mind.adl.anonymous.AnonymousDefinitionExtractor;
+import org.ow2.mind.adl.anonymous.AnonymousDefinitionExtractor.AbstractDelegatingAnonymousDefinitionExtractor;
 import org.ow2.mind.adl.ast.Component;
 import org.ow2.mind.adl.ast.DefinitionReference;
 import org.ow2.mind.adl.parameter.ast.Argument;
@@ -42,6 +40,8 @@ import org.ow2.mind.adl.parameter.ast.ArgumentContainer;
 import org.ow2.mind.adl.parameter.ast.FormalParameter;
 import org.ow2.mind.adl.parameter.ast.FormalParameterContainer;
 import org.ow2.mind.value.ast.Reference;
+
+import com.google.inject.Inject;
 
 /**
  * This delegating {@link AnonymousDefinitionExtractor} component copies
@@ -52,17 +52,13 @@ import org.ow2.mind.value.ast.Reference;
  */
 public class ParametricAnonymousDefinitionExtractor
     extends
-      AbstractAnonymousDefinitionExtractor {
+      AbstractDelegatingAnonymousDefinitionExtractor {
 
-  // ---------------------------------------------------------------------------
-  // Client interfaces
-  // ---------------------------------------------------------------------------
+  @Inject
+  protected NodeFactory nodeFactoryItf;
 
-  /** The node factory interface */
-  public NodeFactory nodeFactoryItf;
-
-  /** The node merger interface */
-  public NodeMerger  nodeMergerItf;
+  @Inject
+  protected NodeMerger  nodeMergerItf;
 
   // ---------------------------------------------------------------------------
   // Implementation of the AnonymousDefinitionResolver interface
@@ -108,8 +104,8 @@ public class ParametricAnonymousDefinitionExtractor
 
   protected Argument newArgumentNode() {
     try {
-      return (Argument) nodeFactoryItf.newNode("argument", Argument.class
-          .getName());
+      return (Argument) nodeFactoryItf.newNode("argument",
+          Argument.class.getName());
     } catch (final ClassNotFoundException e) {
       throw new CompilerError(GenericErrors.INTERNAL_ERROR, e,
           "Node factory error");
@@ -118,8 +114,8 @@ public class ParametricAnonymousDefinitionExtractor
 
   protected Reference newReferenceNode() {
     try {
-      return (Reference) nodeFactoryItf.newNode("reference", Reference.class
-          .getName());
+      return (Reference) nodeFactoryItf.newNode("reference",
+          Reference.class.getName());
     } catch (final ClassNotFoundException e) {
       throw new CompilerError(GenericErrors.INTERNAL_ERROR, e,
           "Node factory error");
@@ -160,71 +156,6 @@ public class ParametricAnonymousDefinitionExtractor
     } catch (final MergeException e) {
       throw new CompilerError(GenericErrors.INTERNAL_ERROR, e,
           "Node merge error");
-    }
-  }
-
-  // ---------------------------------------------------------------------------
-  // Overridden BindingController methods
-  // ---------------------------------------------------------------------------
-
-  @Override
-  public void bindFc(final String itfName, final Object value)
-      throws NoSuchInterfaceException, IllegalBindingException {
-
-    if (itfName == null) {
-      throw new IllegalArgumentException("Interface name can't be null");
-    }
-
-    if (itfName.equals(NodeFactory.ITF_NAME)) {
-      nodeFactoryItf = (NodeFactory) value;
-    } else if (itfName.equals(NodeMerger.ITF_NAME)) {
-      nodeMergerItf = (NodeMerger) value;
-    } else {
-      super.bindFc(itfName, value);
-    }
-
-  }
-
-  @Override
-  public String[] listFc() {
-    final String[] superList = super.listFc();
-    final String[] list = new String[superList.length + 2];
-    list[0] = NodeFactory.ITF_NAME;
-    list[1] = NodeMerger.ITF_NAME;
-    System.arraycopy(superList, 0, list, 2, superList.length);
-    return list;
-  }
-
-  @Override
-  public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
-
-    if (itfName == null) {
-      throw new IllegalArgumentException("Interface name can't be null");
-    }
-
-    if (itfName.equals(NodeFactory.ITF_NAME)) {
-      return nodeFactoryItf;
-    } else if (itfName.equals(NodeMerger.ITF_NAME)) {
-      return nodeMergerItf;
-    } else {
-      return super.lookupFc(itfName);
-    }
-  }
-
-  @Override
-  public void unbindFc(final String itfName) throws NoSuchInterfaceException,
-      IllegalBindingException {
-
-    if (itfName == null) {
-      throw new IllegalArgumentException("Interface name can't be null");
-    }
-
-    if (itfName.equals(NodeFactory.ITF_NAME)) {
-      nodeFactoryItf = null;
-    } else if (itfName.equals(NodeMerger.ITF_NAME)) {
-      nodeMergerItf = null;
-    } else {
-      super.unbindFc(itfName);
     }
   }
 }

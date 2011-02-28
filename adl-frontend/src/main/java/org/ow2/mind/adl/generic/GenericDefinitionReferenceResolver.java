@@ -25,8 +25,6 @@ package org.ow2.mind.adl.generic;
 import static org.objectweb.fractal.adl.NodeUtil.castNodeError;
 import static org.objectweb.fractal.adl.types.TypeInterfaceUtil.isClient;
 import static org.objectweb.fractal.adl.types.TypeInterfaceUtil.isServer;
-import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
-import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
 import static org.ow2.mind.adl.ast.ASTHelper.isAbstract;
 import static org.ow2.mind.adl.ast.ASTHelper.isType;
 import static org.ow2.mind.adl.ast.ASTHelper.isUnresolvedDefinitionNode;
@@ -48,11 +46,9 @@ import org.objectweb.fractal.adl.error.NodeErrorLocator;
 import org.objectweb.fractal.adl.interfaces.Interface;
 import org.objectweb.fractal.adl.interfaces.InterfaceContainer;
 import org.objectweb.fractal.adl.types.TypeInterfaceUtil;
-import org.objectweb.fractal.api.NoSuchInterfaceException;
-import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.ow2.mind.adl.ADLErrors;
-import org.ow2.mind.adl.AbstractDefinitionReferenceResolver;
 import org.ow2.mind.adl.DefinitionReferenceResolver;
+import org.ow2.mind.adl.DefinitionReferenceResolver.AbstractDelegatingDefinitionReferenceResolver;
 import org.ow2.mind.adl.ast.ASTHelper;
 import org.ow2.mind.adl.ast.DefinitionReference;
 import org.ow2.mind.adl.ast.MindInterface;
@@ -62,6 +58,8 @@ import org.ow2.mind.adl.generic.ast.FormalTypeParameterContainer;
 import org.ow2.mind.adl.generic.ast.TypeArgument;
 import org.ow2.mind.adl.generic.ast.TypeArgumentContainer;
 import org.ow2.mind.error.ErrorManager;
+
+import com.google.inject.Inject;
 
 /**
  * Delegating {@link DefinitionReferenceResolver} component that instantiates
@@ -76,37 +74,30 @@ import org.ow2.mind.error.ErrorManager;
  */
 public class GenericDefinitionReferenceResolver
     extends
-      AbstractDefinitionReferenceResolver {
+      AbstractDelegatingDefinitionReferenceResolver {
 
-  protected final ContextLocal<Map<Definition, Map<String, FormalTypeParameter>>> contextualTypeParameters    = new ContextLocal<Map<Definition, Map<String, FormalTypeParameter>>>();
+  // define a class to alias this too long generic type
+  protected static final class FormalTypeParameterCache
+      extends
+        ContextLocal<Map<Definition, Map<String, FormalTypeParameter>>> {
+  }
 
-  // ---------------------------------------------------------------------------
-  // Client interfaces
-  // ---------------------------------------------------------------------------
+  protected final FormalTypeParameterCache contextualTypeParameters = new FormalTypeParameterCache();
 
-  /** The {@link ErrorManager} client interface used to log errors. */
-  public ErrorManager                                                             errorManagerItf;
+  @Inject
+  protected ErrorManager                   errorManagerItf;
 
-  /** The {@link NodeFactory} client interface used by this component. */
-  public NodeFactory                                                              nodeFactoryItf;
+  @Inject
+  protected NodeFactory                    nodeFactoryItf;
 
-  /** The name of the {@link #recursiveResolverItf} client interface. */
-  public static final String                                                      RECURSIVE_RESOLVER_ITF_NAME = "rescursive-resolver";
+  @Inject
+  protected DefinitionReferenceResolver    recursiveResolverItf;
 
-  /**
-   * The DefinitionReferenceResolver interface used to resolve type argument
-   * value.
-   */
-  public DefinitionReferenceResolver                                              recursiveResolverItf;
+  @Inject
+  protected BindingChecker                 bindingCheckerItf;
 
-  /**
-   * The interface used to check interface compatibility when instantiating
-   * templates.
-   */
-  public BindingChecker                                                           bindingCheckerItf;
-
-  /** The interface used to actually instantiate generic definitions. */
-  public TemplateInstantiator                                                     templateInstantiatorItf;
+  @Inject
+  protected TemplateInstantiator           templateInstantiatorItf;
 
   // ---------------------------------------------------------------------------
   // Implementation of the DefinitionReferenceResolver interface
@@ -471,76 +462,5 @@ public class GenericDefinitionReferenceResolver
     }
 
     return result;
-  }
-
-  // ---------------------------------------------------------------------------
-  // Overridden BindingController methods
-  // ---------------------------------------------------------------------------
-
-  @Override
-  public void bindFc(final String itfName, final Object value)
-      throws NoSuchInterfaceException, IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(ErrorManager.ITF_NAME)) {
-      errorManagerItf = (ErrorManager) value;
-    } else if (NodeFactory.ITF_NAME.equals(itfName)) {
-      nodeFactoryItf = (NodeFactory) value;
-    } else if (itfName.equals(RECURSIVE_RESOLVER_ITF_NAME)) {
-      recursiveResolverItf = (DefinitionReferenceResolver) value;
-    } else if (itfName.equals(BindingChecker.ITF_NAME)) {
-      bindingCheckerItf = (BindingChecker) value;
-    } else if (itfName.equals(TemplateInstantiator.ITF_NAME)) {
-      templateInstantiatorItf = (TemplateInstantiator) value;
-    } else {
-      super.bindFc(itfName, value);
-    }
-
-  }
-
-  @Override
-  public String[] listFc() {
-    return listFcHelper(super.listFc(), ErrorManager.ITF_NAME,
-        NodeFactory.ITF_NAME, RECURSIVE_RESOLVER_ITF_NAME,
-        BindingChecker.ITF_NAME, TemplateInstantiator.ITF_NAME);
-  }
-
-  @Override
-  public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
-    checkItfName(itfName);
-
-    if (itfName.equals(ErrorManager.ITF_NAME)) {
-      return errorManagerItf;
-    } else if (NodeFactory.ITF_NAME.equals(itfName)) {
-      return nodeFactoryItf;
-    } else if (itfName.equals(RECURSIVE_RESOLVER_ITF_NAME)) {
-      return recursiveResolverItf;
-    } else if (itfName.equals(BindingChecker.ITF_NAME)) {
-      return bindingCheckerItf;
-    } else if (itfName.equals(TemplateInstantiator.ITF_NAME)) {
-      return templateInstantiatorItf;
-    } else {
-      return super.lookupFc(itfName);
-    }
-  }
-
-  @Override
-  public void unbindFc(final String itfName) throws NoSuchInterfaceException,
-      IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(ErrorManager.ITF_NAME)) {
-      errorManagerItf = null;
-    } else if (NodeFactory.ITF_NAME.equals(itfName)) {
-      nodeFactoryItf = null;
-    } else if (itfName.equals(RECURSIVE_RESOLVER_ITF_NAME)) {
-      recursiveResolverItf = null;
-    } else if (itfName.equals(BindingChecker.ITF_NAME)) {
-      bindingCheckerItf = null;
-    } else if (itfName.equals(TemplateInstantiator.ITF_NAME)) {
-      templateInstantiatorItf = null;
-    } else {
-      super.unbindFc(itfName);
-    }
   }
 }

@@ -26,22 +26,31 @@ import static junit.framework.Assert.fail;
 
 import org.objectweb.fractal.adl.Node;
 import org.objectweb.fractal.adl.NodeFactory;
-import org.objectweb.fractal.adl.NodeFactoryImpl;
 import org.ow2.mind.annotation.ast.AnnotationArgument;
 import org.ow2.mind.annotation.ast.AnnotationNode;
+import org.ow2.mind.plugin.PluginLoaderModule;
 import org.ow2.mind.value.ast.Array;
 import org.ow2.mind.value.ast.NumberLiteral;
 import org.ow2.mind.value.ast.StringLiteral;
 import org.ow2.mind.value.ast.Value;
 import org.testng.annotations.BeforeMethod;
 
-public class AbstractTestcase {
-  NodeFactory nodeFactory;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+
+public abstract class AbstractTestcase {
+  NodeFactory        nodeFactory;
+  protected Injector injector;
 
   @BeforeMethod(alwaysRun = true)
-  public void setUpNodeFactory() {
-    nodeFactory = new NodeFactoryImpl();
+  public void setUp() {
+    injector = Guice.createInjector(new CommonFrontendModule(),
+        new PluginLoaderModule());
+    nodeFactory = injector.getInstance(NodeFactory.class);
+    setUp(injector);
   }
+
+  protected abstract void setUp(Injector injector);
 
   protected AnnotationNode newAnnotationNode(final String type,
       final AnnotationArgument... args) {

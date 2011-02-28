@@ -32,19 +32,24 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.objectweb.fractal.adl.ADLException;
+import org.objectweb.fractal.adl.error.Error;
+import org.ow2.mind.CommonBackendModule;
+import org.ow2.mind.CommonFrontendModule;
 import org.ow2.mind.compilation.BasicCompilationCommandExecutor;
 import org.ow2.mind.compilation.CompilationCommand;
 import org.ow2.mind.compilation.CompilationCommandExecutor;
 import org.ow2.mind.compilation.CompilerCommand;
 import org.ow2.mind.compilation.CompilerWrapper;
 import org.ow2.mind.compilation.PreprocessorCommand;
-import org.ow2.mind.compilation.gcc.GccCompilerWrapper;
+import org.ow2.mind.error.ErrorCollection;
 import org.ow2.mind.error.ErrorManager;
-import org.ow2.mind.error.ErrorManagerFactory;
 import org.ow2.mind.io.BasicOutputFileLocator;
-import org.ow2.mind.plugin.BasicPluginManager;
-import org.ow2.mind.st.STNodeFactoryImpl;
+import org.ow2.mind.plugin.PluginLoaderModule;
 import org.testng.annotations.BeforeTest;
+
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 
 public class AbstractTestMPP {
 
@@ -54,8 +59,6 @@ public class AbstractTestMPP {
   protected MPPWrapper                 mppWrapper;
   protected CompilerWrapper            compilerWrapper;
   protected CompilationCommandExecutor executor;
-  protected STNodeFactoryImpl          stNodeFactory;
-  protected BasicPluginManager         pluginManager;
 
   protected Map<Object, Object>        context;
   protected File                       buildDir;
@@ -64,22 +67,12 @@ public class AbstractTestMPP {
 
   @BeforeTest(alwaysRun = true)
   public void setUp() {
-    errorManager = ErrorManagerFactory.newSimpleErrorManager();
-    pluginManager = new BasicPluginManager();
-    stNodeFactory = new STNodeFactoryImpl();
-    pluginManager.nodeFactoryItf = stNodeFactory;
-
-    final BasicMPPWrapper bmppw = new BasicMPPWrapper();
-    bmppw.pluginManagerItf = pluginManager;
-    mppWrapper = bmppw;
-    final GccCompilerWrapper gcw = new GccCompilerWrapper();
-    compilerWrapper = gcw;
-    final BasicCompilationCommandExecutor bcce = new BasicCompilationCommandExecutor();
-    bcce.errorManagerItf = errorManager;
-    executor = bcce;
-
-    gcw.errorManagerItf = errorManager;
-    bmppw.errorManagerItf = errorManager;
+    final Injector injector = Guice.createInjector(new CommonFrontendModule(),
+        new PluginLoaderModule(), new CommonBackendModule(), new MPPModule());
+    errorManager = injector.getInstance(ErrorManager.class);
+    mppWrapper = injector.getInstance(MPPWrapper.class);
+    compilerWrapper = injector.getInstance(CompilerWrapper.class);
+    executor = injector.getInstance(CompilationCommandExecutor.class);
 
     context = new HashMap<Object, Object>();
     final String buildDirName = "target" + File.separator + "build";
@@ -161,35 +154,55 @@ public class AbstractTestMPP {
 
   protected void mppSingleton(final String dirName, final String fileName)
       throws Exception {
+    errorManager.clear();
     final Collection<CompilationCommand> commands = new ArrayList<CompilationCommand>();
     commands.add(newCPPCommand(dirName, fileName));
     commands.add(newMPPCommand(dirName, fileName, true));
     executor.exec(commands, context);
+    final List<Error> errors = errorManager.getErrors();
+    if (!errors.isEmpty()) {
+      throw new ADLException(new ErrorCollection(errors));
+    }
   }
 
   protected void mppMulti(final String dirName, final String fileName)
       throws Exception {
+    errorManager.clear();
     final Collection<CompilationCommand> commands = new ArrayList<CompilationCommand>();
     commands.add(newCPPCommand(dirName, fileName));
     commands.add(newMPPCommand(dirName, fileName, false));
     executor.exec(commands, context);
+    final List<Error> errors = errorManager.getErrors();
+    if (!errors.isEmpty()) {
+      throw new ADLException(new ErrorCollection(errors));
+    }
   }
 
   protected void compileSingleton(final String dirName, final String fileName)
       throws Exception {
+    errorManager.clear();
     final Collection<CompilationCommand> commands = new ArrayList<CompilationCommand>();
     commands.add(newCPPCommand(dirName, fileName));
     commands.add(newMPPCommand(dirName, fileName, true));
     commands.add(newGCCCommand(dirName, fileName, true));
     executor.exec(commands, context);
+    final List<Error> errors = errorManager.getErrors();
+    if (!errors.isEmpty()) {
+      throw new ADLException(new ErrorCollection(errors));
+    }
   }
 
   protected void compileMulti(final String dirName, final String fileName)
       throws Exception {
+    errorManager.clear();
     final Collection<CompilationCommand> commands = new ArrayList<CompilationCommand>();
     commands.add(newCPPCommand(dirName, fileName));
     commands.add(newMPPCommand(dirName, fileName, false));
     commands.add(newGCCCommand(dirName, fileName, false));
     executor.exec(commands, context);
+    final List<Error> errors = errorManager.getErrors();
+    if (!errors.isEmpty()) {
+      throw new ADLException(new ErrorCollection(errors));
+    }
   }
 }

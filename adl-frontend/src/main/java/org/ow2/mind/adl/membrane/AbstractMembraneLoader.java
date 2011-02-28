@@ -22,15 +22,10 @@
 
 package org.ow2.mind.adl.membrane;
 
-import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
-import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
-
-import org.objectweb.fractal.adl.AbstractLoader;
 import org.objectweb.fractal.adl.Node;
 import org.objectweb.fractal.adl.NodeFactory;
 import org.objectweb.fractal.adl.merger.NodeMerger;
-import org.objectweb.fractal.api.NoSuchInterfaceException;
-import org.objectweb.fractal.api.control.IllegalBindingException;
+import org.ow2.mind.adl.AbstractDelegatingLoader;
 import org.ow2.mind.adl.ast.Data;
 import org.ow2.mind.adl.ast.Source;
 import org.ow2.mind.adl.membrane.ast.Controller;
@@ -39,17 +34,15 @@ import org.ow2.mind.adl.membrane.ast.ControllerInterface;
 import org.ow2.mind.adl.membrane.ast.InternalInterfaceContainer;
 import org.ow2.mind.adl.membrane.ast.MembraneASTHelper;
 
-public abstract class AbstractMembraneLoader extends AbstractLoader {
+import com.google.inject.Inject;
 
-  // ---------------------------------------------------------------------------
-  // Client interfaces
-  // ---------------------------------------------------------------------------
+public abstract class AbstractMembraneLoader extends AbstractDelegatingLoader {
 
-  /** The node factory interface */
-  public NodeFactory nodeFactoryItf;
+  @Inject
+  protected NodeFactory nodeFactoryItf;
 
-  /** The node merger interface */
-  public NodeMerger  nodeMergerItf;
+  @Inject
+  protected NodeMerger  nodeMergerItf;
 
   // ---------------------------------------------------------------------------
   // Utility methods
@@ -61,8 +54,8 @@ public abstract class AbstractMembraneLoader extends AbstractLoader {
 
   protected ControllerInterface newControllerInterfaceNode(
       final String itfName, final boolean isInternal) {
-    return MembraneASTHelper.newControllerInterfaceNode(nodeFactoryItf, itfName,
-        isInternal);
+    return MembraneASTHelper.newControllerInterfaceNode(nodeFactoryItf,
+        itfName, isInternal);
   }
 
   protected Data newDataNode(final String path) {
@@ -82,57 +75,5 @@ public abstract class AbstractMembraneLoader extends AbstractLoader {
       final Node node) {
     return MembraneASTHelper.turnToInternalInterfaceContainer(node,
         nodeFactoryItf, nodeMergerItf);
-  }
-
-  // ---------------------------------------------------------------------------
-  // Overridden BindingController methods
-  // ---------------------------------------------------------------------------
-
-  @Override
-  public void bindFc(final String itfName, final Object value)
-      throws NoSuchInterfaceException, IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(NodeFactory.ITF_NAME)) {
-      nodeFactoryItf = (NodeFactory) value;
-    } else if (itfName.equals(NodeMerger.ITF_NAME)) {
-      nodeMergerItf = (NodeMerger) value;
-    } else {
-      super.bindFc(itfName, value);
-    }
-
-  }
-
-  @Override
-  public String[] listFc() {
-    return listFcHelper(super.listFc(), NodeFactory.ITF_NAME,
-        NodeMerger.ITF_NAME);
-  }
-
-  @Override
-  public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
-    checkItfName(itfName);
-
-    if (itfName.equals(NodeFactory.ITF_NAME)) {
-      return nodeFactoryItf;
-    } else if (itfName.equals(NodeMerger.ITF_NAME)) {
-      return nodeMergerItf;
-    } else {
-      return super.lookupFc(itfName);
-    }
-  }
-
-  @Override
-  public void unbindFc(final String itfName) throws NoSuchInterfaceException,
-      IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(NodeFactory.ITF_NAME)) {
-      nodeFactoryItf = null;
-    } else if (itfName.equals(NodeMerger.ITF_NAME)) {
-      nodeMergerItf = null;
-    } else {
-      super.unbindFc(itfName);
-    }
   }
 }

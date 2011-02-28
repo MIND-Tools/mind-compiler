@@ -35,6 +35,8 @@ public interface LinkerCommand extends CompilationCommand {
 
   LinkerCommand addFlags(String... flags);
 
+  LinkerCommand setLinkerScript(String linkerScript);
+
   LinkerCommand setOptimizationLevel(String level);
 
   LinkerCommand setOutputFile(File outputFile);

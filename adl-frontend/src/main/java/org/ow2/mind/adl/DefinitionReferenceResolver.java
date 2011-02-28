@@ -27,15 +27,13 @@ import java.util.Map;
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.Definition;
 import org.ow2.mind.adl.ast.DefinitionReference;
+import org.ow2.mind.inject.InjectDelegate;
 
 /**
  * Interface used to retrieve the {@link Definition} corresponding to a
  * {@link DefinitionReference}.
  */
 public interface DefinitionReferenceResolver {
-
-  /** Default name of this interface. */
-  String ITF_NAME = "definition-reference-resolver";
 
   /**
    * Checks the given {@link DefinitionReference} and return the designated
@@ -53,4 +51,18 @@ public interface DefinitionReferenceResolver {
   Definition resolve(DefinitionReference reference,
       Definition encapsulatingDefinition, Map<Object, Object> context)
       throws ADLException;
+
+  /**
+   * An abstract delegating {@link DefinitionReferenceResolver} component.
+   */
+  public abstract class AbstractDelegatingDefinitionReferenceResolver
+      implements
+        DefinitionReferenceResolver {
+
+    /**
+     * The client {@link DefinitionReferenceResolver} used by this component.
+     */
+    @InjectDelegate
+    protected DefinitionReferenceResolver clientResolverItf;
+  }
 }

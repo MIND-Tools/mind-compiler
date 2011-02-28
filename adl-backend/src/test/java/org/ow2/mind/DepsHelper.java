@@ -183,7 +183,7 @@ public final class DepsHelper {
     return temporaryOutputDir;
   }
 
-  private static void delete(final File f) {
+  public static void delete(final File f) {
     if (f.isDirectory()) {
       for (final File subFile : f.listFiles())
         delete(subFile);

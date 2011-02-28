@@ -22,8 +22,6 @@
 
 package org.ow2.mind.adl.binding;
 
-import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
-
 import java.util.Set;
 
 import org.objectweb.fractal.adl.ADLException;
@@ -32,26 +30,19 @@ import org.objectweb.fractal.adl.bindings.BindingErrors;
 import org.objectweb.fractal.adl.error.NodeErrorLocator;
 import org.objectweb.fractal.adl.interfaces.Interface;
 import org.objectweb.fractal.adl.types.TypeInterface;
-import org.objectweb.fractal.api.NoSuchInterfaceException;
-import org.objectweb.fractal.api.control.BindingController;
-import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.ow2.mind.adl.ast.Binding;
+import org.ow2.mind.adl.binding.BindingChecker.AbstractDelegatingBindingChecker;
 import org.ow2.mind.adl.idl.InterfaceDefinitionDecorationHelper;
 import org.ow2.mind.error.ErrorManager;
 import org.ow2.mind.idl.ExtendedInterfaceDecorationHelper;
 import org.ow2.mind.idl.ast.InterfaceDefinition;
 
-public class IDLBindingChecker implements BindingChecker, BindingController {
+import com.google.inject.Inject;
 
-  // ---------------------------------------------------------------------------
-  // Client interfaces
-  // ---------------------------------------------------------------------------
+public class IDLBindingChecker extends AbstractDelegatingBindingChecker {
 
-  /** The {@link ErrorManager} client interface used to log errors. */
-  public ErrorManager        errorManagerItf;
-
-  public static final String CLIENT_BINDING_CHECKER_ITF_NAME = "client-binding-checker";
-  public BindingChecker      clientBindingCheckerItf;
+  @Inject
+  protected ErrorManager errorManagerItf;
 
   // ---------------------------------------------------------------------------
   // Implementation of the BindingChecker interface
@@ -111,55 +102,6 @@ public class IDLBindingChecker implements BindingChecker, BindingController {
         errorManagerItf.logError(BindingErrors.INVALID_SIGNATURE, locator,
             new NodeErrorLocator(from), new NodeErrorLocator(to));
       }
-    }
-  }
-
-  // ---------------------------------------------------------------------------
-  // Implementation of the BindingController interface
-  // ---------------------------------------------------------------------------
-
-  public void bindFc(final String itfName, final Object value)
-      throws NoSuchInterfaceException, IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(ErrorManager.ITF_NAME)) {
-      errorManagerItf = (ErrorManager) value;
-    } else if (itfName.equals(CLIENT_BINDING_CHECKER_ITF_NAME)) {
-      clientBindingCheckerItf = (BindingChecker) value;
-    } else {
-      throw new NoSuchInterfaceException("No client interface named '"
-          + itfName + "'");
-    }
-  }
-
-  public String[] listFc() {
-    return new String[]{ErrorManager.ITF_NAME, CLIENT_BINDING_CHECKER_ITF_NAME};
-  }
-
-  public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
-    checkItfName(itfName);
-
-    if (itfName.equals(ErrorManager.ITF_NAME)) {
-      return errorManagerItf;
-    } else if (itfName.equals(CLIENT_BINDING_CHECKER_ITF_NAME)) {
-      return clientBindingCheckerItf;
-    } else {
-      throw new NoSuchInterfaceException("No client interface named '"
-          + itfName + "'");
-    }
-  }
-
-  public void unbindFc(final String itfName) throws NoSuchInterfaceException,
-      IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(ErrorManager.ITF_NAME)) {
-      errorManagerItf = null;
-    } else if (itfName.equals(CLIENT_BINDING_CHECKER_ITF_NAME)) {
-      clientBindingCheckerItf = null;
-    } else {
-      throw new NoSuchInterfaceException("No client interface named '"
-          + itfName + "'");
     }
   }
 }

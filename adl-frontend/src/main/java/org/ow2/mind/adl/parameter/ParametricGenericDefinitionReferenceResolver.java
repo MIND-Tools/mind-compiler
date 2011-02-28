@@ -28,8 +28,8 @@ import java.util.Map;
 
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.Definition;
-import org.ow2.mind.adl.AbstractDefinitionReferenceResolver;
 import org.ow2.mind.adl.DefinitionReferenceResolver;
+import org.ow2.mind.adl.DefinitionReferenceResolver.AbstractDelegatingDefinitionReferenceResolver;
 import org.ow2.mind.adl.ast.ASTHelper;
 import org.ow2.mind.adl.ast.DefinitionReference;
 import org.ow2.mind.adl.generic.ast.TypeArgument;
@@ -57,7 +57,7 @@ import org.ow2.mind.adl.parameter.ast.ArgumentContainer;
  */
 public class ParametricGenericDefinitionReferenceResolver
     extends
-      AbstractDefinitionReferenceResolver {
+      AbstractDelegatingDefinitionReferenceResolver {
 
   // ---------------------------------------------------------------------------
   // Implementation of the DefinitionReferenceResolver interface

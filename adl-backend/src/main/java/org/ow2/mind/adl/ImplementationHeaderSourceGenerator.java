@@ -42,14 +42,7 @@ public class ImplementationHeaderSourceGenerator
     extends
       AbstractSourceGenerator implements DefinitionSourceGenerator {
 
-  // ---------------------------------------------------------------------------
-  // Constructor
-  // ---------------------------------------------------------------------------
-
-  /**
-   * Public constructor.
-   */
-  public ImplementationHeaderSourceGenerator() {
+  protected ImplementationHeaderSourceGenerator() {
     super(null);
   }
 

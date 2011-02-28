@@ -22,15 +22,9 @@
 
 package org.ow2.mind.adl;
 
-import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
-import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
 import static org.ow2.mind.PathHelper.replaceExtension;
-import static org.ow2.mind.annotation.AnnotationHelper.getAnnotation;
-import static org.ow2.mind.compilation.DirectiveHelper.splitOptionString;
 
 import java.io.File;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -38,45 +32,33 @@ import java.util.Map;
 
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.CompilerError;
-import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.error.GenericErrors;
-import org.objectweb.fractal.api.NoSuchInterfaceException;
-import org.objectweb.fractal.api.control.BindingController;
-import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.ow2.mind.InputResourceLocator;
-import org.ow2.mind.adl.annotation.predefined.CFlags;
 import org.ow2.mind.adl.ast.ASTHelper;
 import org.ow2.mind.adl.ast.ImplementationContainer;
 import org.ow2.mind.adl.ast.Source;
+import org.ow2.mind.adl.compilation.CompilationCommandFactory;
 import org.ow2.mind.compilation.CompilationCommand;
 import org.ow2.mind.compilation.CompilerCommand;
-import org.ow2.mind.compilation.CompilerWrapper;
 import org.ow2.mind.compilation.PreprocessorCommand;
 import org.ow2.mind.io.OutputFileLocator;
 import org.ow2.mind.preproc.MPPCommand;
-import org.ow2.mind.preproc.MPPWrapper;
 
-public class BasicInstanceCompiler
-    implements
-      InstanceCompiler,
-      BindingController {
+import com.google.inject.Inject;
 
-  // ---------------------------------------------------------------------------
-  // Client interfaces
-  // ---------------------------------------------------------------------------
+public class BasicInstanceCompiler implements InstanceCompiler {
 
-  public static final String     INSTANCE_SOURCE_GENERATOR_ITF_NAME = "instance-source-generator";
+  @Inject
+  protected InstanceSourceGenerator   instanceSourceGeneratorItf;
 
-  public InstanceSourceGenerator instanceSourceGeneratorItf;
+  @Inject
+  protected OutputFileLocator         outputFileLocatorItf;
 
-  /** Client interface used to locate output files. */
-  public OutputFileLocator       outputFileLocatorItf;
+  @Inject
+  protected InputResourceLocator      inputResourceLocatorItf;
 
-  public InputResourceLocator    inputResourceLocatorItf;
-
-  public CompilerWrapper         compilerWrapperItf;
-
-  public MPPWrapper              mppWrapperItf;
+  @Inject
+  protected CompilationCommandFactory compilationCommandFactory;
 
   // ---------------------------------------------------------------------------
   // Implementation of the Visitor interface
@@ -130,13 +112,20 @@ public class BasicInstanceCompiler
     final File depFile = outputFileLocatorItf.getCCompiledOutputFile(
         replaceExtension(instancesFileName, ".d"), context);
 
-    final PreprocessorCommand cppCommand = newPreprocessorCommand(
-        instanceDesc.instanceDefinition, srcFile, dependencies, depFile,
-        cppFile, context);
-    final MPPCommand mppCommand = newMPPCommand(
-        instanceDesc.instanceDefinition, cppFile, mppFile, context);
-    final CompilerCommand gccCommand = newCompilerCommand(
-        instanceDesc.instanceDefinition, mppFile, objectFile, context);
+    final PreprocessorCommand cppCommand = compilationCommandFactory
+        .newPreprocessorCommand(instanceDesc.instanceDefinition, null, srcFile,
+            dependencies, depFile, cppFile, context);
+    final MPPCommand mppCommand = compilationCommandFactory.newMPPCommand(
+        instanceDesc.instanceDefinition, null, cppFile, mppFile, null, context);
+
+    final CompilerCommand gccCommand = compilationCommandFactory
+        .newCompilerCommand(instanceDesc.instanceDefinition, null, mppFile,
+            true, null, null, objectFile, context);
+
+    gccCommand.addIncludeFile(outputFileLocatorItf.getCSourceOutputFile(
+        DefinitionMacroSourceGenerator
+            .getMacroFileName(instanceDesc.instanceDefinition), context));
+    gccCommand.setAllDependenciesManaged(true);
 
     final List<CompilationCommand> compilationTasks = new ArrayList<CompilationCommand>();
     compilationTasks.add(cppCommand);
@@ -144,151 +133,5 @@ public class BasicInstanceCompiler
     compilationTasks.add(gccCommand);
 
     return compilationTasks;
-  }
-
-  protected PreprocessorCommand newPreprocessorCommand(
-      final Definition definition, final File inputFile,
-      final Collection<File> dependencies, final File depFile,
-      final File outputFile, final Map<Object, Object> context)
-      throws ADLException {
-    final PreprocessorCommand command = compilerWrapperItf
-        .newPreprocessorCommand(context);
-    command.setOutputFile(outputFile).setInputFile(inputFile)
-        .setDependencyOutputFile(depFile);
-
-    if (dependencies != null) {
-      for (final File dep : dependencies) {
-        command.addDependency(dep);
-      }
-    }
-
-    command.addIncludeDir(outputFileLocatorItf.getCSourceOutputDir(context));
-    command.addIncludeDir(outputFileLocatorItf
-        .getCSourceTemporaryOutputDir(context));
-
-    final URL[] inputResourceRoots = inputResourceLocatorItf
-        .getInputResourcesRoot(context);
-    if (inputResourceRoots != null) {
-      for (final URL inputResourceRoot : inputResourceRoots) {
-        try {
-          final File inputDir = new File(inputResourceRoot.toURI());
-          if (inputDir.isDirectory()) {
-            command.addIncludeDir(inputDir);
-          }
-        } catch (final URISyntaxException e) {
-          continue;
-        }
-      }
-    }
-
-    // Add definition level C-Flags
-    final CFlags definitionflags = getAnnotation(definition, CFlags.class);
-    if (definitionflags != null)
-      command.addFlags(splitOptionString(definitionflags.value));
-
-    return command;
-  }
-
-  protected MPPCommand newMPPCommand(final Definition definition,
-      final File inputFile, final File outputFile,
-      final Map<Object, Object> context) throws ADLException {
-    final MPPCommand command = mppWrapperItf.newMPPCommand(definition, context);
-    command.setOutputFile(outputFile).setInputFile(inputFile);
-
-    if (ASTHelper.isSingleton(definition)) {
-      command.setSingletonMode();
-    }
-
-    return command;
-  }
-
-  protected CompilerCommand newCompilerCommand(final Definition definition,
-      final File inputFile, final File outputFile,
-      final Map<Object, Object> context) throws ADLException {
-    final CompilerCommand command = compilerWrapperItf
-        .newCompilerCommand(context);
-    command.setOutputFile(outputFile).setInputFile(inputFile)
-        .setAllDependenciesManaged(true);
-
-    command.addIncludeDir(outputFileLocatorItf.getCSourceOutputDir(context));
-
-    command.addIncludeFile(outputFileLocatorItf.getCSourceOutputFile(
-        DefinitionMacroSourceGenerator.getMacroFileName(definition), context));
-
-    // Add definition level C-Flags
-    final CFlags definitionflags = getAnnotation(definition, CFlags.class);
-    if (definitionflags != null)
-      command.addFlags(splitOptionString(definitionflags.value));
-
-    return command;
-  }
-
-  // ---------------------------------------------------------------------------
-  // implementation of the BindingController interface
-  // ---------------------------------------------------------------------------
-
-  public void bindFc(final String itfName, final Object value)
-      throws NoSuchInterfaceException, IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(INSTANCE_SOURCE_GENERATOR_ITF_NAME)) {
-      instanceSourceGeneratorItf = (InstanceSourceGenerator) value;
-    } else if (itfName.equals(OutputFileLocator.ITF_NAME)) {
-      outputFileLocatorItf = (OutputFileLocator) value;
-    } else if (itfName.equals(CompilerWrapper.ITF_NAME)) {
-      compilerWrapperItf = (CompilerWrapper) value;
-    } else if (itfName.equals(MPPWrapper.ITF_NAME)) {
-      mppWrapperItf = (MPPWrapper) value;
-    } else if (itfName.equals(InputResourceLocator.ITF_NAME)) {
-      inputResourceLocatorItf = (InputResourceLocator) value;
-    } else {
-      throw new NoSuchInterfaceException("No client interface named '"
-          + itfName + "'");
-    }
-  }
-
-  public String[] listFc() {
-    return listFcHelper(INSTANCE_SOURCE_GENERATOR_ITF_NAME,
-        OutputFileLocator.ITF_NAME, CompilerWrapper.ITF_NAME,
-        MPPWrapper.ITF_NAME, InputResourceLocator.ITF_NAME);
-  }
-
-  public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
-    checkItfName(itfName);
-
-    if (itfName.equals(INSTANCE_SOURCE_GENERATOR_ITF_NAME)) {
-      return instanceSourceGeneratorItf;
-    } else if (itfName.equals(OutputFileLocator.ITF_NAME)) {
-      return outputFileLocatorItf;
-    } else if (itfName.equals(CompilerWrapper.ITF_NAME)) {
-      return compilerWrapperItf;
-    } else if (itfName.equals(MPPWrapper.ITF_NAME)) {
-      return mppWrapperItf;
-    } else if (itfName.equals(InputResourceLocator.ITF_NAME)) {
-      return inputResourceLocatorItf;
-    } else {
-      throw new NoSuchInterfaceException("No client interface named '"
-          + itfName + "'");
-    }
-  }
-
-  public void unbindFc(final String itfName) throws NoSuchInterfaceException,
-      IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(INSTANCE_SOURCE_GENERATOR_ITF_NAME)) {
-      instanceSourceGeneratorItf = null;
-    } else if (itfName.equals(OutputFileLocator.ITF_NAME)) {
-      outputFileLocatorItf = null;
-    } else if (itfName.equals(CompilerWrapper.ITF_NAME)) {
-      compilerWrapperItf = null;
-    } else if (itfName.equals(MPPWrapper.ITF_NAME)) {
-      mppWrapperItf = null;
-    } else if (itfName.equals(InputResourceLocator.ITF_NAME)) {
-      inputResourceLocatorItf = null;
-    } else {
-      throw new NoSuchInterfaceException("No client interface named '"
-          + itfName + "'");
-    }
   }
 }

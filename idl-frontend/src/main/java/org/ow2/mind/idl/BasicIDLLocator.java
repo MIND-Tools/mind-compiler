@@ -28,13 +28,13 @@ import static org.ow2.mind.PathHelper.isRelative;
 import static org.ow2.mind.PathHelper.isValid;
 
 import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.Map;
 
-import org.objectweb.fractal.adl.util.ClassLoaderHelper;
 import org.ow2.mind.InputResource;
 import org.ow2.mind.NameHelper;
 import org.ow2.mind.PathHelper;
+
+import com.google.common.collect.Lists;
 
 /**
  * Basic implementation of the {@link IDLLocator} interface for MIND IDL.
@@ -65,12 +65,9 @@ public class BasicIDLLocator implements IDLLocator {
   // Implementation of the IDLLocator interface
   // ---------------------------------------------------------------------------
 
-  public URL[] getInputResourcesRoot(final Map<Object, Object> context) {
-    final ClassLoader cl = ClassLoaderHelper.getClassLoader(this, context);
-    if (cl instanceof URLClassLoader) {
-      return ((URLClassLoader) cl).getURLs();
-    }
-    return null;
+  public Iterable<String> getResourceKind() {
+    return Lists.newArrayList(IDLLocator.IDT_RESOURCE_KIND,
+        IDLLocator.ITF_RESOURCE_KIND);
   }
 
   public URL findSourceItf(final String name, final Map<Object, Object> context) {

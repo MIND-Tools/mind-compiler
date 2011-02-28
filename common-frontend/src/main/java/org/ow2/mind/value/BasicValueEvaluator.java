@@ -24,14 +24,9 @@ package org.ow2.mind.value;
 
 import static java.lang.reflect.Array.newInstance;
 import static java.lang.reflect.Array.set;
-import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
-import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
 
 import java.util.Map;
 
-import org.objectweb.fractal.api.NoSuchInterfaceException;
-import org.objectweb.fractal.api.control.BindingController;
-import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.ow2.mind.value.ast.Array;
 import org.ow2.mind.value.ast.BooleanLiteral;
 import org.ow2.mind.value.ast.NullLiteral;
@@ -40,14 +35,12 @@ import org.ow2.mind.value.ast.StringLiteral;
 import org.ow2.mind.value.ast.Value;
 import org.ow2.mind.value.ast.ValueASTHelper;
 
-public class BasicValueEvaluator implements ValueEvaluator, BindingController {
+import com.google.inject.Inject;
 
-  // ---------------------------------------------------------------------------
-  // Client interfaces
-  // ---------------------------------------------------------------------------
+public class BasicValueEvaluator implements ValueEvaluator {
 
-  public static final String RECURSIVE_VALUE_EVALUATOR_ITF_NAME = "recursive-evaluator";
-  public ValueEvaluator      recursiveEvaluatorItf;
+  @Inject
+  public ValueEvaluator recursiveEvaluatorItf;
 
   // ---------------------------------------------------------------------------
   // Implementation of the ValueEvaluator interface
@@ -250,48 +243,4 @@ public class BasicValueEvaluator implements ValueEvaluator, BindingController {
           "Value of NumberLiteral node is not a number", value, e);
     }
   }
-
-  // ---------------------------------------------------------------------------
-  // Implementation of the BindingController interface
-  // ---------------------------------------------------------------------------
-
-  public String[] listFc() {
-    return listFcHelper(RECURSIVE_VALUE_EVALUATOR_ITF_NAME);
-  }
-
-  public Object lookupFc(final String s) throws NoSuchInterfaceException {
-    checkItfName(s);
-
-    if (RECURSIVE_VALUE_EVALUATOR_ITF_NAME.equals(s)) {
-      return recursiveEvaluatorItf;
-    } else {
-      throw new NoSuchInterfaceException("No client interface named '" + s
-          + "'");
-    }
-  }
-
-  public void bindFc(final String s, final Object o)
-      throws NoSuchInterfaceException, IllegalBindingException {
-    checkItfName(s);
-
-    if (RECURSIVE_VALUE_EVALUATOR_ITF_NAME.equals(s)) {
-      recursiveEvaluatorItf = (ValueEvaluator) o;
-    } else {
-      throw new NoSuchInterfaceException("No client interface named '" + s
-          + "' for binding the interface");
-    }
-  }
-
-  public void unbindFc(final String s) throws IllegalBindingException,
-      NoSuchInterfaceException {
-    checkItfName(s);
-
-    if (RECURSIVE_VALUE_EVALUATOR_ITF_NAME.equals(s)) {
-      recursiveEvaluatorItf = null;
-    } else {
-      throw new NoSuchInterfaceException("No client interface named '" + s
-          + "'");
-    }
-  }
-
 }

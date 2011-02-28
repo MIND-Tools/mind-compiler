@@ -22,8 +22,6 @@
 
 package org.ow2.mind.adl.generic;
 
-import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
-import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
 import static org.ow2.mind.adl.ast.ASTHelper.isType;
 import static org.ow2.mind.adl.ast.ASTHelper.setResolvedComponentDefinition;
 
@@ -31,12 +29,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.objectweb.fractal.adl.ADLException;
-import org.objectweb.fractal.adl.AbstractLoader;
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.NodeFactory;
-import org.objectweb.fractal.api.NoSuchInterfaceException;
-import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.ow2.mind.adl.ADLErrors;
+import org.ow2.mind.adl.AbstractDelegatingLoader;
 import org.ow2.mind.adl.DefinitionReferenceResolver;
 import org.ow2.mind.adl.ast.ASTHelper;
 import org.ow2.mind.adl.ast.Component;
@@ -48,24 +44,22 @@ import org.ow2.mind.adl.imports.ast.Import;
 import org.ow2.mind.adl.imports.ast.ImportContainer;
 import org.ow2.mind.error.ErrorManager;
 
+import com.google.inject.Inject;
+
 /**
  * This delegating Loader checks that types of formal type arguments are
  * correct. It also checks if a formal type argument hides an import statement.
  */
-public class GenericDefinitionLoader extends AbstractLoader {
+public class GenericDefinitionLoader extends AbstractDelegatingLoader {
 
-  // ---------------------------------------------------------------------------
-  // Client interfaces
-  // ---------------------------------------------------------------------------
+  @Inject
+  protected ErrorManager                errorManagerItf;
 
-  /** The {@link ErrorManager} client interface used to log errors. */
-  public ErrorManager                errorManagerItf;
+  @Inject
+  protected NodeFactory                 nodeFactoryItf;
 
-  /** The {@link NodeFactory} interface used by this component. */
-  public NodeFactory                 nodeFactoryItf;
-
-  /** The interface used to resolve type of formal type parameters. */
-  public DefinitionReferenceResolver definitionReferenceResolverItf;
+  @Inject
+  protected DefinitionReferenceResolver definitionReferenceResolverItf;
 
   // ---------------------------------------------------------------------------
   // Implementation of the Loader interface
@@ -149,63 +143,5 @@ public class GenericDefinitionLoader extends AbstractLoader {
       }
     }
     return d;
-  }
-
-  // ---------------------------------------------------------------------------
-  // Overridden BindingController methods
-  // ---------------------------------------------------------------------------
-
-  @Override
-  public void bindFc(final String itfName, final Object value)
-      throws NoSuchInterfaceException, IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(ErrorManager.ITF_NAME)) {
-      errorManagerItf = (ErrorManager) value;
-    } else if (itfName.equals(NodeFactory.ITF_NAME)) {
-      nodeFactoryItf = (NodeFactory) value;
-    } else if (itfName.equals(DefinitionReferenceResolver.ITF_NAME)) {
-      definitionReferenceResolverItf = (DefinitionReferenceResolver) value;
-    } else {
-      super.bindFc(itfName, value);
-    }
-
-  }
-
-  @Override
-  public String[] listFc() {
-    return listFcHelper(super.listFc(), ErrorManager.ITF_NAME,
-        NodeFactory.ITF_NAME, DefinitionReferenceResolver.ITF_NAME);
-  }
-
-  @Override
-  public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
-    checkItfName(itfName);
-
-    if (itfName.equals(ErrorManager.ITF_NAME)) {
-      return errorManagerItf;
-    } else if (itfName.equals(NodeFactory.ITF_NAME)) {
-      return nodeFactoryItf;
-    } else if (itfName.equals(DefinitionReferenceResolver.ITF_NAME)) {
-      return definitionReferenceResolverItf;
-    } else {
-      return super.lookupFc(itfName);
-    }
-  }
-
-  @Override
-  public void unbindFc(final String itfName) throws NoSuchInterfaceException,
-      IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(ErrorManager.ITF_NAME)) {
-      errorManagerItf = null;
-    } else if (itfName.equals(NodeFactory.ITF_NAME)) {
-      nodeFactoryItf = null;
-    } else if (itfName.equals(DefinitionReferenceResolver.ITF_NAME)) {
-      definitionReferenceResolverItf = null;
-    } else {
-      super.unbindFc(itfName);
-    }
   }
 }

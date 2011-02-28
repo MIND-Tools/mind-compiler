@@ -29,8 +29,15 @@ import java.util.Map;
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.Definition;
 import org.ow2.mind.adl.ast.ASTHelper;
+import org.ow2.mind.adl.graph.Instantiator.AbstractDelegatingInstantiator;
+import org.ow2.mind.error.ErrorManager;
 
-public class InstanceNameInstantiator extends AbstractInstantiator {
+import com.google.inject.Inject;
+
+public class InstanceNameInstantiator extends AbstractDelegatingInstantiator {
+
+  @Inject
+  protected ErrorManager errorManagerItf;
 
   // ---------------------------------------------------------------------------
   // Implementation of the Instantiator interface

@@ -27,7 +27,7 @@ import java.util.Map;
 
 public interface GenericResourceLocator {
 
-  URL[] getInputResourcesRoot(Map<Object, Object> context);
+  Iterable<String> getResourceKind();
 
-  public URL findResource(String name, final Map<Object, Object> context);
+  URL findResource(String name, final Map<Object, Object> context);
 }

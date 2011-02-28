@@ -22,9 +22,6 @@
 
 package org.ow2.mind.adl.parser;
 
-import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
-import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -36,46 +33,30 @@ import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.CompilerError;
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.Loader;
-import org.objectweb.fractal.adl.error.BasicErrorLocator;
-import org.objectweb.fractal.adl.error.ErrorLocator;
 import org.objectweb.fractal.adl.error.GenericErrors;
 import org.objectweb.fractal.adl.xml.XMLNodeFactory;
-import org.objectweb.fractal.api.NoSuchInterfaceException;
-import org.objectweb.fractal.api.control.BindingController;
-import org.objectweb.fractal.api.control.IllegalBindingException;
 import org.ow2.mind.InputResourcesHelper;
 import org.ow2.mind.adl.ADLLocator;
-import org.ow2.mind.adl.jtb.ParseException;
-import org.ow2.mind.adl.jtb.Parser;
-import org.ow2.mind.adl.jtb.TokenMgrError;
-import org.ow2.mind.adl.jtb.syntaxtree.ADLFile;
 import org.ow2.mind.error.ErrorManager;
+
+import com.google.inject.Inject;
 
 /**
  * Parser the ADL source file located by the {@link #adlLocatorItf}.
  */
-public class ADLParser implements Loader, BindingController {
+public class ADLParser implements Loader {
 
-  protected static final String DTD = "classpath://org/ow2/mind/adl/mind_v1.dtd";
+  @Inject
+  protected ErrorManager   errorManagerItf;
 
-  // ---------------------------------------------------------------------------
-  // Client interfaces
-  // ---------------------------------------------------------------------------
+  @Inject
+  protected XMLNodeFactory nodeFactoryItf;
 
-  /** The {@link ErrorManager} client interface used to log errors. */
-  public ErrorManager           errorManagerItf;
+  @Inject
+  protected ADLLocator     adlLocatorItf;
 
-  /**
-   * Client interface bound to the {@link XMLNodeFactory node factory}
-   * component.
-   */
-  public XMLNodeFactory         nodeFactoryItf;
-
-  /**
-   * The {@link ADLLocator} client interface used to locate ADL source files to
-   * parse.
-   */
-  public ADLLocator             adlLocatorItf;
+  @Inject
+  protected ADLJTBParser   jtbParser;
 
   // ---------------------------------------------------------------------------
   // Implementation of the Loader interface
@@ -105,32 +86,12 @@ public class ADLParser implements Loader, BindingController {
         is = adlFile.openStream();
       } catch (final IOException e) {
         errorManagerItf.logFatal(ADLErrors.IO_ERROR, e, path);
-        // never executed (logFatal throw an ADLException).
+        // never executed (logFatal throws an ADLException).
         return null;
       }
     }
 
-    Definition d;
-    try {
-      d = readADL(is, path);
-    } catch (final IOException e) {
-      errorManagerItf.logFatal(ADLErrors.IO_ERROR, e, path);
-      // never executed (logFatal throw an ADLException).
-      return null;
-    } catch (final ParseException e) {
-      final ErrorLocator locator = new BasicErrorLocator(path,
-          e.currentToken.next.beginLine, e.currentToken.next.endLine,
-          e.currentToken.next.beginColumn, e.currentToken.next.endColumn);
-      errorManagerItf.logFatal(ADLErrors.PARSE_ERROR, locator, e.getMessage());
-      // never executed (logFatal throw an ADLException).
-      return null;
-    } catch (final TokenMgrError e) {
-      // TokenMgrError do not have location info.
-      final ErrorLocator locator = new BasicErrorLocator(path, -1, -1);
-      errorManagerItf.logFatal(ADLErrors.PARSE_ERROR, locator, e.getMessage());
-      // never executed (logFatal throw an ADLException).
-      return null;
-    }
+    final Definition d = jtbParser.parseADL(is, name, path);
 
     InputResourcesHelper.addInputResource(d,
         adlLocatorItf.toInputResource(name));
@@ -149,71 +110,5 @@ public class ADLParser implements Loader, BindingController {
       throw new ADLException(ADLErrors.ADL_NOT_FOUND, name);
     }
     return srcFile;
-  }
-
-  protected Definition readADL(final InputStream is, final String fileName)
-      throws IOException, ParseException, ADLException {
-    final Parser parser = new Parser(is);
-    final JTBProcessor processor = new JTBProcessor(errorManagerItf,
-        nodeFactoryItf, DTD, fileName);
-    final ADLFile content = parser.ADLFile();
-    return processor.toDefinition(content);
-  }
-
-  // ---------------------------------------------------------------------------
-  // Implementation of the BindingController interface
-  // ---------------------------------------------------------------------------
-
-  public void bindFc(final String itfName, final Object value)
-      throws NoSuchInterfaceException, IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(ErrorManager.ITF_NAME)) {
-      this.errorManagerItf = (ErrorManager) value;
-    } else if (itfName.equals(XMLNodeFactory.ITF_NAME)) {
-      this.nodeFactoryItf = (XMLNodeFactory) value;
-    } else if (itfName.equals(ADLLocator.ITF_NAME)) {
-      this.adlLocatorItf = (ADLLocator) value;
-    } else {
-      throw new NoSuchInterfaceException("There is no interface named '"
-          + itfName + "'");
-    }
-
-  }
-
-  public String[] listFc() {
-    return listFcHelper(ErrorManager.ITF_NAME, XMLNodeFactory.ITF_NAME,
-        ADLLocator.ITF_NAME);
-  }
-
-  public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
-    checkItfName(itfName);
-
-    if (itfName.equals(ErrorManager.ITF_NAME)) {
-      return this.errorManagerItf;
-    } else if (itfName.equals(XMLNodeFactory.ITF_NAME)) {
-      return this.nodeFactoryItf;
-    } else if (itfName.equals(ADLLocator.ITF_NAME)) {
-      return this.adlLocatorItf;
-    } else {
-      throw new NoSuchInterfaceException("There is no interface named '"
-          + itfName + "'");
-    }
-  }
-
-  public void unbindFc(final String itfName) throws NoSuchInterfaceException,
-      IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(ErrorManager.ITF_NAME)) {
-      this.errorManagerItf = null;
-    } else if (itfName.equals(XMLNodeFactory.ITF_NAME)) {
-      this.nodeFactoryItf = null;
-    } else if (itfName.equals(ADLLocator.ITF_NAME)) {
-      this.adlLocatorItf = null;
-    } else {
-      throw new NoSuchInterfaceException("There is no interface named '"
-          + itfName + "'");
-    }
   }
 }

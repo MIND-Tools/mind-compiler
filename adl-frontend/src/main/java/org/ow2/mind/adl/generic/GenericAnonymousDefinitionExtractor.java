@@ -22,18 +22,13 @@
 
 package org.ow2.mind.adl.generic;
 
-import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
-import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
-
 import java.util.Map;
 
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.NodeFactory;
 import org.objectweb.fractal.adl.merger.NodeMerger;
-import org.objectweb.fractal.api.NoSuchInterfaceException;
-import org.objectweb.fractal.api.control.IllegalBindingException;
-import org.ow2.mind.adl.anonymous.AbstractAnonymousDefinitionExtractor;
 import org.ow2.mind.adl.anonymous.AnonymousDefinitionExtractor;
+import org.ow2.mind.adl.anonymous.AnonymousDefinitionExtractor.AbstractDelegatingAnonymousDefinitionExtractor;
 import org.ow2.mind.adl.ast.Component;
 import org.ow2.mind.adl.ast.ComponentContainer;
 import org.ow2.mind.adl.ast.DefinitionReference;
@@ -42,6 +37,8 @@ import org.ow2.mind.adl.generic.ast.FormalTypeParameterContainer;
 import org.ow2.mind.adl.generic.ast.GenericASTHelper;
 import org.ow2.mind.adl.generic.ast.TypeArgument;
 import org.ow2.mind.adl.generic.ast.TypeArgumentContainer;
+
+import com.google.inject.Inject;
 
 /**
  * Delegating {@link AnonymousDefinitionExtractor} component that copies
@@ -52,17 +49,13 @@ import org.ow2.mind.adl.generic.ast.TypeArgumentContainer;
  */
 public class GenericAnonymousDefinitionExtractor
     extends
-      AbstractAnonymousDefinitionExtractor {
+      AbstractDelegatingAnonymousDefinitionExtractor {
 
-  // ---------------------------------------------------------------------------
-  // Client interfaces
-  // ---------------------------------------------------------------------------
+  @Inject
+  protected NodeFactory nodeFactoryItf;
 
-  /** The node factory interface */
-  public NodeFactory nodeFactoryItf;
-
-  /** The node merger interface */
-  public NodeMerger  nodeMergerItf;
+  @Inject
+  protected NodeMerger  nodeMergerItf;
 
   // ---------------------------------------------------------------------------
   // Implementation of the AnonymousDefinitionResolver interface
@@ -108,57 +101,5 @@ public class GenericAnonymousDefinitionExtractor
     }
 
     return anonymousDefinition;
-  }
-
-  // ---------------------------------------------------------------------------
-  // Overridden BindingController methods
-  // ---------------------------------------------------------------------------
-
-  @Override
-  public void bindFc(final String itfName, final Object value)
-      throws NoSuchInterfaceException, IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(NodeFactory.ITF_NAME)) {
-      nodeFactoryItf = (NodeFactory) value;
-    } else if (itfName.equals(NodeMerger.ITF_NAME)) {
-      nodeMergerItf = (NodeMerger) value;
-    } else {
-      super.bindFc(itfName, value);
-    }
-
-  }
-
-  @Override
-  public String[] listFc() {
-    return listFcHelper(super.listFc(), NodeFactory.ITF_NAME,
-        NodeMerger.ITF_NAME);
-  }
-
-  @Override
-  public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
-    checkItfName(itfName);
-
-    if (itfName.equals(NodeFactory.ITF_NAME)) {
-      return nodeFactoryItf;
-    } else if (itfName.equals(NodeMerger.ITF_NAME)) {
-      return nodeMergerItf;
-    } else {
-      return super.lookupFc(itfName);
-    }
-  }
-
-  @Override
-  public void unbindFc(final String itfName) throws NoSuchInterfaceException,
-      IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(NodeFactory.ITF_NAME)) {
-      nodeFactoryItf = null;
-    } else if (itfName.equals(NodeMerger.ITF_NAME)) {
-      nodeMergerItf = null;
-    } else {
-      super.unbindFc(itfName);
-    }
   }
 }

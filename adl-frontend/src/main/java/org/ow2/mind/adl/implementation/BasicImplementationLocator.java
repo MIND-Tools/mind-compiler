@@ -27,11 +27,11 @@ import static org.ow2.mind.PathHelper.isRelative;
 import static org.ow2.mind.PathHelper.isValid;
 
 import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.Map;
 
-import org.objectweb.fractal.adl.util.ClassLoaderHelper;
 import org.ow2.mind.InputResource;
+
+import com.google.common.collect.Lists;
 
 public class BasicImplementationLocator implements ImplementationLocator {
 
@@ -39,12 +39,9 @@ public class BasicImplementationLocator implements ImplementationLocator {
   // Implementation of the ImplementationLocator interface
   // ---------------------------------------------------------------------------
 
-  public URL[] getInputResourcesRoot(final Map<Object, Object> context) {
-    final ClassLoader cl = ClassLoaderHelper.getClassLoader(this, context);
-    if (cl instanceof URLClassLoader) {
-      return ((URLClassLoader) cl).getURLs();
-    }
-    return null;
+  public Iterable<String> getResourceKind() {
+    return Lists
+        .newArrayList(ImplementationLocator.IMPLEMENTATION_RESOURCE_KIND);
   }
 
   public URL findSource(final String path, final Map<Object, Object> context) {

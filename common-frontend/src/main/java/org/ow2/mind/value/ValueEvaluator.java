@@ -24,12 +24,18 @@ package org.ow2.mind.value;
 
 import java.util.Map;
 
+import org.ow2.mind.inject.InjectDelegate;
 import org.ow2.mind.value.ast.Value;
 
 public interface ValueEvaluator {
 
-  String ITF_NAME = "evaluator";
-
   <T> T evaluate(Value value, Class<T> expectedType, Map<Object, Object> context)
       throws ValueEvaluationException;
+
+  public abstract class AbstractDelegatingValueEvaluator
+      implements
+        ValueEvaluator {
+    @InjectDelegate
+    protected ValueEvaluator clientValueEvaluatorItf;
+  }
 }

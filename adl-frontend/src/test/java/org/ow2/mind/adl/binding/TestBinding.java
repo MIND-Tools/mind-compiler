@@ -22,7 +22,6 @@
 
 package org.ow2.mind.adl.binding;
 
-import static org.ow2.mind.BCImplChecker.checkBCImplementation;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
@@ -34,34 +33,33 @@ import java.util.Map;
 
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.Loader;
-import org.objectweb.fractal.adl.NodeFactoryImpl;
 import org.objectweb.fractal.adl.bindings.BindingErrors;
 import org.objectweb.fractal.adl.error.Error;
-import org.objectweb.fractal.adl.merger.NodeMergerImpl;
-import org.objectweb.fractal.adl.xml.XMLNodeFactoryImpl;
+import org.ow2.mind.CommonFrontendModule;
 import org.ow2.mind.adl.ASTChecker;
-import org.ow2.mind.adl.BasicADLLocator;
+import org.ow2.mind.adl.AbstractADLFrontendModule;
 import org.ow2.mind.adl.BasicDefinitionReferenceResolver;
 import org.ow2.mind.adl.CacheLoader;
 import org.ow2.mind.adl.CachingDefinitionReferenceResolver;
+import org.ow2.mind.adl.DefinitionReferenceResolver;
 import org.ow2.mind.adl.ErrorLoader;
 import org.ow2.mind.adl.ExtendsLoader;
-import org.ow2.mind.adl.STCFNodeMerger;
 import org.ow2.mind.adl.SubComponentResolverLoader;
 import org.ow2.mind.adl.idl.BasicInterfaceSignatureResolver;
 import org.ow2.mind.adl.idl.InterfaceSignatureLoader;
+import org.ow2.mind.adl.idl.InterfaceSignatureResolver;
 import org.ow2.mind.adl.imports.ImportDefinitionReferenceResolver;
 import org.ow2.mind.adl.imports.ImportInterfaceSignatureResolver;
 import org.ow2.mind.adl.membrane.CompositeInternalInterfaceLoader;
 import org.ow2.mind.adl.parser.ADLParser;
 import org.ow2.mind.error.ErrorCollection;
-import org.ow2.mind.error.ErrorManager;
-import org.ow2.mind.error.ErrorManagerFactory;
-import org.ow2.mind.idl.BasicIDLLocator;
-import org.ow2.mind.idl.IDLLoaderChainFactory;
-import org.ow2.mind.idl.IDLLocator;
+import org.ow2.mind.idl.IDLFrontendModule;
+import org.ow2.mind.plugin.PluginLoaderModule;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 
 public class TestBinding {
 
@@ -73,107 +71,43 @@ public class TestBinding {
 
   @BeforeMethod(alwaysRun = true)
   protected void setUp() throws Exception {
-    final ErrorManager errorManager = ErrorManagerFactory
-        .newSimpleErrorManager();
+    final Injector injector = Guice.createInjector(new CommonFrontendModule(),
+        new PluginLoaderModule(), new IDLFrontendModule(),
+        new AbstractADLFrontendModule() {
+          protected void configureTest() {
+            bind(Loader.class).toChainStartingWith(ErrorLoader.class)
+                .followedBy(CacheLoader.class)
+                .followedBy(UnboundInterfaceCheckerLoader.class)
+                .followedBy(BindingCheckerLoader.class)
+                .followedBy(BindingNormalizerLoader.class)
+                .followedBy(CompositeInternalInterfaceLoader.class)
+                .followedBy(ExtendsLoader.class)
+                .followedBy(InterfaceSignatureLoader.class)
+                .followedBy(SubComponentResolverLoader.class)
+                .endingWith(ADLParser.class);
 
-    // Loader chain components
-    final ADLParser adlLoader = new ADLParser();
-    final SubComponentResolverLoader scrl = new SubComponentResolverLoader();
-    final InterfaceSignatureLoader isl = new InterfaceSignatureLoader();
-    final ExtendsLoader el = new ExtendsLoader();
-    final CompositeInternalInterfaceLoader ciil = new CompositeInternalInterfaceLoader();
-    final BindingNormalizerLoader bnl = new BindingNormalizerLoader();
-    final BindingCheckerLoader bcl = new BindingCheckerLoader();
-    final UnboundInterfaceCheckerLoader uicl = new UnboundInterfaceCheckerLoader();
-    final CacheLoader cl = new CacheLoader();
-    final ErrorLoader errl = new ErrorLoader();
+            bind(DefinitionReferenceResolver.class)
+                .toChainStartingWith(CachingDefinitionReferenceResolver.class)
+                .followedBy(ImportDefinitionReferenceResolver.class)
+                .endingWith(BasicDefinitionReferenceResolver.class);
 
-    errl.clientLoader = cl;
-    cl.clientLoader = uicl;
-    uicl.clientLoader = bcl;
-    bcl.clientLoader = bnl;
-    bnl.clientLoader = ciil;
-    ciil.clientLoader = el;
-    el.clientLoader = isl;
-    isl.clientLoader = scrl;
-    scrl.clientLoader = adlLoader;
+            bind(BindingChecker.class).toChainStartingWith(
+                IDLBindingChecker.class).endingWith(BasicBindingChecker.class);
 
-    adlLoader.errorManagerItf = errorManager;
-    scrl.errorManagerItf = errorManager;
-    isl.errorManagerItf = errorManager;
-    errl.errorManagerItf = errorManager;
-    uicl.errorManagerItf = errorManager;
+            setDefaultExtendsLoaderConfig();
+            setDefaultSubComponentLoaderConfig();
 
-    // definition reference resolver chain
-    final BasicDefinitionReferenceResolver bdrr = new BasicDefinitionReferenceResolver();
-    final ImportDefinitionReferenceResolver idrr = new ImportDefinitionReferenceResolver();
-    final CachingDefinitionReferenceResolver cdrr = new CachingDefinitionReferenceResolver();
+            bind(InterfaceSignatureResolver.class).toChainStartingWith(
+                ImportInterfaceSignatureResolver.class).endingWith(
+                BasicInterfaceSignatureResolver.class);
+          }
+        });
 
-    cdrr.clientResolverItf = idrr;
-    idrr.clientResolverItf = bdrr;
-    bdrr.loaderItf = cl;
-    cdrr.loaderItf = cl;
-
-    scrl.definitionReferenceResolverItf = cdrr;
-    el.definitionReferenceResolverItf = cdrr;
-    el.nodeMergerItf = new STCFNodeMerger();
-
-    bdrr.errorManagerItf = errorManager;
-
-    // Binding checkers
-    final BindingChecker bindingChecker;
-    final BasicBindingChecker bbc = new BasicBindingChecker();
-    final IDLBindingChecker ibc = new IDLBindingChecker();
-    bindingChecker = ibc;
-    ibc.clientBindingCheckerItf = bbc;
-
-    bcl.bindingCheckerItf = bindingChecker;
-
-    bbc.errorManagerItf = errorManager;
-    ibc.errorManagerItf = errorManager;
-
-    // additional components
-    final BasicADLLocator adlLocator = new BasicADLLocator();
-    final XMLNodeFactoryImpl xmlNodeFactory = new XMLNodeFactoryImpl();
-    final NodeFactoryImpl nodeFactory = new NodeFactoryImpl();
-    final NodeMergerImpl nodeMerger = new NodeMergerImpl();
-
-    adlLoader.adlLocatorItf = adlLocator;
-    adlLoader.nodeFactoryItf = xmlNodeFactory;
-    ciil.nodeFactoryItf = nodeFactory;
-    ciil.nodeMergerItf = nodeMerger;
-
-    idrr.adlLocatorItf = adlLocator;
-    bdrr.nodeFactoryItf = nodeFactory;
-
-    final BasicInterfaceSignatureResolver bisr = new BasicInterfaceSignatureResolver();
-    final ImportInterfaceSignatureResolver iisr = new ImportInterfaceSignatureResolver();
-    final IDLLocator idlLocator = new BasicIDLLocator();
-    iisr.clientResolverItf = bisr;
-    bisr.idlLoaderItf = IDLLoaderChainFactory.newLoader(errorManager).loader;
-    iisr.idlLocatorItf = idlLocator;
-    isl.interfaceSignatureResolverItf = iisr;
-
-    loader = errl;
+    loader = injector.getInstance(Loader.class);
 
     context = new HashMap<Object, Object>();
 
     checker = new ASTChecker();
-  }
-
-  @Test(groups = {"functional", "checkin"})
-  public void testBindingCheckerLoaderBC() {
-    checkBCImplementation(new BindingCheckerLoader());
-  }
-
-  @Test(groups = {"functional", "checkin"})
-  public void testUnboundInterfaceCheckerLoaderBC() {
-    checkBCImplementation(new UnboundInterfaceCheckerLoader());
-  }
-
-  @Test(groups = {"functional", "checkin"})
-  public void testIDLBindingCheckerBC() throws Exception {
-    checkBCImplementation(new IDLBindingChecker());
   }
 
   @Test(groups = {"functional"})

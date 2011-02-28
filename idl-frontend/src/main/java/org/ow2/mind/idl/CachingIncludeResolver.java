@@ -22,86 +22,38 @@
 
 package org.ow2.mind.idl;
 
-import static org.ow2.mind.BindingControllerImplHelper.checkItfName;
-import static org.ow2.mind.BindingControllerImplHelper.listFcHelper;
 import static org.ow2.mind.idl.ast.IDLASTHelper.getIncludedIDL;
 import static org.ow2.mind.idl.ast.IDLASTHelper.setIncludedIDL;
 
 import java.util.Map;
 
 import org.objectweb.fractal.adl.ADLException;
-import org.objectweb.fractal.api.NoSuchInterfaceException;
-import org.objectweb.fractal.api.control.IllegalBindingException;
+import org.ow2.mind.idl.IncludeResolver.AbstractDelegatingIncludeResolver;
 import org.ow2.mind.idl.ast.IDL;
 import org.ow2.mind.idl.ast.Include;
 
-public class CachingIncludeResolver extends AbstractIncludeResolver {
+import com.google.inject.Inject;
 
-  // ---------------------------------------------------------------------------
-  // Client interfaces
-  // ---------------------------------------------------------------------------
+public class CachingIncludeResolver extends AbstractDelegatingIncludeResolver {
 
-  /** The Loader interface used to load referenced IDLs. */
-  public IDLLoader idlLoaderItf;
+  @Inject
+  protected IDLLoader idlLoaderItf;
 
   // ---------------------------------------------------------------------------
   // Implementation of the UsedIDLResolver interface
   // ---------------------------------------------------------------------------
 
   public IDL resolve(final Include usedIDL, final IDL encapsulatingIDL,
-      final Map<Object, Object> context) throws ADLException {
+      final String encapsulatingName, final Map<Object, Object> context)
+      throws ADLException {
 
     IDL idl = getIncludedIDL(usedIDL, idlLoaderItf, context);
     if (idl == null) {
-      idl = clientResolverItf.resolve(usedIDL, encapsulatingIDL, context);
+      idl = clientResolverItf.resolve(usedIDL, encapsulatingIDL,
+          encapsulatingName, context);
       setIncludedIDL(usedIDL, idl);
     }
 
     return idl;
-  }
-
-  // ---------------------------------------------------------------------------
-  // Overridden BindingController methods
-  // ---------------------------------------------------------------------------
-
-  @Override
-  public void bindFc(final String itfName, final Object value)
-      throws NoSuchInterfaceException, IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(IDLLoader.ITF_NAME)) {
-      idlLoaderItf = (IDLLoader) value;
-    } else {
-      super.bindFc(itfName, value);
-    }
-
-  }
-
-  @Override
-  public String[] listFc() {
-    return listFcHelper(super.listFc(), IDLLoader.ITF_NAME);
-  }
-
-  @Override
-  public Object lookupFc(final String itfName) throws NoSuchInterfaceException {
-    checkItfName(itfName);
-
-    if (itfName.equals(IDLLoader.ITF_NAME)) {
-      return idlLoaderItf;
-    } else {
-      return super.lookupFc(itfName);
-    }
-  }
-
-  @Override
-  public void unbindFc(final String itfName) throws NoSuchInterfaceException,
-      IllegalBindingException {
-    checkItfName(itfName);
-
-    if (itfName.equals(IDLLoader.ITF_NAME)) {
-      idlLoaderItf = null;
-    } else {
-      super.unbindFc(itfName);
-    }
   }
 }

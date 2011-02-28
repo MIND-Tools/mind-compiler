@@ -240,34 +240,23 @@
             </dependency>
 
             <dependency>
-                <groupId>org.objectweb.fractal.cecilia.toolchain</groupId>
-                <artifactId>target-descriptor</artifactId>
-                <version>2.1.0</version>
-                <exclusions>
-                    <!-- Exclude fractal-adl transitive dependency to be sure
-                         to use the version that is actually declared here -->
-                    <exclusion>
-                        <groupId>org.objectweb.fractal.fractaladl</groupId>
-                        <artifactId>fractal-adl</artifactId>
-                    </exclusion>
-                </exclusions>
+                <groupId>com.google.collections</groupId>
+                <artifactId>google-collections</artifactId>
+                <version>1.0</version>
+            </dependency>
+            
+            <dependency>
+                <groupId>com.google.inject</groupId>
+                <artifactId>guice</artifactId>
+                <version>2.0</version>
             </dependency>
 
             <dependency>
-                <groupId>org.objectweb.fractal.cecilia.toolchain</groupId>
-                <artifactId>cecilia-adl</artifactId>
-                <version>2.1.0</version>
-                <classifier>tests</classifier>
-                <scope>tests</scope>
-                <exclusions>
-                    <!-- Exclude fractal-adl transitive dependency to be sure
-                         to use the version that is actually declared here -->
-                    <exclusion>
-                        <groupId>org.objectweb.fractal.fractaladl</groupId>
-                        <artifactId>fractal-adl</artifactId>
-                    </exclusion>
-                </exclusions>
+                <groupId>com.google.inject.extensions</groupId>
+                <artifactId>guice-multibindings</artifactId>
+                <version>2.0</version>
             </dependency>
+
         </dependencies>
     </dependencyManagement>
 

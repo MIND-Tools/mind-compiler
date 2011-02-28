@@ -32,4 +32,11 @@ public interface AnnotationFactory {
 
   Annotation newAnnotation(AnnotationNode annotationNode,
       Map<Object, Object> context) throws AnnotationInitializationException;
+
+  public abstract class AbstractDelegatingAnnotationFactory
+      implements
+        AnnotationFactory {
+
+    public AnnotationFactory clientAnnotationFactoryItf;
+  }
 }

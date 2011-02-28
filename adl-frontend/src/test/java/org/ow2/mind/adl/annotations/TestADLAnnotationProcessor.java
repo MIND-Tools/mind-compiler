@@ -22,7 +22,6 @@
 
 package org.ow2.mind.adl.annotations;
 
-import static org.ow2.mind.BCImplChecker.checkBCImplementation;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
@@ -38,27 +37,24 @@ import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.Loader;
 import org.objectweb.fractal.adl.Node;
-import org.ow2.mind.BasicInputResourceLocator;
-import org.ow2.mind.adl.ADLLocator;
+import org.ow2.mind.CommonFrontendModule;
+import org.ow2.mind.adl.ADLFrontendModule;
 import org.ow2.mind.adl.ASTChecker;
 import org.ow2.mind.adl.ErrorLoader;
-import org.ow2.mind.adl.Factory;
 import org.ow2.mind.adl.annotation.ADLLoaderPhase;
 import org.ow2.mind.adl.annotation.AbstractADLLoaderAnnotationProcessor;
-import org.ow2.mind.adl.annotation.AnnotationProcessorTemplateInstantiator;
-import org.ow2.mind.adl.implementation.ImplementationLocator;
 import org.ow2.mind.annotation.Annotation;
-import org.ow2.mind.error.ErrorManager;
-import org.ow2.mind.error.ErrorManagerFactory;
-import org.ow2.mind.idl.IDLLoaderChainFactory;
-import org.ow2.mind.idl.IDLLoaderChainFactory.IDLFrontend;
-import org.ow2.mind.idl.IDLLocator;
-import org.ow2.mind.idl.annotation.AnnotationProcessorLoader;
+import org.ow2.mind.idl.IDLFrontendModule;
 import org.ow2.mind.idl.ast.IDL;
 import org.ow2.mind.idl.ast.InterfaceDefinition;
-import org.ow2.mind.plugin.SimpleClassPluginFactory;
+import org.ow2.mind.plugin.PluginLoaderModule;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.google.inject.Key;
+import com.google.inject.name.Names;
 
 public class TestADLAnnotationProcessor {
 
@@ -66,42 +62,20 @@ public class TestADLAnnotationProcessor {
 
   @BeforeMethod(alwaysRun = true)
   public void setUp() throws Exception {
-    final ErrorManager errorManager = ErrorManagerFactory
-        .newSimpleErrorManager();
+    final Injector injector = Guice.createInjector(new CommonFrontendModule(),
+        new PluginLoaderModule(), new IDLFrontendModule(),
+        new ADLFrontendModule() {
+          protected void configureErrorLoader() {
+            bind(Loader.class).annotatedWith(Names.named("ErrorLoader"))
+                .toChainStartingWith(ErrorLoader.class)
+                .endingWith(Loader.class);
+          }
+        });
 
-    // input locators
-    final BasicInputResourceLocator inputResourceLocator = new BasicInputResourceLocator();
-    final IDLLocator idlLocator = IDLLoaderChainFactory
-        .newIDLLocator(inputResourceLocator);
-    final ADLLocator adlLocator = Factory.newADLLocator(inputResourceLocator);
-    final ImplementationLocator implementationLocator = Factory
-        .newImplementationLocator(inputResourceLocator);
-
-    // Plugin Manager Components
-    final org.objectweb.fractal.adl.Factory pluginFactory = new SimpleClassPluginFactory();
-
-    // loader chains
-    final IDLFrontend idlFrontend = IDLLoaderChainFactory.newLoader(errorManager,
-        idlLocator, inputResourceLocator, pluginFactory);
-    final Loader adlLoader = Factory.newLoader(errorManager,
-        inputResourceLocator, adlLocator, idlLocator, implementationLocator,
-        idlFrontend.cache, idlFrontend.loader, pluginFactory);
-    final ErrorLoader errorLoader = new ErrorLoader();
-    errorLoader.clientLoader = adlLoader;
-    errorLoader.errorManagerItf = errorManager;
-    loader = errorLoader;
+    loader = injector.getInstance(Key.get(Loader.class,
+        Names.named("ErrorLoader")));
     // ensure that phases are empty.
     FooProcessor.phases = new ArrayList<ProcessParams>();
-  }
-
-  @Test(groups = {"functional", "checkin"})
-  public void testAnnotationProcessorLoaderBC() throws Exception {
-    checkBCImplementation(new AnnotationProcessorLoader());
-  }
-
-  @Test(groups = {"functional", "checkin"})
-  public void testAnnotationTemplateInstantiatorBC() throws Exception {
-    checkBCImplementation(new AnnotationProcessorTemplateInstantiator());
   }
 
   @Test(groups = {"functional"})

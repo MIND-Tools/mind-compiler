@@ -26,11 +26,12 @@ import java.util.Map;
 
 import org.objectweb.fractal.adl.Definition;
 import org.ow2.mind.InputResourcesHelper;
+import org.ow2.mind.adl.anonymous.AnonymousDefinitionExtractor.AbstractDelegatingAnonymousDefinitionExtractor;
 import org.ow2.mind.adl.ast.Component;
 
 public class InputResourceAnonymousDefinitionExtractor
     extends
-      AbstractAnonymousDefinitionExtractor {
+      AbstractDelegatingAnonymousDefinitionExtractor {
 
   public Definition extractAnonymousDefinition(final Component component,
       final Definition encapsulatingDefinition,
@@ -38,8 +39,8 @@ public class InputResourceAnonymousDefinitionExtractor
     final Definition def = clientExtractorItf.extractAnonymousDefinition(
         component, encapsulatingDefinition, context);
     // copy input resources from encapsulating def to extracted def.
-    InputResourcesHelper.addInputResources(def, InputResourcesHelper
-        .getInputResources(encapsulatingDefinition));
+    InputResourcesHelper.addInputResources(def,
+        InputResourcesHelper.getInputResources(encapsulatingDefinition));
     return def;
   }
 
