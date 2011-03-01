@@ -112,8 +112,8 @@ public class ADLFrontendModule extends AbstractADLFrontendModule {
   protected void configureDefaultLoader() {
     bind(defaultLoaderKey())
         .toChainStartingWith(CacheLoader.class)
-        .followedBy(BinaryADLLoader.class)
         .followedBy(TemplateInstanceLoader.class)
+        .followedBy(BinaryADLLoader.class)
         .followedBy(
             new AnnotationProcessorProvider(binder(),
                 ADLLoaderPhase.AFTER_CHECKING))

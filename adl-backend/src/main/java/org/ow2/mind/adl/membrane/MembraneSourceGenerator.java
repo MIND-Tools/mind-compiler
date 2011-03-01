@@ -40,7 +40,6 @@ import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.interfaces.Interface;
 import org.objectweb.fractal.adl.interfaces.InterfaceContainer;
 import org.objectweb.fractal.adl.types.TypeInterface;
-import org.ow2.mind.InputResourcesHelper;
 import org.ow2.mind.SourceFileWriter;
 import org.ow2.mind.adl.AbstractSourceGenerator;
 import org.ow2.mind.adl.CompilationDecorationHelper.AdditionalCompilationUnitDecoration;
@@ -106,8 +105,7 @@ public class MembraneSourceGenerator extends AbstractSourceGenerator
     final File outputFile = outputFileLocatorItf.getCSourceOutputFile(
         outputFileName, context);
 
-    if (!inputResourceLocatorItf.isUpToDate(outputFile,
-        InputResourcesHelper.getInputResources(definition), context)) {
+    if (regenerate(outputFile, definition, context)) {
 
       final StringTemplate st = getInstanceOf("ComponentDefinition");
 
