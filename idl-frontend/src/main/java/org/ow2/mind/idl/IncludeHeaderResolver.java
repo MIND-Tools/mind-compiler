@@ -69,7 +69,9 @@ public class IncludeHeaderResolver extends AbstractDelegatingIncludeResolver {
       if (IDLASTHelper.getIncludeDelimiter(include) == IDLASTHelper.IncludeDelimiter.QUOTE) {
         // try to find header file and update the path if needed
 
-        final String encapsulatingIDLName = encapsulatingIDL.getName();
+        final String encapsulatingIDLName = (encapsulatingIDL != null)
+            ? encapsulatingIDL.getName()
+            : encapsulatingName;
         final String encapsulatingDir;
         if (encapsulatingIDLName.startsWith("/")) {
           encapsulatingDir = PathHelper.getParent(encapsulatingIDLName);

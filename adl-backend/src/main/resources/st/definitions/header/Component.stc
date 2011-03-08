@@ -60,12 +60,12 @@ struct __component_<definition.name;format="toCName">_internal_data_t {
 
 ControllerGlobalDecls(definition) ::= <<
 <if (definition.astNodeTypes.("controller"))>
-<definition.controllers:ControllerGlobalDecl(definition=definition, ctrl=it)>
+<definition.controllers:ControllerGlobalDecl(definition=definition, ctrl=it);separator="\n">
 <endif>
 >>
 
 ControllerGlobalDecl(definition, ctrl) ::= <<
-<ctrl.sources:{<(ctrlGenerator.(it.path).ControllerGlobalDecl)(definition=definition, controller=ctrl)>}>
+<ctrl.sources:{<(ctrlGenerator.(it.path).ControllerGlobalDecl)(definition=definition, controller=ctrl)>};separator="\n">
 >>
 
 // -----------------------------------------------------------------------------
