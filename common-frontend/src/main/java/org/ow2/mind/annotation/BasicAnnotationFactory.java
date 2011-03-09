@@ -32,6 +32,7 @@ import org.ow2.mind.annotation.ast.AnnotationArgument;
 import org.ow2.mind.annotation.ast.AnnotationNode;
 import org.ow2.mind.value.ValueEvaluationException;
 import org.ow2.mind.value.ValueEvaluator;
+import org.ow2.mind.value.ast.Value;
 
 import com.google.inject.Inject;
 
@@ -98,8 +99,26 @@ public class BasicAnnotationFactory implements AnnotationFactory {
             argument);
       }
       final Class<?> fieldType = field.getType();
-      Object arguementValue;
+      final Object arguementValue;
       try {
+        // Check if the captured annotation type is compatible with the
+        // expected type.
+        final AnnotationElementType annotationElementType = field
+            .getAnnotation(AnnotationElementType.class);
+        if (annotationElementType != null) {
+          boolean notValid = true;
+          for (final Class<? extends Value> validType : annotationElementType
+              .validTypes()) {
+            if (validType.isAssignableFrom(argument.getValue().getClass())) {
+              notValid = false;
+            }
+          }
+          if (notValid) {
+            throw new AnnotationInitializationException(
+                "Invalid annotation type for argument \"" + argument.getName()
+                    + "\".", argument);
+          }
+        }
         arguementValue = evaluatorItf.evaluate(argument.getValue(), fieldType,
             context);
       } catch (final ValueEvaluationException e) {
