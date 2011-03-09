@@ -73,9 +73,9 @@ public abstract class AbstractADLCompiler implements ADLCompiler {
       throws ADLException, InterruptedException {
     initContext(adlName, execName, stage, context);
 
-    errorManager.clear();
+    final int nbErrors = errorManager.getErrors().size();
     final Iterable<Definition> adlDefs = load(adlName, context);
-    if (!errorManager.getErrors().isEmpty()) {
+    if (errorManager.getErrors().size() != nbErrors) {
       // ADL contains errors
       return null;
     }
@@ -111,7 +111,7 @@ public abstract class AbstractADLCompiler implements ADLCompiler {
     final List<Object> result = new ArrayList<Object>();
     for (final Definition adlDef : adlDefs) {
       final ComponentGraph graph = instantiateGraph(context, adlDef);
-      if (!errorManager.getErrors().isEmpty()) {
+      if (errorManager.getErrors().size() != nbErrors) {
         // ADL contains errors
         return null;
       }

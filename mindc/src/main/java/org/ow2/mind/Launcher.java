@@ -199,6 +199,10 @@ public class Launcher {
 
         final List<Object> l = adlCompiler.compile(adlName, execName,
             StageOptionHandler.getCompilationStage(contextMap), contextMap);
+        if (!errorManager.getErrors().isEmpty()) {
+          break;
+        }
+
         if (l != null) result.addAll(l);
 
       } catch (final InterruptedException e1) {
