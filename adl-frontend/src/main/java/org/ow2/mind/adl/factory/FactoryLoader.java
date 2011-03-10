@@ -31,7 +31,6 @@ import org.objectweb.fractal.adl.interfaces.InterfaceContainer;
 import org.ow2.mind.CommonASTHelper;
 import org.ow2.mind.adl.AbstractDelegatingLoader;
 import org.ow2.mind.adl.ast.ASTHelper;
-import org.ow2.mind.adl.ast.Data;
 import org.ow2.mind.adl.ast.ImplementationContainer;
 import org.ow2.mind.adl.ast.MindInterface;
 import org.ow2.mind.adl.ast.Source;
@@ -120,10 +119,6 @@ public class FactoryLoader extends AbstractDelegatingLoader {
     factoryCtrl.addControllerInterface(factoryCtrlItf);
     factoryCtrl.addControllerInterface(allocatorCtrlItf);
     ((ControllerContainer) d).addController(factoryCtrl);
-
-    // add a "nodata" node.
-    final Data data = ASTHelper.newData(nodeFactoryItf);
-    ((ImplementationContainer) d).setData(data);
 
     return d;
   }

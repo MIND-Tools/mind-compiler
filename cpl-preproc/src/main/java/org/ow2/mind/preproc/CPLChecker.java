@@ -26,6 +26,7 @@ import org.antlr.runtime.Token;
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.error.BasicErrorLocator;
+import org.objectweb.fractal.adl.error.NodeErrorLocator;
 import org.objectweb.fractal.adl.interfaces.Interface;
 import org.objectweb.fractal.adl.types.TypeInterface;
 import org.objectweb.fractal.adl.types.TypeInterfaceUtil;
@@ -66,8 +67,10 @@ public class CPLChecker {
     }
 
     if (data != null && !prvDeclared) {
-      errorManager.logError(MPPErrors.MISSING_PRIVATE_DECLARATION,
-          new BasicErrorLocator(data.getPath(), -1, -1), data.getPath());
+      errorManager.logError(MPPErrors.MISSING_PRIVATE_DECLARATION, (data
+          .getPath() == null)
+          ? new NodeErrorLocator(data)
+          : new BasicErrorLocator(data.getPath(), -1, -1), data.getPath());
     }
 
     final Interface itf = ASTHelper.getInterface(definition, itfName.getText());

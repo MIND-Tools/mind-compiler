@@ -279,7 +279,9 @@ protected structDecl returns [StringBuilder res = new StringBuilder()]
             ) ';'
             {
               String structContent = $structfield.text.substring(1); // (NB: removes first '{'
-              cplChecker.prvDecl(structContent, sourceFile, sourceLineShift);
+              if (isPrivate) {
+                cplChecker.prvDecl(structContent, sourceFile, sourceLineShift);
+              }
               if (singletonMode) {
                 $res.append($text); 
               } else if (isPrivate) {
