@@ -218,9 +218,9 @@ public class Launcher {
           }
         }
       }
-      if (errors != null) errors.addAll(errorManager.getErrors());
-      if (warnings != null) warnings.addAll(errorManager.getWarnings());
     }
+    if (errors != null) errors.addAll(errorManager.getErrors());
+    if (warnings != null) warnings.addAll(errorManager.getWarnings());
     return result;
   }
 
