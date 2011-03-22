@@ -10,7 +10,7 @@
     </parent>
 
     <artifactId>mind-compiler</artifactId>
-    <version>0.3-alpha-1-SNAPSHOT</version>
+    <version>0.3-beta-1</version>
     <name>Mind compiler</name>
     <packaging>pom</packaging>
 
@@ -93,9 +93,9 @@
     </properties>
 
     <scm>
-        <connection>scm:svn:svn://svn.forge.objectweb.org/svnroot/mind/mindc/trunk</connection>
-        <developerConnection>scm:svn:svn+ssh://svn.forge.objectweb.org/svnroot/mind/mindc/trunk</developerConnection>
-        <url>http://fisheye.ow2.org/browse/MIND/mindc/trunk</url>
+        <connection>scm:svn:svn://svn.forge.objectweb.org/svnroot/mind/mindc/tags/mind-compiler-0.3-beta-1</connection>
+        <developerConnection>scm:svn:svn+ssh://svn.forge.objectweb.org/svnroot/mind/mindc/tags/mind-compiler-0.3-beta-1</developerConnection>
+        <url>http://fisheye.ow2.org/browse/MIND/mindc/tags/mind-compiler-0.3-beta-1</url>
     </scm>
 
     <dependencyManagement>
@@ -646,7 +646,7 @@
                                             synbolic link to point to the new
                                             version.
                                         -->
-                                        <sshexec host="${ow2.hostname}" username="${ow2.username}" passphrase="" keyfile="${user.home}/.ssh/id_rsa" command="cd ${ow2.site.deploy.dir}; ln -nfs mindc-${project.version} mindc"/>
+                                        <sshexec host="${ow2.hostname}" username="${ow2.username}" passphrase="" keyfile="${user.home}/.ssh/id_rsa" command="cd ${ow2.site.deploy.dir}; ln -nfs mindc-${project.version} mindc" />
                                     </tasks>
                                 </configuration>
                             </execution>
