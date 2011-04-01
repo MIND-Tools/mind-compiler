@@ -561,10 +561,15 @@ protected sourceLineInfo returns [StringBuilder res = new StringBuilder()]
 	 }
 	}
 	;
-	
+  
 
 STRING_LITERAL
     :  '"' ( EscapeSequence | ~('\\'|'"') )* '"'
+    ;
+  
+
+CHAR_LITERAL
+    :  '\'' ( EscapeSequence | ~('\'') ) '\''
     ;
     
 fragment
