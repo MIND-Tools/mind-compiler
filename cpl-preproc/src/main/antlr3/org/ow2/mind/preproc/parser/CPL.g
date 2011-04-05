@@ -534,10 +534,10 @@ protected params returns [StringBuilder res = new StringBuilder()]
     ;
 
 protected inParams  returns [StringBuilder res = new StringBuilder()] 
-    : (
-        '(' ip = inParams ')' { $res.append("(").append($ip.res).append(")"); }
-        | expr                { $res.append($expr.res); }
-        | e = ~('(' | ')')    { $res.append($e.text); }
+    : ( '(' ws ')'              { $res.append("(").append($ws.text).append(")");}
+        |'(' ip = inParams ')'  { $res.append("(").append($ip.res).append(")"); }
+        | expr                  { $res.append($expr.res); }
+        | e = ~('(' | ')')      { $res.append($e.text); }
       )+
     ;
 
