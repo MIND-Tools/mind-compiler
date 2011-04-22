@@ -51,6 +51,7 @@ public class VarArgsDualAnnotationProcessor
               node,
               "@VarArgsDual. Variadic's dual function can only be specified for variadic functions.");
     }
+    method.getVaArgs2().setDualMethodName(((VarArgsDual) annotation).value);
     return null;
   }
 }

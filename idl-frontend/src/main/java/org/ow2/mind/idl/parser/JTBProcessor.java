@@ -71,6 +71,7 @@ import org.ow2.mind.idl.ast.TypeQualifier;
 import org.ow2.mind.idl.ast.UnaryOperation;
 import org.ow2.mind.idl.ast.UnionDefinition;
 import org.ow2.mind.idl.ast.UnionReference;
+import org.ow2.mind.idl.ast.VaArgs;
 import org.ow2.mind.idl.jtb.Parser;
 import org.ow2.mind.idl.jtb.ParserConstants;
 import org.ow2.mind.idl.jtb.syntaxtree.AbstractDeclarator;
@@ -223,8 +224,8 @@ public class JTBProcessor extends GJDepthFirst<Object, Node>
 
   private Node newNode(final String name,
       final org.ow2.mind.idl.jtb.syntaxtree.Node syntaxNode) {
-    return newNode(name, syntaxNode.accept(beginTokenVisitor),
-        syntaxNode.accept(endTokenVisitor));
+    return newNode(name, syntaxNode.accept(beginTokenVisitor), syntaxNode
+        .accept(endTokenVisitor));
   }
 
   private void setSource(final Node node, final NodeToken source) {
@@ -248,8 +249,8 @@ public class JTBProcessor extends GJDepthFirst<Object, Node>
 
   private void setSource(final Node node,
       final org.ow2.mind.idl.jtb.syntaxtree.Node syntaxNode) {
-    setSource(node, syntaxNode.accept(beginTokenVisitor),
-        syntaxNode.accept(endTokenVisitor));
+    setSource(node, syntaxNode.accept(beginTokenVisitor), syntaxNode
+        .accept(endTokenVisitor));
   }
 
   private void copySource(final Node node, final Node from) {
@@ -851,6 +852,8 @@ public class JTBProcessor extends GJDepthFirst<Object, Node>
 
     // process ...
     if (n.f2.present()) {
+      final VaArgs vaArgs = (VaArgs) newNode("vaArgs2");
+      method.setVaArgs2(vaArgs);
       method.setVaArgs(Method.TRUE);
     }
     return method;
@@ -1027,8 +1030,9 @@ public class JTBProcessor extends GJDepthFirst<Object, Node>
       ((NodeSequence) n.f0.choice).elementAt(2).accept(this, expr);
 
       // process inner cast expression
-      expr.setConstantExpression((ConstantExpression) ((NodeSequence) n.f0.choice)
-          .elementAt(4).accept(this, expr));
+      expr
+          .setConstantExpression((ConstantExpression) ((NodeSequence) n.f0.choice)
+              .elementAt(4).accept(this, expr));
       return expr;
     }
   }

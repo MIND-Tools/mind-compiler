@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2009 STMicroelectronics
+ * Copyright (C) 2011 France Telecom
  *
  * This file is part of "Mind Compiler" is free software: you can redistribute 
  * it and/or modify it under the terms of the GNU Lesser General Public License 
@@ -16,31 +16,19 @@
  *
  * Contact: mind@ow2.org
  *
- * Authors: Matthieu Leclercq
+ * Authors: Matthieu ANNE
  * Contributors: 
  */
 
 package org.ow2.mind.idl.ast;
 
-public interface Method extends TypeContainer, TypeQualifier {
+import org.objectweb.fractal.adl.Node;
+
+public interface VaArgs extends Node {
 
   String TRUE = "true";
 
-  String getName();
+  String getDualMethodName();
 
-  void setName(String name);
-
-  String getVaArgs();
-
-  void setVaArgs(String vaArgs);
-
-  VaArgs getVaArgs2();
-
-  void setVaArgs2(VaArgs vaArgs);
-
-  void addParameter(Parameter node);
-
-  void removeParameter(Parameter node);
-
-  Parameter[] getParameters();
+  void setDualMethodName(String name);
 }
