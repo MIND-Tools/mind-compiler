@@ -37,6 +37,7 @@ MethodDelegator(itf, index, method) ::= <<
 <else>
 <(idl2c.methodDef)(method=method,withThisPtr="typed",methodName=ProxyName(itfName=itf.name, index=index, methodName=method.name)) > { 
 <endif>
+
 <if(method.vaArgs2)>
   va_list args;
   <if (! ((idl2c.isVoidMethod)(method=method)))>
@@ -62,7 +63,9 @@ MethodDelegator(itf, index, method) ::= <<
   CALL_INTERFACE_PTR_WITHOUT_PARAM(CONTEXT_PTR_ACCESS->__component_internal_data.<if (isServer.(itf.role))>inner_<endif>type.<itf.name><if (index)>[<index>]<endif>, <method.name>);
   <endif>
 <endif>
+
 }
+
 >>
 
 

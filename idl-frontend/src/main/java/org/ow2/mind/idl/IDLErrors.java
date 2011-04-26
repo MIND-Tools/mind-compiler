@@ -56,6 +56,12 @@ public enum IDLErrors implements ErrorTemplate {
   /** */
   UNDEFINED_TYPE(6, "Undefined type \"%s\"", "<typename>"),
 
+  /** */
+  UNDEFINED_DUALMETH(
+      7,
+      "Dual method for vaArgs method \"%s\" should be defined using the annotation @VarArgsDual(\"<dualMethName>\")",
+      "<methodname>"),
+
   ;
 
   /** The groupId of ErrorTemplates defined in this enumeration. */

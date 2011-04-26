@@ -44,7 +44,7 @@ public class VarArgsDualAnnotationProcessor
     assert node instanceof Method;
 
     final Method method = (Method) node;
-    if (method.getVaArgs() == null || !method.getVaArgs().equals(Method.TRUE)) {
+    if (method.getVaArgs2() == null) {
       errorManagerItf
           .logError(
               AnnotationErrors.INVALID_ANNOTATION,
