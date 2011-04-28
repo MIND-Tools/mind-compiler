@@ -30,13 +30,9 @@ public interface Method extends TypeContainer, TypeQualifier {
 
   void setName(String name);
 
-  String getVaArgs();
+  VaArgs getVaArgs();
 
-  void setVaArgs(String vaArgs);
-
-  VaArgs getVaArgs2();
-
-  void setVaArgs2(VaArgs vaArgs);
+  void setVaArgs(VaArgs vaArgs);
 
   void addParameter(Parameter node);
 

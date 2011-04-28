@@ -852,9 +852,8 @@ public class JTBProcessor extends GJDepthFirst<Object, Node>
 
     // process ...
     if (n.f2.present()) {
-      final VaArgs vaArgs = (VaArgs) newNode("vaArgs2");
-      method.setVaArgs2(vaArgs);
-      method.setVaArgs(Method.TRUE);
+      final VaArgs vaArgs = (VaArgs) newNode("vaArgs");
+      method.setVaArgs(vaArgs);
     }
     return method;
   }

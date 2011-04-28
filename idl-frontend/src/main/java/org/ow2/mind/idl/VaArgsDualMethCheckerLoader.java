@@ -53,8 +53,8 @@ public class VaArgsDualMethCheckerLoader extends AbstractDelegatingIDLLoader {
       throws ADLException {
     if (idl instanceof InterfaceDefinition) {
       for (final Method method : ((InterfaceDefinition) idl).getMethods()) {
-        if (method.getVaArgs2() != null) {
-          if (method.getVaArgs2().getDualMethodName() == null) {
+        if (method.getVaArgs() != null) {
+          if (method.getVaArgs().getDualMethodName() == null) {
             errorManagerItf.logWarning(IDLErrors.UNDEFINED_DUALMETH, method,
                 method.getName());
           }

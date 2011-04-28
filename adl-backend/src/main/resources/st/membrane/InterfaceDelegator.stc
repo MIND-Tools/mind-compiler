@@ -38,16 +38,16 @@ MethodDelegator(itf, index, method) ::= <<
 <(idl2c.methodDef)(method=method,withThisPtr="typed",methodName=ProxyName(itfName=itf.name, index=index, methodName=method.name)) > { 
 <endif>
 
-<if(method.vaArgs2)>
+<if(method.vaArgs)>
   va_list args;
   <if (! ((idl2c.isVoidMethod)(method=method)))>
-  int retval;
+  <varDef(type=method.type, name="retval")>;
   <endif>
   va_start (args, <last(method.parameters).name>);
   <if (! ((idl2c.isVoidMethod)(method=method)))>
   retval =
   <endif>
-  CALL_INTERFACE_PTR_WITH_PARAM(CONTEXT_PTR_ACCESS->__component_internal_data.<if (isServer.(itf.role))>inner_<endif>type.<itf.name><if (index)>[<index>]<endif>, <method.vaArgs2.dualMethodName>)
+  CALL_INTERFACE_PTR_WITH_PARAM(CONTEXT_PTR_ACCESS->__component_internal_data.<if (isServer.(itf.role))>inner_<endif>type.<itf.name><if (index)>[<index>]<endif>, <method.vaArgs.dualMethodName>)
        <method.parameters:{<it.name>};separator=", "> , args PARAMS_RPARENT;
   <if (! ((idl2c.isVoidMethod)(method=method)))>
   return retval;
