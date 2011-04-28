@@ -41,7 +41,7 @@ MethodDelegator(itf, index, method) ::= <<
 <if(method.vaArgs)>
   va_list args;
   <if (! ((idl2c.isVoidMethod)(method=method)))>
-  <varDef(type=method.type, name="retval")>;
+  <(idl2c.varDef)(type=method.type, name="retval")>;
   <endif>
   va_start (args, <last(method.parameters).name>);
   <if (! ((idl2c.isVoidMethod)(method=method)))>
@@ -49,6 +49,7 @@ MethodDelegator(itf, index, method) ::= <<
   <endif>
   CALL_INTERFACE_PTR_WITH_PARAM(CONTEXT_PTR_ACCESS->__component_internal_data.<if (isServer.(itf.role))>inner_<endif>type.<itf.name><if (index)>[<index>]<endif>, <method.vaArgs.dualMethodName>)
        <method.parameters:{<it.name>};separator=", "> , args PARAMS_RPARENT;
+  va_end(args);
   <if (! ((idl2c.isVoidMethod)(method=method)))>
   return retval;
   <endif>
