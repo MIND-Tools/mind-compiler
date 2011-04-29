@@ -36,9 +36,7 @@ cplFile(idl,itfName) ::= <<
 >>
 
 externPrototype(method) ::= <<
-<if(method.vaArgs)>
-extern <typeQualifier(qualifiers=method)><varDef(type=method.type, name=dualMethPrototype(name=method.vaArgs.dualMethodName, parameters=method.parameters))>;
-<else>
+<if(!method.vaArgs)>
 extern <methodDef(method=method, methodName=method.name, withThisPtr="false")>;
 <endif>
 >>
@@ -69,17 +67,14 @@ wrapMethod(itfName, method) ::= <<
 >>
 
 methDef(itfName, method) ::= <<
-<typeQualifier(qualifiers=method)><varDef(type=method.type, name=methodSignature(itfName = itfName, name=method.name, parameters=method.parameters, vaArgs=method.vaArgs))>
+<typeQualifier(qualifiers=method)><varDef(type=method.type, name=methodSignature(itfName = itfName, method=method))>
 >>
 
-methodSignature(itfName, name, parameters, vaArgs) ::= <<
-METH(<itfName>, <name>)(<if(parameters)>
-<parameters:parameterDef(parameter=it); separator=", "> <if (vaArgs)>, ...<endif>
-<else>
-<if (vaArgs)> ...
+methodSignature(itfName, method) ::= <<
+METH(<itfName>, <method.name>)(<if(method.parameters)>
+<method.parameters:parameterDef(parameter=it); separator=", "><if (method.vaArgs)>, ...<endif>
 <else>
 void
-<endif>
 <endif>)
 >>
 

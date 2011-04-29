@@ -5,4 +5,5 @@ interface wrap.System {
   
   @VarArgsDual("vprintf")
   int printf(const char *format, ...);
+  int vprintf(const char *format, va_list args);
 }
