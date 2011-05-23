@@ -82,6 +82,7 @@
 <!-- *********************************************************************** -->
 
 <?add ast="method"       itf="org.ow2.mind.idl.ast.Method" ?>
+<?add ast="vaArgs"       itf="org.ow2.mind.idl.ast.VaArgs" ?>
 <?add ast="parameter"    itf="org.ow2.mind.idl.ast.Parameter" ?>
 
 
@@ -236,12 +237,16 @@
   isConst (true|false) #IMPLIED
 >
 
-<!ELEMENT method (annotation*, (%type;), parameter*) >
+<!ELEMENT method (annotation*, (vaArgs), (%type;), parameter*) >
 <!ATTLIST method
   name CDATA #REQUIRED
-  vaArgs (true|false) #IMPLIED
   isVolatile (true|false) #IMPLIED
   isConst (true|false) #IMPLIED
+>
+
+<!ELEMENT vaArgs EMPTY >
+<!ATTLIST vaArgs
+  dualMethodName CDATA #REQUIRED
 >
 
 <!ELEMENT parameter (annotation*, (%type;)) >

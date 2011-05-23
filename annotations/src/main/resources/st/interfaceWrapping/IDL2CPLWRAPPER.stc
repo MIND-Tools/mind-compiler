@@ -27,18 +27,16 @@ template st.interfaceWrapping.IDL2CPLWRAPPER : st.interfaces.IDL2C{
  * Generates a ".c" wrapper file.
  */
  
-cplFile(idl,itfName,dualMeths) ::= <<
+cplFile(idl,itfName) ::= <<
 /* This file is a generated file, do not edit. */
 
-<idl.methods:{<externPrototype(method=it, dualMeths=dualMeths)>};separator="\n">
+<idl.methods:{<externPrototype(method=it)>};separator="\n">
  
-<idl.methods:{<wrapMethod(itfName=itfName, method=it, dualMeths=dualMeths)>};separator="\n\n">
+<idl.methods:{<wrapMethod(itfName=itfName, method=it)>};separator="\n\n">
 >>
 
-externPrototype(method, dualMeths) ::= <<
-<if(dualMeths.(method.name))>
-extern <typeQualifier(qualifiers=method)><varDef(type=method.type, name=dualMethPrototype(name=dualMeths.(method.name), parameters=method.parameters))>;
-<else>
+externPrototype(method) ::= <<
+<if(!method.vaArgs)>
 extern <methodDef(method=method, methodName=method.name, withThisPtr="false")>;
 <endif>
 >>
@@ -47,36 +45,36 @@ dualMethPrototype(name, parameters) ::= <<
 <name>(<parameters:parameterDef(parameter=it); separator=", ">, va_list param_list)
 >>
 
-wrapMethod(itfName, method, dualMeths) ::= <<
-<if(dualMeths.(method.name))>
-<methDef(itfName=itfName, method=method, vaArgs="false")>{
-<if (! (isVoidMethod(method=method)))><varDef(type=method.type, name="ret")>;<endif>
-va_list paramList;
-va_start(paramList, <last(method.parameters).name>);
-<if (! (isVoidMethod(method=method)))>ret = <endif><dualMeths.(method.name)>(<method.parameters:parameterName(parameter=it); separator=", ">, paramList);
-va_end(paramList);
-<if (! (isVoidMethod(method=method)))>return <endif>ret;
+wrapMethod(itfName, method) ::= <<
+<if(method.vaArgs)>
+<methDef(itfName=itfName, method=method)>{
+  <if (! (isVoidMethod(method=method)))><varDef(type=method.type, name="ret")>;<endif>
+  va_list paramList;
+  va_start(paramList, <last(method.parameters).name>);
+  <if (! (isVoidMethod(method=method)))>
+  ret = <endif>CALL(<itfName>, <method.vaArgs.dualMethodName>)(<method.parameters:parameterName(parameter=it); separator=", ">, paramList);
+  va_end(paramList);
+  <if (! (isVoidMethod(method=method)))>
+  return ret;
+  <endif>
 <else>
-<methDef(itfName=itfName, method=method, vaArgs=vaArgsMap.(method.vaArgs))>{
-<if (! (isVoidMethod(method=method)))>
-return <endif><fctCall(method=method)>;
+<methDef(itfName=itfName, method=method)>{
+  <if (! (isVoidMethod(method=method)))>
+  return <endif><fctCall(method=method)>;
 <endif>
 
 }
 >>
 
-methDef(itfName, method, vaArgs) ::= <<
-<typeQualifier(qualifiers=method)><varDef(type=method.type, name=methodSignature(itfName = itfName, name=method.name, parameters=method.parameters, vaArgs=vaArgs))>
+methDef(itfName, method) ::= <<
+<typeQualifier(qualifiers=method)><varDef(type=method.type, name=methodSignature(itfName = itfName, method=method))>
 >>
 
-methodSignature(itfName, name, parameters, vaArgs) ::= <<
-METH(<itfName>, <name>)(<if(parameters)>
-<parameters:parameterDef(parameter=it); separator=", "> <if (vaArgs)>, ...<endif>
-<else>
-<if (vaArgs)> ...
+methodSignature(itfName, method) ::= <<
+METH(<itfName>, <method.name>)(<if(method.parameters)>
+<method.parameters:parameterDef(parameter=it); separator=", "><if (method.vaArgs)>, ...<endif>
 <else>
 void
-<endif>
 <endif>)
 >>
 

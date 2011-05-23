@@ -22,7 +22,6 @@
 
 package org.ow2.mind.adl.annotations;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import org.antlr.stringtemplate.StringTemplate;
@@ -40,9 +39,7 @@ import org.ow2.mind.adl.ast.Source;
 import org.ow2.mind.annotation.Annotation;
 import org.ow2.mind.annotation.AnnotationErrors;
 import org.ow2.mind.annotation.AnnotationHelper;
-import org.ow2.mind.idl.annotations.VarArgsDual;
 import org.ow2.mind.idl.ast.InterfaceDefinition;
-import org.ow2.mind.idl.ast.Method;
 
 /**
  * @author Matthieu ANNE
@@ -64,16 +61,6 @@ public class WrapAnnotationProcessor
         final InterfaceDefinition itfDef = itfSignatureResolverItf.resolve(
             (TypeInterface) itf, definition, context);
 
-        final Map<String, String> dualMeths = new HashMap<String, String>();
-
-        for (final Method meth : itfDef.getMethods()) {
-          final VarArgsDual methAnnotation = AnnotationHelper.getAnnotation(
-              meth, VarArgsDual.class);
-          if (methAnnotation != null) {
-            dualMeths.put(meth.getName(), (methAnnotation).value);
-          }
-        }
-
         // TODO might need a #line in generated file to find error in
         // source file
         // NodeErrorLocator sourceInfo = new NodeErrorLocator(node);
@@ -82,7 +69,6 @@ public class WrapAnnotationProcessor
             "cplFile");
         st.setAttribute("idl", itfDef);
         st.setAttribute("itfName", itf.getName());
-        st.setAttribute("dualMeths", dualMeths);
         // st.setAttribute("sourceInfo", sourceInfo);
 
         final Source src = ASTHelper.newSource(nodeFactoryItf);
@@ -98,9 +84,7 @@ public class WrapAnnotationProcessor
         return null;
       }
     } else {
-      errorManagerItf.logError(
-          AnnotationErrors.INVALID_ANNOTATION,
-          node,
+      errorManagerItf.logError(AnnotationErrors.INVALID_ANNOTATION, node,
           "@Wrap applied to interface " + ((Interface) node).getName()
               + ".\n Composite's interfaces cannot be wrapped: "
               + definition.astGetSource());

@@ -36,6 +36,7 @@ public class IDLFrontendModule extends AbstractIDLFrontendModule {
         .followedBy(
             new AnnotationProcessorProvider(IDLLoaderPhase.AFTER_CHECKING))
         .followedBy(KindDecorationLoader.class)
+        .followedBy(VaArgsDualMethCheckerLoader.class)
         .followedBy(IDLTypeCheckerLoader.class)
         .followedBy(ExtendsInterfaceLoader.class)
         .followedBy(IncludeLoader.class)

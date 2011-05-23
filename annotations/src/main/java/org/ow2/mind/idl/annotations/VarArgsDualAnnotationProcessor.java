@@ -44,13 +44,14 @@ public class VarArgsDualAnnotationProcessor
     assert node instanceof Method;
 
     final Method method = (Method) node;
-    if (method.getVaArgs() == null || !method.getVaArgs().equals(Method.TRUE)) {
+    if (method.getVaArgs() == null) {
       errorManagerItf
           .logError(
               AnnotationErrors.INVALID_ANNOTATION,
               node,
               "@VarArgsDual. Variadic's dual function can only be specified for variadic functions.");
     }
+    method.getVaArgs().setDualMethodName(((VarArgsDual) annotation).value);
     return null;
   }
 }

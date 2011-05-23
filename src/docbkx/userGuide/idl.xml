@@ -85,14 +85,39 @@
           </listitem>
           <listitem>
             <para>Line 3 defines a method called <varname>meth2</varname> that takes a pointer
-            to a <code>struct s</code> as parameter and returns a character.</para>
+            to a <code>struct</code> as parameter and returns a character.</para>
           </listitem>
         </itemizedlist>
       </para>
     </example>
     
     <para>Every methods in a given interface must have a unique name.</para>
-    
+
+    <section id="idl-vaArgsMeth">
+    <title>Variadic methods</title>
+ 	<para>
+	An interface may be defined using variadic methods. In this case the
+	interface must also define the dual method (e.g. vprintf is the dual
+	function of printf in stdio). Moreover the method must be specified
+	using the
+	<varname>@VarArgsDual</varname>
+	annotation (see
+	<xref linkend="idl-annot-varargsdual" />
+	).</para>
+	
+    <example>
+    <title>Variadic methods</title>
+    <programlisting language="idl" linenumbering="numbered">interface foo.bar.Itf1 {
+  @VarArgsDual(meth2)
+  int meth1(char * my_sting, ...);
+  char meth2(char * my_sting, va_list args);
+}
+     </programlisting>
+    </example>
+	   
+    </section>
+  <section id="idl-inheritance">
+    <title>Interface inheritance</title>
     <para>An interface definition may extend another interface definition. 
       The name of the extended interface is specified after a dash symbol (<code>":"</code>)
       just after the name of the interface. Methods defined in the extended interface
@@ -127,6 +152,7 @@
           </itemizedlist>
         </para>
     </example>
+  </section> 
   </section>  
   
   <!--#########################################################################-->
@@ -153,14 +179,12 @@
           </para>
         </formalpara>
 
-        <para>The <classname>VarArgsDual</classname> annotation allows to specify 
-          the name of the dual function of a variadic function. A variadic
-          function is a function with a variable number of arguments. Its dual 
-          function generally has only two arguments, the first being the same as 
-          the original function and the second being a list (<varname>va_list</varname>)
-          gathering every other arguments. Having the name of a variadic dual 
-          function can become necessary for example to use the <varname>@Wrap</varname>
-          ADL annotation (see <xref linkend="adl-annot-wrap"/>).</para>
+        <para>The <classname>VarArgsDual</classname> annotation is needed to specify 
+          the name of the dual method of a variadic method. A variadic
+          method is a method with a variable number of arguments. Its dual 
+          method generally has only two arguments, the first being the same as 
+          the original method and the second being a list (<varname>va_list</varname>)
+          gathering every other arguments.</para>
 
       </section>
       

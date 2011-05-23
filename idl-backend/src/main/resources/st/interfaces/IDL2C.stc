@@ -18,7 +18,7 @@ idlFile(idl) ::= <<
 <idl.astDecorations.("referenced-interfaces").referencedInterfaces:includeReference(ref=it.IDL); separator="\n">
 
 <if (idl.astNodeTypes.("method"))>
-<idl.methods:{<if (vaArgsMap.(it.vaArgs))>#include \<stdarg.h> <endif>};separator="\n">
+<idl.methods:{<if (it.vaArgs)>#include \<stdarg.h> <endif>};separator="\n">
 <endif>
 
 <idl.types:{<(defTemplateMap.(it.astDecorations.kind))(it)>;}; separator="\n\n">
@@ -131,11 +131,11 @@ typedef struct __component_<itf.name; format="toCName">_itf_desc *<itf.name; for
 >>
 
 methodDef(method, methodName, withThisPtr) ::= <<
-<typeQualifier(qualifiers=method)><varDef(type=method.type, name=methodPrototype(name=methodName, parameters=method.parameters, withThisPtr=withThisPtr, vaArgs=vaArgsMap.(method.vaArgs)))>
+<typeQualifier(qualifiers=method)><varDef(type=method.type, name=methodPrototype(name=methodName, parameters=method.parameters, withThisPtr=withThisPtr, vaArgs=method.vaArgs))>
 >>
 
 methodPointerCast(method, withThisPtr) ::= <<
-(<varDef(type=method.type, name=methodPrototype(name="(*)", parameters=method.parameters, withThisPtr=withThisPtr, vaArgs=vaArgsMap.(method.vaArgs)))>)
+(<varDef(type=method.type, name=methodPrototype(name="(*)", parameters=method.parameters, withThisPtr=withThisPtr, vaArgs=method.vaArgs))>)
 >>
 
 

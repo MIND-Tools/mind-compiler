@@ -34,22 +34,21 @@ import org.ow2.mind.idl.annotation.IDLLoaderProcessor;
  * variadic function.
  * 
  * @author Matthieu ANNE
- * 
  */
-@IDLLoaderProcessor(processor = VarArgsDualAnnotationProcessor.class, phases = { IDLLoaderPhase.AFTER_PARSING })
+@IDLLoaderProcessor(processor = VarArgsDualAnnotationProcessor.class, phases = {IDLLoaderPhase.AFTER_PARSING})
 public class VarArgsDual implements Annotation {
 
-    @AnnotationElement
-    public String value;
+  @AnnotationElement
+  public String                           value;
 
-    private static final AnnotationTarget[] TARGETS = { IDLAnnotationTarget.METHOD };
+  private static final AnnotationTarget[] TARGETS = {IDLAnnotationTarget.METHOD};
 
-    public AnnotationTarget[] getAnnotationTargets() {
-	return TARGETS;
-    }
+  public AnnotationTarget[] getAnnotationTargets() {
+    return TARGETS;
+  }
 
-    public boolean isInherited() {
-	return true;
-    }
+  public boolean isInherited() {
+    return true;
+  }
 
 }
