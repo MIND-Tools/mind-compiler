@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.CompilerError;
 import org.objectweb.fractal.adl.error.GenericErrors;
 import org.objectweb.fractal.adl.util.FractalADLLogManager;
@@ -77,12 +76,12 @@ public final class ExecutionHelper {
    * @param command the command to execute.
    * @return if its exit value is zero, return null, otherwise returns a string
    *         that contains the process output.
-   * @throws ADLException If an error occurs while running the command.
+   * @throws IOException If an error occurs while running the command.
    * @throws InterruptedException if the calling thread has been interrupted
    *           while waiting for the process to finish.
    * @see #exec(String, List)
    */
-  public static ExecutionResult exec(final String command) throws ADLException,
+  public static ExecutionResult exec(final String command) throws IOException,
       InterruptedException {
     return exec(null, command);
   }
@@ -100,13 +99,13 @@ public final class ExecutionHelper {
    * @param command the command to execute.
    * @return if its exit value is zero, return null, otherwise returns a string
    *         that contains the process output.
-   * @throws ADLException If an error occurs while running the command.
+   * @throws IOException If an error occurs while running the command.
    * @throws InterruptedException if the calling thread has been interrupted
    *           while waiting for the process to finish.
    * @see #exec(String, List)
    */
   public static ExecutionResult exec(final String execTitle,
-      final String command) throws ADLException, InterruptedException {
+      final String command) throws IOException, InterruptedException {
     return exec(execTitle, DirectiveHelper.splitOptionString(command));
   }
 
@@ -122,12 +121,12 @@ public final class ExecutionHelper {
    * @param cmdList the command to execute.
    * @return if its exit value is zero, return null, otherwise returns a string
    *         that contains the process output.
-   * @throws ADLException If an error occurs while running the command.
+   * @throws IOException If an error occurs while running the command.
    * @throws InterruptedException if the calling thread has been interrupted
    *           while waiting for the process to finish.
    */
   public static ExecutionResult exec(final String execTitle,
-      final List<String> cmdList) throws ADLException, InterruptedException {
+      final List<String> cmdList) throws IOException, InterruptedException {
     final boolean titleLogged;
     if (logger.isLoggable(Level.INFO) && execTitle != null) {
       logger.info(execTitle);
@@ -145,11 +144,7 @@ public final class ExecutionHelper {
     }
 
     final Process process;
-    try {
-      process = new ProcessBuilder(cmdList).redirectErrorStream(true).start();
-    } catch (final IOException e1) {
-      throw new ADLException(CompilerErrors.EXECUTION_ERROR, cmdList.get(0));
-    }
+    process = new ProcessBuilder(cmdList).redirectErrorStream(true).start();
 
     final StringBuilder processOutput = new StringBuilder();
     // Read output produced by process in a parallel thread in order to avoid
@@ -200,14 +195,14 @@ public final class ExecutionHelper {
    * @param cmdArray the command to execute.
    * @return if its exit value is zero, return null, otherwise returns a string
    *         that contains the process output.
-   * @throws ADLException If an error occurs while running the command.
+   * @throws IOException If an error occurs while running the command.
    * @throws InterruptedException if the calling thread has been interrupted
    *           while waiting for the process to finish.
    * @see #exec(String, List)
    * @see Runtime#exec(String[])
    */
   public static ExecutionResult exec(final String execTitle,
-      final String[] cmdArray) throws ADLException, InterruptedException {
+      final String[] cmdArray) throws IOException, InterruptedException {
     return exec(execTitle, Arrays.asList(cmdArray));
   }
 }

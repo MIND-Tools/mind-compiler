@@ -137,8 +137,13 @@ public class GccCompilerWrapper implements CompilerWrapper {
       cmd.add(inputFile.getPath());
 
       // execute command
-      final ExecutionResult result = ExecutionHelper
-          .exec(getDescription(), cmd);
+      ExecutionResult result;
+      try {
+        result = ExecutionHelper.exec(getDescription(), cmd);
+      } catch (final IOException e) {
+        errorManagerItf.logError(CompilerErrors.EXECUTION_ERROR, this.cmd);
+        return false;
+      }
       if (dependencyOutputFile != null && dependencyOutputFile.exists()) {
         processDependencyOutputFile(dependencyOutputFile, context);
       }
@@ -218,8 +223,13 @@ public class GccCompilerWrapper implements CompilerWrapper {
       cmd.add(inputFile.getPath());
 
       // execute command
-      final ExecutionResult result = ExecutionHelper
-          .exec(getDescription(), cmd);
+      ExecutionResult result;
+      try {
+        result = ExecutionHelper.exec(getDescription(), cmd);
+      } catch (final IOException e) {
+        errorManagerItf.logError(CompilerErrors.EXECUTION_ERROR, this.cmd);
+        return false;
+      }
       if (dependencyOutputFile != null && dependencyOutputFile.exists()) {
         processDependencyOutputFile(dependencyOutputFile, context);
       }
@@ -287,8 +297,13 @@ public class GccCompilerWrapper implements CompilerWrapper {
       cmd.addAll(flags);
 
       // execute command
-      final ExecutionResult result = ExecutionHelper
-          .exec(getDescription(), cmd);
+      ExecutionResult result;
+      try {
+        result = ExecutionHelper.exec(getDescription(), cmd);
+      } catch (final IOException e) {
+        errorManagerItf.logError(CompilerErrors.EXECUTION_ERROR, this.cmd);
+        return false;
+      }
 
       if (result.getExitValue() != 0) {
         errorManagerItf.logError(CompilerErrors.LINKER_ERROR,
