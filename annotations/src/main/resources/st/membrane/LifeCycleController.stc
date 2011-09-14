@@ -71,9 +71,9 @@ int INTERFACE_METHOD(lifeCycleController, startFc_override) NO_PARAM_DECL
   <startStopSubComponents(definition=definition, methName="startFc")>
   
   err = INTERFACE_METHOD(lifeCycleController, startFc) (CONTEXT_PTR_ACCESS_OR_VOID);
-  if (err == FRACTAL_API_OK) {
-    __component_startFc_delegate(<lccStatePointer(definition=definition)>);
-  }
+  if (err != FRACTAL_API_OK) return err;
+  
+  err = __component_startFc_delegate(<lccStatePointer(definition=definition)>);
   return err;
 }
 #else
@@ -99,9 +99,9 @@ int INTERFACE_METHOD(lifeCycleController, stopFc_override) NO_PARAM_DECL
   <startStopSubComponents(definition=definition, methName="stopFc")>
   
   err = INTERFACE_METHOD(lifeCycleController, stopFc) (CONTEXT_PTR_ACCESS_OR_VOID);
-  if (err == FRACTAL_API_OK) {
-    __component_stopFc_delegate(<lccStatePointer(definition=definition)>);
-  }
+  if (err != FRACTAL_API_OK) return err;
+  
+  err = __component_stopFc_delegate(<lccStatePointer(definition=definition)>);
   return err;
 }
 #else
