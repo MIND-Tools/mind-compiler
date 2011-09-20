@@ -97,6 +97,11 @@ public class BasicInputResourceLocator implements InputResourceLocator {
       return false;
     }
 
+    if (inputs == null) {
+      // this happens when there is no real file attached to a component.
+      return false;
+    }
+
     for (final InputResource dependency : inputs) {
       try {
         if (getTimestamp(dependency, context) >= timestamp) {
