@@ -119,6 +119,12 @@ public final class ErrorHelper {
   public static final String ERROR_DECORATION_NAME   = "error-list";
   public static final String WARNING_DECORATION_NAME = "warning-list";
 
+  // This class is use to avoid serialization of Error/Warning list (see
+// MIND-119)
+  private static final class NonSerializableErrorList {
+    final List<Error> list = new ArrayList<Error>();
+  }
+
   public static void addError(final Node node, final Error error) {
     getErrorListDecoration(node).add(error);
   }
@@ -130,15 +136,14 @@ public final class ErrorHelper {
     return new ArrayList<Error>(getErrorListDecoration(node));
   }
 
-  @SuppressWarnings("unchecked")
   private static List<Error> getErrorListDecoration(final Node node) {
-    List<Error> errors = (List<Error>) node
+    NonSerializableErrorList errors = (NonSerializableErrorList) node
         .astGetDecoration(ERROR_DECORATION_NAME);
     if (errors == null) {
-      errors = new ArrayList<Error>();
+      errors = new NonSerializableErrorList();
       node.astSetDecoration(ERROR_DECORATION_NAME, errors);
     }
-    return errors;
+    return errors.list;
   }
 
   public static void addWarning(final Node node, final Error warning) {
@@ -152,15 +157,14 @@ public final class ErrorHelper {
     return new ArrayList<Error>(getWarningListDecoration(node));
   }
 
-  @SuppressWarnings("unchecked")
   private static List<Error> getWarningListDecoration(final Node node) {
-    List<Error> warnings = (List<Error>) node
+    NonSerializableErrorList warnings = (NonSerializableErrorList) node
         .astGetDecoration(WARNING_DECORATION_NAME);
     if (warnings == null) {
-      warnings = new ArrayList<Error>();
+      warnings = new NonSerializableErrorList();
       node.astSetDecoration(WARNING_DECORATION_NAME, warnings);
     }
-    return warnings;
+    return warnings.list;
   }
 
 }

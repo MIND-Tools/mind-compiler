@@ -41,8 +41,6 @@ import org.objectweb.fractal.adl.util.FractalADLLogManager;
 
 import com.google.inject.Singleton;
 
-import com.google.inject.Singleton;
-
 /**
  * Simple implementation of {@link ErrorManager} interface. Every methods
  * implemented by this class calls {@link ErrorManager#logError(Error)} or
@@ -179,8 +177,8 @@ public class SimpleErrorManager implements ErrorManager {
   public void logWarning(final Error warning) {
     warnings.add(warning);
     if (warning.getLocator() instanceof NodeErrorLocator) {
-      ErrorHelper.addError(((NodeErrorLocator) warning.getLocator()).getNode(),
-          warning);
+      ErrorHelper.addWarning(
+          ((NodeErrorLocator) warning.getLocator()).getNode(), warning);
     }
     if (logger.isLoggable(Level.FINER)) {
       logger.fine(ErrorHelper.formatError(warning));
