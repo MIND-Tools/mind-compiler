@@ -53,13 +53,12 @@ public class CPLChecker {
         : null;
   }
 
-  public void prvDecl(final String structContent, final String sourceFile,
-      final int lineNumberShift) {
+  public void prvDecl(final String structContent, final String sourceFile) {
     prvDeclared = true;
   }
 
   public void serverMethDef(final Token itfName, final Token methName,
-      final String sourceFile, final int lineNumberShift) throws ADLException {
+      final String sourceFile) throws ADLException {
     if (definition == null) {
       // Add this condition so that the testNG will not throw exceptions
       // (stand-alone node)
@@ -76,13 +75,12 @@ public class CPLChecker {
     final Interface itf = ASTHelper.getInterface(definition, itfName.getText());
     if (itf == null) {
       errorManager.logError(MPPErrors.UNKNOWN_INTERFACE,
-          locator(itfName, sourceFile, lineNumberShift), itfName.getText());
+          locator(itfName, sourceFile), itfName.getText());
       return;
     }
     if (!TypeInterfaceUtil.isServer(itf)) {
       errorManager.logError(MPPErrors.INVALID_CLIENT_INTERFACE,
-          locator(itfName, sourceFile, lineNumberShift), itfName.getText(),
-          methName.getText());
+          locator(itfName, sourceFile), itfName.getText(), methName.getText());
       return;
     }
 
@@ -91,14 +89,13 @@ public class CPLChecker {
         .getResolvedInterfaceDefinition((TypeInterface) itf, null, null);
     if (IDLASTHelper.getMethod(itfDef, methName.getText()) == null) {
       errorManager.logError(MPPErrors.UNKNOWN_METHOD,
-          locator(methName, sourceFile, lineNumberShift), itfName.getText(),
-          methName.getText());
+          locator(methName, sourceFile), itfName.getText(), methName.getText());
     }
 
   }
 
   public void itfMethCall(final Token itfName, final Token methName,
-      final String sourceFile, final int lineNumberShift) throws ADLException {
+      final String sourceFile) throws ADLException {
     if (definition == null) {
       // Add this condition so that the testNG will not throw exceptions
       // (stand-alone node)
@@ -108,7 +105,7 @@ public class CPLChecker {
     final Interface itf = ASTHelper.getInterface(definition, itfName.getText());
     if (itf == null) {
       errorManager.logError(MPPErrors.UNKNOWN_INTERFACE,
-          locator(itfName, sourceFile, lineNumberShift), itfName.getText());
+          locator(itfName, sourceFile), itfName.getText());
       return;
     }
 
@@ -117,13 +114,12 @@ public class CPLChecker {
         .getResolvedInterfaceDefinition((TypeInterface) itf, null, null);
     if (IDLASTHelper.getMethod(itfDef, methName.getText()) == null) {
       errorManager.logError(MPPErrors.UNKNOWN_METHOD,
-          locator(methName, sourceFile, lineNumberShift), itfName.getText(),
-          methName.getText());
+          locator(methName, sourceFile), itfName.getText(), methName.getText());
     }
   }
 
-  public void attAccess(final Token attributeName, final String sourceFile,
-      final int lineNumberShift) throws ADLException {
+  public void attAccess(final Token attributeName, final String sourceFile)
+      throws ADLException {
     if (definition == null) {
       // Add this condition so that the testNG will not throw exceptions
       // (stand-alone node)
@@ -132,14 +128,12 @@ public class CPLChecker {
 
     if (ASTHelper.getAttribute(definition, attributeName.getText()) == null) {
       errorManager.logError(MPPErrors.UNKNOWN_ATTRIBUTE,
-          locator(attributeName, sourceFile, lineNumberShift),
-          attributeName.getText());
+          locator(attributeName, sourceFile), attributeName.getText());
     }
   }
 
   public void collItfMethCall(final Token itfName, final Token methName,
-      final StringBuilder idx, final String sourceFile,
-      final int lineNumberShift) throws ADLException {
+      final StringBuilder idx, final String sourceFile) throws ADLException {
     if (definition == null) {
       // Add this condition so that the testNG will not throw exceptions
       // (stand-alone node)
@@ -149,7 +143,7 @@ public class CPLChecker {
     final Interface itf = ASTHelper.getInterface(definition, itfName.getText());
     if (itf == null) {
       errorManager.logError(MPPErrors.UNKNOWN_INTERFACE,
-          locator(itfName, sourceFile, lineNumberShift), itfName.getText());
+          locator(itfName, sourceFile), itfName.getText());
       return;
     }
 
@@ -158,15 +152,14 @@ public class CPLChecker {
         .getResolvedInterfaceDefinition((TypeInterface) itf, null, null);
     if (IDLASTHelper.getMethod(itfDef, methName.getText()) == null) {
       errorManager.logError(MPPErrors.UNKNOWN_METHOD,
-          locator(methName, sourceFile, lineNumberShift), itfName.getText(),
-          methName.getText());
+          locator(methName, sourceFile), itfName.getText(), methName.getText());
     }
 
-    checkIdx(itf, itfName, idx, sourceFile, lineNumberShift);
+    checkIdx(itf, itfName, idx, sourceFile);
   }
 
   public void getMyItf(final Token itfName, final StringBuilder idx,
-      final String sourceFile, final int lineNumberShift) throws ADLException {
+      final String sourceFile) throws ADLException {
     if (definition == null) {
       // Add this condition so that the testNG will not throw exceptions
       // (stand-alone node)
@@ -176,15 +169,15 @@ public class CPLChecker {
     final Interface itf = ASTHelper.getInterface(definition, itfName.getText());
     if (itf == null) {
       errorManager.logError(MPPErrors.UNKNOWN_INTERFACE,
-          locator(itfName, sourceFile, lineNumberShift), itfName.getText());
+          locator(itfName, sourceFile), itfName.getText());
       return;
     }
 
-    checkIdx(itf, itfName, idx, sourceFile, lineNumberShift);
+    checkIdx(itf, itfName, idx, sourceFile);
   }
 
   public void bindMyItf(final Token itfName, final StringBuilder idx,
-      final String sourceFile, final int lineNumberShift) throws ADLException {
+      final String sourceFile) throws ADLException {
     if (definition == null) {
       // Add this condition so that the testNG will not throw exceptions
       // (stand-alone node)
@@ -194,15 +187,15 @@ public class CPLChecker {
     final Interface itf = ASTHelper.getInterface(definition, itfName.getText());
     if (itf == null) {
       errorManager.logError(MPPErrors.UNKNOWN_INTERFACE,
-          locator(itfName, sourceFile, lineNumberShift), itfName.getText());
+          locator(itfName, sourceFile), itfName.getText());
       return;
     }
 
-    checkIdx(itf, itfName, idx, sourceFile, lineNumberShift);
+    checkIdx(itf, itfName, idx, sourceFile);
   }
 
   public void isBound(final Token itfName, final StringBuilder idx,
-      final String sourceFile, final int lineNumberShift) throws ADLException {
+      final String sourceFile) throws ADLException {
     if (definition == null) {
       // Add this condition so that the testNG will not throw exceptions
       // (stand-alone node)
@@ -212,15 +205,15 @@ public class CPLChecker {
     final Interface itf = ASTHelper.getInterface(definition, itfName.getText());
     if (itf == null) {
       errorManager.logError(MPPErrors.UNKNOWN_INTERFACE,
-          locator(itfName, sourceFile, lineNumberShift), itfName.getText());
+          locator(itfName, sourceFile), itfName.getText());
       return;
     }
 
-    checkIdx(itf, itfName, idx, sourceFile, lineNumberShift);
+    checkIdx(itf, itfName, idx, sourceFile);
   }
 
-  public void getCollectionSize(final Token itfName, final String sourceFile,
-      final int lineNumberShift) throws ADLException {
+  public void getCollectionSize(final Token itfName, final String sourceFile)
+      throws ADLException {
     if (definition == null) {
       // Add this condition so that the testNG will not throw exceptions
       // (stand-alone node)
@@ -230,23 +223,22 @@ public class CPLChecker {
     final Interface itf = ASTHelper.getInterface(definition, itfName.getText());
     if (itf == null) {
       errorManager.logError(MPPErrors.UNKNOWN_INTERFACE,
-          locator(itfName, sourceFile, lineNumberShift), itfName.getText());
+          locator(itfName, sourceFile), itfName.getText());
       return;
     }
   }
 
   protected void checkIdx(final Interface itf, final Token itfToken,
-      final StringBuilder idx, final String sourceFile,
-      final int sourceLineShift) throws ADLException {
+      final StringBuilder idx, final String sourceFile) throws ADLException {
     if (idx == null) {
       if (TypeInterfaceUtil.isCollection(itf)) {
         errorManager.logError(MPPErrors.INVALID_INTERFACE_MISSING_INDEX,
-            locator(itfToken, sourceFile, sourceLineShift), itf.getName());
+            locator(itfToken, sourceFile), itf.getName());
       }
     } else {
       if (!TypeInterfaceUtil.isCollection(itf)) {
         errorManager.logError(MPPErrors.INVALID_INTERFACE_NOT_A_COLLECTION,
-            locator(itfToken, sourceFile, sourceLineShift), itf.getName());
+            locator(itfToken, sourceFile), itf.getName());
       }
 
       if (idx.length() <= 2) {
@@ -257,8 +249,7 @@ public class CPLChecker {
         final int i = Integer.parseInt(index);
         if (i < 0 || i >= ASTHelper.getNumberOfElement(itf)) {
           errorManager.logError(MPPErrors.INVALID_INDEX,
-              locator(itfToken, sourceFile, sourceLineShift), itf.getName(),
-              index);
+              locator(itfToken, sourceFile), itf.getName(), index);
         }
       } catch (final NumberFormatException e) {
         // ignore, idx is not a number literal
@@ -266,9 +257,8 @@ public class CPLChecker {
     }
   }
 
-  protected BasicErrorLocator locator(final Token token,
-      final String sourceFile, final int lineNumberShift) {
-    return new BasicErrorLocator(sourceFile, token.getLine() + lineNumberShift,
+  protected BasicErrorLocator locator(final Token token, final String sourceFile) {
+    return new BasicErrorLocator(sourceFile, token.getLine(),
         token.getCharPositionInLine());
   }
 

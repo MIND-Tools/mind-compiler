@@ -23,6 +23,8 @@
 package org.ow2.mind.preproc.parser;
 
 import java.io.PrintStream;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.antlr.runtime.Parser;
 import org.antlr.runtime.RecognitionException;
@@ -32,6 +34,18 @@ import org.ow2.mind.error.ErrorManager;
 import org.ow2.mind.preproc.CPLChecker;
 
 public abstract class AbstractCPLParser extends Parser {
+
+  static final Pattern sourceLinePattern = Pattern
+                                             .compile("#(\\ |\\t)*(line(\\ |\\t)*)?(\\d+)\"(.*)\"");
+  static final int     lineIndex         = 4;
+  static final int     fileIndex         = 5;
+
+  public void processSourceLine(final String token) {
+    final Matcher matcher = sourceLinePattern.matcher(token);
+    final int line = Integer.parseInt(matcher.group(lineIndex));
+    final String file = matcher.group(fileIndex);
+    System.out.printf("Line:%d File:%s\n", line, file);
+  }
 
   public AbstractCPLParser(final TokenStream input,
       final RecognizerSharedState state) {

@@ -47,6 +47,9 @@ public class TestMPPErrors extends AbstractTestMPP {
       assertEquals(errors.size(), 1);
       final Error error = errors.iterator().next();
       assertSame(error.getTemplate(), MPPErrors.PARSE_ERROR);
+      assertEquals(error.getLocator().getBeginLine(), 2);
+      assertTrue(error.getLocator().getInputFilePath()
+          .endsWith("error/error1.c"));
       System.out.println(ErrorHelper.formatError(error));
     }
   }
@@ -62,6 +65,8 @@ public class TestMPPErrors extends AbstractTestMPP {
       assertEquals(errors.size(), 1);
       final Error error = errors.iterator().next();
       assertSame(error.getTemplate(), MPPErrors.PARSE_ERROR);
+      assertEquals(error.getLocator().getBeginLine(), 6);
+      assertTrue(error.getLocator().getInputFilePath().endsWith("init/data.h"));
       System.out.println(ErrorHelper.formatError(error));
     }
   }
@@ -77,6 +82,8 @@ public class TestMPPErrors extends AbstractTestMPP {
       assertEquals(errors.size(), 1);
       final Error error = errors.iterator().next();
       assertSame(error.getTemplate(), MPPErrors.PARSE_ERROR);
+      assertEquals(error.getLocator().getBeginLine(), 6);
+      assertTrue(error.getLocator().getInputFilePath().endsWith("init/data.h"));
       System.out.println(ErrorHelper.formatError(error));
     }
   }
