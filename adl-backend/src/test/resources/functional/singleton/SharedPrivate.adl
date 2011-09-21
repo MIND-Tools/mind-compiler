@@ -1,0 +1,11 @@
+@Run
+@Singleton
+composite singleton.SharedPrivate extends ApplicationType {
+
+  contains A as a;
+  contains B as b;
+  
+  binds this.main to a.main;
+  binds a.b to b.b;
+
+}

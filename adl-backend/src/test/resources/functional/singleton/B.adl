@@ -1,0 +1,21 @@
+@Singleton
+primitive singleton.B {
+
+  provides Bservice as b;
+  
+  data{{
+    struct{
+      int intB;
+    } PRIVATE;
+  }}
+  
+  source {{
+    #include <stdio.h>
+    #include <string.h>
+    
+    
+    intptr_t METH(b, getPrivate)() {
+      return (intptr_t) &PRIVATE.intB;
+    }
+  }};
+}
