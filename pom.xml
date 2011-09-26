@@ -105,106 +105,106 @@
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>idl-parser</artifactId>
-    <version>0.3-beta-2-SNAPSHOT</version>
+                <version>${project.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>idl-frontend</artifactId>
-    <version>0.3-beta-2-SNAPSHOT</version>
+                <version>${project.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>idl-backend</artifactId>
-    <version>0.3-beta-2-SNAPSHOT</version>
+                <version>${project.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>adl-parser</artifactId>
-    <version>0.3-beta-2-SNAPSHOT</version>
+                <version>${project.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>adl-frontend</artifactId>
-    <version>0.3-beta-2-SNAPSHOT</version>
+                <version>${project.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>adl-frontend</artifactId>
-    <version>0.3-beta-2-SNAPSHOT</version>
+                <version>${project.version}</version>
                 <type>test-jar</type>
             </dependency>
 
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>adl-backend</artifactId>
-    <version>0.3-beta-2-SNAPSHOT</version>
+                <version>${project.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>adl-backend</artifactId>
-    <version>0.3-beta-2-SNAPSHOT</version>
+                <version>${project.version}</version>
                 <type>test-jar</type>
             </dependency>
 
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>common-frontend</artifactId>
-    <version>0.3-beta-2-SNAPSHOT</version>
+                <version>${project.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>common-frontend</artifactId>
-    <version>0.3-beta-2-SNAPSHOT</version>
+                <version>${project.version}</version>
                 <type>test-jar</type>
             </dependency>
 
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>common-backend</artifactId>
-    <version>0.3-beta-2-SNAPSHOT</version>
+                <version>${project.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>cpl-preproc</artifactId>
-    <version>0.3-beta-2-SNAPSHOT</version>
+                <version>${project.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>mindc</artifactId>
-    <version>0.3-beta-2-SNAPSHOT</version>
+                <version>${project.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>fractal-runtime</artifactId>
-    <version>0.3-beta-2-SNAPSHOT</version>
+                <version>${project.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>plugin-loader</artifactId>
-    <version>0.3-beta-2-SNAPSHOT</version>
+                <version>${project.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>annotations</artifactId>
-    <version>0.3-beta-2-SNAPSHOT</version>
+                <version>${project.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>fractal-adl-bundle</artifactId>
-    <version>0.3-beta-2-SNAPSHOT</version>
+                <version>${project.version}</version>
                 <type>bundle</type>
             </dependency>
 

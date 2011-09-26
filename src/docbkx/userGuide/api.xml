@@ -1335,7 +1335,7 @@
     
   </section>
   
-    <section id="api-memapi-pkg">
+  <section id="api-memapi-pkg">
     <title>The <classname>memory.api</classname> package</title>
     
     <section id="api-memapi-Allocator">
@@ -1406,4 +1406,119 @@
       </informaltable>
   	</section>
   </section>
+
+  <section id="api-mem-pkg">
+    <title>The <classname>memory</classname> package</title>
+	<section>
+      <title>The <classname>memory.AllocatorType</classname> component type</title>
+	  
+	  <para>A Type definition for memory allocator components. Provides a single interface
+	    called <varname>allocation</varname> whose type is 
+	    <link linkend="api-memapi-Allocator"><classname>memory.api.Allocator</classname></link>.</para>
+	</section>
+	
+	<section>
+      <title>The <classname>memory.Malloc</classname> component</title>
+	  
+	  <para>A simple memory allocator component that use <code>malloc</code> and 
+        <code>free</code> system calls to allocate/free memory.</para>
+	</section>
+  </section>  
+  
+  <section id="api-boot-pkg">
+    <title>The <classname>boot</classname> package</title>
+	<section id="api-boot-Main">
+      <title>The <classname>boot.Main</classname> interface</title>
+	  
+	  <para>The <classname>boot.Main</classname> IDL defines a <methodname>main</methodname> method. A 
+	    component-based application must provides an interface of this type, so 
+	    that it can be launched by a bootstrap compoenent.</para>
+      
+      <para>This interface defines the following method:</para>
+      
+      <informaltable border="all" width="100%">
+        <tr>
+          <td>
+            <programlisting language="idl"> int main(int argc, char **argv);</programlisting>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <para>Application entry-points</para>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <variablelist>
+              <varlistentry>
+                <term><varname>argc</varname></term>
+                <listitem><para>Argument count</para></listitem>
+              </varlistentry>
+              <varlistentry>
+                <term><varname>argv</varname></term>
+                <listitem><para>Argument values</para></listitem>
+              </varlistentry>
+              <varlistentry>
+                <term>return</term>
+                <listitem><para>Return value. By convention '0' means OK, any other value
+                  is considered as an error.</para></listitem>
+              </varlistentry>
+            </variablelist>
+          </td>
+        </tr>
+      </informaltable>
+	</section>
+	<section id="api-boot-AppType">
+      <title>The <classname>boot.ApplicationType</classname> component type</title>
+	  <para>An ADL type that can be extended by application components (i.e. components
+        providing an <varname>entryPoint</varname> interface of type 
+        <link linkend="api-boot-Main"><classname>boot.Main</classname></link>).</para>
+	</section>
+	
+	<section id="api-boot-Bootstrap">
+	  <title>The <classname>boot.Bootstrap</classname> component</title>
+	  
+	  <para>The <classname>boot.Bootstrap</classname> primitive component is used to initialize and launch a 
+        component-based application on a POSIX system.</para>
+      <para>It requires an <varname>entryPoint</varname> interface that is intended to be bound to the 
+        <link linkend="api-boot-Main"><classname>boot.Main</classname></link> 
+        provided interface of the component-based application. It also requires a 
+        optional <varname>appLCC</varname> interface. This interface can be bound to the 
+        <link linkend="api-fapi-LCC"><classname>fractal.api.LifeCycleController</classname></link>
+        interface of the application, if this latter provides it.</para>
+      <para>The component implementation contains the definition of the traditional "main"
+        C function that is executed when the application is launched.</para>
+      <para>This component is singleton.</para>
+	</section>
+	
+	<section id="api-boot-GenApp">
+	  <title>The <classname>boot.GenericApplication</classname> template component</title>
+	  
+	  <para>This template ADL defines a generic top-level architecture made of a 
+        <link linkend="api-boot-Bootstrap"><classname>boot.Bootstrap</classname></link>
+        component and a generic <varname>App</varname> component bound together.</para>
+	  <para>The generic <varname>App</varname> component must conforms to the 
+	    <link linkend="api-boot-AppType"><classname>boot.ApplicationType</classname></link>.</para>
+      <para>This component is singleton.</para>
+	</section>
+	
+	<section id="api-boot-LCCAppType">
+      <title>The <classname>boot.LCCApplicationType</classname> component type</title>
+	  <para>An ADL type that can be extended by <link linkend="api-boot-AppType">application components</link>
+	    that also have a <link linkend="api-fapi-LCC"><classname>fractal.api.LifeCycleController</classname></link>
+	    interface.</para>
+	</section>
+	
+	<section id="api-boot-GenLCCApp">
+	  <title>The <classname>boot.GenericLCCApplication</classname> template component</title>
+	  
+	  <para>This template ADL defines a generic top-level architecture made of a 
+        <link linkend="api-boot-Bootstrap"><classname>boot.Bootstrap</classname></link>
+        component and a generic <varname>App</varname> component bound together.</para>
+	  <para>The generic <varname>App</varname> component must conforms to the 
+	    <link linkend="api-boot-LCCAppType"><classname>boot.LCCApplicationType</classname></link>.</para>
+      <para>This component is singleton.</para>
+	</section>
+  </section>  
+  
 </chapter>
