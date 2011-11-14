@@ -297,8 +297,7 @@
       <para>A target descriptor must start with the following XML prolog :</para>
       <programlisting><![CDATA[<?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE target SYSTEM
-  "classpath://org/objectweb/fractal/cecilia/targetDescriptor/ast/targe
-tDescriptor.dtd">]]></programlisting>
+  "classpath://org/ow2/mind/target/ast/targetDescriptor.dtd">]]></programlisting>
       
       <note>
         <para>The DTD URL must be written on a single line without linebreak. </para>
