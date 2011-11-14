@@ -10,7 +10,9 @@ int METH(myItf, myMethod)(int a, int b) {
 }
 
 int METH(myPrivateMethod)(int a) {
-	return PRIVATE.a + a;
+	// test MIND-133
+	const char *c = "\x0D\x0A";
+	return PRIVATE.a + c[0];
 }
 
 // test MIND-130

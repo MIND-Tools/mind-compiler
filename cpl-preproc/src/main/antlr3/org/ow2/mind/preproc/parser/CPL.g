@@ -606,8 +606,9 @@ CHAR_LITERAL
     
 fragment
 EscapeSequence
-    :   '\\' ('b'|'t'|'n'|'f'|'r'|'\"'|'\''|'\\')
+    :   '\\' ('a'|'b'|'t'|'n'|'f'|'r'|'v'|'"'|'\''|'\\'|'?')
     |   OctalEscape
+    |   HexaEscape
     ;
 
 fragment
@@ -618,6 +619,15 @@ OctalEscape
     ;
   
 
+fragment
+HexaEscape
+    :  '\\x' HexaDigit+
+    ;
+
+fragment
+HexaDigit
+	:  '0'..'9'|'a'..'f'|'A'..'F'
+	;
 	
 ID
 	: ( 'a'..'z'|'A'..'Z'|'_')( 'a'..'z'|'A'..'Z'|'_'|'0'..'9')*
