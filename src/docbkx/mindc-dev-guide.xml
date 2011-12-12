@@ -4,18 +4,27 @@
 %myents;
 ]>
 <book>
-    <title>
-        <emphasis>&productName;</emphasis> developer guide 
-    </title>
-    <subtitle>version <?eval ${project.version}?></subtitle>
-    
-    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="devGuide/intro-chapter.xml" />
+  <title>
+      <emphasis>&productName;</emphasis> developer guide 
+  </title>
+  <subtitle>version <?eval ${project.version}?></subtitle>
+  
+  <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="devGuide/intro-chapter.xml" />
+  
+  <part>
+    <title>&productName; internal architecture</title>
+    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="devGuide/plugin-framework.xml" />
     <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="devGuide/common-frontend.xml" />
     <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="devGuide/adl-frontend.xml" />
+    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="devGuide/idl-frontend.xml" />
     <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="devGuide/common-backend.xml" />
     <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="devGuide/mpp.xml" />
     <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="devGuide/adl-backend.xml" />
-    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="devGuide/plugin-loader.xml" />
-    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="devGuide/fractaladl-intro.xml" />
-    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="devGuide/code-convention.xml" />
+  </part>
+  <part>
+    <title>Developing &productName; plugins</title>
+    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="devGuide/new-mind-plugins.xml" />
+  </part>
+  <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="devGuide/fractaladl-intro.xml" />
+  <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="devGuide/code-convention.xml" />
 </book>

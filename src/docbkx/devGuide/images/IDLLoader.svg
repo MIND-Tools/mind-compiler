@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN" "http://www.w3.org/TR/2001/PR-SVG-20010719/DTD/svg10.dtd">
+<svg width="40cm" height="17cm" viewBox="35 179 786 322" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <g>
+    <rect style="fill: #ffffff" x="360" y="180" width="360" height="60"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="360" y="180" width="360" height="60"/>
+  </g>
+  <text style="fill: #000000;text-anchor:middle;font-size:18.0619;font-family:sanserif;font-style:normal;font-weight:normal" x="540" y="216.25">
+    <tspan x="540" y="216.25">Loader Chain</tspan>
+  </text>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="220" y1="200" x2="250.264" y2="200"/>
+    <polygon style="fill: #000000" points="257.764,200 247.764,205 250.264,200 247.764,195 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="257.764,200 247.764,205 250.264,200 247.764,195 "/>
+  </g>
+  <text style="fill: #000000;text-anchor:end;font-size:16.9331;font-family:sanserif;font-style:normal;font-weight:normal" x="240" y="200">
+    <tspan x="240" y="200">IDL frontend entry-point</tspan>
+  </text>
+  <g>
+    <rect style="fill: #ffffff" x="740" y="180" width="80" height="60"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="740" y="180" width="80" height="60"/>
+  </g>
+  <text style="fill: #000000;text-anchor:middle;font-size:18.0619;font-family:sanserif;font-style:normal;font-weight:normal" x="780" y="204.697">
+    <tspan x="780" y="204.697">IDL</tspan>
+    <tspan x="780" y="227.275">Parser</tspan>
+  </text>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="720.981" y1="210" x2="730.264" y2="210"/>
+    <polygon style="fill: #000000" points="737.764,210 727.764,215 730.264,210 727.764,205 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="737.764,210 727.764,215 730.264,210 727.764,205 "/>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="260" y="180" width="80" height="60"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="260" y="180" width="80" height="60"/>
+  </g>
+  <text style="fill: #000000;text-anchor:middle;font-size:18.0619;font-family:sanserif;font-style:normal;font-weight:normal" x="300" y="204.697">
+    <tspan x="300" y="204.697">IDL</tspan>
+    <tspan x="300" y="227.275">cache</tspan>
+  </text>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="340" y1="210" x2="350.264" y2="210"/>
+    <polygon style="fill: #000000" points="357.764,210 347.764,215 350.264,210 347.764,205 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="357.764,210 347.764,215 350.264,210 347.764,205 "/>
+  </g>
+  <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="260" y1="180" x2="260" y2="240"/>
+  <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="360" y1="240" x2="720" y2="240"/>
+  <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="360" y1="180" x2="720" y2="180"/>
+  <g>
+    <rect style="fill: #ffffff" x="600" y="280" width="100" height="180"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="600" y="280" width="100" height="180"/>
+  </g>
+  <text style="fill: #000000;text-anchor:middle;font-size:18.0619;font-family:sanserif;font-style:normal;font-weight:normal" x="650" y="353.672">
+    <tspan x="650" y="353.672">Include</tspan>
+    <tspan x="650" y="376.25">Resolver</tspan>
+    <tspan x="650" y="398.828">sub-chain</tspan>
+  </text>
+  <g>
+    <rect style="fill: #ffffff" x="440" y="280" width="110" height="180"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="440" y="280" width="110" height="180"/>
+  </g>
+  <text style="fill: #000000;text-anchor:start;font-size:12.7998;font-family:sanserif;font-style:normal;font-weight:normal" x="680" y="400">
+    <tspan x="680" y="400"></tspan>
+  </text>
+  <text style="fill: #000000;text-anchor:middle;font-size:18.0619;font-family:sanserif;font-style:normal;font-weight:normal" x="495" y="342.383">
+    <tspan x="495" y="342.383">Interface</tspan>
+    <tspan x="495" y="364.961">Reference</tspan>
+    <tspan x="495" y="387.539">Resolver</tspan>
+    <tspan x="495" y="410.117">sub-chain</tspan>
+  </text>
+  <g>
+    <rect style="fill: #ffffff" x="180" y="320" width="100" height="80"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="180" y="320" width="100" height="80"/>
+  </g>
+  <text style="fill: #000000;text-anchor:middle;font-size:18.0619;font-family:sanserif;font-style:normal;font-weight:normal" x="230" y="343.672">
+    <tspan x="230" y="343.672">Recursive</tspan>
+    <tspan x="230" y="366.25">IDL</tspan>
+    <tspan x="230" y="388.828">Loader</tspan>
+  </text>
+  <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="180" y1="400" x2="280" y2="400"/>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="650,460 650,500 213.333,500 213.333,409.736 "/>
+    <polygon style="fill: #000000" points="213.333,402.236 218.333,412.236 213.333,409.736 208.333,412.236 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="213.333,402.236 218.333,412.236 213.333,409.736 208.333,412.236 "/>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="495,460 495,480 246.667,480 246.667,409.736 "/>
+    <polygon style="fill: #000000" points="246.667,402.236 251.667,412.236 246.667,409.736 241.667,412.236 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="246.667,402.236 251.667,412.236 246.667,409.736 241.667,412.236 "/>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="230,320 230,220 250.264,220 "/>
+    <polygon style="fill: #000000" points="257.764,220 247.764,225 250.264,220 247.764,215 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="257.764,220 247.764,225 250.264,220 247.764,215 "/>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="496,240 496,260 496,260 496,270.264 "/>
+    <polygon style="fill: #000000" points="496,277.764 491,267.764 496,270.264 501,267.764 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="496,277.764 491,267.764 496,270.264 501,267.764 "/>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="648,240 648,260 648,260 648,270.264 "/>
+    <polygon style="fill: #000000" points="648,277.764 643,267.764 648,270.264 653,267.764 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="648,277.764 643,267.764 648,270.264 653,267.764 "/>
+  </g>
+</svg>

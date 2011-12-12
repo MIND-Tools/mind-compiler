@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2010 STMicroelectronics
+ * Copyright (C) 2010-2011 STMicroelectronics
  *
  * This file is part of "Mind Compiler" is free software: you can redistribute 
  * it and/or modify it under the terms of the GNU Lesser General Public License 
@@ -22,7 +22,10 @@
 
 package org.ow2.mind.idl.ast;
 
-public interface UnaryOperation extends ConstantExpression {
+public interface UnaryOperation
+    extends
+      ConstantExpression,
+      ConstantExpressionContainer {
 
   String AMP   = "&";
   String STAR  = "*";
@@ -34,9 +37,4 @@ public interface UnaryOperation extends ConstantExpression {
   String getOperation();
 
   void setOperation(String operation);
-
-  void setConstantExpression(ConstantExpression node);
-
-  ConstantExpression getConstantExpression();
-
 }

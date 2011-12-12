@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter SYSTEM "../dtd/minddoc.dtd" [
+<!ENTITY % myents SYSTEM "../shared.ent" >
+%myents;
+]>
+<chapter id="idlfe">
+  <title>IDL Frontend</title>
+
+  <section id="idlfe-ovarch">
+    <title>Overall architecture</title>
+    <para>The architecture of the IDL frontend is similar to the architecture of the ADL frontend.
+      It is made of a delegation-chain of IDL loader components that uses sub-chains for the 
+      resolution of external references.</para>
+    <para>The following schema presents the global architecture of the IDL frontend.</para>
+
+    <figure id="idlfe-ovarch-fig">
+      <title>IDL frontend global architecture</title>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="images/IDLLoader.svg" scale="30" align="center"/>
+        </imageobject>
+      </mediaobject>
+    </figure>
+  </section>
+  
+  <section id="idlfe-loader">
+    <title>IDL Loader chain</title>
+
+    <para>Each IDL loader component provides a <codelink class="&mindPkg;.idl.IDLLoader" jdocurl="&mindJdoc;" codeurl="&mindCode;"/>
+      interface and requires an interface of the same kind. Its implementation is similar to :
+    </para>
+    <example>
+      <title>
+        Typical implementation of a
+        loader component</title>
+      <programlisting language="java">public class <replaceable>AnIDLLoaderComponent</replaceable> 
+    extends <codelink class="&mindPkg;.idl.IDLLoader.AbstractDelegatingIDLLoader" jdocurl="&mindJdoc;"/> {
+  
+  // implementation of the IDLLoader interface.
+  public <codelink class="&mindPkg;.idl.ast.IDL" jdocurl="&mindJdoc;"/> load(String name, Map&lt;Object, Object&gt; context)
+      throws ADLException {
+    <codelink class="&mindPkg;.idl.ast.IDL" jdocurl="&mindJdoc;"/> idl = clientIDLLoaderItf.load(name, context);
+    processIDL(idl);
+    return d;
+  }
+  
+  protected void processIDL(<codelink class="&mindPkg;.idl.ast.IDL" jdocurl="&mindJdoc;"/> idl) 
+        throws ADLException {
+    //process the IDL...
+  }
+}</programlisting>
+    </example>
+    <para>The <codelink class="&mindPkg;.idl.IDLLoader.AbstractDelegatingIDLLoader" jdocurl="&mindJdoc;"/>
+      class defines the <function>clientIDLLoaderItf</function> client interface that
+      is bound to the next loader component in the delegation chain.</para>
+    <para>Similarly to ADL frontend, the IDL loader chain contains the parser as the last component in the chain
+      and a cache as the first component.</para>
+  </section>
+  
+  <section>
+    <title>IDL AST structure</title>
+    
+    <para>IDL AST is structured as a graph of nodes where each node implements a set
+      of interfaces. See <xref linkend="fadl-ast"/> for details on the FractalADL AST framework.</para>
+    
+    <section>
+      <title>Global structure of IDL AST</title>
+      <para>The following schema details the AST interfaces corresponding to the top-level structure of an IDL file.</para>
+      <figure id="idlfe-ovast-fig">
+        <title>AST interfaces of top-level IDL structure</title>
+        <mediaobject>
+          <imageobject>
+            <imagedata fileref="images/IDLAST.svg"  scale="30" align="center"/>
+          </imageobject>
+          <caption>
+            <blockquote>
+              <para>(1) See <xref linkend="idlfe-asttype-fig" />.</para>
+            </blockquote>
+          </caption>
+        </mediaobject>
+      </figure>
+      
+      <para>The root AST node corresponding to an input IDL file alway implements the
+        <codelink class="&mindPkg;.idl.ast.IDL" jdocurl="&mindJdoc;" codeurl="&mindCode;"/> interface.
+        Depending of the kind of input file (<filename>.itf</filename> or <filename>.idt</filename>),
+        The root node also implements the <codelink class="&mindPkg;.idl.ast.InterfaceDefinition" jdocurl="&mindJdoc;" codeurl="&mindCode;"/>
+        or the <codelink class="&mindPkg;.idl.ast.SharedTypeDefinition" jdocurl="&mindJdoc;" codeurl="&mindCode;"/>
+        interface.</para>
+    </section>
+    
+    <section>
+      <title>AST structure for C type system</title>
+      <para>The following schema details the AST interfaces corresponding to the C type system supported by the IDL.</para>
+      <figure id="idlfe-asttype-fig">
+        <title>AST interfaces of the C type system</title>
+        <mediaobject>
+          <imageobject>
+            <imagedata fileref="images/IDLType.svg"  scale="30" align="center"/>
+          </imageobject>
+          <caption>
+            <blockquote>
+              <para>(1) See <xref linkend="idlfe-astexpr-fig" />.</para>
+            </blockquote>
+          </caption>
+        </mediaobject>
+      </figure>
+      
+      <para>Every data-type that can be defined in an IDL is represented by a node that implements
+        the <codelink class="&mindPkg;.idl.ast.Type" jdocurl="&mindJdoc;" codeurl="&mindCode;"/> interface.</para>
+      <para>To simplify AST structure, constant definitions are considered as 
+        <codelink class="&mindPkg;.idl.ast.Type" jdocurl="&mindJdoc;" codeurl="&mindCode;"/> object.</para>
+    </section>
+
+    <section>
+      <title>AST structure for constant expressions</title>
+      <para>The following schema details the AST interfaces corresponding to the constant expressions supported by the IDL.</para>
+      <figure id="idlfe-astexpr-fig">
+        <title>AST interfaces of constant expressions</title>
+        <mediaobject>
+          <imageobject>
+            <imagedata fileref="images/IDLExpr.svg"  scale="30" align="center"/>
+          </imageobject>
+          <caption>
+            <blockquote>
+              <para>(1) See <xref linkend="idlfe-asttype-fig" />.</para>
+            </blockquote>
+          </caption>
+        </mediaobject>
+      </figure>
+    </section>
+    <section>
+      <title>AST Structure for the support of annotations</title>
+      <para>The following schema details the AST interfaces for the support of annotations in IDL:</para>
+      <figure id="idlfe-astannot-fig">
+        <title>AST structure for annotation support in IDL</title>
+        <mediaobject>
+          <imageobject>
+            <imagedata fileref="images/IDLAnnotation.svg"  scale="30" align="center"/>
+          </imageobject>
+          <caption>
+            <blockquote>
+              <para>(1) See <xref linkend="idlfe-ovast-fig"/>. (2) See <xref linkend="idlfe-asttype-fig"/>.</para>
+            </blockquote>
+          </caption>
+        </mediaobject>
+      </figure>
+    </section>
+    
+    <section>
+      <title>Interface and include resolver sub-chain</title>
+      <para>Interfaces and include files referenced in an IDL file are resolved using
+        two dedicated sub-chain. The interface reference resolver sub-chain is responsible to find 
+        interface definitions that are referenced in an IDL (when an interface definition extends another one for instance). 
+        The include resolver sub-chain is responsible to find and load included <filename>.idt</filename> files. When an IDL
+        file includes a <filename>.h</filename> file, the include resolver sub-chain creates and returns a new AST node that implements the 
+        <codelink class="&mindPkg;.idl.ast.Header" jdocurl="&mindJdoc;" codeurl="&mindCode;"/> interface.</para>
+    </section>
+  </section>
+</chapter>

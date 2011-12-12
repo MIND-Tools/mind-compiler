@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2009 STMicroelectronics
+ * Copyright (C) 2009-2011 STMicroelectronics
  *
  * This file is part of "Mind Compiler" is free software: you can redistribute 
  * it and/or modify it under the terms of the GNU Lesser General Public License 
@@ -22,9 +22,7 @@
 
 package org.ow2.mind.idl.ast;
 
-import org.objectweb.fractal.adl.Node;
-
-public interface TypeQualifier extends Node {
+public interface TypeQualifier extends TypeContainer {
 
   String TRUE = "true";
 

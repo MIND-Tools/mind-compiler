@@ -22,7 +22,7 @@
 
 package org.ow2.mind.idl.ast;
 
-public interface Parameter extends TypeContainer, TypeQualifier {
+public interface Parameter extends TypeQualifier {
 
   String TRUE = "true";
 

@@ -4,32 +4,116 @@
 %myents;
 ]>
 <chapter id="comfe">
-  <title>
-    Common Frontend
-    </title>
+  <title>Common Frontend</title>
+
+  <para>The common frontend module provides services common to both ADL and IDL frontends.
+    This section gives an overview of these services.</para>
+
+  <section id="comfe-values">
+    <title>Generic values support</title>
+
+    <para>The common-frontend defines AST interfaces and helper classes to manage representation of 
+      literal and complex values. This generic value support is used in ADL language for the value 
+      of definition parameters and attributes. It is used also in ADL and IDL language for the value
+      of annotation parameters.</para>
+    <para>The following schema details the AST interfaces of the generic value support:</para>
+    <figure id="comfe-valuesast-fig">
+      <title>AST structure for value support</title>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="images/ASTValue.svg"  scale="30" align="center"/>
+        </imageobject>
+      </mediaobject>
+    </figure>
+    <para>The common-frontend provides a support for the evaluation of values AST node using the 
+      <codelink class="&mindPkg;.value.ValueEvaluator" jdocurl="&mindJdoc;" codeurl="&mindCode;"/> interface.</para>
+  </section>
 
   <section id="comfe-anno">
     <title>Generic annotation support</title>
 
+    <para>The common-frontend defines AST interfaces and helper classes to manage annotations
+      in both ADL and IDL.</para>
+    <para>The following schema details the AST interfaces of the annotation support:</para>
+    <figure id="comfe-annoast-fig">
+      <title>AST structure for annotation support</title>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="images/ASTAnnotation.svg"  scale="30" align="center"/>
+        </imageobject>
+        <caption>
+          <blockquote>
+            <para>(1) See <xref linkend="comfe-valuesast-fig"/>.</para>
+          </blockquote>
+        </caption>
+      </mediaobject>
+    </figure>
+    <para>An annotation AST node has a type and contains a set of arguments. These 
+      arguments have one value which can be itself an annotation node or any value
+      supported by the generic value support (see <xref linkend="comfe-values"/>)</para>
+    <para>The generic annotation support provides various services to integrate annotations
+      in ADL and IDL frontends.</para> 
+    <para>The <codelink class="&mindPkg;.annotation.AnnotationChecker" jdocurl="&mindJdoc;" codeurl="&mindCode;"/>
+      service is used to check annotation AST and transform it into an 
+      <codelink class="&mindPkg;.annotation.Annotation" jdocurl="&mindJdoc;" codeurl="&mindCode;"/> object that is 
+      attached as decoration to the AST node that contains the annotation AST.</para>
+    <para>The <codelink class="&mindPkg;.annotation.AnnotationLocator" jdocurl="&mindJdoc;" codeurl="&mindCode;"/>
+      service is used to locate the Java class of an 
+      <codelink class="&mindPkg;.annotation.Annotation" jdocurl="&mindJdoc;" codeurl="&mindCode;"/> object for a given
+      annotation type. This service uses an extension points to allows plugins to contribute new locations where 
+      annotation classes can be searched (see TODO for more details concerning plugins that defines new annotations).</para>
+  </section>
+  
+  <section>
+    <title>StringTemplate support for code generation</title>
     <para>TODO</para>
   </section>
 
   <section id="comfe-srv">
     <title>Common Frontend services</title>
+    
+    <section id="comfs-srv-error">
+      <title>Error reporting</title>
+      <para>Error reporting is an important part of the implementation of a compiler. The common-frontend
+        provides a generic support to report errors and warnings. This support reused the error framework 
+        provided by <application>FractalADL</application>: an error (or a warning) is represented by:</para>
 
-    <para>TODO</para>
+      <itemizedlist>
+        <listitem><para>an <codelink class="&fadlPkg;.error.ErrorTemplate" jdocurl="&fadlJdoc;"/>
+          that represents a type of error that can be detected by the compiler. An error template is identified
+          by a <varname>groupId</varname> and an <varname>errorId</varname> and has a printf-like string format
+          to generate a string representation of the error.</para></listitem>
+        <listitem><para>an <codelink class="&fadlPkg;.error.ErrorLocator" jdocurl="&fadlJdoc;"/> 
+          that represents the location where the error has been detected.</para></listitem>
+        <listitem><para>a list of arguments for the formated message contained by the <classname>ErrorTemplate</classname>.</para></listitem>
+      </itemizedlist>
+      
+      <para>The <codelink class="&mindPkg;.error.ErrorManager" jdocurl="&mindJdoc;" codeurl="&mindCode;"/>
+        service allows frontend components to log errors, fatal errors and warnings. When an error or a warning is
+        logged to the <classname>ErrorManager</classname>, the normal execution of the frontend continue, while 
+        logging a fatal error will cause an exception to be thrown. So fatal errors should be used only if 
+        an error cannot be recovered and the execution of the compiler must be stopped.</para>
+      <para>Since logging an non-fatal error does not throw an exception, the frontends components
+        must take care that the AST may not be semantically correct.</para>
+    </section>
 
     <section id="comfe-srv-inputrsc">
       <title>Input resources</title>
   
-      <para>TODO</para>
-    </section>
+      <para>A compiler transforms input files in an intermediate representation which is then
+        transforms into output files. So it is important to track what are the input files that
+        participate in a given part of the intermediate representation. This allows to implement
+        some optimizations to avoid the re-generation of output files if corresponding input files are up-to-dates.</para>
 
-    <section id="comfe-srv-helper">
-      <title>Name and Path helpers</title>
-  
-      <para>TODO</para>
+      <para>The common-frontend provides a notion of <codelink class="&mindPkg;.InputResource" jdocurl="&mindJdoc;" codeurl="&mindCode;"/>
+        that is used to identify an input file. An <classname>InputResource</classname> has a <varname>kind</varname> 
+        (typically <literal>"adl"</literal>, <literal>"idl"</literal>, etc.), a name (the fully-qualified name of an ADL, 
+        the path to an implementation file, etc.).</para>
+      <para>The <codelink class="&mindPkg;.InputResourceLocator" jdocurl="&mindJdoc;" codeurl="&mindCode;"/>
+        service can be used to locate resources (i.e. URL) corresponding to a given <classname>InputResource</classname>
+        and to check is a file is up-to-date regarding a set of <classname>InputResource</classname>. 
+        ADL and IDL Frontends provides services that extends <classname>InputResourceLocator</classname> to manage
+        input resources of a given kind (<codelink class="&mindPkg;.adl.ADLLocator" jdocurl="&mindJdoc;" codeurl="&mindCode;"/> for instance).</para>
     </section>
-
   </section>
 </chapter>

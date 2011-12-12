@@ -22,11 +22,7 @@
 
 package org.ow2.mind.idl.ast;
 
-public interface Member
-    extends
-      TypeContainer,
-      ConstantExpressionContainer,
-      TypeQualifier {
+public interface Member extends TypeQualifier, ConstantExpressionContainer {
 
   String getName();
 

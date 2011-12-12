@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN" "http://www.w3.org/TR/2001/PR-SVG-20010719/DTD/svg10.dtd">
+<svg width="40cm" height="19cm" viewBox="-22351 -26071 792 362" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <g>
+    <rect style="fill: #ffffff" x="-22020" y="-26000" width="360" height="60"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="-22020" y="-26000" width="360" height="60"/>
+  </g>
+  <text style="fill: #000000;text-anchor:middle;font-size:18.0619;font-family:sanserif;font-style:normal;font-weight:normal" x="-21840" y="-25963.8">
+    <tspan x="-21840" y="-25963.8">Loader Chain</tspan>
+  </text>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="-22160" y1="-25980" x2="-22129.7" y2="-25980"/>
+    <polygon style="fill: #000000" points="-22122.2,-25980 -22132.2,-25975 -22129.7,-25980 -22132.2,-25985 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="-22122.2,-25980 -22132.2,-25975 -22129.7,-25980 -22132.2,-25985 "/>
+  </g>
+  <text style="fill: #000000;text-anchor:end;font-size:16.9331;font-family:sanserif;font-style:normal;font-weight:normal" x="-22140" y="-25980">
+    <tspan x="-22140" y="-25980">ADL frontend entry-point</tspan>
+  </text>
+  <g>
+    <rect style="fill: #ffffff" x="-21844" y="-25908" width="96" height="180"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="-21844" y="-25908" width="96" height="180"/>
+  </g>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="-21780" y1="-25940" x2="-21780" y2="-25917.7"/>
+    <polygon style="fill: #000000" points="-21780,-25910.2 -21785,-25920.2 -21780,-25917.7 -21775,-25920.2 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="-21780,-25910.2 -21785,-25920.2 -21780,-25917.7 -21775,-25920.2 "/>
+  </g>
+  <text style="fill: #000000;text-anchor:middle;font-size:18.0619;font-family:sanserif;font-style:normal;font-weight:normal" x="-21796" y="-25845.6">
+    <tspan x="-21796" y="-25845.6">Definition</tspan>
+    <tspan x="-21796" y="-25823">Reference</tspan>
+    <tspan x="-21796" y="-25800.5">Resolver</tspan>
+    <tspan x="-21796" y="-25777.9">sub-chain</tspan>
+  </text>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="-21796,-25728 -21796,-25710 -22140,-25710 -22140,-25960 -22129.7,-25960 "/>
+    <polygon style="fill: #000000" points="-22122.2,-25960 -22132.2,-25955 -22129.7,-25960 -22132.2,-25965 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="-22122.2,-25960 -22132.2,-25955 -22129.7,-25960 -22132.2,-25965 "/>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="-21640" y="-26000" width="80" height="60"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="-21640" y="-26000" width="80" height="60"/>
+  </g>
+  <text style="fill: #000000;text-anchor:middle;font-size:18.0619;font-family:sanserif;font-style:normal;font-weight:normal" x="-21600" y="-25975.3">
+    <tspan x="-21600" y="-25975.3">ADL</tspan>
+    <tspan x="-21600" y="-25952.7">Parser</tspan>
+  </text>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="-21659" y1="-25970" x2="-21649.7" y2="-25970"/>
+    <polygon style="fill: #000000" points="-21642.2,-25970 -21652.2,-25965 -21649.7,-25970 -21652.2,-25975 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="-21642.2,-25970 -21652.2,-25965 -21649.7,-25970 -21652.2,-25975 "/>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="-22120" y="-26000" width="80" height="60"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="-22120" y="-26000" width="80" height="60"/>
+  </g>
+  <text style="fill: #000000;text-anchor:middle;font-size:18.0619;font-family:sanserif;font-style:normal;font-weight:normal" x="-22080" y="-25975">
+    <tspan x="-22080" y="-25975">ADL</tspan>
+    <tspan x="-22080" y="-25952.5">cache</tspan>
+  </text>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="-22040" y1="-25970" x2="-22029.7" y2="-25970"/>
+    <polygon style="fill: #000000" points="-22022.2,-25970 -22032.2,-25965 -22029.7,-25970 -22032.2,-25975 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="-22022.2,-25970 -22032.2,-25965 -22029.7,-25970 -22032.2,-25975 "/>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="-22016" y="-25856" width="150" height="76"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="-22016" y="-25856" width="150" height="76"/>
+  </g>
+  <text style="fill: #000000;text-anchor:middle;font-size:18.0619;font-family:sanserif;font-style:normal;font-weight:normal" x="-21941" y="-25834.3">
+    <tspan x="-21941" y="-25834.3">Template</tspan>
+    <tspan x="-21941" y="-25811.8">Instantiation</tspan>
+    <tspan x="-21941" y="-25789.2">sub-chain</tspan>
+  </text>
+  <g>
+    <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="-21844" y1="-25818" x2="-21856.3" y2="-25818"/>
+    <polygon style="fill: #000000" points="-21863.8,-25818 -21853.8,-25823 -21856.3,-25818 -21853.8,-25813 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="-21863.8,-25818 -21853.8,-25823 -21856.3,-25818 -21853.8,-25813 "/>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="-22016,-25818 -22028,-25818 -22028,-25930 -21812,-25930 -21812,-25917.7 "/>
+    <polygon style="fill: #000000" points="-21812,-25910.2 -21817,-25920.2 -21812,-25917.7 -21807,-25920.2 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="-21812,-25910.2 -21817,-25920.2 -21812,-25917.7 -21807,-25920.2 "/>
+  </g>
+  <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="-22120" y1="-26000" x2="-22120" y2="-25940"/>
+  <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="-22020" y1="-25940" x2="-21660" y2="-25940"/>
+  <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="-21844" y1="-25908" x2="-21748" y2="-25908"/>
+  <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="-22020" y1="-26000" x2="-21660" y2="-26000"/>
+  <g>
+    <rect style="fill: #ffffff" x="-21770" y="-26070" width="210" height="60"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="-21770" y="-26070" width="210" height="60"/>
+  </g>
+  <text style="fill: #000000;text-anchor:middle;font-size:18.0619;font-family:sanserif;font-style:normal;font-weight:normal" x="-21665" y="-26045">
+    <tspan x="-21665" y="-26045">AnonymousDefinition </tspan>
+    <tspan x="-21665" y="-26022.5">extraction sub-chain</tspan>
+  </text>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="-21814.3,-26000 -21814.3,-26040 -21779.7,-26040 "/>
+    <polygon style="fill: #000000" points="-21772.2,-26040 -21782.2,-26035 -21779.7,-26040 -21782.2,-26045 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="-21772.2,-26040 -21782.2,-26035 -21779.7,-26040 -21782.2,-26045 "/>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="-21720" y="-25908" width="100" height="160"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="-21720" y="-25908" width="100" height="160"/>
+  </g>
+  <text style="fill: #000000;text-anchor:middle;font-size:18.0619;font-family:sanserif;font-style:normal;font-weight:normal" x="-21670" y="-25833">
+    <tspan x="-21670" y="-25833">IDL</tspan>
+    <tspan x="-21670" y="-25810.5">Frontend</tspan>
+  </text>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="-21720,-25940 -21720,-25924.5 -21670,-25924.5 -21670,-25918.7 "/>
+    <polygon style="fill: #000000" points="-21670,-25911.2 -21675,-25921.2 -21670,-25918.7 -21665,-25921.2 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="-21670,-25911.2 -21675,-25921.2 -21670,-25918.7 -21665,-25921.2 "/>
+  </g>
+</svg>

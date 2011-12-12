@@ -22,7 +22,7 @@
 
 package org.ow2.mind.idl.ast;
 
-public interface TypeDefinition extends Type, TypeContainer, TypeQualifier {
+public interface TypeDefinition extends Type, TypeQualifier {
 
   String getName();
 

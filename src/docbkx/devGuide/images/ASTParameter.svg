@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN" "http://www.w3.org/TR/2001/PR-SVG-20010719/DTD/svg10.dtd">
+<svg width="25cm" height="23cm" viewBox="99 -1 497 445" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <g>
+    <rect style="fill: #ffffff" x="100" y="122" width="189.85" height="28"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="100" y="122" width="189.85" height="28"/>
+    <text style="fill: #000000;text-anchor:middle;font-size:16;font-family:sanserif;font-style:italic;font-weight:700" x="194.925" y="141">ArgumentContainer</text>
+    <rect style="fill: #ffffff" x="100" y="150" width="189.85" height="8"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="100" y="150" width="189.85" height="8"/>
+    <rect style="fill: #ffffff" x="100" y="158" width="189.85" height="8"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="100" y="158" width="189.85" height="8"/>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="144.3" y="220" width="101.25" height="28"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="144.3" y="220" width="101.25" height="28"/>
+    <text style="fill: #000000;text-anchor:middle;font-size:16;font-family:sanserif;font-style:italic;font-weight:700" x="194.925" y="239">Argument</text>
+    <rect style="fill: #ffffff" x="144.3" y="248" width="101.25" height="20"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="144.3" y="248" width="101.25" height="20"/>
+    <text style="fill: #000000;text-anchor:start;font-size:12.8;font-family:monospace;font-style:normal;font-weight:normal" x="147.3" y="262">+name</text>
+    <rect style="fill: #ffffff" x="144.3" y="268" width="101.25" height="8"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="144.3" y="268" width="101.25" height="8"/>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="180" y="400" width="204.8" height="42"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="180" y="400" width="204.8" height="42"/>
+    <text style="fill: #000000;text-anchor:middle;font-size:16;font-family:sanserif;font-style:italic;font-weight:700" x="282.4" y="419">SingleValueContainer</text>
+    <text style="fill: #000000;text-anchor:middle;font-size:11.2;font-family:sanserif;font-style:italic;font-weight:normal" x="282.4" y="434.5">(2)</text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="145.875" y="341.423" width="98.1" height="28"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #000000" x="145.875" y="341.423" width="98.1" height="28"/>
+    <text style="fill: #000000;text-anchor:middle;font-size:16;font-family:sanserif;font-style:normal;font-weight:700" x="194.925" y="360.423">argument</text>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke-dasharray: 8; stroke: #000000" points="194.925,294.236 194.925,341.423 194.925,341.423 "/>
+    <polygon style="fill: #ffffff" points="202.925,294.236 194.925,278.236 186.925,294.236 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="202.925,294.236 194.925,278.236 186.925,294.236 "/>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="194.925,192.177 194.925,218.993 194.925,218.993 "/>
+    <polygon style="fill: #ffffff" points="194.925,167.006 199.725,181.006 194.925,195.006 190.125,181.006 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="194.925,167.006 199.725,181.006 194.925,195.006 190.125,181.006 "/>
+    <text style="fill: #000000;text-anchor:start;font-size:12.7998;font-family:monospace;font-style:normal;font-weight:normal" x="196.925" y="192.999"></text>
+    <text style="fill: #000000;text-anchor:start;font-size:12.7998;font-family:monospace;font-style:normal;font-weight:normal" x="205.925" y="179.006">1</text>
+    <text style="fill: #000000;text-anchor:start;font-size:12.7998;font-family:monospace;font-style:normal;font-weight:normal" x="198.925" y="214.993">0..*</text>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="282.4,380.759 282.4,234 245.55,234 "/>
+    <polygon style="fill: #ffffff" points="274.4,380.759 282.4,396.759 290.4,380.759 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="274.4,380.759 282.4,396.759 290.4,380.759 "/>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="340" y="120" width="254.5" height="28"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="340" y="120" width="254.5" height="28"/>
+    <text style="fill: #000000;text-anchor:middle;font-size:16;font-family:sanserif;font-style:italic;font-weight:700" x="467.25" y="139">FormalParameterContainer</text>
+    <rect style="fill: #ffffff" x="340" y="148" width="254.5" height="8"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="340" y="148" width="254.5" height="8"/>
+    <rect style="fill: #ffffff" x="340" y="156" width="254.5" height="8"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="340" y="156" width="254.5" height="8"/>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="384.125" y="218" width="166.25" height="28"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="384.125" y="218" width="166.25" height="28"/>
+    <text style="fill: #000000;text-anchor:middle;font-size:16;font-family:sanserif;font-style:italic;font-weight:700" x="467.25" y="237">FormalParameter</text>
+    <rect style="fill: #ffffff" x="384.125" y="246" width="166.25" height="20"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="384.125" y="246" width="166.25" height="20"/>
+    <text style="fill: #000000;text-anchor:start;font-size:12.8;font-family:monospace;font-style:normal;font-weight:normal" x="387.125" y="260">+name</text>
+    <rect style="fill: #ffffff" x="384.125" y="266" width="166.25" height="8"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="384.125" y="266" width="166.25" height="8"/>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="385.5" y="339.423" width="163.5" height="28"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #000000" x="385.5" y="339.423" width="163.5" height="28"/>
+    <text style="fill: #000000;text-anchor:middle;font-size:16;font-family:sanserif;font-style:normal;font-weight:700" x="467.25" y="358.423">formalParameter</text>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke-dasharray: 8; stroke: #000000" points="467.25,292.236 467.25,339.423 467.25,339.423 "/>
+    <polygon style="fill: #ffffff" points="475.25,292.236 467.25,276.236 459.25,292.236 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="475.25,292.236 467.25,276.236 459.25,292.236 "/>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="467.25,190.177 467.25,216.993 467.25,216.993 "/>
+    <polygon style="fill: #ffffff" points="467.25,165.006 472.05,179.006 467.25,193.006 462.45,179.006 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="467.25,165.006 472.05,179.006 467.25,193.006 462.45,179.006 "/>
+    <text style="fill: #000000;text-anchor:start;font-size:12.7998;font-family:monospace;font-style:normal;font-weight:normal" x="469.25" y="190.999"></text>
+    <text style="fill: #000000;text-anchor:start;font-size:12.7998;font-family:monospace;font-style:normal;font-weight:normal" x="478.25" y="177.006">1</text>
+    <text style="fill: #000000;text-anchor:start;font-size:12.7998;font-family:monospace;font-style:normal;font-weight:normal" x="471.25" y="212.993">0..*</text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="500" y="0" width="91.45" height="42"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #000000" x="500" y="0" width="91.45" height="42"/>
+    <text style="fill: #000000;text-anchor:middle;font-size:16;font-family:sanserif;font-style:normal;font-weight:700" x="545.725" y="19">primitive</text>
+    <text style="fill: #000000;text-anchor:middle;font-size:11.2;font-family:sanserif;font-style:italic;font-weight:normal" x="545.725" y="34.5">(1)</text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="340" y="0" width="103.1" height="42"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #000000" x="340" y="0" width="103.1" height="42"/>
+    <text style="fill: #000000;text-anchor:middle;font-size:16;font-family:sanserif;font-style:normal;font-weight:700" x="391.55" y="19">composite</text>
+    <text style="fill: #000000;text-anchor:middle;font-size:11.2;font-family:sanserif;font-style:italic;font-weight:normal" x="391.55" y="34.5">(1)</text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="100.6" y="0" width="188.65" height="42"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 4; stroke: #000000" x="100.6" y="0" width="188.65" height="42"/>
+    <text style="fill: #000000;text-anchor:middle;font-size:16;font-family:sanserif;font-style:normal;font-weight:700" x="194.925" y="19">definitionReference</text>
+    <text style="fill: #000000;text-anchor:middle;font-size:11.2;font-family:sanserif;font-style:italic;font-weight:normal" x="194.925" y="34.5">(1)</text>
+  </g>
+  <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="500" y1="0" x2="591.45" y2="0"/>
+  <line style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x1="340" y1="120" x2="594.5" y2="120"/>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke-dasharray: 8; stroke: #000000" points="424.833,101.764 424.833,81 391.55,81 391.55,42 "/>
+    <polygon style="fill: #ffffff" points="416.833,101.764 424.833,117.764 432.833,101.764 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="416.833,101.764 424.833,117.764 432.833,101.764 "/>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke-dasharray: 8; stroke: #000000" points="509.667,101.764 509.667,81 545.725,81 545.725,42 "/>
+    <polygon style="fill: #ffffff" points="501.667,101.764 509.667,117.764 517.667,101.764 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="501.667,101.764 509.667,117.764 517.667,101.764 "/>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke-dasharray: 8; stroke: #000000" points="194.925,103.764 194.925,43.0054 194.925,43.0054 "/>
+    <polygon style="fill: #ffffff" points="186.925,103.764 194.925,119.764 202.925,103.764 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="186.925,103.764 194.925,119.764 202.925,103.764 "/>
+  </g>
+</svg>

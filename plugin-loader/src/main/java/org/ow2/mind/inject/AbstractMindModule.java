@@ -51,7 +51,7 @@ import com.google.inject.util.Providers;
  * contains a field that is injected to the reference of the next object in the
  * chain. This field must be annotated with the {@link InjectDelegate}
  * annotation.<br>
- * This class provide an extension to the <em>Google Guide Binding EDSL</em> to
+ * This class provides an extension to the <em>Google Guide Binding EDSL</em> to
  * define such delegation chain. For example :
  * 
  * <pre>

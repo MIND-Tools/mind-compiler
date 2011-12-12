@@ -5,57 +5,53 @@
 %myents;
 ]>
 <chapter id="intro">
-    <title>
-        Introduction
-    </title>
-    <para>The &productName;
-        tool-chain is based on the
-        <ulink url="&fractalADLDoc;">FractalADL</ulink>
-        framework. So the &productName;
-        tool-chain is itself a component-based application written in
-        <emphasis>Java</emphasis>
-        .
-    </para>
-    <para>
-        The &productName;
-        tool-chain is composed of several modules :
-        <itemizedlist>
-            <listitem>
-                <para><application>ADL and IDL parsers</application> defines the grammars of the two
-                    languages.
-                </para>
-            </listitem>
-            <listitem>
-                <para><application>ADL and IDL frontends</application> contains components for the
-                    verification and the enhancement of ADL and IDL files.
-                </para>
-            </listitem>
-            <listitem>
-                <para><application>ADL and IDL backends</application> contains components for the
-                    generation
-                    and the compilation of C sourceCode.
-                </para>
-            </listitem>
-            <listitem>
-                <para><application>Common frontend and backend</application> contains components shared by
-                    ADL and IDL frontend and backend modules.</para>
-            </listitem>
-            <listitem>
-                <para><application>cpl-preproc</application> : the specialized C preprocessor.</para>
-            </listitem>
-            <listitem>
-                <para><application>fractal-runtime</application> : the source code of the minimal runtime
-                    required by fractal components.</para>
-            </listitem>
-            <listitem>
-                <para>
-                    <application>mindc</application> : The integration module that contains the main class
-                    of the
-                    <command>mindc</command>
-                    command.
-                </para>
-            </listitem>
-        </itemizedlist>
-    </para>
+  <title>
+      Introduction
+  </title>
+  <para>The &productName; tool-chain is based on the <ulink url="&fractalADLDoc;">FractalADL</ulink>
+      framework. So the &productName; tool-chain is itself a component-based application written in
+      <emphasis>Java</emphasis>.
+  </para>
+  <para>
+    The &productName;
+    tool-chain is composed of several modules :
+    <itemizedlist>
+      <listitem>
+        <para><application>ADL and IDL parsers</application> defines the grammars of the two
+          languages.
+        </para>
+      </listitem>
+      <listitem>
+        <para><application>ADL and IDL frontends</application> contains components for the
+          verification and the enhancement of ADL and IDL files.
+        </para>
+      </listitem>
+      <listitem>
+        <para><application>ADL and IDL backends</application> contains components for the
+          generation and the compilation of C sourceCode.
+        </para>
+      </listitem>
+      <listitem>
+        <para><application>Common frontend and backend</application> contains components shared by
+          ADL and IDL frontend and backend modules.</para>
+      </listitem>
+      <listitem>
+        <para><application>cpl-preproc</application> : the specialized C preprocessor.</para>
+      </listitem>
+      <listitem>
+        <para><application>fractal-runtime</application> : the source code of the minimal runtime
+          required by fractal components.</para>
+      </listitem>
+      <listitem>
+        <para>
+          <application>mindc</application> : The integration module that contains the main class
+          of the <command>mindc</command> command.
+        </para>
+      </listitem>
+      <listitem>
+        <para><application>plugin</application> module contains the core plugin system.</para>
+      </listitem>
+    </itemizedlist>
+  </para>
 
 </chapter>

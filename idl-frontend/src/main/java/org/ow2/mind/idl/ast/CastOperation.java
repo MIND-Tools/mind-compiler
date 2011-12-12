@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2010 STMicroelectronics
+ * Copyright (C) 2010-2011 STMicroelectronics
  *
  * This file is part of "Mind Compiler" is free software: you can redistribute 
  * it and/or modify it under the terms of the GNU Lesser General Public License 
@@ -22,9 +22,9 @@
 
 package org.ow2.mind.idl.ast;
 
-public interface CastOperation extends ConstantExpression, TypeContainer {
-
-  void setConstantExpression(ConstantExpression node);
-
-  ConstantExpression getConstantExpression();
+public interface CastOperation
+    extends
+      ConstantExpression,
+      TypeContainer,
+      ConstantExpressionContainer {
 }
