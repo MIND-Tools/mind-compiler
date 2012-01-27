@@ -77,8 +77,8 @@ public class TestBinding {
           protected void configureTest() {
             bind(Loader.class).toChainStartingWith(ErrorLoader.class)
                 .followedBy(CacheLoader.class)
-                .followedBy(UnboundInterfaceCheckerLoader.class)
                 .followedBy(BindingCheckerLoader.class)
+                .followedBy(UnboundInterfaceCheckerLoader.class)
                 .followedBy(BindingNormalizerLoader.class)
                 .followedBy(CompositeInternalInterfaceLoader.class)
                 .followedBy(ExtendsLoader.class)

@@ -144,21 +144,25 @@ public class BindingCheckerLoader extends AbstractDelegatingLoader {
       if (from == null || to == null) continue;
 
       if (THIS_COMPONENT.equals(binding.getFromComponent())) {
-        bindingCheckerItf.checkFromCompositeToSubcomponentBinding(from, to,
-            binding, binding);
+        final boolean isValid = bindingCheckerItf
+            .checkFromCompositeToSubcomponentBinding(from, to, binding, binding);
+        if (!isValid) container.removeBinding(binding);
         if (controllerItfs.contains(from)) {
           // From itf is a controller interface
           ASTHelper.setFromCompositeControllerDecoration(binding, true);
         }
       } else if (THIS_COMPONENT.equals(binding.getToComponent())) {
-        bindingCheckerItf.checkFromSubcomponentToCompositeBinding(from, to,
-            binding, binding);
+        final boolean isValid = bindingCheckerItf
+            .checkFromSubcomponentToCompositeBinding(from, to, binding, binding);
+        if (!isValid) container.removeBinding(binding);
         if (controllerItfs.contains(to)) {
           // To itf is a controller interface
           ASTHelper.setToCompositeControllerDecoration(binding, true);
         }
       } else {
-        bindingCheckerItf.checkBinding(from, to, binding, binding);
+        final boolean isValid = bindingCheckerItf.checkBinding(from, to,
+            binding, binding);
+        if (!isValid) container.removeBinding(binding);
       }
     }
   }

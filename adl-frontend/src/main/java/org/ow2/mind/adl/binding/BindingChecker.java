@@ -30,18 +30,18 @@ import org.ow2.mind.inject.InjectDelegate;
 
 public interface BindingChecker {
 
-  void checkFromCompositeToSubcomponentBinding(Interface compositeInterface,
+  boolean checkFromCompositeToSubcomponentBinding(Interface compositeInterface,
       Interface subComponentInterface, Binding binding, Node locator)
       throws ADLException;
 
-  void checkFromSubcomponentToCompositeBinding(Interface subComponentInterface,
-      Interface compositeInterface, Binding binding, Node locator)
-      throws ADLException;
-
-  void checkBinding(Interface fromInterface, Interface toInterface,
+  boolean checkFromSubcomponentToCompositeBinding(
+      Interface subComponentInterface, Interface compositeInterface,
       Binding binding, Node locator) throws ADLException;
 
-  void checkCompatibility(Interface from, Interface to, Node locator)
+  boolean checkBinding(Interface fromInterface, Interface toInterface,
+      Binding binding, Node locator) throws ADLException;
+
+  boolean checkCompatibility(Interface from, Interface to, Node locator)
       throws ADLException;
 
   /**
