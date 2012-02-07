@@ -382,17 +382,40 @@ ServerInterfaceStub(definition, interfaceDefinitions, itf) ::= <<
 
 ServerMethodStub(definition, itf, index, method) ::= <<
 <(idl2c.methodDef)(method=method,methodName=StubName(definition=definition, itfName=itf.name, index=index, methodName=method.name), withThisPtr="true")> { 
-#ifdef INTERFACE_METHOD_<itf.name>_<method.name>_OVERRIDDEN
-<if (! ((idl2c.isVoidMethod)(method=method)))>
-  return 
-<endif>
-<METHODName(itfName=itf.name, index=index, methodName={INTERFACE_METHOD_<itf.name>_<method.name>_OVERRIDDEN})>(<method.parameters:{<it.name>};separator=", ">);
+<if(method.vaArgs)>
+  va_list args;
+  <if (! ((idl2c.isVoidMethod)(method=method)))>
+  <(idl2c.varDef)(type=method.type, name="retval")>;
+  <endif>
+  va_start (args, <last(method.parameters).name>);
+#ifdef INTERFACE_METHOD_<itf.name>_<method.vaArgs.dualMethodName>_OVERRIDDEN
+  <if (! ((idl2c.isVoidMethod)(method=method)))>
+  retval =
+  <endif>
+  <METHODName(itfName=itf.name, index=index, methodName={INTERFACE_METHOD_<itf.name>_<method.vaArgs.dualMethodName>_OVERRIDDEN})>(<method.parameters:{<it.name>};separator=", ">, args);
 #else
-<if (! ((idl2c.isVoidMethod)(method=method)))>
-  return 
-<endif>
-<METHODName(itfName=itf.name, index=index, methodName=method.name)>(<method.parameters:{<it.name>};separator=", ">);
+  <if (! ((idl2c.isVoidMethod)(method=method)))>
+  retval =
+  <endif>
+  <METHODName(itfName=itf.name, index=index, methodName=method.vaArgs.dualMethodName)>(<method.parameters:{<it.name>};separator=", ">, args);
 #endif
+  va_end(args);
+  <if (! ((idl2c.isVoidMethod)(method=method)))>
+  return retval;
+  <endif>
+<else>
+#ifdef INTERFACE_METHOD_<itf.name>_<method.name>_OVERRIDDEN
+  <if (! ((idl2c.isVoidMethod)(method=method)))>
+    return 
+  <endif>
+  <METHODName(itfName=itf.name, index=index, methodName={INTERFACE_METHOD_<itf.name>_<method.name>_OVERRIDDEN})>(<method.parameters:{<it.name>};separator=", ">);
+#else
+  <if (! ((idl2c.isVoidMethod)(method=method)))>
+    return 
+  <endif>
+  <METHODName(itfName=itf.name, index=index, methodName=method.name)>(<method.parameters:{<it.name>};separator=", ">);
+#endif
+<endif>
 
 }
 >>
