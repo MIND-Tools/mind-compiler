@@ -39,7 +39,7 @@ MethodDelegator(itf, index, method) ::= <<
 <endif>
 
 <if (! ((idl2c.isVoidMethod)(method=method)))>
-return
+return 
 <endif>
 <if (method.parameters)>
 CALL_INTERFACE_PTR_WITH_PARAM(CONTEXT_PTR_ACCESS->__component_internal_data.<if (isServer.(itf.role))>inner_<endif>type.<itf.name><if (index)>[<index>]<endif>, <method.name>)
