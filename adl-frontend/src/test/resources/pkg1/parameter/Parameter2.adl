@@ -1,10 +1,12 @@
 
 import pkg1.pkg2.Type1;
 
-composite pkg1.parameter.Parameter2 extends Type1 {
+composite pkg1.parameter.Parameter2(a, b) extends Type1 {
 
-  contains Parameter1(10) as subComp1;
+  contains Parameter1(10, {3, 5}, "titi") as subComp1;
+  contains Parameter1(a, {3, b}, {14, 15}) as subComp2;
   
   binds this.sItf to subComp1.sItf;
   binds subComp1.cItf to this.cItf;
+  binds subComp2.cItf to this.cItf;
 }

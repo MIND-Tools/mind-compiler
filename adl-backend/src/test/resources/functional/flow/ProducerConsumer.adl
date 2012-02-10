@@ -1,0 +1,9 @@
+@Run
+composite flow.ProducerConsumer extends ApplicationType {
+
+  contains Producer as producer;
+  contains Consumer as consumer;
+  
+  binds producer.out to consumer.in;
+  binds this.main to producer.main;
+}

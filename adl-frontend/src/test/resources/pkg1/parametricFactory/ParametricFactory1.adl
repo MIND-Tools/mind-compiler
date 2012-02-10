@@ -3,5 +3,5 @@ import pkg1.parameter.Parameter1;
 
 composite pkg1.parametricFactory.ParametricFactory1 {
 
-  contains Factory<Parameter1(10)> as factory;
+  contains Factory<Parameter1(10, 11, 12)> as factory;
 }

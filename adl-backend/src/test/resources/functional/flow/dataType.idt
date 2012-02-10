@@ -1,0 +1,10 @@
+#ifndef _FLOW_DATATYPE_IDT
+#define _FLOW_DATATYPE_IDT
+
+typedef struct {
+  int a;
+  int b;
+} data_t[2];
+
+
+#endif

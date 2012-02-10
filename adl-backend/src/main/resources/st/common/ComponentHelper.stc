@@ -26,6 +26,35 @@ vTableInstanceName(definition, itf, index) ::= <<
 __component_<definition.name; format="toCName">_<itf.name><if (index)>_<index><endif>_VTable
 >>
 
+AttributeValue(value) ::= <<
+<(AttributeValueTemplateMap.(value.astDecorations.kind))(value)>
+>>
+
+AttributeValueTemplateMap ::= [
+  "string"    : "LiteralValue",
+  "number"    : "LiteralValue",
+  "reference" : "ReferenceValue",
+  "null"      : "NullValue",
+  "compound"  : "CompoundValue"
+]
+
+LiteralValue(value) ::= <<
+<value.value>
+>>
+
+ReferenceValue(value) ::= <<
+<value.ref;format="toCName">
+>>
+
+NullValue(value) ::= <<
+NULL
+>>
+
+CompoundValue(value) ::= <<
+{<value.compoundValueFields:{<if (it.name)>.<it.name>=<endif><AttributeValue(value=it.value)>}; separator=", ">}
+>>
+
+isCompoundValue ::= [ "compound" : "true" ]
 
 }$$
 

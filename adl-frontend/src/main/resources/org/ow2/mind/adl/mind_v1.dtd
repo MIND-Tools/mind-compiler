@@ -1,5 +1,5 @@
 <!--
-  Copyright (C) 2009 STMicroelectronics
+  Copyright (C) 2009-2011 STMicroelectronics
 
  This file is part of "Mind Compiler" is free software: you can redistribute 
  it and/or modify it under the terms of the GNU Lesser General Public License 
@@ -170,6 +170,14 @@
 <?add ast="array"     itf="org.ow2.mind.value.ast.Array" ?>
 <?map ast="array"     type="value" ?>
 
+<?add ast="path"      itf="org.ow2.mind.value.ast.PathLiteral" ?>
+<?map ast="path"      type="value" ?>
+
+<?add ast="compoundValue" itf="org.ow2.mind.value.ast.CompoundValue" ?>
+<?map ast="compoundValue" type="value" ?>
+
+<?add ast="compoundValueField" itf="org.ow2.mind.value.ast.CompoundValueField" ?>
+
 
 <!-- *********************************************************************** -->
 <!-- Node grammar                                                            -->
@@ -236,9 +244,10 @@
   numberOfElement CDATA #IMPLIED
 >
 
-<!ELEMENT attribute ( annotation* , ( string | integer | reference | null ) ) >
+<!ELEMENT attribute ( annotation* , ( string | integer | reference | null | compoundValue ) ) >
 <!ATTLIST attribute
   name CDATA #REQUIRED
+  idt CDATA #IMPLIED
   type CDATA #IMPLIED
 >
 
@@ -286,12 +295,12 @@
   type CDATA #REQUIRED
 >
 
-<!ELEMENT annotationArgument ( string | integer | array | annotationValue | null ) >
+<!ELEMENT annotationArgument ( string | integer | array | annotationValue | null | path | compoundValue ) >
 <!ATTLIST annotationArgument
   name CDATA #IMPLIED
 >
 
-<!ELEMENT array ( ( string | integer | array | annotationValue | null )* ) >
+<!ELEMENT array ( ( string | integer | array | annotationValue | null | path | compoundValue )* ) >
 <!ATTLIST array >
 
 <!ELEMENT string EMPTY >
@@ -312,4 +321,15 @@
   ref CDATA #REQUIRED
 >
 
+<!ELEMENT path EMPTY >
+<!ATTLIST path
+  value CDATA #REQUIRED
+>
 
+<!ELEMENT compoundValue ( compoundValueField* ) >
+<!ATTLIST compoundValue>
+
+<!ELEMENT compoundValueField ( string | integer | reference | null | compoundValue ) >
+<!ATTLIST compoundValueField
+  name CDATA #IMPLIED
+>

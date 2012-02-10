@@ -1,0 +1,17 @@
+primitive flow.Splitter {
+
+    attribute pedfTypes.h:generic ctl0 = {NULL, 0};
+    attribute int ctl1; 
+
+    /**
+     * A DSplitter can only have a single input port
+     */
+    input pedfTypes.h:generic as splitIn;
+    
+    /**
+     * Up to 8 outputs ports can be (optionally) connected
+     */
+    output pedfTypes.h:generic as splitOut[8];
+    
+    source snkMem.c;
+}

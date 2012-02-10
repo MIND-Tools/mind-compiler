@@ -132,12 +132,26 @@ public class TestParameterFactory {
         "pkg1.parametricFactory.ParametricFactory1", context);
     final ComponentChecker component = checker.assertDefinition(d)
         .containsComponent("factory");
-    component.isReferencing("Factory<pkg1.parameter.Parameter1>").that()
-        .containsArguments("InstantiatedDefinition$a").whereFirst().valueIs(10);
+    component
+        .isReferencing("Factory<pkg1.parameter.Parameter1>")
+        .that()
+        .containsArguments("InstantiatedDefinition$a",
+            "InstantiatedDefinition$b", "InstantiatedDefinition$c")
+
+        .whereFirst().valueIs(10)
+
+        .andNext().valueIs(11)
+
+        .andNext().valueIs(12);
 
     component.isAnInstanceOf("Factory<pkg1.parameter.Parameter1>").that()
-        .containsAttributes("a").whereFirst()
-        .valueReferences("InstantiatedDefinition$a");
+        .containsAttributes("a", "b", "c")
+
+        .whereFirst().valueReferences("InstantiatedDefinition$a")
+
+        .andNext().valueReferences("InstantiatedDefinition$b")
+
+        .andNext().valueReferences("InstantiatedDefinition$c");
   }
 
   @Test(groups = {"functional"})
@@ -152,13 +166,26 @@ public class TestParameterFactory {
             "pkg1.factory.GenericFactory1<pkg1.parameter.Parameter1>")
         .containsComponent("factory");
 
-    component.isReferencing("Factory<pkg1.parameter.Parameter1>").that()
-        .containsArguments("InstantiatedDefinition$a").whereFirst()
-        .valueReferences("T$a");
+    component
+        .isReferencing("Factory<pkg1.parameter.Parameter1>")
+        .that()
+        .containsArguments("InstantiatedDefinition$a",
+            "InstantiatedDefinition$b", "InstantiatedDefinition$c")
+
+        .whereFirst().valueReferences("T$a")
+
+        .andNext().valueReferences("T$b")
+
+        .andNext().valueReferences("T$c");
 
     component.isAnInstanceOf("Factory<pkg1.parameter.Parameter1>").that()
-        .containsAttributes("a").whereFirst()
-        .valueReferences("InstantiatedDefinition$a");
+        .containsAttributes("a", "b", "c")
+
+        .whereFirst().valueReferences("InstantiatedDefinition$a")
+
+        .andNext().valueReferences("InstantiatedDefinition$b")
+
+        .andNext().valueReferences("InstantiatedDefinition$c");
   }
 
 }

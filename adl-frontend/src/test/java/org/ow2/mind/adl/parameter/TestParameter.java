@@ -30,6 +30,8 @@ import org.objectweb.fractal.adl.Loader;
 import org.objectweb.fractal.adl.merger.NodeMerger;
 import org.ow2.mind.CommonFrontendModule;
 import org.ow2.mind.adl.ASTChecker;
+import org.ow2.mind.adl.ASTChecker.DefinitionChecker;
+import org.ow2.mind.adl.ASTChecker.ReferenceValue;
 import org.ow2.mind.adl.AbstractADLFrontendModule;
 import org.ow2.mind.adl.BasicDefinitionReferenceResolver;
 import org.ow2.mind.adl.CacheLoader;
@@ -39,8 +41,11 @@ import org.ow2.mind.adl.ErrorLoader;
 import org.ow2.mind.adl.ExtendsLoader;
 import org.ow2.mind.adl.STCFNodeMerger;
 import org.ow2.mind.adl.SubComponentResolverLoader;
+import org.ow2.mind.adl.attribute.AttributeCheckerLoader;
 import org.ow2.mind.adl.imports.ImportDefinitionReferenceResolver;
+import org.ow2.mind.adl.parameter.ast.ParameterASTHelper.ParameterType;
 import org.ow2.mind.adl.parser.ADLParser;
+import org.ow2.mind.idl.IDLFrontendModule;
 import org.ow2.mind.plugin.PluginLoaderModule;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -61,11 +66,14 @@ public class TestParameter {
   protected void setUp() throws Exception {
 
     final Injector injector = Guice.createInjector(new CommonFrontendModule(),
-        new PluginLoaderModule(), new AbstractADLFrontendModule() {
+        new PluginLoaderModule(), new IDLFrontendModule(),
+        new AbstractADLFrontendModule() {
 
           protected void configureTest() {
             bind(Loader.class).toChainStartingWith(ErrorLoader.class)
-                .followedBy(CacheLoader.class).followedBy(ExtendsLoader.class)
+                .followedBy(CacheLoader.class)
+                .followedBy(AttributeCheckerLoader.class)
+                .followedBy(ExtendsLoader.class)
                 .followedBy(SubComponentResolverLoader.class)
                 .endingWith(ADLParser.class);
 
@@ -102,10 +110,22 @@ public class TestParameter {
     final Definition content = loader
         .load("pkg1.parameter.Parameter1", context);
 
-    checker.assertDefinition(content).containsFormalParameters("a");
+    checker.assertDefinition(content).containsFormalParameters("a", "b", "c")
 
-    checker.assertDefinition(content).containsAttributes("attr1").whereFirst()
-        .valueReferences("a");
+    .whereFirst().hasType(ParameterType.INT)
+
+    .andNext().hasType(ParameterType.fromCType("./foo.h", "struct s"))
+
+    .andNext().hasNoType();
+
+    checker.assertDefinition(content)
+        .containsAttributes("attr1", "attr2", "attr3")
+
+        .whereFirst().valueIs(new ReferenceValue("a"))
+
+        .andNext().valueIs(new ReferenceValue("b"))
+
+        .andNext().valueIs(new Object[]{3, new ReferenceValue("c")});
   }
 
   @Test(groups = {"functional", "checkin"})
@@ -113,8 +133,28 @@ public class TestParameter {
     final Definition content = loader
         .load("pkg1.parameter.Parameter2", context);
 
-    checker.assertDefinition(content).containsComponent("subComp1")
-        .isAnInstanceOf("pkg1.parameter.Parameter1")
-        .containsAttributes("attr1").whereFirst().valueReferences("a");
+    final DefinitionChecker definitionChecker = checker
+        .assertDefinition(content);
+    definitionChecker.containsComponent("subComp1")
+        .isReferencing("pkg1.parameter.Parameter1")
+
+        .containsArguments("a", "b", "c")
+
+        .whereFirst().valueIs(10)
+
+        .andNext().valueIs(new Object[]{3, 5})
+
+        .andNext().valueIs("titi");
+
+    definitionChecker.containsComponent("subComp2")
+        .isReferencing("pkg1.parameter.Parameter1")
+
+        .containsArguments("a", "b", "c")
+
+        .whereFirst().valueIs(new ReferenceValue("a"))
+
+        .andNext().valueIs(new Object[]{3, new ReferenceValue("b")})
+
+        .andNext().valueIs(new Object[]{14, 15});
   }
 }

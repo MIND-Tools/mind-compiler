@@ -1,0 +1,35 @@
+@CompileDef
+primitive flow.Consumer {
+
+  input ./dataType.idt:data_t as in;
+  
+  data {{
+    struct {
+      int counter;
+    } PRIVATE;
+  }}
+  
+  source {{
+    #include "mindassert.h"
+      
+    CONSTRUCTOR() {
+      PRIVATE.counter = 0;
+    }
+        
+    void METH(in, push)(data_t data) {
+      if (PRIVATE.counter == 0) {
+        mindassert(data[0].a == 0);
+        mindassert(data[0].b == 1);
+        mindassert(data[1].a == 2);
+        mindassert(data[1].b == 3);
+      } else {
+        mindassert(PRIVATE.counter == 1);
+        mindassert(data[0].a == 0);
+        mindassert(data[0].b == 1);
+        mindassert(data[1].a == 4);
+        mindassert(data[1].b == 5);
+      }
+      PRIVATE.counter++;
+    }
+  }}
+}

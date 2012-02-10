@@ -85,4 +85,31 @@ public class TestGraph {
         /* c3/c1/c1/subComp1 */.containsAttributeValue("attr1", 20);
 
   }
+
+  @Test(groups = {"functional"})
+  public void test2() throws Exception {
+    final Definition d = loader.load("pkg1.parameter.Parameter3", context);
+
+    final ComponentGraph graph = instantiator.instantiate(d, context);
+    graphChecker
+        .assertGraph(graph)
+        .containsSubComponents("subComp1")
+        .whereFirst()
+        /* subComp1 */.containsSubComponents("subComp1", "subComp2")
+
+        .whereFirst()
+        /* subComp1/subComp1 */
+        /* subComp1/subComp1.attr1 */.containsAttributeValue("attr1", 10)
+        /* subComp1/subComp1.attr2 */.containsAttributeValue("attr2", "{3, 5}")
+        /* subComp1/subComp1.attr3 */.containsAttributeValue("attr3",
+            "{3, \"titi\"}")
+
+        .andNext()
+        /* subComp1/subComp2 */
+        /* subComp1/subComp2.attr1 */.containsAttributeValue("attr1", 1)
+        /* subComp1/subComp2.attr2 */.containsAttributeValue("attr2", "{3, 2}")
+        /* subComp1/subComp2.attr3 */.containsAttributeValue("attr3",
+            "{3, {14, 15}}");
+
+  }
 }

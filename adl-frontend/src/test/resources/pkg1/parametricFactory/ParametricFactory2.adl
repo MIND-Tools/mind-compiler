@@ -4,5 +4,5 @@ import pkg1.parameter.Parameter1;
 
 composite pkg1.parametricFactory.ParametricFactory2 {
 
-  contains GenericFactory1<Parameter1(10)> as subComp;
+  contains GenericFactory1<Parameter1(10, 11, 12)> as subComp;
 }

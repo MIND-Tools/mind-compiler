@@ -143,9 +143,11 @@ TOKEN : {
 	<DATA: "data"> |
 	<EXTENDS: "extends"> |
 	<IMPORT: "import"> |
+    <INPUT: "input"> |
 	<MANDATORY: "mandatory"> |
 	<NULL: "NULL" | "null"> |
 	<OPTIONAL: "optional"> |
+    <OUTPUT: "output"> |
 	<PRIMITIVE: "primitive"> |
 	<PROPERTY: "property"> |
 	<PROVIDES: "provides"> |
@@ -174,12 +176,34 @@ TOKEN : {
     <IDENTIFIER: <LETTER> (<LETTER> | <DIGIT>)*> |
     <#LETTER: ["A"-"Z","_","a"-"z"]> |
     <#DIGIT: ["0"-"9"]> |
-    <STRING_LITERAL: "\"" ( ~["\"","\\","\n","\r"] | "\\" ( ["n","t","b","r","f","\\","\'","\""] | ["0"-"7"] (["0"-"7"])?  | ["0"-"3"] ["0"-"7"] ["0"-"7"] | ( ["\n","\r"] | "\r\n")))* "\""> |
-    <CHARACTER_LITERAL: "\'"   (~["\'","\\","\n","\r"] | "\\" (["n","t","b","r","f","\\","\'","\""] | ["0"-"7"] (["0"-"7"])? | ["0"-"3"] ["0"-"7"] ["0"-"7"])) "\'"> |
-    <INTEGER_LITERAL: <DECIMAL_LITERAL> (["l","L"])? | <HEX_LITERAL> (["l","L"])? | <OCTAL_LITERAL> (["l","L"])?> |
+    <STRING_LITERAL: 
+      "\"" 
+      ( ~["\"","\\","\n","\r"] 
+        | "\\" ( ["n","t","b","r","f","\\","\'","\""] 
+                 | ["0"-"7"] (["0"-"7"])?  
+                 | ["0"-"3"] ["0"-"7"] ["0"-"7"] 
+                 | ( ["\n","\r"] | "\r\n"))
+      )* "\""> |
+    <CHARACTER_LITERAL: 
+      "\'"
+      ( ~["\'","\\","\n","\r"] 
+        | "\\" ( ["n","t","b","r","f","\\","\'","\""] 
+                 | ["0"-"7"] (["0"-"7"])? 
+                 | ["0"-"3"] ["0"-"7"] ["0"-"7"])
+      ) "\'"> |
+    <INTEGER_LITERAL: 
+      <DECIMAL_LITERAL> (["l","L"])? 
+      | <HEX_LITERAL> (["l","L"])? 
+      | <OCTAL_LITERAL> (["l","L"])?> |
     <#DECIMAL_LITERAL: (["1"-"9"] (["0"-"9"])*)> |
     <#HEX_LITERAL: "0" ["x","X"] (["0"-"9","a"-"f","A"-"F"])+> |
-    <#OCTAL_LITERAL: "0" (["0"-"7"])*>
+    <#OCTAL_LITERAL: "0" (["0"-"7"])*> |
+    <FLOATING_POINT_LITERAL: 
+      (["0"-"9"])+ "." (["0"-"9"])* (<EXPONENT>)? (["f","F","d","D"])? 
+      | "." (["0"-"9"])+ (<EXPONENT>)? (["f","F","d","D"])? 
+      | (["0"-"9"])+ <EXPONENT> (["f","F","d","D"])? 
+      | (["0"-"9"])+ (<EXPONENT>)? ["f","F","d","D"]> |
+    <#EXPONENT: ["e","E"] (["+","-"])? (["0"-"9"])+>
 }
 
 // Separators
@@ -194,6 +218,7 @@ TOKEN :
 | < LT: "<" >
 | < GT: ">" >
 | < SEMICOLON: ";" >
+| < DASH : ":" >
 | < COMMA: "," >
 | < DOT: "." >
 | < DOTDOT: ".." >
@@ -328,7 +353,7 @@ void ArgumentAssignement() : {}
 
 void Argument() : {}
 {
-  StringValue() | IntegerValue() | ReferenceValue() | NullValue()
+  AttributeValue()
 }
 
 void PrimitiveDefinitionBody() : {}
@@ -339,7 +364,7 @@ void PrimitiveDefinitionBody() : {}
 
 void PrimitiveDefinitionElement() : {}
 {
-  LOOKAHEAD( (Annotation())* (<PROVIDES>|<REQUIRES>) ) InterfaceDefinition()
+  LOOKAHEAD( (Annotation())* (<PROVIDES>|<REQUIRES>|<INPUT>|<OUTPUT>) ) InterfaceDefinition()
   | LOOKAHEAD( (Annotation())* <ATTRIBUTE> ) AttributeDefinition()
   | LOOKAHEAD( (Annotation())* <DATA> ) DataDefinition()
   | LOOKAHEAD( (Annotation())* <SOURCE> ) ImplementationDefinition()
@@ -409,7 +434,7 @@ void CompositeDefinitionBody() : {}
 
 void CompositeDefinitionElement() : {}
 {
-  LOOKAHEAD( (Annotation())* (<PROVIDES>|<REQUIRES>) ) InterfaceDefinition()
+  LOOKAHEAD( (Annotation())* (<PROVIDES>|<REQUIRES>|<INPUT>|<OUTPUT>) ) InterfaceDefinition()
   | LOOKAHEAD( (Annotation())* <BINDS> ) BindingDefinition()
   | SubComponentDefinition()
 }
@@ -421,18 +446,44 @@ void CompositeDefinitionElement() : {}
 void InterfaceDefinition() : {}
 {
   Annotations()
+  ( FunctionalInterfaceDefinition()
+    | FlowInterfaceDefinition() )
+}
+
+void FunctionalInterfaceDefinition() : {}
+{
   ( <PROVIDES> | <REQUIRES> ) [ <OPTIONAL> ]
   FullyQualifiedName() <AS>
   <IDENTIFIER> [ <LBRACKET> [ <INTEGER_LITERAL> ] <RBRACKET> ]
   [ <SEMICOLON> ]
 }
 
+void FlowInterfaceDefinition() : {}
+{
+  ( <INPUT> | <OUTPUT> ) [ <OPTIONAL> ]
+  FlowType() <AS>
+  <IDENTIFIER> [ <LBRACKET> [ <INTEGER_LITERAL> ] <RBRACKET> ]
+  [ <SEMICOLON> ]
+}
+
+void FlowType() : {}
+{
+  AttributeType()
+  | IDTType()
+}
+
+void IDTType() : {}
+{
+  Path() <DASH> [ < STRUCT > | < ENUM > | < UNION > ] <IDENTIFIER>
+}
+
+
 /******************************************************************************/
 
 void AttributeDefinition() : {}
 {
   Annotations()
-  <ATTRIBUTE> [ AttributeType() ] <IDENTIFIER> [ <ASSIGN> AttributeValue() ]
+  <ATTRIBUTE>  FlowType()  <IDENTIFIER> [ <ASSIGN> AttributeValue() ]
   [ <SEMICOLON> ]
 }
 
@@ -454,7 +505,26 @@ void AttributeType() : {}
 
 void AttributeValue() : {}
 {
-  StringValue() | IntegerValue() | ReferenceValue() | NullValue()
+  StringValue() 
+  | IntegerValue() 
+  | ReferenceValue() 
+  | NullValue()
+  | CompoundAttributeValue()
+}
+
+void CompoundAttributeValue() : {}
+{
+  <LBRACE> [ CompoundAttributeValueField() ( <COMMA> CompoundAttributeValueField() )* ] <RBRACE>
+}
+
+void CompoundAttributeValueField() : {}
+{
+  [ CompoundFieldName() ] AttributeValue()
+}
+
+void CompoundFieldName() : {}
+{
+  <DOT> <IDENTIFIER> <ASSIGN>
 }
 
 /******************************************************************************/
@@ -503,7 +573,7 @@ void SubComponentDefinition() : {}
 
 void SimpleSubComponentReference() : {}
 {
-  [ CompositeDefinitionReference() ] <AS> <IDENTIFIER> 
+  [ CompositeDefinitionReference() ] <AS> <IDENTIFIER> (<COMMA> <IDENTIFIER>)*
   
   [ LOOKAHEAD( (Annotation())* ( <PRIMITIVE> | <COMPOSITE> ))
     ( LOOKAHEAD( (Annotation())* <PRIMITIVE> ) PrimitiveAnonymousDefinition() 
@@ -560,7 +630,7 @@ void Annotation() : {}
 
 void AnnotationParameters() : {}
 {
-  <LPAREN> [ AnnotationValuePairs() | AnnotationValue() ] <RPAREN>
+  <LPAREN> [ LOOKAHEAD(2) AnnotationValuePairs() | AnnotationValue() ] <RPAREN>
 }
 
 void AnnotationValuePairs() : {}
@@ -581,6 +651,7 @@ void AnnotationValue() : {}
   | AnnotationAnnotationValue()
   | ArrayAnnotationValue()
   | NullValue()
+  | PathValue()
 }
 
 void AnnotationAnnotationValue() : {}
@@ -592,6 +663,10 @@ void ArrayAnnotationValue() : {}
 {
   <LBRACE> [ AnnotationValue()( <COMMA> AnnotationValue() ) * ] <RBRACE>
 }
+
+/*******************************************************************************
+  Value grammar
+ ******************************************************************************/
 
 void StringValue() : {}
 {
@@ -617,6 +692,11 @@ void NullValue() : {}
 {  <NULL>
 }
 
+void PathValue() : {}
+{
+  Path()
+}
+
 void FullyQualifiedName() : {}
 {
   <IDENTIFIER> ( <DOT> <IDENTIFIER> ) *
@@ -625,5 +705,5 @@ void FullyQualifiedName() : {}
 void Path() : {}
 {
   [ <SLASH> ] [ <DOT> <SLASH> ] ( <DOTDOT> <SLASH> )* 
-  <IDENTIFIER> ( <SLASH> <IDENTIFIER> )* <DOT> <IDENTIFIER>
+  <IDENTIFIER> ( <SLASH> <IDENTIFIER> )* [ <DOT> <IDENTIFIER> ]
 }

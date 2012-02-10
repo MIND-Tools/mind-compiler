@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2009 STMicroelectronics
+ * Copyright (C) 2011 STMicroelectronics
  *
  * This file is part of "Mind Compiler" is free software: you can redistribute 
  * it and/or modify it under the terms of the GNU Lesser General Public License 
@@ -20,21 +20,10 @@
  * Contributors: 
  */
 
-package org.ow2.mind.adl.ast;
+package org.ow2.mind.value.ast;;
 
-import org.ow2.mind.value.ast.SingleValueContainer;
+public interface PathLiteral extends Value {
+  String getValue();
 
-public interface Attribute extends SingleValueContainer {
-
-  String getName();
-
-  void setName(String name);
-
-  String getIdt();
-
-  void setIdt(String idt);
-
-  String getType();
-
-  void setType(String type);
+  void setValue(String value);
 }

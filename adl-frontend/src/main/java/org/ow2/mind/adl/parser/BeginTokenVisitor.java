@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2010 STMicroelectronics
+ * Copyright (C) 2010-2011 STMicroelectronics
  *
  * This file is part of "Mind Compiler" is free software: you can redistribute 
  * it and/or modify it under the terms of the GNU Lesser General Public License 
@@ -46,15 +46,22 @@ import org.ow2.mind.adl.jtb.syntaxtree.CompositeDefinition;
 import org.ow2.mind.adl.jtb.syntaxtree.CompositeDefinitionBody;
 import org.ow2.mind.adl.jtb.syntaxtree.CompositeDefinitionElement;
 import org.ow2.mind.adl.jtb.syntaxtree.CompositeDefinitionReference;
+import org.ow2.mind.adl.jtb.syntaxtree.CompoundAttributeValue;
+import org.ow2.mind.adl.jtb.syntaxtree.CompoundAttributeValueField;
+import org.ow2.mind.adl.jtb.syntaxtree.CompoundFieldName;
 import org.ow2.mind.adl.jtb.syntaxtree.DataDefinition;
 import org.ow2.mind.adl.jtb.syntaxtree.ExtendedCompositeDefinitions;
 import org.ow2.mind.adl.jtb.syntaxtree.ExtendedPrimitiveDefinitions;
 import org.ow2.mind.adl.jtb.syntaxtree.ExtendedTypeDefinitions;
+import org.ow2.mind.adl.jtb.syntaxtree.FlowInterfaceDefinition;
+import org.ow2.mind.adl.jtb.syntaxtree.FlowType;
 import org.ow2.mind.adl.jtb.syntaxtree.FormalParameterDeclaration;
 import org.ow2.mind.adl.jtb.syntaxtree.FormalParameterDeclarationList;
 import org.ow2.mind.adl.jtb.syntaxtree.FormalTypeParameterDeclaration;
 import org.ow2.mind.adl.jtb.syntaxtree.FormalTypeParameterDeclarationList;
 import org.ow2.mind.adl.jtb.syntaxtree.FullyQualifiedName;
+import org.ow2.mind.adl.jtb.syntaxtree.FunctionalInterfaceDefinition;
+import org.ow2.mind.adl.jtb.syntaxtree.IDTType;
 import org.ow2.mind.adl.jtb.syntaxtree.ImplementationDefinition;
 import org.ow2.mind.adl.jtb.syntaxtree.ImportDefinition;
 import org.ow2.mind.adl.jtb.syntaxtree.IntegerValue;
@@ -66,6 +73,7 @@ import org.ow2.mind.adl.jtb.syntaxtree.NodeSequence;
 import org.ow2.mind.adl.jtb.syntaxtree.NodeToken;
 import org.ow2.mind.adl.jtb.syntaxtree.NullValue;
 import org.ow2.mind.adl.jtb.syntaxtree.Path;
+import org.ow2.mind.adl.jtb.syntaxtree.PathValue;
 import org.ow2.mind.adl.jtb.syntaxtree.PrimitiveAnonymousDefinition;
 import org.ow2.mind.adl.jtb.syntaxtree.PrimitiveAnonymousExtension;
 import org.ow2.mind.adl.jtb.syntaxtree.PrimitiveDefinition;
@@ -308,6 +316,26 @@ public class BeginTokenVisitor extends GJNoArguDepthFirst<NodeToken> {
   }
 
   @Override
+  public NodeToken visit(final FlowInterfaceDefinition n) {
+    return n.f0.accept(this);
+  }
+
+  @Override
+  public NodeToken visit(final FunctionalInterfaceDefinition n) {
+    return n.f0.accept(this);
+  }
+
+  @Override
+  public NodeToken visit(final FlowType n) {
+    return n.f0.accept(this);
+  }
+
+  @Override
+  public NodeToken visit(final IDTType n) {
+    return n.f0.accept(this);
+  }
+
+  @Override
   public NodeToken visit(final AttributeDefinition n) {
     return n.f1;
   }
@@ -319,6 +347,24 @@ public class BeginTokenVisitor extends GJNoArguDepthFirst<NodeToken> {
 
   @Override
   public NodeToken visit(final AttributeValue n) {
+    return n.f0.accept(this);
+  }
+
+  @Override
+  public NodeToken visit(final CompoundAttributeValue n) {
+    return n.f0.accept(this);
+  }
+
+  @Override
+  public NodeToken visit(final CompoundAttributeValueField n) {
+    final NodeToken t = n.f0.accept(this);
+    if (t != null) return t;
+
+    return n.f1.accept(this);
+  }
+
+  @Override
+  public NodeToken visit(final CompoundFieldName n) {
     return n.f0.accept(this);
   }
 
@@ -463,6 +509,11 @@ public class BeginTokenVisitor extends GJNoArguDepthFirst<NodeToken> {
   @Override
   public NodeToken visit(final NullValue n) {
     return n.f0;
+  }
+
+  @Override
+  public NodeToken visit(final PathValue n) {
+    return n.f0.accept(this);
   }
 
 }

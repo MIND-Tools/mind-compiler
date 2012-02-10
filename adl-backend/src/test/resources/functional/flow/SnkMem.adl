@@ -1,0 +1,8 @@
+primitive flow.SnkMem  {
+
+    data snkMemState.h;
+        
+    input int as snkInput;    
+    
+    source snkMem.c;
+}

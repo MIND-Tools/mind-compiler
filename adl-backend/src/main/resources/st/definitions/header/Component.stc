@@ -27,6 +27,12 @@ ComponentDefinitionHeader(definition) ::= <<
 /* End including the sub-component descriptions */
 <endif>
 
+<if (definition.astNodeTypes.("attribute"))>
+/* Start including the attribute IDT */
+<definition.attributes:{<if (it.idt)>#include "<it.idt; format="toCPath">"<endif>}; separator="\n">
+/* End including the attribute IDT */
+<endif>
+
 <ControllerGlobalDecls(definition=definition)>
 
 /* Start definition of internal component data type */
@@ -344,7 +350,7 @@ InitializeComponents(definition) ::= <<
 
 InitializeAttributes(definition) ::= <<
 <if (definition.astNodeTypes.("attribute"))><if (definition.attributes)>    {  /* attributes: */ \
-    <definition.attributes:{/* <it.name> : */ (<it.name>)};separator=", \\\n      "> \
+    <definition.attributes:{/* <it.name> : */ <it.name>};separator=", \\\n      "> \
     }, \
 <endif><endif>
 >>

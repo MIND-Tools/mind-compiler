@@ -1,0 +1,6 @@
+// The path in the annotation doesn't exist.
+primitive pkg1.annotations.PathAnnotation4 {
+
+  @org.ow2.mind.adl.annotations.PathAnnotation(url=non_existing_path)
+  source foo.c;
+}

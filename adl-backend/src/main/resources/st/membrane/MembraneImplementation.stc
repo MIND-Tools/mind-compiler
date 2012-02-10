@@ -62,8 +62,17 @@ ComponentFactoryMethod(definition) ::= <<
 void __component_<definition.name;format="toCName">_constructor(PRIVATE_DATA_T* instance);
 #endif
 
+static inline void __component_<definition.name;format="toCName">_cpy(void * dest, void *src, int size) {
+	int i;
+	for (i = 0; i \< size; i++) {
+		((char *) dest)[i] = ((char *) src)[i];
+	}
+}
+
+
 int __component_<definition.name;format="toCName">_factory(void **instance, void *allocItf <ComponentFactoryParameters(definition=definition)>) {
   int err = 0;
+  <DeclareComplexAttributeValues(definition=definition)>
 
   PRIVATE_DATA_T* newInstance = (PRIVATE_DATA_T*) CALL_PTR((memory_api_Allocator) allocItf, alloc)(sizeof(PRIVATE_DATA_T));
   if (newInstance == NULL) return -1;
@@ -275,6 +284,19 @@ components.<binding.toComponent>->__component_internal_data.type
 >>
 
 
+DeclareComplexAttributeValues(definition) ::= <<
+<if (definition.astNodeTypes.("attribute"))>
+<definition.attributes:DeclareComplexAttributeValue(definition=definition, attribute=it);separator="\n\n">
+<endif>
+>>
+
+DeclareComplexAttributeValue(definition, attribute) ::= <<
+<if (attribute.value)>
+<if (isCompoundValue.(attribute.value.astDecorations.kind))>
+<attribute.type> __component_<definition.name;format="toCName">_attr_<attribute.name> = <AttributeValue(value=attribute.value)>;
+<endif>
+<endif>
+>>
 
 InitializeAttributes(definition) ::= <<
 <if (definition.astNodeTypes.("attribute"))>
@@ -284,13 +306,10 @@ InitializeAttributes(definition) ::= <<
 
 InitializeAttribute(definition, attribute) ::= <<
 <if (attribute.value)>
-newInstance->__component_internal_data.attributes.<attribute.name> = 
-<if (attribute.value.astAttributes.("ref"))>
-  <attribute.value.ref;format="toCName">
-<elseif (attribute.value.astAttributes.("value"))>
-  <attribute.value.value>
+<if (isCompoundValue.(attribute.value.astDecorations.kind))>
+__component_<definition.name;format="toCName">_cpy(&(newInstance->__component_internal_data.attributes.<attribute.name>), &__component_<definition.name;format="toCName">_attr_<attribute.name>, sizeof(__component_<definition.name;format="toCName">_attr_<attribute.name>))
 <else>
-  NULL
+newInstance->__component_internal_data.attributes.<attribute.name> = <AttributeValue(value=attribute.value)>
 <endif>
 ;
 <endif>

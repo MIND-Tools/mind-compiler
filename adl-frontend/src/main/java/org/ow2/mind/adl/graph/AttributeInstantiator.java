@@ -40,6 +40,8 @@ import org.ow2.mind.adl.parameter.ast.Argument;
 import org.ow2.mind.adl.parameter.ast.ArgumentContainer;
 import org.ow2.mind.adl.parameter.ast.FormalParameterContainer;
 import org.ow2.mind.error.ErrorManager;
+import org.ow2.mind.value.ast.CompoundValue;
+import org.ow2.mind.value.ast.CompoundValueField;
 import org.ow2.mind.value.ast.NullLiteral;
 import org.ow2.mind.value.ast.NumberLiteral;
 import org.ow2.mind.value.ast.Reference;
@@ -50,10 +52,10 @@ import com.google.inject.Inject;
 
 public class AttributeInstantiator extends AbstractDelegatingInstantiator {
 
-  private static final Map<String, Value> EMPTY_NAME_VALUE_MAP = new HashMap<String, Value>();
+  private static final Map<String, ValueContext> EMPTY_NAME_VALUE_MAP = new HashMap<String, ValueContext>();
 
   @Inject
-  protected ErrorManager                  errorManagerItf;
+  protected ErrorManager                         errorManagerItf;
 
   // ---------------------------------------------------------------------------
   // Implementation of the Instantiator interface
@@ -76,7 +78,8 @@ public class AttributeInstantiator extends AbstractDelegatingInstantiator {
   }
 
   protected void initAttributes(final ComponentGraph graph,
-      final Map<String, Value> argumentValues, final Map<Object, Object> context) {
+      final Map<String, ValueContext> argumentValues,
+      final Map<Object, Object> context) {
 
     // Initialize map of attribute values.
     if (graph.getDefinition() instanceof AttributeContainer) {
@@ -85,25 +88,10 @@ public class AttributeInstantiator extends AbstractDelegatingInstantiator {
       if (attributes.length > 0) {
         final Map<String, String> attributeValues = new HashMap<String, String>();
         for (final Attribute attribute : attributes) {
-          Value valueNode = attribute.getValue();
+          final Value valueNode = attribute.getValue();
           String valueString;
-          if (valueNode instanceof Reference) {
-            final Value value = argumentValues.get(((Reference) valueNode)
-                .getRef());
-            assert value != null;
-            valueNode = value;
-          }
 
-          if (valueNode instanceof StringLiteral) {
-            valueString = ((StringLiteral) valueNode).getValue();
-          } else if (valueNode instanceof NumberLiteral) {
-            valueString = ((NumberLiteral) valueNode).getValue();
-          } else if (valueNode instanceof NullLiteral) {
-            valueString = "((void *) 0)";
-          } else {
-            throw new CompilerError(GenericErrors.INTERNAL_ERROR,
-                "Unexpected value");
-          }
+          valueString = toValueString(valueNode, argumentValues);
 
           attributeValues.put(attribute.getName(), valueString);
         }
@@ -124,7 +112,7 @@ public class AttributeInstantiator extends AbstractDelegatingInstantiator {
           final DefinitionReference subCompDefRef = subComponent
               .getDefinitionReference();
 
-          final Map<String, Value> refValues;
+          final Map<String, ValueContext> refValues;
           final Argument[] refArguments = (subCompDefRef instanceof ArgumentContainer)
               ? ((ArgumentContainer) subCompDefRef).getArguments()
               : null;
@@ -133,19 +121,22 @@ public class AttributeInstantiator extends AbstractDelegatingInstantiator {
             assert subGraph.getDefinition() instanceof FormalParameterContainer;
             assert ((FormalParameterContainer) subGraph.getDefinition())
                 .getFormalParameters().length == refArguments.length;
-            refValues = new HashMap<String, Value>();
+            refValues = new HashMap<String, ValueContext>();
 
             for (final Argument refArgument : refArguments) {
               assert refArgument.getName() != null;
-              final Value refValue = refArgument.getValue();
-              if (refValue instanceof Reference) {
-                final Value value = argumentValues.get(((Reference) refValue)
-                    .getRef());
-                assert value != null;
-                refValues.put(refArgument.getName(), value);
-              } else {
-                refValues.put(refArgument.getName(), refValue);
-              }
+
+// final Value refValue = refArgument.getValue();
+// if (refValue instanceof Reference) {
+// final Value value = argumentValues.get(((Reference) refValue)
+// .getRef());
+// assert value != null;
+// refValues.put(refArgument.getName(), value);
+// } else {
+// refValues.put(refArgument.getName(), refValue);
+// }
+              refValues.put(refArgument.getName(),
+                  new ValueContext(refArgument.getValue(), argumentValues));
             }
           } else {
             refValues = EMPTY_NAME_VALUE_MAP;
@@ -154,6 +145,57 @@ public class AttributeInstantiator extends AbstractDelegatingInstantiator {
           initAttributes(subGraph, refValues, context);
         }
       }
+    }
+  }
+
+  private String toValueString(final Value valueNode,
+      final Map<String, ValueContext> referenceValues) throws CompilerError {
+    if (valueNode instanceof Reference) {
+      final ValueContext ctx = referenceValues.get(((Reference) valueNode)
+          .getRef());
+      assert ctx != null;
+      return toValueString(ctx.value, ctx.referenceValues);
+
+    } else if (valueNode instanceof StringLiteral) {
+      return ((StringLiteral) valueNode).getValue();
+
+    } else if (valueNode instanceof NumberLiteral) {
+      return ((NumberLiteral) valueNode).getValue();
+
+    } else if (valueNode instanceof NullLiteral) {
+      return "((void *) 0)";
+
+    } else if (valueNode instanceof CompoundValue) {
+      final StringBuilder sb = new StringBuilder();
+      sb.append("{");
+      final CompoundValueField[] fields = ((CompoundValue) valueNode)
+          .getCompoundValueFields();
+      for (int i = 0; i < fields.length; i++) {
+        final CompoundValueField field = fields[i];
+        if (field.getName() != null) {
+          sb.append(".").append(field.getName()).append("=");
+        }
+        sb.append(toValueString(field.getValue(), referenceValues));
+        if (i < fields.length - 1) {
+          sb.append(", ");
+        }
+      }
+      sb.append("}");
+      return sb.toString();
+
+    } else {
+      throw new CompilerError(GenericErrors.INTERNAL_ERROR, "Unexpected value");
+    }
+  }
+
+  protected static class ValueContext {
+    final protected Value                     value;
+    final protected Map<String, ValueContext> referenceValues;
+
+    protected ValueContext(final Value value,
+        final Map<String, ValueContext> referenceValues) {
+      this.value = value;
+      this.referenceValues = referenceValues;
     }
   }
 }

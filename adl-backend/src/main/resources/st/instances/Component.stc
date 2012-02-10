@@ -112,6 +112,8 @@ DeclareInstance(definition, instance) ::= <<
 >>
 
 InitInstance(definition, instance) ::= <<
+<DefineAttributeValues(definition=definition, instance=instance)>
+
 <definition.name;format="toUpperCName">_INIT_INSTANCE(<instance.decorations.("instance-name"); format="toCName"> 
   <AddItfValues(definition=definition, instance=instance)>
   <AddSubComponentValues(definition=definition, instance=instance)>
@@ -169,6 +171,16 @@ StaticCollectionBindingValue(bindingDesc, index) ::= <<
 
 StaticBindingItfName(itfName, index, isInternal) ::= "<if (isInternal)>INTERNAL_<endif><itfName><if (index)>_<index><endif>"
 
+DefineAttributeValues(definition, instance) ::= <<
+<if (definition.astNodeTypes.("attribute"))>
+<definition.attributes:DefineAttributeValue(definition=definition, instance=instance, attribute=it);separator="\n">
+<endif>
+>>
+
+DefineAttributeValue(definition, instance, attribute) ::= <<
+#define <instance.decorations.("instance-name"); format="toUpperCName">_<attribute.name; format="toUpperCName"> <instance.decorations.("attribute-values").(attribute.name)>
+>>
+
 AddAttributeValues(definition, instance) ::= <<
 <if (definition.astNodeTypes.("attribute"))>
 <definition.attributes:AddAttributeValue(definition=definition, instance=instance, attribute=it);separator="\n">
@@ -176,7 +188,7 @@ AddAttributeValues(definition, instance) ::= <<
 >>
 
 AddAttributeValue(definition, instance, attribute) ::= <<
-, /* <attribute.name> */ <instance.decorations.("attribute-values").(attribute.name)>
+, /* <attribute.name> */ <instance.decorations.("instance-name"); format="toUpperCName">_<attribute.name; format="toUpperCName">
 >>
 
 AddSubComponentValues(definition, instance) ::= <<

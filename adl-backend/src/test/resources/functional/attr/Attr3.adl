@@ -1,0 +1,32 @@
+
+@Run
+primitive attr.Attr3 extends ApplicationType {
+
+  attribute int attr1 = -1;
+  attribute attrTypes.h:struct s1 attr2 = {3, 4};
+
+  source {{
+    #include <stdio.h>
+    #include <string.h>
+    
+    
+    int METH(main, main)(int argc, char **argv) {
+      
+      if (ATTR(attr1) != -1) {
+        printf("Invalid value for attr1=%d\n", ATTR(attr1));
+        return 1;
+      }
+      
+      if (ATTR(attr2).a != 3) {
+        printf("Invalid value for attr2=%d\n", ATTR(attr2).a);
+        return 2;
+      }
+      
+      if (ATTR(attr2).b != 4) {
+        printf("Invalid value for attr2=%d\n", ATTR(attr2).b);
+        return 2;
+      }
+      return 0;
+    }
+  }};
+}
