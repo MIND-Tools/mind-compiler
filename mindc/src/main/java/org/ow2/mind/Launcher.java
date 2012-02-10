@@ -169,6 +169,11 @@ public class Launcher {
     // parse adlNames
     for (final String adlName : adlList) {
       final int i = adlName.indexOf(':');
+      if (i == 0) {
+        throw new InvalidCommandLineException(
+            "no adl name is specified for executable "
+                + adlName.substring(i + 1) + ".", 1);
+      }
       if (i == -1) {
         adlToExecName.put(adlName, null);
       } else {
