@@ -1,5 +1,8 @@
 
-composite params.Composite1(a, b) {
+composite params.Composite1(a, b) extends api.Type1 {
 
   contains Primitive1(a, b) as subComp1;
+  
+  binds this.sItf to subComp1.sItf;
+  binds subComp1.cItf to this.cItf;
 }

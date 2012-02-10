@@ -152,6 +152,7 @@ public class ParametricDefinitionReferenceResolver
     if (parameters == null || parameters.length == 0) {
       if (arguments != null && arguments.length > 0
           && !ASTHelper.isUnresolvedDefinitionNode(definition)) {
+        removeArguments((ArgumentContainer) reference);
         errorManagerItf.logError(ADLErrors.INVALID_REFERENCE_NO_PARAMETER,
             reference);
       }
@@ -170,6 +171,7 @@ public class ParametricDefinitionReferenceResolver
 
         if (parameters.length > arguments.length) {
           // missing parameter values
+          removeArguments((ArgumentContainer) reference);
           errorManagerItf.logError(
               ADLErrors.INVALID_REFERENCE_MISSING_ARGUMENT, reference);
           return null;
@@ -177,6 +179,7 @@ public class ParametricDefinitionReferenceResolver
 
         if (parameters.length < arguments.length
             && !ASTHelper.isUnresolvedDefinitionNode(definition)) {
+          removeArguments((ArgumentContainer) reference);
           errorManagerItf.logError(
               ADLErrors.INVALID_REFERENCE_TOO_MANY_ARGUMENT, reference);
           return null;
@@ -226,6 +229,7 @@ public class ParametricDefinitionReferenceResolver
           final Argument value = valuesByName.remove(variable.getName());
           if (value == null) {
             // missing parameter values
+            removeArguments((ArgumentContainer) reference);
             errorManagerItf.logError(
                 ADLErrors.INVALID_REFERENCE_MISSING_ARGUMENT, reference,
                 variable.getName());
@@ -240,6 +244,8 @@ public class ParametricDefinitionReferenceResolver
           if (!ASTHelper.isUnresolvedDefinitionNode(definition)) {
             for (final Map.Entry<String, Argument> value : valuesByName
                 .entrySet()) {
+              // remove faulty argument
+              ((ArgumentContainer) reference).removeArgument(value.getValue());
               errorManagerItf.logError(
                   ADLErrors.INVALID_REFERENCE_NO_SUCH_PARAMETER,
                   value.getValue(), value.getKey());
@@ -250,6 +256,12 @@ public class ParametricDefinitionReferenceResolver
 
         return result;
       }
+    }
+  }
+
+  protected void removeArguments(final ArgumentContainer container) {
+    for (final Argument argument : container.getArguments()) {
+      container.removeArgument(argument);
     }
   }
 
