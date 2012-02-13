@@ -62,7 +62,7 @@ ComponentFactoryMethod(definition) ::= <<
 void __component_<definition.name;format="toCName">_constructor(PRIVATE_DATA_T* instance);
 #endif
 
-static inline void __component_<definition.name;format="toCName">_cpy(void * dest, void *src, int size) {
+static __MIND_INLINE void __component_<definition.name;format="toCName">_cpy(void * dest, void *src, int size) {
 	int i;
 	for (i = 0; i \< size; i++) {
 		((char *) dest)[i] = ((char *) src)[i];
