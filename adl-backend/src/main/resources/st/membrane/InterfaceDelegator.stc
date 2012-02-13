@@ -38,31 +38,14 @@ MethodDelegator(itf, index, method) ::= <<
 <(idl2c.methodDef)(method=method,withThisPtr="typed",methodName=ProxyName(itfName=itf.name, index=index, methodName=method.name)) > { 
 <endif>
 
-<if(method.vaArgs)>
-  va_list args;
-  <if (! ((idl2c.isVoidMethod)(method=method)))>
-  <(idl2c.varDef)(type=method.type, name="retval")>;
-  <endif>
-  va_start (args, <last(method.parameters).name>);
-  <if (! ((idl2c.isVoidMethod)(method=method)))>
-  retval =
-  <endif>
-  CALL_INTERFACE_PTR_WITH_PARAM(CONTEXT_PTR_ACCESS->__component_internal_data.<if (isServer.(itf.role))>inner_<endif>type.<itf.name><if (index)>[<index>]<endif>, <method.vaArgs.dualMethodName>)
-       <method.parameters:{<it.name>};separator=", "> , args PARAMS_RPARENT;
-  va_end(args);
-  <if (! ((idl2c.isVoidMethod)(method=method)))>
-  return retval;
-  <endif>
+<if (! ((idl2c.isVoidMethod)(method=method)))>
+return 
+<endif>
+<if (method.parameters)>
+CALL_INTERFACE_PTR_WITH_PARAM(CONTEXT_PTR_ACCESS->__component_internal_data.<if (isServer.(itf.role))>inner_<endif>type.<itf.name><if (index)>[<index>]<endif>, <method.name>)
+     <method.parameters:{<it.name>};separator=", "> PARAMS_RPARENT;
 <else>
-  <if (! ((idl2c.isVoidMethod)(method=method)))>
-  return
-  <endif>
-  <if (method.parameters)>
-  CALL_INTERFACE_PTR_WITH_PARAM(CONTEXT_PTR_ACCESS->__component_internal_data.<if (isServer.(itf.role))>inner_<endif>type.<itf.name><if (index)>[<index>]<endif>, <method.name>)
-       <method.parameters:{<it.name>};separator=", "> PARAMS_RPARENT;
-  <else>
-  CALL_INTERFACE_PTR_WITHOUT_PARAM(CONTEXT_PTR_ACCESS->__component_internal_data.<if (isServer.(itf.role))>inner_<endif>type.<itf.name><if (index)>[<index>]<endif>, <method.name>);
-  <endif>
+CALL_INTERFACE_PTR_WITHOUT_PARAM(CONTEXT_PTR_ACCESS->__component_internal_data.<if (isServer.(itf.role))>inner_<endif>type.<itf.name><if (index)>[<index>]<endif>, <method.name>);
 <endif>
 
 }

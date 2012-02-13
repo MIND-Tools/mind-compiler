@@ -1,5 +1,5 @@
 
-primitive params.Primitive1(a, b) {
+primitive params.Primitive1(a, b) extends api.Type1 {
 
   source {{ }};
   

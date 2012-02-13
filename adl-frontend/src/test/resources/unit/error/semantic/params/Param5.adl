@@ -1,0 +1,10 @@
+//#SemanticError GroupId=MADL ErrorId=INVALID_REFERENCE_MISSING_ARGUMENT line=5
+
+composite params.Param5 extends 
+generic.Generic1<
+Composite1
+(1)
+>
+{
+
+}

@@ -1,0 +1,8 @@
+//#SemanticError GroupId=MADL ErrorId=INVALID_REFERENCE_MISSING_ARGUMENT line=4
+
+composite params.Param4 extends 
+Composite1
+(1)
+{
+
+}

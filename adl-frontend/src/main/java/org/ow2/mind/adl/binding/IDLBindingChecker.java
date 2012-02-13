@@ -48,50 +48,55 @@ public class IDLBindingChecker extends AbstractDelegatingBindingChecker {
   // Implementation of the BindingChecker interface
   // ---------------------------------------------------------------------------
 
-  public void checkBinding(final Interface fromInterface,
+  public boolean checkBinding(final Interface fromInterface,
       final Interface toInterface, final Binding binding, final Node locator)
       throws ADLException {
-    clientBindingCheckerItf.checkBinding(fromInterface, toInterface, binding,
-        locator);
-    checkSignature(fromInterface, toInterface, locator);
+    final boolean isValid = clientBindingCheckerItf.checkBinding(fromInterface,
+        toInterface, binding, locator);
+    return checkSignature(fromInterface, toInterface, locator) && isValid;
   }
 
-  public void checkFromCompositeToSubcomponentBinding(
+  public boolean checkFromCompositeToSubcomponentBinding(
       final Interface compositeInterface,
       final Interface subComponentInterface, final Binding binding,
       final Node locator) throws ADLException {
-    clientBindingCheckerItf.checkFromCompositeToSubcomponentBinding(
-        compositeInterface, subComponentInterface, binding, locator);
-    checkSignature(compositeInterface, subComponentInterface, locator);
+    final boolean isValid = clientBindingCheckerItf
+        .checkFromCompositeToSubcomponentBinding(compositeInterface,
+            subComponentInterface, binding, locator);
+    return checkSignature(compositeInterface, subComponentInterface, locator)
+        && isValid;
   }
 
-  public void checkFromSubcomponentToCompositeBinding(
+  public boolean checkFromSubcomponentToCompositeBinding(
       final Interface subComponentInterface,
       final Interface compositeInterface, final Binding binding,
       final Node locator) throws ADLException {
-    clientBindingCheckerItf.checkFromSubcomponentToCompositeBinding(
-        subComponentInterface, compositeInterface, binding, locator);
-    checkSignature(subComponentInterface, compositeInterface, locator);
+    final boolean isValid = clientBindingCheckerItf
+        .checkFromSubcomponentToCompositeBinding(subComponentInterface,
+            compositeInterface, binding, locator);
+    return checkSignature(subComponentInterface, compositeInterface, locator)
+        && isValid;
   }
 
-  public void checkCompatibility(final Interface from, final Interface to,
+  public boolean checkCompatibility(final Interface from, final Interface to,
       final Node locator) throws ADLException {
-    clientBindingCheckerItf.checkCompatibility(from, to, locator);
-    checkSignature(from, to, locator);
+    final boolean isValid = clientBindingCheckerItf.checkCompatibility(from,
+        to, locator);
+    return checkSignature(from, to, locator) && isValid;
   }
 
   // ---------------------------------------------------------------------------
   // Utility methods
   // ---------------------------------------------------------------------------
 
-  protected void checkSignature(final Interface from, final Interface to,
+  protected boolean checkSignature(final Interface from, final Interface to,
       final Node locator) throws ADLException {
     if ((from instanceof TypeInterface) && (to instanceof TypeInterface)) {
       final String fromSignature = ((TypeInterface) from).getSignature();
       final String toSignature = ((TypeInterface) to).getSignature();
       if (fromSignature.equals(toSignature)) {
         // same signature. binding is OK
-        return;
+        return true;
       }
       // otherwise need to check if 'toSignature' extends 'fromSignature'
       final InterfaceDefinition toItf = InterfaceDefinitionDecorationHelper
@@ -101,7 +106,9 @@ public class IDLBindingChecker extends AbstractDelegatingBindingChecker {
       if (!extendedItf.contains(fromSignature)) {
         errorManagerItf.logError(BindingErrors.INVALID_SIGNATURE, locator,
             new NodeErrorLocator(from), new NodeErrorLocator(to));
+        return false;
       }
     }
+    return true;
   }
 }

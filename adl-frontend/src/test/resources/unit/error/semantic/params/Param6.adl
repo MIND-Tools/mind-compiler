@@ -1,0 +1,10 @@
+//#SemanticError GroupId=MADL ErrorId=INVALID_REFERENCE_TOO_MANY_ARGUMENT line=5
+
+composite params.Param6 extends 
+generic.Generic1<
+Composite1
+(1, 2, 3)
+>
+{
+
+}
