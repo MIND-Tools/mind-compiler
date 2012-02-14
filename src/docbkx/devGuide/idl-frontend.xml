@@ -16,8 +16,11 @@
     <figure id="idlfe-ovarch-fig">
       <title>IDL frontend global architecture</title>
       <mediaobject>
-        <imageobject>
+        <imageobject role="fo">
           <imagedata fileref="images/IDLLoader.svg" scale="30" align="center"/>
+        </imageobject>
+        <imageobject role="html">
+          <imagedata fileref="images/IDLLoader.png" align="center"/>
         </imageobject>
       </mediaobject>
     </figure>
@@ -69,8 +72,11 @@
       <figure id="idlfe-ovast-fig">
         <title>AST interfaces of top-level IDL structure</title>
         <mediaobject>
-          <imageobject>
+          <imageobject role="fo">
             <imagedata fileref="images/IDLAST.svg"  scale="30" align="center"/>
+          </imageobject>
+          <imageobject role="html">
+            <imagedata fileref="images/IDLAST.png" align="center"/>
           </imageobject>
           <caption>
             <blockquote>
@@ -94,8 +100,11 @@
       <figure id="idlfe-asttype-fig">
         <title>AST interfaces of the C type system</title>
         <mediaobject>
-          <imageobject>
+          <imageobject role="fo">
             <imagedata fileref="images/IDLType.svg"  scale="30" align="center"/>
+          </imageobject>
+          <imageobject role="html">
+            <imagedata fileref="images/IDLType.png" align="center"/>
           </imageobject>
           <caption>
             <blockquote>
@@ -117,8 +126,11 @@
       <figure id="idlfe-astexpr-fig">
         <title>AST interfaces of constant expressions</title>
         <mediaobject>
-          <imageobject>
+          <imageobject role="fo">
             <imagedata fileref="images/IDLExpr.svg"  scale="30" align="center"/>
+          </imageobject>
+          <imageobject role="html">
+            <imagedata fileref="images/IDLExpr.png" align="center"/>
           </imageobject>
           <caption>
             <blockquote>
@@ -134,8 +146,11 @@
       <figure id="idlfe-astannot-fig">
         <title>AST structure for annotation support in IDL</title>
         <mediaobject>
-          <imageobject>
+          <imageobject role="fo">
             <imagedata fileref="images/IDLAnnotation.svg"  scale="30" align="center"/>
+          </imageobject>
+          <imageobject role="html">
+            <imagedata fileref="images/IDLAnnotation.png" align="center"/>
           </imageobject>
           <caption>
             <blockquote>

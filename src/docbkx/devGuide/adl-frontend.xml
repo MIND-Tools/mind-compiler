@@ -24,8 +24,11 @@
     <figure id="adlfe-ovarch-fig">
       <title>ADL frontend global architecture</title>
       <mediaobject>
-        <imageobject>
-          <imagedata fileref="images/ADLLoader.svg" scale="30" align="center"/>
+        <imageobject role="fo">
+          <imagedata fileref="images/ADLLoader.svg"  scale="30" align="center"/>
+        </imageobject>
+        <imageobject role="html">
+          <imagedata fileref="images/ADLLoader.png" align="center"/>
         </imageobject>
       </mediaobject>
     </figure>
@@ -122,8 +125,11 @@
       <figure id="adlfe-ovast-fig">
         <title>AST structure for architectural elements </title>
         <mediaobject>
-          <imageobject>
+          <imageobject role="fo">
             <imagedata fileref="images/ASTOverview.svg"  scale="30" align="center"/>
+          </imageobject>
+          <imageobject role="html">
+            <imagedata fileref="images/ASTOverview.png" align="center"/>
           </imageobject>
           <caption>
             <blockquote>
@@ -151,8 +157,11 @@
       <figure id="adlfe-astparam-fig">
         <title>AST structure for parametric ADL aspect </title>
         <mediaobject>
-          <imageobject>
+          <imageobject role="fo">
             <imagedata fileref="images/ASTParameter.svg"  scale="30" align="center"/>
+          </imageobject>
+          <imageobject role="html">
+            <imagedata fileref="images/ASTParameter.png" align="center"/>
           </imageobject>
           <caption>
             <blockquote>
@@ -175,8 +184,11 @@
       <figure id="adlfe-astgeneric-fig">
         <title>AST structure for generic ADL aspect </title>
         <mediaobject>
-          <imageobject>
+          <imageobject role="fo">
             <imagedata fileref="images/ASTGeneric.svg"  scale="30" align="center"/>
+          </imageobject>
+          <imageobject role="html">
+            <imagedata fileref="images/ASTGeneric.png" align="center"/>
           </imageobject>
           <caption>
             <blockquote>
@@ -201,8 +213,11 @@
       <figure id="adlfe-astanonym-fig">
         <title>AST structure for anonymous definitions</title>
         <mediaobject>
-          <imageobject>
+          <imageobject role="fo">
             <imagedata fileref="images/ASTAnonymous.svg"  scale="30" align="center"/>
+          </imageobject>
+          <imageobject role="html">
+            <imagedata fileref="images/ASTAnonymous.png" align="center"/>
           </imageobject>
           <caption>
             <blockquote>
@@ -223,8 +238,11 @@
       <figure id="adlfe-astimport-fig">
         <title>AST structure for import support</title>
         <mediaobject>
-          <imageobject>
+          <imageobject role="fo">
             <imagedata fileref="images/ASTImport.svg"  scale="30" align="center"/>
+          </imageobject>
+          <imageobject role="html">
+            <imagedata fileref="images/ASTImport.png" align="center"/>
           </imageobject>
           <caption>
             <blockquote>
@@ -241,8 +259,11 @@
       <figure id="adlfe-astannot-fig">
         <title>AST structure for annotation support</title>
         <mediaobject>
-          <imageobject>
+          <imageobject role="fo">
             <imagedata fileref="images/ASTADLAnnotation.svg"  scale="30" align="center"/>
+          </imageobject>
+          <imageobject role="html">
+            <imagedata fileref="images/ASTADLAnnotation.png" align="center"/>
           </imageobject>
           <caption>
             <blockquote>

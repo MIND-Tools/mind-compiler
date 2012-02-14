@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.ow2.mind</groupId>
         <artifactId>mind-parent</artifactId>
-        <version>4</version>
+        <version>5</version>
     </parent>
 
     <artifactId>mind-compiler</artifactId>
@@ -43,7 +43,7 @@
         <module>fractal-adl-bundle</module>
         <module>plugin-loader</module>
         <module>annotations</module>
-  </modules>
+    </modules>
 
     <developers>
         <developer>
@@ -498,9 +498,7 @@
                 <extensions>true</extensions>
             </plugin>
             <plugin>
-            	<groupId>org.apache.maven.plugins</groupId>
             	<artifactId>maven-source-plugin</artifactId>
-            	<version>2.1.2</version>
 				<executions>
             		<execution>
             			<id>attach-sources</id>
