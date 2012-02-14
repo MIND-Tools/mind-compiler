@@ -26,7 +26,9 @@ import static org.ow2.mind.adl.parameter.ast.ParameterASTHelper.getInferredParam
 import static org.ow2.mind.adl.parameter.ast.ParameterASTHelper.setInferredParameterType;
 import static org.ow2.mind.adl.parameter.ast.ParameterASTHelper.setUsedFormalParameter;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.objectweb.fractal.adl.ADLException;
@@ -53,7 +55,6 @@ import org.ow2.mind.value.ast.NumberLiteral;
 import org.ow2.mind.value.ast.Reference;
 import org.ow2.mind.value.ast.StringLiteral;
 import org.ow2.mind.value.ast.Value;
-import org.ow2.mind.value.ast.ValueASTHelper;
 
 import com.google.inject.Inject;
 
@@ -93,6 +94,8 @@ public class AttributeCheckerLoader extends AbstractDelegatingLoader {
         formalParameters.put(parameter.getName(), parameter);
       }
     }
+
+    final List<Attribute> uninitializedAttributes = new ArrayList<Attribute>();
 
     for (final Attribute attr : container.getAttributes()) {
 
@@ -155,22 +158,14 @@ public class AttributeCheckerLoader extends AbstractDelegatingLoader {
           }
         }
       } else {
-        // value is null, set a default value
-        final Value defaultValue;
-        if (type != null && type.isComplexType()) {
-          errorManagerItf.logError(
-              ADLErrors.INVALID_ATTRIBUTE_MISSING_INITIAL_VALUE, attr);
-          defaultValue = null;
-        } else if (type == ParameterType.STRING) {
-          defaultValue = ValueASTHelper.newNullLiteral(nodeFactoryItf);
-        } else {
-          defaultValue = ValueASTHelper.newNumberLiteral(nodeFactoryItf, 0);
-        }
-        if (defaultValue != null) {
-          valueKindDecoratorItf.setValueKind(defaultValue, context);
-          attr.setValue(defaultValue);
-        }
+        // value is null, move attribute at end of list
+        uninitializedAttributes.add(attr);
+        container.removeAttribute(attr);
       }
+    }
+    // re-add uninitialized attribute at end of container.
+    for (final Attribute uninitializedAttr : uninitializedAttributes) {
+      container.addAttribute(uninitializedAttr);
     }
   }
 

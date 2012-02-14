@@ -3,7 +3,8 @@
 primitive attr.Attr3 extends ApplicationType {
 
   attribute int attr1 = -1;
-  attribute attrTypes.h:struct s1 attr2 = {3, 4};
+  attribute attrTypes.h:struct s1 attr2;
+  attribute attrTypes.h:struct s1 attr3 = {3, 4};
 
   source {{
     #include <stdio.h>
@@ -17,13 +18,13 @@ primitive attr.Attr3 extends ApplicationType {
         return 1;
       }
       
-      if (ATTR(attr2).a != 3) {
-        printf("Invalid value for attr2=%d\n", ATTR(attr2).a);
+      if (ATTR(attr3).a != 3) {
+        printf("Invalid value for attr3=%d\n", ATTR(attr3).a);
         return 2;
       }
       
-      if (ATTR(attr2).b != 4) {
-        printf("Invalid value for attr2=%d\n", ATTR(attr2).b);
+      if (ATTR(attr3).b != 4) {
+        printf("Invalid value for attr3=%d\n", ATTR(attr3).b);
         return 2;
       }
       return 0;

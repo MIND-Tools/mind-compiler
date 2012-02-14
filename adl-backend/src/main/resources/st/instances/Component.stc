@@ -178,7 +178,9 @@ DefineAttributeValues(definition, instance) ::= <<
 >>
 
 DefineAttributeValue(definition, instance, attribute) ::= <<
+<if (instance.decorations.("attribute-values").(attribute.name))>
 #define <instance.decorations.("instance-name"); format="toUpperCName">_<attribute.name; format="toUpperCName"> <instance.decorations.("attribute-values").(attribute.name)>
+<endif>
 >>
 
 AddAttributeValues(definition, instance) ::= <<
@@ -188,7 +190,9 @@ AddAttributeValues(definition, instance) ::= <<
 >>
 
 AddAttributeValue(definition, instance, attribute) ::= <<
+<if (instance.decorations.("attribute-values").(attribute.name))>
 , /* <attribute.name> */ <instance.decorations.("instance-name"); format="toUpperCName">_<attribute.name; format="toUpperCName">
+<endif>
 >>
 
 AddSubComponentValues(definition, instance) ::= <<

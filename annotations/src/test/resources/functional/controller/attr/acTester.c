@@ -1,13 +1,15 @@
 #include <mindassert.h>
 #include <string.h>
+#include "attrType.h"
 
-#define NB_ATTR 3
+#define NB_ATTR 5
 
-const char * expectedNames[NB_ATTR] = { "attr1", "attr2", "attr3" };
-int expectedIntValues[NB_ATTR] = { 0, 4, 0 };
-const char * expectedStringValues[NB_ATTR] = { "", "", "toto" };
-int expectedSizes[NB_ATTR] = { sizeof(int), sizeof(int), sizeof(char *) };
-enum AttributeType expectedTypes[NB_ATTR] = {INT_ATTR_TYPE, INT_ATTR_TYPE, STRING_ATTR_TYPE};
+const char * expectedNames[NB_ATTR] = { "attr1", "attr2", "attr3", "attr5", "attr4" /* uninitialized attributes are moved at the end */};
+int expectedIntValues[NB_ATTR] = { 0, 4, 0, 0, 0 };
+const char * expectedStringValues[NB_ATTR] = { "", "", "toto", "", "" };
+struct s1 expectedStructValues[NB_ATTR] = { {0,0}, {0,0}, {0,0}, {1,2}, {0, 0} };
+int expectedSizes[NB_ATTR] = { sizeof(int), sizeof(int), sizeof(char *), sizeof(struct s1), sizeof(struct s1)};
+enum AttributeType expectedTypes[NB_ATTR] = {INT_ATTR_TYPE, INT_ATTR_TYPE, STRING_ATTR_TYPE, UNKNOWN_ATTR_TYPE, UNKNOWN_ATTR_TYPE};
 
 /* -----------------------------------------------------------------------------
    Implementation of the main interface.
@@ -37,11 +39,15 @@ int METH(main, main) (int argc, char *argv[]) {
       int attrValue;
       mindassert(CALL(testedAC, getFcAttribute)(attrNames[i], (void **)&attrValue) == FRACTAL_API_OK);
       mindassert(attrValue == expectedIntValues[i]);
-    } else {
+    } else if (expectedTypes[i] == STRING_ATTR_TYPE) {
       char * attrValue;
-      mindassert(expectedTypes[i] == STRING_ATTR_TYPE);
       mindassert(CALL(testedAC, getFcAttribute)(attrNames[i], (void **)&attrValue) == FRACTAL_API_OK);
       mindassert(strcmp(attrValue, expectedStringValues[i]) == 0);
+    } else if (expectedTypes[i] == UNKNOWN_ATTR_TYPE) {
+      struct s1 attrValue;
+      mindassert(CALL(testedAC, getFcAttribute)(attrNames[i], (void **)&attrValue) == FRACTAL_API_OK);
+      mindassert(attrValue.a == expectedStructValues[i].a);
+      mindassert(attrValue.b == expectedStructValues[i].b);
     }
 
   }

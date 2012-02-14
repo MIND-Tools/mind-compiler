@@ -12,4 +12,6 @@ primitive controller.std.ACSingletonPrimitiveComponent extends controller.attr.A
   attribute int attr1=0;
   attribute int attr2=4;
   attribute string attr3="toto";
+  attribute ../attr/attrType.h:struct s1 attr4;
+  attribute ../attr/attrType.h:struct s1 attr5 = {1, 2};
 }

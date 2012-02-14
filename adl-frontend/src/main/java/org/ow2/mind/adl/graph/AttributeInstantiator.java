@@ -89,6 +89,7 @@ public class AttributeInstantiator extends AbstractDelegatingInstantiator {
         final Map<String, String> attributeValues = new HashMap<String, String>();
         for (final Attribute attribute : attributes) {
           final Value valueNode = attribute.getValue();
+          if (valueNode == null) continue;
           String valueString;
 
           valueString = toValueString(valueNode, argumentValues);

@@ -39,8 +39,8 @@ ComponentDefinitionHeader(definition) ::= <<
 struct __component_<definition.name;format="toCName">_internal_data_t {
 <TypeStructures(definition=definition)>
 <SubComponentStructures(definition=definition)>
-<AttributeStructures(definition=definition)>
 <ControllerStructures(definition=definition)>
+<AttributeStructures(definition=definition)>
 };
 /* End definition of internal component data type */
 
@@ -265,7 +265,7 @@ extern <ComponentTypeName(definitionName=definition.name)> instance_name;
 #define <definition.name;format="toUpperCName">_INIT_INSTANCE(instance_name<AddItfNames(definition=definition)><AddSubComponentNames(definition=definition)><AddAttributeNames(definition=definition)>) \
 <InitializeGlobalControllerStructures(definition=definition)><ComponentTypeName(definitionName=definition.name)> instance_name = { \
   { /* __component_internal_data: */ \
-<InitializeInterfaces(definition=definition)><InitializeComponents(definition=definition)><InitializeAttributes(definition=definition)><InitializeControllerStructures(definition=definition)>  } \
+<InitializeInterfaces(definition=definition)><InitializeComponents(definition=definition)><InitializeControllerStructures(definition=definition)><InitializeAttributes(definition=definition)>  } \
 };
 
 int __component_<definition.name;format="toCName">_factory(void **instance, void *allocItf <ComponentFactoryParameters(definition=definition)>);
@@ -295,7 +295,7 @@ AddSubComponentNames(definition) ::= <<
 >>
 
 AddAttributeNames(definition) ::= <<
-<if (definition.astNodeTypes.("attribute"))><definition.attributes:{, <it.name>}><endif>
+<if (definition.astNodeTypes.("attribute"))><definition.attributes:{<if (it.value)>, <it.name><endif>}><endif>
 >>
 
 
@@ -350,7 +350,7 @@ InitializeComponents(definition) ::= <<
 
 InitializeAttributes(definition) ::= <<
 <if (definition.astNodeTypes.("attribute"))><if (definition.attributes)>    {  /* attributes: */ \
-    <definition.attributes:{/* <it.name> : */ <it.name>};separator=", \\\n      "> \
+    <definition.attributes:{<if (it.value)>/* <it.name> : */ <it.name>, <endif>}> \
     }, \
 <endif><endif>
 >>
