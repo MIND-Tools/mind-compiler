@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.ow2.mind</groupId>
         <artifactId>mind-parent</artifactId>
-        <version>5</version>
+        <version>6</version>
     </parent>
 
     <artifactId>mind-compiler</artifactId>
@@ -654,7 +654,7 @@
 
             <activation>
                 <property>
-                    <name>performRelease</name>
+                    <name>mindRelease</name>
                     <value>true</value>
                 </property>
             </activation>
