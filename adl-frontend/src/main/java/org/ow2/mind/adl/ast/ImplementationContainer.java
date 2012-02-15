@@ -30,6 +30,12 @@ public interface ImplementationContainer extends Node {
 
   void setData(Data data);
 
+  DataField[] getDataFields();
+
+  void addDataField(DataField dataField);
+
+  void removeDataField(DataField dataField);
+
   Source[] getSources();
 
   void addSource(Source source);

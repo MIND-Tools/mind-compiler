@@ -32,6 +32,7 @@ import org.objectweb.fractal.adl.types.TypeInterface;
 import org.objectweb.fractal.adl.types.TypeInterfaceUtil;
 import org.ow2.mind.adl.ast.ASTHelper;
 import org.ow2.mind.adl.ast.Data;
+import org.ow2.mind.adl.ast.DataField;
 import org.ow2.mind.adl.ast.ImplementationContainer;
 import org.ow2.mind.adl.idl.InterfaceDefinitionDecorationHelper;
 import org.ow2.mind.error.ErrorManager;
@@ -55,6 +56,34 @@ public class CPLChecker {
 
   public void prvDecl(final String structContent, final String sourceFile) {
     prvDeclared = true;
+  }
+
+  // returns 'true' is the accessed field is a DataField declared in definition.
+  public boolean prvAccess(final Token fieldName, final String sourceFile)
+      throws ADLException {
+    if (definition == null) {
+      // Add this condition so that the testNG will not throw exceptions
+      // (stand-alone node)
+      return false;
+    }
+    if (definition instanceof ImplementationContainer) {
+      for (final DataField dataField : ((ImplementationContainer) definition)
+          .getDataFields()) {
+        if (fieldName.getText().equals(dataField.getName())) {
+          return true;
+        }
+      }
+      // field name not found in DataFields
+      if (data != null) {
+        // component also declare a PRIVATE structure. assumes that field is in
+        // this structure
+        return false;
+      }
+      // component does not have PRIVATE structure, the field name is invalid.
+      errorManager.logError(MPPErrors.UNKNOWN_DATAFIELD,
+          locator(fieldName, sourceFile), fieldName.getText());
+    }
+    return false;
   }
 
   public void serverMethDef(final Token itfName, final Token methName,

@@ -341,10 +341,22 @@ protected structfield
 	;
 
 protected privateAccess returns [StringBuilder res = new StringBuilder()]
-    : PRIVATE ws1=ws* '.'
+    : PRIVATE ws1=ws* '.' ws2=ws* field=ID
       {
         if (singletonMode) $res.append($text); 
-        else $res.append("CONTEXT_PTR_ACCESS").append(wstext($ws1.text)).append("->"); 
+        else {
+          boolean isDataField;
+          try {
+	    	isDataField = cplChecker.prvAccess($field, getSourceFile());
+	      } catch (ADLException e) {
+	        isDataField = false;
+	      }
+	      if (isDataField) {
+	      	$res.append("DATA_FIELD_ACCESS(").append(wstext($ws1.text)).append(wstext($ws2.text)).append($field.text).append(")");
+	      } else {
+            $res.append("CONTEXT_PTR_ACCESS").append(wstext($ws1.text)).append("->").append(wstext($ws2.text)).append($field.text);
+	      }
+        } 
       }
     | {singletonMode==true}? PRIVATE { $res.append($text); } 
     ;

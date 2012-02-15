@@ -532,8 +532,18 @@ void CompoundFieldName() : {}
 void DataDefinition() : {}
 {
   Annotations()
-  <DATA> ( Path() | <INLINED_CODE> )
+  <DATA> ( LOOKAHEAD(FlowType()) DataField() | DataFile() )
   [ <SEMICOLON> ]
+}
+
+void DataFile() : {}
+{
+  Path() | <INLINED_CODE>
+}
+
+void DataField() : {}
+{
+  FlowType() <IDENTIFIER>
 }
 
 /******************************************************************************/

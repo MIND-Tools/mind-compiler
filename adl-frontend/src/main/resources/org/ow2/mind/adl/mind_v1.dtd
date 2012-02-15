@@ -51,6 +51,8 @@
 
 <?add ast="data"      itf="org.ow2.mind.adl.ast.Data" ?>
 
+<?add ast="dataField" itf="org.ow2.mind.adl.ast.DataField" ?>
+
 <?add ast="source"    itf="org.ow2.mind.adl.ast.Source" ?>
 
 <?add ast="component" itf="org.ow2.mind.adl.ast.Component" ?>
@@ -135,6 +137,7 @@
 <?add ast="interface" itf="org.ow2.mind.annotation.ast.AnnotationContainer" ?>
 <?add ast="attribute" itf="org.ow2.mind.annotation.ast.AnnotationContainer" ?>
 <?add ast="data"      itf="org.ow2.mind.annotation.ast.AnnotationContainer" ?>
+<?add ast="dataField" itf="org.ow2.mind.annotation.ast.AnnotationContainer" ?>
 <?add ast="source"    itf="org.ow2.mind.annotation.ast.AnnotationContainer" ?>
 <?add ast="component" itf="org.ow2.mind.annotation.ast.AnnotationContainer" ?>
 <?add ast="binding"   itf="org.ow2.mind.annotation.ast.AnnotationContainer" ?>
@@ -188,7 +191,7 @@
   name CDATA #REQUIRED
 >
 
-<!ELEMENT primitive (import*, annotation*, parameter*, extends?, (interface | attribute)*, data?, source* ) >
+<!ELEMENT primitive (import*, annotation*, parameter*, extends?, (interface | attribute)*, data?, dataField*, source* ) >
 <!ATTLIST primitive
   name CDATA #REQUIRED
   isAbstract (true|false) "false"
@@ -257,6 +260,13 @@
   cCode CDATA #IMPLIED
 >
 
+<!ELEMENT dataField ( annotation* ) >
+<!ATTLIST dataField
+  name CDATA #REQUIRED
+  idt CDATA #IMPLIED
+  type CDATA #IMPLIED
+>
+
 <!ELEMENT source ( annotation* ) >
 <!ATTLIST source
   path CDATA #IMPLIED
@@ -269,7 +279,7 @@
   typeParameter CDATA #IMPLIED
 >
 
-<!ELEMENT anonymousPrimitive (annotation*, extends?, (interface | attribute)*, data?, source*  ) >
+<!ELEMENT anonymousPrimitive (annotation*, extends?, (interface | attribute)*, data?, dataField*, source*  ) >
 <!ATTLIST anonymousPrimitive
   name CDATA #IMPLIED
 >

@@ -73,6 +73,10 @@ public enum MPPErrors implements ErrorTemplate {
   MISSING_PRIVATE_DECLARATION(9,
       "Missing declaration of PRIVATE structure in \"%s\".", "<data file name>"),
 
+  /** */
+  UNKNOWN_DATAFIELD(10, "Invalid PRIVATE access, no such field \"%s\".",
+      "<fieldName>"),
+
   ;
 
   /** The groupId of ErrorTemplates defined in this enumeration. */

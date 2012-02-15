@@ -234,6 +234,11 @@ public enum ADLErrors implements ErrorTemplate {
   /** */
   MULTIPLE_DATA(68, "\"data\" declaration can only appear at most once."),
 
+  /** */
+  DUPLICATED_DATAFIELD(69,
+      "Redifinition of data field \"%s\" (previously defined at \"%s\").",
+      "<name>", "<location>"),
+
   // ---------------------------------------------------------------------------
   // Parameter errors (70-89)
   // ---------------------------------------------------------------------------

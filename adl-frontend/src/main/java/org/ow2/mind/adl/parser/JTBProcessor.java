@@ -52,6 +52,7 @@ import org.ow2.mind.adl.ast.BindingContainer;
 import org.ow2.mind.adl.ast.Component;
 import org.ow2.mind.adl.ast.ComponentContainer;
 import org.ow2.mind.adl.ast.Data;
+import org.ow2.mind.adl.ast.DataField;
 import org.ow2.mind.adl.ast.DefinitionReference;
 import org.ow2.mind.adl.ast.DefinitionReferenceContainer;
 import org.ow2.mind.adl.ast.ImplementationContainer;
@@ -89,6 +90,7 @@ import org.ow2.mind.adl.jtb.syntaxtree.CompoundAttributeValue;
 import org.ow2.mind.adl.jtb.syntaxtree.CompoundAttributeValueField;
 import org.ow2.mind.adl.jtb.syntaxtree.CompoundFieldName;
 import org.ow2.mind.adl.jtb.syntaxtree.DataDefinition;
+import org.ow2.mind.adl.jtb.syntaxtree.DataFile;
 import org.ow2.mind.adl.jtb.syntaxtree.ExtendedCompositeDefinitions;
 import org.ow2.mind.adl.jtb.syntaxtree.ExtendedPrimitiveDefinitions;
 import org.ow2.mind.adl.jtb.syntaxtree.ExtendedTypeDefinitions;
@@ -685,9 +687,13 @@ public class JTBProcessor extends GJDepthFirst<Node, Node>
       if (argu instanceof MindInterface) {
         final MindInterface itf = castNodeError(argu, MindInterface.class);
         itf.setSignature(((NodeToken) type.f0.choice).tokenImage);
-      } else { // This should be an attribute definition
-        final Attribute attr = castNodeError(argu, Attribute.class);
+      } else if (argu instanceof Attribute) {
+        final Attribute attr = (Attribute) argu;
         attr.setType(((NodeToken) type.f0.choice).tokenImage);
+      } else {
+        // This should be a data field
+        final DataField dataField = castNodeError(argu, DataField.class);
+        dataField.setType(((NodeToken) type.f0.choice).tokenImage);
       }
     } else {
       assert n.f0.choice instanceof IDTType;
@@ -708,10 +714,15 @@ public class JTBProcessor extends GJDepthFirst<Node, Node>
     if (argu instanceof MindInterface) {
       final MindInterface itf = (MindInterface) argu;
       itf.setSignature(idt + ":" + type);
-    } else { // This should be an attribute definition
-      final Attribute attr = castNodeError(argu, Attribute.class);
+    } else if (argu instanceof Attribute) {
+      final Attribute attr = (Attribute) argu;
       attr.setIdt(idt);
       attr.setType(type);
+    } else {
+      // This should be a data field
+      final DataField dataField = castNodeError(argu, DataField.class);
+      dataField.setIdt(idt);
+      dataField.setType(type);
     }
 
     return argu;
@@ -803,32 +814,73 @@ public class JTBProcessor extends GJDepthFirst<Node, Node>
   public Node visit(final DataDefinition n, final Node argu) {
     assert argu != null;
 
-    final Data data = (Data) newNode("data", n);
+    // process DataField() | DataFile()
+    if (n.f2.choice instanceof org.ow2.mind.adl.jtb.syntaxtree.DataField) {
+      final DataField dataField = (DataField) newNode("dataField", n);
+      // process annotations
+      n.f0.accept(this, dataField);
 
+      // process DataField
+      n.f2.accept(this, dataField);
+
+      castNodeError(argu, ImplementationContainer.class)
+          .addDataField(dataField);
+      return dataField;
+    } else {
+      final Data data = (Data) newNode("data", n);
+
+      // process annotations
+      n.f0.accept(this, data);
+
+      // process DataFile
+      n.f2.accept(this, data);
+      final ImplementationContainer implContainer = castNodeError(argu,
+          ImplementationContainer.class);
+      if (implContainer.getData() != null) {
+        try {
+          errorManager.logError(org.ow2.mind.adl.ADLErrors.MULTIPLE_DATA, data);
+        } catch (final ADLException e) {
+          // ignore.
+        }
+      }
+      implContainer.setData(data);
+      return data;
+    }
+
+  }
+
+  @Override
+  public Node visit(final DataFile n, final Node argu) {
+    assert argu != null;
+
+    final Data data = castNodeError(argu, Data.class);
     // process Path() | <CCode>
-    if (n.f2.choice instanceof NodeToken) {
-      assert ((NodeToken) n.f2.choice).kind == INLINED_CODE;
-      final String inlinedCCode = ((NodeToken) n.f2.choice).tokenImage;
+    if (n.f0.choice instanceof NodeToken) {
+      assert ((NodeToken) n.f0.choice).kind == INLINED_CODE;
+      final String inlinedCCode = ((NodeToken) n.f0.choice).tokenImage;
       data.setCCode(inlinedCCode.substring(2, inlinedCCode.length() - 2));
     } else {
-      assert n.f2.choice instanceof Path;
-      data.setPath(path((Path) n.f2.choice));
+      assert n.f0.choice instanceof Path;
+      data.setPath(path((Path) n.f0.choice));
     }
-    // process annotations
-    n.f0.accept(this, data);
-
-    final ImplementationContainer implContainer = castNodeError(argu,
-        ImplementationContainer.class);
-    if (implContainer.getData() != null) {
-      try {
-        errorManager.logError(org.ow2.mind.adl.ADLErrors.MULTIPLE_DATA, data);
-      } catch (final ADLException e) {
-        // ignore.
-      }
-    }
-    implContainer.setData(data);
 
     return data;
+  }
+
+  @Override
+  public Node visit(final org.ow2.mind.adl.jtb.syntaxtree.DataField n,
+      final Node argu) {
+    assert argu != null;
+
+    final DataField dataField = castNodeError(argu, DataField.class);
+
+    // process FlowType
+    n.f0.accept(this, dataField);
+
+    // set name
+    dataField.setName(n.f1.tokenImage);
+
+    return dataField;
   }
 
   // ---------------------------------------------------------------------------

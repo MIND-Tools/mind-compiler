@@ -33,6 +33,12 @@ ComponentDefinitionHeader(definition) ::= <<
 /* End including the attribute IDT */
 <endif>
 
+<if (definition.astNodeTypes.("dataField"))>
+/* Start including the data field IDT */
+<definition.dataFields:{<if (it.idt)>#include "<it.idt; format="toCPath">"<endif>}; separator="\n">
+/* End including the data field IDT */
+<endif>
+
 <ControllerGlobalDecls(definition=definition)>
 
 /* Start definition of internal component data type */
@@ -41,6 +47,7 @@ struct __component_<definition.name;format="toCName">_internal_data_t {
 <SubComponentStructures(definition=definition)>
 <ControllerStructures(definition=definition)>
 <AttributeStructures(definition=definition)>
+<DataFieldStructures(definition=definition)>
 };
 /* End definition of internal component data type */
 
@@ -147,6 +154,25 @@ AttributeDecl(attr) ::= <<
 attrTypeNameMap ::= [
   "string" : "const char*"
 ]
+
+
+DataFieldStructures(definition) ::= <<
+<if (definition.astNodeTypes.("dataField"))>
+<if (definition.dataFields)>
+  struct {
+    <definition.dataFields:DataFieldDecl(dataField=it); separator="\n">
+  } dataFields;
+<endif>
+<endif>
+>>
+
+DataFieldDecl(dataField) ::= <<
+<if (attrTypeNameMap.(dataField.type))>
+<attrTypeNameMap.(dataField.type)> <dataField.name>;
+<else>
+<dataField.type> <dataField.name>;
+<endif>
+>>
 
 
 ControllerStructures(definition) ::= <<

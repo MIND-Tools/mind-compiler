@@ -50,6 +50,8 @@ import org.ow2.mind.adl.jtb.syntaxtree.CompoundAttributeValue;
 import org.ow2.mind.adl.jtb.syntaxtree.CompoundAttributeValueField;
 import org.ow2.mind.adl.jtb.syntaxtree.CompoundFieldName;
 import org.ow2.mind.adl.jtb.syntaxtree.DataDefinition;
+import org.ow2.mind.adl.jtb.syntaxtree.DataField;
+import org.ow2.mind.adl.jtb.syntaxtree.DataFile;
 import org.ow2.mind.adl.jtb.syntaxtree.ExtendedCompositeDefinitions;
 import org.ow2.mind.adl.jtb.syntaxtree.ExtendedPrimitiveDefinitions;
 import org.ow2.mind.adl.jtb.syntaxtree.ExtendedTypeDefinitions;
@@ -424,6 +426,16 @@ public class EndTokenVisitor extends GJNoArguDepthFirst<NodeToken> {
     if (t != null) return t;
 
     return n.f2.accept(this);
+  }
+
+  @Override
+  public NodeToken visit(final DataField n) {
+    return n.f1.accept(this);
+  }
+
+  @Override
+  public NodeToken visit(final DataFile n) {
+    return n.f0.accept(this);
   }
 
   @Override
