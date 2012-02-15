@@ -120,7 +120,7 @@
             <id>src-packages</id>
             <activation>
                 <property>
-                    <name>performRelease</name>
+                    <name>mindRelease</name>
                     <value>true</value>
                 </property>
             </activation>
@@ -193,7 +193,7 @@
             <id>release</id>
             <activation>
                 <property>
-                    <name>performRelease</name>
+                    <name>mindRelease</name>
                     <value>true</value>
                 </property>
             </activation>
