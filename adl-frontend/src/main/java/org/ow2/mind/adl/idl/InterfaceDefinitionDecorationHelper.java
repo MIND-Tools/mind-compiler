@@ -36,12 +36,10 @@ import java.util.Set;
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.CompilerError;
 import org.objectweb.fractal.adl.Definition;
-import org.objectweb.fractal.adl.Loader;
 import org.objectweb.fractal.adl.Node;
 import org.objectweb.fractal.adl.error.GenericErrors;
 import org.objectweb.fractal.adl.types.TypeInterface;
 import org.ow2.mind.NodeContainerDecoration;
-import org.ow2.mind.adl.ast.DefinitionReference;
 import org.ow2.mind.idl.IDLLoader;
 import org.ow2.mind.idl.ast.IDL;
 import org.ow2.mind.idl.ast.InterfaceDefinition;
@@ -62,7 +60,7 @@ public class InterfaceDefinitionDecorationHelper {
    * @param itf a typed interface.
    * @param resolvedItfDef the interface definition corresponding to the
    *          signature of given interface.
-   * @see #getResolvedInterfaceDefinition(DefinitionReference, Loader, Map)
+   * @see #getResolvedInterfaceDefinition(TypeInterface, IDLLoader, Map)
    */
   public static void setResolvedInterfaceDefinition(final TypeInterface itf,
       final InterfaceDefinition resolvedItfDef) {

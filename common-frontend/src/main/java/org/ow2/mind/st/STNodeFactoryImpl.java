@@ -29,8 +29,7 @@ import org.objectweb.fractal.adl.NodeFactoryImpl;
 /**
  * A {@link NodeFactory} component that uses {@link AbstractSTNode} as default
  * base class of generated node classes. So nodes created by this node factory
- * are directly suitable for StringTemplate and do not need to be transformed
- * using the {@link StringTemplateASTTransformer}.
+ * are directly suitable for StringTemplate.
  */
 public class STNodeFactoryImpl extends NodeFactoryImpl {
 

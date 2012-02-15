@@ -52,7 +52,7 @@ public interface InputResourceLocator {
    * @return <code>true</code> if the given timestamp is greater that the
    *         timestamps of the given input resources.
    * @see File#lastModified()
-   * @see #isUpToDate(long, Collection)
+   * @see #isUpToDate(long, Collection, Map)
    */
   boolean isUpToDate(File file, Collection<InputResource> inputs,
       Map<Object, Object> context);
@@ -63,13 +63,13 @@ public interface InputResourceLocator {
    * {@link InputResource} can't be located, this method return
    * <code>false</code>.
    * 
-   * @param file a file to check.
+   * @param url a URL to check.
    * @param inputs a collection of input resources.
    * @return <code>true</code> if the given timestamp is greater that the
    *         timestamps of the given input resources.
    * @throws MalformedURLException
    * @see InputResourcesHelper#getTimestamp(URL)
-   * @see #isUpToDate(long, Collection)
+   * @see #isUpToDate(long, Collection, Map)
    */
   boolean isUpToDate(URL url, Collection<InputResource> inputs,
       Map<Object, Object> context) throws MalformedURLException;

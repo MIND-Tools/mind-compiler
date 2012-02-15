@@ -20,8 +20,11 @@
     <figure id="comfe-valuesast-fig">
       <title>AST structure for value support</title>
       <mediaobject>
-        <imageobject>
+        <imageobject role="fo">
           <imagedata fileref="images/ASTValue.svg"  scale="30" align="center"/>
+        </imageobject>
+        <imageobject role="html">
+          <imagedata fileref="images/ASTValue.png" align="center"/>
         </imageobject>
       </mediaobject>
     </figure>
@@ -38,8 +41,11 @@
     <figure id="comfe-annoast-fig">
       <title>AST structure for annotation support</title>
       <mediaobject>
-        <imageobject>
+        <imageobject role="fo">
           <imagedata fileref="images/ASTAnnotation.svg"  scale="30" align="center"/>
+        </imageobject>
+        <imageobject role="html">
+          <imagedata fileref="images/ASTAnnotation.png" align="center"/>
         </imageobject>
         <caption>
           <blockquote>
