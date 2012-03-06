@@ -372,7 +372,7 @@ protected itfMethCall returns [StringBuilder res = new StringBuilder()]
     ;
 		
 protected collItfMethCall returns [StringBuilder res = new StringBuilder()]
-    : CALL ws1=ws* '(' ws2=ws* itf=ID ws3=ws* index ws4=ws* ',' ws5=ws meth=ID ws6=ws* ')' ws7=ws* params
+    : CALL ws1=ws* '(' ws2=ws* itf=ID ws3=ws* index ws4=ws* ',' ws5=ws* meth=ID ws6=ws* ')' ws7=ws* params
       {
         try {
           cplChecker.collItfMethCall($itf, $meth, $index.res, getSourceFile());
