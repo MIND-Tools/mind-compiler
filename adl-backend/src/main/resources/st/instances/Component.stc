@@ -1,6 +1,8 @@
 template st.instances.Component : st.common.ComponentHelper
 implements st.instances.ComponentInstances{
 
+st.membrane.ControllerGenerator ctrlGenerator = plugin(st.membrane);
+
 $${
 
 isClient ::= [ "client" : "true" ]
@@ -118,6 +120,7 @@ InitInstance(definition, instance) ::= <<
   <AddItfValues(definition=definition, instance=instance)>
   <AddSubComponentValues(definition=definition, instance=instance)>
   <AddAttributeValues(definition=definition, instance=instance)>
+  <AddControllersValues(definition=definition, instance=instance)>
 );
 >>
 
@@ -204,6 +207,17 @@ AddSubComponentValues(definition, instance) ::= <<
 AddSubComponentValue(definition, instance, subComponent) ::= <<
 , <subComponent.decorations.("instance-name"); format="toCName">
 >>
+
+AddControllersValues(definition, instance) ::= <<
+<if (definition.astNodeTypes.("controller"))>
+<definition.controllers:AddControllerValues(definition=definition, ctrl=it, instance=instance)>
+<endif>
+>>
+
+AddControllerValues(definition, ctrl, instance) ::= <<
+<ctrl.sources:{<(ctrlGenerator.(it.path).ControllerDataNamedInit)(definition=definition, controller=ctrl, instance=instance)>}>
+>>
+
 
 ConstructorCalls(definition, instances) ::= <<
 #ifdef CONSTRUCTOR_METHOD_IMPLEMENTED
