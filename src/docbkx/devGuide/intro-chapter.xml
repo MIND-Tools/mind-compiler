@@ -8,50 +8,107 @@
   <title>
       Introduction
   </title>
-  <para>The &productName; tool-chain is based on the <ulink url="&fractalADLDoc;">FractalADL</ulink>
-      framework. So the &productName; tool-chain is itself a component-based application written in
-      <emphasis>Java</emphasis>.
+  <para>
+  &productName; is an extensible source-to-source compilation toolset.
+  It is meant to translate component-based programs written in C, whose 
+  structure is captured using an Architecture and Interface Description Language
+  (ADL and IDL) to pure C code. It also manages the compilation of the output C
+  code for various target platforms. 
   </para>
   <para>
-    The &productName;
-    tool-chain is composed of several modules :
+  The major feature of &productName; is its ability to be extended to support
+  new concepts which are required for a specific domain of application. This can
+  be done either by adding annotation to the extensible ADL of &productName;, or
+  by adding new input languages which are supported by the toolset.
+  </para>
+  <para>
+  The main challenge of such extensible compilation toolsets is the inflation of
+  concepts that are captured in the input language and/or the number of different 
+  target platforms to be supported. &productName; deals with this challenge using
+  an extremely modular architecture that is integrated using a flexible plugin 
+  framework. This architecture allows any external user to develop plugins for 
+  &productName; in order to support new concepts in the input language, to extend
+  the kind of verifications and code enhancements that are already provided or 
+  to re-target
+  the generated output code for optimization or other purposes.
+  </para>
+  
+  <section>
+  <title> General overview</title>
+  
+  <para>
+  &productName; is written in Java leveraging on the <ulink url="&fractalADLDoc;">FractalADL</ulink>
+      framework. So the &productName;. It is composed of various Maven modules. 
+  </para>
+  <para>
+    The summary of these modules is as follows:
     <itemizedlist>
       <listitem>
-        <para><application>ADL and IDL parsers</application> defines the grammars of the two
-          languages.
+      <para>
+      <application>adl-parser</application> defines the grammar of the &productName;
+      ADL language.
+      </para>
+      </listitem>
+      <listitem>
+        <para><application>idl-parser</application> defines the &productName;
+        IDL language.
         </para>
       </listitem>
       <listitem>
-        <para><application>ADL and IDL frontends</application> contains components for the
-          verification and the enhancement of ADL and IDL files.
+      <para>
+      	<application>common-frontend</application> contains the common components 
+      	of the compiler frontend. 
+      </para>
+      </listitem>
+	  <listitem>
+	  <para>
+	  <application>annotations</application> contains the implementation of the
+	  extensible annotation mechanism which is supported by the &productName;
+	  ADL language.
+	  </para>
+	  </listitem>
+      <listitem>
+      <para>
+      <application>adl-frontend and idl-frontend</application> contain the components that transforms
+      the ADL and IDL syntex trees to an extensible semantic tree which can be used for various purposes,
+      such as verification and code generation.
+      </para>
+      </listitem>
+      <listitem>
+      <para>
+      <application>common-backend</application> contain the main components
+      which are used for generating the output code. 
+      </para>
+      </listitem>
+      <listitem>
+        <para><application>adl-backend and idl-backend</application> contain 
+        the code generators that translate the input ADL and IDL semantic trees
+        into C code.
         </para>
       </listitem>
       <listitem>
-        <para><application>ADL and IDL backends</application> contains components for the
-          generation and the compilation of C sourceCode.
+        <para><application>cpl-preproc</application>  implements a custom
+        C pre-processor which allows to do some analysis on the input implementation files
+        which are written in C.
         </para>
       </listitem>
       <listitem>
-        <para><application>Common frontend and backend</application> contains components shared by
-          ADL and IDL frontend and backend modules.</para>
-      </listitem>
-      <listitem>
-        <para><application>cpl-preproc</application> : the specialized C preprocessor.</para>
-      </listitem>
-      <listitem>
-        <para><application>fractal-runtime</application> : the source code of the minimal runtime
-          required by fractal components.</para>
+        <para><application>fractal-runtime</application>  provides 
+        a minimal runtime required by fractal components written using the 
+        &productName; toolset.</para>
       </listitem>
       <listitem>
         <para>
           <application>mindc</application> : The integration module that contains the main class
-          of the <command>mindc</command> command.
+          implementing the the <command>mindc</command> command line interface.
         </para>
       </listitem>
       <listitem>
-        <para><application>plugin</application> module contains the core plugin system.</para>
+        <para><application>plugin</application> module contains the core plugin system
+        which is used to host plugins that are developed by third party users.</para>
       </listitem>
     </itemizedlist>
   </para>
+  </section>
 
 </chapter>
