@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.0//EN" "http://www.w3.org/TR/2001/PR-SVG-20010719/DTD/svg10.dtd">
+<svg width="52cm" height="43cm" viewBox="2 -128 1039 846" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <g>
+    <rect style="fill: #ffffff" x="746.4" y="155.3" width="127.6" height="70"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="746.4" y="155.3" width="127.6" height="70"/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="810.2" y="179.1">
+      <tspan x="810.2" y="179.1">Definition</tspan>
+      <tspan x="810.2" y="195.1">Source Generator</tspan>
+      <tspan x="810.2" y="211.1">Dispatcher</tspan>
+    </text>
+  </g>
+  <text font-size="12.7998" style="fill: #000000;text-anchor:start;font-family:sans-serif;font-style:normal;font-weight:normal" x="810.2" y="190.3">
+    <tspan x="810.2" y="190.3"></tspan>
+  </text>
+  <g>
+    <rect style="fill: #ffffff" x="762" y="646.3" width="116.675" height="70"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="762" y="646.3" width="116.675" height="70"/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="820.337" y="670.1">
+      <tspan x="820.337" y="670.1">Instance Source</tspan>
+      <tspan x="820.337" y="686.1">Generator</tspan>
+      <tspan x="820.337" y="702.1">Dispatcher</tspan>
+    </text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="929.5" y="-126.7" width="109.05" height="70"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="929.5" y="-126.7" width="109.05" height="70"/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="984.025" y="-102.9">
+      <tspan x="984.025" y="-102.9">Definition</tspan>
+      <tspan x="984.025" y="-86.9">Header Source </tspan>
+      <tspan x="984.025" y="-70.9">Generator</tspan>
+    </text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="929.175" y="-39.7" width="110.825" height="70"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="929.175" y="-39.7" width="110.825" height="70"/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="984.588" y="-15.9">
+      <tspan x="984.588" y="-15.9">Definition</tspan>
+      <tspan x="984.588" y="0.1">IncSource </tspan>
+      <tspan x="984.588" y="16.1">Generator</tspan>
+    </text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="927.938" y="52.3" width="111.35" height="70"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="927.938" y="52.3" width="111.35" height="70"/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="983.613" y="76.1">
+      <tspan x="983.613" y="76.1">Implementation</tspan>
+      <tspan x="983.613" y="92.1">Header Source </tspan>
+      <tspan x="983.613" y="108.1">Generator</tspan>
+    </text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="928.4" y="135.6" width="110.825" height="70"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="928.4" y="135.6" width="110.825" height="70"/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="983.813" y="159.4">
+      <tspan x="983.813" y="159.4">Definition</tspan>
+      <tspan x="983.813" y="175.4">Macro Source </tspan>
+      <tspan x="983.813" y="191.4">Generator</tspan>
+    </text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="929" y="221.9" width="110" height="70"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="929" y="221.9" width="110" height="70"/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="984" y="245.7">
+      <tspan x="984" y="245.7">Membrane </tspan>
+      <tspan x="984" y="261.7">Source </tspan>
+      <tspan x="984" y="277.7">Generator</tspan>
+    </text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="928.8" y="315.2" width="110.825" height="70"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="928.8" y="315.2" width="110.825" height="70"/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="984.213" y="339">
+      <tspan x="984.213" y="339">IDL Definition</tspan>
+      <tspan x="984.213" y="355">Source </tspan>
+      <tspan x="984.213" y="371">Generator</tspan>
+    </text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="929" y="397.5" width="110.825" height="70"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="929" y="397.5" width="110.825" height="70"/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="984.413" y="421.3">
+      <tspan x="984.413" y="421.3">Gen. Definition</tspan>
+      <tspan x="984.413" y="437.3">Name Source </tspan>
+      <tspan x="984.413" y="453.3">Generator</tspan>
+    </text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="928.2" y="483.8" width="110.825" height="70"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="928.2" y="483.8" width="110.825" height="70"/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="983.613" y="507.6">
+      <tspan x="983.613" y="507.6">Binary</tspan>
+      <tspan x="983.613" y="523.6">ADL</tspan>
+      <tspan x="983.613" y="539.6">Writer</tspan>
+    </text>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="874,190.3 901.75,190.3 901.75,-91.7 918.5,-91.7 "/>
+    <polygon style="fill: #000000" points="918.5,-86.7 928.5,-91.7 918.5,-96.7 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="918.5,-86.7 928.5,-91.7 918.5,-96.7 "/>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="874,190.3 901.588,190.3 901.588,-4.7 918.175,-4.7 "/>
+    <polygon style="fill: #000000" points="918.175,0.3 928.175,-4.7 918.175,-9.7 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="918.175,0.3 928.175,-4.7 918.175,-9.7 "/>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="874,190.3 900.969,190.3 900.969,87.3 916.938,87.3 "/>
+    <polygon style="fill: #000000" points="916.938,92.3 926.938,87.3 916.938,82.3 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="916.938,92.3 926.938,87.3 916.938,82.3 "/>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="874,190.3 901.2,190.3 901.2,170.6 917.4,170.6 "/>
+    <polygon style="fill: #000000" points="917.4,175.6 927.4,170.6 917.4,165.6 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="917.4,175.6 927.4,170.6 917.4,165.6 "/>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="874,190.3 901.5,190.3 901.5,256.9 918,256.9 "/>
+    <polygon style="fill: #000000" points="918,261.9 928,256.9 918,251.9 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="918,261.9 928,256.9 918,251.9 "/>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="874,190.3 901.4,190.3 901.4,350.2 917.8,350.2 "/>
+    <polygon style="fill: #000000" points="917.8,355.2 927.8,350.2 917.8,345.2 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="917.8,355.2 927.8,350.2 917.8,345.2 "/>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="874,190.3 901.5,190.3 901.5,432.5 918,432.5 "/>
+    <polygon style="fill: #000000" points="918,437.5 928,432.5 918,427.5 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="918,437.5 928,432.5 918,427.5 "/>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="874,190.3 901.1,190.3 901.1,518.8 917.2,518.8 "/>
+    <polygon style="fill: #000000" points="917.2,523.8 927.2,518.8 917.2,513.8 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="917.2,523.8 927.2,518.8 917.2,513.8 "/>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="928.2" y="646.688" width="110" height="70"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="928.2" y="646.688" width="110" height="70"/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="983.2" y="670.488">
+      <tspan x="983.2" y="670.488">Basic Instance </tspan>
+      <tspan x="983.2" y="686.488">Source </tspan>
+      <tspan x="983.2" y="702.488">Generator</tspan>
+    </text>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="878.675,681.3 902.934,681.3 902.934,681.688 916.193,681.688 "/>
+    <polygon style="fill: #000000" points="916.193,686.688 926.193,681.688 916.193,676.688 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="916.193,686.688 926.193,681.688 916.193,676.688 "/>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="557.2" y="155.688" width="131.6" height="70"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="557.2" y="155.688" width="131.6" height="70"/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="623" y="179.488">
+      <tspan x="623" y="179.488">Collection Interface</tspan>
+      <tspan x="623" y="195.488">Definition Source</tspan>
+      <tspan x="623" y="211.488">Generator</tspan>
+    </text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="387.8" y="153.388" width="127.6" height="70"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="387.8" y="153.388" width="127.6" height="70"/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="451.6" y="177.188">
+      <tspan x="451.6" y="177.188">Basic </tspan>
+      <tspan x="451.6" y="193.188">Definition</tspan>
+      <tspan x="451.6" y="209.188">Compiler</tspan>
+    </text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="386.8" y="646.388" width="127.6" height="70"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="386.8" y="646.388" width="127.6" height="70"/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="450.6" y="670.188">
+      <tspan x="450.6" y="670.188">Basic </tspan>
+      <tspan x="450.6" y="686.188">Instance</tspan>
+      <tspan x="450.6" y="702.188">Compiler</tspan>
+    </text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="250" y="398.388" width="82.4" height="70"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="250" y="398.388" width="82.4" height="70"/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="291.2" y="422.188">
+      <tspan x="291.2" y="422.188">Basic</tspan>
+      <tspan x="291.2" y="438.188">Graph</tspan>
+      <tspan x="291.2" y="454.188">Compiler</tspan>
+    </text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="120.8" y="398.388" width="82.4" height="70"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="120.8" y="398.388" width="82.4" height="70"/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="162" y="422.188">
+      <tspan x="162" y="422.188">Factory</tspan>
+      <tspan x="162" y="438.188">Graph</tspan>
+      <tspan x="162" y="454.188">Compiler</tspan>
+    </text>
+  </g>
+  <g>
+    <rect style="fill: #ffffff" x="3.8" y="398.388" width="82.4" height="70"/>
+    <rect style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" x="3.8" y="398.388" width="82.4" height="70"/>
+    <text font-size="12.7998" style="fill: #000000;text-anchor:middle;font-family:sans-serif;font-style:normal;font-weight:normal" x="45" y="422.188">
+      <tspan x="45" y="422.188">Basic</tspan>
+      <tspan x="45" y="438.188">Graph</tspan>
+      <tspan x="45" y="454.188">Linker</tspan>
+    </text>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="86.2,433.388 87.2,433.388 119.8,433.388 109.8,433.388 "/>
+    <polygon style="fill: #000000" points="109.8,438.388 119.8,433.388 109.8,428.388 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="109.8,438.388 119.8,433.388 109.8,428.388 "/>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="203.2,433.388 204.2,433.388 249,433.388 239,433.388 "/>
+    <polygon style="fill: #000000" points="239,438.388 249,433.388 239,428.388 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="239,438.388 249,433.388 239,428.388 "/>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="332.4,433.388 360.1,433.388 360.1,188.388 376.8,188.388 "/>
+    <polygon style="fill: #000000" points="376.8,193.388 386.8,188.388 376.8,183.388 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="376.8,193.388 386.8,188.388 376.8,183.388 "/>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="332.4,433.388 359.6,433.388 359.6,681.388 375.8,681.388 "/>
+    <polygon style="fill: #000000" points="375.8,686.388 385.8,681.388 375.8,676.388 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="375.8,686.388 385.8,681.388 375.8,676.388 "/>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="515.4,188.388 516.4,188.388 552,188.388 542,188.388 "/>
+    <polygon style="fill: #000000" points="542,193.388 552,188.388 542,183.388 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="542,193.388 552,188.388 542,183.388 "/>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="688.8,190.688 717.096,190.688 717.096,190.3 734.392,190.3 "/>
+    <polygon style="fill: #000000" points="734.392,195.3 744.392,190.3 734.392,185.3 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="734.392,195.3 744.392,190.3 734.392,185.3 "/>
+  </g>
+  <g>
+    <polyline style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="514.4,681.388 638.2,681.388 638.2,681.3 751,681.3 "/>
+    <polygon style="fill: #000000" points="751,686.3 761,681.3 751,676.3 "/>
+    <polygon style="fill: none; fill-opacity:0; stroke-width: 2; stroke: #000000" points="751,686.3 761,681.3 751,676.3 "/>
+  </g>
+</svg>

@@ -8,14 +8,30 @@
     ADL Backend
     </title>
 
-  <section id="adlbe-ovarch">
+  <section id="adlbe-oview">
     <title>Overall architecture</title>
+      <figure id="adlbe-oview-fig">
+        <title>AST structure for architectural elements </title>
+        <mediaobject>
+          <imageobject role="fo">
+            <imagedata fileref="images/ADLBackend.svg"  scale="30" align="center"/>
+          </imageobject>
+          <imageobject role="html">
+            <imagedata fileref="images/ADLBackend.png" align="center"/>
+          </imageobject>
+          <caption>
+            <blockquote>
+              <para>Structure of the ADL Backend Module.</para>
+            </blockquote>
+          </caption>
+        </mediaobject>
+      </figure>
 
     <para>TODO</para>
-    
+
     <section>
       <title>ADL-backend flow</title>
-  
+
       <para>TODO</para>
     </section>
   </section>
@@ -27,18 +43,18 @@
 
     <section>
       <title>Membrane source-generators</title>
-  
+
       <para>TODO</para>
     </section>
   </section>
-   
+
   <section id="adlbe-inst">
     <title>Instance source-generators</title>
 
     <para>TODO</para>
 
   </section>
-     
+
   <section id="adlbe-comp">
     <title>Compilation drivers</title>
 
