@@ -8,19 +8,82 @@
     Common Backend
     </title>
 
+	<para>
+	The backend of &productName; is in charge of generating and compiling the output code.
+	It is designed as a combination of delegation and visitor patterns.
+	The code generation is organized using the visitor pattern. This allows
+	to implement a modular approach to the code generation, where different
+	components of the backend generate different parts of the output code from the
+	same input AST. The actual code generation is implemented using the String Templates
+	technology. Note that, we developed and extension to the standard String Templates
+	in order to easily implement delegation chains inside the templates.
+	On the other hand, the compilation is implemented using a
+	delegation pattern. The following sections presents details about this architecture.
+	</para>
+
   <section id="combe-visit">
     <title>Generic visitor framework</title>
 
-    <para>TODO</para>
+    <para>The code generation of the &productName; is implemented using
+    a classical visitor pattern. That is, the <emphasis>component graph</emphasis>
+    which is output by the front end is traveled by a dispatcher component,
+    and the latter invokes a set of visitors which are connected to it so
+    that they visit the parts of the AST for generating the code.
+    Thanks to the visitor pattern, the code generation can be split into
+    multiple components in order to make this work in a modular way.
+    </para>
+
+	<para>
+	The visitor pattern is implemented through the generic <codelink class="&mindPkg;.Visitor" jdocurl="&fadlJdoc;" />
+	generic interface. This interface implements the visit method. The input parameter of this
+	interface is a generic type to improve its reusability in different contexts. In the case of the
+	standard adl-backend, the visitor method accepts <code>Definition</code> and <code>ComponentGraph</code>
+	types as input parameters. The output is also designed as a generic parameter. In the case
+	of pur code generation, the output parameter can be <code>null</code>. In some other
+	cases, the visitor may return a <code>CompilationCommand</code> object to describe
+	how the generated code should be compiled.
+	</para>
+
+
   </section>
 
   <section id="combe-comp">
     <title>Compilation framework</title>
 
-    <para>TODO</para>
+    <para>The compilation framework is implemented as a chain of delegation.
+    That is, the upper level visitor (i.e. root visitor) of the backend
+    delegates to the compilation logic to its children components and then
+    it describes how the latter compilation logic can be synthesized.</para>
+    <para>
+    For instance, the root of the backend may be linker component. It would
+    delegate the code generation for component definitions to the lower-level
+    visitors. The definition visitor would generate a different file for each
+    component definition which is found in the application and would return a
+    <code>CompilationCommand</code> object for each definition file that is generated.
+    Then, the linker component would create a list of <code>CompilationCommand</code>
+    objects that it received from its children and it would add a <code>LinkerCommand</code>
+    object to this list to make sure that the definitions that are compiled are finally
+    linked together.
+    </para>
+
+    <para>
+    The execution of these <code>CompilationCommand</code> and <code>LinkerCommand</code>
+    objects are done once the whole list is completed by the delegation chain. Indeed,
+    the root of this chain returns a list of  <code>CompilationCommand</code> commands and
+    this list is passed to the <codelink class="&mindPkg;.compilation.gcc.BasicCompilationCommandExecutor" jdocurl="&fadlJdoc;" />
+    component. This component processes this list to (1) decide which commands should actually
+    be executed (i.e. if the sources didn't change since last compilation, the compilation command is ignored unless it is forced),
+    (2) to define the order of compilation based of the dependency graph which is extracted by the applicaion and
+    finally (3) to execute the selected compilation commands in the correct order.
+    </para>
+    <para>
+    Note that the <codelink class="&mindPkg;.compilation.gcc.BasicCompilationCommandExecutor" jdocurl="&fadlJdoc;" />
+    also manages multiple threads of execution in order to support parallel compilation
+    on multicore workstations.
+    </para>
 
   </section>
-  
+
   <section id="combe-st">
     <title>StringTemplate framework</title>
 
