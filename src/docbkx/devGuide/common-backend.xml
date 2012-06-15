@@ -87,6 +87,82 @@
   <section id="combe-st">
     <title>StringTemplate framework</title>
 
-    <para>TODO</para>
+    <para>
+    &productName; uses a modified version of the String Template framework.
+    This modification consists of adding a component-based structure to the String Template groups.
+    That is, in addition to the inheritence and interface implementation features
+    that are supported by the standard version, &productName; adds the possibility
+    to declare client interfaces. This way, a string template can
+    invoke the templates which are implemented in another group using
+    its client interface.
+    </para>
+
+    <para>
+    The below code excerpt illustrates the structure of a <emphasis>String Template Component</emphasis>,
+    which is written in a <code>.stc</code> file. The header part of the file is not standard
+    string template syntax. it is used for declaring the name and the type of the string template component.
+    The first qualified name (<code>somePackage.MyStc</code>) is the name of the component.
+    The second qualified name following <code>:</code> declares the template component which is extended and is optional.
+    The third qualified name following the <code>implements</code> keyword declares
+    the interface which is implemented by the string template component, and is optional as well.
+    </para>
+
+    <para>
+
+    The following part is used for declaring the client interfaces of the string template component.
+    There are two ways to declare a client interface:
+    </para>
+
+    <variablelist>
+      <varlistentry>
+        <term>Direct binding</term>
+        <listitem><para>One way to declare a client interface is to declare a variable
+        which is assigned to another string template group. An example of this declaration
+        is <code>cItf1</code>. As depicted in the below code excerpt, <code>cItf1</code>
+        is a template variable implementing the  <code>somePackage.Itf2</code> interface
+        and it is assigned to the <code>somePackage.SomeStc</code> string template component.
+        </para></listitem>
+      </varlistentry>
+            <varlistentry>
+        <term>Plugin binding</term>
+        <listitem><para>Another way to declare a client interface is to bind it to a <code>plugin</code>.
+        The <code>plugin</code> is specified using a package name. Once the &productName;
+        compiler is instantiated, all the string template components which are found
+        in this package are bound to the client interface. Therefore, the client interface
+        is actually implemented as a <emphasis>map</emphasis> containing all the
+        string template component belonging to the specified package.
+        </para></listitem>
+      </varlistentry>
+    </variablelist>
+
+<example>
+      <title>
+        Typical implementation of a
+        string template component</title>
+      <programlisting language="java">template somePackage.MyStc: somePackage.MyParentStc
+  implements somePackage.MyInterface {
+
+somePackage.Itf2 cItf2 = somePackage.SomeStc;
+somePackage.Itf1 cItf1 = plugin(somePackage);
+
+$${
+  MyTemplate1(parm) ::= &lt;&lt;
+    &lt;(cItf1.template)(parm=parm)&gt;
+  &gt;&gt;
+
+  MyTemplate2(parm, selector) ::= &lt;&lt;
+    &lt;(cItf1.(selector).template)(parm=parm)&gt;
+  &gt;&gt;
+}$$
+}</programlisting>
+    </example>
+
+	<para>
+	The code which is captured between the <code>$${</code> and <code>}$$</code> delimiters
+	is standard String Template code. The headers may refer to the standard documentation
+	for more information about this language. Note that the client interfaces can be
+	accessed in these templates, as depcicted in the above examples.
+	</para>
+
   </section>
 </chapter>
