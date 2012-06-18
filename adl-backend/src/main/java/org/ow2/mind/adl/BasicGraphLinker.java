@@ -17,7 +17,7 @@
  * Contact: mind@ow2.org
  *
  * Authors: Matthieu Leclercq
- * Contributors: 
+ * Contributors: Julien Tous
  */
 
 package org.ow2.mind.adl;
@@ -42,6 +42,7 @@ import org.ow2.mind.adl.compilation.CompilationCommandFactory;
 import org.ow2.mind.adl.graph.ComponentGraph;
 import org.ow2.mind.adl.implementation.ImplementationLocator;
 import org.ow2.mind.adl.implementation.SharedImplementationDecorationHelper;
+import org.ow2.mind.compilation.AssemblerCommand;
 import org.ow2.mind.compilation.CompilationCommand;
 import org.ow2.mind.compilation.CompilerCommand;
 import org.ow2.mind.compilation.CompilerContextHelper;
@@ -92,6 +93,10 @@ public class BasicGraphLinker implements GraphCompiler {
       result.add(compilationCommand);
       if (compilationCommand instanceof CompilerCommand) {
         command.addInputFiles(((CompilerCommand) compilationCommand)
+            .getOutputFile());
+      }
+      if (compilationCommand instanceof AssemblerCommand) {
+        command.addInputFiles(((AssemblerCommand) compilationCommand)
             .getOutputFile());
       }
     }

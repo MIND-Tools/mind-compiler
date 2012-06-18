@@ -17,7 +17,7 @@
  * Contact: mind@ow2.org
  *
  * Authors: Matthieu Leclercq
- * Contributors: 
+ * Contributors: Julien Tous
  */
 
 package org.ow2.mind.adl.factory;
@@ -79,6 +79,26 @@ public class FactoryFlagExtractor extends AbstractDelegatingFlagExtractor {
   public Collection<String> getCFlags(final Source source,
       final Map<Object, Object> context) throws ADLException {
     return clientExtractorItf.getCFlags(source, context);
+  }
+
+  public Collection<String> getASFlags(final Definition definition,
+      final Map<Object, Object> context) throws ADLException {
+    final Definition instanciatedDefinition = ASTHelper
+        .getFactoryInstantiatedDefinition(definition, loaderItf, context);
+    if (instanciatedDefinition == null) {
+      return clientExtractorItf.getASFlags(definition, context);
+    } else {
+      final List<String> flags = new ArrayList<String>(
+          clientExtractorItf.getASFlags(definition, context));
+      flags.addAll(clientExtractorItf.getASFlags(instanciatedDefinition,
+          context));
+      return flags;
+    }
+  }
+
+  public Collection<String> getASFlags(final Source source,
+      final Map<Object, Object> context) throws ADLException {
+    return clientExtractorItf.getASFlags(source, context);
   }
 
   public Collection<String> getLDFlags(final Definition definition,

@@ -17,7 +17,7 @@
  * Contact: mind@ow2.org
  *
  * Authors: Matthieu Leclercq
- * Contributors: 
+ * Contributors: Julien Tous
  */
 
 package org.ow2.mind.target.ast;
@@ -43,6 +43,10 @@ public interface Target extends Node {
   Compiler getCompiler();
 
   void setCompiler(Compiler compiler);
+
+  Assembler getAssembler();
+
+  void setAssembler(Assembler assembler);
 
   Linker getLinker();
 
@@ -73,4 +77,11 @@ public interface Target extends Node {
   void removeLdFlag(Flag flag);
 
   Flag[] getLdFlags();
+
+  void addAsFlag(Flag flag);
+
+  void removeAsFlag(Flag flag);
+
+  Flag[] getAsFlags();
+
 }

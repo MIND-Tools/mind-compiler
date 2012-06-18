@@ -17,7 +17,7 @@
  * Contact: mind@ow2.org
  *
  * Authors: Matthieu Leclercq
- * Contributors: 
+ * Contributors: Julien Tous
  */
 
 package org.ow2.mind.adl.compilation;
@@ -33,6 +33,7 @@ import org.objectweb.fractal.adl.Definition;
 import org.ow2.mind.adl.FlagExtractor;
 import org.ow2.mind.adl.ast.ASTHelper;
 import org.ow2.mind.adl.graph.ComponentGraph;
+import org.ow2.mind.compilation.AssemblerCommand;
 import org.ow2.mind.compilation.CompilerCommand;
 import org.ow2.mind.compilation.CompilerWrapper;
 import org.ow2.mind.compilation.LinkerCommand;
@@ -115,12 +116,11 @@ public class BasicCompilationCommandFactory
     return command;
   }
 
-  public CompilerCommand newAssemblyCompilerCommand(
-      final Definition definition, final Object source, final File inputFile,
-      final File outputFile, final Map<Object, Object> context)
-      throws ADLException {
-    final CompilerCommand command = compilerWrapperItf
-        .newCompilerCommand(context);
+  public AssemblerCommand newAssemblerCommand(final Definition definition,
+      final Object source, final File inputFile, final File outputFile,
+      final Map<Object, Object> context) throws ADLException {
+    final AssemblerCommand command = compilerWrapperItf
+        .newAssemblerCommand(context);
     command.setOutputFile(outputFile).setInputFile(inputFile)
         .setAllDependenciesManaged(true);
 

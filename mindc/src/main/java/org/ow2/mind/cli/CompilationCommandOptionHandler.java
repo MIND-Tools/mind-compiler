@@ -17,7 +17,7 @@
  * Contact: mind@ow2.org
  *
  * Authors: Matthieu Leclercq
- * Contributors: 
+ * Contributors: Julien Tous
  */
 
 package org.ow2.mind.cli;
@@ -35,9 +35,11 @@ import org.ow2.mind.plugin.util.Assert;
 public class CompilationCommandOptionHandler implements CommandOptionHandler {
 
   /** The ID of the "compiler-command" option. */
-  public static final String COMPILER_COMMAND_ID = "org.ow2.mind.mindc.CompilerCommand";
+  public static final String COMPILER_COMMAND_ID  = "org.ow2.mind.mindc.CompilerCommand";
+  /** The ID of the "assembler-command" option. */
+  public static final String ASSEMBLER_COMMAND_ID = "org.ow2.mind.mindc.AssemblerCommand";
   /** The ID of the "linker-command" option. */
-  public static final String LINKER_COMMAND_ID   = "org.ow2.mind.mindc.LinkerCommand";
+  public static final String LINKER_COMMAND_ID    = "org.ow2.mind.mindc.LinkerCommand";
 
   public void processCommandOption(final CmdOption cmdOption,
       final CommandLine cmdLine, final Map<Object, Object> context)
@@ -62,6 +64,17 @@ public class CompilationCommandOptionHandler implements CommandOptionHandler {
         if (value.length() == 0)
           throw new InvalidCommandLineException("Invalid linker ''", 1);
         CompilerContextHelper.setLinkerCommand(context, value);
+      }
+
+    } else if (ASSEMBLER_COMMAND_ID.equals(cmdOption.getId())) {
+      final CmdArgument assemblerCmdOpt = Assert.assertInstanceof(cmdOption,
+          CmdArgument.class);
+
+      if (assemblerCmdOpt.isPresent(cmdLine)) {
+        final String value = assemblerCmdOpt.getValue(cmdLine);
+        if (value.length() == 0)
+          throw new InvalidCommandLineException("Invalid assembler ''", 1);
+        CompilerContextHelper.setAssemblerCommand(context, value);
       }
 
     } else {
