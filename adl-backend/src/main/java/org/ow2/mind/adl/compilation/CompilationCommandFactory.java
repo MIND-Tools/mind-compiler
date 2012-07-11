@@ -17,7 +17,7 @@
  * Contact: mind@ow2.org
  *
  * Authors: Matthieu Leclercq
- * Contributors: 
+ * Contributors: Julien Tous
  */
 
 package org.ow2.mind.adl.compilation;
@@ -29,6 +29,7 @@ import java.util.Map;
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.Definition;
 import org.ow2.mind.adl.graph.ComponentGraph;
+import org.ow2.mind.compilation.AssemblerCommand;
 import org.ow2.mind.compilation.CompilerCommand;
 import org.ow2.mind.compilation.LinkerCommand;
 import org.ow2.mind.compilation.PreprocessorCommand;
@@ -51,9 +52,9 @@ public interface CompilationCommandFactory {
       File depFile, File outputFile, Map<Object, Object> context)
       throws ADLException;
 
-  CompilerCommand newAssemblyCompilerCommand(Definition definition,
-      Object source, File inputFile, File outputFile,
-      Map<Object, Object> context) throws ADLException;
+  AssemblerCommand newAssemblerCommand(Definition definition, Object source,
+      File inputFile, File outputFile, Map<Object, Object> context)
+      throws ADLException;
 
   LinkerCommand newLinkerCommand(ComponentGraph graph, File outputFile,
       Map<Object, Object> context) throws ADLException;

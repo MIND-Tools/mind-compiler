@@ -17,7 +17,7 @@
  * Contact: mind@ow2.org
  *
  * Authors: Matthieu Leclercq
- * Contributors: 
+ * Contributors: Julien Tous
  */
 
 package org.ow2.mind.compilation;
@@ -53,7 +53,15 @@ public enum CompilerErrors implements ErrorTemplate {
 
   /** */
   LINKER_WARNING(5, "Warning while linking the file \"%s\" : \n%s", "filename",
-      "ouput");
+      "ouput"),
+
+  /** */
+  ASSEMBLER_ERROR(6, "Error while assembling the file \"%s\" : \n%s",
+      "filename", "ouput"),
+
+  /** */
+  ASSEMBLER_WARNING(7, "Warning while assembling the file \"%s\" : \n%s",
+      "filename", "ouput");
 
   /** The groupId of ErrorTemplates defined in this enumeration. */
   public static final String GROUP_ID = "CPI";

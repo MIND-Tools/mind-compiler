@@ -17,7 +17,7 @@
  * Contact: mind@ow2.org
  *
  * Authors: Matthieu Leclercq
- * Contributors: 
+ * Contributors: Julien Tous
  */
 
 package org.ow2.mind;
@@ -127,6 +127,7 @@ public class CompilerRunner {
     final String compiler = System.getProperty(COMPILER_PROPERTY);
     if (compiler != null) {
       CompilerContextHelper.setCompilerCommand(context, compiler);
+      CompilerContextHelper.setAssemblerCommand(context, compiler);
       CompilerContextHelper.setLinkerCommand(context, compiler);
     }
 

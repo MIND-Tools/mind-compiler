@@ -17,7 +17,7 @@
  * Contact: mind@ow2.org
  *
  * Authors: Matthieu Leclercq
- * Contributors: 
+ * Contributors: Julien Tous
  */
 
 package org.ow2.mind.adl;
@@ -48,6 +48,12 @@ public interface FlagExtractor {
       final Map<Object, Object> context) throws ADLException;
 
   Collection<String> getLDFlags(Source source, final Map<Object, Object> context)
+      throws ADLException;
+
+  Collection<String> getASFlags(Definition definition,
+      final Map<Object, Object> context) throws ADLException;
+
+  Collection<String> getASFlags(Source source, final Map<Object, Object> context)
       throws ADLException;
 
   /**

@@ -17,7 +17,7 @@
  * Contact: mind@ow2.org
  *
  * Authors: Matthieu Leclercq
- * Contributors: 
+ * Contributors: Julien Tous
  */
 
 package org.ow2.mind.adl.compilation;
@@ -35,6 +35,7 @@ import org.ow2.mind.adl.ast.ImplementationContainer;
 import org.ow2.mind.adl.ast.Source;
 import org.ow2.mind.adl.compilation.CompilationCommandFactory.AbstractDelegatingCompilationCommandFactory;
 import org.ow2.mind.adl.graph.ComponentGraph;
+import org.ow2.mind.compilation.AssemblerCommand;
 import org.ow2.mind.compilation.CompilerCommand;
 import org.ow2.mind.compilation.LinkerCommand;
 import org.ow2.mind.compilation.PreprocessorCommand;
@@ -109,23 +110,20 @@ public class AnnotationFlagsCompilationCommandFactory
     return command;
   }
 
-  public CompilerCommand newAssemblyCompilerCommand(
-      final Definition definition, final Object source, final File inputFile,
-      final File outputFile, final Map<Object, Object> context)
-      throws ADLException {
-    final CompilerCommand command = factoryDelegate.newAssemblyCompilerCommand(
+  public AssemblerCommand newAssemblerCommand(final Definition definition,
+      final Object source, final File inputFile, final File outputFile,
+      final Map<Object, Object> context) throws ADLException {
+    final AssemblerCommand command = factoryDelegate.newAssemblerCommand(
         definition, source, inputFile, outputFile, context);
 
     if (definition != null) {
-      // Add definition level C-Flags
-      command.addFlags(flagExtractor.getCPPFlags(definition, context));
-      command.addFlags(flagExtractor.getCFlags(definition, context));
+      // Add definition level As-Flags
+      command.addFlags(flagExtractor.getASFlags(definition, context));
     }
 
     if (source instanceof Source) {
-      // Add source level C-Flags
-      command.addFlags(flagExtractor.getCPPFlags((Source) source, context));
-      command.addFlags(flagExtractor.getCFlags((Source) source, context));
+      // Add source level AS-Flags
+      command.addFlags(flagExtractor.getASFlags((Source) source, context));
     }
 
     return command;

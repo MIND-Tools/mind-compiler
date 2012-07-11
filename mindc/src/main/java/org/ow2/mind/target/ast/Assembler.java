@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2009 STMicroelectronics
+ * Copyright (C) 2011 STMicroelectronics
  *
  * This file is part of "Mind Compiler" is free software: you can redistribute 
  * it and/or modify it under the terms of the GNU Lesser General Public License 
@@ -20,17 +20,13 @@
  * Contributors: Julien Tous
  */
 
-package org.ow2.mind.compilation;
+package org.ow2.mind.target.ast;
 
-import java.util.Map;
+import org.objectweb.fractal.adl.Node;
 
-public interface CompilerWrapper {
+public interface Assembler extends Node {
 
-  PreprocessorCommand newPreprocessorCommand(final Map<Object, Object> context);
+  String getPath();
 
-  CompilerCommand newCompilerCommand(final Map<Object, Object> context);
-
-  AssemblerCommand newAssemblerCommand(final Map<Object, Object> context);
-
-  LinkerCommand newLinkerCommand(final Map<Object, Object> context);
+  void setPath(String path);
 }

@@ -17,7 +17,7 @@
  * Contact: mind@ow2.org
  *
  * Authors: Matthieu Leclercq
- * Contributors: 
+ * Contributors: Julien Tous
  */
 
 package org.ow2.mind.cli;
@@ -33,8 +33,8 @@ import org.ow2.mind.compilation.DirectiveHelper;
 import org.ow2.mind.plugin.util.Assert;
 
 /**
- * Handles "cpp-flags", "c-flags", "inc-path", "ld-flags", "ld-path" and
- * "linker-script" options.
+ * Handles "cpp-flags", "c-flags", "inc-path", "as-flags", "ld-flags", "ld-path"
+ * and "linker-script" options.
  * 
  * @see CompilerContextHelper
  */
@@ -46,7 +46,8 @@ public class FlagsOptionHandler implements CommandOptionHandler {
   public static final String CFLAGS_ID        = "org.ow2.mind.mindc.CFlags";
   /** The ID of the "inc-path" option. */
   public static final String INC_PATH_ID      = "org.ow2.mind.mindc.IncPath";
-
+  /** The ID of the "as-flags" option. */
+  public static final String ASFLAGS_ID       = "org.ow2.mind.mindc.ASFlags";
   /** The ID of the "ld-flags" option. */
   public static final String LDFLAGS_ID       = "org.ow2.mind.mindc.LDFlags";
   /** The ID of the "ld-path" option. */
@@ -82,6 +83,18 @@ public class FlagsOptionHandler implements CommandOptionHandler {
         cFlagsList.addAll(DirectiveHelper.splitOptionString(value));
       }
       CompilerContextHelper.setCFlags(context, cFlagsList);
+    } else if (ASFLAGS_ID.equals(cmdOption.getId())) {
+      // process ASFlags
+      final CmdAppendOption asFlagsOpt = Assert.assertInstanceof(cmdOption,
+          CmdAppendOption.class);
+
+      final List<String> asFlagsList = new ArrayList<String>(
+          CompilerContextHelper.getASFlags(context));
+      final String value = asFlagsOpt.getValue(cmdLine);
+      if (value != null && value.length() > 0) {
+        asFlagsList.addAll(DirectiveHelper.splitOptionString(value));
+      }
+      CompilerContextHelper.setASFlags(context, asFlagsList);
     } else if (INC_PATH_ID.equals(cmdOption.getId())) {
       // process inc-path
       final CmdPathOption includePathOpt = Assert.assertInstanceof(cmdOption,
