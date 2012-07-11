@@ -17,7 +17,7 @@
  * Contact: mind@ow2.org
  *
  * Authors: Matthieu Leclercq
- * Contributors: 
+ * Contributors: Julien Tous
  */
 
 package org.ow2.mind.adl;
@@ -31,6 +31,7 @@ import java.util.Map;
 
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.Definition;
+import org.ow2.mind.adl.annotation.predefined.ASFlags;
 import org.ow2.mind.adl.annotation.predefined.CFlags;
 import org.ow2.mind.adl.annotation.predefined.CPPFlags;
 import org.ow2.mind.adl.annotation.predefined.LDFlags;
@@ -68,6 +69,24 @@ public class BasicFlagExtractor implements FlagExtractor {
   public Collection<String> getCFlags(final Source source,
       final Map<Object, Object> context) throws ADLException {
     final CFlags flags = getAnnotation(source, CFlags.class);
+    if (flags != null)
+      return splitOptionString(flags.value);
+    else
+      return Collections.emptyList();
+  }
+
+  public Collection<String> getASFlags(final Definition definition,
+      final Map<Object, Object> context) throws ADLException {
+    final ASFlags flags = getAnnotation(definition, ASFlags.class);
+    if (flags != null)
+      return splitOptionString(flags.value);
+    else
+      return Collections.emptyList();
+  }
+
+  public Collection<String> getASFlags(final Source source,
+      final Map<Object, Object> context) throws ADLException {
+    final ASFlags flags = getAnnotation(source, ASFlags.class);
     if (flags != null)
       return splitOptionString(flags.value);
     else

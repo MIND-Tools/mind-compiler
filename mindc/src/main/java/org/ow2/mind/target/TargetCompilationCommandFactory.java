@@ -17,7 +17,7 @@
  * Contact: mind@ow2.org
  *
  * Authors: Matthieu Leclercq
- * Contributors: 
+ * Contributors: Julien Tous
  */
 
 package org.ow2.mind.target;
@@ -30,6 +30,7 @@ import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.Definition;
 import org.ow2.mind.adl.compilation.CompilationCommandFactory.AbstractDelegatingCompilationCommandFactory;
 import org.ow2.mind.adl.graph.ComponentGraph;
+import org.ow2.mind.compilation.AssemblerCommand;
 import org.ow2.mind.compilation.CompilerCommand;
 import org.ow2.mind.compilation.CompilerContextHelper;
 import org.ow2.mind.compilation.DirectiveHelper;
@@ -95,14 +96,13 @@ public class TargetCompilationCommandFactory
     return command;
   }
 
-  public CompilerCommand newAssemblyCompilerCommand(
-      final Definition definition, final Object source, final File inputFile,
-      final File outputFile, final Map<Object, Object> context)
-      throws ADLException {
-    final CompilerCommand command = factoryDelegate.newAssemblyCompilerCommand(
+  public AssemblerCommand newAssemblerCommand(final Definition definition,
+      final Object source, final File inputFile, final File outputFile,
+      final Map<Object, Object> context) throws ADLException {
+    final AssemblerCommand command = factoryDelegate.newAssemblerCommand(
         definition, source, inputFile, outputFile, context);
 
-    processCompilerCommand(
+    processAssemblerCommand(
         command,
         false,
         loadTarget(TargetDescriptorOptionHandler.getTargetDescriptor(context),
@@ -164,6 +164,21 @@ public class TargetCompilationCommandFactory
       }
       if (!preprocessedFile && target.getCppFlags() != null) {
         for (final Flag flag : target.getCppFlags()) {
+          command.addFlags(DirectiveHelper.splitOptionString(flag.getValue()));
+        }
+      }
+    }
+  }
+
+  protected void processAssemblerCommand(final AssemblerCommand command,
+      final boolean preprocessedFile, final Target target,
+      final Map<Object, Object> context) throws ADLException {
+    if (target != null) {
+      if (target.getAssembler() != null) {
+        command.setCommand(target.getAssembler().getPath());
+      }
+      if (target.getAsFlags() != null) {
+        for (final Flag flag : target.getAsFlags()) {
           command.addFlags(DirectiveHelper.splitOptionString(flag.getValue()));
         }
       }

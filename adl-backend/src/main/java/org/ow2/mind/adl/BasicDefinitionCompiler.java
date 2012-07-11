@@ -17,7 +17,7 @@
  * Contact: mind@ow2.org
  *
  * Authors: Matthieu Leclercq
- * Contributors: 
+ * Contributors: Julien Tous
  */
 
 package org.ow2.mind.adl;
@@ -45,6 +45,7 @@ import org.ow2.mind.adl.ast.ImplementationContainer;
 import org.ow2.mind.adl.ast.Source;
 import org.ow2.mind.adl.compilation.CompilationCommandFactory;
 import org.ow2.mind.adl.implementation.ImplementationLocator;
+import org.ow2.mind.compilation.AssemblerCommand;
 import org.ow2.mind.compilation.CompilationCommand;
 import org.ow2.mind.compilation.CompilerCommand;
 import org.ow2.mind.compilation.PreprocessorCommand;
@@ -132,9 +133,8 @@ public class BasicDefinitionCompiler implements DefinitionCompiler {
           throw new CompilerError(GenericErrors.INTERNAL_ERROR, e);
         }
 
-        final CompilerCommand gccCommand = compilationCommandFactory
-            .newAssemblyCompilerCommand(definition, src, srcFile, objectFile,
-                context);
+        final AssemblerCommand gccCommand = compilationCommandFactory
+            .newAssemblerCommand(definition, src, srcFile, objectFile, context);
 
         compilationTasks.add(gccCommand);
 

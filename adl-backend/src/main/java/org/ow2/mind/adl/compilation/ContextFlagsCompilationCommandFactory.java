@@ -17,7 +17,7 @@
  * Contact: mind@ow2.org
  *
  * Authors: Matthieu Leclercq
- * Contributors: 
+ * Contributors: Julien Tous
  */
 
 package org.ow2.mind.adl.compilation;
@@ -33,6 +33,7 @@ import org.objectweb.fractal.adl.Definition;
 import org.ow2.mind.InputResourceLocator;
 import org.ow2.mind.adl.compilation.CompilationCommandFactory.AbstractDelegatingCompilationCommandFactory;
 import org.ow2.mind.adl.graph.ComponentGraph;
+import org.ow2.mind.compilation.AssemblerCommand;
 import org.ow2.mind.compilation.CompilerCommand;
 import org.ow2.mind.compilation.CompilerContextHelper;
 import org.ow2.mind.compilation.LinkerCommand;
@@ -130,15 +131,13 @@ public class ContextFlagsCompilationCommandFactory
     return command;
   }
 
-  public CompilerCommand newAssemblyCompilerCommand(
-      final Definition definition, final Object source, final File inputFile,
-      final File outputFile, final Map<Object, Object> context)
-      throws ADLException {
-    final CompilerCommand command = factoryDelegate.newAssemblyCompilerCommand(
+  public AssemblerCommand newAssemblerCommand(final Definition definition,
+      final Object source, final File inputFile, final File outputFile,
+      final Map<Object, Object> context) throws ADLException {
+    final AssemblerCommand command = factoryDelegate.newAssemblerCommand(
         definition, source, inputFile, outputFile, context);
 
-    command.addFlags(CompilerContextHelper.getCPPFlags(context));
-    command.addFlags(CompilerContextHelper.getCFlags(context));
+    command.addFlags(CompilerContextHelper.getASFlags(context));
 
     command.addIncludeDir(outputFileLocatorItf.getCSourceOutputDir(context));
     command.addIncludeDir(outputFileLocatorItf

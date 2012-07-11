@@ -17,7 +17,7 @@
  Contact: mind@ow2.org
 
  Authors: Matthieu Leclercq
- Contributors: 
+ Contributors: Julien Tous
 
  -->
 <plugin
@@ -121,6 +121,17 @@
                 id="org.ow2.mind.mindc.IncPath" />
         </cmdAppendOption>
 
+        <cmdAppendOption
+            id="org.ow2.mind.mindc.ASFlags"
+            handler="org.ow2.mind.cli.FlagsOptionHandler"
+            shortName="a"
+            longName="as-flags"
+            description="The as-flags assembler directives"
+            argDesc="&lt;flags&gt;">
+            <processAfter
+                id="org.ow2.mind.mindc.IncPath" />
+        </cmdAppendOption>
+        
         <cmdPathOption
             id="org.ow2.mind.mindc.IncPath"
             handler="org.ow2.mind.cli.FlagsOptionHandler"
@@ -176,6 +187,15 @@
             defaultValue="gcc"
             allowMultiple="false"
             description="The command of the C compiler"
+            argDesc="&lt;path&gt;" />
+
+        <cmdArgument
+            id="org.ow2.mind.mindc.AssemblerCommand"
+            handler="org.ow2.mind.cli.CompilationCommandOptionHandler"
+            longName="assembler-command"
+            defaultValue="gcc"
+            allowMultiple="false"
+            description="The command of the assembler compiler"
             argDesc="&lt;path&gt;" />
 
         <cmdArgument
