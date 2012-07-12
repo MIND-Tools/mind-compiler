@@ -8,4 +8,6 @@ primitive controller.attr.MultiPrimitiveComponent extends ACTested {
   attribute int attr1=0;
   attribute int attr2=4;
   attribute string attr3="toto";
+  attribute attrType.h:struct s1 attr4;
+  attribute attrType.h:struct s1 attr5 = {1, 2};
 }

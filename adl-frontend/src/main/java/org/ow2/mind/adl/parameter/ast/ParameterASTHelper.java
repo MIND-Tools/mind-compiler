@@ -147,68 +147,130 @@ public final class ParameterASTHelper {
         nodeMerger);
   }
 
-  public static enum ParameterType {
-    STRING("string"), INT("int"), INT8_T("int8_t"), UINT8_T("uint8_t"), INT16_T(
-        "int16_t"), UINT16_T("uint16_t"), INT32_T("int32_t"), UINT32_T(
-        "uint32_t"), INT64_T("int64_t"), UINT64_T("uint64_t"), INTPTR_T(
-        "intptr_t"), UINTPTR_T("uintptr_t");
+  public static class ParameterType {
 
-    private final String cType;
+    public static final ParameterType    STRING        = new ParameterType(
+                                                           "string");
+    public static final ParameterType    INT           = new ParameterType(
+                                                           "int");
+    public static final ParameterType    INT8_T        = new ParameterType(
+                                                           "int8_t");
+    public static final ParameterType    UINT8_T       = new ParameterType(
+                                                           "uint8_t");
+    public static final ParameterType    INT16_T       = new ParameterType(
+                                                           "int16_t");
+    public static final ParameterType    UINT16_T      = new ParameterType(
+                                                           "uint16_t");
+    public static final ParameterType    INT32_T       = new ParameterType(
+                                                           "int32_t");
+    public static final ParameterType    UINT32_T      = new ParameterType(
+                                                           "uint32_t");
+    public static final ParameterType    INT64_T       = new ParameterType(
+                                                           "int64_t");
+    public static final ParameterType    UINT64_T      = new ParameterType(
+                                                           "uint64_t");
+    public static final ParameterType    INTPTR_T      = new ParameterType(
+                                                           "intptr_t");
+    public static final ParameterType    UINTPTR_T     = new ParameterType(
+                                                           "uintptr_t");
+
+    private static final ParameterType[] INTEGER_TYPES = {INT, INT8_T, UINT8_T,
+                                                           INT16_T, UINT16_T,
+                                                           INT32_T, UINT32_T,
+                                                           INT64_T, UINT64_T,
+                                                           INTPTR_T, UINTPTR_T};
+
+    private final String                 idtFile;
+    private final String                 cType;
 
     private ParameterType(final String cType) {
+      this(null, cType);
+    }
+
+    private ParameterType(final String idt, final String cType) {
+      this.idtFile = idt;
       this.cType = cType;
     }
 
-    public boolean isCompatible(final ParameterType type) {
-      if (type == this) return true;
-      switch (this) {
-        case STRING :
-          return type == STRING;
-        case INT :
-        case INT8_T :
-        case UINT8_T :
-        case INT16_T :
-        case UINT16_T :
-        case INT32_T :
-        case UINT32_T :
-        case INT64_T :
-        case UINT64_T :
-        case INTPTR_T :
-        case UINTPTR_T :
-          return type != STRING;
+    public boolean isIntegerType() {
+      for (final ParameterType t : INTEGER_TYPES) {
+        if (this == t) return true;
       }
+      return false;
+    }
+
+    public boolean isStringType() {
+      return this == STRING;
+    }
+
+    public boolean isPrimitiveType() {
+      return isIntegerType() || isStringType();
+    }
+
+    public boolean isComplexType() {
+      return !isPrimitiveType();
+    }
+
+    public boolean isCompatible(final ParameterType type) {
+      if (this.equals(type)) return true;
+      if (this == STRING) return type == STRING;
+      if (this.isIntegerType()) return type.isIntegerType();
+      if (this.isComplexType()) return true;
       return false;
     }
 
     public boolean isCompatible(final Value value) {
-      switch (this) {
-        case STRING :
-          return value instanceof StringLiteral || value instanceof NullLiteral;
-        case INT :
-        case INT8_T :
-        case UINT8_T :
-        case INT16_T :
-        case UINT16_T :
-        case INT32_T :
-        case UINT32_T :
-        case INT64_T :
-        case UINT64_T :
-        case INTPTR_T :
-        case UINTPTR_T :
-          return value instanceof NumberLiteral;
-      }
+      if (this.isStringType())
+        return value instanceof StringLiteral || value instanceof NullLiteral;
+
+      if (this.isIntegerType()) return value instanceof NumberLiteral;
+
+      if (this.isComplexType())
+      // Cannot check complex types, so assumes that value is compatible. If
+      // not the C compiler will raise an error
+        return true;
+
       return false;
+    }
+
+    public String getIdtFile() {
+      return idtFile;
     }
 
     public String getCType() {
       return cType;
     }
 
-    public static ParameterType fromCType(final String cType) {
-      for (final ParameterType type : ParameterType.values()) {
-        if (type.cType.equals(cType)) return type;
+    @Override
+    public int hashCode() {
+      int hashcode = cType.hashCode();
+      if (idtFile != null) {
+        hashcode = hashcode * 37 + idtFile.hashCode();
       }
-      throw new IllegalArgumentException(cType);
+      return hashcode;
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+      if (this == obj) return true;
+      if (!(obj instanceof ParameterType)) return false;
+
+      final ParameterType other = (ParameterType) obj;
+      if (this.idtFile == null) {
+        if (other.idtFile != null) return false;
+      } else if (!this.idtFile.equals(other.idtFile)) return false;
+      return this.cType.equals(other.cType);
+    }
+
+    public static ParameterType fromCType(final String idt, final String cType) {
+      if (idt == null) {
+        for (final ParameterType type : INTEGER_TYPES) {
+          if (type.cType.equals(cType)) return type;
+        }
+        if (cType.equals(STRING.cType)) return STRING;
+      }
+
+      return new ParameterType(idt, cType);
     }
   }
 

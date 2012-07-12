@@ -1,0 +1,5 @@
+primitive pkg1.annotations.PathAnnotation5 {
+
+  @org.ow2.mind.adl.annotations.PathAnnotation(url=/pkg1/annotations/foo.c)
+  source foo.c;
+}

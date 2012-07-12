@@ -35,6 +35,8 @@ import static org.ow2.mind.adl.parameter.ast.ParameterASTHelper.getInferredParam
 import static org.ow2.mind.value.ast.ValueASTHelper.getValue;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
@@ -65,6 +67,8 @@ import org.ow2.mind.adl.parameter.ast.ArgumentContainer;
 import org.ow2.mind.adl.parameter.ast.FormalParameter;
 import org.ow2.mind.adl.parameter.ast.FormalParameterContainer;
 import org.ow2.mind.adl.parameter.ast.ParameterASTHelper.ParameterType;
+import org.ow2.mind.value.ast.CompoundValue;
+import org.ow2.mind.value.ast.CompoundValueField;
 import org.ow2.mind.value.ast.NumberLiteral;
 import org.ow2.mind.value.ast.Reference;
 import org.ow2.mind.value.ast.StringLiteral;
@@ -147,8 +151,8 @@ public class ASTChecker {
       final List<InterfaceChecker> list = new ArrayList<InterfaceChecker>(
           names.length);
       for (final String name : names) {
-        assertTrue("Duplucated string in given names " + names, nameSet
-            .add(name));
+        assertTrue("Duplucated string in given names " + names,
+            nameSet.add(name));
         list.add(containsInterface(name));
       }
       assertEquals("Definition contains more interfaces than expected.",
@@ -176,8 +180,8 @@ public class ASTChecker {
       final List<ComponentChecker> list = new ArrayList<ComponentChecker>(
           names.length);
       for (final String name : names) {
-        assertTrue("Duplucated string in given names " + names, nameSet
-            .add(name));
+        assertTrue("Duplucated string in given names " + names,
+            nameSet.add(name));
         list.add(containsComponent(name));
       }
       assertEquals("Definition contains more sub-components than expected.",
@@ -208,14 +212,14 @@ public class ASTChecker {
       final List<FormalTypeParameterChecker> list = new ArrayList<FormalTypeParameterChecker>(
           names.length);
       for (final String name : names) {
-        assertTrue("Duplucated string in given names " + names, nameSet
-            .add(name));
+        assertTrue("Duplucated string in given names " + names,
+            nameSet.add(name));
         list.add(containsFormalTypeParameter(name));
       }
       assertEquals(
           "Definition contains more FormalTypeParameter than expected.",
-          names.length, ((FormalTypeParameterContainer) def)
-              .getFormalTypeParameters().length);
+          names.length,
+          ((FormalTypeParameterContainer) def).getFormalTypeParameters().length);
 
       return new FormalTypeParameterCheckerIterator(list);
     }
@@ -242,8 +246,8 @@ public class ASTChecker {
       final List<FormalParameterChecker> list = new ArrayList<FormalParameterChecker>(
           names.length);
       for (final String name : names) {
-        assertTrue("Duplucated string in given names " + names, nameSet
-            .add(name));
+        assertTrue("Duplucated string in given names " + names,
+            nameSet.add(name));
         list.add(containsFormalParameter(name));
       }
       assertEquals("Definition contains more FormalParameter than expected.",
@@ -273,8 +277,8 @@ public class ASTChecker {
       final List<AttributeChecker> list = new ArrayList<AttributeChecker>(
           names.length);
       for (final String name : names) {
-        assertTrue("Duplucated string in given names " + names, nameSet
-            .add(name));
+        assertTrue("Duplucated string in given names " + names,
+            nameSet.add(name));
         list.add(containsAttribute(name));
       }
       assertEquals("Definition contains more attribute than expected.",
@@ -285,17 +289,18 @@ public class ASTChecker {
 
     public DefinitionChecker isSingleton() {
       assertTrue("Definition is not singleton", ASTHelper.isSingleton(def));
-      assertTrue("Definition does not contain the is-singleton decoration", def
-          .astGetDecoration(ASTHelper.SINGLETON_DECORATION_NAME) != null
-          && (Boolean) def
-              .astGetDecoration(ASTHelper.SINGLETON_DECORATION_NAME));
+      assertTrue(
+          "Definition does not contain the is-singleton decoration",
+          def.astGetDecoration(ASTHelper.SINGLETON_DECORATION_NAME) != null
+              && (Boolean) def
+                  .astGetDecoration(ASTHelper.SINGLETON_DECORATION_NAME));
       return this;
     }
 
     public DefinitionChecker isMultiton() {
       assertFalse("Definition is singleton", ASTHelper.isSingleton(def));
-      assertTrue("Definition contains the is-singleton decoration", def
-          .astGetDecoration(ASTHelper.SINGLETON_DECORATION_NAME) == null);
+      assertTrue("Definition contains the is-singleton decoration",
+          def.astGetDecoration(ASTHelper.SINGLETON_DECORATION_NAME) == null);
       return this;
     }
   }
@@ -317,8 +322,8 @@ public class ASTChecker {
         resolvedDefinition);
 
     assertEquals(
-        "Name of resolved definition is not coherent with decoration.", deco
-            .getDefinitionName(), resolvedDefinition.getName());
+        "Name of resolved definition is not coherent with decoration.",
+        deco.getDefinitionName(), resolvedDefinition.getName());
 
     assertEquals(
         "Name of resolved definition does not match definition reference name.",
@@ -380,8 +385,8 @@ public class ASTChecker {
       final List<ArgumentChecker> list = new ArrayList<ArgumentChecker>(
           names.length);
       for (final String name : names) {
-        assertTrue("Duplucated string in given names " + names, nameSet
-            .add(name));
+        assertTrue("Duplucated string in given names " + names,
+            nameSet.add(name));
         list.add(containsArgument(name));
       }
       assertEquals("Definition contains more FormalParameter than expected.",
@@ -439,32 +444,32 @@ public class ASTChecker {
     public InterfaceChecker isClient() {
       assertTrue("Interface is not a TypeInterface",
           itf instanceof TypeInterface);
-      assertTrue("Interface is not a client interface", TypeInterfaceUtil
-          .isClient(itf));
+      assertTrue("Interface is not a client interface",
+          TypeInterfaceUtil.isClient(itf));
       return this;
     }
 
     public InterfaceChecker isServer() {
       assertTrue("Interface is not a TypeInterface",
           itf instanceof TypeInterface);
-      assertTrue("Interface is not a client interface", TypeInterfaceUtil
-          .isServer(itf));
+      assertTrue("Interface is not a client interface",
+          TypeInterfaceUtil.isServer(itf));
       return this;
     }
 
     public InterfaceChecker isMandatory() {
       assertTrue("Interface is not a TypeInterface",
           itf instanceof TypeInterface);
-      assertTrue("Interface is not a client interface", TypeInterfaceUtil
-          .isMandatory(itf));
+      assertTrue("Interface is not a client interface",
+          TypeInterfaceUtil.isMandatory(itf));
       return this;
     }
 
     public InterfaceChecker isOptional() {
       assertTrue("Interface is not a TypeInterface",
           itf instanceof TypeInterface);
-      assertTrue("Interface is not a client interface", TypeInterfaceUtil
-          .isOptional(itf));
+      assertTrue("Interface is not a client interface",
+          TypeInterfaceUtil.isOptional(itf));
       return this;
     }
 
@@ -668,8 +673,8 @@ public class ASTChecker {
   protected void checkAttributeContainer(final AttributeContainer container) {
     final Set<String> names = new HashSet<String>();
     for (final Attribute attribute : container.getAttributes()) {
-      assertTrue("Duplicated FormalTypeParameter name.", names.add(attribute
-          .getName()));
+      assertTrue("Duplicated FormalTypeParameter name.",
+          names.add(attribute.getName()));
       checkAttribute(attribute);
     }
   }
@@ -705,7 +710,9 @@ public class ASTChecker {
     }
 
     public AttributeChecker hasType(final String type) {
-      assertEquals("Unexpected attribute type ", type, attribute.getType());
+      final String attrType = attribute.getIdt() != null ? attribute.getIdt()
+          + ":" + attribute.getType() : attribute.getType();
+      assertEquals("Unexpected attribute type ", type, attrType);
       return this;
     }
 
@@ -755,6 +762,26 @@ public class ASTChecker {
       return this;
     }
 
+    public AttributeCheckerIterator valueIs(final Object[] v) {
+      element.value().is(v);
+      return this;
+    }
+
+    public AttributeCheckerIterator valueIs(final Iterable<?> v) {
+      element.value().is(v);
+      return this;
+    }
+
+    public AttributeCheckerIterator valueIs(final Map<?, ?> v) {
+      element.value().is(v);
+      return this;
+    }
+
+    public AttributeCheckerIterator valueIs(final ReferenceValue v) {
+      element.value().is(v);
+      return this;
+    }
+
     public AttributeCheckerIterator valueReferences(final String ref) {
       element.value().references(ref);
       return this;
@@ -773,8 +800,8 @@ public class ASTChecker {
   protected void checkFormalTypeParameter(
       final FormalTypeParameter formalTypeParameter) {
     assertNotNull("Given FormalTypeParameter is null", formalTypeParameter);
-    assertNotNull("FormalTypeParameter name is null", formalTypeParameter
-        .getName());
+    assertNotNull("FormalTypeParameter name is null",
+        formalTypeParameter.getName());
     if (formalTypeParameter.getDefinitionReference() != null)
       checkDefinitionReference(formalTypeParameter.getDefinitionReference());
   }
@@ -784,8 +811,8 @@ public class ASTChecker {
     final Set<String> names = new HashSet<String>();
     for (final FormalTypeParameter formalTypeParameter : container
         .getFormalTypeParameters()) {
-      assertTrue("Duplicated FormalTypeParameter name.", names
-          .add(formalTypeParameter.getName()));
+      assertTrue("Duplicated FormalTypeParameter name.",
+          names.add(formalTypeParameter.getName()));
       checkFormalTypeParameter(formalTypeParameter);
     }
   }
@@ -867,8 +894,8 @@ public class ASTChecker {
     final Set<String> names = new HashSet<String>();
     for (final FormalParameter formalParameter : container
         .getFormalParameters()) {
-      assertTrue("Duplicated FormalTypeParameter name.", names
-          .add(formalParameter.getName()));
+      assertTrue("Duplicated FormalTypeParameter name.",
+          names.add(formalParameter.getName()));
       checkFormalParameter(formalParameter);
     }
   }
@@ -909,8 +936,14 @@ public class ASTChecker {
       final ParameterType inferredParameterType = getInferredParameterType(formalParameter);
       assertNotNull("FormalParamter has no inferred type",
           inferredParameterType);
-      assertEquals("Unexpected type for formalParameter "
-          + formalParameter.getName(), type, inferredParameterType);
+      assertEquals(
+          "Unexpected type for formalParameter " + formalParameter.getName(),
+          type, inferredParameterType);
+    }
+
+    public void hasNoType() {
+      final ParameterType inferredParameterType = getInferredParameterType(formalParameter);
+      assertNull("FormalParamter has an inferred type", inferredParameterType);
     }
   }
 
@@ -930,6 +963,11 @@ public class ASTChecker {
 
     public FormalParameterCheckerIterator hasType(final ParameterType type) {
       element.hasType(type);
+      return this;
+    }
+
+    public FormalParameterCheckerIterator hasNoType() {
+      element.hasNoType();
       return this;
     }
   }
@@ -1020,6 +1058,26 @@ public class ASTChecker {
       return this;
     }
 
+    public ArgumentCheckerIterator valueIs(final Object[] v) {
+      element.value().is(v);
+      return this;
+    }
+
+    public ArgumentCheckerIterator valueIs(final Iterable<?> v) {
+      element.value().is(v);
+      return this;
+    }
+
+    public ArgumentCheckerIterator valueIs(final Map<?, ?> v) {
+      element.value().is(v);
+      return this;
+    }
+
+    public ArgumentCheckerIterator valueIs(final ReferenceValue v) {
+      element.value().is(v);
+      return this;
+    }
+
     public ArgumentCheckerIterator valueReferences(final String ref) {
       element.valueReferences(ref);
       return this;
@@ -1034,7 +1092,8 @@ public class ASTChecker {
     assertNotNull("Given value is null", value);
     assertTrue("Unknown value type " + value.astGetType(),
         (value instanceof NumberLiteral) || (value instanceof Reference)
-            || (value instanceof StringLiteral));
+            || (value instanceof StringLiteral)
+            || (value instanceof CompoundValue));
   }
 
   public ValueChecker assertValue(final Value value) {
@@ -1045,6 +1104,18 @@ public class ASTChecker {
       checkers.put(value, checker);
     }
     return checker;
+  }
+
+  public static final class ReferenceValue {
+    private final String referenceName;
+
+    public ReferenceValue(final String referenceName) {
+      this.referenceName = referenceName;
+    }
+
+    public String getReferenceName() {
+      return referenceName;
+    }
   }
 
   protected ValueChecker createValueChecker(final Value value) {
@@ -1070,8 +1141,63 @@ public class ASTChecker {
       assertTrue("Value is not an StringLiteral",
           value instanceof StringLiteral);
       final String strValue = ((StringLiteral) value).getValue();
-      assertEquals("Unexpected string value", v, strValue.substring(1, strValue
-          .length() - 1));
+      assertEquals("Unexpected string value", v,
+          strValue.substring(1, strValue.length() - 1));
+    }
+
+    public void is(final ReferenceValue v) {
+      references(v.getReferenceName());
+    }
+
+    public void is(final Object[] compoundValues) {
+      is(Arrays.asList(compoundValues));
+    }
+
+    public void is(final Iterable<?> compoundValues) {
+      assertTrue("Value is not an CompoundValue",
+          value instanceof CompoundValue);
+      final Iterator<?> values = compoundValues.iterator();
+      for (final CompoundValueField field : ((CompoundValue) value)
+          .getCompoundValueFields()) {
+        assertTrue("More compound value fields than expected", values.hasNext());
+        final Object v = values.next();
+        assertNotNull("Value missing in compound field", field.getValue());
+        createValueChecker(field.getValue()).is(v);
+      }
+    }
+
+    public void is(final Map<?, ?> compoundValues) {
+      assertTrue("Value is not an CompoundValue",
+          value instanceof CompoundValue);
+      final Map<Object, Object> values = new HashMap<Object, Object>(
+          compoundValues);
+      for (final CompoundValueField field : ((CompoundValue) value)
+          .getCompoundValueFields()) {
+        assertFalse("More compound value fields than expected",
+            values.isEmpty());
+        assertNotNull("Name missing in compound field", field.getName());
+        assertNotNull("Value missing in compound field", field.getValue());
+        final Object v = values.get(field.getName());
+        assertNotNull("Unexpected name of compound field '" + field.getName()
+            + "'", v);
+        createValueChecker(field.getValue()).is(v);
+      }
+    }
+
+    public void is(final Object v) {
+      if (v instanceof String) {
+        is((String) v);
+      } else if (v instanceof Number) {
+        is(((Number) v).intValue());
+      } else if (v instanceof Iterable<?>) {
+        is((Iterable<?>) v);
+      } else if (v instanceof Object[]) {
+        is((Object[]) v);
+      } else if (v instanceof ReferenceValue) {
+        is((ReferenceValue) v);
+      } else {
+        fail("Unknown value type: " + v.getClass());
+      }
     }
 
     public void references(final String ref) {

@@ -106,3 +106,4 @@ build and deploy new artifacts.
 The two previous commands can be shortened into the following one:
 
 $ mvn release:prepare release:perform -Dow2.username=<your OW2 login>
+

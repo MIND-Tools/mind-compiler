@@ -41,6 +41,7 @@ import org.ow2.mind.adl.parameter.ast.FormalParameter;
 import org.ow2.mind.adl.parameter.ast.FormalParameterContainer;
 import org.ow2.mind.adl.parameter.ast.ParameterASTHelper;
 import org.ow2.mind.adl.parameter.ast.ParameterASTHelper.ParameterType;
+import org.ow2.mind.value.ValueKindDecorator;
 import org.ow2.mind.value.ast.Reference;
 
 import com.google.inject.Inject;
@@ -50,10 +51,13 @@ public class ParametricFactoryTemplateInstantiator
       AbstractDelegatingTemplateInstantiator {
 
   @Inject
-  protected NodeFactory nodeFactoryItf;
+  protected NodeFactory        nodeFactoryItf;
 
   @Inject
-  protected NodeMerger  nodeMergerItf;
+  protected NodeMerger         nodeMergerItf;
+
+  @Inject
+  protected ValueKindDecorator valueKindDecoratorItf;
 
   // ---------------------------------------------------------------------------
   // Implementation of the TemplateInstantiator interface
@@ -94,14 +98,17 @@ public class ParametricFactoryTemplateInstantiator
 
           final Reference reference = newReferenceNode();
           reference.setRef(formalParameter.getName());
+          valueKindDecoratorItf.setValueKind(reference, context);
           attrNode.setValue(reference);
 
           final ParameterType inferredParameterType = ParameterASTHelper
               .getInferredParameterType(formalParameter);
-          if (inferredParameterType != null)
+          if (inferredParameterType != null) {
+            attrNode.setIdt(inferredParameterType.getIdtFile());
             attrNode.setType(inferredParameterType.getCType());
-          else
+          } else {
             attrNode.setType("int");
+          }
 
           attributeContainer.addAttribute(attrNode);
         }

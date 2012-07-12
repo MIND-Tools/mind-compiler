@@ -1,0 +1,24 @@
+@CompileDef
+primitive flow.Producer extends ApplicationType {
+
+  output dataType.idt:data_t as out;
+  
+  source {{
+    #include <stdio.h>
+    #include <string.h>
+        
+    int METH(main, main)(int argc, char **argv) {
+      data_t data;
+      data[0].a = 0;
+      data[0].b = 1;
+      data[1].a = 2;
+      data[1].b = 3;
+      CALL(out, push)(data);
+      
+      data[1].a = 4;
+      data[1].b = 5;
+      CALL(out, push)(data);
+      return 0;
+    }
+  }}
+}

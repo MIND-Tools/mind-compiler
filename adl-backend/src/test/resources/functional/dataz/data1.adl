@@ -1,0 +1,22 @@
+@Run
+primitive dataz.data1 extends ApplicationType {
+
+  data {{
+    struct {
+      int a;
+    } PRIVATE;
+  }}
+  
+  source {{
+    #include <stdio.h>
+    #include <string.h>
+    
+    
+    int METH(main, main)(int argc, char **argv) {
+      
+      PRIVATE.a = 0;
+      
+      return PRIVATE.a;
+    }
+  }};
+}

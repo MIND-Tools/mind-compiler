@@ -45,7 +45,10 @@ import org.ow2.mind.st.StringTemplateComponentLoader;
 import org.ow2.mind.st.XMLSTNodeFactoryImpl;
 import org.ow2.mind.st.templates.parser.StringTemplateLoader;
 import org.ow2.mind.value.BasicValueEvaluator;
+import org.ow2.mind.value.BasicValueKindDecorator;
+import org.ow2.mind.value.PathValueEvaluator;
 import org.ow2.mind.value.ValueEvaluator;
+import org.ow2.mind.value.ValueKindDecorator;
 
 import com.google.inject.Binder;
 import com.google.inject.Provider;
@@ -158,8 +161,13 @@ public class CommonFrontendModule extends AbstractMindModule {
   // ---------------------------------------------------------------------------
 
   protected void configureValueEvaluator() {
-    bind(ValueEvaluator.class).toChainStartingWith(
-        AnnotationValueEvaluator.class).endingWith(BasicValueEvaluator.class);
+    bind(ValueEvaluator.class)
+        .toChainStartingWith(AnnotationValueEvaluator.class)
+        .followedBy(PathValueEvaluator.class)
+        .endingWith(BasicValueEvaluator.class);
   }
 
+  protected void configureValueKindDecorator() {
+    bind(ValueKindDecorator.class).to(BasicValueKindDecorator.class);
+  }
 }

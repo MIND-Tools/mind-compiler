@@ -4,9 +4,9 @@ import pkg1.generic.Generic2;
 import pkg1.generic.Generic4;
 import pkg1.parameter.Parameter1;
 
-composite pkg1.parameterGeneric.Composite1 extends Generic2<Parameter1(10), Parameter1(12)> {
+composite pkg1.parameterGeneric.Composite1 extends Generic2<Parameter1(10, 11, 12), Parameter1(12, 13, 14)> {
 
-  contains Generic4<Parameter1(20)> as c3;
+  contains Generic4<Parameter1(20, 30, 40)> as c3;
   
   binds c3.cItf to this.cItf;
 }

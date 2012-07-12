@@ -2,5 +2,5 @@
 primitive pkg1.pkg2.Primitive2 extends pkg1.pkg2.Type2 {
 
   source {{ }};
-  attribute attr1 = 1;
+  attribute int attr1 = 1;
 }

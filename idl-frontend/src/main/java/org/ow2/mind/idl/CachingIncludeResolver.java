@@ -30,6 +30,7 @@ import java.util.Map;
 import org.objectweb.fractal.adl.ADLException;
 import org.ow2.mind.idl.IncludeResolver.AbstractDelegatingIncludeResolver;
 import org.ow2.mind.idl.ast.IDL;
+import org.ow2.mind.idl.ast.IDLASTHelper;
 import org.ow2.mind.idl.ast.Include;
 
 import com.google.inject.Inject;
@@ -51,7 +52,9 @@ public class CachingIncludeResolver extends AbstractDelegatingIncludeResolver {
     if (idl == null) {
       idl = clientResolverItf.resolve(usedIDL, encapsulatingIDL,
           encapsulatingName, context);
-      setIncludedIDL(usedIDL, idl);
+      if (!IDLASTHelper.isUnresolvedIDLNode(idl)) {
+        setIncludedIDL(usedIDL, idl);
+      }
     }
 
     return idl;

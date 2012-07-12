@@ -30,6 +30,10 @@ public interface Attribute extends SingleValueContainer {
 
   void setName(String name);
 
+  String getIdt();
+
+  void setIdt(String idt);
+
   String getType();
 
   void setType(String type);

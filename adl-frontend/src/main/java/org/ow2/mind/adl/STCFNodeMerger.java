@@ -78,7 +78,7 @@ public class STCFNodeMerger extends STNodeMergerImpl {
       final String inheritedType = inheritedSubNode.astGetAttributes().get(
           "type");
       final String overridingType = subNode.astGetAttributes().get("type");
-      if (overridingType != null && !overridingType.equals(inheritedType)) {
+      if (!overridingType.equals(inheritedType)) {
         throw new InvalidMergeException(
             ADLErrors.INVALID_ATTRIBUTE_OVERRIDE_INHERITED_ATTRIBUTE_TYPE,
             subNode, new NodeErrorLocator(inheritedSubNode));

@@ -1,0 +1,29 @@
+@Run
+primitive dataz.data3 extends ApplicationType {
+
+  data dataTypes.h:s1_t a;
+  data dataTypes.h:struct s1 b;
+  
+  // Checks that data field declared in ADL mask fields in PRIVATE structure
+  data {{
+    struct {
+      int a;
+    } PRIVATE;
+  }}
+  
+  source {{
+    #include <stdio.h>
+    #include <string.h>
+    
+    
+    int METH(main, main)(int argc, char **argv) {
+      
+      PRIVATE.a.a = 0;
+      PRIVATE.a.b = PRIVATE.a.a;
+      PRIVATE.b.a = 2;
+      PRIVATE.b.b = PRIVATE.b.a;
+      
+      return PRIVATE.a.a;
+    }
+  }};
+}

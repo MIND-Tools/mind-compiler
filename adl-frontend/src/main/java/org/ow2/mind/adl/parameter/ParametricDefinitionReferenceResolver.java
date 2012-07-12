@@ -35,6 +35,7 @@ import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.CompilerError;
 import org.objectweb.fractal.adl.ContextLocal;
 import org.objectweb.fractal.adl.Definition;
+import org.objectweb.fractal.adl.NodeFactory;
 import org.objectweb.fractal.adl.error.GenericErrors;
 import org.objectweb.fractal.adl.error.NodeErrorLocator;
 import org.ow2.mind.adl.ADLErrors;
@@ -71,6 +72,8 @@ public class ParametricDefinitionReferenceResolver
 
   protected final FormalParameterCache contextualParameters = new FormalParameterCache();
 
+  @Inject
+  protected NodeFactory                nodeFactoryItf;
   @Inject
   protected ErrorManager               errorManagerItf;
 

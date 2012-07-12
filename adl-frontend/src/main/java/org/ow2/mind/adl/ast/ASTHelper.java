@@ -312,6 +312,66 @@ public class ASTHelper {
   }
 
   // ---------------------------------------------------------------------------
+  // Flow Interface helper methods
+  // ---------------------------------------------------------------------------
+
+  /**
+   * The {@link TypeInterface#getRole() role} of 'input' data-flow interface.
+   */
+  public static final String INPUT_ROLE  = "input";
+
+  /**
+   * The {@link TypeInterface#getRole() role} of 'output' data-flow interface.
+   */
+  public static final String OUTPUT_ROLE = "output";
+
+  /**
+   * Returns <code>true</code> if the given interface is a flow interface (i.e.
+   * if its {@link TypeInterface#getRole() role} is either {@link #INPUT_ROLE}
+   * or {@link #OUTPUT_ROLE}).
+   * 
+   * @param itf an interface.
+   * @return <code>true</code> if the given interface is a flow interface.
+   */
+  public static boolean isFlowInterface(final Interface itf) {
+    if (!(itf instanceof TypeInterface)) return false;
+
+    final String role = ((TypeInterface) itf).getRole();
+    return (INPUT_ROLE.equals(role) || OUTPUT_ROLE.equals(role));
+  }
+
+  /**
+   * Returns <code>true</code> if the given interface is an output flow
+   * interface (i.e. if its {@link TypeInterface#getRole() role} is
+   * {@link #OUTPUT_ROLE}).
+   * 
+   * @param itf an interface.
+   * @return <code>true</code> if the given interface is an output flow
+   *         interface.
+   */
+  public static boolean isOutput(final Interface itf) {
+    if (!(itf instanceof TypeInterface)) return false;
+
+    final String role = ((TypeInterface) itf).getRole();
+    return OUTPUT_ROLE.equals(role);
+  }
+
+  /**
+   * Returns <code>true</code> if the given interface is an input flow interface
+   * (i.e. if its {@link TypeInterface#getRole() role} is {@link #INPUT_ROLE}).
+   * 
+   * @param itf an interface.
+   * @return <code>true</code> if the given interface is an input flow
+   *         interface.
+   */
+  public static boolean isInput(final Interface itf) {
+    if (!(itf instanceof TypeInterface)) return false;
+
+    final String role = ((TypeInterface) itf).getRole();
+    return INPUT_ROLE.equals(role);
+  }
+
+  // ---------------------------------------------------------------------------
   // DefinitionReference helper methods
   // ---------------------------------------------------------------------------
 

@@ -194,11 +194,11 @@ public enum ADLErrors implements ErrorTemplate {
       "<location>"),
 
   // ---------------------------------------------------------------------------
-  // Attribute errors (60-64)
+  // Attribute errors (60-65)
   // ---------------------------------------------------------------------------
 
   /** */
-  INVALID_ATTRIBUTE_MISSING_TYPE(60, "Invalid attribute, missing type"),
+  INVALID_ATTRIBUTE_MISSING_INITIAL_VALUE(60, "Attribute must be initialized"),
 
   /** */
   INVALID_ATTRIBUTE_VALUE_INCOMPATIBLE_TYPE(61,
@@ -233,6 +233,11 @@ public enum ADLErrors implements ErrorTemplate {
 
   /** */
   MULTIPLE_DATA(68, "\"data\" declaration can only appear at most once."),
+
+  /** */
+  DUPLICATED_DATAFIELD(69,
+      "Redifinition of data field \"%s\" (previously defined at \"%s\").",
+      "<name>", "<location>"),
 
   // ---------------------------------------------------------------------------
   // Parameter errors (70-89)

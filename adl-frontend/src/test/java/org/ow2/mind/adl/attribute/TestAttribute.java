@@ -38,6 +38,7 @@ import org.ow2.mind.adl.ErrorLoader;
 import org.ow2.mind.adl.ExtendsLoader;
 import org.ow2.mind.adl.imports.ImportDefinitionReferenceResolver;
 import org.ow2.mind.adl.parser.ADLParser;
+import org.ow2.mind.idl.IDLFrontendModule;
 import org.ow2.mind.plugin.PluginLoaderModule;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -57,7 +58,8 @@ public class TestAttribute {
   protected void setUp() throws Exception {
 
     final Injector injector = Guice.createInjector(new CommonFrontendModule(),
-        new PluginLoaderModule(), new AbstractADLFrontendModule() {
+        new PluginLoaderModule(), new IDLFrontendModule(),
+        new AbstractADLFrontendModule() {
 
           protected void configureTest() {
             bind(Loader.class).toChainStartingWith(ErrorLoader.class)
@@ -85,22 +87,40 @@ public class TestAttribute {
   @Test(groups = {"functional"})
   public void testAttr1() throws Exception {
     final Definition d = loader.load("pkg1.attr.Attr1", context);
-    checker.assertDefinition(d).containsAttributes("attr1", "attr2", "attr3")
+    final Map<String, Object> attr5Value = new HashMap<String, Object>();
+    attr5Value.put("s1", 6);
+    attr5Value.put("s2", "titi");
+    checker.assertDefinition(d)
+        .containsAttributes("attr1", "attr2", "attr3", "attr4", "attr5")
         .whereFirst().hasType("int").and().valueIs(12)
 
         .andNext().hasType("uint8_t").and().valueIs(11)
 
-        .andNext().hasType("string").and().valueIs("toto");
+        .andNext().hasType("string").and().valueIs("toto")
+
+        .andNext().hasType("/pkg1/attr/foo.h:struct s")
+        .valueIs(new Object[]{3, 5, new Object[]{4, 6}})
+
+        .andNext().hasType("/pkg1/attr/foo.h:struct s").valueIs(attr5Value);
   }
 
   @Test(groups = {"functional"})
   public void testExtendsAttr1() throws Exception {
     final Definition d = loader.load("pkg1.attr.ExtendsAttr1", context);
-    checker.assertDefinition(d).containsAttributes("attr1", "attr2", "attr3")
+    final Map<String, Object> attr5Value = new HashMap<String, Object>();
+    attr5Value.put("s1", 6);
+    attr5Value.put("s2", "titi");
+    checker.assertDefinition(d)
+        .containsAttributes("attr1", "attr2", "attr3", "attr4", "attr5")
         .whereFirst().hasType("int").and().valueReferences("a")
 
         .andNext().hasType("uint8_t").and().valueIs(11)
 
-        .andNext().hasType("string").and().valueIs("titi");
+        .andNext().hasType("string").and().valueIs("titi")
+
+        .andNext().hasType("/pkg1/attr/foo.h:struct s")
+        .valueIs(new Object[]{3, 5, new Object[]{4, 6}})
+
+        .andNext().hasType("/pkg1/attr/foo.h:struct s").valueIs(attr5Value);
   }
 }

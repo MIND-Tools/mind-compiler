@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2009 STMicroelectronics
+ * Copyright (C) 2009-2011 STMicroelectronics
  *
  * This file is part of "Mind Compiler" is free software: you can redistribute 
  * it and/or modify it under the terms of the GNU Lesser General Public License 
@@ -40,7 +40,10 @@ import org.objectweb.fractal.adl.error.NodeErrorLocator;
 import org.objectweb.fractal.adl.interfaces.InterfaceContainer;
 import org.objectweb.fractal.adl.types.TypeInterface;
 import org.objectweb.fractal.adl.xml.XMLNodeFactory;
+import org.ow2.mind.PathHelper;
+import org.ow2.mind.PathHelper.InvalidRelativPathException;
 import org.ow2.mind.adl.anonymous.ast.AnonymousDefinitionContainer;
+import org.ow2.mind.adl.ast.ASTHelper;
 import org.ow2.mind.adl.ast.AbstractDefinition;
 import org.ow2.mind.adl.ast.Attribute;
 import org.ow2.mind.adl.ast.AttributeContainer;
@@ -49,6 +52,7 @@ import org.ow2.mind.adl.ast.BindingContainer;
 import org.ow2.mind.adl.ast.Component;
 import org.ow2.mind.adl.ast.ComponentContainer;
 import org.ow2.mind.adl.ast.Data;
+import org.ow2.mind.adl.ast.DataField;
 import org.ow2.mind.adl.ast.DefinitionReference;
 import org.ow2.mind.adl.ast.DefinitionReferenceContainer;
 import org.ow2.mind.adl.ast.ImplementationContainer;
@@ -82,13 +86,21 @@ import org.ow2.mind.adl.jtb.syntaxtree.CompositeAnonymousDefinition;
 import org.ow2.mind.adl.jtb.syntaxtree.CompositeAnonymousExtension;
 import org.ow2.mind.adl.jtb.syntaxtree.CompositeDefinition;
 import org.ow2.mind.adl.jtb.syntaxtree.CompositeDefinitionReference;
+import org.ow2.mind.adl.jtb.syntaxtree.CompoundAttributeValue;
+import org.ow2.mind.adl.jtb.syntaxtree.CompoundAttributeValueField;
+import org.ow2.mind.adl.jtb.syntaxtree.CompoundFieldName;
 import org.ow2.mind.adl.jtb.syntaxtree.DataDefinition;
+import org.ow2.mind.adl.jtb.syntaxtree.DataFile;
 import org.ow2.mind.adl.jtb.syntaxtree.ExtendedCompositeDefinitions;
 import org.ow2.mind.adl.jtb.syntaxtree.ExtendedPrimitiveDefinitions;
 import org.ow2.mind.adl.jtb.syntaxtree.ExtendedTypeDefinitions;
+import org.ow2.mind.adl.jtb.syntaxtree.FlowInterfaceDefinition;
+import org.ow2.mind.adl.jtb.syntaxtree.FlowType;
 import org.ow2.mind.adl.jtb.syntaxtree.FormalParameterDeclaration;
 import org.ow2.mind.adl.jtb.syntaxtree.FormalTypeParameterDeclaration;
 import org.ow2.mind.adl.jtb.syntaxtree.FullyQualifiedName;
+import org.ow2.mind.adl.jtb.syntaxtree.FunctionalInterfaceDefinition;
+import org.ow2.mind.adl.jtb.syntaxtree.IDTType;
 import org.ow2.mind.adl.jtb.syntaxtree.ImplementationDefinition;
 import org.ow2.mind.adl.jtb.syntaxtree.ImportDefinition;
 import org.ow2.mind.adl.jtb.syntaxtree.IntegerValue;
@@ -99,6 +111,7 @@ import org.ow2.mind.adl.jtb.syntaxtree.NodeSequence;
 import org.ow2.mind.adl.jtb.syntaxtree.NodeToken;
 import org.ow2.mind.adl.jtb.syntaxtree.NullValue;
 import org.ow2.mind.adl.jtb.syntaxtree.Path;
+import org.ow2.mind.adl.jtb.syntaxtree.PathValue;
 import org.ow2.mind.adl.jtb.syntaxtree.PrimitiveAnonymousDefinition;
 import org.ow2.mind.adl.jtb.syntaxtree.PrimitiveAnonymousExtension;
 import org.ow2.mind.adl.jtb.syntaxtree.PrimitiveDefinition;
@@ -121,9 +134,12 @@ import org.ow2.mind.annotation.ast.AnnotationNode;
 import org.ow2.mind.error.ErrorManager;
 import org.ow2.mind.value.ast.Array;
 import org.ow2.mind.value.ast.BooleanLiteral;
+import org.ow2.mind.value.ast.CompoundValue;
+import org.ow2.mind.value.ast.CompoundValueField;
 import org.ow2.mind.value.ast.MultipleValueContainer;
 import org.ow2.mind.value.ast.NullLiteral;
 import org.ow2.mind.value.ast.NumberLiteral;
+import org.ow2.mind.value.ast.PathLiteral;
 import org.ow2.mind.value.ast.Reference;
 import org.ow2.mind.value.ast.SingleValueContainer;
 import org.ow2.mind.value.ast.StringLiteral;
@@ -585,40 +601,131 @@ public class JTBProcessor extends GJDepthFirst<Node, Node>
   @Override
   public Node visit(final InterfaceDefinition n, final Node argu) {
     assert argu != null;
-    final MindInterface itf = (MindInterface) newNode("interface", n);
+    // process FunctionalInterfaceDefinition | FlowInterfaceDefinition
+    final MindInterface itf = (MindInterface) n.f1.accept(this, argu);
 
     // process annotations
     n.f0.accept(this, itf);
 
-    // process PROVIDES/REQUIRES
-    if (((NodeToken) n.f1.choice).kind == PROVIDES) {
+    castNodeError(argu, InterfaceContainer.class).addInterface(itf);
+    return itf;
+  }
+
+  @Override
+  public Node visit(final FunctionalInterfaceDefinition n, final Node argu) {
+
+    final MindInterface itf = (MindInterface) newNode("interface", n);
+
+    if (((NodeToken) n.f0.choice).kind == PROVIDES) {
       itf.setRole(TypeInterface.SERVER_ROLE);
     } else {
-      assert ((NodeToken) n.f1.choice).kind == REQUIRES;
+      assert ((NodeToken) n.f0.choice).kind == REQUIRES;
       itf.setRole(TypeInterface.CLIENT_ROLE);
     }
 
     // process contingency
-    if (n.f2.present()) itf.setContingency(TypeInterface.OPTIONAL_CONTINGENCY);
+    if (n.f1.present()) itf.setContingency(TypeInterface.OPTIONAL_CONTINGENCY);
 
     // process IDL signature
-    itf.setSignature(fullyQualifiedName(n.f3));
+    itf.setSignature(fullyQualifiedName(n.f2));
 
     // process name
-    itf.setName(n.f5.tokenImage);
+    itf.setName(n.f4.tokenImage);
 
     // process [count]
-    if (n.f6.present()) {
+    if (n.f5.present()) {
       itf.setCardinality(TypeInterface.COLLECTION_CARDINALITY);
-      if (((NodeOptional) ((NodeSequence) n.f6.node).elementAt(1)).present()) {
-        final NodeToken count = (NodeToken) ((NodeOptional) ((NodeSequence) n.f6.node)
+      if (((NodeOptional) ((NodeSequence) n.f5.node).elementAt(1)).present()) {
+        final NodeToken count = (NodeToken) ((NodeOptional) ((NodeSequence) n.f5.node)
             .elementAt(1)).node;
         itf.setNumberOfElement(count.tokenImage);
       }
     }
 
-    castNodeError(argu, InterfaceContainer.class).addInterface(itf);
     return itf;
+  }
+
+  @Override
+  public Node visit(final FlowInterfaceDefinition n, final Node argu) {
+
+    final MindInterface itf = (MindInterface) newNode("interface", n);
+
+    if (((NodeToken) n.f0.choice).kind == INPUT) {
+      itf.setRole(ASTHelper.INPUT_ROLE);
+    } else {
+      assert ((NodeToken) n.f0.choice).kind == OUTPUT;
+      itf.setRole(ASTHelper.OUTPUT_ROLE);
+    }
+
+    // process contingency
+    if (n.f1.present()) itf.setContingency(TypeInterface.OPTIONAL_CONTINGENCY);
+
+    // process type
+    n.f2.accept(this, itf);
+
+    // process name
+    itf.setName(n.f4.tokenImage);
+
+    // process [count]
+    if (n.f5.present()) {
+      itf.setCardinality(TypeInterface.COLLECTION_CARDINALITY);
+      if (((NodeOptional) ((NodeSequence) n.f5.node).elementAt(1)).present()) {
+        final NodeToken count = (NodeToken) ((NodeOptional) ((NodeSequence) n.f5.node)
+            .elementAt(1)).node;
+        itf.setNumberOfElement(count.tokenImage);
+      }
+    }
+
+    return itf;
+  }
+
+  @Override
+  public Node visit(final FlowType n, final Node argu) {
+    assert argu != null;
+    if (n.f0.choice instanceof AttributeType) {
+      final AttributeType type = (AttributeType) n.f0.choice;
+      if (argu instanceof MindInterface) {
+        final MindInterface itf = castNodeError(argu, MindInterface.class);
+        itf.setSignature(((NodeToken) type.f0.choice).tokenImage);
+      } else if (argu instanceof Attribute) {
+        final Attribute attr = (Attribute) argu;
+        attr.setType(((NodeToken) type.f0.choice).tokenImage);
+      } else {
+        // This should be a data field
+        final DataField dataField = castNodeError(argu, DataField.class);
+        dataField.setType(((NodeToken) type.f0.choice).tokenImage);
+      }
+    } else {
+      assert n.f0.choice instanceof IDTType;
+      n.f0.choice.accept(this, argu);
+    }
+    return argu;
+  }
+
+  @Override
+  public Node visit(final IDTType n, final Node argu) {
+    assert argu != null;
+    final String idt = path(n.f0);
+    String type = n.f3.tokenImage;
+    if (n.f2.present()) {
+      type = ((NodeToken) ((NodeChoice) n.f2.node).choice).tokenImage + " "
+          + type;
+    }
+    if (argu instanceof MindInterface) {
+      final MindInterface itf = (MindInterface) argu;
+      itf.setSignature(idt + ":" + type);
+    } else if (argu instanceof Attribute) {
+      final Attribute attr = (Attribute) argu;
+      attr.setIdt(idt);
+      attr.setType(type);
+    } else {
+      // This should be a data field
+      final DataField dataField = castNodeError(argu, DataField.class);
+      dataField.setIdt(idt);
+      dataField.setType(type);
+    }
+
+    return argu;
   }
 
   // ---------------------------------------------------------------------------
@@ -656,38 +763,124 @@ public class JTBProcessor extends GJDepthFirst<Node, Node>
     return argu;
   }
 
+  @Override
+  public Node visit(final CompoundAttributeValue n, final Node argu) {
+    assert argu != null;
+
+    final CompoundValue value = (CompoundValue) newNode("compoundValue", n);
+
+    // process fields
+    n.f1.accept(this, value);
+
+    if (argu instanceof SingleValueContainer) {
+      ((SingleValueContainer) argu).setValue(value);
+    } else {
+      castNodeError(argu, MultipleValueContainer.class).addValue(value);
+    }
+
+    return value;
+  }
+
+  @Override
+  public Node visit(final CompoundAttributeValueField n, final Node argu) {
+    assert argu != null;
+
+    final CompoundValueField field = (CompoundValueField) newNode(
+        "compoundValueField", n);
+
+    // process name (if any)
+    n.f0.accept(this, field);
+
+    // process value
+    n.f1.accept(this, field);
+
+    castNodeError(argu, CompoundValue.class).addCompoundValueField(field);
+
+    return field;
+  }
+
+  @Override
+  public Node visit(final CompoundFieldName n, final Node argu) {
+    assert argu != null;
+
+    castNodeError(argu, CompoundValueField.class).setName(n.f1.tokenImage);
+
+    return argu;
+  }
+
   // ---------------------------------------------------------------------------
 
   @Override
   public Node visit(final DataDefinition n, final Node argu) {
     assert argu != null;
 
-    final Data data = (Data) newNode("data", n);
+    // process DataField() | DataFile()
+    if (n.f2.choice instanceof org.ow2.mind.adl.jtb.syntaxtree.DataField) {
+      final DataField dataField = (DataField) newNode("dataField", n);
+      // process annotations
+      n.f0.accept(this, dataField);
 
+      // process DataField
+      n.f2.accept(this, dataField);
+
+      castNodeError(argu, ImplementationContainer.class)
+          .addDataField(dataField);
+      return dataField;
+    } else {
+      final Data data = (Data) newNode("data", n);
+
+      // process annotations
+      n.f0.accept(this, data);
+
+      // process DataFile
+      n.f2.accept(this, data);
+      final ImplementationContainer implContainer = castNodeError(argu,
+          ImplementationContainer.class);
+      if (implContainer.getData() != null) {
+        try {
+          errorManager.logError(org.ow2.mind.adl.ADLErrors.MULTIPLE_DATA, data);
+        } catch (final ADLException e) {
+          // ignore.
+        }
+      }
+      implContainer.setData(data);
+      return data;
+    }
+
+  }
+
+  @Override
+  public Node visit(final DataFile n, final Node argu) {
+    assert argu != null;
+
+    final Data data = castNodeError(argu, Data.class);
     // process Path() | <CCode>
-    if (n.f2.choice instanceof NodeToken) {
-      assert ((NodeToken) n.f2.choice).kind == INLINED_CODE;
-      final String inlinedCCode = ((NodeToken) n.f2.choice).tokenImage;
+    if (n.f0.choice instanceof NodeToken) {
+      assert ((NodeToken) n.f0.choice).kind == INLINED_CODE;
+      final String inlinedCCode = ((NodeToken) n.f0.choice).tokenImage;
       data.setCCode(inlinedCCode.substring(2, inlinedCCode.length() - 2));
     } else {
-      assert n.f2.choice instanceof Path;
-      data.setPath(path((Path) n.f2.choice));
+      assert n.f0.choice instanceof Path;
+      data.setPath(path((Path) n.f0.choice));
     }
-    // process annotations
-    n.f0.accept(this, data);
-
-    final ImplementationContainer implContainer = castNodeError(argu,
-        ImplementationContainer.class);
-    if (implContainer.getData() != null) {
-      try {
-        errorManager.logError(org.ow2.mind.adl.ADLErrors.MULTIPLE_DATA, data);
-      } catch (final ADLException e) {
-        // ignore.
-      }
-    }
-    implContainer.setData(data);
 
     return data;
+  }
+
+  @Override
+  public Node visit(final org.ow2.mind.adl.jtb.syntaxtree.DataField n,
+      final Node argu) {
+    assert argu != null;
+
+    final DataField dataField = castNodeError(argu, DataField.class);
+
+    // process FlowType
+    n.f0.accept(this, dataField);
+
+    // set name
+    dataField.setName(n.f1.tokenImage);
+
+    return dataField;
   }
 
   // ---------------------------------------------------------------------------
@@ -801,10 +994,16 @@ public class JTBProcessor extends GJDepthFirst<Node, Node>
     }
 
     // process name
-    comp.setName(n.f2.tokenImage);
+    String nameList = n.f2.tokenImage;
+    for (final org.ow2.mind.adl.jtb.syntaxtree.Node subN : n.f3.nodes) {
+      assert subN instanceof NodeSequence;
+      nameList += ","
+          + ((NodeToken) ((NodeSequence) subN).elementAt(1)).tokenImage;
+    }
+    comp.setName(nameList);
 
     // process anonymous definition
-    if (n.f3.present()) {
+    if (n.f4.present()) {
       if (comp instanceof FormalTypeParameterReference
           && ((FormalTypeParameterReference) comp).getTypeParameterReference() != null) {
         // both reference to template parameter and anonymous definition
@@ -816,7 +1015,7 @@ public class JTBProcessor extends GJDepthFirst<Node, Node>
           // ignore.
         }
       }
-      n.f3.accept(this, comp);
+      n.f4.accept(this, comp);
     } else if (!hasDefRef) {
       // neither defRef nor anonymous definition
       try {
@@ -1132,6 +1331,34 @@ public class JTBProcessor extends GJDepthFirst<Node, Node>
     return value;
   }
 
+  @Override
+  public Node visit(final PathValue n, final Node argu) {
+    assert argu != null;
+
+    final PathLiteral value = (PathLiteral) newNode("path", n);
+    String path = path(n.f0);
+    if (PathHelper.isRelative(path)) {
+      try {
+        path = PathHelper.fullyQualifiedNameToAbsolute(definitionName, path);
+      } catch (final InvalidRelativPathException e) {
+        try {
+          errorManager.logError(org.ow2.mind.adl.ADLErrors.INVALID_PATH, value,
+              path);
+        } catch (final ADLException e1) {
+          // ignore
+        }
+      }
+    }
+    value.setValue(path);
+    if (argu instanceof SingleValueContainer) {
+      ((SingleValueContainer) argu).setValue(value);
+    } else {
+      castNodeError(argu, MultipleValueContainer.class).addValue(value);
+    }
+
+    return value;
+  }
+
   // ---------------------------------------------------------------------------
   // Utility
   // ---------------------------------------------------------------------------
@@ -1165,7 +1392,10 @@ public class JTBProcessor extends GJDepthFirst<Node, Node>
           + ((NodeToken) ((NodeSequence) pathElem).elementAt(1)).tokenImage;
     }
 
-    s += "." + n.f6.tokenImage;
+    if (n.f5.present()) {
+      s += "."
+          + ((NodeToken) ((NodeSequence) (n.f5.node)).elementAt(1)).tokenImage;
+    }
 
     return s;
   }

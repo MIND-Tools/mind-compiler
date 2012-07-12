@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2010 STMicroelectronics
+ * Copyright (C) 2010-2011 STMicroelectronics
  *
  * This file is part of "Mind Compiler" is free software: you can redistribute 
  * it and/or modify it under the terms of the GNU Lesser General Public License 
@@ -46,15 +46,24 @@ import org.ow2.mind.adl.jtb.syntaxtree.CompositeDefinition;
 import org.ow2.mind.adl.jtb.syntaxtree.CompositeDefinitionBody;
 import org.ow2.mind.adl.jtb.syntaxtree.CompositeDefinitionElement;
 import org.ow2.mind.adl.jtb.syntaxtree.CompositeDefinitionReference;
+import org.ow2.mind.adl.jtb.syntaxtree.CompoundAttributeValue;
+import org.ow2.mind.adl.jtb.syntaxtree.CompoundAttributeValueField;
+import org.ow2.mind.adl.jtb.syntaxtree.CompoundFieldName;
 import org.ow2.mind.adl.jtb.syntaxtree.DataDefinition;
+import org.ow2.mind.adl.jtb.syntaxtree.DataField;
+import org.ow2.mind.adl.jtb.syntaxtree.DataFile;
 import org.ow2.mind.adl.jtb.syntaxtree.ExtendedCompositeDefinitions;
 import org.ow2.mind.adl.jtb.syntaxtree.ExtendedPrimitiveDefinitions;
 import org.ow2.mind.adl.jtb.syntaxtree.ExtendedTypeDefinitions;
+import org.ow2.mind.adl.jtb.syntaxtree.FlowInterfaceDefinition;
+import org.ow2.mind.adl.jtb.syntaxtree.FlowType;
 import org.ow2.mind.adl.jtb.syntaxtree.FormalParameterDeclaration;
 import org.ow2.mind.adl.jtb.syntaxtree.FormalParameterDeclarationList;
 import org.ow2.mind.adl.jtb.syntaxtree.FormalTypeParameterDeclaration;
 import org.ow2.mind.adl.jtb.syntaxtree.FormalTypeParameterDeclarationList;
 import org.ow2.mind.adl.jtb.syntaxtree.FullyQualifiedName;
+import org.ow2.mind.adl.jtb.syntaxtree.FunctionalInterfaceDefinition;
+import org.ow2.mind.adl.jtb.syntaxtree.IDTType;
 import org.ow2.mind.adl.jtb.syntaxtree.ImplementationDefinition;
 import org.ow2.mind.adl.jtb.syntaxtree.ImportDefinition;
 import org.ow2.mind.adl.jtb.syntaxtree.IntegerValue;
@@ -66,6 +75,7 @@ import org.ow2.mind.adl.jtb.syntaxtree.NodeSequence;
 import org.ow2.mind.adl.jtb.syntaxtree.NodeToken;
 import org.ow2.mind.adl.jtb.syntaxtree.NullValue;
 import org.ow2.mind.adl.jtb.syntaxtree.Path;
+import org.ow2.mind.adl.jtb.syntaxtree.PathValue;
 import org.ow2.mind.adl.jtb.syntaxtree.PrimitiveAnonymousDefinition;
 import org.ow2.mind.adl.jtb.syntaxtree.PrimitiveAnonymousExtension;
 import org.ow2.mind.adl.jtb.syntaxtree.PrimitiveDefinition;
@@ -339,13 +349,39 @@ public class EndTokenVisitor extends GJNoArguDepthFirst<NodeToken> {
 
   @Override
   public NodeToken visit(final InterfaceDefinition n) {
-    NodeToken t = n.f7.accept(this);
+    return n.f1.accept(this);
+  }
+
+  @Override
+  public NodeToken visit(final FunctionalInterfaceDefinition n) {
+    NodeToken t = n.f6.accept(this);
     if (t != null) return t;
 
-    t = n.f6.accept(this);
+    t = n.f5.accept(this);
     if (t != null) return t;
 
-    return n.f5;
+    return n.f4;
+  }
+
+  @Override
+  public NodeToken visit(final FlowInterfaceDefinition n) {
+    NodeToken t = n.f6.accept(this);
+    if (t != null) return t;
+
+    t = n.f5.accept(this);
+    if (t != null) return t;
+
+    return n.f4;
+  }
+
+  @Override
+  public NodeToken visit(final FlowType n) {
+    return n.f0.accept(this);
+  }
+
+  @Override
+  public NodeToken visit(final IDTType n) {
+    return n.f3.accept(this);
   }
 
   @Override
@@ -370,11 +406,36 @@ public class EndTokenVisitor extends GJNoArguDepthFirst<NodeToken> {
   }
 
   @Override
+  public NodeToken visit(final CompoundAttributeValue n) {
+    return n.f2.accept(this);
+  }
+
+  @Override
+  public NodeToken visit(final CompoundAttributeValueField n) {
+    return n.f1.accept(this);
+  }
+
+  @Override
+  public NodeToken visit(final CompoundFieldName n) {
+    return n.f2.accept(this);
+  }
+
+  @Override
   public NodeToken visit(final DataDefinition n) {
     final NodeToken t = n.f3.accept(this);
     if (t != null) return t;
 
     return n.f2.accept(this);
+  }
+
+  @Override
+  public NodeToken visit(final DataField n) {
+    return n.f1.accept(this);
+  }
+
+  @Override
+  public NodeToken visit(final DataFile n) {
+    return n.f0.accept(this);
   }
 
   @Override
@@ -387,7 +448,14 @@ public class EndTokenVisitor extends GJNoArguDepthFirst<NodeToken> {
 
   @Override
   public NodeToken visit(final Path n) {
-    return n.f6;
+    if (n.f5.present()) {
+      return (NodeToken) ((NodeSequence) n.f5.node).nodes.elementAt(1);
+    } else if (n.f4.present()) {
+      return (NodeToken) ((NodeSequence) (n.f4.nodes.lastElement()))
+          .elementAt(1);
+    } else {
+      return n.f3;
+    }
   }
 
   @Override
@@ -519,6 +587,11 @@ public class EndTokenVisitor extends GJNoArguDepthFirst<NodeToken> {
   @Override
   public NodeToken visit(final NullValue n) {
     return n.f0;
+  }
+
+  @Override
+  public NodeToken visit(final PathValue n) {
+    return n.f0.accept(this);
   }
 
 }

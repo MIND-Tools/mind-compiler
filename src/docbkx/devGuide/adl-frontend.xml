@@ -10,16 +10,20 @@
     <title>Overall architecture</title>
 
     <para>The architecture of the ADL frontend is inspired by <application>FractalADL</application>.
-      The main role of the ADL frontend is to parse ADL input files, check them and build an 
-      intermediate representation (<abbrev>aka</abbrev>. <acronym>AST</acronym>). The 
+      The main role of the ADL frontend is to parse ADL input files, check them and build an
+      Abstract Syntax Tree (<abbrev>aka</abbrev>. <acronym>AST</acronym>). The
       frontend is organized as a <emphasis>chain of delegating loader components</emphasis>.
-      Each loader is responsible for the verification and the enhancement for a dedicated 
-      aspect of the language (checking of bindings, template instantiation, resolution of 
+      Each loader is responsible for the verification and the enhancement for a dedicated
+      aspect of the language (checking of bindings, template instantiation, resolution of
       extended definitions, ...). A loader component may use a <emphasis>sub-chain</emphasis>
-      for the resolution of complex tasks in which multiple language aspects are involved 
+      for the resolution of complex tasks in which multiple language aspects are involved
       (resolution of definition references for instance).</para>
 
-    <para>The following schema presents the global architecture of the ADL frontend.</para>
+    <para>The following schema presents the high-level architecture of the ADL front-end.
+    In this figure, the direction of the arrow corresponds to the direction of the invocation.
+    That is, the component which is at the source of the arrows calls the component
+    which is at the target of the arrow to delegate the processing operation.
+    </para>
 
     <figure id="adlfe-ovarch-fig">
       <title>ADL frontend global architecture</title>
@@ -32,6 +36,31 @@
         </imageobject>
       </mediaobject>
     </figure>
+
+    <para>
+    As depicted in the Figure, the leaf node of the loader delegation chain is the ADL
+    parser component. This is the one which parses an ADL files and returns an initial
+    AST that contains all the information which is captured in the ADL file. This
+    AST is taken by the <emphasis>Loader Chain</emphasis> component, which is composed
+    of many sub-components. For instance, one of these sub-components loads tha IDL
+    files which are referenced in the ADL files. This sub-component uses the <emphasis>IDL Loader</emphasis>
+    sub-chain. Another component of the <emphasis>Loader Chain</emphasis> resolved the
+    references to other ADL files (e.g. the definition of the sub-components which are
+    used in the input ADL file). Such a component would use the <emphasis>Definition Resolver Sub-Chain</emphasis>.
+    Note that, the latter delegates the processing to the <emphasis>ADL Loader</emphasis>.
+    That is, when an ADL definition refers to another one, the processing is forked
+    to load the <emphasis>refered definitin</emphasis> before finishing the
+    processing of the initial ADL definition. This way, the loading process of
+    an ADL definition is done recursively, with the depth-first strategy.
+    </para>
+
+    <para>
+    Another important component in the <emphasis>Loader Chain</emphasis> is
+    the <emphasis>ADL Cache</emphasis> component. The latter is used to
+    store the definitions which are loaded once in order to return them
+    without reloading them, for optimization purposes.
+    </para>
+
   </section>
   <section id="adlfe-loader">
     <title>Loader chain</title>
@@ -44,16 +73,16 @@
         Typical implementation of a
         loader component</title>
       <programlisting language="java">public class <replaceable>ALoaderComponent</replaceable> extends <codelink class="&mindPkg;.AbstractDelegatingLoader" jdocurl="&mindJdoc;"/> {
-  
+
   // implementation of the Loader interface.
-  public <codelink class="&fadlPkg;.Definition" jdocurl="&fadlJdoc;" /> load(String name, Map&lt;Object, Object&gt; context) 
+  public <codelink class="&fadlPkg;.Definition" jdocurl="&fadlJdoc;" /> load(String name, Map&lt;Object, Object&gt; context)
         throws ADLException {
     <codelink class="&fadlPkg;.Definition" jdocurl="&fadlJdoc;" /> d = clientLoader.load(name, context);
     processDefinition(d);
     return d;
   }
-  
-  protected void processDefinition(<codelink class="&fadlPkg;.Definition" jdocurl="&fadlJdoc;" /> d) 
+
+  protected void processDefinition(<codelink class="&fadlPkg;.Definition" jdocurl="&fadlJdoc;" /> d)
         throws ADLException {
     //process the definition...
   }
@@ -70,7 +99,7 @@
       <varlistentry>
         <term><codelink class="&mindPkg;.adl.parser.ADLParser" jdocurl="&mindJdoc;" codeurl="&mindCode;"/> </term>
         <listitem><para>
-          This loader component in the last loader in the chain. It is 
+          This loader component in the last loader in the chain. It is
           responsible to parser the ADL input files and create the initial AST
           structure that represent the input file.
         </para></listitem>
@@ -79,8 +108,8 @@
         <term><codelink class="&mindPkg;.adl.CacheLoader" jdocurl="&mindJdoc;" codeurl="&mindCode;"/> </term>
         <listitem><para>
           This loader component is the first loader in the chain. It manages a
-          cache of already loaded ADLs to avoid to execute the loader 
-          chain several times for the same ADL input file. This loader is also 
+          cache of already loaded ADLs to avoid to execute the loader
+          chain several times for the same ADL input file. This loader is also
           responsible to check that an ADL do not reference itself directly or
           transitively.
         </para></listitem>
@@ -91,7 +120,7 @@
           This loader is responsible to merge a definition with the definitions
           it extends. So loader components located between the <classname>CacheLoader</classname>
           and this loader in the loader chain, work on an AST where inheritance is resolved (i.e.
-          inherited elements are present in the AST); whereas loader component 
+          inherited elements are present in the AST); whereas loader component
           that are between this loader and the <classname>ADLParser</classname>,
           work only the elements that are actually
           declared in the ADL input file (and not on the inherited elements).
@@ -101,7 +130,7 @@
         <term><codelink class="&mindPkg;.adl.idl.InterfaceSignatureLoader" jdocurl="&mindJdoc;" codeurl="&mindCode;"/> </term>
         <listitem><para>
           This loader loads the signature of the interfaces that are described
-          in the ADL. This loader component is the bridge between the ADL 
+          in the ADL. This loader component is the bridge between the ADL
           frontend and the IDL frontend.
         </para></listitem>
       </varlistentry>
@@ -110,18 +139,21 @@
 
   <section id="adlfe-ast">
     <title>ADL AST structure</title>
-    
-    <para>ADL AST is structured as a graph of nodes where each node implements a set
-      of interfaces. A given AST node implements different interfaces corresponding to 
-      different aspect of the ADL language. See <xref linkend="fadl-ast"/> for details
-      on the FractalADL AST framework.</para>
-    
+
+    <para>The AST of the ADL is structured as a graph of nodes.
+    Each node has a set of attributes and a set of container
+    interfaces to give access to other nodes which are related to it.
+	The set of attributes that can be accessed through a node depends
+	on the type of the node. Each node type captures a different
+	elements of the ADL language.  See <xref linkend="fadl-ast"/> for details
+      on the FractalADL AST framework, which constitutes the basis of the
+      &productName;.</para>
+
     <section id="adlfe-ast-arch">
-      <title>Structure of architectural aspect of ADL</title>
+      <title>Structure of the ADL AST</title>
       <para>The following schema gives an overview of
-        the AST interfaces corresponding to architectural elements (definition, 
-        sub-components, bindings, attributes etc.):</para>
-      
+        the AST:</para>
+
       <figure id="adlfe-ovast-fig">
         <title>AST structure for architectural elements </title>
         <mediaobject>
@@ -138,18 +170,44 @@
           </caption>
         </mediaobject>
       </figure>
-      
-      <para>The root AST node corresponding to an input ADL file is a 
-        <codelink class="&mindPkg;.adl.ast.MindDefinition" jdocurl="&mindJdoc;" codeurl="&mindCode;"/>
-        A <classname>MindDefinition</classname> extends the generic 
+
+
+	 <para>
+	 As depicted in this Figure, the root node of the AST that corresponds to
+	 and ADL file is a <codelink class="&mindPkg;.adl.ast.MindDefinition" jdocurl="&mindJdoc;" codeurl="&mindCode;"/>.
+	 The <classname>MindDefinition</classname> class extends the generic
         <codelink class="&fadlPkg;.Definition" jdocurl="&fadlJdoc;" /> interface from
-        <application>FractalADL</application>. It has a name and may contains a set 
-        of referenced definitions corresponding to the definition this ADL extends.</para>
-      <para>Depending on the kind of definition contained in the ADL input file (type, primitive 
-        or composite), the root node also implements different container interfaces corresponding
-        to sub-nodes that can be contained for each definition kind.</para>
+        <application>FractalADL</application>. It has a name and may contains a set
+        of referenced definitions corresponding to the definition this ADL extends.
+	 </para>
+	 <para>
+	A  <classname>MindDefinition</classname> node may be representing a <code>Type</code>,
+	<code>Primitive</code> or <code>Composite</code> definition. Depending on the kind
+	of definitio which is represented, the <classname>MindDefinition</classname>
+	implements a different set of container interfaces. For instance, a node that
+	represents a <code>Primitive</code> definition implements the <code>InterfaceContainer</code>,
+	<code>AttrobuteContainer</code> and <code>ImplementationContainer</code> interfaces whereas the
+	<code>Composite</code> definitin implements the <code>InterfaceContainer</code>, <code>ComponentContainer</code>
+    and <code>BindingContainer</code> interfaces.
+	 </para>
+	 <para>The nodes such as the <code>Interface</code> or the <code>Binding</code>
+	 have only some attributes to give access to the information which is captured
+	 for these basic elements.
+	 </para>
+	<para>
+	The <code>Component</code> nodes represent the sub-components of a composite component.
+	It gives direct access to the instance name of the sub-component that it represents.
+	Furthermore, it also gives access to a <code>DefinitionReference</code> node. The
+	latter is used as a bridge to bind the sub-component to its definition. The
+	<code>DefinitionReference</code> node contains the name of the definitoins which is refered to.
+	It also gives access to the <code>MindDefinitoin</code> representing the definition
+	of the sub-component through the <code>DefinitionReferenceContainer</code> interface.
+	Note that, multiple component instances belonging to the same type
+	refer to the same <code>MindDefinition</code> node representing their definition.
+	</para>
+
     </section>
-    
+
     <section>
       <title>AST structure for parametric ADL</title>
       <para>The following schema details the AST interfaces corresponding
@@ -170,13 +228,13 @@
           </caption>
         </mediaobject>
       </figure>
-      
-      <para>A <codelink class="&mindPkg;.adl.parameter.ast.FormalParameter" jdocurl="&mindJdoc;" codeurl="&mindCode;"/> 
-        corresponds to the declaration of a ADL parameter, while an 
-        <codelink class="&mindPkg;.adl.parameter.ast.Argument" jdocurl="&mindJdoc;" codeurl="&mindCode;"/> 
+
+      <para>A <codelink class="&mindPkg;.adl.parameter.ast.FormalParameter" jdocurl="&mindJdoc;" codeurl="&mindCode;"/>
+        corresponds to the declaration of a ADL parameter, while an
+        <codelink class="&mindPkg;.adl.parameter.ast.Argument" jdocurl="&mindJdoc;" codeurl="&mindCode;"/>
         corresponds to the value given to a parameter in a reference to another ADL.</para>
     </section>
-    
+
     <section>
       <title>AST structure for generic ADL</title>
       <para>The following schema details the AST interfaces for the support of generic ADL:</para>
@@ -197,16 +255,16 @@
           </caption>
         </mediaobject>
       </figure>
-      <para>A <codelink class="&mindPkg;.adl.generic.ast.FormalTypeParameter" jdocurl="&mindJdoc;" codeurl="&mindCode;"/> 
-        corresponds to the declaration of a type parameter in a definition of a composite ADL. 
-        This formal type parameter contains a definition references that corresponds to the type definition 
-        to which the type parameter must be conform. 
+      <para>A <codelink class="&mindPkg;.adl.generic.ast.FormalTypeParameter" jdocurl="&mindJdoc;" codeurl="&mindCode;"/>
+        corresponds to the declaration of a type parameter in a definition of a composite ADL.
+        This formal type parameter contains a definition references that corresponds to the type definition
+        to which the type parameter must be conform.
         A <codelink class="&mindPkg;.adl.generic.ast.TypeArgument" jdocurl="&mindJdoc;" codeurl="&mindCode;"/>
-        corresponds to the value given to a type parameter in a reference to a generic ADL. This value can have 
+        corresponds to the value given to a type parameter in a reference to a generic ADL. This value can have
         two different kinds: it can be a reference to an another ADL or a reference to the formal type parameter
         of the current ADL.</para>
     </section>
-    
+
     <section>
       <title>AST structure for anonymous definitions</title>
       <para>The following schema details the AST interfaces for the support of anonymous ADL:</para>
@@ -226,12 +284,12 @@
           </caption>
         </mediaobject>
       </figure>
-      
+
       <para>A node corresponding to a sub-component may contain an anonymous definition.
         Two different nodes represents anonymous definitions of primitive component and
         anonymous definitions of composite component.</para>
     </section>
-    
+
     <section>
       <title>AST structure for the support of import</title>
       <para>The following schema details the AST interfaces for the support of import in ADL:</para>
@@ -252,7 +310,7 @@
         </mediaobject>
       </figure>
     </section>
-    
+
     <section>
       <title>AST Structure for the support of annotations</title>
       <para>The following schema details the AST interfaces for the support of annotations in ADL:</para>
@@ -267,7 +325,7 @@
           </imageobject>
           <caption>
             <blockquote>
-              <para>(1) See <xref linkend="adlfe-ovast-fig"/>. (2) See <xref linkend="adlfe-astanonym-fig"/>. 
+              <para>(1) See <xref linkend="adlfe-ovast-fig"/>. (2) See <xref linkend="adlfe-astanonym-fig"/>.
                 (3) See <xref linkend="adlfe-astimport-fig"/>.(4) See <xref linkend="comfe-anno"/>.</para>
             </blockquote>
           </caption>
@@ -277,36 +335,36 @@
   </section>
   <section id="adlfe-defref">
     <title>Definition Reference Resolver sub-chain</title>
-    
-    <para>The definition reference resolved sub-chain is responsible to find the 
-      <codelink class="&fadlPkg;.Definition" jdocurl="&fadlJdoc;" /> corresponding to 
+
+    <para>The definition reference resolved sub-chain is responsible to find the
+      <codelink class="&fadlPkg;.Definition" jdocurl="&fadlJdoc;" /> corresponding to
       a given <codelink class="&mindPkg;.adl.ast.DefinitionReference" jdocurl="&mindJdoc;" codeurl="&mindCode;"/>.</para>
     <para>The last component in the definition reference resolver delegation chain is the
-      <codelink class="&mindPkg;.adl.BasicDefinitionReferenceResolver" jdocurl="&mindJdoc;" codeurl="&mindCode;"/>. 
-      This component simply uses the main loader chain to retrieve the ADL definition whose name 
+      <codelink class="&mindPkg;.adl.BasicDefinitionReferenceResolver" jdocurl="&mindJdoc;" codeurl="&mindCode;"/>.
+      This component simply uses the main loader chain to retrieve the ADL definition whose name
       corresponds to the name contained in the definition reference. Other components in the chain
       are responsible to check that the definition reference is correct regarding the actual definition.
       In particular the <codelink class="&mindPkg;.adl.parameter.ParametricDefinitionReferenceResolver" jdocurl="&mindJdoc;" codeurl="&mindCode;"/>
-      component checks that the arguments contained by the definition reference matches formal parameters 
+      component checks that the arguments contained by the definition reference matches formal parameters
       declared by the definition.</para>
     <para>Similarly, the <codelink class="&mindPkg;.adl.generic.GenericDefinitionReferenceResolver" jdocurl="&mindJdoc;" codeurl="&mindCode;"/>
-      component checks values given to formal type parameters of a generic definition. Moreover this component delegates 
+      component checks values given to formal type parameters of a generic definition. Moreover this component delegates
       the creation of a unique template instance to the template instantiation sub-chain (see <xref linkend="adlfe-tmpl"/>
       for more details concerning template instantiation).</para>
     <para>The <codelink class="&mindPkg;.adl.parameter.ParametricGenericDefinitionReferenceResolver" jdocurl="&mindJdoc;" codeurl="&mindCode;"/>
-      handles definition references that contains both type arguments and arguments. For instance this component transforms 
+      handles definition references that contains both type arguments and arguments. For instance this component transforms
       <code>D1&lt;P1(10, 11), P2(&quot;foo&quot;)&gt;</code> to <code>D1&lt;P1, P2&gt;(10, 11, &quot;foo&quot;)</code>.</para>
     <para>The <codelink class="&mindPkg;.adl.imports.ImportDefinitionReferenceResolver" jdocurl="&mindJdoc;" codeurl="&mindCode;"/>
       scans import statements to transform the simple name contained in the definition reference into a fully-qualified name.</para>
     <para>Finally the <codelink class="&mindPkg;.adl.CachingDefinitionReferenceResolver" jdocurl="&mindJdoc;" codeurl="&mindCode;"/>
-      stores the resolved definition corresponding to given definition reference into an AST decoration attached to the definition 
+      stores the resolved definition corresponding to given definition reference into an AST decoration attached to the definition
       reference. This avoid to re-execute the whole definition reference resolver sub-chain for the same definition reference.</para>
   </section>
 
   <section id="adlfe-tmpl">
     <title>Template instantiation sub-chain</title>
-    
-    <para>The template instantiation sub-chain is responsible to create a new AST graph corresponding to an 
+
+    <para>The template instantiation sub-chain is responsible to create a new AST graph corresponding to an
       instantiation of a generic definition with given values of type parameters. For instance considering the
       following generic definition:</para>
     <programlisting language="adl">composite D1&lt;T conformsto T1, U conformsto T2&gt; {
@@ -324,14 +382,14 @@
   contains P2 as subComp2;
   ...
 }</programlisting>
-    <para>The previous example is a simple use case. The template instantiation sub-chain must support 
+    <para>The previous example is a simple use case. The template instantiation sub-chain must support
       more complex instantiation schemes like recursive instantiations: <code>D1&lt;P1, D1&lt;P1, P2&gt;&gt;</code>
-      or partial instantiations: <code>D1&lt;P1, U&gt;</code> where <varname>U</varname> is a formal type parameter of 
+      or partial instantiations: <code>D1&lt;P1, U&gt;</code> where <varname>U</varname> is a formal type parameter of
       the enclosing definition.</para>
-    <para>Moreover, the template instantiation sub-chain must ensure that a given template is instantiated at most once 
-     for a given combination of type parameters. To do so, a unique name is given to each template instance that 
+    <para>Moreover, the template instantiation sub-chain must ensure that a given template is instantiated at most once
+     for a given combination of type parameters. To do so, a unique name is given to each template instance that
      identifies the values of the type parameters.</para>
-    <para>Finally, the template instantiation sub-chain handles the case where type argument values are parametric 
+    <para>Finally, the template instantiation sub-chain handles the case where type argument values are parametric
       definitions. In this case, the formal parameters of definition referenced in the type argument value are re-exported
       as formal parameters of the template instance. As an example considering the following parametric definitions:</para>
     <programlisting language="adl">primitive P1(a, b) {
@@ -341,8 +399,8 @@
 primitive P2(c) {
   ...
 }</programlisting>
-    <para>Then the template instantiation corresponding to the following definition reference 
-      <code>D1&lt;P1(10, 11), P2(&quot;foo&quot;)&gt;</code> must returns an AST corresponding to the 
+    <para>Then the template instantiation corresponding to the following definition reference
+      <code>D1&lt;P1(10, 11), P2(&quot;foo&quot;)&gt;</code> must returns an AST corresponding to the
       following ADL:</para>
     <programlisting language="adl">composite D1&lt;P1, P2&gt;(T_a, T_b, U_c) {
   ...
@@ -350,10 +408,10 @@ primitive P2(c) {
   contains P2(U_c) as subComp2;
   ...
 }</programlisting>
-    <para>This ensures that the template instance does not depends on particular values of the 
+    <para>This ensures that the template instance does not depends on particular values of the
       formal parameters (i.e. the same template instance can be used with different argument values).</para>
   </section>
-  
+
   <section id="adlfe-anonym">
     <title>Anonymous definition extraction sub-chain</title>
     <para>The anonymous definition extraction sub-chain is responsible to extract anonymous definition contained by
@@ -369,7 +427,7 @@ primitive P2(c) {
     attribute int attr1 = a;
     attribute int attr2 = b;
   }
-  
+
   contains as subComp2 composite {
     ...
     contains T as subSubComp1;
@@ -396,10 +454,10 @@ composite D1$1&lt;T conformsto T1, U conformsto T2&gt; {
 }
 </programlisting>
   </section>
-  
+
   <section id="adlfe-error">
     <title>Error reporting in the ADL frontend</title>
-    <para>When an error is detected in the ADL frontend, it is reported to the 
+    <para>When an error is detected in the ADL frontend, it is reported to the
     <codelink class="&mindPkg;.error.ErrorManager" jdocurl="&mindJdoc;" codeurl="&mindCode;"/>
     service (see <xref linkend="comfs-srv-error"/>). When a definition reference cannot be resolved
     to an existing definition, the <codelink class="&mindPkg;.adl.BasicDefinitionReferenceResolver" jdocurl="&mindJdoc;" codeurl="&mindCode;"/>
@@ -407,26 +465,26 @@ composite D1$1&lt;T conformsto T1, U conformsto T2&gt; {
     if a definition is an unresolved definition AST node using the <methodname>isUnresolvedDefinitionNode</methodname> method of the
     <codelink class="&mindPkg;.adl.ast.ASTHelper" jdocurl="&mindJdoc;" codeurl="&mindCode;"/> class.
     </para>
-    
+
   </section>
 
   <section id="adlfe-binadl">
     <title>Serialization of AST and incremental ADL loading</title>
     <para>To improve toolchain performances, the <codelink class="&mindPkg;.adl.BinaryADLLoader" jdocurl="&mindJdoc;" codeurl="&mindCode;"/>
-      component tries to load ADL definitions from files containing a serialization of the AST that have been produced by a previous execution of 
+      component tries to load ADL definitions from files containing a serialization of the AST that have been produced by a previous execution of
       the toolchain. If the binary file is found, the <classname>BynaryADLLoader</classname> deserializes the AST and checks if it is up-to-date
       by checking the timestamps of all the input resources (see <xref linkend="comfe-srv-inputrsc"/>) attached to the AST.</para>
   </section>
 
   <section id="adlfe-annot">
     <title>Support for annotations in ADL</title>
-    <para>Annotations founds in ADL files are checked and resolved to an 
+    <para>Annotations founds in ADL files are checked and resolved to an
       <codelink class="&mindPkg;.annotation.Annotation" jdocurl="&mindJdoc;" codeurl="&mindCode;"/> object by the
       <codelink class="&mindPkg;.annotation.AnnotationChecker" jdocurl="&mindJdoc;" codeurl="&mindCode;"/>
-      service (see <xref linkend="comfe-anno"/>). Annotation processors classes can be associated to 
+      service (see <xref linkend="comfe-anno"/>). Annotation processors classes can be associated to
       annotations. An annotation processor class that must be executed during the ADL loading must implements
       the <codelink class="&mindPkg;.adl.annotation.ADLLoaderAnnotationProcessor" jdocurl="&mindJdoc;" codeurl="&mindCode;"/>
-      interface. Annotation processors can be executed at different phases of the ADL Loading. For each of these phases, the 
+      interface. Annotation processors can be executed at different phases of the ADL Loading. For each of these phases, the
       ADL loader chain contains, at a different place, an <codelink class="&mindPkg;.adl.annotation.AnnotationProcessorLoader" jdocurl="&mindJdoc;" codeurl="&mindCode;"/>
       component.</para>
     <para>See TODO for details on how to add new ADL annotations and write associated processors.</para>

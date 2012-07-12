@@ -5,7 +5,7 @@ import pkg1.pkg2.Type1;
 
 composite pkg1.parameterGeneric.Composite2 extends Composite1 {
 
-  contains Generic1<Parameter1(12)> as c4;
+  contains Generic1<Parameter1(12, 13, 14)> as c4;
   contains Composite1 as c5;
   
   binds c4.cItf to this.cItf;

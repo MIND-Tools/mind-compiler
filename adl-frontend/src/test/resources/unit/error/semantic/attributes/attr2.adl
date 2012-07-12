@@ -1,6 +1,0 @@
-//#SemanticError GroupId=MADL ErrorId=INVALID_ATTRIBUTE_MISSING_TYPE line=5
-// attribute declaration without type
-primitive attributes.attr2 {
-  // simple attribute name
-  attribute attr_name1;
-}

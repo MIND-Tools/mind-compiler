@@ -1,6 +1,8 @@
 template st.instances.Component : st.common.ComponentHelper
 implements st.instances.ComponentInstances{
 
+st.membrane.ControllerGenerator ctrlGenerator = plugin(st.membrane);
+
 $${
 
 isClient ::= [ "client" : "true" ]
@@ -112,10 +114,13 @@ DeclareInstance(definition, instance) ::= <<
 >>
 
 InitInstance(definition, instance) ::= <<
+<DefineAttributeValues(definition=definition, instance=instance)>
+
 <definition.name;format="toUpperCName">_INIT_INSTANCE(<instance.decorations.("instance-name"); format="toCName"> 
   <AddItfValues(definition=definition, instance=instance)>
   <AddSubComponentValues(definition=definition, instance=instance)>
   <AddAttributeValues(definition=definition, instance=instance)>
+  <AddControllersValues(definition=definition, instance=instance)>
 );
 >>
 
@@ -169,6 +174,18 @@ StaticCollectionBindingValue(bindingDesc, index) ::= <<
 
 StaticBindingItfName(itfName, index, isInternal) ::= "<if (isInternal)>INTERNAL_<endif><itfName><if (index)>_<index><endif>"
 
+DefineAttributeValues(definition, instance) ::= <<
+<if (definition.astNodeTypes.("attribute"))>
+<definition.attributes:DefineAttributeValue(definition=definition, instance=instance, attribute=it);separator="\n">
+<endif>
+>>
+
+DefineAttributeValue(definition, instance, attribute) ::= <<
+<if (instance.decorations.("attribute-values").(attribute.name))>
+#define <instance.decorations.("instance-name"); format="toUpperCName">_<attribute.name; format="toUpperCName"> <instance.decorations.("attribute-values").(attribute.name)>
+<endif>
+>>
+
 AddAttributeValues(definition, instance) ::= <<
 <if (definition.astNodeTypes.("attribute"))>
 <definition.attributes:AddAttributeValue(definition=definition, instance=instance, attribute=it);separator="\n">
@@ -176,7 +193,9 @@ AddAttributeValues(definition, instance) ::= <<
 >>
 
 AddAttributeValue(definition, instance, attribute) ::= <<
-, /* <attribute.name> */ <instance.decorations.("attribute-values").(attribute.name)>
+<if (instance.decorations.("attribute-values").(attribute.name))>
+, /* <attribute.name> */ <instance.decorations.("instance-name"); format="toUpperCName">_<attribute.name; format="toUpperCName">
+<endif>
 >>
 
 AddSubComponentValues(definition, instance) ::= <<
@@ -188,6 +207,17 @@ AddSubComponentValues(definition, instance) ::= <<
 AddSubComponentValue(definition, instance, subComponent) ::= <<
 , <subComponent.decorations.("instance-name"); format="toCName">
 >>
+
+AddControllersValues(definition, instance) ::= <<
+<if (definition.astNodeTypes.("controller"))>
+<definition.controllers:AddControllerValues(definition=definition, ctrl=it, instance=instance)>
+<endif>
+>>
+
+AddControllerValues(definition, ctrl, instance) ::= <<
+<ctrl.sources:{<(ctrlGenerator.(it.path).ControllerDataNamedInit)(definition=definition, controller=ctrl, instance=instance)>}>
+>>
+
 
 ConstructorCalls(definition, instances) ::= <<
 #ifdef CONSTRUCTOR_METHOD_IMPLEMENTED

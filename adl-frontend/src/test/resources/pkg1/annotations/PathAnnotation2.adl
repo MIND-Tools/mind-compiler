@@ -1,0 +1,5 @@
+primitive pkg1.annotations.PathAnnotation2 {
+
+  @org.ow2.mind.adl.annotations.PathAnnotation(value=/tmp/mind)
+  source foo.c;
+}

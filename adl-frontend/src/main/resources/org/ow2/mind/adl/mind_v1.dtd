@@ -1,5 +1,5 @@
 <!--
-  Copyright (C) 2009 STMicroelectronics
+  Copyright (C) 2009-2011 STMicroelectronics
 
  This file is part of "Mind Compiler" is free software: you can redistribute 
  it and/or modify it under the terms of the GNU Lesser General Public License 
@@ -50,6 +50,8 @@
 <?add ast="attribute" itf="org.ow2.mind.adl.ast.Attribute" ?>
 
 <?add ast="data"      itf="org.ow2.mind.adl.ast.Data" ?>
+
+<?add ast="dataField" itf="org.ow2.mind.adl.ast.DataField" ?>
 
 <?add ast="source"    itf="org.ow2.mind.adl.ast.Source" ?>
 
@@ -135,6 +137,7 @@
 <?add ast="interface" itf="org.ow2.mind.annotation.ast.AnnotationContainer" ?>
 <?add ast="attribute" itf="org.ow2.mind.annotation.ast.AnnotationContainer" ?>
 <?add ast="data"      itf="org.ow2.mind.annotation.ast.AnnotationContainer" ?>
+<?add ast="dataField" itf="org.ow2.mind.annotation.ast.AnnotationContainer" ?>
 <?add ast="source"    itf="org.ow2.mind.annotation.ast.AnnotationContainer" ?>
 <?add ast="component" itf="org.ow2.mind.annotation.ast.AnnotationContainer" ?>
 <?add ast="binding"   itf="org.ow2.mind.annotation.ast.AnnotationContainer" ?>
@@ -170,6 +173,14 @@
 <?add ast="array"     itf="org.ow2.mind.value.ast.Array" ?>
 <?map ast="array"     type="value" ?>
 
+<?add ast="path"      itf="org.ow2.mind.value.ast.PathLiteral" ?>
+<?map ast="path"      type="value" ?>
+
+<?add ast="compoundValue" itf="org.ow2.mind.value.ast.CompoundValue" ?>
+<?map ast="compoundValue" type="value" ?>
+
+<?add ast="compoundValueField" itf="org.ow2.mind.value.ast.CompoundValueField" ?>
+
 
 <!-- *********************************************************************** -->
 <!-- Node grammar                                                            -->
@@ -180,7 +191,7 @@
   name CDATA #REQUIRED
 >
 
-<!ELEMENT primitive (import*, annotation*, parameter*, extends?, (interface | attribute)*, data?, source* ) >
+<!ELEMENT primitive (import*, annotation*, parameter*, extends?, (interface | attribute)*, data?, dataField*, source* ) >
 <!ATTLIST primitive
   name CDATA #REQUIRED
   isAbstract (true|false) "false"
@@ -236,9 +247,10 @@
   numberOfElement CDATA #IMPLIED
 >
 
-<!ELEMENT attribute ( annotation* , ( string | integer | reference | null ) ) >
+<!ELEMENT attribute ( annotation* , ( string | integer | reference | null | compoundValue ) ) >
 <!ATTLIST attribute
   name CDATA #REQUIRED
+  idt CDATA #IMPLIED
   type CDATA #IMPLIED
 >
 
@@ -246,6 +258,13 @@
 <!ATTLIST data
   path CDATA #IMPLIED
   cCode CDATA #IMPLIED
+>
+
+<!ELEMENT dataField ( annotation* ) >
+<!ATTLIST dataField
+  name CDATA #REQUIRED
+  idt CDATA #IMPLIED
+  type CDATA #IMPLIED
 >
 
 <!ELEMENT source ( annotation* ) >
@@ -260,7 +279,7 @@
   typeParameter CDATA #IMPLIED
 >
 
-<!ELEMENT anonymousPrimitive (annotation*, extends?, (interface | attribute)*, data?, source*  ) >
+<!ELEMENT anonymousPrimitive (annotation*, extends?, (interface | attribute)*, data?, dataField*, source*  ) >
 <!ATTLIST anonymousPrimitive
   name CDATA #IMPLIED
 >
@@ -286,12 +305,12 @@
   type CDATA #REQUIRED
 >
 
-<!ELEMENT annotationArgument ( string | integer | array | annotationValue | null ) >
+<!ELEMENT annotationArgument ( string | integer | array | annotationValue | null | path | compoundValue ) >
 <!ATTLIST annotationArgument
   name CDATA #IMPLIED
 >
 
-<!ELEMENT array ( ( string | integer | array | annotationValue | null )* ) >
+<!ELEMENT array ( ( string | integer | array | annotationValue | null | path | compoundValue )* ) >
 <!ATTLIST array >
 
 <!ELEMENT string EMPTY >
@@ -312,4 +331,15 @@
   ref CDATA #REQUIRED
 >
 
+<!ELEMENT path EMPTY >
+<!ATTLIST path
+  value CDATA #REQUIRED
+>
 
+<!ELEMENT compoundValue ( compoundValueField* ) >
+<!ATTLIST compoundValue>
+
+<!ELEMENT compoundValueField ( string | integer | reference | null | compoundValue ) >
+<!ATTLIST compoundValueField
+  name CDATA #IMPLIED
+>

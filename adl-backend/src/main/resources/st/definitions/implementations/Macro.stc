@@ -31,6 +31,8 @@ ComponentDefinition(definition, interfaceDefinitions) ::= <<
 
 <ATTR(definition=definition)>
 
+<DATA_FIELD_ACCESS(definition=definition)>
+
 <CALL(definition=definition, interfaceDefinitions=interfaceDefinitions)>
 
 <GET_MY_INTERFACE(definition=definition)>
@@ -120,6 +122,14 @@ ATTR(definition) ::= <<
 <endif>
 <endif>
 >>
+
+// -----------------------------------------------------------------------------
+// PRIVATE DataField access macros
+
+DATA_FIELD_ACCESS(definition) ::= <<
+#define DATA_FIELD_ACCESS(fieldName) (CONTEXT_PTR_ACCESS->__component_internal_data.dataFields.fieldName)
+>>
+
 
 // -----------------------------------------------------------------------------
 // CALL macros

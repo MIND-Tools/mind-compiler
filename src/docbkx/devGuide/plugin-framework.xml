@@ -5,62 +5,78 @@
 ]>
 <chapter id="plug">
   <title>&productName; plugin framework</title>
-  <para>&productName; is an extensible toolchain that can be customized to change
-    the generated code or add new features. To achieve this, the toolchain is built
-    using a plugin framework. This framework is made of two things:</para>
+  <para>&productName; is an extensible toolset that can be customized by third party users
+   to modify
+    the generated code or to add new features. This extensibility is supported
+    using a plugin framework. This framework is made of two parts:</para>
   <itemizedlist>
-    <listitem><para>An extension mechanism highly inspired by the Eclipse plugin system using the notion 
+    <listitem><para>An extension mechanism highly inspired by the Eclipse plugin system using the notion
       of <emphasis>Extension</emphasis> and <emphasis>Extension-points</emphasis>.</para></listitem>
-    <listitem><para>An dependency injection system based on <ulink url="http://code.google.com/p/google-guice/">Google Guice</ulink>.
-      This system is used to instantiate and bind together the toolchain components.</para></listitem>
+    <listitem><para>A dependency injection system based on <ulink url="http://code.google.com/p/google-guice/">Google Guice</ulink>.
+      This system is used to instantiate and bind together the toolchain components with the components
+      that are found in the plugins.</para></listitem>
   </itemizedlist>
-  
+
   <section>
     <title>&productName; Extension and Extension-point</title>
-    <para>The extension mechanism implemented in &productName; is highly inspired by the
-      Eclipse plugin system but is much simpler (no OSGi, no dynamic update, no automatic installation, ...).
-      This mechanism defines two notions:</para>
+    <para>The extension mechanism implemented in &productName; can be considered
+    as a simpler version of the
+      Eclipse plugin system  (i.e. no OSGi, no dynamic update, no automatic installation, ...).
+      This mechanism is based on two notions:</para>
     <variablelist>
       <varlistentry>
         <term>Extension-point</term>
         <listitem><para>defines a point where plugins can contribute extensions. The &productName; toolchain
-          defines a set of extension-points and plugins can define their own.</para></listitem>
+          defines a set of extension-points. In addition, any plugins can also define their own extension-points
+          for supporting higher levels of extensibility.</para></listitem>
       </varlistentry>
       <varlistentry>
         <term>Extension</term>
-        <listitem><para>defines contribution to a given extension-point. An extension contains 
-          <emphasis>configuration elements</emphasis> that configure this contribution to the extension-point.</para></listitem>
+        <listitem><para>defines contribution to a given extension-point. An extension contains
+          <emphasis>configuration elements</emphasis> that configure this contribution to the extension-point.
+          A plugin can provide one or more extensions.</para></listitem>
       </varlistentry>
     </variablelist>
-    
-    <para>A &productName; plugin is a <filename>.jar</filename> file containing Java class files and a 
+
+    <para>A &productName; plugin is provided as a <filename>.jar</filename> file containing Java class files and a
       plugin descriptor file called <filename>mind-plugin.xml</filename>. This plugin descriptor
       declares the extensions contributed by the plugin and optionally the new extension-points it declares.
       When the &productName; toolchain is started, all the <filename>mind-plugin.xml</filename> files are searched
       in its classpath and a graph of the extension-points and the associated extensions is built.</para>
-    
-    <para>The <filename>mind-plugin.xml</filename> must contains at least:</para>
+
+    <para>The <filename>mind-plugin.xml</filename> must be encapsulated by the following identification tag:</para>
     <example>
       <title><filename>mind-plugin.xml</filename> file skeleton</title>
       <programlisting>&lt;plugin
   id="<replaceable>plugin fully qualified id</replaceable>"
   name="<replaceable>plugin name</replaceable>"&gt;
-  
+
   <replaceable>extention and extension-points declaration.</replaceable>
-  
+
 &lt;/plugin&gt;</programlisting>
     </example>
 
-    <para>The extension mechanism provides a <codelink class="&mindPkg;.plugin.PluginManager" jdocurl="&mindJdoc;" codeurl="&mindCode;"/>
-      service that is used to retrieve extension descriptors associated to a given extension-point. This service is used by components
-      that implements the behavior associated to extension-points.</para>
-    
+	<para>
+	As described above, the implementor of an extension-point must manage the extensions
+	that are connected to this extension-point. The plugin framework provides
+	a <codelink class="&mindPkg;.plugin.PluginManager" jdocurl="&mindJdoc;" codeurl="&mindCode;"/>
+	which can be used for that purpose. Indeed, using this service, the implementor
+	of an extension point may retrieve the list of extensions that are connected to
+	this extension point. It can also read the configuration descriptors of each
+	extension.
+	</para>
+
+
     <section>
       <title>Extension-point definition</title>
-      <para>An extension-point as a unique identifier, a name and a DTD schema that describes
+      <para>Extension points are defined in <filename>mind-plugin.xml</filename> files.
+      Each extension-point must have a unique identifier, a name and a DTD schema that describes
         the valid configuration elements that can be specified on extensions that are attached to this
         extension-point.</para>
-      <para>The declaration of an extension point in a <filename>mind-plugin.xml</filename> file has the following form:</para>
+
+      <para>
+      The declaration of an extension point in a <filename>mind-plugin.xml</filename>
+      file has the following form:</para>
       <programlisting>&lt;extension-point
   id="<replaceable>extension-pint name</replaceable>"
   dtd="<replaceable>path to DTD</replaceable>" /&gt;</programlisting>
@@ -73,14 +89,14 @@
       <programlisting>&lt;plugin
   id="org.myPlugin"
   name="My &productName; plugin"&gt;
-  
-  &lt;extension-point 
-    id="MyExtensionPoint" 
+
+  &lt;extension-point
+    id="MyExtensionPoint"
     dtd="dtd/MyExtensionPoint.dtd"/&gt;
-  
+
 &lt;/plugin&gt;</programlisting>
       </example>
-      
+
       <para>The DTD associated to an extension-point is used to describe the valid configuration
         elements for the extensions attached to the extension-point. The DTD must at least contain
         the definition of the <varname>extension</varname> XML element. For instance:</para>
@@ -99,11 +115,18 @@
 >]]></programlisting>
       </example>
     </section>
-    
+
     <section>
       <title>Extension declaration</title>
-      <para>In a plugin descriptor, an extension is declared by specifying the unique identifier of the extension-point
-        to which it is attached and declaring the inner configuration elements. For instance:</para>
+      <para>As discussed above, the extensions are also declared in <filename>mind-plugin.xml</filename>
+      descriptor files.
+      An extension is declared by specifying the unique identifier of the extension-point
+        to which it is attached. It must also declare values for the required  inner configuration elements.
+        </para>
+        <para>
+        For instance, in the following example, there is an extension which is attached
+        to <code>org.myPlugin.MyExtensionPoint"</code> and it speficies a
+        visitor class which is called <code>org.myPlugin.MyVisitor</code>.</para>
       <example>
         <title>Extension declaration</title>
         <programlisting>&lt;extension point="org.myPlugin.MyExtensionPoint"&gt;
@@ -112,15 +135,27 @@
       </example>
     </section>
   </section>
-  
+
   <section>
     <title>Dependency injection system</title>
-    <para>The &productName; toolchain is itself a component-based application. So when the 
-      toolchain is started, the components must be instantiated and bound together. This is done
-      using the <ulink url="http://code.google.com/p/google-guice/">Google Guice</ulink> dependency injection tool.
-      Basically this tool allows to declare client interfaces as class field annotated with the <code>@Inject</code> Java
-      annotation and then to declare how this client interface must be bound to a concrete object that implement the 
-      interface. For instance:</para>
+    <para>
+    The extensibility of the &productName; toolchain is implemented using a component
+    based architecture. That is, even the core parts of the toolchain is implemented
+    as a component-based application as this is the case of the various plugins that
+    can be developed to extend the toolchain.
+    </para>
+    <para>
+    The main challenge of building such an extensible component-based application is
+    to have a solid framework to instantiate the components of the application and
+    to bind them together so that they can use services implemnted by other components.
+    In &productName;, this base framework is based on <ulink url="http://code.google.com/p/google-guice/">Google Guice</ulink>,
+    which is a dependency injection tool which allows the construction of the application's
+    component graph leveraging the Java Annotation System. For instance, using Guice,
+    one can declare client interfaces of a component as class fieds annotated with the
+    the <code>@Inject</code> annotation and then to declare how this client interface is bound to a concete
+    server object implementing this interface.
+    </para>
+
     <example>
       <title>Guice example</title>
       <para>Implementation of a toolchain component:</para>
@@ -131,10 +166,15 @@ class MyToolchainComponent {
   // declaration of the 'adlLocator' client interface
   @Inject
   protected ADLLocator adlLocator;
-  
+
   // Do something useful using the adlLocator ...
 }</programlisting>
-      <para>Definition of bindings in a Guice module class</para>
+      <para>In the above example, the component which is called <code>MyToolchainComponent</code>
+      defeines an <code>ADLLocator</code> field and declares that this is a client
+      interface whose server needs to be injected at runtime using the <code>@Inject</code>
+      annotation.</para>
+
+
       <programlisting language="java">import org.ow2.mind.inject.AbstractMindModule;
 
 public class MyModule extends AbstractMindModule {
@@ -143,8 +183,25 @@ public class MyModule extends AbstractMindModule {
   }
 }</programlisting>
     </example>
-
-    <para>Google Guice supports different injection type and various binding definitions. See the 
+	<para>
+	The components of the &productName; toolchain are instantiated in specific classes,
+	which are called <emphasis>Module</emphasis> classes. Each <emphasis>Module</emphasis> class
+	must extend the <code>AbstractMindModule</code> class, which defines some based operators.
+	A <emphasis>Module</emphasis> class may implement as many configuration methods as needed.
+	The name of these configuration methods must be prefixed with <code>configure</code>.
+	</para>
+	<para>
+	The configuration methods defines the concrete server objects which are bound to the client
+	interfaces declared by the components of the application. In the above example, the method
+	<code>configureADLLocator</code> states that all client interfaces (i.e. class fields annotated
+	with <code>@Inject</code>) are bound to an instance of the <code>BasicADLLocator</code> class.
+	It is very important to note that, only a single instance of the <code>BasicADLLocator</code>
+	is created and all the interfaces which are using the interface implemented by this object
+	are bound to this single instance. This feature is particularly useful for binding plugin components
+	to some base services which are provided by the core toolchain, such as logger and input/output
+	file locater services.
+	</para>
+    <para>Google Guice supports different injection type and various binding definitions. See the
       <ulink url="http://code.google.com/p/google-guice/wiki/Motivation?tm=6">Google Guice documentation</ulink> for more details.</para>
 
     <section>
@@ -159,7 +216,7 @@ public class MyModule extends AbstractMindModule {
         <programlisting language="java">import org.ow2.mind.inject.AbstractMindModule;
 
 public class MyModule extends AbstractMindModule {
-  
+
   protected void configureADLLocator() {
     bind(ADLLocator.class).to(BasicADLLocator.class);
   }
@@ -170,8 +227,8 @@ public class MyModule extends AbstractMindModule {
   }
 }</programlisting>
       </example>
-      
-      <para>Guice module classes must be specified in the <filename>mind-plugin.xml</filename> file as extensions with the 
+
+      <para>Guice module classes must be specified in the <filename>mind-plugin.xml</filename> file as extensions with the
         <classname>org.ow2.mind.plugin.guice-module</classname> extension-point id. For instance:</para>
       <example>
         <title>Guice module declaration in <filename>mind-plugin.xml</filename></title>
@@ -180,11 +237,17 @@ public class MyModule extends AbstractMindModule {
   <module class="org.myPlugin.MyModule"/>
 </extension>]]></programlisting>
       </example>
-      
-      <para>A Guice module declared in a plugin descriptor may override or be combined with another Guice module.
-        Overriding a Guice module allows to modify some bindings. This is particularly useful for plugins that 
-        need to change the architecture of the &productName; toolchain. Combining two Guice module can be useful
-        to manage multibindings. TODO add details or xref to a plugin example.</para>
+
+	  <para>
+	  As described abote, plugins may declare their own modules to contribute new features.
+	  The plugin framework supports  two different models of contribution. That is,
+	  a plugin descriptor may either override an existing module or combine its module
+	  with an existing module. Overriding an existing module is useful in cases where
+	  the module must implement a new functionality the replaces the default one (e.g.
+	  modifying the way component internal structures are generated). On the other hand,
+	  combinding the new features with the existing ones are useful to extend the existing features
+	  with some new ones (e.g. defining new macros in addition to the ones that are supported by Mind.)
+	  </para>
       <para>Overriding or combining is declared in plugin descriptor using the following syntax:</para>
       <example>
         <title>Guice module overriding or combining</title>
@@ -198,7 +261,7 @@ public class MyModule extends AbstractMindModule {
   </module>
 </extension>]]></programlisting>
       </example>
-      
+
       <para>The actual use of a Guice module can be conditioned by a boolean expression. This is very important
         for third party plugins that contribute Guice modules that override modules of the base toolchain. This
         avoid to change unconditionally the behavior of the toolchain. Most of the time, a toolchain extension
@@ -233,7 +296,7 @@ public class MyModule extends AbstractMindModule {
       .endingWith(BasicInstantiator.class);
 }</programlisting>
       </example>
-      <para>In component implementation, the client interface that is bound to the next component in the 
+      <para>In component implementation, the client interface that is bound to the next component in the
         delegation-chain must be annotated with the <code>@InjectDelegate</code> annotation. For instance:</para>
       <example>
         <title>Delegation-chain client interface declaration</title>
@@ -241,7 +304,7 @@ public class MyModule extends AbstractMindModule {
 
   @InjectDelegate
   protected Instantiator clientInstantiatorItf;
-  
+
   // Do something useful
 }</programlisting>
       </example>

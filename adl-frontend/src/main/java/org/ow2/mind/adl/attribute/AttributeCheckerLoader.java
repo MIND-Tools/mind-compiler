@@ -26,7 +26,9 @@ import static org.ow2.mind.adl.parameter.ast.ParameterASTHelper.getInferredParam
 import static org.ow2.mind.adl.parameter.ast.ParameterASTHelper.setInferredParameterType;
 import static org.ow2.mind.adl.parameter.ast.ParameterASTHelper.setUsedFormalParameter;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.objectweb.fractal.adl.ADLException;
@@ -40,22 +42,35 @@ import org.ow2.mind.adl.parameter.ast.FormalParameter;
 import org.ow2.mind.adl.parameter.ast.FormalParameterContainer;
 import org.ow2.mind.adl.parameter.ast.ParameterASTHelper.ParameterType;
 import org.ow2.mind.error.ErrorManager;
+import org.ow2.mind.idl.IncludeResolver;
+import org.ow2.mind.idl.ast.IDL;
+import org.ow2.mind.idl.ast.IDLASTHelper;
+import org.ow2.mind.idl.ast.IDLASTHelper.IncludeDelimiter;
+import org.ow2.mind.idl.ast.Include;
+import org.ow2.mind.value.ValueKindDecorator;
+import org.ow2.mind.value.ast.CompoundValue;
+import org.ow2.mind.value.ast.CompoundValueField;
 import org.ow2.mind.value.ast.NullLiteral;
 import org.ow2.mind.value.ast.NumberLiteral;
 import org.ow2.mind.value.ast.Reference;
 import org.ow2.mind.value.ast.StringLiteral;
 import org.ow2.mind.value.ast.Value;
-import org.ow2.mind.value.ast.ValueASTHelper;
 
 import com.google.inject.Inject;
 
 public class AttributeCheckerLoader extends AbstractDelegatingLoader {
 
   @Inject
-  protected ErrorManager errorManagerItf;
+  protected ErrorManager       errorManagerItf;
 
   @Inject
-  protected NodeFactory  nodeFactoryItf;
+  protected NodeFactory        nodeFactoryItf;
+
+  @Inject
+  protected IncludeResolver    includeResolverItf;
+
+  @Inject
+  protected ValueKindDecorator valueKindDecoratorItf;
 
   // ---------------------------------------------------------------------------
   // Implementation of the Loader interface
@@ -72,52 +87,60 @@ public class AttributeCheckerLoader extends AbstractDelegatingLoader {
   protected void checkAttributes(final AttributeContainer container,
       final Map<Object, Object> context) throws ADLException {
 
-    Map<String, FormalParameter> formalParameters = null;
+    final Map<String, FormalParameter> formalParameters = new HashMap<String, FormalParameter>();
+    if (container instanceof FormalParameterContainer) {
+      for (final FormalParameter parameter : ((FormalParameterContainer) container)
+          .getFormalParameters()) {
+        formalParameters.put(parameter.getName(), parameter);
+      }
+    }
+
+    final List<Attribute> uninitializedAttributes = new ArrayList<Attribute>();
 
     for (final Attribute attr : container.getAttributes()) {
-      ParameterType type = null;
 
-      final String typeName = attr.getType();
-      if (typeName == null) {
-        errorManagerItf
-            .logError(ADLErrors.INVALID_ATTRIBUTE_MISSING_TYPE, attr);
-      } else {
-        type = ParameterType.fromCType(typeName);
+      final String idtPath = attr.getIdt();
+      if (idtPath != null) {
+        // check idt path
+        // create an include node to use the IncludeResolver
+        final Include includeNode = IDLASTHelper.newIncludeNode(nodeFactoryItf,
+            idtPath, IncludeDelimiter.QUOTE);
+        // copy source info for error reporting
+        includeNode.astSetSource(attr.astGetSource());
+        final IDL idtFile = includeResolverItf.resolve(includeNode, null,
+            ((Definition) container).getName(), context);
+        attr.setIdt(idtFile.getName());
       }
+      final ParameterType type = ParameterType.fromCType(idtPath,
+          attr.getType());
 
       final Value value = attr.getValue();
 
       if (value != null) {
-        if (type != null && (value instanceof NumberLiteral)) {
+        valueKindDecoratorItf.setValueKind(value, context);
+
+        if (value instanceof NumberLiteral) {
           if (!type.isCompatible(value))
             errorManagerItf.logError(
                 ADLErrors.INVALID_ATTRIBUTE_VALUE_INCOMPATIBLE_TYPE, value);
 
-          if (typeName != null && typeName.startsWith("u")
+          if (type.isIntegerType() && type.getCType().startsWith("u")
               && ((NumberLiteral) value).getValue().startsWith("-")) {
             errorManagerItf.logWarning(
                 ADLErrors.WARNING_ATTRIBUTE_UNSIGNED_ASSIGNED_TO_NEGATIVE,
                 value);
           }
-        } else if (type != null
-            && (value instanceof StringLiteral || value instanceof NullLiteral)) {
+        } else if (value instanceof StringLiteral
+            || value instanceof NullLiteral || value instanceof CompoundValue) {
           if (!type.isCompatible(value))
             errorManagerItf.logError(
                 ADLErrors.INVALID_ATTRIBUTE_VALUE_INCOMPATIBLE_TYPE, value);
+          if (value instanceof CompoundValue) {
+            checkCompoundValue((CompoundValue) value, formalParameters);
+          }
         } else {
           assert value instanceof Reference;
           final String refParamName = ((Reference) value).getRef();
-
-          if (formalParameters == null) {
-            // init formalParameters lazily
-            formalParameters = new HashMap<String, FormalParameter>();
-            if (container instanceof FormalParameterContainer) {
-              for (final FormalParameter parameter : ((FormalParameterContainer) container)
-                  .getFormalParameters()) {
-                formalParameters.put(parameter.getName(), parameter);
-              }
-            }
-          }
 
           final FormalParameter refParam = formalParameters.get(refParamName);
           if (refParam == null) {
@@ -135,12 +158,33 @@ public class AttributeCheckerLoader extends AbstractDelegatingLoader {
           }
         }
       } else {
-        // value is null, set a default value
-        if (type == ParameterType.STRING) {
-          attr.setValue(ValueASTHelper.newNullLiteral(nodeFactoryItf));
+        // value is null, move attribute at end of list
+        uninitializedAttributes.add(attr);
+        container.removeAttribute(attr);
+      }
+    }
+    // re-add uninitialized attribute at end of container.
+    for (final Attribute uninitializedAttr : uninitializedAttributes) {
+      container.addAttribute(uninitializedAttr);
+    }
+  }
+
+  private void checkCompoundValue(final CompoundValue value,
+      final Map<String, FormalParameter> formalParameters) throws ADLException {
+    for (final CompoundValueField field : value.getCompoundValueFields()) {
+      final Value subValue = field.getValue();
+      if (subValue instanceof Reference) {
+        final String refParamName = ((Reference) subValue).getRef();
+
+        final FormalParameter refParam = formalParameters.get(refParamName);
+        if (refParam == null) {
+          errorManagerItf.logError(ADLErrors.UNDEFINED_PARAMETER, value,
+              refParamName);
         } else {
-          attr.setValue(ValueASTHelper.newNumberLiteral(nodeFactoryItf, 0));
+          setUsedFormalParameter(refParam);
         }
+      } else if (subValue instanceof CompoundValue) {
+        checkCompoundValue((CompoundValue) subValue, formalParameters);
       }
     }
   }
