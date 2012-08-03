@@ -76,15 +76,15 @@
             <email>stephane.chomat@imag.fr</email>
             <organization>LIG Adele</organization>
         </developer>
-    </developers>
-
-    <contributors>
-        <contributor>
+        <developer>
             <id>deruyter</id>
             <name>Thomas Deruyter</name>
             <email>thomas.deruyter@st.com</email>
             <organization>STMicroelectronics</organization>
-        </contributor>
+        </developer>
+    </developers>
+
+    <contributors>
     </contributors>
 
     <ciManagement>
