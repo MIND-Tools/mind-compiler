@@ -47,6 +47,12 @@
 
     <developers>
         <developer>
+            <id>valeriebertin</id>
+            <name>Valerie Bertin</name>
+            <email>valerie.bertin@st.com</email>
+            <organization>STMicroelectronics</organization>
+        </developer>
+        <developer>
             <id>ozcan</id>
             <name>Ali-Erdem Ozcan</name>
             <email>ali-erdem.ozcan@st.com</email>
@@ -73,7 +79,12 @@
     </developers>
 
     <contributors>
-        <!-- TODO write contributors here -->
+        <contributor>
+            <id>deruyter</id>
+            <name>Thomas Deruyter</name>
+            <email>thomas.deruyter@st.com</email>
+            <organization>STMicroelectronics</organization>
+        </contributor>
     </contributors>
 
     <ciManagement>
@@ -87,15 +98,14 @@
             on
         -->
         <fractaladl.dependencies.version>2.6.1</fractaladl.dependencies.version>
-
         <!-- By default run tests for groups "functional" and "checkin" -->
         <test.groups>functional, checkin</test.groups>
     </properties>
 
     <scm>
-        <connection>scm:svn:svn://svn.forge.objectweb.org/svnroot/mind/mindc/trunk</connection>
-        <developerConnection>scm:svn:svn+ssh://svn.forge.objectweb.org/svnroot/mind/mindc/trunk</developerConnection>
-        <url>http://fisheye.ow2.org/browse/MIND/mindc/trunk</url>
+        <connection>scm:git:https://github.com/MIND-Tools/mindc.git</connection>
+        <developerConnection>scm:git:https://github.com/MIND-Tools/mindc.git</developerConnection>
+        <url>https://github.com/MIND-Tools/mindc</url>
     </scm>
 
     <dependencyManagement>
