@@ -1,0 +1,3 @@
+language: java
+install: mvn -U clean -PCI-profile
+script: mvn -U verify -PCI-profile
