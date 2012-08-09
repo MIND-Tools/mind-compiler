@@ -1,4 +1,4 @@
-#!/bin/sh -x
+#!/bin/sh
 
 # ------------------------------------------------------------------------------
 # Copyright (C) 2009 STMicroelectronics
@@ -121,11 +121,12 @@ LAUNCHER=org.ow2.mind.Launcher
 ## Preparation of the java command to be executed
 if [ -z "$JAVACMD" ] ; then
   if [ -n "$JAVA_HOME"  ] ; then
-    echo TDR $JAVA_HOME
     if [ -x "$JAVA_HOME/jre/sh/java" ] ; then
       # IBM's JDK on AIX uses strange locations for the executables
       JAVACMD="$JAVA_HOME/jre/sh/java"
-    else
+    elif [ -x "$JAVA_HOME" ] ; then
+      JAVACMD="$JAVA_HOME"
+    else 
       JAVACMD="$JAVA_HOME/bin/java"
     fi
   else
