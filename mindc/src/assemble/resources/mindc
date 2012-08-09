@@ -1,8 +1,6 @@
-#!/bin/sh
+#!/bin/sh -x
 
 # ------------------------------------------------------------------------------
-# Copyright (C) 2009 STMicroelectronics
-#
 # Copyright (C) 2009 STMicroelectronics
 #
 # This file is part of "Mind Compiler" is free software: you can redistribute 
@@ -123,6 +121,7 @@ LAUNCHER=org.ow2.mind.Launcher
 ## Preparation of the java command to be executed
 if [ -z "$JAVACMD" ] ; then
   if [ -n "$JAVA_HOME"  ] ; then
+    echo TDR $JAVA_HOME
     if [ -x "$JAVA_HOME/jre/sh/java" ] ; then
       # IBM's JDK on AIX uses strange locations for the executables
       JAVACMD="$JAVA_HOME/jre/sh/java"
