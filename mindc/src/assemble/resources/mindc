@@ -124,7 +124,7 @@ if [ -z "$JAVACMD" ] ; then
     if [ -x "$JAVA_HOME/jre/sh/java" ] ; then
       # IBM's JDK on AIX uses strange locations for the executables
       JAVACMD="$JAVA_HOME/jre/sh/java"
-    elif [ -z "$JAVA_HOME" ] ; then
+    elif [ -f "$JAVA_HOME"  -a -x "$JAVA_HOME" ] ; then
       JAVACMD="$JAVA_HOME"
     else 
       JAVACMD="$JAVA_HOME/bin/java"
