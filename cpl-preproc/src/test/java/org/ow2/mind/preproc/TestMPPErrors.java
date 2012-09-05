@@ -48,8 +48,12 @@ public class TestMPPErrors extends AbstractTestMPP {
       final Error error = errors.iterator().next();
       assertSame(error.getTemplate(), MPPErrors.PARSE_ERROR);
       assertEquals(error.getLocator().getBeginLine(), 2);
-      assertTrue(error.getLocator().getInputFilePath()
-          .endsWith("error/error1.c"));
+      if (!System.getProperty("os.name").startsWith("Windows"))
+        assertTrue(error.getLocator().getInputFilePath()
+            .endsWith("error/error1.c"));
+      else
+        assertTrue(error.getLocator().getInputFilePath()
+            .endsWith("error\\\\error1.c"));
       System.out.println(ErrorHelper.formatError(error));
     }
   }
@@ -66,7 +70,12 @@ public class TestMPPErrors extends AbstractTestMPP {
       final Error error = errors.iterator().next();
       assertSame(error.getTemplate(), MPPErrors.PARSE_ERROR);
       assertEquals(error.getLocator().getBeginLine(), 6);
-      assertTrue(error.getLocator().getInputFilePath().endsWith("init/data.h"));
+      if (!System.getProperty("os.name").startsWith("Windows"))
+        assertTrue(error.getLocator().getInputFilePath()
+            .endsWith("init/data.h"));
+      else
+        // could also test for init\\\\/data.h but it's ugly.
+        assertTrue(error.getLocator().getInputFilePath().endsWith("data.h"));
       System.out.println(ErrorHelper.formatError(error));
     }
   }
@@ -83,7 +92,12 @@ public class TestMPPErrors extends AbstractTestMPP {
       final Error error = errors.iterator().next();
       assertSame(error.getTemplate(), MPPErrors.PARSE_ERROR);
       assertEquals(error.getLocator().getBeginLine(), 6);
-      assertTrue(error.getLocator().getInputFilePath().endsWith("init/data.h"));
+      if (!System.getProperty("os.name").startsWith("Windows"))
+        assertTrue(error.getLocator().getInputFilePath()
+            .endsWith("init/data.h"));
+      else
+        // could also test for init\\\\/data.h but it's ugly.
+        assertTrue(error.getLocator().getInputFilePath().endsWith("data.h"));
       System.out.println(ErrorHelper.formatError(error));
     }
   }
