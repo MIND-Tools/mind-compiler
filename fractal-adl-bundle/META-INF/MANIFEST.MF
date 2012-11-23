@@ -64,7 +64,7 @@ Export-Package: org.objectweb.fractal.adl.timestamp;uses:="org.objectw
 Private-Package: org.objectweb.fractal.task.deployment.api,org.objectw
  eb.util.monolog.api,com.wutka.dtd,org.objectweb.fractal.task.deployme
  nt.lib,org.objectweb.fractal.util,org.objectweb.fractal.task.core
-Built-By: sesa231795
+Built-By: sesa206922
 Tool: Bnd-0.0.357
 Bundle-Name: org.ow2.mind.fractal-adl-bundle
 Created-By: Apache Maven Bundle Plugin

@@ -98,25 +98,6 @@ public class GccCompilerWrapper implements CompilerWrapper {
       return this;
     }
 
-    public PreprocessorCommand addDefine(final String name, final String value) {
-      if (value != null)
-        flags.add("-D" + name + "=" + value);
-      else
-        flags.add("-D" + name);
-      return this;
-    }
-
-    public PreprocessorCommand addIncludeDir(final File includeDir) {
-      flags.add("-I" + includeDir.getPath());
-      return this;
-    }
-
-    public PreprocessorCommand addIncludeFile(final File includeFile) {
-      flags.add("-include");
-      flags.add(includeFile.getPath());
-      return this;
-    }
-
     @Override
     protected Collection<File> readDependencies() {
       return readDeps(dependencyOutputFile, outputFile, context);
@@ -128,6 +109,19 @@ public class GccCompilerWrapper implements CompilerWrapper {
       cmd.add("-E");
 
       cmd.addAll(flags);
+
+      for (final String def : defines) {
+        cmd.add("-D" + def);
+      }
+
+      for (final File incDir : includeDir) {
+        cmd.add("-I" + incDir.getPath().trim());
+      }
+
+      for (final File incFile : includeFile) {
+        cmd.add("-include");
+        cmd.add(incFile.getPath());
+      }
 
       if (dependencyOutputFile != null) {
         cmd.add("-MMD");
@@ -183,25 +177,6 @@ public class GccCompilerWrapper implements CompilerWrapper {
       return this;
     }
 
-    public CompilerCommand addDefine(final String name, final String value) {
-      if (value != null)
-        flags.add("-D" + name + "=" + value);
-      else
-        flags.add("-D" + name);
-      return this;
-    }
-
-    public CompilerCommand addIncludeDir(final File includeDir) {
-      flags.add("-I" + includeDir.getPath());
-      return this;
-    }
-
-    public CompilerCommand addIncludeFile(final File includeFile) {
-      flags.add("-include");
-      flags.add(includeFile.getPath());
-      return this;
-    }
-
     @Override
     protected Collection<File> readDependencies() {
       return readDeps(dependencyOutputFile, outputFile, context);
@@ -214,6 +189,18 @@ public class GccCompilerWrapper implements CompilerWrapper {
       cmd.add("-c");
 
       cmd.addAll(flags);
+
+      for (final String def : defines) {
+        cmd.add("-D" + def);
+      }
+      for (final File incDir : includeDir) {
+        cmd.add("-I" + incDir.getPath().trim());
+      }
+
+      for (final File incFile : includeFile) {
+        cmd.add("-include");
+        cmd.add(incFile.getPath());
+      }
 
       if (dependencyOutputFile != null) {
         cmd.add("-MMD");
@@ -270,25 +257,6 @@ public class GccCompilerWrapper implements CompilerWrapper {
       return this;
     }
 
-    public AssemblerCommand addDefine(final String name, final String value) {
-      if (value != null)
-        flags.add("-D" + name + "=" + value);
-      else
-        flags.add("-D" + name);
-      return this;
-    }
-
-    public AssemblerCommand addIncludeDir(final File includeDir) {
-      flags.add("-I" + includeDir.getPath().trim());
-      return this;
-    }
-
-    public AssemblerCommand addIncludeFile(final File includeFile) {
-      flags.add("-include");
-      flags.add(includeFile.getPath());
-      return this;
-    }
-
     @Override
     protected Collection<File> readDependencies() {
       return readDeps(dependencyOutputFile, outputFile, context);
@@ -302,6 +270,17 @@ public class GccCompilerWrapper implements CompilerWrapper {
 
       cmd.addAll(flags);
 
+      for (final String def : defines) {
+        cmd.add("-D" + def);
+      }
+      for (final File incDir : includeDir) {
+        cmd.add("-I" + incDir.getPath().trim());
+      }
+
+      for (final File incFile : includeFile) {
+        cmd.add("-include");
+        cmd.add(incFile.getPath());
+      }
       cmd.add("-o");
       cmd.add(outputFile.getPath());
 
@@ -332,35 +311,6 @@ public class GccCompilerWrapper implements CompilerWrapper {
     public String getDescription() {
       return "AS: " + outputFile.getPath();
 
-    }
-
-    /*
-     * SSZ: Here we abuse the toString standard method to return a
-     * Makefile-compatible String. This String is the command ran by the exec()
-     * method (see above) (non-Javadoc)
-     * @see java.lang.Object#toString()
-     */
-    @Override
-    public String toString() {
-      final List<String> cmd = new ArrayList<String>();
-      cmd.add(this.cmd);
-      cmd.add("-c");
-
-      cmd.addAll(flags);
-
-      cmd.add("-o");
-      cmd.add(outputFile.getPath());
-
-      cmd.add(inputFile.getPath());
-
-      // Build the final String from List<String>
-      final StringBuilder sb = new StringBuilder();
-      for (int i = 0; i < cmd.size(); i++) {
-        sb.append(cmd.get(i));
-        if (i < cmd.size() - 1) sb.append(" ");
-      }
-
-      return outputFile.getName() + ":\n\t" + sb.toString();
     }
   }
 
