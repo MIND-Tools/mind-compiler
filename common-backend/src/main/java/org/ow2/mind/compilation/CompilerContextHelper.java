@@ -38,6 +38,7 @@ public final class CompilerContextHelper {
   public static final String EXECUTABLE_NAME_CONTEXT_KEY   = "executable-name";
 
   public static final String C_FLAGS_CONTEXT_KEY           = "c-flags";
+  public static final String INC_PATH_CONTEXT_KEY          = "inc-path";
   public static final String AS_FLAGS_CONTEXT_KEY          = "as-flags";
   public static final String CPP_FLAGS_CONTEXT_KEY         = "cpp-flags";
   public static final String LD_FLAGS_CONTEXT_KEY          = "ld-flags";
@@ -90,6 +91,28 @@ public final class CompilerContextHelper {
     return flags;
   }
 
+  public static void setIncPath(final Map<Object, Object> context,
+      final List<String> inc) {
+    context.put(INC_PATH_CONTEXT_KEY, inc);
+  }
+
+  public static void addIncPath(final Map<Object, Object> context,
+      final List<String> inc) {
+    final List<String> i = getCFlags(context);
+    if (i.isEmpty()) {
+      setCFlags(context, inc);
+    } else {
+      i.addAll(inc);
+    }
+  }
+
+  @SuppressWarnings("unchecked")
+  public static List<String> getIncPath(final Map<Object, Object> context) {
+    List<String> inc = (List<String>) context.get(INC_PATH_CONTEXT_KEY);
+    if (inc == null) inc = Collections.emptyList();
+    return inc;
+  }
+
   public static void setASFlags(final Map<Object, Object> context,
       final List<String> flags) {
     context.put(AS_FLAGS_CONTEXT_KEY, flags);
@@ -105,6 +128,7 @@ public final class CompilerContextHelper {
     }
   }
 
+  @SuppressWarnings("unchecked")
   public static List<String> getASFlags(final Map<Object, Object> context) {
     List<String> flags = (List<String>) context.get(AS_FLAGS_CONTEXT_KEY);
     if (flags == null) flags = Collections.emptyList();
@@ -126,6 +150,7 @@ public final class CompilerContextHelper {
     }
   }
 
+  @SuppressWarnings("unchecked")
   public static List<String> getLDFlags(final Map<Object, Object> context) {
     List<String> flags = (List<String>) context.get(LD_FLAGS_CONTEXT_KEY);
     if (flags == null) flags = Collections.emptyList();
