@@ -69,6 +69,8 @@ tokens{
 
   static final Pattern sourceLinePattern = Pattern
                                              .compile("\\#\\s*(\\d+)\\s*\"(.*)\"");
+  static final Pattern shortSourceLinePattern = Pattern
+                                             .compile("\\#\\s*(\\d+)\\s*");
   static final int     lineIndex         = 1;
   static final int     fileIndex         = 2;
   
@@ -77,13 +79,26 @@ tokens{
   }
 
   public void processSourceLine() {
-    final Matcher matcher = sourceLinePattern.matcher(input.substring(state.tokenStartCharIndex, getCharIndex()-1));
-    if (matcher.matches()) {
-      final int line = Integer.parseInt(matcher.group(lineIndex));
-      final String file = matcher.group(fileIndex);
+    // handle standard preprocessors
+    Matcher standardMatcher = sourceLinePattern.matcher(input.substring(state.tokenStartCharIndex, getCharIndex()-1));
+    
+    // handle preprocessors that output "#line n" information without file reference
+    Matcher shortMatcher = shortSourceLinePattern.matcher(input.substring(state.tokenStartCharIndex, getCharIndex()-1));
+    
+    int line;
+    String file;
+    if (standardMatcher.matches()) {
+      // handle standard preprocessors
+      line = Integer.parseInt(standardMatcher.group(lineIndex));
+      file = standardMatcher.group(fileIndex);
       input.setLine(line - 1);
       ((ANTLRStringStream) input).name = file;
-    }
+      return;
+    } else if (shortMatcher.matches()) {
+      // handle preprocessors that output "#line n" information without file reference
+      line = Integer.parseInt(shortMatcher.group(lineIndex));
+      input.setLine(line - 1);
+    }    
   }
 }
 
@@ -602,7 +617,7 @@ protected ws
 //	;
   
 LINE_INFO
-	: '#' (' ' | '\t')* ('line' (' ' | '\t')*)? INT (' ' | '\t')+ STRING_LITERAL {
+	: '#' (' ' | '\t')* ('line' (' ' | '\t')*)? INT (' ' | '\t')* STRING_LITERAL* {
 		processSourceLine();
 	}
 	;
@@ -612,9 +627,9 @@ STRING_LITERAL
     ;
   
 
-CHAR_LITERAL
-    :  '\'' ( EscapeSequence | ~('\'') ) '\''
-    ;
+//CHAR_LITERAL
+//    :  '\'' ( EscapeSequence | ~('\'') ) '\''
+//    ;
     
 fragment
 EscapeSequence
