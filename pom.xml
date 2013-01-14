@@ -103,9 +103,9 @@
     </properties>
 
     <scm>
-        <connection>scm:git:https://github.com/MIND-Tools/mindc.git</connection>
-        <developerConnection>scm:git:https://github.com/MIND-Tools/mindc.git</developerConnection>
-        <url>https://github.com/MIND-Tools/mindc</url>
+        <connection>scm:git:https://github.com/MIND-Tools/mind-compiler.git</connection>
+        <developerConnection>scm:git:https://github.com/MIND-Tools/mind-compiler.git</developerConnection>
+        <url>https://github.com/MIND-Tools/mind-compiler</url>
     </scm>
 
     <dependencyManagement>
