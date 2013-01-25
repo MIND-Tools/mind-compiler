@@ -1,0 +1,5 @@
+primitive importidl.Server {
+ 	provides TargetService as targetServiceItf;
+ 	provides InterfaceTransfer as interfaceTransferItf;
+  	source server.c;
+}

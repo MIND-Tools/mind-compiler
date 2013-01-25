@@ -1,0 +1,5 @@
+primitive importidl.Relay {
+	provides RelayService as relayServiceItf;
+	requires optional TargetService as targetServiceItf;
+  	source relay.c;
+}

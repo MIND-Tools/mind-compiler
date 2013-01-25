@@ -20,7 +20,7 @@
  * Contributors: 
  */
 
-package org.ow2.mind.idl.annotation.predefined;
+package org.ow2.mind.idl.annotations;
 
 import org.ow2.mind.annotation.Annotation;
 import org.ow2.mind.annotation.AnnotationElement;
@@ -28,7 +28,6 @@ import org.ow2.mind.annotation.AnnotationTarget;
 import org.ow2.mind.idl.annotation.IDLAnnotationTarget;
 import org.ow2.mind.idl.annotation.IDLLoaderPhase;
 import org.ow2.mind.idl.annotation.IDLLoaderProcessor;
-import org.ow2.mind.idl.annotation.ImportIDLAnnotationProcessor;
 
 @IDLLoaderProcessor(processor = ImportIDLAnnotationProcessor.class, phases = {IDLLoaderPhase.AFTER_PARSING})
 public class ImportIDL implements Annotation {

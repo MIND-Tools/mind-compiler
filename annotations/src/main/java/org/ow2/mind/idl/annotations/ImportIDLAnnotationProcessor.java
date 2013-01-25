@@ -20,14 +20,15 @@
  * Contributors: 
  */
 
-package org.ow2.mind.idl.annotation;
+package org.ow2.mind.idl.annotations;
 
 import java.util.Map;
 
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.Node;
 import org.ow2.mind.annotation.Annotation;
-import org.ow2.mind.idl.annotation.predefined.ImportIDL;
+import org.ow2.mind.idl.annotation.AbstractIDLLoaderAnnotationProcessor;
+import org.ow2.mind.idl.annotation.IDLLoaderPhase;
 import org.ow2.mind.idl.ast.IDL;
 import org.ow2.mind.idl.ast.IDLASTHelper;
 import org.ow2.mind.idl.ast.InterfaceDefinition;
