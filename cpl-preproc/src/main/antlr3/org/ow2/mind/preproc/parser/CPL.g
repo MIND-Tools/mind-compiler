@@ -329,14 +329,14 @@ protected structDecl returns [StringBuilder res = new StringBuilder()]
                 if (singletonMode) {
                   // compatibility mode for picky compilers (such as IAR), to avoid duplicate definitions
                   // of PRIVATE in MPP-ed files (_ctrl_impl.mpp.c + _instances.mpp.c)
-                  $res.append("#ifndef SINGLETON_PRIVATE_DATA" + "\n");
-                  $res.append("#define SINGLETON_PRIVATE_DATA" + "\n");
+                  $res.append("#ifndef SINGLETON_PRIVATE_DATA" + System.getProperty("line.separator"));
+                  $res.append("#define SINGLETON_PRIVATE_DATA" + System.getProperty("line.separator"));
                   $res.append("typedef struct").append(wstext($ws1.text)).append("{");
                   $res.append(structContent);
                   $res.append(wstext($ws2.text)).append(" SINGLETON_PRIVATE_DATA_T");
                   $res.append(str);
                   $res.append(";");
-                  $res.append("\n" + "#endif");
+                  $res.append(System.getProperty("line.separator") + "#endif");
                 } else {                
                   $res.append("typedef struct").append(wstext($ws1.text)).append("{");
                   $res.append(" COMP_DATA; ");
