@@ -214,7 +214,7 @@ typedef struct {
 
 /* SSZ: Duplicate-definition fix for some families of compilers such as IAR */
 #define INSTANCE___component_<definition.name;format="toCName">_PRIVATEDATA_DECLARED
-extern PURE_PRIVATE_DATA_T __component_<definition.name;format="toCName">_singleton_instance_private_data;
+extern SINGLETON_PRIVATE_DATA_T __component_<definition.name;format="toCName">_singleton_instance_private_data;
 
 <endif>
 <elseif (definition.data.path)>
@@ -227,7 +227,7 @@ typedef struct {
 
 /* SSZ: Duplicate-definition fix for some families of compilers such as IAR */
 #define INSTANCE___component_<definition.name;format="toCName">_PRIVATEDATA_DECLARED
-extern PURE_PRIVATE_DATA_T __component_<definition.name;format="toCName">_singleton_instance_private_data;
+extern SINGLETON_PRIVATE_DATA_T __component_<definition.name;format="toCName">_singleton_instance_private_data;
 <endif>
 <else>
 /* No private data */
@@ -304,7 +304,7 @@ extern <ComponentTypeName(definitionName=definition.name)> instance_name;
 
 /* SSZ: Duplicate-definition fix for some families of compilers such as IAR */
 #define <definition.name;format="toUpperCName">_DECLARE_PRIVATEDATA(private_name) \
-PURE_PRIVATE_DATA_T private_name;
+SINGLETON_PRIVATE_DATA_T private_name;
 
 int __component_<definition.name;format="toCName">_factory(void **instance, void *allocItf <ComponentFactoryParameters(definition=definition)>);
 int __component_<definition.name;format="toCName">_destroy(void *instance, void *allocItf);

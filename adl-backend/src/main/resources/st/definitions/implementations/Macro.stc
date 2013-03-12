@@ -25,7 +25,7 @@ ComponentDefinition(definition, interfaceDefinitions) ::= <<
 <if (definition.astDecorations.("is-singleton"))>
 /* New Private Data handling to avoid the "duplicate definitions" bug of PRIVATE with some families of picky compilers (such as IAR) */
 #define PRIVATE __component_<definition.name;format="toCName">_singleton_instance_private_data
-#define PURE_PRIVATE_DATA_T <ComponentTypeName(definitionName=definition.name)>_private_t
+#define SINGLETON_PRIVATE_DATA_T <ComponentTypeName(definitionName=definition.name)>_private_t
 <endif>
 
 <CONTEXT_PTR(definition=definition)>
