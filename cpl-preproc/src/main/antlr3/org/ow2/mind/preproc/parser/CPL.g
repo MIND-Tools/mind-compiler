@@ -325,16 +325,8 @@ protected structDecl returns [StringBuilder res = new StringBuilder()]
                 cplChecker.prvDecl(structContent, getSourceFile());
               }
               
-              // OLD BUT MAY HAVE TO BE RESTORED
-//              if (singletonMode) {
-//                  //$res.append(" /* SSZ: singleton */ ");
-//                  $res.append($text); 
-//                }
               if (isPrivate) {
                 if (singletonMode) {
-                  //$res.append(" /* SSZ: isPrivate, and singleton */ ");
-                  // original code
-                  //$res.append($text);
                   // compatibility mode for picky compilers (such as IAR), to avoid duplicate definitions
                   // of PRIVATE in MPP-ed files (_ctrl_impl.mpp.c + _instances.mpp.c)
                   $res.append("#ifndef SINGLETON_PRIVATE_DATA" + "\n");
@@ -346,7 +338,6 @@ protected structDecl returns [StringBuilder res = new StringBuilder()]
                   $res.append(";");
                   $res.append("\n" + "#endif");
                 } else {                
-                  //$res.append(" /* SSZ: isPrivate, and not singleton */ ");
                   $res.append("typedef struct").append(wstext($ws1.text)).append("{");
                   $res.append(" COMP_DATA; ");
                   $res.append(structContent);
@@ -356,10 +347,8 @@ protected structDecl returns [StringBuilder res = new StringBuilder()]
                 }
               } else {
                 if (singletonMode) {
-                  //$res.append(" /* SSZ: not private, and singleton */ ");
                   $res.append($text); 
                 } else {
-                  //$res.append(" /* SSZ: not private, and not singleton */ ");
                   $res.append("struct ").append(wstext($ws1.text)).append($structfield.text)
                     .append(str).append(";");
                 }
