@@ -160,9 +160,6 @@ public class AbstractTestMPP {
       command.addIncludeFile(new File(dataDefURL.toURI()));
     }
 
-    System.out.println("AbstractTestMPP - newGCCCommand - command : "
-        + command.toString());
-
     return command;
   }
 
