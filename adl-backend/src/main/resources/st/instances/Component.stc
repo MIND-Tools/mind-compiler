@@ -28,6 +28,15 @@ ComponentInstances(topLevelDefinition, definition, instances) ::= <<
 
 <instances:InitInstance(definition=definition, instance=it); separator="\n\n">
 
+/* SSZ: Duplicate-definition fix for some families of compilers such as IAR */
+<if (definition.astDecorations.("is-singleton"))>
+<if (definition.astNodeTypes.("data"))>
+<if (definition.data)>
+<instances:DeclarePrivateData(definition=definition, instance=it); separator="\n\n">
+<endif>
+<endif>
+<endif>
+
 <ConstructorCalls(definition=definition, instances=instances)>
 
 >>
@@ -88,6 +97,14 @@ DeclareComponentInstance(instance) ::= <<
 #ifndef INSTANCE_<instance.decorations.("instance-name"); format="toCName">_DECLARED
 <instance.definition.name;format="toUpperCName">_DECLARE_INSTANCE(<instance.decorations.("instance-name"); format="toCName">);
 #define INSTANCE_<instance.decorations.("instance-name"); format="toCName">_DECLARED
+#endif
+
+>>
+
+DeclarePrivateData(definition, instance) ::= <<
+#ifndef INSTANCE_<instance.decorations.("instance-name"); format="toCName">__PRIVATEDATA_DECLARED
+<instance.definition.name;format="toUpperCName">_DECLARE_PRIVATEDATA(<instance.decorations.("instance-name"); format="toCName">_private_data);
+#define INSTANCE_<instance.decorations.("instance-name"); format="toCName">_PRIVATEDATA_DECLARED
 #endif
 
 >>

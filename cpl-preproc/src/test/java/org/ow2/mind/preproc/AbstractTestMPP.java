@@ -139,6 +139,7 @@ public class AbstractTestMPP {
     command.setOutputFile(newBuildFile(dirName, fileName, singleton
         ? ".singleton-mpp.o"
         : ".multi-mpp.o"));
+
     command.addFlags(cppFlags);
 
     final String name = "macro_def.h";
@@ -148,6 +149,16 @@ public class AbstractTestMPP {
 
     command.addDefine("COMPONENT_NAME", dirName.replace('-', '_'));
     if (singleton) command.addDefine("SINGLETON");
+
+    /* Duplicate-definition bug fix for some families of compilers (such as IAR) */
+    if (singleton) {
+      final String dataDefName = "private_data_def.c";
+      final URL dataDefURL = getClass().getClassLoader().getResource(
+          dataDefName);
+      if (dataDefURL == null)
+        throw new Exception("Can't find file " + dataDefName);
+      command.addIncludeFile(new File(dataDefURL.toURI()));
+    }
 
     return command;
   }
