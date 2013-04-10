@@ -37,7 +37,8 @@ cplFile(idl,itfName) ::= <<
 
 externPrototype(method) ::= <<
 <if(!method.vaArgs)>
-extern <methodDef(method=method, methodName=method.name, withThisPtr="false")>;
+extern
+<methodDef(method=method, methodName=method.name, withThisPtr="false")>;
 <endif>
 >>
 
