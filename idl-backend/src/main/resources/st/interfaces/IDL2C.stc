@@ -131,6 +131,7 @@ typedef struct __component_<itf.name; format="toCName">_itf_desc *<itf.name; for
 >>
 
 methodDef(method, methodName, withThisPtr) ::= <<
+<method.astSource; format="sourceTo#line">
 <typeQualifier(qualifiers=method)><varDef(type=method.type, name=methodPrototype(name=methodName, parameters=method.parameters, withThisPtr=withThisPtr, vaArgs=method.vaArgs))>
 >>
 
