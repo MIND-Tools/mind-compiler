@@ -96,6 +96,12 @@ public class AppTest extends TestCase {
       String actualLine = actualReader.readLine();
       String expectedLine = expectedReader.readLine();
       while (actualLine != null && expectedLine != null) {
+        // skip #line info, but keep the current expected line for next line
+        if (actualLine.startsWith("  #line")) {
+          actualLine = actualReader.readLine();
+          continue;
+        }
+        // otherwise normal comparison
         assertEquals(actualFile.getPath() + ":" + actualReader.getLineNumber()
             + " unexpected line", expectedLine, actualLine);
         actualLine = actualReader.readLine();
