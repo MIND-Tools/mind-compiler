@@ -54,6 +54,6 @@ public class CFlags implements Annotation {
   }
 
   public boolean isInherited() {
-    return false;
+    return true;
   }
 }
