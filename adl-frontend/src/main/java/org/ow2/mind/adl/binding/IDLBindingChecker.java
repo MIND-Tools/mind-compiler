@@ -53,7 +53,19 @@ public class IDLBindingChecker extends AbstractDelegatingBindingChecker {
       throws ADLException {
     final boolean isValid = clientBindingCheckerItf.checkBinding(fromInterface,
         toInterface, binding, locator);
-    return checkSignature(fromInterface, toInterface, locator) && isValid;
+
+    final boolean signatureCheckRes = checkSignature(fromInterface,
+        toInterface, locator);
+
+    // as binding destination is from a different child type, some compilers
+    // such as IAR raised a warning on incompatible structs, we force
+    // the cast, as we know (lines above) that the types are indeed compatible
+    if (!checkSameSignature(fromInterface, toInterface, locator)
+        && signatureCheckRes && (fromInterface instanceof TypeInterface))
+      decorateForTypeInheritanceCast(binding,
+          ((TypeInterface) fromInterface).getSignature());
+
+    return signatureCheckRes && isValid;
   }
 
   public boolean checkFromCompositeToSubcomponentBinding(
@@ -63,8 +75,19 @@ public class IDLBindingChecker extends AbstractDelegatingBindingChecker {
     final boolean isValid = clientBindingCheckerItf
         .checkFromCompositeToSubcomponentBinding(compositeInterface,
             subComponentInterface, binding, locator);
-    return checkSignature(compositeInterface, subComponentInterface, locator)
-        && isValid;
+
+    final boolean signatureCheckRes = checkSignature(compositeInterface,
+        subComponentInterface, locator);
+
+    // as binding destination is from a different child type, some compilers
+    // such as IAR raised a warning on incompatible structs, we force
+    // the cast, as we know (lines above) that the types are indeed compatible
+    if (!checkSameSignature(compositeInterface, subComponentInterface, locator)
+        && signatureCheckRes && (compositeInterface instanceof TypeInterface))
+      decorateForTypeInheritanceCast(binding,
+          ((TypeInterface) compositeInterface).getSignature());
+
+    return signatureCheckRes && isValid;
   }
 
   public boolean checkFromSubcomponentToCompositeBinding(
@@ -74,8 +97,20 @@ public class IDLBindingChecker extends AbstractDelegatingBindingChecker {
     final boolean isValid = clientBindingCheckerItf
         .checkFromSubcomponentToCompositeBinding(subComponentInterface,
             compositeInterface, binding, locator);
-    return checkSignature(subComponentInterface, compositeInterface, locator)
-        && isValid;
+
+    final boolean signatureCheckRes = checkSignature(subComponentInterface,
+        compositeInterface, locator);
+
+    // as binding destination is from a different child type, some compilers
+    // such as IAR raised a warning on incompatible structs, we force
+    // the cast, as we know (lines above) that the types are indeed compatible
+    if (!checkSameSignature(subComponentInterface, compositeInterface, locator)
+        && signatureCheckRes
+        && (subComponentInterface instanceof TypeInterface))
+      decorateForTypeInheritanceCast(binding,
+          ((TypeInterface) subComponentInterface).getSignature());
+
+    return signatureCheckRes && isValid;
   }
 
   public boolean checkCompatibility(final Interface from, final Interface to,
@@ -111,4 +146,24 @@ public class IDLBindingChecker extends AbstractDelegatingBindingChecker {
     }
     return true;
   }
+
+  private void decorateForTypeInheritanceCast(final Binding binding,
+      final String castSignature) {
+    binding.astSetDecoration("type-inheritance-cast", castSignature);
+  }
+
+  // Redundant with checkSignature but not functionally wrong.
+  private boolean checkSameSignature(final Interface from, final Interface to,
+      final Node locator) throws ADLException {
+    if ((from instanceof TypeInterface) && (to instanceof TypeInterface)) {
+      final String fromSignature = ((TypeInterface) from).getSignature();
+      final String toSignature = ((TypeInterface) to).getSignature();
+      if (fromSignature.equals(toSignature)) {
+        // same signature. binding is OK
+        return true;
+      }
+    }
+    return false;
+  }
+
 }

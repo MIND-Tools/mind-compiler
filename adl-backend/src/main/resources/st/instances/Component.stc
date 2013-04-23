@@ -28,7 +28,14 @@ ComponentInstances(topLevelDefinition, definition, instances) ::= <<
 
 <instances:InitInstance(definition=definition, instance=it); separator="\n\n">
 
+/* Duplicate-definition fix for some families of compilers such as IAR */
+<if (definition.astDecorations.("is-singleton"))>
+<if (definition.astNodeTypes.("data"))>
+<if (definition.data)>
 <instances:DeclarePrivateData(definition=definition, instance=it); separator="\n\n">
+<endif>
+<endif>
+<endif>
 
 <ConstructorCalls(definition=definition, instances=instances)>
 
@@ -95,17 +102,11 @@ DeclareComponentInstance(instance) ::= <<
 >>
 
 DeclarePrivateData(definition, instance) ::= <<
-<if (definition.astDecorations.("is-singleton"))>
-<if (definition.astNodeTypes.("data"))>
-<if (definition.data)>
-/* SSZ: Duplicate-definition fix for some families of compilers such as IAR */
 #ifndef INSTANCE_<instance.decorations.("instance-name"); format="toCName">__PRIVATEDATA_DECLARED
 <instance.definition.name;format="toUpperCName">_DECLARE_PRIVATEDATA(<instance.decorations.("instance-name"); format="toCName">_private_data);
 #define INSTANCE_<instance.decorations.("instance-name"); format="toCName">_PRIVATEDATA_DECLARED
 #endif
-<endif>
-<endif>
-<endif>
+
 >>
 
 DeclareServerComponent(definition, instance, interface, isInternal) ::= <<
@@ -155,7 +156,7 @@ AddItfValue(definition, instance, itf, isInternal) ::= <<
 <if (itf.numberOfElement)>
 <itf.astDecorations.("collectionIndexes"):AddItfCollectionValue(definition=definition, instance=instance, itf=itf, index=it, isInternal=isInternal);separator="\n">
 <else>
-, /* <itf.name> */ <StaticBindingValue(bindingDesc=instance.decorations.("binding-descriptors").(StaticBindingItfName(itfName=itf.name, isInternal=isInternal)))>
+, /* <itf.name> */ <BindingCastIfNeeded(instance=instance, itf=itf, isInternal=isInternal)><StaticBindingValue(bindingDesc=instance.decorations.("binding-descriptors").(StaticBindingItfName(itfName=itf.name, isInternal=isInternal)))>
 <endif>
 <endif>
 >>
@@ -189,6 +190,9 @@ StaticCollectionBindingValue(bindingDesc, index) ::= <<
 >>
 
 StaticBindingItfName(itfName, index, isInternal) ::= "<if (isInternal)>INTERNAL_<endif><itfName><if (index)>_<index><endif>"
+
+
+BindingCastIfNeeded(instance, itf, isInternal) ::= << <if (instance.decorations.("binding-descriptors").(StaticBindingItfName(itfName=itf.name, isInternal=isInternal)).binding.astDecorations.("type-inheritance-cast"))>(<instance.decorations.("binding-descriptors").(StaticBindingItfName(itfName=itf.name, isInternal=isInternal)).binding.astDecorations.("type-inheritance-cast"); format="toCName">)<endif> >>
 
 DefineAttributeValues(definition, instance) ::= <<
 <if (definition.astNodeTypes.("attribute"))>

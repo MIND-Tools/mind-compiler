@@ -212,7 +212,7 @@ typedef struct {
   COMP_DATA;
 } PRIVATE_DATA_T;
 
-/* SSZ: Duplicate-definition fix for some families of compilers such as IAR */
+/* Duplicate-definition fix for some families of compilers such as IAR */
 #define INSTANCE___component_<definition.name;format="toCName">_PRIVATEDATA_DECLARED
 extern SINGLETON_PRIVATE_DATA_T __component_<definition.name;format="toCName">_singleton_instance_private_data;
 
@@ -225,7 +225,7 @@ typedef struct {
   COMP_DATA;
 } PRIVATE_DATA_T;
 
-/* SSZ: Duplicate-definition fix for some families of compilers such as IAR */
+/* Duplicate-definition fix for some families of compilers such as IAR */
 #define INSTANCE___component_<definition.name;format="toCName">_PRIVATEDATA_DECLARED
 extern SINGLETON_PRIVATE_DATA_T __component_<definition.name;format="toCName">_singleton_instance_private_data;
 <endif>
@@ -302,7 +302,7 @@ extern <ComponentTypeName(definitionName=definition.name)> instance_name;
 <InitializeInterfaces(definition=definition)><InitializeComponents(definition=definition)><InitializeControllerStructures(definition=definition)><InitializeAttributes(definition=definition)>  } \
 };
 
-/* SSZ: Duplicate-definition fix for some families of compilers such as IAR */
+/* Duplicate-definition fix for some families of compilers such as IAR */
 #define <definition.name;format="toUpperCName">_DECLARE_PRIVATEDATA(private_name) \
 SINGLETON_PRIVATE_DATA_T private_name;
 
