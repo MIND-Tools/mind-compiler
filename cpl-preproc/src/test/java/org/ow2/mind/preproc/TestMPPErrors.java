@@ -48,8 +48,12 @@ public class TestMPPErrors extends AbstractTestMPP {
       final Error error = errors.iterator().next();
       assertSame(error.getTemplate(), MPPErrors.PARSE_ERROR);
       assertEquals(error.getLocator().getBeginLine(), 2);
-      assertTrue(error.getLocator().getInputFilePath()
-          .endsWith("error/error1.c"));
+      if (!isRunningOnWindows())
+        assertTrue(error.getLocator().getInputFilePath()
+            .endsWith("error/error1.c"));
+      else
+        assertTrue(error.getLocator().getInputFilePath()
+            .endsWith("error\\\\error1.c"));
       System.out.println(ErrorHelper.formatError(error));
     }
   }
@@ -66,7 +70,11 @@ public class TestMPPErrors extends AbstractTestMPP {
       final Error error = errors.iterator().next();
       assertSame(error.getTemplate(), MPPErrors.PARSE_ERROR);
       assertEquals(error.getLocator().getBeginLine(), 6);
-      assertTrue(error.getLocator().getInputFilePath().endsWith("init/data.h"));
+      if (!isRunningOnWindows())
+        assertTrue(error.getLocator().getInputFilePath()
+            .endsWith("init/data.h"));
+      else
+        assertTrue(error.getLocator().getInputFilePath().endsWith("data.h"));
       System.out.println(ErrorHelper.formatError(error));
     }
   }
@@ -83,8 +91,16 @@ public class TestMPPErrors extends AbstractTestMPP {
       final Error error = errors.iterator().next();
       assertSame(error.getTemplate(), MPPErrors.PARSE_ERROR);
       assertEquals(error.getLocator().getBeginLine(), 6);
-      assertTrue(error.getLocator().getInputFilePath().endsWith("init/data.h"));
+      if (!isRunningOnWindows())
+        assertTrue(error.getLocator().getInputFilePath()
+            .endsWith("init/data.h"));
+      else
+        assertTrue(error.getLocator().getInputFilePath().endsWith("data.h"));
       System.out.println(ErrorHelper.formatError(error));
     }
+  }
+
+  protected boolean isRunningOnWindows() {
+    return System.getProperty("os.name").contains("Windows");
   }
 }

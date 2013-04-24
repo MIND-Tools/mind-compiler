@@ -98,6 +98,10 @@ public class CmdArgument extends CmdOption {
     return desc;
   }
 
+  public String getArgDescription() {
+    return argDesc;
+  }
+
   @Override
   public String getDescription() {
     if (allowMultiple)

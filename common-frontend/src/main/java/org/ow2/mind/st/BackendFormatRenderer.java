@@ -99,7 +99,7 @@ public class BackendFormatRenderer implements AttributeRenderer {
     final int i = s.lastIndexOf(':');
     if (i == -1) return "";
     final String inputFilePath = s.substring(0, i);
-    final int j = s.indexOf('-', i);
+    int j = s.indexOf('-', i);
     int lineNumber;
     if (j == -1) {
       try {
@@ -108,8 +108,14 @@ public class BackendFormatRenderer implements AttributeRenderer {
         return "";
       }
     } else {
+      // For interface files the info is formatted as [row,column]
+      String inputFileInfo = s.substring(i + 1, j);
+      if (inputFileInfo.startsWith("[") && inputFileInfo.endsWith("]")) {
+        j = inputFileInfo.indexOf(",");
+        inputFileInfo = inputFileInfo.substring(1, j); // '[' -> ','
+      } // else it should directly be the integer
       try {
-        lineNumber = Integer.parseInt(s.substring(i + 1, j));
+        lineNumber = Integer.parseInt(inputFileInfo);
       } catch (final NumberFormatException e) {
         return "";
       }

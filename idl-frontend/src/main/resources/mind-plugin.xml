@@ -17,12 +17,18 @@
  Contact: mind@ow2.org
 
  Authors: Matthieu Leclercq
- Contributors: 
+ Contributors: Stephane Seyvoz
 
  -->
 <plugin
     id="org.ow2.mind.idl-frontend"
     name="The IDL Frontend of the MIND Compiler">
+
+	<extension
+        point="org.ow2.mind.predefined-annotations">
+        <annotation
+            package="org.ow2.mind.idl.annotation.predefined" />
+    </extension>
 
     <extension
         point="org.ow2.mind.plugin.guice-module">

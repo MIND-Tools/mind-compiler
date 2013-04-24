@@ -65,6 +65,15 @@ public class BasicADLCompiler extends AbstractADLCompiler {
   protected void initContext(final String adlName, final String execName,
       final CompilationStage stage, final Map<Object, Object> context)
       throws ADLException {
+
+    /**
+     * Some plugins may need the executable name earlier than the compileGraph
+     * (see below), for example as early as the check-adl phase.
+     */
+    if (execName != null) {
+      CompilerContextHelper.setExecutableName(context, execName);
+    }
+
   }
 
   @Override
