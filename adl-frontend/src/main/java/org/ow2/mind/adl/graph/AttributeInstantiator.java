@@ -136,6 +136,20 @@ public class AttributeInstantiator extends AbstractDelegatingInstantiator {
 // } else {
 // refValues.put(refArgument.getName(), refValue);
 // }
+
+              // when the definition is anonymous, there are no written
+// arguments,
+              // only inferred ones and we've got only their name, no value...
+              // so we try to get the value from the parent context
+              if (subGraph.getDefinition().astGetType()
+                  .equals("anonymousDefinition")) {
+                final ValueContext parentValueContextByArgName = argumentValues
+                    .get(refArgument.getName());
+
+                if (parentValueContextByArgName != null)
+                  refArgument.setValue(parentValueContextByArgName.value);
+              }
+
               refValues.put(refArgument.getName(),
                   new ValueContext(refArgument.getValue(), argumentValues));
             }
