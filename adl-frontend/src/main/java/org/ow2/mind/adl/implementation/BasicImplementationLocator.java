@@ -26,7 +26,9 @@ import static org.objectweb.fractal.adl.util.ClassLoaderHelper.getClassLoader;
 import static org.ow2.mind.PathHelper.isRelative;
 import static org.ow2.mind.PathHelper.isValid;
 
+import java.io.IOException;
 import java.net.URL;
+import java.util.Enumeration;
 import java.util.Map;
 
 import org.ow2.mind.InputResource;
@@ -50,8 +52,19 @@ public class BasicImplementationLocator implements ImplementationLocator {
     if (isRelative(path))
       throw new IllegalArgumentException("\"" + path
           + "\" is not an absolute path");
+    try {
+      final Enumeration<URL> urls = getClassLoader(this, context).getResources(
+          path.substring(1));
+      while (urls.hasMoreElements()) {
+        final URL url = urls.nextElement();
+        if (url.getProtocol().equals("file")) return url;
+      }
+    } catch (final IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+    return null;
 
-    return getClassLoader(this, context).getResource(path.substring(1));
   }
 
   public InputResource toInputResource(final String path) {

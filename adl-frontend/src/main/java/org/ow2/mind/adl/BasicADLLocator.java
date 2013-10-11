@@ -24,7 +24,9 @@ package org.ow2.mind.adl;
 
 import static org.ow2.mind.PathHelper.fullyQualifiedNameToPath;
 
+import java.io.IOException;
 import java.net.URL;
+import java.util.Enumeration;
 import java.util.Map;
 
 import org.objectweb.fractal.adl.Definition;
@@ -84,8 +86,18 @@ public class BasicADLLocator implements ADLLocator {
   }
 
   public URL findSourceADL(final String name, final Map<Object, Object> context) {
-    return ClassLoaderHelper.getClassLoader(this, context).getResource(
-        getADLSourceName(name).substring(1));
+    try {
+      final Enumeration<URL> urls = ClassLoaderHelper.getClassLoader(this,
+          context).getResources(getADLSourceName(name).substring(1));
+      while (urls.hasMoreElements()) {
+        final URL url = urls.nextElement();
+        if (url.getProtocol().equals("file")) return url;
+      }
+    } catch (final IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+    return null;
   }
 
   public URL findResource(final String name, final Map<Object, Object> context) {
