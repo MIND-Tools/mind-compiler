@@ -98,11 +98,11 @@ if $cygwin ; then
   [ -n "$JAVA_HOME" ] &&
     JAVA_HOME=`cygpath --unix "$JAVA_HOME"`
   [ -n "$MIND_LIB" ] &&
-    MIND_LIB=`cygpath --path --unix "$MIND_LIB"`
+    MIND_LIB=`cygpath --unix "$MIND_LIB"`
   [ -n "$MIND_EXT" ] &&
-    MIND_EXT=`cygpath --path --unix "$MIND_EXT"`
+    MIND_EXT=`cygpath --unix "$MIND_EXT"`
   [ -n "$MIND_RUNTIME" ] &&
-    MIND_RUNTIME=`cygpath --path --unix "$MIND_RUNTIME"`
+    MIND_RUNTIME=`cygpath --unix "$MIND_RUNTIME"`
 fi
 
 # For Migwn, ensure paths are in UNIX format before anything is touched
@@ -148,17 +148,17 @@ fi
 # For Cygwin, switch paths to Windows format before running java
 if $cygwin; then
   [ -n "$MIND_HOME" ] &&
-    MIND_HOME=`cygpath --path --windows "$MIND_HOME"`
+    MIND_HOME=`cygpath --windows "$MIND_HOME"`
   [ -n "$JAVA_HOME" ] &&
-    JAVA_HOME=`cygpath --path --windows "$JAVA_HOME"`
+    JAVA_HOME=`cygpath --windows "$JAVA_HOME"`
   [ -n "$HOME" ] &&
-    HOME=`cygpath --path --windows "$HOME"`
+    HOME=`cygpath --windows "$HOME"`
   [ -n "$MIND_LIB" ] &&
-    MIND_LIB=`cygpath --path --windows "$MIND_LIB"`
+    MIND_LIB=`cygpath --windows "$MIND_LIB"`
   [ -n "$MIND_EXT" ] &&
-    MIND_EXT=`cygpath --path --windows "$MIND_EXT"`
+    MIND_EXT=`cygpath --windows "$MIND_EXT"`
   [ -n "$MIND_RUNTIME" ] &&
-    MIND_RUNTIME=`cygpath --path --windows "$MIND_RUNTIME"`
+    MIND_RUNTIME=`cygpath --windows "$MIND_RUNTIME"`
 fi
 
 
@@ -167,14 +167,14 @@ fi
 for i in "${MIND_LIB}"/*.jar "${MIND_EXT}"/*.jar; do
   if [ -z "$MIND_CLASSPATH" ] ; then
     if $cygwin; then
-      lib=`cygpath --path --windows "${i}"`
+      lib=`cygpath --windows "${i}"`
       MIND_CLASSPATH="${lib}"
     else
       MIND_CLASSPATH="${i}"
     fi
   else
     if $cygwin; then
-      lib=`cygpath --path --windows "${i}"`
+      lib=`cygpath --windows "${i}"`
       MIND_CLASSPATH="${MIND_CLASSPATH};${lib}"
     else
       MIND_CLASSPATH="${MIND_CLASSPATH}:${i}"
