@@ -17,7 +17,7 @@
  * Contact: mind@ow2.org
  *
  * Authors: Matthieu ANNE
- * Contributors: Olivier Lobry, Matthieu Leclercq
+ * Contributors: Olivier Lobry, Matthieu Leclercq, Stephane Seyvoz
  */
  
 grammar CPL;
@@ -68,9 +68,9 @@ tokens{
 @lexer::members {
 
   static final Pattern sourceLinePattern = Pattern
-                                             .compile("\\#\\s*(\\d+)\\s*\"(.*)\"");
-  static final int     lineIndex         = 1;
-  static final int     fileIndex         = 2;
+                                             .compile("\\#(line)*\\s*(\\d+)\\s*(\"(.*)\")*");
+  static final int     lineIndex         = 2;
+  static final int     fileIndex         = 4;
   
   public String getSourceFileName() {
   	return ((ANTLRStringStream) input).name;
@@ -602,7 +602,7 @@ protected ws
 //	;
   
 LINE_INFO
-	: '#' (' ' | '\t')* ('line' (' ' | '\t')*)? INT (' ' | '\t')+ STRING_LITERAL {
+	: '#' (' ' | '\t')* ('line' (' ' | '\t')*)? INT (' ' | '\t')* STRING_LITERAL* {
 		processSourceLine();
 	}
 	;
@@ -612,9 +612,9 @@ STRING_LITERAL
     ;
   
 
-CHAR_LITERAL
-    :  '\'' ( EscapeSequence | ~('\'') ) '\''
-    ;
+//CHAR_LITERAL
+//    :  '\'' ( EscapeSequence | ~('\'') ) '\''
+//    ;
     
 fragment
 EscapeSequence
