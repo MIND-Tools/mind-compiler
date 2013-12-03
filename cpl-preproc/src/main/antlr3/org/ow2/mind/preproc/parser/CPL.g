@@ -572,18 +572,24 @@ protected inParamsDef returns [StringBuilder res = new StringBuilder()]
     ;
 
 protected params returns [StringBuilder res = new StringBuilder()]
-    : '(' ws* ')'       { $res = null; }
-    | '(' inParams ')' 
-      { 
-        $res.append($inParams.res).append(" PARAMS_RPARENT ");
-      }
+    : '(' 
+        (
+          ws* ')'         { $res = null; }
+          | inParams ')'  { $res.append($inParams.res).append(" PARAMS_RPARENT "); }
+        )
     ;
 
 protected inParams  returns [StringBuilder res = new StringBuilder()] 
-    : ( '(' ws* ')'              { $res.append("(").append(wstext($ws.text)).append(")");}
-        |'(' ip = inParams ')'  { $res.append("(").append($ip.res).append(")"); }
-        | expr                  { $res.append($expr.res); }
-        | e = ~('(' | ')')      { $res.append($e.text); }
+    : ( 
+        expr                      { $res.append($expr.res); }
+        | e = ~('(' | ')')        { $res.append($e.text); }
+        | (
+            '(' 
+                (
+                  ws* ')'             { $res.append("(").append(wstext($ws.text)).append(")"); }
+                  | ip = inParams ')' { $res.append("(").append($ip.res).append(")"); }
+                )
+          )
       )+
     ;
 
