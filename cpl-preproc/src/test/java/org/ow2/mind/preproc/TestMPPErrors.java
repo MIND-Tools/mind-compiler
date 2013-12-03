@@ -104,11 +104,11 @@ public class TestMPPErrors extends AbstractTestMPP {
 
   @Test(groups = {"functional"})
   public void testMissingMethod1() throws Exception {
+    final String dirName = "missingMETH";
     try {
-      initSourcePath(getDepsDir("missingMETH/MissingMethItf.itf")
+      initSourcePath(getDepsDir(dirName + "/MissingMethItf.itf")
           .getAbsolutePath());
-      compileSingletonForDef("missingMETH", "missingMETH",
-          "missingMETH.MissingMETH");
+      compileSingletonForDef(dirName, "missingMETH", dirName + ".MissingMeth");
     } catch (final ADLException e) {
       assertTrue(e.getError() instanceof ErrorCollection);
       final Collection<Error> errors = ((ErrorCollection) e.getError())
