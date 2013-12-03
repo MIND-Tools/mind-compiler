@@ -1,0 +1,6 @@
+primitive methImplCheckSplit.Primitive {
+	provides Interface0 as myItf0;
+	provides Interface1 as myItf1;
+	source source0.c;
+	source source1.c;
+}

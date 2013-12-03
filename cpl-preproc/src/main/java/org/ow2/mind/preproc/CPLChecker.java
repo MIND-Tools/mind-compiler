@@ -17,10 +17,16 @@
  * Contact: mind@ow2.org
  *
  * Authors: Matthieu ANNE
- * Contributors: 
+ * Contributors: Stephane SEYVOZ
  */
 
 package org.ow2.mind.preproc;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Logger;
 
 import org.antlr.runtime.Token;
 import org.objectweb.fractal.adl.ADLException;
@@ -28,27 +34,42 @@ import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.error.BasicErrorLocator;
 import org.objectweb.fractal.adl.error.NodeErrorLocator;
 import org.objectweb.fractal.adl.interfaces.Interface;
+import org.objectweb.fractal.adl.interfaces.InterfaceContainer;
 import org.objectweb.fractal.adl.types.TypeInterface;
 import org.objectweb.fractal.adl.types.TypeInterfaceUtil;
+import org.objectweb.fractal.adl.util.FractalADLLogManager;
 import org.ow2.mind.adl.ast.ASTHelper;
 import org.ow2.mind.adl.ast.Data;
 import org.ow2.mind.adl.ast.DataField;
 import org.ow2.mind.adl.ast.ImplementationContainer;
+import org.ow2.mind.adl.ast.Source;
 import org.ow2.mind.adl.idl.InterfaceDefinitionDecorationHelper;
+import org.ow2.mind.adl.membrane.ast.Controller;
+import org.ow2.mind.adl.membrane.ast.ControllerContainer;
+import org.ow2.mind.adl.membrane.ast.ControllerInterface;
 import org.ow2.mind.error.ErrorManager;
 import org.ow2.mind.idl.ast.IDLASTHelper;
 import org.ow2.mind.idl.ast.InterfaceDefinition;
 
 public class CPLChecker {
-  protected final Definition   definition;
-  protected final ErrorManager errorManager;
+  protected final Definition          definition;
+  protected final ErrorManager        errorManager;
 
-  protected final Data         data;
-  protected boolean            prvDeclared = false;
+  protected final Data                data;
+  protected boolean                   prvDeclared        = false;
 
-  public CPLChecker(final ErrorManager errorManager, final Definition definition) {
+  protected static Logger             logger             = FractalADLLogManager
+                                                             .getLogger("MPP");
+
+  protected Map<String, List<String>> declaredItfMethMap = new HashMap<String, List<String>>();
+
+  protected final Map<Object, Object> context;
+
+  public CPLChecker(final ErrorManager errorManager,
+      final Definition definition, final Map<Object, Object> context) {
     this.errorManager = errorManager;
     this.definition = definition;
+    this.context = context;
     this.data = (definition instanceof ImplementationContainer)
         ? ((ImplementationContainer) definition).getData()
         : null;
@@ -86,8 +107,8 @@ public class CPLChecker {
     return false;
   }
 
-  public void serverMethDef(final Token itfName, final Token methName,
-      final String sourceFile) throws ADLException {
+  public void serverMethDef(final Token itfName, final String itfIdx,
+      final Token methName, final String sourceFile) throws ADLException {
     if (definition == null) {
       // Add this condition so that the testNG will not throw exceptions
       // (stand-alone node)
@@ -120,6 +141,27 @@ public class CPLChecker {
       errorManager.logError(MPPErrors.UNKNOWN_METHOD,
           locator(methName, sourceFile), itfName.getText(), methName.getText());
     }
+
+    // to avoid rewriting the grammar
+    StringBuilder idxSB = null;
+    Integer idxInt = null;
+    if (itfIdx != null) idxSB = new StringBuilder().append(itfIdx);
+
+    checkIdx(itf, itfName, idxSB, sourceFile);
+
+    if (itfIdx != null) {
+      try {
+        idxInt = Integer.parseInt(itfIdx);
+      } catch (final NumberFormatException e) {
+        // ignore, idx is not a number literal
+      }
+    }
+
+    if (!TypeInterfaceUtil.isCollection(itf))
+      ImplementedMethodsHelper.addImplementedMethod(itf, methName.getText());
+    else
+      ImplementedMethodsHelper.addCollectionImplementedMethod(itf, idxInt,
+          methName.getText());
 
   }
 
@@ -291,4 +333,110 @@ public class CPLChecker {
         token.getCharPositionInLine());
   }
 
+  protected BasicErrorLocator locatorNoLine(final String sourceFile) {
+    return new BasicErrorLocator(sourceFile, -1, -1);
+  }
+
+  public void postParseChecks(final String sourceFile) throws ADLException {
+
+    // this means we aren't in standard compilation
+    // probably CPL-Preproc direct parser tests
+    if (definition == null) return;
+
+    // handling membrane of composites
+    if (!ASTHelper.isPrimitive(definition)) return;
+
+    // mark file as visited
+    final Source source = ImplementedMethodsHelper.getDefinitionSourceFromPath(
+        (ImplementationContainer) definition, sourceFile, context);
+
+    // TODO: handle inline C code !!
+    if (source == null) return;
+
+    ImplementedMethodsHelper.setSourceVisited(source);
+
+    // was it the last one ? if yes, we run a full methods check
+    if (definition instanceof ImplementationContainer
+        && definition instanceof InterfaceContainer)
+      if (ImplementedMethodsHelper
+          .haveAllSourcesBeenVisited((ImplementationContainer) definition)) {
+
+        final Map<Interface, List<String>> allUnimplementedMethods = new HashMap<Interface, List<String>>();
+        final Map<Interface, Map<Integer, List<String>>> allCollectionUnimplementedMethods = new HashMap<Interface, Map<Integer, List<String>>>();
+
+        logger
+            .fine("All of "
+                + definition.getName()
+                + " sources visited - Now checking if all provided methods were implemented...");
+
+        for (final Interface currItf : ((InterfaceContainer) definition)
+            .getInterfaces())
+          if ((currItf instanceof TypeInterface)
+              && ((TypeInterface) currItf).getRole().equals(
+                  TypeInterface.SERVER_ROLE)
+              && !isControllerInterface(currItf.getName())) {
+
+            if (!TypeInterfaceUtil.isCollection(currItf)) {
+              final List<String> unimplementedMethodsList = ImplementedMethodsHelper
+                  .getInterfaceUnimplementedMethods(currItf);
+              if (!unimplementedMethodsList.isEmpty())
+                allUnimplementedMethods.put(currItf, unimplementedMethodsList);
+            } else {
+              final Map<Integer, List<String>> unimplementedMethodsMap = ImplementedMethodsHelper
+                  .getCollectionInterfaceUnimplementedMethods(currItf);
+              if (!unimplementedMethodsMap.isEmpty()) {
+                allCollectionUnimplementedMethods.put(currItf,
+                    unimplementedMethodsMap);
+              }
+            }
+
+          }
+
+        if (allUnimplementedMethods.isEmpty()
+            && allCollectionUnimplementedMethods.isEmpty())
+          logger.fine("All methods were correctly implemented.");
+        else if (!allUnimplementedMethods.isEmpty()) {
+          final Set<Interface> interfaces = allUnimplementedMethods.keySet();
+          final Interface itf0 = (Interface) interfaces.toArray()[0];
+
+          // Show missing methods from the first concerned interface
+          errorManager.logError(MPPErrors.MISSING_METHOD_DECLARATION,
+              locatorNoLine(sourceFile), definition.getName(), itf0.getName(),
+              allUnimplementedMethods.get(itf0));
+        } else if (!allCollectionUnimplementedMethods.isEmpty()) {
+          final Set<Interface> interfaces = allCollectionUnimplementedMethods
+              .keySet();
+          final Interface itf0 = (Interface) interfaces.toArray()[0];
+
+          final Map<Integer, List<String>> unimplMethsByIdxMap = allCollectionUnimplementedMethods
+              .get(itf0);
+          final Set<Integer> indexes = unimplMethsByIdxMap.keySet();
+          final Integer idx0 = (Integer) indexes.toArray()[0];
+
+          // Show missing methods from the first concerned interface
+          errorManager.logError(MPPErrors.MISSING_COLL_METHOD_DECLARATION,
+          /* locatorNoLine(sourceFile), */definition.getName(), itf0.getName(),
+              idx0.toString(), unimplMethsByIdxMap.get(idx0));
+        }
+      }
+  }
+
+  private boolean isControllerInterface(final String currItf) {
+    /*
+     * Check if we host controllers (METH-s will be generated so they can't be
+     * found in Source-s) Inspired from
+     * AbstractControllerADLLoaderAnnotationProcessor
+     */
+    if (definition instanceof ControllerContainer) {
+      for (final Controller ctrl : ((ControllerContainer) definition)
+          .getControllers()) {
+        for (final ControllerInterface ctrlItf : ctrl.getControllerInterfaces()) {
+          if (ctrlItf.getName().equals(currItf)) {
+            return true;
+          }
+        }
+      }
+    }
+    return false;
+  }
 }

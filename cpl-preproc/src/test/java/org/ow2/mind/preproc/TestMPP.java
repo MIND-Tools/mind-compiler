@@ -201,4 +201,12 @@ public class TestMPP extends AbstractTestMPP {
     compileMulti("constructor", "constructor");
   }
 
+  @Test(groups = {"functional"})
+  public void testMethImplCheckSplitSingleton() throws Exception {
+    initSourcePath(getDepsDir("methImplCheckSplit/Interface0.itf")
+        .getAbsolutePath());
+    compileSplitSingletonForDef("methImplCheckSplit", "source0", "source1",
+        "methImplCheckSplit.Primitive");
+  }
+
 }

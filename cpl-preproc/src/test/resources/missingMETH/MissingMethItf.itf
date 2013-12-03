@@ -1,0 +1,4 @@
+
+interface missingMETH.MissingMethItf {
+	int myMethod(int a, int b);
+}

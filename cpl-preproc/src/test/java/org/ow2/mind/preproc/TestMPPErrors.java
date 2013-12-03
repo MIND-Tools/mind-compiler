@@ -25,6 +25,7 @@ package org.ow2.mind.preproc;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 import java.io.File;
 import java.util.Collection;
@@ -53,7 +54,9 @@ public class TestMPPErrors extends AbstractTestMPP {
       assertTrue(inputFile.getCanonicalPath().endsWith(
           "error" + File.separator + "error1.c"));
       System.out.println(ErrorHelper.formatError(error));
+      return;
     }
+    fail("Test should have raised a PARSE_ERROR !");
   }
 
   @Test(groups = {"functional"})
@@ -72,7 +75,9 @@ public class TestMPPErrors extends AbstractTestMPP {
       assertTrue(inputFile.getCanonicalPath().endsWith(
           "init" + File.separator + "data.h"));
       System.out.println(ErrorHelper.formatError(error));
+      return;
     }
+    fail("Test should have raised a PARSE_ERROR !");
   }
 
   @Test(groups = {"functional"})
@@ -91,6 +96,80 @@ public class TestMPPErrors extends AbstractTestMPP {
       assertTrue(inputFile.getCanonicalPath().endsWith(
           "init" + File.separator + "data.h"));
       System.out.println(ErrorHelper.formatError(error));
+      return;
     }
+    fail("Test should have raised a PARSE_ERROR !");
+  }
+
+  @Test(groups = {"functional"})
+  public void testMissingMethod1() throws Exception {
+    try {
+      initSourcePath(getDepsDir("missingMETH/MissingMethItf.itf")
+          .getAbsolutePath());
+      compileSingletonForDef("missingMETH", "missingMETH",
+          "missingMETH.MissingMETH");
+    } catch (final ADLException e) {
+      assertTrue(e.getError() instanceof ErrorCollection);
+      final Collection<Error> errors = ((ErrorCollection) e.getError())
+          .getErrors();
+      assertEquals(errors.size(), 1);
+      final Error error = errors.iterator().next();
+      assertSame(error.getTemplate(), MPPErrors.MISSING_METHOD_DECLARATION);
+      final File inputFile = new File(error.getLocator().getInputFilePath());
+      assertTrue(inputFile.getCanonicalPath().endsWith(
+          "missingMETH" + File.separator + "missingMETH.c"));
+      return;
+    }
+    fail("Test should have raised a MISSING_METHOD_DECLARATION error !");
+  }
+
+  @Test(groups = {"functional"})
+  public void testMethImplCheckSplitError0() throws Exception {
+    final String dirName = "methImplCheckSplit";
+    try {
+      initSourcePath(getDepsDir(dirName + "/Interface0.itf").getAbsolutePath());
+      compileSplitSingletonForDef(dirName, "source0", "source1", dirName
+          + ".PrimitiveError0");
+    } catch (final ADLException e) {
+      assertTrue(e.getError() instanceof ErrorCollection);
+      final Collection<Error> errors = ((ErrorCollection) e.getError())
+          .getErrors();
+      assertEquals(errors.size(), 1);
+      final Error error = errors.iterator().next();
+      assertSame(error.getTemplate(), MPPErrors.MISSING_METHOD_DECLARATION);
+      final File inputFile = new File(error.getLocator().getInputFilePath());
+      assertTrue(inputFile.getCanonicalPath().endsWith(
+          dirName + File.separator + "source1.c"));
+      assertEquals(
+          error.getMessage(),
+          "In definition methImplCheckSplit.PrimitiveError0: METH(myItf2, [myMeth1]) method(s) haven't been implemented !");
+      return;
+    }
+    fail("Test should have raised a MISSING_METHOD_DECLARATION error !");
+  }
+
+  @Test(groups = {"functional"})
+  public void testMethImplCheckSplitError1() throws Exception {
+    final String dirName = "methImplCheckSplit";
+    try {
+      initSourcePath(getDepsDir(dirName + "/Interface0.itf").getAbsolutePath());
+      compileSplitSingletonForDef(dirName, "source0", "source1", dirName
+          + ".PrimitiveError1");
+    } catch (final ADLException e) {
+      assertTrue(e.getError() instanceof ErrorCollection);
+      final Collection<Error> errors = ((ErrorCollection) e.getError())
+          .getErrors();
+      assertEquals(errors.size(), 1);
+      final Error error = errors.iterator().next();
+      assertSame(error.getTemplate(), MPPErrors.MISSING_METHOD_DECLARATION);
+      final File inputFile = new File(error.getLocator().getInputFilePath());
+      assertTrue(inputFile.getCanonicalPath().endsWith(
+          dirName + File.separator + "source1.c"));
+      assertEquals(
+          error.getMessage(),
+          "In definition methImplCheckSplit.PrimitiveError1: METH(myItf2, [myMeth2]) method(s) haven't been implemented !");
+      return;
+    }
+    fail("Test should have raised a MISSING_METHOD_DECLARATION error !");
   }
 }

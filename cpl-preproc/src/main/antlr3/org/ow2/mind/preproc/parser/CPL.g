@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2009 France Telecom
+ * Copyright (C) 2013 Schneider-Electric
  *
  * This file is part of "Mind Compiler" is free software: you can redistribute 
  * it and/or modify it under the terms of the GNU Lesser General Public License 
@@ -117,7 +118,13 @@ tokens{
 
 parseFile returns [String res]
 @init{StringBuilder sb = new StringBuilder(); }
-@after{$res=sb.toString(); out.println($res);}
+@after{
+  try {
+    cplChecker.postParseChecks(getSourceFile());
+  } catch (ADLException e1) {
+    // TODO ?
+  }
+  $res=sb.toString(); out.println($res);}
   :(methDef    {sb.append($methDef.res);}
   | methCall    {sb.append($methCall.res); }
   | attAccess     {sb.append($attAccess.res); }
@@ -161,7 +168,7 @@ protected serverMethDef returns [StringBuilder res = new StringBuilder()]
       )* // handle case of (((... METH(foo) )))(...
     {
       try {
-        cplChecker.serverMethDef($id, $meth, getSourceFile());
+        cplChecker.serverMethDef($id, itfIdx, $meth, getSourceFile());
       } catch (ADLException e1) {
         // ignore
       }

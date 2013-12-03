@@ -1,0 +1,1 @@
+MissingMETH.adl: forget 'METH' when writing a server method.
