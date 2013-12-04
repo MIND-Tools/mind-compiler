@@ -1,0 +1,10 @@
+@Run
+composite itfinheritance.Helloworld {
+  provides Main as main;
+
+  contains Client as client;
+  contains Server as server;
+  
+  binds this.main to client.main;
+  binds client.sa to server.s;
+}

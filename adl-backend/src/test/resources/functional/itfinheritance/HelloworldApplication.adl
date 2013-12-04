@@ -1,0 +1,4 @@
+@Run(addBootstrap=false)
+composite itfinheritance.HelloworldApplication 
+    extends GenericApplication<Helloworld> {
+}

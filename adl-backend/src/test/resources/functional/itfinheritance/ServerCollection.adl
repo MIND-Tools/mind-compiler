@@ -1,0 +1,9 @@
+@Singleton
+primitive itfinheritance.ServerCollection {
+  
+  provides ExtendedService as s[2] ;
+  
+  attribute int count = 2;
+  
+  source servercollection.c;
+}
