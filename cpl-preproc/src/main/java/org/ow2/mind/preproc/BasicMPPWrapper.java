@@ -78,8 +78,8 @@ public class BasicMPPWrapper implements MPPWrapper {
     protected File                      outputFile;
     protected File                      headerOutputFile;
 
-    private List<File>                  inputFiles;
-    private List<File>                  outputFiles;
+    protected List<File>                inputFiles;
+    protected List<File>                outputFiles;
 
     protected Definition                definition;
 
