@@ -1,0 +1,7 @@
+
+primitive missingmeth.helloworldColl.Server {
+  
+  provides Service as s[2] ;
+  
+  source server.c;
+}

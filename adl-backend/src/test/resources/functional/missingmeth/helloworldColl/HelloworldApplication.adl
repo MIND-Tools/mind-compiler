@@ -1,0 +1,3 @@
+composite missingmeth.helloworldColl.HelloworldApplication 
+    extends GenericApplication<Helloworld> {
+}
