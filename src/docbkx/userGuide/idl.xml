@@ -188,6 +188,62 @@
 
       </section>
       
+      <section id="idl-annot-importIDL">
+        <title><classname>@ImportIDL</classname></title>
+        
+        <formalpara>
+          <title>Annotation fields</title>
+          <para>One field called <varname>value</varname> of type <varname>string[]</varname></para>
+        </formalpara>
+        
+        <formalpara>
+          <title>Annotation targets</title>
+          <para>
+            <simplelist type="inline">
+              <member>Interface definition</member>
+            </simplelist>
+          </para>
+        </formalpara>
+
+        <para>The <classname>ImportIDL</classname> annotation allows specifying
+          other IDL interfaces signatures to be available in the interface body in
+          methods definitions.</para>
+
+		<para>This is particularly useful for reconfiguration cases where components
+		transfer interface pointers from one another. The imported types are
+		then available to use as explicit methods arguments types or methods return types.
+		This avoids using void*, improves compiler checks, reduces warnings.
+		</para>
+
+		<example>
+		<title>ImportIDL for arguments</title>
+		<programlisting linenumbering="numbered" language="idl"> @ImportIDL({"importidl.TargetService"})
+ interface importidl.RelayService {
+   int relayInterfacePointer(importidl_TargetService itf);
+ }
+		</programlisting>
+		</example>
+		
+		<example>
+		<title>ImportIDL for return type</title>
+		<programlisting linenumbering="numbered" language="idl"> @ImportIDL({"importidl.TargetService"})
+ interface importidl.InterfaceTransfer {
+   importidl_TargetService getTargetServiceInterface();
+ }
+		</programlisting>
+		</example>
+
+		<note><para>When importing types, you must use the { } curly brackets to list signatures
+		(separated by commas ',') even if there's only one.</para>
+		<para>Also replace the dots '.' from imported signature with underscores '_' in the
+		arguments and return types.</para></note>
+		<note><para>This annotation is similar to <varname>@UseIDL</varname> (see <xref linkend="adl-annot-useIDL"/>),
+		and makes the imported types available in the component implementation as well, which
+		is useful for the concerned interface methods implementation.
+		</para></note>
+
+      </section>
+      
   </section>
   
   
