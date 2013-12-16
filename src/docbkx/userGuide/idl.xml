@@ -211,7 +211,7 @@
 
 		<para>This is particularly useful for reconfiguration cases where components
 		transfer interface pointers from one another. The imported types are
-		then available to use as explicit methods arguments types or methods return types.
+		then available to be used as explicit methods arguments types or methods return types.
 		This avoids using void*, improves compiler checks, reduces warnings.
 		</para>
 

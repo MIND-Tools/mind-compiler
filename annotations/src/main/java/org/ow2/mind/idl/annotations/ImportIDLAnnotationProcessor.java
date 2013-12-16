@@ -45,13 +45,12 @@ public class ImportIDLAnnotationProcessor
       final IDL idl, final IDLLoaderPhase phase,
       final Map<Object, Object> context) throws ADLException {
     assert annotation instanceof ImportIDL;
-    final ImportIDL useIDL = (ImportIDL) annotation;
-    final String[] idlNames = useIDL.value;
+    final ImportIDL importIDL = (ImportIDL) annotation;
+    final String[] idlNames = importIDL.value;
     for (final String idlName : idlNames) {
 
       final IDL currentArgIDL = idlLoaderItf.load(idlName, context);
 
-      // should be everytime ?
       if (currentArgIDL instanceof InterfaceDefinition)
         IDLASTHelper.addReferencedInterface(idl,
             (InterfaceDefinition) currentArgIDL);
