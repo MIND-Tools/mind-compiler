@@ -210,9 +210,19 @@
           methods definitions.</para>
 
 		<para>This is particularly useful for reconfiguration cases where components
-		transfer interface pointers from one another. The imported types are
-		then available to be used as explicit methods arguments types or methods return types.
-		This avoids using void*, improves compiler checks, reduces warnings.
+		transfer interface pointers from one another.</para>
+		
+		<para>For example, if component A obtains an interface pointer (that it owns, as is
+		usually the case for callbacks, or from another component C) and transfers
+		it to component B that will use it, it will have to transfer the interface pointer 
+		through an interface as a method argument, for B to use it with CALL_PTR or BIND_MY_INTERFACE.
+		This used to be done using a void* type, which is not the most elegant way to do it.
+		</para>
+		
+		<para>
+		Using @ImportIDL, the imported types are made available to be used as explicit methods
+		arguments types	or methods return types.
+		This avoids using void*, improves compiler checks, and may reduce warnings with some compilers.
 		</para>
 
 		<example>
