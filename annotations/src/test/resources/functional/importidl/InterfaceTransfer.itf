@@ -1,0 +1,5 @@
+
+@ImportIDL({"importidl.TargetService"})
+interface importidl.InterfaceTransfer {
+	importidl_TargetService getTargetServiceInterface();
+}

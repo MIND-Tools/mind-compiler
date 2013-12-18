@@ -1,0 +1,4 @@
+
+interface importidl.TargetService {
+	int getResult();
+}
