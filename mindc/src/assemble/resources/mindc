@@ -61,10 +61,10 @@ if [ -z "$JAVA_HOME" ] ; then
   fi
 fi
 
-# Definition of MIND_HOME ENV var 
-# -------------------------------
+# Definition of MIND_HOME var 
+# ---------------------------
 #   MIND_HOME - location of mind's installed home dir
-# MIND_HOME is set to the home dir in which the current script is defined
+#               computed from the current script location (.. directory) 
 
   ## resolve links - $0 may be a link to mind's home
   PRG="$0"
