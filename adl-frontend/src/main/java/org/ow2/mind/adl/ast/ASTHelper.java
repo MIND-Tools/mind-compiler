@@ -703,7 +703,8 @@ public class ASTHelper {
     final String srcPath = src.getPath();
     if (srcPath == null) return false;
     final String srcExt = PathHelper.getExtension(srcPath);
-    return srcExt != null && (srcExt.equals("s") || srcExt.equals("S"));
+    return srcExt != null
+        && (srcExt.equals("s") || srcExt.equals("S") || srcExt.equals("asm"));
   }
 
   /**
