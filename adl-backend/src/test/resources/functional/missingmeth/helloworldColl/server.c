@@ -16,7 +16,7 @@ void METH(s[1], print)(const char *msg)
     printf("%s\n", msg);
 }
 
-/* We want an error to be raised and println and flush to be missing
+/* We want an error to be raised and println and flush to be missing for both collection indexes
 void METH(s[0], println)(const char *msg)
 {
 	printf("%s\n", msg);
