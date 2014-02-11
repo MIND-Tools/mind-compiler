@@ -45,13 +45,10 @@ public class TestMissingMethodsError extends AbstractFunctionalTest {
     initSourcePath(getDepsDir("fractal/api/Component.itf").getAbsolutePath(),
         "common", "functional");
 
-    boolean errorOccured = false;
-
     try {
       runner.compileRunAndCheck("missingmeth.helloworld.HelloworldApplication",
           null);
     } catch (final ADLException e) {
-      errorOccured = true;
       // Expected behavior: the compilation HAS to fail
       final Error err = e.getError();
       Assert.assertTrue(err instanceof ErrorCollection);
@@ -71,12 +68,11 @@ public class TestMissingMethodsError extends AbstractFunctionalTest {
               .getMessage()
               .equals(
                   "In definition missingmeth.helloworld.Server: METH(s, [println, flush]) method(s) haven't been implemented !"));
-    }
 
-    if (!errorOccured) {
-      Assert
-          .fail("MPPError.MISSING_METHOD_DECLARATION should have been raised !");
+      return;
     }
+    Assert
+        .fail("MPPError.MISSING_METHOD_DECLARATION should have been raised !");
   }
 
   @Test(groups = {"functional"})
@@ -84,13 +80,10 @@ public class TestMissingMethodsError extends AbstractFunctionalTest {
     initSourcePath(getDepsDir("fractal/api/Component.itf").getAbsolutePath(),
         "common", "functional");
 
-    boolean errorOccured = false;
-
     try {
       runner.compileRunAndCheck(
           "missingmeth.helloworldSplitImpl.HelloworldApplication", null);
     } catch (final ADLException e) {
-      errorOccured = true;
       // Expected behavior: the compilation HAS to fail
       final Error err = e.getError();
       Assert.assertTrue(err instanceof ErrorCollection);
@@ -110,12 +103,11 @@ public class TestMissingMethodsError extends AbstractFunctionalTest {
               .getMessage()
               .equals(
                   "In definition missingmeth.helloworldSplitImpl.Server: METH(s, [flush]) method(s) haven't been implemented !"));
-    }
 
-    if (!errorOccured) {
-      Assert
-          .fail("MPPError.MISSING_METHOD_DECLARATION should have been raised !");
+      return;
     }
+    Assert
+        .fail("MPPError.MISSING_METHOD_DECLARATION should have been raised !");
   }
 
   @Test(groups = {"functional"})
@@ -123,13 +115,10 @@ public class TestMissingMethodsError extends AbstractFunctionalTest {
     initSourcePath(getDepsDir("fractal/api/Component.itf").getAbsolutePath(),
         "common", "functional");
 
-    boolean errorOccured = false;
-
     try {
       runner.compileRunAndCheck(
           "missingmeth.helloworldColl.HelloworldApplication", null);
     } catch (final ADLException e) {
-      errorOccured = true;
       // Expected behavior: the compilation HAS to fail
       final Error err = e.getError();
       Assert.assertTrue(err instanceof ErrorCollection);
@@ -149,11 +138,10 @@ public class TestMissingMethodsError extends AbstractFunctionalTest {
               .getMessage()
               .equals(
                   "In definition missingmeth.helloworldColl.Server: METH(s[0], [println, flush]) method(s) haven't been implemented !"));
-    }
 
-    if (!errorOccured) {
-      Assert
-          .fail("MPPError.MISSING_METHOD_DECLARATION should have been raised !");
+      return;
     }
+    Assert
+        .fail("MPPError.MISSING_METHOD_DECLARATION should have been raised !");
   }
 }
