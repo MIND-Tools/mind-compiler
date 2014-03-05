@@ -95,6 +95,12 @@
             longName="no-bin"
             description="Do not generate binary ADL/IDL ('.def', '.itfdef' and '.idtdef' files)." />
 
+		<cmdFlag
+            id="org.ow2.mind.cli.KeepSourceName"
+            longName="keep-source-name"
+            handler="org.ow2.mind.cli.KeepSourceNameOptionHandler"
+            description="Use source files names as suffix for temporary files instead of _impl + idx" />
+
         <!-- ============= -->
         <!-- Flags options -->
         <!-- ============= -->

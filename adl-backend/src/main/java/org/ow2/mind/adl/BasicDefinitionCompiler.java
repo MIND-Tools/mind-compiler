@@ -98,6 +98,13 @@ public class BasicDefinitionCompiler implements DefinitionCompiler {
       final Collection<CompilationCommand> compilationTasks,
       final Map<Object, Object> context) throws ADLException {
 
+    // we don't use the KeepSrcNameContextHelper here since it would need to
+    // add a adl-backend -> mindc modules dependency, which is wrong.
+    final Boolean keepSrcNameInCtx = (Boolean) context.get("keep-src-name");
+    final Boolean keepSrcName = (keepSrcNameInCtx != null)
+        ? keepSrcNameInCtx
+        : false;
+
     final Source[] sources = container.getSources();
     for (int i = 0; i < sources.length; i++) {
       final Source src = sources[i];
@@ -118,10 +125,9 @@ public class BasicDefinitionCompiler implements DefinitionCompiler {
 
       } else if (ASTHelper.isAssembly(src)) {
         // src file is an assembly file
-        final String implSuffix = "_impl" + i;
-        final File objectFile = outputFileLocatorItf.getCCompiledOutputFile(
-            fullyQualifiedNameToPath(definition.getName(), implSuffix, ".o"),
-            context);
+
+        // default naming convention
+        String implSuffix = "_impl" + i;
 
         final File srcFile;
         assert src.getPath() != null;
@@ -133,6 +139,20 @@ public class BasicDefinitionCompiler implements DefinitionCompiler {
           throw new CompilerError(GenericErrors.INTERNAL_ERROR, e);
         }
 
+        if (keepSrcName) {
+          // keep-source-name convention: override suffix
+          final String srcName = srcFile.getName();
+
+          // replace all path separators by underscores and remove extension
+          implSuffix = "_"
+              + srcName.replace(File.separatorChar, '_').substring(0,
+                  srcFile.getName().lastIndexOf('.'));
+        }
+
+        final File objectFile = outputFileLocatorItf.getCCompiledOutputFile(
+            fullyQualifiedNameToPath(definition.getName(), implSuffix, ".o"),
+            context);
+
         final AssemblerCommand gccCommand = compilationCommandFactory
             .newAssemblerCommand(definition, src, srcFile, objectFile, context);
 
@@ -140,32 +160,9 @@ public class BasicDefinitionCompiler implements DefinitionCompiler {
 
       } else {
         // src file is a normal C file to be processed with MPP.
-        final String implSuffix = "_impl" + i;
-        final File cppFile = outputFileLocatorItf
-            .getCSourceTemporaryOutputFile(
-                fullyQualifiedNameToPath(definition.getName(), implSuffix, ".i"),
-                context);
-        final File mppFile = outputFileLocatorItf
-            .getCSourceTemporaryOutputFile(
-                fullyQualifiedNameToPath(definition.getName(), implSuffix,
-                    ".mpp.c"), context);
-        final File objectFile = outputFileLocatorItf.getCCompiledOutputFile(
-            fullyQualifiedNameToPath(definition.getName(), implSuffix, ".o"),
-            context);
-        final File depFile = outputFileLocatorItf.getCCompiledOutputFile(
-            fullyQualifiedNameToPath(definition.getName(), implSuffix, ".d"),
-            context);
 
-        final File headerFile;
-        if (sources.length == 1) {
-          headerFile = outputFileLocatorItf.getCSourceTemporaryOutputFile(
-              ImplementationHeaderSourceGenerator
-                  .getImplHeaderFileName(definition), context);
-        } else {
-          headerFile = outputFileLocatorItf.getCSourceTemporaryOutputFile(
-              ImplementationHeaderSourceGenerator.getImplHeaderFileName(
-                  definition, i), context);
-        }
+        // default naming convention, useful to keep for inlined C code
+        String implSuffix = "_impl" + i;
 
         final File srcFile;
         String inlinedCCode = src.getCCode();
@@ -191,6 +188,42 @@ public class BasicDefinitionCompiler implements DefinitionCompiler {
           } catch (final URISyntaxException e) {
             throw new CompilerError(GenericErrors.INTERNAL_ERROR, e);
           }
+
+          if (keepSrcName) {
+            // keep-source-name convention: override suffix
+            final String srcName = srcFile.getName();
+
+            // replace all path separators by underscores and remove extension
+            implSuffix = "_"
+                + srcName.replace(File.separatorChar, '_').substring(0,
+                    srcFile.getName().lastIndexOf('.'));
+          }
+        }
+
+        final File cppFile = outputFileLocatorItf
+            .getCSourceTemporaryOutputFile(
+                fullyQualifiedNameToPath(definition.getName(), implSuffix, ".i"),
+                context);
+        final File mppFile = outputFileLocatorItf
+            .getCSourceTemporaryOutputFile(
+                fullyQualifiedNameToPath(definition.getName(), implSuffix,
+                    ".mpp.c"), context);
+        final File objectFile = outputFileLocatorItf.getCCompiledOutputFile(
+            fullyQualifiedNameToPath(definition.getName(), implSuffix, ".o"),
+            context);
+        final File depFile = outputFileLocatorItf.getCCompiledOutputFile(
+            fullyQualifiedNameToPath(definition.getName(), implSuffix, ".d"),
+            context);
+
+        final File headerFile;
+        if (sources.length == 1) {
+          headerFile = outputFileLocatorItf.getCSourceTemporaryOutputFile(
+              ImplementationHeaderSourceGenerator
+                  .getImplHeaderFileName(definition), context);
+        } else {
+          headerFile = outputFileLocatorItf.getCSourceTemporaryOutputFile(
+              ImplementationHeaderSourceGenerator.getImplHeaderFileName(
+                  definition, i), context);
         }
 
         final PreprocessorCommand cppCommand = compilationCommandFactory
