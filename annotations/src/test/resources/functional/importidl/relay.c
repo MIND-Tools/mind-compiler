@@ -9,7 +9,6 @@ int METH(relayServiceItf, relayInterfacePointer)(importidl_TargetService targetI
 
 	// bind our client interface to the one given to us
 	BIND_MY_INTERFACE(targetServiceItf, targetItf);
-	// should be, but let's check
 	if (IS_BOUND(targetServiceItf))
 		res = CALL(targetServiceItf, getResult)();
 
