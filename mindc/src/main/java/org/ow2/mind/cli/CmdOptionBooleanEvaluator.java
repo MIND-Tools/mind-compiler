@@ -70,7 +70,7 @@ public class CmdOptionBooleanEvaluator implements BooleanEvaluator {
     Assert.assertNotNull(context,
         "CmdOptionBooleanEvaluator can't find option with id '" + id + "'.");
 
-    if (!cmdOption.isPresent(cmdLine)) {
+    if ((cmdOption == null) || !cmdOption.isPresent(cmdLine)) {
       return false;
     }
 
