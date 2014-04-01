@@ -3,17 +3,16 @@
  * Defaut expected result value for @Run annotation is 0
  */
 
-@Run(addBootstrap=false)
+@Run
 @Singleton
-composite importidl.ImportIDLTester {
-	contains boot.Bootstrap as boot;
+composite importidl.ImportIDLTester extends ApplicationType {
 	
 	contains Server as serverComp;
 	
 	contains Client as clientComp;
 	contains Relay as relayComp;
 	
-	binds boot.entryPoint to clientComp.entryPoint;
+	binds this.main to clientComp.main;
 	
 	binds clientComp.interfaceTransferItf to serverComp.interfaceTransferItf;
 	binds clientComp.relayServiceItf to relayComp.relayServiceItf;
