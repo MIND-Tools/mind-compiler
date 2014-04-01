@@ -1,8 +1,4 @@
 
-// -----------------------------------------------------------------------------
-// Implementation of the primitive test.useidl.initf.Server.
-// -----------------------------------------------------------------------------
-
 #include <stdio.h>
 
 int METH(targetServiceItf, getResult)() {

@@ -1,7 +1,7 @@
 
 @UseIDL({"importidl.TargetService"})
 primitive importidl.Client {
-	provides boot.Main as entryPoint;
+	provides Main as main;
 	requires RelayService as relayServiceItf;
 	requires InterfaceTransfer as interfaceTransferItf;
   	source client.c;
