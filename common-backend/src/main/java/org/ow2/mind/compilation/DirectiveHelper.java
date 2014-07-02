@@ -65,4 +65,28 @@ public final class DirectiveHelper {
 
     return result;
   }
+
+  public static String formatOptionString(final String s) {
+
+    String result = null;
+
+    final StringBuilder sb = new StringBuilder();
+    for (int i = 0; i < s.length(); i++) {
+      final char c = s.charAt(i);
+      if (c == '\\') {
+        if (i + 1 < s.length() && isWhitespace(s.charAt(i + 1))) {
+          sb.append(s.charAt(i + 1));
+          i++;
+        } else {
+          sb.append('\\');
+        }
+      } else {
+        sb.append(c);
+      }
+    }
+    if (sb.length() != 0) result = sb.toString();
+
+    return result;
+  }
+
 }
