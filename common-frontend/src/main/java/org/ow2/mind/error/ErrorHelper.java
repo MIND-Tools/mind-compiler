@@ -73,7 +73,8 @@ public final class ErrorHelper {
       inputFile = new File(fileLocation);
 
       if (inputFile.getPath().startsWith(cwdFile.getPath())) {
-        fileLocation = fileLocation.substring(cwd.length());
+        fileLocation = inputFile.getPath().substring(
+            cwdFile.getPath().length() + 1);
       }
     }
 
