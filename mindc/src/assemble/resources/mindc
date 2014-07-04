@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # ------------------------------------------------------------------------------
-# Copyright (C) 2009 STMicroelectronics
+# Copyright (C) 2014 Schneider Electric
 #
 # This file is part of "Mind Compiler" is free software: you can redistribute 
 # it and/or modify it under the terms of the GNU Lesser General Public License 
@@ -18,17 +18,9 @@
 #
 # Contact: mind@ow2.org
 #
-# Authors: Matthieu Leclercq
+# Authors: Schneider Electric Mind4SE
 # Contributors: 
 # ------------------------------------------------------------------------------
-
-# ------------------------------------------------------------------------------
-# Mind Compiler batch script ${project.version}
-#
-# Required ENV vars:
-# ------------------
-#   JAVA_HOME - location of a JDK home dir
-#
 # Optional ENV vars
 # -----------------
 #   MIND_OPTS - parameters passed to the Java VM running the mind compiler
@@ -36,168 +28,8 @@
 #       set MIND_OPTS=-Ddefault.console.level=FINE -Ddefault.file.level=FINER
 #   See documentation for more detail on logging system.
 
-
-# OS specific support.  $var _must_ be set to either true or false.
-cygwin=false;
-darwin=false;
-mingw=false
-case "`uname`" in
-  CYGWIN*) cygwin=true ;;
-  MINGW*) mingw=true;;
-  Darwin*) darwin=true 
-           if [ -z "$JAVA_VERSION" ] ; then
-             JAVA_VERSION="CurrentJDK"
-           else
-             echo "Using Java version: $JAVA_VERSION"
-           fi
-           if [ -z "$JAVA_HOME" ] ; then
-             JAVA_HOME=/System/Library/Frameworks/JavaVM.framework/Versions/${JAVA_VERSION}/Home
-           fi
-           ;;
-esac
-if [ -z "$JAVA_HOME" ] ; then
-  if [ -r /etc/gentoo-release ] ; then
-    JAVA_HOME=`java-config --jre-home`
-  fi
-fi
-
-# Definition of MIND_HOME var 
-# ---------------------------
-#   MIND_HOME - location of mind's installed home dir
-#               computed from the current script location (.. directory) 
-
-  ## resolve links - $0 may be a link to mind's home
-  PRG="$0"
-
-  # need this for relative symlinks
-  while [ -h "$PRG" ] ; do
-    ls=`ls -ld "$PRG"`
-    link=`expr "$ls" : '.*-> \(.*\)$'`
-    if expr "$link" : '/.*' > /dev/null; then
-      PRG="$link"
-    else
-      PRG="`dirname "$PRG"`/$link"
-    fi
-  done
-
-  saveddir=`pwd`
-
-  MIND_HOME=`dirname "$PRG"`/..
-
-  # make it fully qualified
-  MIND_HOME=`cd "$MIND_HOME" && pwd`
-
-  cd "$saveddir"
-  # echo Using mindc at $MIND_HOME
-
-MIND_RUNTIME="$MIND_HOME"/runtime
-MIND_LIB="$MIND_HOME"/lib
-MIND_EXT="$MIND_HOME"/ext
-
-# For Cygwin, ensure paths are in UNIX format before anything is touched
-if $cygwin ; then
-  [ -n "$MIND_HOME" ] &&
-    MIND_HOME=`cygpath --unix "$MIND_HOME"`
-  [ -n "$JAVA_HOME" ] &&
-    JAVA_HOME=`cygpath --unix "$JAVA_HOME"`
-  [ -n "$MIND_LIB" ] &&
-    MIND_LIB=`cygpath --unix "$MIND_LIB"`
-  [ -n "$MIND_EXT" ] &&
-    MIND_EXT=`cygpath --unix "$MIND_EXT"`
-  [ -n "$MIND_RUNTIME" ] &&
-    MIND_RUNTIME=`cygpath --unix "$MIND_RUNTIME"`
-fi
-
-# For Migwn, ensure paths are in UNIX format before anything is touched
-if $mingw ; then
-  [ -n "$MIND_HOME" ] &&
-    MIND_HOME="`(cd "$MIND_HOME"; pwd)`"
-  [ -n "$JAVA_HOME" ] &&
-    JAVA_HOME="`(cd "$JAVA_HOME"; pwd)`"
-  # TODO classpath?
-fi
-
-
 ## Launcher class name
 LAUNCHER=org.ow2.mind.Launcher
 
-## Preparation of the java command to be executed
-if [ -z "$JAVACMD" ] ; then
-  if [ -n "$JAVA_HOME"  ] ; then
-    if [ -x "$JAVA_HOME/jre/sh/java" ] ; then
-      # IBM's JDK on AIX uses strange locations for the executables
-      JAVACMD="$JAVA_HOME/jre/sh/java"
-    elif [ -f "$JAVA_HOME"  -a -x "$JAVA_HOME" ] ; then
-      # In some cases (such as on TRAVIS CI system) $JAVA_HOME directly point the java executable.
-      JAVACMD="$JAVA_HOME"
-    else 
-      JAVACMD="$JAVA_HOME/bin/java"
-    fi
-  else
-    JAVACMD="`which java`"
-  fi
-fi
-
-## Print error if the java command is not ready
-if [ ! -x "$JAVACMD" ] ; then
-  echo "Error: JAVA_HOME is not defined correctly."
-  echo "  We cannot execute $JAVACMD"
-  exit 1
-fi
-if [ -z "$JAVA_HOME" ] ; then
-  echo "Warning: JAVA_HOME environment variable is not set."
-fi
-
-# For Cygwin, switch paths to Windows format before running java
-if $cygwin; then
-  [ -n "$MIND_HOME" ] &&
-    MIND_HOME=`cygpath --windows "$MIND_HOME"`
-  [ -n "$JAVA_HOME" ] &&
-    JAVA_HOME=`cygpath --windows "$JAVA_HOME"`
-  [ -n "$HOME" ] &&
-    HOME=`cygpath --windows "$HOME"`
-  [ -n "$MIND_LIB" ] &&
-    MIND_LIB=`cygpath --windows "$MIND_LIB"`
-  [ -n "$MIND_EXT" ] &&
-    MIND_EXT=`cygpath --windows "$MIND_EXT"`
-  [ -n "$MIND_RUNTIME" ] &&
-    MIND_RUNTIME=`cygpath --windows "$MIND_RUNTIME"`
-fi
-
-
-
-
-for i in "${MIND_LIB}"/*.jar "${MIND_EXT}"/*.jar; do
-  if [ -z "$MIND_CLASSPATH" ] ; then
-    if $cygwin; then
-      lib=`cygpath --windows "${i}"`
-      MIND_CLASSPATH="${lib}"
-    else
-      MIND_CLASSPATH="${i}"
-    fi
-  else
-    if $cygwin; then
-      lib=`cygpath --windows "${i}"`
-      MIND_CLASSPATH="${MIND_CLASSPATH};${lib}"
-    else
-      MIND_CLASSPATH="${MIND_CLASSPATH}:${i}"
-    fi
-  fi
-done
-
-
-##########################################
-#echo MIND_LIB=$MIND_LIB
-#echo MIND_RUNTIME=$MIND_RUNTIME
-#echo MIND_CLASSPATH=$MIND_CLASSPATH
-###########################################
-
-exec "$JAVACMD" \
-  -classpath "${MIND_CLASSPATH}" \
-  ${MIND_OPTS} \
-  -Dmindc.launcher.name=mindc \
-  ${LAUNCHER} \
-  -src-path="${MIND_RUNTIME}" \
-  "$@"
-
-
+#echo $(dirname $(readlink -m $0))/jar_launcher ${LAUNCHER} ${MIND_OPTS} -Dmindc.launcher.name=mindc ${LAUNCHER} $*
+exec $(dirname $(readlink -m $0))/jar_launcher ${LAUNCHER} ${MIND_OPTS} -Dmindc.launcher.name=mindc ${LAUNCHER} $*
