@@ -52,7 +52,15 @@ public class BasicImplementationLocator implements ImplementationLocator {
     if (isRelative(path))
       throw new IllegalArgumentException("\"" + path
           + "\" is not an absolute path");
+
     try {
+      /*
+       * Usual case was with getResource. However, the Maven plugin case is more
+       * complex: when using elements from fractal-runtime, it would find
+       * matches in the fractal-runtime.jar in the Maven cache + matches in the
+       * compiler's distribution 'runtime' folder. We get all possible contents,
+       * and return a file-system entry only, thus discarding jar contents.
+       */
       final Enumeration<URL> urls = getClassLoader(this, context).getResources(
           path.substring(1));
       while (urls.hasMoreElements()) {
@@ -60,8 +68,7 @@ public class BasicImplementationLocator implements ImplementationLocator {
         if (url.getProtocol().equals("file")) return url;
       }
     } catch (final IOException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+      // ignore ('null' case handled at higher level)
     }
     return null;
 
