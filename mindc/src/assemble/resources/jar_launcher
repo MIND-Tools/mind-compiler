@@ -82,8 +82,8 @@ fi
 #MIND_HOME=`dirname "$PRG"`/..
 # make it fully qualified
 #MIND_HOME="`(cd "$MIND_HOME"; pwd)`"
-MIND_HOME=$(readlink -m $(dirname $(readlink -m $0))/..)
-
+#MIND_HOME=$(readlink -m $(dirname $(readlink -m $0))/..)
+MIND_HOME=$(cd $(dirname $0)/..; pwd)
 
 # For Cygwin, ensure paths are in UNIX format before anything is touched
 if $cygwin ; then
