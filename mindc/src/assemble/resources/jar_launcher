@@ -178,9 +178,9 @@ fi
 CMD=$1
 shift  # Removes 1st argument of $@
 case $CMD in
-  *mind.Launcher | *unit.Launcher )
-    #echo "$JAVACMD" -classpath "${MIND_CLASSPATH}" "$@" -src-path="${MIND_RUNTIME}" ;
-    exec "$JAVACMD" -classpath "${MIND_CLASSPATH}" "$@" -src-path="${MIND_RUNTIME}" ;;
+  *mind.Launcher | *doc.Launcher | *unit.Launcher )
+    #echo "$JAVACMD" -classpath "${MIND_CLASSPATH}" "$@" --src-path="${MIND_RUNTIME}" ;
+    exec "$JAVACMD" -classpath "${MIND_CLASSPATH}" "$@" --src-path="${MIND_RUNTIME}" ;;
 
   * )
     #echo "$JAVACMD" -classpath "${MIND_CLASSPATH}" "$@" ;

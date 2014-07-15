@@ -38,10 +38,8 @@ setlocal
 if "%JAVA_HOME%" == "" goto NoJHome
 
 @REM ==== CHECK JAVA_HOME_EXE ===
-echo __JVH:%JAVA_HOME%
 "%JAVA_HOME%\bin\java.exe" -? > nul 2>&1
 set JAVACMD="%JAVA_HOME%\bin\java.exe"
-echo __JVC:%JAVA_CMD%
 if ERRORLEVEL 0 goto OkJava
 echo.
 echo ERROR: JAVA_HOME is set to an invalid directory.
@@ -99,9 +97,8 @@ if "%PARAMS:~0,1%" neq " " (
   set PARAMS=%PARAMS:~1%
   goto :loop )
 
-echo *=%*
-echo CMD=%CMD%
-echo PARAMS=%PARAMS%
+@rem echo CMD=%CMD%
+@rem echo PARAMS=%PARAMS%
 @rem echo MIND_HOME=%MIND_HOME%
 @rem echo MIND_LIB=%MIND_LIB%
 @rem echo MIND_EXT=%MIND_EXT%
@@ -110,13 +107,16 @@ echo PARAMS=%PARAMS%
 
 echo %CMD% | findstr ".*mind.Launcher" > nul 2>&1
 if ERRORLEVEL 1 (
+  echo %CMD% | findstr ".*doc.Launcher" > nul 2>&1
+)
+if ERRORLEVEL 1 (
   echo %CMD% | findstr ".*unit.Launcher" > nul 2>&1
 )
 if NOT ERRORLEVEL 1 (
-  echo %JAVACMD% -classpath %MIND_CLASSPATH% %PARAMS% -src-path=%MIND_RUNTIME%
-  %JAVACMD% -classpath %MIND_CLASSPATH% %PARAMS% -src-path=%MIND_RUNTIME%
+  @rem echo %JAVACMD% -classpath %MIND_CLASSPATH% %PARAMS% --src-path=%MIND_RUNTIME%
+  %JAVACMD% -classpath %MIND_CLASSPATH% %PARAMS% --src-path=%MIND_RUNTIME%
 ) else (
-  echo %JAVACMD% -classpath %MIND_CLASSPATH% %PARAMS%
+  @rem echo %JAVACMD% -classpath %MIND_CLASSPATH% %PARAMS%
   %JAVACMD% -classpath %MIND_CLASSPATH% %PARAMS%
 )
 
