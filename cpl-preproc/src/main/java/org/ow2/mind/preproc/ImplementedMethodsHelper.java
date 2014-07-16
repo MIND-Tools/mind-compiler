@@ -22,10 +22,11 @@
 
 package org.ow2.mind.preproc;
 
+import static org.ow2.mind.PathHelper.fullyQualifiedNameToPath;
 import static org.ow2.mind.adl.ast.ASTHelper.getNumberOfElement;
 
 import java.io.File;
-import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,44 +34,66 @@ import java.util.List;
 import java.util.Map;
 
 import org.objectweb.fractal.adl.ADLException;
+import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.interfaces.Interface;
 import org.objectweb.fractal.adl.types.TypeInterface;
 import org.objectweb.fractal.adl.types.TypeInterfaceUtil;
 import org.ow2.mind.adl.ast.ImplementationContainer;
 import org.ow2.mind.adl.ast.Source;
 import org.ow2.mind.adl.idl.InterfaceDefinitionDecorationHelper;
-import org.ow2.mind.adl.implementation.BasicImplementationLocator;
 import org.ow2.mind.adl.implementation.ImplementationLocator;
 import org.ow2.mind.idl.ast.InterfaceDefinition;
 import org.ow2.mind.idl.ast.Method;
+import org.ow2.mind.io.OutputFileLocator;
 
 public class ImplementedMethodsHelper {
 
-  // Inject would not work... FIXME
-  // Any suggestion/contribution is welcome. Stephane.
-  private static final ImplementationLocator implLocatorItf = new BasicImplementationLocator();
-
   public static Source getDefinitionSourceFromPath(
-      final ImplementationContainer container, final String sourceFileName,
+      final ImplementationLocator implLocatorItf,
+      final OutputFileLocator outputFileLocatorItf,
+      final Definition definition, final String mppSourceFileName,
       final Map<Object, Object> context) {
 
+    int i = 0;
+    URL sourceFileURL = null;
+    String implSuffix = null;
+    File currSrcFile = null;
+
+    final ImplementationContainer container = (ImplementationContainer) definition;
+    final File sourceFile = new File(mppSourceFileName);
+
+    /*
+     * In the case of inlined C code, the whole validity of this algorithm is
+     * based on the container.getSources() order staying the same as in {@link
+     * BasicDefinitionCompiler#visitImplementation}, giving numbers to the
+     * implementations, including the inlined C code, which is extracted to
+     * _impl<i>.c files in the output folder.
+     */
     for (final Source currSource : container.getSources()) {
+      implSuffix = "_impl" + i;
       try {
-        // inlined C code ? TODO: handle this case !!
-        if (currSource.getPath() == null) return null;
+        // inlined C code ?
+        if (currSource.getPath() == null) {
+          if (currSource.getCCode() != null) {
+            // Search in BasicDefinitionCompiler this comment:
+            // "Implementation code is inlined in the ADL. Dump it in a file."
+            currSrcFile = outputFileLocatorItf
+                .getCSourceOutputFile(
+                    fullyQualifiedNameToPath(definition.getName(), implSuffix,
+                        ".c"), context);
+          } else
+            return null; // Error case
+        } else {
+          sourceFileURL = implLocatorItf.findSource(currSource.getPath(),
+              context);
+          currSrcFile = new File(sourceFileURL.toURI());
+        }
 
-        // FIXME: Inject instead of hand-made instance
-        final URL sourceFileURL = implLocatorItf.findSource(
-            currSource.getPath(), context);
-
-        final File sourceFile = new File(sourceFileName);
-
-        if (sourceFileURL.getPath()
-            .equals(sourceFile.toURI().toURL().getPath())) return currSource;
-      } catch (final MalformedURLException e) {
-        // TODO Auto-generated catch block
+        if (currSrcFile.equals(sourceFile)) return currSource;
+      } catch (final URISyntaxException e) {
         e.printStackTrace();
       }
+      i++;
     }
 
     return null;

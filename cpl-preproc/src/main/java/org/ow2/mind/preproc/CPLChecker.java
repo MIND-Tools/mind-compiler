@@ -45,30 +45,38 @@ import org.ow2.mind.adl.ast.DataField;
 import org.ow2.mind.adl.ast.ImplementationContainer;
 import org.ow2.mind.adl.ast.Source;
 import org.ow2.mind.adl.idl.InterfaceDefinitionDecorationHelper;
+import org.ow2.mind.adl.implementation.ImplementationLocator;
 import org.ow2.mind.adl.membrane.ast.Controller;
 import org.ow2.mind.adl.membrane.ast.ControllerContainer;
 import org.ow2.mind.adl.membrane.ast.ControllerInterface;
 import org.ow2.mind.error.ErrorManager;
 import org.ow2.mind.idl.ast.IDLASTHelper;
 import org.ow2.mind.idl.ast.InterfaceDefinition;
+import org.ow2.mind.io.OutputFileLocator;
 
 public class CPLChecker {
-  protected final Definition          definition;
-  protected final ErrorManager        errorManager;
+  protected final Definition            definition;
+  protected final ErrorManager          errorManager;
+  protected final ImplementationLocator implLocatorItf;
+  protected final OutputFileLocator     outputFileLocatorItf;
 
-  protected final Data                data;
-  protected boolean                   prvDeclared        = false;
+  protected final Data                  data;
+  protected boolean                     prvDeclared        = false;
 
-  protected static Logger             logger             = FractalADLLogManager
-                                                             .getLogger("MPP");
+  protected static Logger               logger             = FractalADLLogManager
+                                                               .getLogger("MPP");
 
-  protected Map<String, List<String>> declaredItfMethMap = new HashMap<String, List<String>>();
+  protected Map<String, List<String>>   declaredItfMethMap = new HashMap<String, List<String>>();
 
-  protected final Map<Object, Object> context;
+  protected final Map<Object, Object>   context;
 
   public CPLChecker(final ErrorManager errorManager,
+      final ImplementationLocator implLocatorItf,
+      final OutputFileLocator outputFileLocatorItf,
       final Definition definition, final Map<Object, Object> context) {
     this.errorManager = errorManager;
+    this.implLocatorItf = implLocatorItf;
+    this.outputFileLocatorItf = outputFileLocatorItf;
     this.definition = definition;
     this.context = context;
     this.data = (definition instanceof ImplementationContainer)
@@ -349,9 +357,10 @@ public class CPLChecker {
 
     // mark file as visited
     final Source source = ImplementedMethodsHelper.getDefinitionSourceFromPath(
-        (ImplementationContainer) definition, sourceFile, context);
+        implLocatorItf, outputFileLocatorItf, definition, sourceFile, context);
 
-    // TODO: handle inline C code !!
+    // should never happen, except maybe for generated code issued from
+    // architecture transformations, and added in definition ?
     if (source == null) return;
 
     ImplementedMethodsHelper.setSourceVisited(source);

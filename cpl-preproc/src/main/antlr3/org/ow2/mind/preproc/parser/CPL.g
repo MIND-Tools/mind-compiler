@@ -122,7 +122,7 @@ parseFile returns [String res]
   try {
     cplChecker.postParseChecks(getSourceFile());
   } catch (ADLException e1) {
-    // TODO ?
+    // ignore
   }
   $res=sb.toString(); out.println($res);}
   :(methDef    {sb.append($methDef.res);}

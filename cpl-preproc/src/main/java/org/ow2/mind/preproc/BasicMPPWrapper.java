@@ -44,7 +44,9 @@ import org.objectweb.fractal.adl.CompilerError;
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.error.GenericErrors;
 import org.objectweb.fractal.adl.util.FractalADLLogManager;
+import org.ow2.mind.adl.implementation.ImplementationLocator;
 import org.ow2.mind.error.ErrorManager;
+import org.ow2.mind.io.OutputFileLocator;
 import org.ow2.mind.plugin.PluginManager;
 import org.ow2.mind.preproc.parser.AbstractCPLParser;
 
@@ -52,13 +54,19 @@ import com.google.inject.Inject;
 
 public class BasicMPPWrapper implements MPPWrapper {
 
-  protected static Logger logger = FractalADLLogManager.getLogger("io");
+  protected static Logger         logger = FractalADLLogManager.getLogger("io");
 
   @Inject
-  protected ErrorManager  errorManagerItf;
+  protected ErrorManager          errorManagerItf;
 
   @Inject
-  protected PluginManager pluginManagerItf;
+  protected PluginManager         pluginManagerItf;
+
+  @Inject
+  protected ImplementationLocator implLocatorItf;
+
+  @Inject
+  protected OutputFileLocator     outputFileLocatorItf;
 
   // ---------------------------------------------------------------------------
   // Implementation of the MPPWrapper interface
@@ -85,7 +93,8 @@ public class BasicMPPWrapper implements MPPWrapper {
 
     BasicMPPCommand(final Definition definition,
         final Map<Object, Object> context) {
-      this.cplChecker = new CPLChecker(errorManagerItf, definition, context);
+      this.cplChecker = new CPLChecker(errorManagerItf, implLocatorItf,
+          outputFileLocatorItf, definition, context);
       this.context = context;
       this.definition = definition;
     }
