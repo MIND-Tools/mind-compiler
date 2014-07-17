@@ -42,7 +42,7 @@ SINGLETON_PRIVATE_DATA_T PRIVATE;
 #ifndef SINGLETON_PRIVATE_DATA
 #define SINGLETON_PRIVATE_DATA
 typedef struct {
- int a, b;
+ int a, b, c;
 }  SINGLETON_PRIVATE_DATA_T;
 #endif /* SINGLETON_PRIVATE_DATA */
 
