@@ -94,7 +94,7 @@ DeclareComponentInstance(instance) ::= <<
 
 >>
 
-<! Duplicate-definition fix for some families of compilers such as IAR !>
+/* Call the _DECLARE_PRIVATEDATA macro generated in the according .adl.h */
 DeclarePrivateData(definition, instance) ::= <<
 <if (definition.astDecorations.("is-singleton"))>
 <if (definition.astNodeTypes.("data"))>
