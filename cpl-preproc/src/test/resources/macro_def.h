@@ -12,20 +12,10 @@
 #define COMP_DESC __component_##compName##_desc
 #define CHECK_CONTEXT_PTR (assert (_mind_this != (void*) 0));
 
-/*
- * Duplicate-definition bug fix for some families of compilers (such as IAR)
- * singleton_instance is defined in the according .c file, used after the Mind Preprocessing
- * The typedef is redundant, however we have to "redefine" it here since the header doesn't
- * know the SINGLETON_PRIVATE_DATA_T type before Mind Preprocessing (MPP) (and CPP is used before
- * on the sources to generate .i files without the SINGLETON_PRIVATE_DATA_T type, leading to an error).
- */
-#ifdef SINGLETON
-// Do nothing - TODO: check if we should do something here.
-#else
+#ifndef SINGLETON
 #define CONTEXT_PTR_DECL PRIVATE_DATA_T * _mind_this
 #define CONTEXT_PTR_ACCESS _mind_this
 #endif
-/* */
 
 #define PRIVATE PRIVATE_0(COMPONENT_NAME)
 #define PRIVATE_0(compName) PRIVATE_1(compName)

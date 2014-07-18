@@ -28,7 +28,6 @@ ComponentInstances(topLevelDefinition, definition, instances) ::= <<
 
 <instances:InitInstance(definition=definition, instance=it); separator="\n\n">
 
-/* Duplicate-definition fix for some families of compilers such as IAR */
 <instances:DeclarePrivateData(definition=definition, instance=it); separator="\n\n">
 
 <ConstructorCalls(definition=definition, instances=instances)>
@@ -95,6 +94,7 @@ DeclareComponentInstance(instance) ::= <<
 
 >>
 
+<! Duplicate-definition fix for some families of compilers such as IAR !>
 DeclarePrivateData(definition, instance) ::= <<
 <if (definition.astDecorations.("is-singleton"))>
 <if (definition.astNodeTypes.("data"))>

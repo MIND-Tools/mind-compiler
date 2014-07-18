@@ -212,7 +212,7 @@ typedef struct {
   COMP_DATA;
 } PRIVATE_DATA_T;
 
-/* Duplicate-definition fix for some families of compilers such as IAR */
+<! Private data variable is created in the _instances.c file (_DECLARE_PRIVATEDATA macro) !>
 #define INSTANCE___component_<definition.name;format="toCName">_PRIVATEDATA_DECLARED
 extern SINGLETON_PRIVATE_DATA_T __component_<definition.name;format="toCName">_singleton_instance_private_data;
 
@@ -225,7 +225,7 @@ typedef struct {
   COMP_DATA;
 } PRIVATE_DATA_T;
 
-/* Duplicate-definition fix for some families of compilers such as IAR */
+<! Private data variable is created in the _instances.c file (_DECLARE_PRIVATEDATA macro) !>
 #define INSTANCE___component_<definition.name;format="toCName">_PRIVATEDATA_DECLARED
 extern SINGLETON_PRIVATE_DATA_T __component_<definition.name;format="toCName">_singleton_instance_private_data;
 
@@ -304,7 +304,7 @@ extern <ComponentTypeName(definitionName=definition.name)> instance_name;
 <InitializeInterfaces(definition=definition)><InitializeComponents(definition=definition)><InitializeControllerStructures(definition=definition)><InitializeAttributes(definition=definition)>  } \
 };
 
-/* Duplicate-definition fix for some families of compilers such as IAR */
+<! Macro used to declare PRIVATE data, used by _instances.c files !>
 #define <definition.name;format="toUpperCName">_DECLARE_PRIVATEDATA(private_name) \
 SINGLETON_PRIVATE_DATA_T private_name;
 
