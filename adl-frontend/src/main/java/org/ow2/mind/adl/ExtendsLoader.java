@@ -40,6 +40,7 @@ import org.objectweb.fractal.adl.merger.NodeMerger;
 import org.ow2.mind.adl.ast.ASTHelper;
 import org.ow2.mind.adl.ast.AbstractDefinition;
 import org.ow2.mind.adl.ast.DefinitionReference;
+import org.ow2.mind.adl.ast.ExtendsDecoration;
 import org.ow2.mind.adl.ast.MindDefinition;
 import org.ow2.mind.error.ErrorManager;
 
@@ -109,6 +110,17 @@ public class ExtendsLoader extends AbstractDelegatingLoader {
     final boolean isAbstract = ASTHelper.isAbstract(d);
     final DefinitionReference[] extendedDefs = d.getExtends()
         .getDefinitionReferences();
+
+    // keep inheritance information as a decoration, since the direct "extends"
+    // is removed afterwards
+    final ExtendsDecoration list = new ExtendsDecoration();
+    for (final DefinitionReference extend : extendedDefs) {
+      list.add(extend);
+    }
+
+    d.astSetDecoration("extends", list);
+
+    // cleanup
     d.setExtends(null);
 
     if (extendedDefs.length > 0) {
