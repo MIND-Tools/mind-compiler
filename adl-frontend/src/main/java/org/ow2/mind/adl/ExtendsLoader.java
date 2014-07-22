@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2009 STMicroelectronics
+ * Copyright (C) 2014 Schneider-Electric
  *
  * This file is part of "Mind Compiler" is free software: you can redistribute 
  * it and/or modify it under the terms of the GNU Lesser General Public License 
@@ -17,7 +18,7 @@
  * Contact: mind@ow2.org
  *
  * Authors: Matthieu Leclercq
- * Contributors: 
+ * Contributors: Stephane Seyvoz
  */
 
 package org.ow2.mind.adl;
@@ -31,6 +32,7 @@ import java.util.Map;
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.CompilerError;
 import org.objectweb.fractal.adl.Definition;
+import org.objectweb.fractal.adl.Loader;
 import org.objectweb.fractal.adl.Node;
 import org.objectweb.fractal.adl.components.ComponentErrors;
 import org.objectweb.fractal.adl.error.GenericErrors;
@@ -42,6 +44,7 @@ import org.ow2.mind.adl.ast.AbstractDefinition;
 import org.ow2.mind.adl.ast.DefinitionReference;
 import org.ow2.mind.adl.ast.ExtendsDecoration;
 import org.ow2.mind.adl.ast.MindDefinition;
+import org.ow2.mind.adl.ast.SubDefinitionsDecoration;
 import org.ow2.mind.error.ErrorManager;
 
 import com.google.inject.Inject;
@@ -88,6 +91,12 @@ public class ExtendsLoader extends AbstractDelegatingLoader {
   @Named(ADL_ID_ATTRIBUTES)
   protected Map<String, String>         nameAttributes;
 
+  /**
+   * Used to retrieve super types Definitions from DefinitionReferences.
+   */
+  @Inject
+  protected Loader                      loaderItf;
+
   // ---------------------------------------------------------------------------
   // Implementation of the Loader interface
   // ---------------------------------------------------------------------------
@@ -115,10 +124,16 @@ public class ExtendsLoader extends AbstractDelegatingLoader {
     // is removed afterwards
     final ExtendsDecoration list = new ExtendsDecoration();
     for (final DefinitionReference extend : extendedDefs) {
+      // allow retrieving super-types from a definition
       list.add(extend);
     }
-
     d.astSetDecoration("extends", list);
+
+    // save "sub-definitions" before merge
+    final Object subDefsObject = d.astGetDecoration("sub-definitions");
+    SubDefinitionsDecoration savedSubDefinitionsDecoration = null;
+    if (subDefsObject instanceof SubDefinitionsDecoration)
+      savedSubDefinitionsDecoration = (SubDefinitionsDecoration) subDefsObject;
 
     // cleanup
     d.setExtends(null);
@@ -181,6 +196,19 @@ public class ExtendsLoader extends AbstractDelegatingLoader {
             extendedDefs[extendedDefs.length - 1]);
       }
 
+      // restore original sub-definition decoration instead of the merge
+      // result one
+      d.astSetDecoration("sub-definitions", savedSubDefinitionsDecoration);
+
+      for (final DefinitionReference extend : extendedDefs) {
+        /*
+         * allow retrieving sub-types from parent we do it post-merge for the
+         * current node not to be decorated with its own parent sub-definition
+         * info, meaning itself.
+         */
+        decorateParentDefinitionWithSubDefinition(extend, d, context);
+      }
+
       // restore the "abstract" attribute
       if (d instanceof AbstractDefinition) {
         if (isAbstract)
@@ -190,6 +218,35 @@ public class ExtendsLoader extends AbstractDelegatingLoader {
       }
     }
     return d;
+  }
+
+  private void decorateParentDefinitionWithSubDefinition(
+      final DefinitionReference extend, final MindDefinition d,
+      final Map<Object, Object> context) throws ADLException {
+
+    SubDefinitionsDecoration subDefinitionsDecoration = null;
+
+    final Definition extendedDefinition = definitionReferenceResolverItf
+        .resolve(extend, d, context);
+
+    // if the definition has not been resolved correctly, ignore it.
+    if (ASTHelper.isUnresolvedDefinitionNode(extendedDefinition)) return;
+
+    final Object subDefsDecorationObject = extendedDefinition
+        .astGetDecoration("sub-definitions");
+
+    if (subDefsDecorationObject != null) {
+      if (subDefsDecorationObject instanceof SubDefinitionsDecoration) {
+        subDefinitionsDecoration = (SubDefinitionsDecoration) subDefsDecorationObject;
+        subDefinitionsDecoration.add(d);
+      }
+    } else {
+      subDefinitionsDecoration = new SubDefinitionsDecoration();
+      subDefinitionsDecoration.add(d);
+      extendedDefinition.astSetDecoration("sub-definitions",
+          subDefinitionsDecoration);
+    }
+
   }
 
   private static enum Kind {
