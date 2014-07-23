@@ -120,20 +120,27 @@ public class ExtendsLoader extends AbstractDelegatingLoader {
     final DefinitionReference[] extendedDefs = d.getExtends()
         .getDefinitionReferences();
 
-    // keep inheritance information as a decoration, since the direct "extends"
-    // is removed afterwards
-    final ExtendsDecoration list = new ExtendsDecoration();
-    for (final DefinitionReference extend : extendedDefs) {
-      // allow retrieving super-types from a definition
-      list.add(extend);
-    }
-    d.astSetDecoration("extends", list);
-
     // save "sub-definitions" before merge
     final Object subDefsObject = d.astGetDecoration("sub-definitions");
     SubDefinitionsDecoration savedSubDefinitionsDecoration = null;
     if (subDefsObject instanceof SubDefinitionsDecoration)
       savedSubDefinitionsDecoration = (SubDefinitionsDecoration) subDefsObject;
+
+    // keep inheritance information as a decoration, since the direct "extends"
+    // is removed afterwards
+    final ExtendsDecoration list = new ExtendsDecoration();
+    for (final DefinitionReference extend : extendedDefs) {
+      /*
+       * allow retrieving super-types from a definition
+       */
+      list.add(extend);
+
+      /*
+       * allow retrieving sub-types from parent
+       */
+      decorateParentDefinitionWithSubDefinition(extend, d, context);
+    }
+    d.astSetDecoration("extends", list);
 
     // cleanup
     d.setExtends(null);
@@ -200,15 +207,6 @@ public class ExtendsLoader extends AbstractDelegatingLoader {
       // result one
       d.astSetDecoration("sub-definitions", savedSubDefinitionsDecoration);
 
-      for (final DefinitionReference extend : extendedDefs) {
-        /*
-         * allow retrieving sub-types from parent we do it post-merge for the
-         * current node not to be decorated with its own parent sub-definition
-         * info, meaning itself.
-         */
-        decorateParentDefinitionWithSubDefinition(extend, d, context);
-      }
-
       // restore the "abstract" attribute
       if (d instanceof AbstractDefinition) {
         if (isAbstract)
@@ -226,8 +224,20 @@ public class ExtendsLoader extends AbstractDelegatingLoader {
 
     SubDefinitionsDecoration subDefinitionsDecoration = null;
 
-    final Definition extendedDefinition = definitionReferenceResolverItf
-        .resolve(extend, d, context);
+    Definition extendedDefinition = definitionReferenceResolverItf.resolve(
+        extend, d, context);
+
+    // It was a Generic Definition, the resolve will return the merged
+    // definition according to its TypeArguments, not the generic one.
+    // We needed resolve for fully qualified name according to the "d"
+    // scope however (if it was used with short name and imports).
+    // Note: Checking the original definitionReference, not the merge
+    final int i = extendedDefinition.getName().indexOf('<');
+    // -1 = not found, no name can start with '<', and avoid empty string
+    if (i > 0) {
+      final String templateName = extendedDefinition.getName().substring(0, i);
+      extendedDefinition = loaderItf.load(templateName, context);
+    }
 
     // if the definition has not been resolved correctly, ignore it.
     if (ASTHelper.isUnresolvedDefinitionNode(extendedDefinition)) return;
