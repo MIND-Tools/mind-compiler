@@ -260,7 +260,7 @@
                 <artifactId>google-collections</artifactId>
                 <version>1.0</version>
             </dependency>
-            
+
             <dependency>
                 <groupId>com.google.inject</groupId>
                 <artifactId>guice</artifactId>
@@ -303,13 +303,13 @@
 
             <plugin>
                 <artifactId>maven-resources-plugin</artifactId>
-				<version>2.5</version>
+                <version>2.5</version>
                 <inherited>false</inherited>
                 <executions>
                     <execution>
                         <id>copy-docbook-resources</id>
                         <!-- here the phase you need -->
-                        <phase>pre-site</phase>
+                        <phase>prepare-package</phase>
                         <goals>
                             <goal>copy-resources</goal>
                         </goals>
@@ -337,7 +337,7 @@
                     <!-- User Guide PDF execution -->
                     <execution>
                         <id>pdf</id>
-                        <phase>pre-site</phase>
+                        <phase>prepare-package</phase>
                         <goals>
                             <goal>generate-pdf</goal>
                         </goals>
@@ -351,7 +351,7 @@
                     <!-- User Guide HTML executions -->
                     <execution>
                         <id>html-printable</id>
-                        <phase>pre-site</phase>
+                        <phase>prepare-package</phase>
                         <goals>
                             <goal>generate-html</goal>
                         </goals>
@@ -365,7 +365,7 @@
                     </execution>
                     <execution>
                         <id>userguide-html</id>
-                        <phase>pre-site</phase>
+                        <phase>prepare-package</phase>
                         <goals>
                             <goal>generate-html</goal>
                         </goals>
@@ -397,7 +397,7 @@
                     </execution>
                     <execution>
                         <id>userguide-html-chunked</id>
-                        <phase>pre-site</phase>
+                        <phase>prepare-package</phase>
                         <goals>
                             <goal>generate-html</goal>
                         </goals>
@@ -432,7 +432,7 @@
                     <!-- Dev Guide HTML executions -->
                     <execution>
                         <id>devguide-html</id>
-                        <phase>pre-site</phase>
+                        <phase>prepare-package</phase>
                         <goals>
                             <goal>generate-html</goal>
                         </goals>
@@ -464,7 +464,7 @@
                     </execution>
                     <execution>
                         <id>devguide-html-chunked</id>
-                        <phase>pre-site</phase>
+                        <phase>prepare-package</phase>
                         <goals>
                             <goal>generate-html</goal>
                         </goals>
@@ -505,7 +505,7 @@
                     <xincludeSupported>true</xincludeSupported>
                 </configuration>
             </plugin>
-        
+
             <!-- Add this plugin in parent POM to ensure that 
                  "factal-adl-bundle" artifact of type "bundle" is correctly
                  handled. -->
@@ -516,17 +516,17 @@
                 <extensions>true</extensions>
             </plugin>
             <plugin>
-            	<artifactId>maven-source-plugin</artifactId>
-				<executions>
-            		<execution>
-            			<id>attach-sources</id>
-            			<goals>
-            				<goal>jar</goal>
-            			</goals>
-            		</execution>
-            	</executions>
+                <artifactId>maven-source-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
-            
+
         </plugins>
 
         <pluginManagement>
@@ -542,9 +542,9 @@
                             </manifest>
                         </archive>
                     </configuration>
-                    
+
                 </plugin>
-            
+
                 <!-- By default run tests for groups "functional" and "checkin" -->
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
@@ -622,7 +622,7 @@
                         </excludes>
                     </configuration>
                 </plugin>
-                
+
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>exec-maven-plugin</artifactId>
@@ -630,36 +630,36 @@
                 </plugin>
                 <!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
                 <plugin>
-                	<groupId>org.eclipse.m2e</groupId>
-                	<artifactId>lifecycle-mapping</artifactId>
-                	<version>1.0.0</version>
-                	<configuration>
-                		<lifecycleMappingMetadata>
-                			<pluginExecutions>
-                				<pluginExecution>
-                					<pluginExecutionFilter>
-                						<groupId>
-                							org.codehaus.mojo
-                						</groupId>
-                						<artifactId>
-                							javacc-maven-plugin
-                						</artifactId>
-                						<versionRange>
-                							[2.6,)
-                						</versionRange>
-                						<goals>
-                							<goal>jtb-javacc</goal>
-                						</goals>
-                					</pluginExecutionFilter>
-                					<action>
-                						<configurator>
-          									<id>org.objectledge.maven.connectors.jjtree-javacc</id>
-        								</configurator>
-                					</action>
-                				</pluginExecution>
-                			</pluginExecutions>
-                		</lifecycleMappingMetadata>
-                	</configuration>
+                    <groupId>org.eclipse.m2e</groupId>
+                    <artifactId>lifecycle-mapping</artifactId>
+                    <version>1.0.0</version>
+                    <configuration>
+                        <lifecycleMappingMetadata>
+                            <pluginExecutions>
+                                <pluginExecution>
+                                    <pluginExecutionFilter>
+                                        <groupId>
+                                            org.codehaus.mojo
+                                        </groupId>
+                                        <artifactId>
+                                            javacc-maven-plugin
+                                        </artifactId>
+                                        <versionRange>
+                                            [2.6,)
+                                        </versionRange>
+                                        <goals>
+                                            <goal>jtb-javacc</goal>
+                                        </goals>
+                                    </pluginExecutionFilter>
+                                    <action>
+                                        <configurator>
+                                            <id>org.objectledge.maven.connectors.jjtree-javacc</id>
+                                        </configurator>
+                                    </action>
+                                </pluginExecution>
+                            </pluginExecutions>
+                        </lifecycleMappingMetadata>
+                    </configuration>
                 </plugin>
             </plugins>
         </pluginManagement>

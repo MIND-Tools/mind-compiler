@@ -88,6 +88,11 @@
             <filtered>true</filtered>
         </file>
         <file>
+            <source>../target/site/mindc-user-guide.pdf</source>
+            <fileMode>0644</fileMode>
+            <outputDirectory>doc</outputDirectory>
+        </file>
+        <file>
             <source>LICENSES.txt</source>
             <fileMode>0644</fileMode>
             <outputDirectory></outputDirectory>
