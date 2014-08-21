@@ -1,19 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
+<!DOCTYPE section PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
   "../dtd/docbookx.dtd" [
 <!ENTITY % myents SYSTEM "../shared.ent" >
 %myents;
 ]>
-<chapter id="adl">
+<section id="adl">
   <title>Architecture Description Language</title>
   <titleabbrev>ADL</titleabbrev>
-  <para>
-    The MIND toolset uses an Architecture Description Language (ADL) for capturing 
-    the architecture of an application. In a nutshell, the ADL language provides first-level constructs 
-    for defining components in terms of the interfaces they require and provide
-    and to specify their implementations either by referencing a set of C-based
-    implementation files or by assembling a set of sub-components.
-  </para>
+  <para>The MIND toolset uses an Architecture Description Language (ADL) for capturing the
+    architecture of an application. In a nutshell, the ADL language provides first-level constructs
+    for defining components in terms of the interfaces they require and provide and to specify their
+    implementations either by referencing a set of C-based implementation files or by assembling a
+    set of sub-components. </para>
 
   <para>
     An architecture definition defined in ADL may be under three forms :
@@ -1873,4 +1871,4 @@
     </productionset>
     
   </section>
-</chapter>
+</section>

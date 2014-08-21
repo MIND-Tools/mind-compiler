@@ -12,6 +12,9 @@
 <xsl:import href="./minddoc-html-common.xsl" />
 <xsl:import href="./minddoc-common.xsl" />
 
+<!-- Depth to which sections should be chunked -->
+<xsl:param name="chunk.section.depth" select="2"></xsl:param>
+
 <xsl:param name="pdf.link"/>
 <xsl:param name="single.link"/>
 <xsl:param name="printable.link"/>

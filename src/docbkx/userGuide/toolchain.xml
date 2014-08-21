@@ -4,7 +4,7 @@
 <!ENTITY % myents SYSTEM "../shared.ent" >
 %myents;
 ]>
-<chapter id="tool">
+<section id="tool">
   <title>
     The <command>mindc</command> command.
   </title>
@@ -745,4 +745,4 @@
 <!--      </variablelist>-->
     </section>
   </section>
-</chapter>
+</section>

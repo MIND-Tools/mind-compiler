@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
+<!DOCTYPE section PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
   "../dtd/docbookx.dtd" [
 <!ENTITY % myents SYSTEM "../shared.ent" >
 %myents;
 ]>
-<chapter id="idl">
+<section id="idl">
      <title>Interface definition language</title>
     <titleabbrev>IDL</titleabbrev>
     <para>The IDL language allows to define component interface types. 
@@ -257,4 +257,4 @@
   </section>
   
   
-</chapter>
+</section>

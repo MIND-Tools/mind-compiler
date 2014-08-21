@@ -4,7 +4,7 @@
 <!ENTITY % myents SYSTEM "../shared.ent" >
 %myents;
 ]>
-<chapter id="api">
+<section id="api">
   <title>Fractal runtime reference</title>
   
   <section id="api-top-pkg">
@@ -1521,4 +1521,4 @@
 	</section>
   </section>  
   
-</chapter>
+</section>

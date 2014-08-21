@@ -11,11 +11,20 @@
     <subtitle>version <?eval ${project.version}?></subtitle>
     
     <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="userGuide/intro-chapter.xml" />
-    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="userGuide/adl.xml" />
-    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="userGuide/idl.xml" />
-    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="userGuide/c.xml" />
-    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="userGuide/toolchain.xml" />
-    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="userGuide/advanced.xml" />
-    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="userGuide/api.xml" />
-    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="userGuide/glossary.xml" />
+    <chapter>
+        <title>MIND language</title>
+        <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="userGuide/adl.xml" />
+        <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="userGuide/idl.xml" />
+        <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="userGuide/c.xml" />
+    </chapter>
+    <chapter>
+        <title>MIND tool-chain</title>
+        <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="userGuide/toolchain.xml" />
+    </chapter>
+    <appendix>
+        <title>Annex</title>
+        <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="userGuide/advanced.xml" />
+        <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="userGuide/api.xml" />
+        <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="userGuide/glossary.xml" />
+    </appendix>
 </book>

@@ -9,6 +9,11 @@
 
 <xsl:param name="callout.graphics.path">src/docbkx/images/callouts/</xsl:param>
 
+<!-- Each new section1 starts on a new page -->
+<xsl:attribute-set name="section.level1.properties">
+<xsl:attribute name="break-before">page</xsl:attribute>
+</xsl:attribute-set>
+
 <!-- codelink template -->
 <xsl:template match="d:codelink">
 

@@ -4,7 +4,7 @@
 <!ENTITY % myents SYSTEM "../shared.ent" >
 %myents;
 ]>
-<chapter id="adv">
+<section id="adv">
   <title>Advanced Features</title>
 
   <para>An ADL definition describes a static architecture where every 
@@ -480,4 +480,4 @@
       </example>
     </section>
   </section>
-</chapter>
+</section>

@@ -4,11 +4,10 @@
 <!ENTITY % myents SYSTEM "../shared.ent" >
 %myents;
 ]>
-<appendix id="glossary">
-  <title>
-    Glossary
+  <glossary id="glossary">
+    <title>
+      Glossary
     </title>
-  <glossary>
     <!-- TODO improve glossary -->
     <glossentry id="ADL">
       <glossterm>Architecture Description Language</glossterm>
@@ -51,5 +50,4 @@
       </glossdef>
     </glossentry>
   </glossary>
-  <para></para>
-</appendix>
+
