@@ -342,10 +342,6 @@ public class CPLChecker {
         token.getCharPositionInLine());
   }
 
-  protected BasicErrorLocator locatorNoLine(final String sourceFile) {
-    return new BasicErrorLocator(sourceFile, -1, -1);
-  }
-
   public void postParseChecks(final String sourceFile) throws ADLException {
 
     // this means we aren't in standard compilation
@@ -411,7 +407,7 @@ public class CPLChecker {
 
           // Show missing methods from the first concerned interface
           errorManager.logError(MPPErrors.MISSING_METHOD_DECLARATION,
-              locatorNoLine(sourceFile), definition.getName(), itf0.getName(),
+              definition.getName(), itf0.getName(),
               allUnimplementedMethods.get(itf0));
         } else if (!allCollectionUnimplementedMethods.isEmpty()) {
           final Set<Interface> interfaces = allCollectionUnimplementedMethods
