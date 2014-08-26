@@ -116,9 +116,6 @@ public class TestMPPErrors extends AbstractTestMPP {
       assertEquals(errors.size(), 1);
       final Error error = errors.iterator().next();
       assertSame(error.getTemplate(), MPPErrors.MISSING_METHOD_DECLARATION);
-      final File inputFile = new File(error.getLocator().getInputFilePath());
-      assertTrue(inputFile.getCanonicalPath().endsWith(
-          "missingMETH" + File.separator + "missingMETH.c"));
       return;
     }
     fail("Test should have raised a MISSING_METHOD_DECLARATION error !");
@@ -138,9 +135,6 @@ public class TestMPPErrors extends AbstractTestMPP {
       assertEquals(errors.size(), 1);
       final Error error = errors.iterator().next();
       assertSame(error.getTemplate(), MPPErrors.MISSING_METHOD_DECLARATION);
-      final File inputFile = new File(error.getLocator().getInputFilePath());
-      assertTrue(inputFile.getCanonicalPath().endsWith(
-          dirName + File.separator + "source1.c"));
       assertEquals(
           error.getMessage(),
           "In definition methImplCheckSplit.PrimitiveError0: METH(myItf2, [myMeth1]) method(s) haven't been implemented !");
@@ -163,9 +157,6 @@ public class TestMPPErrors extends AbstractTestMPP {
       assertEquals(errors.size(), 1);
       final Error error = errors.iterator().next();
       assertSame(error.getTemplate(), MPPErrors.MISSING_METHOD_DECLARATION);
-      final File inputFile = new File(error.getLocator().getInputFilePath());
-      assertTrue(inputFile.getCanonicalPath().endsWith(
-          dirName + File.separator + "source1.c"));
       assertEquals(
           error.getMessage(),
           "In definition methImplCheckSplit.PrimitiveError1: METH(myItf2, [myMeth2]) method(s) haven't been implemented !");
