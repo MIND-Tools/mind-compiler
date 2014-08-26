@@ -41,9 +41,6 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
-import org.objectweb.fractal.adl.CompilerError;
-import org.objectweb.fractal.adl.error.GenericErrors;
-
 public final class DepsHelper {
 
   private static final String    TEST_DEPS_DIR = "target/test-deps";
@@ -142,48 +139,6 @@ public final class DepsHelper {
       }
     }
     return toDir;
-  }
-
-  private static File getTempDir(final String name) {
-    File tempOutDir = null;
-    for (int i = 0; i < 10; i++) {
-      File tempFile;
-      try {
-        tempFile = File.createTempFile(name, null);
-      } catch (final IOException e) {
-        // fail to create temp file, retry.
-        continue;
-      }
-      if (!tempFile.delete()) {
-        // fail to delete temp file, retry
-        continue;
-      }
-      if (!tempFile.mkdir()) {
-        // fail to create directory, retry
-        continue;
-      }
-
-      // succesfully create temp directory.
-      tempOutDir = tempFile;
-      break;
-    }
-
-    if (tempOutDir == null) {
-      throw new CompilerError(GenericErrors.GENERIC_ERROR,
-          "IO Error: fail to create temporary directory.");
-    }
-
-    // Add a shutdown hook to delete temporary directory.
-    final File temporaryOutputDir = tempOutDir;
-    Runtime.getRuntime().addShutdownHook(new Thread() {
-      @Override
-      public void run() {
-        delete(temporaryOutputDir);
-      }
-
-    });
-
-    return temporaryOutputDir;
   }
 
   public static void delete(final File f) {
