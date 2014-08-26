@@ -425,8 +425,8 @@ public class CPLChecker {
 
           // Show missing methods from the first concerned interface
           errorManager.logError(MPPErrors.MISSING_COLL_METHOD_DECLARATION,
-          /* locatorNoLine(sourceFile), */definition.getName(), itf0.getName(),
-              idx0.toString(), unimplMethsByIdxMap.get(idx0));
+              definition.getName(), itf0.getName(), idx0.toString(),
+              unimplMethsByIdxMap.get(idx0));
         }
       }
   }
