@@ -1,0 +1,4 @@
+primitive missingMETH.MissingMeth {
+	provides MissingMethItf as myItf;
+	source missingMETH.c;
+}

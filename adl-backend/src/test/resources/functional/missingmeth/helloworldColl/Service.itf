@@ -1,0 +1,11 @@
+
+interface missingmeth.helloworldColl.Service {
+
+  void print(const char *msg);
+ 
+  void println(const char *msg);
+  
+  void flush();
+
+};
+

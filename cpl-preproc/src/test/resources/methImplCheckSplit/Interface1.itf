@@ -1,0 +1,4 @@
+
+interface methImplCheckSplit.Interface1 {
+	int myMeth1(int c);
+}

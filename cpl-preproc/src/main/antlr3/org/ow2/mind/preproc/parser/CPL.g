@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2009 France Telecom
+ * Copyright (C) 2013 Schneider-Electric
  *
  * This file is part of "Mind Compiler" is free software: you can redistribute 
  * it and/or modify it under the terms of the GNU Lesser General Public License 
@@ -17,7 +18,7 @@
  * Contact: mind@ow2.org
  *
  * Authors: Matthieu ANNE
- * Contributors: Olivier Lobry, Matthieu Leclercq
+ * Contributors: Olivier Lobry, Matthieu Leclercq, Stephane Seyvoz
  */
  
 grammar CPL;
@@ -68,9 +69,9 @@ tokens{
 @lexer::members {
 
   static final Pattern sourceLinePattern = Pattern
-                                             .compile("\\#\\s*(\\d+)\\s*\"(.*)\"");
-  static final int     lineIndex         = 1;
-  static final int     fileIndex         = 2;
+                                             .compile("\\#(line)*\\s*(\\d+)\\s*(\"(.*)\")*");
+  static final int     lineIndex         = 2;
+  static final int     fileIndex         = 4;
   
   public String getSourceFileName() {
   	return ((ANTLRStringStream) input).name;
@@ -117,7 +118,13 @@ tokens{
 
 parseFile returns [String res]
 @init{StringBuilder sb = new StringBuilder(); }
-@after{$res=sb.toString(); out.println($res);}
+@after{
+  try {
+    cplChecker.postParseChecks(getSourceFile());
+  } catch (ADLException e1) {
+    // ignore
+  }
+  $res=sb.toString(); out.println($res);}
   :(methDef    {sb.append($methDef.res);}
   | methCall    {sb.append($methCall.res); }
   | attAccess     {sb.append($attAccess.res); }
@@ -161,7 +168,7 @@ protected serverMethDef returns [StringBuilder res = new StringBuilder()]
       )* // handle case of (((... METH(foo) )))(...
     {
       try {
-        cplChecker.serverMethDef($id, $meth, getSourceFile());
+        cplChecker.serverMethDef($id, itfIdx, $meth, getSourceFile());
       } catch (ADLException e1) {
         // ignore
       }
@@ -565,18 +572,24 @@ protected inParamsDef returns [StringBuilder res = new StringBuilder()]
     ;
 
 protected params returns [StringBuilder res = new StringBuilder()]
-    : '(' ws* ')'       { $res = null; }
-    | '(' inParams ')' 
-      { 
-        $res.append($inParams.res).append(" PARAMS_RPARENT ");
-      }
+    : '(' 
+        (
+          ws* ')'         { $res = null; }
+          | inParams ')'  { $res.append($inParams.res).append(" PARAMS_RPARENT "); }
+        )
     ;
 
 protected inParams  returns [StringBuilder res = new StringBuilder()] 
-    : ( '(' ws* ')'              { $res.append("(").append(wstext($ws.text)).append(")");}
-        |'(' ip = inParams ')'  { $res.append("(").append($ip.res).append(")"); }
-        | expr                  { $res.append($expr.res); }
-        | e = ~('(' | ')')      { $res.append($e.text); }
+    : ( 
+        expr                      { $res.append($expr.res); }
+        | e = ~('(' | ')')        { $res.append($e.text); }
+        | (
+            '(' 
+                (
+                  ws* ')'             { $res.append("(").append(wstext($ws.text)).append(")"); }
+                  | ip = inParams ')' { $res.append("(").append($ip.res).append(")"); }
+                )
+          )
       )+
     ;
 
@@ -602,7 +615,7 @@ protected ws
 //	;
   
 LINE_INFO
-	: '#' (' ' | '\t')* ('line' (' ' | '\t')*)? INT (' ' | '\t')+ STRING_LITERAL {
+	: '#' (' ' | '\t')* ('line' (' ' | '\t')*)? INT (' ' | '\t')* STRING_LITERAL* {
 		processSourceLine();
 	}
 	;
@@ -612,9 +625,9 @@ STRING_LITERAL
     ;
   
 
-CHAR_LITERAL
-    :  '\'' ( EscapeSequence | ~('\'') ) '\''
-    ;
+//CHAR_LITERAL
+//    :  '\'' ( EscapeSequence | ~('\'') ) '\''
+//    ;
     
 fragment
 EscapeSequence

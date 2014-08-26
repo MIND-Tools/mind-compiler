@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2009 STMicroelectronics
+ * Copyright (C) 2013 Schneider-Electric
  *
  * This file is part of "Mind Compiler" is free software: you can redistribute 
  * it and/or modify it under the terms of the GNU Lesser General Public License 
@@ -17,7 +18,7 @@
  * Contact: mind@ow2.org
  *
  * Authors: Matthieu Leclercq
- * Contributors: Matthieu ANNE
+ * Contributors: Matthieu ANNE, Stephane SEYVOZ
  */
 
 package org.ow2.mind.preproc;
@@ -43,7 +44,9 @@ import org.objectweb.fractal.adl.CompilerError;
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.error.GenericErrors;
 import org.objectweb.fractal.adl.util.FractalADLLogManager;
+import org.ow2.mind.adl.implementation.ImplementationLocator;
 import org.ow2.mind.error.ErrorManager;
+import org.ow2.mind.io.OutputFileLocator;
 import org.ow2.mind.plugin.PluginManager;
 import org.ow2.mind.preproc.parser.AbstractCPLParser;
 
@@ -51,13 +54,19 @@ import com.google.inject.Inject;
 
 public class BasicMPPWrapper implements MPPWrapper {
 
-  protected static Logger logger = FractalADLLogManager.getLogger("io");
+  protected static Logger         logger = FractalADLLogManager.getLogger("io");
 
   @Inject
-  protected ErrorManager  errorManagerItf;
+  protected ErrorManager          errorManagerItf;
 
   @Inject
-  protected PluginManager pluginManagerItf;
+  protected PluginManager         pluginManagerItf;
+
+  @Inject
+  protected ImplementationLocator implLocatorItf;
+
+  @Inject
+  protected OutputFileLocator     outputFileLocatorItf;
 
   // ---------------------------------------------------------------------------
   // Implementation of the MPPWrapper interface
@@ -77,13 +86,17 @@ public class BasicMPPWrapper implements MPPWrapper {
     protected File                      outputFile;
     protected File                      headerOutputFile;
 
-    private List<File>                  inputFiles;
-    private List<File>                  outputFiles;
+    protected List<File>                inputFiles;
+    protected List<File>                outputFiles;
+
+    protected Definition                definition;
 
     BasicMPPCommand(final Definition definition,
         final Map<Object, Object> context) {
-      this.cplChecker = new CPLChecker(errorManagerItf, definition);
+      this.cplChecker = new CPLChecker(errorManagerItf, implLocatorItf,
+          outputFileLocatorItf, definition, context);
       this.context = context;
+      this.definition = definition;
     }
 
     public String getCommand() {

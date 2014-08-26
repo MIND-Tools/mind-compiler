@@ -1,0 +1,10 @@
+primitive methImplCheckSplit.PrimitiveError0 {
+	provides Interface0 as myItf0;
+	provides Interface1 as myItf1;
+	
+	// Same type, different instance not implemented: raise an error
+	provides Interface1 as myItf2;
+	
+	source source0.c;
+	source source1.c;
+}

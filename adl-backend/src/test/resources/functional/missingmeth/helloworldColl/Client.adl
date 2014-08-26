@@ -1,0 +1,7 @@
+primitive missingmeth.helloworldColl.Client {
+  
+  provides Main as main;
+  requires Service as sa[2] ;
+  
+  source client.c;
+}

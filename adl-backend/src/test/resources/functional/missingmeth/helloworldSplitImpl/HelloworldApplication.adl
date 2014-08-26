@@ -1,0 +1,3 @@
+composite missingmeth.helloworldSplitImpl.HelloworldApplication 
+    extends GenericApplication<Helloworld> {
+}

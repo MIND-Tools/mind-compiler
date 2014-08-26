@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2009 STMicroelectronics
+ * Copyright (C) 2013 Schneider-Electric
  *
  * This file is part of "Mind Compiler" is free software: you can redistribute 
  * it and/or modify it under the terms of the GNU Lesser General Public License 
@@ -17,7 +18,7 @@
  * Contact: mind@ow2.org
  *
  * Authors: Matthieu Leclercq
- * Contributors: 
+ * Contributors: Stephane Seyvoz
  */
 
 package org.ow2.mind.preproc;
@@ -77,7 +78,16 @@ public enum MPPErrors implements ErrorTemplate {
   UNKNOWN_DATAFIELD(10, "Invalid PRIVATE access, no such field \"%s\".",
       "<fieldName>"),
 
-  ;
+  /** */
+  MISSING_METHOD_DECLARATION(11,
+      "In definition %s: METH(%s, %s) method(s) haven't been implemented !",
+      "<defName>", "<itfName>", "<methName>"),
+
+  /** */
+  MISSING_COLL_METHOD_DECLARATION(
+      12,
+      "In definition %s: METH(%s[%s], %s) method(s) haven't been implemented !",
+      "<defName>", "<itfName>", "<idxStr>", "<methName>"), ;
 
   /** The groupId of ErrorTemplates defined in this enumeration. */
   public static final String GROUP_ID = "MPP";
