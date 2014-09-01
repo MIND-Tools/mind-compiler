@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2009 STMicroelectronics
+ * Copyright (C) 2014 Schneider-Electric
  *
  * This file is part of "Mind Compiler".
  * "Mind Compiler" is a free software tool.
@@ -12,7 +12,7 @@
  *
  * Contact: mind@ow2.org
  *
- * Authors: Ali-Erdem Ozcan, Michel Metzger, Matthieu Leclercq
+ * Authors: Stephane Seyvoz
  * Contributors:
  */
 
