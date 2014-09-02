@@ -316,18 +316,34 @@ protected structDecl returns [StringBuilder res = new StringBuilder()]
               if (isPrivate) {
                 cplChecker.prvDecl(structContent, getSourceFile());
               }
-              if (singletonMode) {
-                $res.append($text); 
-              } else if (isPrivate) {
-                $res.append("typedef struct").append(wstext($ws1.text)).append("{");
-                $res.append(" COMP_DATA; ");
-                $res.append(structContent);
-                $res.append(wstext($ws2.text)).append(" PRIVATE_DATA_T");
-                $res.append(str);
-                $res.append(";");
+              
+              if (isPrivate) {
+                if (singletonMode) {
+                  // compatibility mode for picky compilers (such as IAR), to avoid duplicate definitions
+                  // of PRIVATE in MPP-ed files (_ctrl_impl.mpp.c + _instances.mpp.c)
+                  $res.append("#ifndef SINGLETON_PRIVATE_DATA" + System.getProperty("line.separator"));
+                  $res.append("#define SINGLETON_PRIVATE_DATA" + System.getProperty("line.separator"));
+                  $res.append("typedef struct").append(wstext($ws1.text)).append("{");
+                  $res.append(structContent);
+                  $res.append(wstext($ws2.text)).append(" SINGLETON_PRIVATE_DATA_T");
+                  $res.append(str);
+                  $res.append(";");
+                  $res.append(System.getProperty("line.separator") + "#endif");
+                } else {                
+                  $res.append("typedef struct").append(wstext($ws1.text)).append("{");
+                  $res.append(" COMP_DATA; ");
+                  $res.append(structContent);
+                  $res.append(wstext($ws2.text)).append(" PRIVATE_DATA_T");
+                  $res.append(str);
+                  $res.append(";");
+                }
               } else {
-                $res.append("struct ").append(wstext($ws1.text)).append($structfield.text)
+                if (singletonMode) {
+                  $res.append($text); 
+                } else {
+                  $res.append("struct ").append(wstext($ws1.text)).append($structfield.text)
                     .append(str).append(";");
+                }
               }
             }
         | ( e=~LCURLY { $res.append("struct").append(wstext($ws1.text)).append($e.text); } )
@@ -350,20 +366,20 @@ protected structfield
 protected privateAccess returns [StringBuilder res = new StringBuilder()]
     : PRIVATE ws1=ws* '.' ws2=ws* field=ID
       {
-        if (singletonMode) $res.append($text); 
+        if (singletonMode) $res.append($text);
         else {
           boolean isDataField;
           try {
-	    	isDataField = cplChecker.prvAccess($field, getSourceFile());
-	      } catch (ADLException e) {
-	        isDataField = false;
-	      }
-	      if (isDataField) {
-	      	$res.append("DATA_FIELD_ACCESS(").append(wstext($ws1.text)).append(wstext($ws2.text)).append($field.text).append(")");
-	      } else {
+            isDataField = cplChecker.prvAccess($field, getSourceFile());
+          } catch (ADLException e) {
+            isDataField = false;
+          }
+          if (isDataField) {
+            $res.append("DATA_FIELD_ACCESS(").append(wstext($ws1.text)).append(wstext($ws2.text)).append($field.text).append(")");
+          } else {
             $res.append("CONTEXT_PTR_ACCESS").append(wstext($ws1.text)).append("->").append(wstext($ws2.text)).append($field.text);
-	      }
-        } 
+          }
+        }
       }
     | {singletonMode==true}? PRIVATE { $res.append($text); } 
     ;

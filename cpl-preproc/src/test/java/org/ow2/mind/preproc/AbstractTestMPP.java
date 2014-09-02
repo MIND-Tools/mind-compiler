@@ -177,6 +177,19 @@ public class AbstractTestMPP {
     command.addDefine("COMPONENT_NAME", dirName.replace('-', '_'));
     if (singleton) command.addDefine("SINGLETON");
 
+    /*
+     * Since we're now using typedefs instead of direct struct declaration for
+     * private data, we need to declare a real variable in a .c file.
+     */
+    if (singleton) {
+      final String dataDefName = "private_data_def.c";
+      final URL dataDefURL = getClass().getClassLoader().getResource(
+          dataDefName);
+      if (dataDefURL == null)
+        throw new Exception("Can't find file " + dataDefName);
+      command.addIncludeFile(new File(dataDefURL.toURI()));
+    }
+
     return command;
   }
 

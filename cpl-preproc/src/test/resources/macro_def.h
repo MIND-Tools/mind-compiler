@@ -11,8 +11,11 @@
 #define COMP_DATA_INIT { 1 }
 #define COMP_DESC __component_##compName##_desc
 #define CHECK_CONTEXT_PTR (assert (_mind_this != (void*) 0));
+
+#ifndef SINGLETON
 #define CONTEXT_PTR_DECL PRIVATE_DATA_T * _mind_this
 #define CONTEXT_PTR_ACCESS _mind_this
+#endif
 
 #define PRIVATE PRIVATE_0(COMPONENT_NAME)
 #define PRIVATE_0(compName) PRIVATE_1(compName)

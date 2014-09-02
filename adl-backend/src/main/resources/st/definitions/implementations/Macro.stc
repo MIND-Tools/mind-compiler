@@ -21,8 +21,11 @@ ComponentDefinition(definition, interfaceDefinitions) ::= <<
 #define COMP_DATA struct __component_<definition.name;format="toCName">_internal_data_t __component_internal_data
 
 #define PRIVATE_DATA_T <ComponentTypeName(definitionName=definition.name)>
+
 <if (definition.astDecorations.("is-singleton"))>
-#define PRIVATE __component_<definition.name;format="toCName">_singleton_private_data
+#define PRIVATE __component_<definition.name;format="toCName">_singleton_instance_private_data
+<! Private data declaration is now based on typedefs !> 
+#define SINGLETON_PRIVATE_DATA_T <ComponentTypeName(definitionName=definition.name)>_private_t
 <endif>
 
 <CONTEXT_PTR(definition=definition)>
