@@ -1,4 +1,6 @@
 
+@REM  Copyright (C) 2009 Sogeti High Tech
+@REM  Copyright (C) 2010 STMicroelectronics
 @REM  Copyright (C) 2014 Schneider Electric
 @REM
 @REM  This file is part of "Mind Compiler" is free software: you can redistribute 
@@ -16,8 +18,8 @@
 @REM 
 @REM  Contact: mind@ow2.org
 @REM 
-@REM  Authors: Schneider Electric Mind4SE
-@REM  Contributors: 
+@REM  Authors: Edine Coly (edine.coly@mail.sogeti.com)
+@REM  Contributors: Matthieu Leclercq, Schneider Electric Mind4SE
 @REM -----------------------------------------------------------------------------
 @REM
 @REM Optional ENV vars
