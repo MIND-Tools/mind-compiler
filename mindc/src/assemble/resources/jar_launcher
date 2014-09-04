@@ -159,8 +159,8 @@ fi
 #  fi
 #done
 
-#MIND_CLASSPATH=$(find ${MIND_LIB} ${MIND_EXT} -name "*.jar" | tr "\n" ":")
-MIND_CLASSPATH=$(ls -1R ${MIND_LIB}/*.jar ${MIND_EXT}/*.jar | tr "\n" ":")
+#MIND_CLASSPATH=$(find ${MIND_LIB} ${MIND_EXT} -name "*.jar" 2>/dev/null | tr "\n" ":")${MIND_CLASSPATH}
+MIND_CLASSPATH=$(ls -1R ${MIND_LIB}/*.jar ${MIND_EXT}/*.jar 2>/dev/null | tr "\n" ":")${MIND_CLASSPATH}
 
 if $cygwin; then
   MIND_CLASSPATH=`cygpath --path --windows "$MIND_CLASSPATH"`

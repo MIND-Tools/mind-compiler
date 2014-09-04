@@ -83,7 +83,7 @@ for /r "%MIND_EXT%\" %%i in (*.jar) do (
 goto :run
 
 :concat
-set MIND_CLASSPATH=%MIND_CLASSPATH%%VarTmp%
+set MIND_CLASSPATH=%VarTmp%%MIND_CLASSPATH%
 goto :eof
 
 :run
