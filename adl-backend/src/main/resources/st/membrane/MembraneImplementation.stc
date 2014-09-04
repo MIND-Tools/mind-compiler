@@ -255,10 +255,12 @@ InitializeBindings(definition) ::= <<
 >>
 
 InitializeBinding(definition, binding) ::= <<
-  /* initialize binding from <binding.fromComponent>.<binding.fromInterface> to <binding.toComponent>.<binding.toInterface> */
+  /* initialize binding from <binding.fromComponent>.<binding.fromInterface><if(binding.fromInterfaceNumber)>[<binding.fromInterfaceNumber>]<endif> to <binding.toComponent>.<binding.toInterface><if(binding.toInterfaceNumber)>[<binding.toInterfaceNumber>]<endif> */
   newInstance->__component_internal_data.<FromItfContainer(binding=binding)>.<binding.fromInterface><if(binding.fromInterfaceNumber)>[<binding.fromInterfaceNumber>]<endif> = 
-    & newInstance->__component_internal_data.<ToItfContainer(binding=binding)>.<binding.toInterface><if(binding.toInterfaceNumber)>[<binding.toInterfaceNumber>]<endif>;
+    <BindingCastIfNeeded(binding=binding)>& newInstance->__component_internal_data.<ToItfContainer(binding=binding)>.<binding.toInterface><if(binding.toInterfaceNumber)>[<binding.toInterfaceNumber>]<endif>;
 >>
+
+BindingCastIfNeeded(binding) ::= << <if (binding.astDecorations.("type-inheritance-cast"))>(<binding.astDecorations.("type-inheritance-cast"); format="toCName">)<endif> >>
 
 FromItfContainer(binding) ::= <<
 <if (isThis.(binding.fromComponent))>

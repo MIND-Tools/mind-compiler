@@ -1,0 +1,12 @@
+@Run
+composite itfinheritance.HelloworldCollection {
+  provides Main as main;
+
+  contains ClientCollection as client;
+  contains ServerCollection as server;
+  
+  binds this.main to client.main;
+  
+  /* here the binding is a collection binding */
+  binds client.sa to server.s;
+}

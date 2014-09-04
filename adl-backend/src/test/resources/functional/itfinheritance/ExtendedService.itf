@@ -1,0 +1,7 @@
+
+interface itfinheritance.ExtendedService : itfinheritance.Service {
+
+  void resetCount(void);
+
+};
+

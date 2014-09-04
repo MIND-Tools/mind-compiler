@@ -1,0 +1,7 @@
+primitive itfinheritance.ClientCollection {
+  
+  provides Main as main;
+  requires Service as sa[2] ;
+  
+  source clientcollection.c;
+}
