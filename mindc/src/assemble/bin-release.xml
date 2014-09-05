@@ -51,6 +51,18 @@
     </fileSets>
     <files>
         <file>
+            <source>src/assemble/resources/jar_launcher</source>
+            <fileMode>0755</fileMode>
+            <outputDirectory>bin</outputDirectory>
+            <filtered>true</filtered>
+        </file>
+        <file>
+            <source>src/assemble/resources/jar_launcher.bat</source>
+            <fileMode>0755</fileMode>
+            <outputDirectory>bin</outputDirectory>
+            <filtered>true</filtered>
+        </file>
+        <file>
             <source>src/assemble/resources/mindc</source>
             <fileMode>0755</fileMode>
             <outputDirectory>bin</outputDirectory>
