@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE chapter SYSTEM "../dtd/minddoc.dtd" [
+<!DOCTYPE chapter [
 <!ENTITY % myents SYSTEM "../shared.ent" >
 %myents;
 ]>
-<chapter id="idlfe">
+<chapter id="idlfe" xmlns="http://docbook.org/ns/docbook" version="5.0">
   <title>IDL Frontend</title>
 
   <section id="idlfe-ovarch">

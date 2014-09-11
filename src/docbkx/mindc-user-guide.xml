@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
-  "./dtd/docbookx.dtd" [
+<!DOCTYPE book [
 <!ENTITY % myents SYSTEM "./shared.ent" >
 %myents;
 ]>
-<book status="draft">
+<book status="draft" xmlns="http://docbook.org/ns/docbook" version="5.0">
     <title>
         <emphasis>&productName;</emphasis> User Guide 
     </title>

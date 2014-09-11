@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE section PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
-  "../dtd/docbookx.dtd" [
+<!DOCTYPE section [
 <!ENTITY % myents SYSTEM "../shared.ent" >
 %myents;
 ]>
-<section id="idl">
+<section id="idl" xmlns="http://docbook.org/ns/docbook" version="5.0">
      <title>Interface definition language</title>
     <titleabbrev>IDL</titleabbrev>
     <para>The IDL language allows to define component interface types. 

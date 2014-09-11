@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE chapter SYSTEM "../dtd/minddoc.dtd" [
+<!DOCTYPE chapter [
 <!ENTITY % myents SYSTEM "../shared.ent" >
 %myents;
 ]>
-<chapter id="plug">
+<chapter id="plug" xmlns="http://docbook.org/ns/docbook" version="5.0">
   <title>&productName; plugin framework</title>
   <para>&productName; is an extensible toolset that can be customized by third party users
    to modify

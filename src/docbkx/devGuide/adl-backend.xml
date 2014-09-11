@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE chapter SYSTEM "../dtd/minddoc.dtd" [
+<!DOCTYPE chapter [
 <!ENTITY % myents SYSTEM "../shared.ent" >
 %myents;
 ]>
-<chapter id="adlbe">
+<chapter id="adlbe" xmlns="http://docbook.org/ns/docbook" version="5.0">
   <title>
     ADL Backend
     </title>
