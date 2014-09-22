@@ -3,7 +3,7 @@
 <!ENTITY % myents SYSTEM "./shared.ent" >
 %myents;
 ]>
-<book status="draft" xmlns="http://docbook.org/ns/docbook" version="5.0">
+<book status="draft" xmlns="http://docbook.org/ns/docbook" version="5.0" xml:lang="en">
     <title>
         <emphasis>&productName;</emphasis> User Guide 
     </title>
@@ -24,6 +24,6 @@
         <title>Annex</title>
         <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="userGuide/advanced.xml" />
         <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="userGuide/api.xml" />
-        <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="userGuide/glossary.xml" />
     </appendix>
+    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="userGuide/glossary.xml" />
 </book>

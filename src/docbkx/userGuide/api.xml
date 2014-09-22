@@ -1429,9 +1429,9 @@
 	<section id="api-boot-Main">
       <title>The <classname>boot.Main</classname> interface</title>
 	  
-	  <para>The <classname>boot.Main</classname> IDL defines a <methodname>main</methodname> method. A 
-	    component-based application must provides an interface of this type, so 
-	    that it can be launched by a bootstrap compoenent.</para>
+	  <para>The <classname>boot.Main</classname> IDL defines a <methodname>main</methodname> method. A
+        component-based application must provides an interface of this type, so that it can be
+        launched by a bootstrap component.</para>
       
       <para>This interface defines the following method:</para>
       

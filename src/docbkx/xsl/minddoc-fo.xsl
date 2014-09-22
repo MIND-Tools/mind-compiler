@@ -7,6 +7,57 @@
 <xsl:import href="urn:docbkx:stylesheet" />
 <xsl:import href="./minddoc-common.xsl" />
 
+
+<!-- Handling of revhistory data for book on verso page -->
+<xsl:template name="book.titlepage.verso">
+  <xsl:choose>
+    <xsl:when test="d:bookinfo/d:revhistory">
+      <xsl:apply-templates mode="book.titlepage.verso.auto.mode" select="d:bookinfo/d:revhistory"/>
+    </xsl:when>
+    <xsl:when test="d:info/d:revhistory">
+      <xsl:apply-templates mode="book.titlepage.verso.auto.mode" select="d:info/d:revhistory"/>
+    </xsl:when>
+    <xsl:when test="d:revhistory">
+      <xsl:apply-templates mode="book.titlepage.verso.auto.mode" select="d:revhistory"/>
+    </xsl:when>
+  </xsl:choose>
+</xsl:template>
+  
+<xsl:template match="d:revhistory" mode="book.titlepage.verso.auto.mode">
+<fo:block xmlns:fo="http://www.w3.org/1999/XSL/Format" xsl:use-attribute-sets="book.titlepage.verso.style">
+<xsl:apply-templates select="." mode="book.titlepage.verso.mode"/>
+</fo:block>
+</xsl:template>
+
+<!-- Revision history table format -->
+<xsl:attribute-set name="revhistory.title.properties">
+  <xsl:attribute name="font-size">12pt</xsl:attribute>
+  <xsl:attribute name="font-weight">bold</xsl:attribute>
+  <xsl:attribute name="text-align">center</xsl:attribute>
+</xsl:attribute-set>
+
+<xsl:attribute-set name="revhistory.table.properties">
+  <xsl:attribute name="space-before">1em</xsl:attribute>
+  <xsl:attribute name="border">0.5pt solid black</xsl:attribute>
+  <xsl:attribute name="background-color">#EEEEEE</xsl:attribute>
+  <xsl:attribute name="width">50%</xsl:attribute>
+</xsl:attribute-set>
+
+<xsl:attribute-set name="revhistory.table.cell.properties">
+  <xsl:attribute name="border">0.5pt solid black</xsl:attribute>
+  <xsl:attribute name="font-size">9pt</xsl:attribute>
+  <xsl:attribute name="padding">4pt</xsl:attribute>
+</xsl:attribute-set>
+
+<!-- Customization of programlisting areas -->
+<xsl:attribute-set name="monospace.verbatim.properties"
+                   use-attribute-sets="monospace.properties verbatim.properties">
+  <!-- Try to put a block on a single page -->
+  <xsl:attribute name="keep-together.within-column">always</xsl:attribute>
+  <!-- Wrap of long lines -->
+  <xsl:attribute name="wrap-option">wrap</xsl:attribute>
+</xsl:attribute-set>
+
 <xsl:param name="callout.graphics.path">src/docbkx/images/callouts/</xsl:param>
 
 <!-- Each new section1 starts on a new page -->

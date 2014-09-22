@@ -3,7 +3,7 @@
 <!ENTITY % myents SYSTEM "./shared.ent" >
 %myents;
 ]>
-<book xmlns="http://docbook.org/ns/docbook" version="5.0">
+<book xmlns="http://docbook.org/ns/docbook" version="5.0" xml:lang="en">
   <title>
       <emphasis>&productName;</emphasis> developer guide 
   </title>

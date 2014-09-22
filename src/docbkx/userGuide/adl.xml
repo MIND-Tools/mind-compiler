@@ -33,10 +33,9 @@
       <varlistentry>
         <term>Component type definition</term>
         <listitem>
-          <para>defines a component's abstract architecture in terms of the interfaces it requires and provides.
-          The purpose of a component type definition is the specification of abstract architectures that can be
-          reused with different concrete implementations. 
-          </para>
+          <para>defines the abstract architecture of a component in terms of the interfaces it
+            requires and provides. The purpose of a component type definition is the specification
+            of abstract architectures that can be reused with different concrete implementations. </para>
         </listitem>
       </varlistentry>
     </variablelist>
@@ -155,7 +154,7 @@
   
   <section id="adl-itf">
     <title>Interface declarations</title>
-    <para>Interfaces are the acces points of a component. Components may have two 
+    <para>Interfaces are the access points of a component. Components may have two 
       kinds of interfaces. That is, <emphasis>provided interfaces</emphasis> (a.k.a.
       server interfaces) are implemented by the component whereas 
       <emphasis>required interfaces</emphasis> (a.k.a. client interfaces) may be
@@ -184,7 +183,7 @@
               in the IDL definition called <classname>foo.Itf1</classname>.</para>
           </listitem>
           <listitem>
-            <para>Line 2 declares a second provided interface interface whose name 
+            <para>Line 2 declares a second provided interface whose name 
               is <varname>anotherProvidedInterface</varname> and whose signature is 
               <classname>foo.Itf1</classname>. Note that a given component may provide
               and/or require multiple interfaces with the same signature with 
@@ -199,21 +198,16 @@
       </para>
     </example>
       
-    <para>An interface may be tagged as <emphasis>optional</emphasis>. 
-      If a required interface is tagged as optional, the component requiring this interface
-      is expected to be functional even if this interface is not bound. On the other hand, 
-      if a provided interface is tagged as optional, the component may not actually 
-      provide the implemenation of this interface. Therefore, only optional
-      required interfaces can be bound to optional provided interfaces. This constaint is
-      discussed more in details in  
-      <xref linkend="adl-bind"/>. To specify that an interface
-      is optional, the <code>"optional"</code>
-      keyword must be added after the <code>"provides"</code> or <code>"requires"</code>
-      keywords in the interface declaration.
-      
-      <note>
-        <para>Optional provided interfaces are not fully supported in the current
-          &productName; toolchain.</para>
+    <para>An interface may be tagged as <emphasis>optional</emphasis>. If a required interface is
+      tagged as optional, the component requiring this interface is expected to be functional even
+      if this interface is not bound. On the other hand, if a provided interface is tagged as
+      optional, the component may not actually provide the implementation of this interface.
+      Therefore, only optional required interfaces can be bound to optional provided interfaces.
+      This constraint is discussed more in details in <xref linkend="adl-bind"/>. To specify that an
+      interface is optional, the <code>"optional"</code> keyword must be added after the
+        <code>"provides"</code> or <code>"requires"</code> keywords in the interface declaration. <note>
+        <para>Optional provided interfaces are not fully supported in the current &productName;
+          toolchain.</para>
       </note>
     </para>
     
@@ -247,10 +241,10 @@
     </example>
     
     <para>An interface can be both optional and collection. In the case of a provided interface,
-      being both collection and optional means the component may not provide some (or any) implementations
-      of the interface. On the other hand, in the case of a required interface, being both
-      collection and optional means that some (or all) of the interfaces may not be bound whereas the 
-      component is still suppsed to be functional.</para>
+      being both collection and optional means the component may not provide some (or any)
+      implementations of the interface. On the other hand, in the case of a required interface,
+      being both collection and optional means that some (or all) of the interfaces may not be bound
+      whereas the component is still supposed to be functional.</para>
   </section>
 
 <!--#########################################################################-->
@@ -264,20 +258,19 @@
       source files providing the implementation of the component.
     </para>
     
-    <para> There are two constructs in the ADL for specifying the 
-      implementation of a primitive component. The first one is used for specifying the 
-      declaratrion of the <emphasis>private-data</emphasis> of the component. The 
-      second one is used for specifying the set of <emphasis>implementation files</emphasis> of the component. 
-      Further information about the syntactic extensions to the C language that need to 
-      be respected in those C implementation files are discussed in detail in <xref linkend="c"/>. 
-      The rest of this section focuses only on ADL related aspects.
-    </para>
+    <para> There are two constructs in the ADL for specifying the implementation of a primitive
+      component. The first one is used for specifying the declaration of the
+        <emphasis>private-data</emphasis> of the component. The second one is used for specifying
+      the set of <emphasis>implementation files</emphasis> of the component. Further information
+      about the syntactic extensions to the C language that need to be respected in those C
+      implementation files are discussed in detail in <xref linkend="c"/>. The rest of this section
+      focuses only on ADL related aspects. </para>
     
     <section id="adl-impl-data">
       <title>Private data definition</title>
 
-      <para>The specification of component's private-data may be done under two
-        different forms using the ADL:</para>
+      <para>The specification of the private-data of a component may be done under two different
+        forms using the ADL:</para>
       <orderedlist>
         <listitem>
           <para>The private-data structure definition can be put in a separate header file,
@@ -289,33 +282,31 @@
             ADL definition in between double curly braces (<code>"{{"</code> 
             and <code>"}}"</code>) following the <code>"data"</code> keyword;</para>
             
-          <warning><para>Source-code inlined in the ADL file is not parsed by the 
-            &productName; toolchain. It is escaped by the double curly brace (<code>"{{"</code> 
-            and <code>"}}"</code>). Please make sure that consecutive curly 
-            braces in the inline source-code are separated by at least one 
-            whitespace character.</para></warning>
+          <warning><para>Source-code inlined in the ADL file is not parsed by the &productName; toolchain. It is
+              escaped by the double curly brace (<code>"{{"</code> and <code>"}}"</code>). Please
+              make sure that consecutive curly braces in the inline source-code are separated by at
+              least one white-space character.</para></warning>
         </listitem>
       </orderedlist>
       
       <para>A primitive component definition may have a maximum of one private-data definition.
         On the other hand, composite and type definitions cannot specify private-data.</para>
       
-      <para>When the private-data structure is defined in a separate header file, 
-        the latter should contains only the definition of the private-data structure. It is
-        not necessary to include it in the implememtation files (this is done automatically 
-        by the generated code). Moreorver it must not be included by implementations of 
-        other components.</para>
+      <para>When the private-data structure is defined in a separate header file, the latter should
+        contains only the definition of the private-data structure. It is not necessary to include
+        it in the implementation files (this is done automatically by the generated code). Moreover
+        it must not be included by implementations of other components.</para>
       
-      <para>See <xref linkend="c-prvdecl"/> for details on the syntax to be 
-        used to define component's private data.</para>
+      <para>See <xref linkend="c-prvdecl"/> for details on the syntax to be used to define the
+        private-data of a component.</para>
 
       <example>
         <title>Private data definition in a separate header file</title>
         <programlisting linenumbering="numbered" language="adl"> data myComponentData.h;</programlisting>
         
-        <para>The above code excerpt specifies that the component's private-data 
-          are defined in the file called <filename>myComponentData.h</filename>. 
-          The latter file should look-like :</para>
+        <para>The above code excerpt specifies that the private-data of a component are defined in
+          the file called <filename>myComponentData.h</filename>. The latter file should look like
+          :</para>
           
         <programlisting language="cpl" linenumbering="numbered"> #ifndef MY_COMPONENT_DATA_H
  #define MY_COMPONENT_DATA_H
@@ -391,11 +382,10 @@
           component is inlined in the ADL file.</para>
       </example>
       
-      <para>Moreover, the <code>"source"</code> keyword may be followed by a path 
-        to a pre-compiled file (<code>".o"</code>, <code>".a"</code>, <code>".so"</code>,
-        or <code>.dll</code> file). In that case, the source file will only be added on
-        the linker command. This is particularly usefull to define a component that wraps a
-        pre-compiled C library.</para>
+      <para>Moreover, the <code>"source"</code> keyword may be followed by a path to a pre-compiled
+        file (<code>".o"</code>, <code>".a"</code>, <code>".so"</code>, or <code>.dll</code> file).
+        In that case, the source file will only be added on the linker command. This is particularly
+        useful to define a component that wraps a pre-compiled C library.</para>
     </section>
   </section>
   
@@ -406,14 +396,15 @@
   <section id="adl-attr">
     <title>Attribute declarations</title>
     
-    <para>Attributes are component's data that are declared and initialized in 
-      the ADL. This is very useful feature to set some initial parameters for a component 
-      (e.g. size of a buffer component). Moreover, if the component implements the 
-      <emphasis>attribute-controller</emphasis> interface (see <xref linkend="adv-ctrl-ac"/> for more detail),
-      the attributes may also be read and modified at runtime by other components.</para>
+    <para>Attributes are data of a component that are declared and initialized in the ADL. This is
+      very useful feature to set some initial parameters for a component (e.g. size of a buffer
+      component). Moreover, if the component implements the
+        <emphasis>attribute-controller</emphasis> interface (see <xref linkend="adv-ctrl-ac"/> for
+      more detail), the attributes may also be read and modified at runtime by other
+      components.</para>
     
-    <para>Attribute declarations are done using the <code>"attribute"</code> keyword followed 
-      by a type, a name and optionnaly an initial value.</para>
+    <para>Attribute declarations are done using the <code>"attribute"</code> keyword followed by a
+      type, a name and optionally an initial value.</para>
     <note><para>Currently only type <code>"int"</code> is supported in the &productName; 
       toolchain.</para></note>
     <para>The initial value of an attribute can be a literal integer (which may optionally be 
@@ -484,23 +475,21 @@
   
   <section id="adl-bind">
     <title>Binding declarations</title>
-    <para>Components' interfaces must be bound together in order to establish a communication
-      between them. A binding (in its simplest form) is a point-to-point connection
-      that links a required interface (the <emphasis>client side</emphasis> of the binding) to a
-      provided interface (the <emphasis>server side</emphasis> of the binding).
-      Composite component definitions declare a list of bindings to 
-      assemble its sub-components together in a consistent way.</para>
+    <para>The interfaces of components must be bound together in order to establish a communication
+      between them. A binding (in its simplest form) is a point-to-point connection that links a
+      required interface (the <emphasis>client side</emphasis> of the binding) to a provided
+      interface (the <emphasis>server side</emphasis> of the binding). Composite component
+      definitions declare a list of bindings to assemble its sub-components together in a consistent
+      way.</para>
     
-    <para>A binding is specified using the <code>"binds"</code> keyword followed 
-      by the specification of the client side and the server-side which are spearated by the
-      <code>"to"</code> keyword. Both client and server sides of a binding are specified with
-      the local-name of the sub-component and the name of the interface
-      of this sub-component separated by a dot (<code>"."</code>).
-      The special <code>"this"</code> 
-      keyword can be used to refer to the encapsulating composite component definition.
-      In the case of collection interfaces, the binding declaration may also specify
-      the indexes of the interfaces to be bound. In this case, the index is specified in 
-      between square brackets following the interface name. </para>
+    <para>A binding is specified using the <code>"binds"</code> keyword followed by the
+      specification of the client side and the server-side which are separated by the
+        <code>"to"</code> keyword. Both client and server sides of a binding are specified with the
+      local-name of the sub-component and the name of the interface of this sub-component separated
+      by a dot (<code>"."</code>). The special <code>"this"</code> keyword can be used to refer to
+      the encapsulating composite component definition. In the case of collection interfaces, the
+      binding declaration may also specify the indexes of the interfaces to be bound. In this case,
+      the index is specified in between square brackets following the interface name. </para>
       
     <example>
       <title>Binding declarations</title>
@@ -551,9 +540,9 @@
       rather than their <glossterm linkend="FQN">fully-qualified-name</glossterm>. 
       This feature is directly inspired from the Java programming language.</para>
 
-    <para>Import statements must be placed at the very begining of ADL files, preceeding any 
-      <code>"primitive"</code>, <code>"composite"</code> or <code>"type"</code>
-      keywords. An import statement is composed of the <code>"import"</code> keyword followed by a 
+    <para>Import statements must be placed at the very beginning of ADL files, preceding any
+        <code>"primitive"</code>, <code>"composite"</code> or <code>"type"</code> keywords. An
+      import statement is composed of the <code>"import"</code> keyword followed by a
       fully-qualified-name or a package-name itself followed by <code>".*"</code>.</para>
 
     <para>The first form (i.e. fully-qualified-name) allows to reference the specified 
@@ -561,12 +550,12 @@
     <para>The second form (i.e. package-name followed by <code>".*"</code>) allows to
       reference any ADL or IDL definition belonging to specified package using their simple names.</para>
     
-    <para>ADL or IDL definitions beloning to the same package as the current definition are 
+    <para>ADL or IDL definitions belonging to the same package as the current definition are
       implicitly imported and can be referenced with there simple-name</para>
 
     <example>
       <title>Import statements</title>
-      <para>The following example can be refactored to use import</para>
+      <para>The following example can be re-factored to use import</para>
       <programlisting linenumbering="numbered" language="adl"> composite foo.bar.MyCompositeComponent {
 
    provides foo.Itf1 as itf1;
@@ -611,16 +600,16 @@
               package as the encapsulating (current) definition (<classname>foo.bar.MyCompositeComponent</classname>).</para>
           </listitem>
           <listitem>
-            <para>The import statement at line 1 may be considered as useless since it imports 
-              an IDL definition which is already in the same package as the current definition. Nevertheless,  
-              such an import statement may be usefull in some cases to explicitly import an ADL or IDL definition
-              in order to avoid name preemption that may occur. For instance, if another IDL
-              whose simple name is <classname>Itf3</classname> is defined in the
-              <classname>foo</classname> package, then the import statement at 
-              line 2 would import the latter and therefore <classname>Itf3</classname>
-              would be resolved in <classname>foo.Itf3</classname> rather than in
-              <classname>foo.bar.Itf3</classname>. 
-              For more information about the simple-name resolution rules, please refer to <xref linkend="adl-import-order"/>.</para>
+            <para>The import statement at line 1 may be considered as useless since it imports an
+              IDL definition which is already in the same package as the current definition.
+              Nevertheless, such an import statement may be useful in some cases to explicitly
+              import an ADL or IDL definition in order to avoid name preemption that may occur. For
+              instance, if another IDL whose simple name is <classname>Itf3</classname> is defined
+              in the <classname>foo</classname> package, then the import statement at line 2 would
+              import the latter and therefore <classname>Itf3</classname> would be resolved in
+                <classname>foo.Itf3</classname> rather than in <classname>foo.bar.Itf3</classname>.
+              For more information about the simple-name resolution rules, please refer to <xref
+                linkend="adl-import-order"/>.</para>
           </listitem>
         </itemizedlist>
       </para>
@@ -628,10 +617,9 @@
 
     <section id="adl-import-order">
       <title>Resolution of simple names</title>
-      <para>Names used in ADL definitions for the declaration of sub-components 
-        and/or the spoecification of interface signatures have  
-        to be resolved into fully-qualified-names. The way &productName; toolchain
-        proceed to this name resolution is as follow :</para>
+      <para>Names used in ADL definitions for the declaration of sub-components and/or the
+        specification of interface signatures have to be resolved into fully-qualified-names. The
+        way &productName; toolchain proceed to this name resolution is as follow :</para>
       <procedure>
         <step>
           <para>If the name contains at least one dot (<code>"."</code>), then it is a 
@@ -675,11 +663,10 @@
   
   <section id="adl-extend">
     <title>Definition inheritance</title>
-    <para>The ADL has a definiton inheritence feature in order to support the design
-    of reusable ADL definitions. That is, an ADL definiton can
-    extend one or more definitions so that it inherits from the architectural elements
-    defined by the latters. In some cases, the inherited elements may also be overriden 
-    in the inheriting definition. </para>
+    <para>The ADL has a definition inheritance feature in order to support the design of reusable
+      ADL definitions. That is, an ADL definition can extend one or more definitions so that it
+      inherits from the architectural elements defined by the latter. In some cases, the inherited
+      elements may also be overridden in the inheriting definition. </para>
 
     <para>The extended definitions are specified after the name of the definition using the 
       <code>"extends"</code> keyword followed by a comma-separated list of ADL name.</para>
@@ -701,21 +688,20 @@
       overridden by declaring new architectural element of the same kind and with 
       the same name.</para>
     
-    <para>Inherrited bindings can be overridden by declaring a new 
-      binding with the same client-side.</para>
+    <para>Inherited bindings can be overridden by declaring a new binding with the same
+      client-side.</para>
     
     <para>Private-data declaration can be overridden simply by specifying a new
       private-data declaration.</para>
     
-    <para>Finnaly, source declarations are simply inherited and cannot be overridden.
-      Nevertheless, a definition that inherits source declaration can specify additional
-      implementation files.</para>
+    <para>Finally, source declarations are simply inherited and cannot be overridden. Nevertheless,
+      a definition that inherits source declaration can specify additional implementation
+      files.</para>
 
     <warning>
-      <para>When a definition overrides the private-data definition and inherits
-        the sources of the definition it extends,
-        it is the responsability of the developper to make sure that the new component's
-        private-data structure is compatible with the inherited sources.</para>
+      <para>When a definition overrides the private-data definition and inherits the sources of the
+        definition it extends, it is the responsibility of the developer to make sure that the new
+        private-data structure of a component is compatible with the inherited sources.</para>
     </warning>
     
     <example>
@@ -778,18 +764,16 @@
   
   <section id="adl-para">
     <title>Definition parameters</title>
-    <para>The ADL supports definition parameters to allow component attributes to be 
-      assigned in a parameterized way. This feature improves the reusability of 
-      architecture descriptions. </para>
+    <para>The ADL supports definition parameters to allow component attributes to be assigned in a
+      parametrized way. This feature improves the re-usability of architecture descriptions. </para>
     <para>The definition parameters are specified in a comma separated list
       between parenthesis right after the name of the definition 
       (and before the <code>"extends"</code> keyword if any).</para>
-    <para>When a parameterized definition is referenced in another ADL definition, either for the 
-      declaration of a sub-component, or for an inheritence specification, the value 
-      of these parameters must be specified. The value specification must be done
-      as a comma-separated list in between paranthesis either respecting 
-      the order of declaration of parameters, or in a
-      <code><replaceable>name</replaceable>=<replaceable>value</replaceable></code> 
+    <para>When a parametrized definition is referenced in another ADL definition, either for the
+      declaration of a sub-component, or for an inheritance specification, the value of these
+      parameters must be specified. The value specification must be done as a comma-separated list
+      in between parenthesis either respecting the order of declaration of parameters, or in a
+          <code><replaceable>name</replaceable>=<replaceable>value</replaceable></code>
       fashion.</para>
       
     <para>Types of parameters are inferred from the type of the attribute 
@@ -854,19 +838,16 @@
   
   <section id="adl-tmpl">
     <title>Generic definitions</title>
-    <para>
-      Generic definitions is another feature of the ADL for improving 
-      the reusability of composite component definitions. Using generic definitions,
-      programmers may define abstract composite components where only the type of some 
-      sub-components is known rather than there concrete implementations. Such generic
-      component definitions cannot be instantiable directly. But, they can be reused 
-      in other definitions where the concrete implementations of these sub-components are specified. 
-      For instance, a generic definition 
-      may be used for describing a system architecture which contains a memory allocator
-      component without specifying the concrete implementation details of the latter component.
-      This generic definition can be extended later on, in another definition where 
-      a platform specific memory component is specified in order to map the defined system architecture
-      on a given HW platform.</para>
+    <para> Generic definitions is another feature of the ADL for improving the re-usability of
+      composite component definitions. Using generic definitions, programmers may define abstract
+      composite components where only the type of some sub-components is known rather than there
+      concrete implementations. Such generic component definitions cannot be instantiable directly.
+      But, they can be reused in other definitions where the concrete implementations of these
+      sub-components are specified. For instance, a generic definition may be used for describing a
+      system architecture which contains a memory allocator component without specifying the
+      concrete implementation details of the latter component. This generic definition can be
+      extended later on, in another definition where a platform specific memory component is
+      specified in order to map the defined system architecture on a given HW platform.</para>
 
     <para>To turn a composite component definition into a generic definition,
       a list of <emphasis>template variables</emphasis> should be defined
@@ -893,11 +874,10 @@
       </para>
     </example>
     
-    <para>Template variables can be used to specify the definition of a sub-component.
-      Doing so, only the interfaces of the sub-cmponent are specifyed by the type
-      which the template variable conforms to. The concrete definition of the sub-component
-      will be given by the value that is assigned to the template variable 
-      when the generic definition is referenced.</para>
+    <para>Template variables can be used to specify the definition of a sub-component. Doing so,
+      only the interfaces of the sub-component are specified by the type which the template variable
+      conforms to. The concrete definition of the sub-component will be given by the value that is
+      assigned to the template variable when the generic definition is referenced.</para>
 
     <para>When referencing a generic definitions, values of its template variables 
      are specified between inferior and superior symbols (<code>"&lt;"</code>, <code>"&gt;"</code>)
@@ -905,14 +885,13 @@
      variables, or in a <code><replaceable>name</replaceable>=<replaceable>value</replaceable></code> 
      fashion.</para>
 
-    <para>Values given to template variables must be a reference to a concrete 
-      ADL definition (or a reference to another template variable) that <emphasis>conforms to</emphasis>
-      the type of the template variable. This means that the definition must 
-      have the same provided and required interfaces (same name, same signature and same size for collection interfaces);
-      it may have additional provided interfaces; it may also have additional 
-      required interfaces but these latters must be optional. Note that it is 
-      neither necessary or sufficient that a definition extends (directly or 
-      transitively) the type to conform to it.</para>
+    <para>Values given to template variables must be a reference to a concrete ADL definition (or a
+      reference to another template variable) that <emphasis>conforms to</emphasis> the type of the
+      template variable. This means that the definition must have the same provided and required
+      interfaces (same name, same signature and same size for collection interfaces); it may have
+      additional provided interfaces; it may also have additional required interfaces but these
+      latter must be optional. Note that it is neither necessary or sufficient that a definition
+      extends (directly or transitively) the type to conform to it.</para>
     
     <example>
       <title>Generic composite component definition</title>
@@ -954,15 +933,15 @@
             </listitem>
             <listitem>
               <para>At lines 16 and 17, bindings from or to the <varname>subComp1</varname>
-                sub-component are checked with the interfaces defines in the 
-                <classname>foo.bar.MyType</classname> type definition.
-                <varname>subComp1</varname> has a provided interface called 
-                <varname>itf1</varname> (this interface is defined at line 2).
-                Therefore, the binding declared at line 16 is correct. 
-                Similarly, <varname>subComp1</varname> has a required interface
-                called <varname>itf2</varname> (defined at line 3) so binding at line 17 is correct.
-                Finally, the <varname>subComp1</varname> doesn't have any other mandatory required
-                interfaces, so there is no missing binding in this composite component definition.</para>
+                sub-component are checked with the interfaces defines in the
+                  <classname>foo.bar.MyType</classname> type definition. <varname>subComp1</varname>
+                has a provided interface called <varname>itf1</varname> (this interface is defined
+                at line 2). Therefore, the binding declared at line 16 is correct. Similarly,
+                  <varname>subComp1</varname> has a required interface called
+                  <varname>itf2</varname> (defined at line 3) so binding at line 17 is correct.
+                Finally, the <varname>subComp1</varname> does not have any other mandatory required
+                interfaces, so there is no missing binding in this composite component
+                definition.</para>
             </listitem>
             <listitem>
               <para>At line 32, the sub-component <varname>aSubComp</varname> is an
@@ -987,11 +966,10 @@
       in the generic definition are still valid (i.e. binding ends actually exist, and 
       no binding is missing for a mandatory required interface).</para>
     
-    <para>Under some circumstances, it may be usefull to extend a generic definition 
-      and change the type of one of its template variables. This can be done 
-      using a <code>"?"</code> as a value of a template variable. When doing so,
-      the definition must ensure that each occurence of the template variable is
-      correctly overridden.</para>
+    <para>Under some circumstances, it may be useful to extend a generic definition and change the
+      type of one of its template variables. This can be done using a <code>"?"</code> as a value of
+      a template variable. When doing so, the definition must ensure that each occurrence of the
+      template variable is correctly overridden.</para>
       
     <example>
       <title>Extension of generic definitions</title>
@@ -1023,11 +1001,11 @@
               to the type <classname>foo.bar.MySecondType</classname>;</para>
           </listitem>
           <listitem>
-            <para>At line 11, the definition extends the <classname>foo.bar.AComposite</classname> generic definition
-              and assignes <code>?</code> as value of the <varname>T</varname> template 
-              variable. This means that this template variable doesn't take a concrete
-              value, so that each occurrence of this template variable must be overridden
-              in the <classname>foo.bar.YetAnotherComposite</classname> definition;</para>
+            <para>At line 11, the definition extends the <classname>foo.bar.AComposite</classname>
+                generic definition and assigns <code>?</code> as value of the <varname>T</varname>
+                template variable. This means that this template variable does not take a concrete
+                value, so that each occurrence of this template variable must be overridden in the
+                  <classname>foo.bar.YetAnotherComposite</classname> definition;</para>
           </listitem>
           <listitem>
             <para>At line 14, the inherited specification of <varname>subComp1</varname>
@@ -1040,11 +1018,12 @@
               and <varname>itf2</varname> are inherited from <classname>foo.bar.AComposite</classname>.</para>
           </listitem>
         </itemizedlist>
-        <para>In this example, the <classname>foo.bar.YetAnotherComposite</classname> generic definition
-          cannot extend <code>AComposite&lt;U&gt;</code> since <classname>foo.bar.MySecondType</classname>
-          (the type of <varname>U</varname>) doesn't conform to <classname>foo.bar.MyType</classname> 
-          (the type of the template parameter of <classname>AComposite</classname>) because it has 
-          an additional mandatory required interface.</para>
+        <para>In this example, the <classname>foo.bar.YetAnotherComposite</classname> generic
+            definition cannot extend <code>AComposite&lt;U&gt;</code> since
+              <classname>foo.bar.MySecondType</classname> (the type of <varname>U</varname>) does
+            not conform to <classname>foo.bar.MyType</classname> (the type of the template parameter
+            of <classname>AComposite</classname>) because it has an additional mandatory required
+            interface.</para>
       </note>
     </para>
     </example>
@@ -1057,25 +1036,21 @@
   <section id="adl-anonym">
     <title>Anonymous definitions</title>
 
-    <para>As presented in previous sections of this document, each ADL 
-      definition has a name and must be placed in a separate file respecting 
-      a convention related to its name. This allows the &productName; toolchain
-      to find the ADL file of a component using its definition name. However, 
-      inlining the definition of a component in where an instance is defined, rather than
-      writing it in a separate file may be handy in some circumstances. For that prupose, 
-      the ADL supports <emphasis>anonymous definitions</emphasis>, which is a 
-      feature inspired from the Java language. This feature is particularly useful for 
-      defining an extension specific to a sub-components instance. It may also be useful 
-      for defining simple components which have only one instance
-      in the application architecture.
-    </para>
+    <para>As presented in previous sections of this document, each ADL definition has a name and
+      must be placed in a separate file respecting a convention related to its name. This allows the
+      &productName; toolchain to find the ADL file of a component using its definition name.
+      However, in-lining the definition of a component in where an instance is defined, rather than
+      writing it in a separate file may be handy in some circumstances. For that purpose, the ADL
+      supports <emphasis>anonymous definitions</emphasis>, which is a feature inspired from the Java
+      language. This feature is particularly useful for defining an extension specific to a
+      sub-components instance. It may also be useful for defining simple components which have only
+      one instance in the application architecture. </para>
 
-    <para>An anonymous definition can only be used for defining sub-components.
-      In order to specify an anonymous definition
-      for a sub-component declaration, the local-name must be
-      followed by the specification of the definition nature (i.e either <code>"primitive"</code> 
-      or <code>"composite"</code>), itself followed by the content of the anonymous definition between curly 
-      braces (<code>"{"</code> and <code>"}"</code>).</para>
+    <para>An anonymous definition can only be used for defining sub-components. In order to specify
+      an anonymous definition for a sub-component declaration, the local-name must be followed by
+      the specification of the definition nature (i.e. either <code>"primitive"</code> or
+        <code>"composite"</code>), itself followed by the content of the anonymous definition
+      between curly braces (<code>"{"</code> and <code>"}"</code>).</para>
 
     <example>
       <title>Anonymous definition</title>
@@ -1094,17 +1069,17 @@
     
       <para>
         <note>
-          <para>The architecture of sub-component <varname>subComp1</varname> is defined 
-            in an anonymous definition inlined in the surrounding definition. This annonymous
-            definition describes a primitive component that specifies 2 interfaces
-            and an implementation source file.</para>
+          <para>The architecture of sub-component <varname>subComp1</varname> is defined in an
+            anonymous definition inlined in the surrounding definition. This anonymous definition
+            describes a primitive component that specifies 2 interfaces and an implementation source
+            file.</para>
         </note>
       </para>
     </example>
     
-    <para>An anonymous definition can extends one other definition (multiple inheritence is not 
-      supported for anonymous definition). This is done by specifying the extended definition between
-      the <code>"contains"</code> and the <code>"as"</code> keywords.</para>
+    <para>An anonymous definition can extends one other definition (multiple inheritance is not
+      supported for anonymous definition). This is done by specifying the extended definition
+      between the <code>"contains"</code> and the <code>"as"</code> keywords.</para>
       
       
     <example>
@@ -1120,7 +1095,7 @@
  }</programlisting>
     </example>
     
-    <para>Anonymous definitions can make use of the surronding definition's parameters and template 
+    <para>Anonymous definitions can make use of the surrounding definition parameters and template
       variables.</para>
       
     <example>
@@ -1138,10 +1113,9 @@
     </example>
     
     <warning>
-      <para>Anonymous definitions must be used sparingly since it may lead to 
-        ADL files that are difficult to read. Obviously, the definition of complex
-        architectures is in a monolithic ADL file should be avoided for 
-        convenience and reusability reasons.</para>
+      <para>Anonymous definitions must be used sparingly since it may lead to ADL files that are
+        difficult to read. Obviously, the definition of complex architectures is in a monolithic ADL
+        file should be avoided for convenience and re-usability reasons.</para>
     </warning>
   </section>
   
@@ -1283,10 +1257,9 @@
            An error is reported by the &productName; toolchain if a definition 
            with this annotation is instantiated more that once in an application.</para>
           
-         <note><para>Composite definition that contains at least on singleton 
-           sub-component are implicitly declared singleton. It is recommanded to 
-           add explicitly the <classname>Singleton</classname> annotation on such
-           composite definition.</para></note>
+         <note><para>Composite definition that contains at least on singleton sub-component are implicitly declared
+            singleton. It is recommended to add explicitly the <classname>Singleton</classname>
+            annotation on such composite definition.</para></note>
            
          <note><para>Instantiating a generic definition by passing a singleton 
            definition as value result in a singleton definition.</para></note>
@@ -1348,10 +1321,10 @@
           if a flag can be attached to a given source specification to indicate
           that this is this particular source file that requires this flag.</para>
         
-        <para>Specifying LD-Flags in ADL is particularly usefull for primitive components
-          that use shared libraries in their code. It ensures that the link
-          flag (for instance <code>-lm</code> if the code use the math library)
-          is always present for the link of an application that use such primitive component.</para>
+        <para>Specifying LD-Flags in ADL is particularly useful for primitive components that use
+          shared libraries in their code. It ensures that the link flag (for instance
+            <code>-lm</code> if the code use the math library) is always present for the link of an
+          application that use such primitive component.</para>
       </section>
       
       <section id="adl-annot-useIDL">
@@ -1376,8 +1349,8 @@
           and that are not explicitly declared as a provided or required 
           interface.</para>
         
-        <para>This annotation must be attached to a definition (usualy a 
-          definition of primitive component).</para>
+        <para>This annotation must be attached to a definition (usually a definition of primitive
+          component).</para>
         
         <para>This is particularly useful if the component implementation 
           cast pointers to interface types that are not directly accessible
@@ -1409,14 +1382,13 @@
           function and generally takes the same parameters. This approach is 
           close to the ld <varname>--wrap</varname> option.</para>
           
-        <note><para>Wrapping a varadic function needs complementary information 
-        to know the name of the dual function. Actually, as the number of 
-        parameters of a variadic function can't be determined apriori, the call 
-        to this function can't be done directly but through a function assuring
-        the same functionality having a <varname>va_list</varname> and a 
-        <varname>format</varname> as parameters. This specification will be done 
-        using the <varname>@VarArgsDual</varname> annotation (see 
-        <xref linkend="idl-annot-varargsdual"/>) in the corresponding IDL.</para></note>
+        <note><para>Wrapping a variadic function needs complementary information to know the name of the dual
+            function. Actually, as the number of parameters of a variadic function cannot be
+            determined a priori, the call to this function cannot be done directly but through a
+            function assuring the same functionality having a <varname>va_list</varname> and a
+              <varname>format</varname> as parameters. This specification will be done using the
+              <varname>@VarArgsDual</varname> annotation (see <xref linkend="idl-annot-varargsdual"
+            />) in the corresponding IDL.</para></note>
       </section>
       
     </section>

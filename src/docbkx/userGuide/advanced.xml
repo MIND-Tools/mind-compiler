@@ -121,10 +121,10 @@
     <para>A controller is an additional interface provided by a component that 
       allows to introspect or reconfigure it. The Fractal component model defines 
       a set of standard controller interfaces.</para>
-    <para>The &productName; toolchain allows to specify in the ADL, the 
-      controllers provided by components using annotations. Controllers can be 
-      specified individualy using one annotation per controller, or can be 
-      specified all-together using a single annotation (see <xref linkend="adv-ctrl-std"/>).</para>
+    <para>The &productName; toolchain allows to specify in the ADL, the controllers provided by
+      components using annotations. Controllers can be specified individually using one annotation
+      per controller, or can be specified all-together using a single annotation (see <xref
+        linkend="adv-ctrl-std"/>).</para>
 
     <section id="adv-ctrl-cmp">
       <title>The <classname>component</classname> controller</title>
@@ -327,11 +327,10 @@
       <para>See <xref linkend="api-fapi-LCC"/> for details on the
         <classname>fractal.api.LifeCycleController</classname> interface signature.</para>
       
-      <para>When the <classname>@controller.LifeCycleController</classname> annotation 
-        is attached to a definitions of primitive compoent, 
-        the source code must contain at least the implementation of  
-        one of the <varname>startFc</varname> or <varname>stopFc</varname> methods of the
-        <varname>lifeCycleController</varname> interface. For instance:</para>
+      <para>When the <classname>@controller.LifeCycleController</classname> annotation is attached
+        to a definitions of primitive component, the source code must contain at least the
+        implementation of one of the <varname>startFc</varname> or <varname>stopFc</varname> methods
+        of the <varname>lifeCycleController</varname> interface. For instance:</para>
         
       <example>
         <title>Implementation of the <classname>life-cycle-controller</classname>
@@ -426,13 +425,13 @@
         code contains at least the implementation of  
         one of the <varname>startFc</varname> or <varname>stopFc</varname> methods.</para>
       
-      <para>The <classname>@controller.StdControllers</classname> annotation is 
-        inherited, this means that the added controllers depends on the architecture
-        of the final definition in the inheritence graph and not the definition 
-        (in this inheritence graph) on which the annotation is added. For example:</para>
+      <para>The <classname>@controller.StdControllers</classname> annotation is inherited, this
+        means that the added controllers depends on the architecture of the final definition in the
+        inheritance graph and not the definition (in this inheritance graph) on which the annotation
+        is added. For example:</para>
         
       <example>
-        <title><classname>@controller.StdControllers</classname> and definition inheritence</title>
+        <title><classname>@controller.StdControllers</classname> and definition inheritance</title>
         
         <programlisting linenumbering="numbered" language="adl"> @controller.StdControllers
  type foo.bar.MyType {
