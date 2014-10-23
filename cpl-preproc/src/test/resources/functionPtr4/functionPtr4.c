@@ -2,7 +2,7 @@
 
 #define NULL ((void *) 0)
 
-// declaration of the private method.
+/* declaration of the private method. */
 int METH(myPrivateMethod)(void* pointer, ...);
 
 int (* METH_PTR(METH(myOtherPrivateMethod)(int a)))(void* pointer, ...);
@@ -11,17 +11,17 @@ int METH(myItf, myMethod)(int a, int b) {
 	int (* METH_PTR(f))(void* pointer, ...);
 	METH_PTR(f) = METH(myPrivateMethod);
 	
-	// invoke method pointer without 'CALL' construct.
-	f(NULL, &(PRIVATE.a)); //  cannot be detected at compile-time => mind "exception" at runtime
+	/* invoke method pointer without 'CALL' construct. */
+	f(NULL, &(PRIVATE.a)); /*  cannot be detected at compile-time => mind "exception" at runtime */
 
-	// should be :
-	// CALL_PTR(f)(NULL, &(PRIVATE.a)); // correct
+	/* should be :
+	   CALL_PTR(f)(NULL, &(PRIVATE.a)); */ /* correct */
 
 	
-	CALL(myOtherPrivateMethod)(1)(NULL, &(PRIVATE.a)); // cannot be detected at compile-time => mind "exception" at runtime
-	// should be :
-	// CALL_PTR(CALL(myOtherPrivateMethod)(1))(NULL, &(PRIVATE.a)); // correct
-	// ========================
+	CALL(myOtherPrivateMethod)(1)(NULL, &(PRIVATE.a)); /* cannot be detected at compile-time => mind "exception" at runtime */
+	/* should be :
+	   CALL_PTR(CALL(myOtherPrivateMethod)(1))(NULL, &(PRIVATE.a)); */ /* correct */
+	/* ======================== */
 	
 	return 0;
 }
@@ -32,6 +32,6 @@ int METH(myPrivateMethod)(void* pointer, ...) {
 
 int (* METH_PTR(METH(myOtherPrivateMethod)(int a)))(void * pointer, ...) {
 	PRIVATE.a += a;
-	// return a pointer to the "myPrivateMethod" private method
+	/* return a pointer to the "myPrivateMethod" private method */
 	return METH(myPrivateMethod);
 }

@@ -1,1 +1,1 @@
-// Empty implementation file for frontend tests.
+/* Empty implementation file for frontend tests. */

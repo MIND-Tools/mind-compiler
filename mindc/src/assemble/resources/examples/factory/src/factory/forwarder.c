@@ -28,11 +28,11 @@ CONSTRUCTOR() {
   printf("In forwarder constructor\n");
 }
 
-// -----------------------------------------------------------------------------
-// Implementation of the entryPoint interface with signature boot.Main.
-// -----------------------------------------------------------------------------
+/* -----------------------------------------------------------------------------
+   Implementation of the entryPoint interface with signature boot.Main.
+   -------------------------------------------------------------------------- */
 
-// int main(int argc, string[] argv)
+/* int main(int argc, string[] argv) */
 int METH(entryPoint, main) (int argc, char *argv[]) {
   int r;
   printf("In forwarder: Call forwarded.main\n");

@@ -22,17 +22,17 @@
  * Authors: Matthieu Leclercq
  */
 
-// -----------------------------------------------------------------------------
-// Implementation of the entryPoint interface with signature boot.Main.
-// -----------------------------------------------------------------------------
+/* -----------------------------------------------------------------------------
+   Implementation of the entryPoint interface with signature boot.Main.
+   -------------------------------------------------------------------------- */
 
-// int main(int argc, string[] argv)
+/* int main(int argc, string[] argv) */
 int METH(entryPoint, main) (int argc, char *argv[]) {
 
-  // call the 'print' method of the 's' client interface.
+  /* call the 'print' method of the 's' client interface. */
   CALL(s, print)("hello world !");
 
-  // call again the same interface to look at invocation count
+  /* call again the same interface to look at invocation count */
   CALL(s, println)("goodbye world");
 
   return 0;

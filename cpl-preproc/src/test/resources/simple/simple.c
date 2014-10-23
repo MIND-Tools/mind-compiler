@@ -1,6 +1,6 @@
 #include "data.h"
 
-// declaration of the private method.
+/* declaration of the private method. */
 int METH(myPrivateMethod)(int a);
 
 int METH(myItf, myMethod)(int a, int b) {
@@ -10,12 +10,12 @@ int METH(myItf, myMethod)(int a, int b) {
 }
 
 int METH(myPrivateMethod)(int a) {
-	// test MIND-133
+	/* test MIND-133 */
 	const char *c = "\x0D\x0A";
 	return PRIVATE.a + c[0];
 }
 
-// test MIND-130
+/* test MIND-130 */
 typedef struct {
 
     /*

@@ -19,5 +19,5 @@ void METH(s, println)(const char *msg)
 
 void METH(s, flush)(void)
 {
-  // Nothing to do...
+
 }*/

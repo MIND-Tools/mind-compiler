@@ -13,5 +13,5 @@ void METH(s, println)(const char *msg)
 /* We want an error to be raised and flush to be missing
 void METH(s, flush)(void)
 {
-  // Nothing to do...
+
 }*/

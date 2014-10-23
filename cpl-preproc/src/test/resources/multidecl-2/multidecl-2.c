@@ -1,6 +1,6 @@
 #include "data.h"
 
-// declaration of two private methods in the same statement.
+/* declaration of two private methods in the same statement. */
 int METH(myPrivateMethod)(int a), METH(myOtherPrivateMethod)(int b);
 
 int METH(myItf, myMethod)(int a, int b) {

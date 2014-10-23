@@ -8,7 +8,7 @@ DESTRUCTOR(void) {
 	PRIVATE.a = 0;
 }
 
-// declaration of the private method.
+/* declaration of the private method. */
 int METH(myPrivateMethod)(int a);
 
 int METH(myItf, myMethod)(int a, int b) {

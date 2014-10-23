@@ -1,6 +1,6 @@
 #include "data.h"
 
-// declaration of the private method.
+/* declaration of the private method. */
 static int myPrivateFunction(int a);
 
 int METH(myItf, myMethod)(int a, int b) {
