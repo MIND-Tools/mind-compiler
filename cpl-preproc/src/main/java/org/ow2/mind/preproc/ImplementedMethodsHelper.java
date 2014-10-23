@@ -29,9 +29,9 @@ import java.io.File;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.Definition;
@@ -173,7 +173,7 @@ public class ImplementedMethodsHelper {
 
     final int nbElement = getNumberOfElement(itf);
     final Map<Integer, List<String>> implMeths = getCollectionImplementedMethods(itf);
-    final Map<Integer, List<String>> result = new HashMap<Integer, List<String>>();
+    final Map<Integer, List<String>> result = new TreeMap<Integer, List<String>>();
 
     InterfaceDefinition itfDef;
 
@@ -250,7 +250,7 @@ public class ImplementedMethodsHelper {
 
     final Map<Integer, List<String>> idxMethNamesMap = (Map<Integer, List<String>>) itf
         .astGetDecoration(IMPLEMENTED_METHODS);
-    if (idxMethNamesMap == null) return new HashMap<Integer, List<String>>();
+    if (idxMethNamesMap == null) return new TreeMap<Integer, List<String>>();
 
     return idxMethNamesMap;
   }
