@@ -4,9 +4,9 @@
    Implementation of the service interface.
 ----------------------------------------------------------------------------- */
 
-//------------------------
-// Collection element 0
-//------------------------
+/*------------------------
+   Collection element 0
+  --------------------- */
 
 /* void print(string msg) */
 void METH(s[0], print)(const char *msg)
@@ -45,9 +45,9 @@ void METH(s[0], resetCount)(void) {
 	ATTR(count) = 2;
 }
 
-//------------------------
-// Collection element 1
-//------------------------
+/*------------------------
+   Collection element 1
+  --------------------- */
 
 /* void print(string msg) */
 void METH(s[1], print)(const char *msg)

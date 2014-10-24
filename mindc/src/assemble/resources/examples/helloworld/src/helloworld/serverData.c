@@ -22,11 +22,11 @@
  * Authors: Matthieu Leclercq
  */
 
-// -----------------------------------------------------------------------------
-// Declaration of private data of the "helloworld.Server" component.
-// -----------------------------------------------------------------------------
+/* -----------------------------------------------------------------------------
+   Declaration of private data of the "helloworld.Server" component.
+   -------------------------------------------------------------------------- */
 
 struct {
-  // declares an invocation counter.
+  /* declares an invocation counter. */
   int count;
 } PRIVATE;

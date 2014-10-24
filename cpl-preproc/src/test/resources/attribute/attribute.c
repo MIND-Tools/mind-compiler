@@ -1,6 +1,6 @@
 #include "data.h"
 
-// declaration of the private method.
+/* declaration of the private method. */
 void (__attribute__((noreturn)) METH(myPrivateMethod))(int a);
 
 void METH(myItf, myMethod)(int a, int b) {

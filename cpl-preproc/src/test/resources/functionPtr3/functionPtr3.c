@@ -11,15 +11,15 @@ int (* g(int b))(int a) {
 
 int (* (*g_ptr)(int b))(int a) = g;
 
-// declaration of the private method.
+/* declaration of the private method. */
 int METH(myPrivateMethod)(int a);
 
-// declaration of the private method that take an int and return a pointer to
-// a private method that take an int and return an int;
+/* declaration of the private method that take an int and return a pointer to
+   a private method that take an int and return an int; */
 int (* METH_PTR(METH(myOtherPrivateMethod)(int a)))(int a);
 
 int METH(myItf, myMethod)(int a, int b) {
-	// f is a pointer to the myOtherPrivateMethod private method
+	/* f is a pointer to the myOtherPrivateMethod private method */
 	int (* METH_PTR((* METH_PTR(f))(int a)))(int a) = METH(myOtherPrivateMethod);
 	PRIVATE.a = a;
 	PRIVATE.b = b;
@@ -32,6 +32,6 @@ int METH(myPrivateMethod)(int a) {
 
 int (* METH_PTR(METH(myOtherPrivateMethod)(int a)))(int a) {
 	PRIVATE.a += a;
-	// return a pointer to the "myPrivateMethod" private method
+	/* return a pointer to the "myPrivateMethod" private method */
 	return METH(myPrivateMethod);
 }

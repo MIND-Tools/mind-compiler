@@ -1,1 +1,1 @@
-// No implementation needed.
+/* No implementation needed. */

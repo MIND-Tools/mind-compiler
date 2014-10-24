@@ -1,6 +1,6 @@
 #include "data.h"
 
-// declaration of the private method.
+/* declaration of the private method. */
 int
 METH
 (

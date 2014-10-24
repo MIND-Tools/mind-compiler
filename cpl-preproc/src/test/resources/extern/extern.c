@@ -1,10 +1,10 @@
 #include "data.h"
 
-// definition of PRIVATE (could be initialized, but would overlap with the init
-// example)
+/* definition of PRIVATE (could be initialized, but would overlap with the init
+   example) */
 struct s PRIVATE;
 
-// declaration of the private method.
+/* declaration of the private method. */
 int METH(myPrivateMethod)(int a);
 
 int METH(myItf, myMethod)(int a, int b) {

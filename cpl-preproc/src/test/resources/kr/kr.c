@@ -1,9 +1,9 @@
 #include "data.h"
 
-// declaration of the private method.
+/* declaration of the private method. */
 int METH(myPrivateMethod)(int a);
 
-// Kardigan & Richie declaration of METHOD
+/* Kernighan & Richie declaration of METHOD */
 int METH(myItf, myMethod)(a, b)
 	int a;
 	int b;

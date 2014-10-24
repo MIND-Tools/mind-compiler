@@ -24,9 +24,9 @@
 
 #include <stdio.h>
 
-// -----------------------------------------------------------------------------
-// Constructor implementation
-// -----------------------------------------------------------------------------
+/* -----------------------------------------------------------------------------
+   Constructor implementation
+   -------------------------------------------------------------------------- */
 
 CONSTRUCTOR() {
   printf("In CONSTRUCTOR\n");
@@ -36,11 +36,11 @@ DESTRUCTOR() {
   printf("In DESTRUCTOR\n");
 }
 
-// -----------------------------------------------------------------------------
-// Implementation of the entryPoint interface with signature boot.Main.
-// -----------------------------------------------------------------------------
+/* -----------------------------------------------------------------------------
+   Implementation of the entryPoint interface with signature boot.Main.
+   -------------------------------------------------------------------------- */
 
-// int main(int argc, string[] argv)
+/* int main(int argc, string[] argv) */
 int METH(entryPoint, main) (int argc, char *argv[]) {
 
   printf("In entryPoint.main\n");
@@ -48,9 +48,9 @@ int METH(entryPoint, main) (int argc, char *argv[]) {
   return 0;
 }
 
-// -----------------------------------------------------------------------------
-// Implementation of the lifeCycleController interface with signature boot.Main.
-// -----------------------------------------------------------------------------
+/* -----------------------------------------------------------------------------
+   Implementation of the lifeCycleController interface with signature boot.Main.
+   -------------------------------------------------------------------------- */
 
 
 int METH(lifeCycleController, startFc) (void) {
