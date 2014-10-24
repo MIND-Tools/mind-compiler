@@ -12,16 +12,16 @@ int METH(myItf, myMethod)(int a, int b) {
 	METH_PTR(f) = METH(myPrivateMethod);
 	
 	/* invoke method pointer without 'CALL' construct. */
-	f(NULL, &(PRIVATE.a)); /*  cannot be detected at compile-time => mind "exception" at runtime */
+	f(NULL, &(PRIVATE.a)); /* cannot be detected at compile-time => mind "exception" at runtime */
 
 	/* should be :
-	   CALL_PTR(f)(NULL, &(PRIVATE.a)); */ /* correct */
+	   CALL_PTR(f)(NULL, &(PRIVATE.a)); */
 
 	
 	CALL(myOtherPrivateMethod)(1)(NULL, &(PRIVATE.a)); /* cannot be detected at compile-time => mind "exception" at runtime */
 	/* should be :
-	   CALL_PTR(CALL(myOtherPrivateMethod)(1))(NULL, &(PRIVATE.a)); */ /* correct */
-	/* ======================== */
+	   CALL_PTR(CALL(myOtherPrivateMethod)(1))(NULL, &(PRIVATE.a));
+	   ======================== */
 	
 	return 0;
 }
