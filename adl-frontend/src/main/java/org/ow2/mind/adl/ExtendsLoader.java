@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2009 STMicroelectronics
+ * Copyright (C) 2014 Schneider-Electric
  *
  * This file is part of "Mind Compiler" is free software: you can redistribute 
  * it and/or modify it under the terms of the GNU Lesser General Public License 
@@ -17,7 +18,7 @@
  * Contact: mind@ow2.org
  *
  * Authors: Matthieu Leclercq
- * Contributors: 
+ * Contributors: Stephane Seyvoz
  */
 
 package org.ow2.mind.adl;
@@ -31,6 +32,7 @@ import java.util.Map;
 import org.objectweb.fractal.adl.ADLException;
 import org.objectweb.fractal.adl.CompilerError;
 import org.objectweb.fractal.adl.Definition;
+import org.objectweb.fractal.adl.Loader;
 import org.objectweb.fractal.adl.Node;
 import org.objectweb.fractal.adl.components.ComponentErrors;
 import org.objectweb.fractal.adl.error.GenericErrors;
@@ -40,7 +42,9 @@ import org.objectweb.fractal.adl.merger.NodeMerger;
 import org.ow2.mind.adl.ast.ASTHelper;
 import org.ow2.mind.adl.ast.AbstractDefinition;
 import org.ow2.mind.adl.ast.DefinitionReference;
+import org.ow2.mind.adl.ast.ExtendsDecoration;
 import org.ow2.mind.adl.ast.MindDefinition;
+import org.ow2.mind.adl.ast.SubDefinitionsDecoration;
 import org.ow2.mind.error.ErrorManager;
 
 import com.google.inject.Inject;
@@ -87,6 +91,12 @@ public class ExtendsLoader extends AbstractDelegatingLoader {
   @Named(ADL_ID_ATTRIBUTES)
   protected Map<String, String>         nameAttributes;
 
+  /**
+   * Used to retrieve super types Definitions from DefinitionReferences.
+   */
+  @Inject
+  protected Loader                      loaderItf;
+
   // ---------------------------------------------------------------------------
   // Implementation of the Loader interface
   // ---------------------------------------------------------------------------
@@ -109,6 +119,30 @@ public class ExtendsLoader extends AbstractDelegatingLoader {
     final boolean isAbstract = ASTHelper.isAbstract(d);
     final DefinitionReference[] extendedDefs = d.getExtends()
         .getDefinitionReferences();
+
+    // save "sub-definitions" before merge
+    final Object subDefsObject = d.astGetDecoration("sub-definitions");
+    SubDefinitionsDecoration savedSubDefinitionsDecoration = null;
+    if (subDefsObject instanceof SubDefinitionsDecoration)
+      savedSubDefinitionsDecoration = (SubDefinitionsDecoration) subDefsObject;
+
+    // keep inheritance information as a decoration, since the direct "extends"
+    // is removed afterwards
+    final ExtendsDecoration list = new ExtendsDecoration();
+    for (final DefinitionReference extend : extendedDefs) {
+      /*
+       * allow retrieving super-types from a definition
+       */
+      list.add(extend);
+
+      /*
+       * allow retrieving sub-types from parent
+       */
+      decorateParentDefinitionWithSubDefinition(extend, d, context);
+    }
+    d.astSetDecoration("extends", list);
+
+    // cleanup
     d.setExtends(null);
 
     if (extendedDefs.length > 0) {
@@ -169,6 +203,10 @@ public class ExtendsLoader extends AbstractDelegatingLoader {
             extendedDefs[extendedDefs.length - 1]);
       }
 
+      // restore original sub-definition decoration instead of the merge
+      // result one
+      d.astSetDecoration("sub-definitions", savedSubDefinitionsDecoration);
+
       // restore the "abstract" attribute
       if (d instanceof AbstractDefinition) {
         if (isAbstract)
@@ -178,6 +216,47 @@ public class ExtendsLoader extends AbstractDelegatingLoader {
       }
     }
     return d;
+  }
+
+  private void decorateParentDefinitionWithSubDefinition(
+      final DefinitionReference extend, final MindDefinition d,
+      final Map<Object, Object> context) throws ADLException {
+
+    SubDefinitionsDecoration subDefinitionsDecoration = null;
+
+    Definition extendedDefinition = definitionReferenceResolverItf.resolve(
+        extend, d, context);
+
+    // It was a Generic Definition, the resolve will return the merged
+    // definition according to its TypeArguments, not the generic one.
+    // We needed resolve for fully qualified name according to the "d"
+    // scope however (if it was used with short name and imports).
+    // Note: Checking the original definitionReference, not the merge
+    final int i = extendedDefinition.getName().indexOf('<');
+    // -1 = not found, no name can start with '<', and avoid empty string
+    if (i > 0) {
+      final String templateName = extendedDefinition.getName().substring(0, i);
+      extendedDefinition = loaderItf.load(templateName, context);
+    }
+
+    // if the definition has not been resolved correctly, ignore it.
+    if (ASTHelper.isUnresolvedDefinitionNode(extendedDefinition)) return;
+
+    final Object subDefsDecorationObject = extendedDefinition
+        .astGetDecoration("sub-definitions");
+
+    if (subDefsDecorationObject != null) {
+      if (subDefsDecorationObject instanceof SubDefinitionsDecoration) {
+        subDefinitionsDecoration = (SubDefinitionsDecoration) subDefsDecorationObject;
+        subDefinitionsDecoration.add(d);
+      }
+    } else {
+      subDefinitionsDecoration = new SubDefinitionsDecoration();
+      subDefinitionsDecoration.add(d);
+      extendedDefinition.astSetDecoration("sub-definitions",
+          subDefinitionsDecoration);
+    }
+
   }
 
   private static enum Kind {
