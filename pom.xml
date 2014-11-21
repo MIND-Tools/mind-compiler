@@ -334,6 +334,7 @@
                 <artifactId>docbkx-maven-plugin</artifactId>
                 <inherited>false</inherited>
                 <executions>
+                    <!-- User Guide PDF execution -->
                     <execution>
                         <id>pdf</id>
                         <phase>pre-site</phase>
@@ -347,6 +348,7 @@
                             <draftWatermarkImage>${basedir}/src/docbkx/images/draft.png</draftWatermarkImage>
                         </configuration>
                     </execution>
+                    <!-- User Guide HTML executions -->
                     <execution>
                         <id>html-printable</id>
                         <phase>pre-site</phase>
@@ -361,7 +363,6 @@
                             <htmlStylesheet>../css/docbook-printable.css</htmlStylesheet>
                         </configuration>
                     </execution>
-                    <!-- User Guide HTML executions -->
                     <execution>
                         <id>userguide-html</id>
                         <phase>pre-site</phase>
@@ -497,8 +498,9 @@
                     </execution>
                 </executions>
                 <configuration>
+                    <sourceDirectory>${basedir}/src/docbkx</sourceDirectory>
                     <targetDirectory>${project.build.directory}/site</targetDirectory>
-                    <xslthlConfig>${basedir}/src/docbkx/xsl/xslthl-config.xml</xslthlConfig>
+                    <highlightXslthlConfig>${basedir}/src/docbkx/xsl/xslthl-config.xml</highlightXslthlConfig>
                     <highlightSource>1</highlightSource>
                     <xincludeSupported>true</xincludeSupported>
                 </configuration>
@@ -776,6 +778,7 @@
                     </plugin>
                 </plugins>
             </reporting>
+
         </profile>
 
         <profile>
