@@ -81,7 +81,7 @@
                             </descriptors>
                             <outputDirectory>
                                 ${project.build.directory}
-							</outputDirectory>
+                            </outputDirectory>
                         </configuration>
                     </execution>
                 </executions>
@@ -94,7 +94,7 @@
                     <executable>make</executable>
                     <workingDirectory>
                         ${project.build.directory}/${project.build.finalName}-bin/${project.build.finalName}/examples
-					</workingDirectory>
+                    </workingDirectory>
                     <arguments>
                         <argument>MIND_ROOT=../../</argument>
                         <argument>clean</argument>
