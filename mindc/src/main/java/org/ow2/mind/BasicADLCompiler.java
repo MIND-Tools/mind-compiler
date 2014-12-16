@@ -1,5 +1,6 @@
 /**
  * Copyright (C) 2010 STMicroelectronics
+ * Copyright (C) 2014 Schneider-Electric
  *
  * This file is part of "Mind Compiler" is free software: you can redistribute 
  * it and/or modify it under the terms of the GNU Lesser General Public License 
@@ -17,7 +18,7 @@
  * Contact: mind@ow2.org
  *
  * Authors: Matthieu Leclercq
- * Contributors: 
+ * Contributors: Stephane Seyvoz
  */
 
 package org.ow2.mind;
@@ -44,7 +45,9 @@ import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 
 /**
- * Basic implementation of {@link ADLCompiler} interface.
+ * Basic implementation of {@link ADLCompiler} interface. Contribution: Moved
+ * the executable name context setting from compileGraph to initContext, to
+ * allow earlier access from plugins.
  */
 public class BasicADLCompiler extends AbstractADLCompiler {
 
@@ -65,6 +68,24 @@ public class BasicADLCompiler extends AbstractADLCompiler {
   protected void initContext(final String adlName, final String execName,
       final CompilationStage stage, final Map<Object, Object> context)
       throws ADLException {
+
+    if (execName != null) {
+      CompilerContextHelper.setExecutableName(context, execName);
+    } else {
+      final String targetDescName = TargetDescriptorOptionHandler
+          .getTargetDescriptor(context);
+      if (targetDescName != null) {
+        final Target target = targetDescriptorLoader.load(targetDescName,
+            context);
+        final ADLMapping adlMapping = target.getAdlMapping();
+        if (adlMapping != null && adlMapping.getOutputName() != null) {
+          final String tdExecName = adlMapping.getMapping().replace(
+              "${inputADL}", adlName);
+          CompilerContextHelper.setExecutableName(context, tdExecName);
+        }
+      }
+    }
+
   }
 
   @Override
@@ -106,22 +127,7 @@ public class BasicADLCompiler extends AbstractADLCompiler {
   @Override
   protected Collection<CompilationCommand> compileGraph(
       final Map<Object, Object> context, final ComponentGraph graph,
-      String execName) throws ADLException {
-    if (execName != null) {
-      CompilerContextHelper.setExecutableName(context, execName);
-    } else {
-      final String targetDescName = TargetDescriptorOptionHandler
-          .getTargetDescriptor(context);
-      if (targetDescName != null) {
-        final Target target = targetDescriptorLoader.load(targetDescName,
-            context);
-        final ADLMapping adlMapping = target.getAdlMapping();
-        if (adlMapping != null && adlMapping.getOutputName() != null) {
-          execName = adlMapping.getMapping().replace("${inputADL}",
-              graph.getDefinition().getName());
-        }
-      }
-    }
+      final String execName) throws ADLException {
 
     return graphCompiler.visit(graph, context);
   }
