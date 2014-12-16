@@ -37,7 +37,6 @@
                 <include>${project.groupId}:fractal-runtime</include>
             </includes>
             <outputDirectory>runtime</outputDirectory>
-            <directoryMode>0755</directoryMode>
             <fileMode>0644</fileMode>
         </dependencySet>
 
