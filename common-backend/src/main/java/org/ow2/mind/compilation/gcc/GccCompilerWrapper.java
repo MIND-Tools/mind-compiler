@@ -98,25 +98,6 @@ public class GccCompilerWrapper implements CompilerWrapper {
       return this;
     }
 
-    public PreprocessorCommand addDefine(final String name, final String value) {
-      if (value != null)
-        flags.add("-D" + name + "=" + value);
-      else
-        flags.add("-D" + name);
-      return this;
-    }
-
-    public PreprocessorCommand addIncludeDir(final File includeDir) {
-      flags.add("-I" + includeDir.getPath());
-      return this;
-    }
-
-    public PreprocessorCommand addIncludeFile(final File includeFile) {
-      flags.add("-include");
-      flags.add(includeFile.getPath());
-      return this;
-    }
-
     @Override
     protected Collection<File> readDependencies() {
       return readDeps(dependencyOutputFile, outputFile, context);
@@ -128,6 +109,19 @@ public class GccCompilerWrapper implements CompilerWrapper {
       cmd.add("-E");
 
       cmd.addAll(flags);
+
+      for (final String def : defines) {
+        cmd.add("-D" + def);
+      }
+
+      for (final File incDir : includeDir) {
+        cmd.add("-I" + incDir.getPath().trim());
+      }
+
+      for (final File incFile : includeFile) {
+        cmd.add("-include");
+        cmd.add(incFile.getPath());
+      }
 
       if (dependencyOutputFile != null) {
         cmd.add("-MMD");
@@ -141,6 +135,14 @@ public class GccCompilerWrapper implements CompilerWrapper {
       cmd.add(outputFile.getPath());
 
       cmd.add(inputFile.getPath());
+
+      // save full command for debug and log purposes
+      final StringBuilder sb = new StringBuilder();
+      for (final String str : cmd) {
+        sb.append(str);
+        sb.append(" ");
+      }
+      fullCmd = sb.toString();
 
       // execute command
       ExecutionResult result;
@@ -170,6 +172,14 @@ public class GccCompilerWrapper implements CompilerWrapper {
     public String getDescription() {
       return "CPP: " + outputFile.getPath();
     }
+
+    @Override
+    public String toString() {
+      if (fullCmd == null)
+        return super.toString();
+      else
+        return fullCmd;
+    }
   }
 
   protected class GccCompilerCommand extends AbstractCompilerCommand {
@@ -180,25 +190,6 @@ public class GccCompilerWrapper implements CompilerWrapper {
 
     public CompilerCommand addDebugFlag() {
       flags.add("-g");
-      return this;
-    }
-
-    public CompilerCommand addDefine(final String name, final String value) {
-      if (value != null)
-        flags.add("-D" + name + "=" + value);
-      else
-        flags.add("-D" + name);
-      return this;
-    }
-
-    public CompilerCommand addIncludeDir(final File includeDir) {
-      flags.add("-I" + includeDir.getPath());
-      return this;
-    }
-
-    public CompilerCommand addIncludeFile(final File includeFile) {
-      flags.add("-include");
-      flags.add(includeFile.getPath());
       return this;
     }
 
@@ -215,6 +206,18 @@ public class GccCompilerWrapper implements CompilerWrapper {
 
       cmd.addAll(flags);
 
+      for (final String def : defines) {
+        cmd.add("-D" + def);
+      }
+      for (final File incDir : includeDir) {
+        cmd.add("-I" + incDir.getPath().trim());
+      }
+
+      for (final File incFile : includeFile) {
+        cmd.add("-include");
+        cmd.add(incFile.getPath());
+      }
+
       if (dependencyOutputFile != null) {
         cmd.add("-MMD");
         cmd.add("-MF");
@@ -227,6 +230,14 @@ public class GccCompilerWrapper implements CompilerWrapper {
       cmd.add(outputFile.getPath());
 
       cmd.add(inputFile.getPath());
+
+      // save full command for debug and log purposes
+      final StringBuilder sb = new StringBuilder();
+      for (final String str : cmd) {
+        sb.append(str);
+        sb.append(" ");
+      }
+      fullCmd = sb.toString();
 
       // execute command
       ExecutionResult result;
@@ -257,6 +268,14 @@ public class GccCompilerWrapper implements CompilerWrapper {
       return "GCC: " + outputFile.getPath();
 
     }
+
+    @Override
+    public String toString() {
+      if (fullCmd == null)
+        return super.toString();
+      else
+        return fullCmd;
+    }
   }
 
   protected class GccAssemblerCommand extends AbstractAssemblerCommand {
@@ -267,25 +286,6 @@ public class GccCompilerWrapper implements CompilerWrapper {
 
     public AssemblerCommand addDebugFlag() {
       flags.add("-g");
-      return this;
-    }
-
-    public AssemblerCommand addDefine(final String name, final String value) {
-      if (value != null)
-        flags.add("-D" + name + "=" + value);
-      else
-        flags.add("-D" + name);
-      return this;
-    }
-
-    public AssemblerCommand addIncludeDir(final File includeDir) {
-      flags.add("-I" + includeDir.getPath().trim());
-      return this;
-    }
-
-    public AssemblerCommand addIncludeFile(final File includeFile) {
-      flags.add("-include");
-      flags.add(includeFile.getPath());
       return this;
     }
 
@@ -302,10 +302,29 @@ public class GccCompilerWrapper implements CompilerWrapper {
 
       cmd.addAll(flags);
 
+      for (final String def : defines) {
+        cmd.add("-D" + def);
+      }
+      for (final File incDir : includeDir) {
+        cmd.add("-I" + incDir.getPath().trim());
+      }
+
+      for (final File incFile : includeFile) {
+        cmd.add("-include");
+        cmd.add(incFile.getPath());
+      }
       cmd.add("-o");
       cmd.add(outputFile.getPath());
 
       cmd.add(inputFile.getPath());
+
+      // save full command for debug and log purposes
+      final StringBuilder sb = new StringBuilder();
+      for (final String str : cmd) {
+        sb.append(str);
+        sb.append(" ");
+      }
+      fullCmd = sb.toString();
 
       // execute command
       ExecutionResult result;
@@ -334,33 +353,12 @@ public class GccCompilerWrapper implements CompilerWrapper {
 
     }
 
-    /*
-     * SSZ: Here we abuse the toString standard method to return a
-     * Makefile-compatible String. This String is the command ran by the exec()
-     * method (see above) (non-Javadoc)
-     * @see java.lang.Object#toString()
-     */
     @Override
     public String toString() {
-      final List<String> cmd = new ArrayList<String>();
-      cmd.add(this.cmd);
-      cmd.add("-c");
-
-      cmd.addAll(flags);
-
-      cmd.add("-o");
-      cmd.add(outputFile.getPath());
-
-      cmd.add(inputFile.getPath());
-
-      // Build the final String from List<String>
-      final StringBuilder sb = new StringBuilder();
-      for (int i = 0; i < cmd.size(); i++) {
-        sb.append(cmd.get(i));
-        if (i < cmd.size() - 1) sb.append(" ");
-      }
-
-      return outputFile.getName() + ":\n\t" + sb.toString();
+      if (fullCmd == null)
+        return super.toString();
+      else
+        return fullCmd;
     }
   }
 
@@ -407,6 +405,14 @@ public class GccCompilerWrapper implements CompilerWrapper {
 
       cmd.addAll(flags);
 
+      // save full command for debug and log purposes
+      final StringBuilder sb = new StringBuilder();
+      for (final String str : cmd) {
+        sb.append(str);
+        sb.append(" ");
+      }
+      fullCmd = sb.toString();
+
       // execute command
       ExecutionResult result;
       try {
@@ -431,6 +437,14 @@ public class GccCompilerWrapper implements CompilerWrapper {
 
     public String getDescription() {
       return "LD : " + outputFile.getPath();
+    }
+
+    @Override
+    public String toString() {
+      if (fullCmd == null)
+        return super.toString();
+      else
+        return fullCmd;
     }
   }
 

@@ -33,7 +33,11 @@ public abstract class AbstractAssemblerCommand implements AssemblerCommand {
 
   protected final Map<Object, Object> context;
   protected String                    cmd;
+  protected String                    fullCmd;
   protected final List<String>        flags             = new ArrayList<String>();
+  protected final List<String>        defines           = new ArrayList<String>();
+  protected final List<File>          includeDir        = new ArrayList<File>();
+  protected final List<File>          includeFile       = new ArrayList<File>();
   protected File                      inputFile;
   protected File                      outputFile;
   protected File                      dependencyOutputFile;
@@ -79,6 +83,24 @@ public abstract class AbstractAssemblerCommand implements AssemblerCommand {
 
   public AssemblerCommand addDefine(final String name) {
     return addDefine(name, null);
+  }
+
+  public AssemblerCommand addDefine(final String name, final String value) {
+    if (value != null)
+      defines.add(name + "=" + value);
+    else
+      defines.add(name);
+    return this;
+  }
+
+  public AssemblerCommand addIncludeDir(final File incDir) {
+    includeDir.add(incDir);
+    return this;
+  }
+
+  public AssemblerCommand addIncludeFile(final File incFile) {
+    includeFile.add(incFile);
+    return this;
   }
 
   public AssemblerCommand setInputFile(final File inputFile) {

@@ -100,7 +100,8 @@ public class FlagsOptionHandler implements CommandOptionHandler {
       final CmdPathOption includePathOpt = Assert.assertInstanceof(cmdOption,
           CmdPathOption.class);
 
-      final List<String> incPaths = new ArrayList<String>();
+      final List<String> incPaths = new ArrayList<String>(
+          CompilerContextHelper.getIncPath(context));
 
       // "src-path" is added as "inc-path"
       final CmdPathOption srcPathOpt = (CmdPathOption) cmdLine.getOptions()
@@ -113,17 +114,7 @@ public class FlagsOptionHandler implements CommandOptionHandler {
       }
       // "out-path is added as "inc-path"
       incPaths.add(OutPathOptionHandler.getOutPath(context).getAbsolutePath());
-
-      final List<String> cFlagsList = new ArrayList<String>(
-          CompilerContextHelper.getCFlags(context));
-
-      for (final String inc : incPaths) {
-        final File incDir = new File(inc);
-        cFlagsList.add("-I");
-        cFlagsList.add(incDir.getAbsolutePath());
-      }
-
-      CompilerContextHelper.setCPPFlags(context, cFlagsList);
+      CompilerContextHelper.setIncPath(context, incPaths);
 
     } else if (LDFLAGS_ID.equals(cmdOption.getId())) {
       // process LDFlags

@@ -35,7 +35,11 @@ public abstract class AbstractPreprocessorCommand
 
   protected final Map<Object, Object> context;
   protected String                    cmd;
+  protected String                    fullCmd;
   protected final List<String>        flags             = new ArrayList<String>();
+  protected final List<String>        defines           = new ArrayList<String>();
+  protected final List<File>          includeDir        = new ArrayList<File>();
+  protected final List<File>          includeFile       = new ArrayList<File>();
   protected File                      inputFile;
   protected File                      outputFile;
   protected File                      dependencyOutputFile;
@@ -82,8 +86,26 @@ public abstract class AbstractPreprocessorCommand
     return addDefine(name, null);
   }
 
-  public PreprocessorCommand setInputFile(final File inputFile) {
-    this.inputFile = inputFile;
+  public PreprocessorCommand addDefine(final String name, final String value) {
+    if (value != null)
+      defines.add(name + "=" + value);
+    else
+      defines.add(name);
+    return this;
+  }
+
+  public PreprocessorCommand addIncludeDir(final File incDir) {
+    includeDir.add(incDir);
+    return this;
+  }
+
+  public PreprocessorCommand addIncludeFile(final File incFile) {
+    includeFile.add(incFile);
+    return this;
+  }
+
+  public PreprocessorCommand setInputFile(final File inFile) {
+    inputFile = inFile;
     return this;
   }
 
@@ -91,8 +113,8 @@ public abstract class AbstractPreprocessorCommand
     return inputFile;
   }
 
-  public PreprocessorCommand setOutputFile(final File outputFile) {
-    this.outputFile = outputFile;
+  public PreprocessorCommand setOutputFile(final File outFile) {
+    outputFile = outFile;
     return this;
   }
 
