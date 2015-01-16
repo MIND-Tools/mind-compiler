@@ -33,6 +33,7 @@ public abstract class AbstractLinkerCommand implements LinkerCommand {
 
   protected final Map<Object, Object> context;
   protected String                    cmd;
+  protected String                    fullCmd;
   protected final List<String>        flags      = new ArrayList<String>();
   protected final List<File>          inputFiles = new ArrayList<File>();
   protected final List<String>        libs       = new ArrayList<String>();

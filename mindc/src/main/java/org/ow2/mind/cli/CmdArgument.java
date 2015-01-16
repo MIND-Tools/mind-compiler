@@ -55,7 +55,7 @@ public class CmdArgument extends CmdOption {
     this(id, shortName, longName, description, argDesc, null, false);
   }
 
-  void setValue(final CommandLine commandLine, final String value)
+  public void setValue(final CommandLine commandLine, final String value)
       throws InvalidCommandLineException {
     if (value == null) return;
     final Object prevValue = commandLine.setOptionValue(this, value);
@@ -96,6 +96,10 @@ public class CmdArgument extends CmdOption {
       desc = "--" + longName + "=" + argDesc;
     }
     return desc;
+  }
+
+  public String getArgDescription() {
+    return argDesc;
   }
 
   @Override

@@ -63,6 +63,9 @@ public class ContextFlagsCompilationCommandFactory
         context);
 
     command.addFlags(CompilerContextHelper.getCPPFlags(context));
+    for (final String inc : CompilerContextHelper.getIncPath(context)) {
+      command.addIncludeDir(new File(inc));
+    }
     command.addFlags(CompilerContextHelper.getCFlags(context));
 
     command.addIncludeDir(outputFileLocatorItf.getCSourceOutputDir(context));
@@ -106,6 +109,9 @@ public class ContextFlagsCompilationCommandFactory
 
     if (!preprocessedFile) {
       command.addFlags(CompilerContextHelper.getCPPFlags(context));
+    }
+    for (final String inc : CompilerContextHelper.getIncPath(context)) {
+      command.addIncludeDir(new File(inc));
     }
     command.addFlags(CompilerContextHelper.getCFlags(context));
 

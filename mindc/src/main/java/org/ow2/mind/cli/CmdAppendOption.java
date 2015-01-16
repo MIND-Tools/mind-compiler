@@ -51,7 +51,7 @@ public class CmdAppendOption extends CmdArgument {
   }
 
   @Override
-  void setValue(final CommandLine commandLine, final String value)
+  public void setValue(final CommandLine commandLine, final String value)
       throws InvalidCommandLineException {
     if (value == null) return;
     final String prevValue = (String) commandLine.getOptionValue(this);
