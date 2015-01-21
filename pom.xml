@@ -82,6 +82,12 @@
             <email>thomas.deruyter@st.com</email>
             <organization>STMicroelectronics</organization>
         </developer>
+        <developer>
+            <id>seyvozs</id>
+            <name>Stephane Seyvoz</name>
+            <email>sseyvoz@assystem.com</email>
+            <organization>Assystem</organization>
+        </developer>
     </developers>
 
     <contributors>
