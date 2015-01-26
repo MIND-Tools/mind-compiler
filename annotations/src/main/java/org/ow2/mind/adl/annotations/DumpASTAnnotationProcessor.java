@@ -127,14 +127,12 @@ public class DumpASTAnnotationProcessor
         final Component subComponent = subComponents[i];
 
         try {
-          // Simple component
           Definition subCompDef = ASTHelper.getResolvedComponentDefinition(
               subComponent, loaderItf, context);
-          if (subCompDef == null) // or template ?
+          if (subCompDef == null)
             subCompDef = ASTHelper.getResolvedDefinition(
                 subComponent.getDefinitionReference(), loaderItf, context);
 
-          // factory ?
           if (subCompDef != null) {
             System.out.println(prf + "Component #" + i + ": "
                 + subComponent.getName() + " (" + subCompDef.getName() + ")");
