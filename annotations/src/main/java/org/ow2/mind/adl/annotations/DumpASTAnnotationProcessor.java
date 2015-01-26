@@ -52,10 +52,10 @@ public class DumpASTAnnotationProcessor
       AbstractADLLoaderAnnotationProcessor {
 
   @Inject
-  private static Loader loaderItf;
+  private Loader loaderItf;
 
   private static void showComponents(final Definition definition,
-      final int depth, final Map<Object, Object> context) {
+      final int depth, final Loader loaderItf, final Map<Object, Object> context) {
     String prf = "  ";
 
     for (int i = 0; i < depth; i++)
@@ -134,10 +134,15 @@ public class DumpASTAnnotationProcessor
             subCompDef = ASTHelper.getResolvedDefinition(
                 subComponent.getDefinitionReference(), loaderItf, context);
 
-          System.out.println(prf + "Component #" + i + ": "
-              + subComponent.getName() + " (" + subCompDef.getName() + ")");
+          // factory ?
+          if (subCompDef != null) {
+            System.out.println(prf + "Component #" + i + ": "
+                + subComponent.getName() + " (" + subCompDef.getName() + ")");
 
-          showComponents(subCompDef, depth + 1, context);
+            showComponents(subCompDef, depth + 1, loaderItf, context);
+          } else
+            System.out.println("Could not resolve \""
+                + subComponent.getDefinitionReference() + "\" definition !");
         } catch (final ADLException e) {
           System.out.println("Could not resolve \""
               + subComponent.getDefinitionReference() + "\" definition !");
@@ -166,10 +171,10 @@ public class DumpASTAnnotationProcessor
   }
 
   public static void showDefinitionContent(final Definition definition,
-      final Map<Object, Object> context) {
+      final Loader loaderItf, final Map<Object, Object> context) {
     System.out.println("Showing content of current definition: "
         + definition.getName() + ";\n");
-    showComponents(definition, 0, context);
+    showComponents(definition, 0, loaderItf, context);
 
     System.out
         .println("\n\n---------------------------------------------------------------\n\n");
@@ -188,7 +193,7 @@ public class DumpASTAnnotationProcessor
       final Node node, final Definition definition, final ADLLoaderPhase phase,
       final Map<Object, Object> context) throws ADLException {
     assert annotation instanceof DumpAST;
-    showDefinitionContent(definition, context);
+    showDefinitionContent(definition, loaderItf, context);
     return null;
   }
 
