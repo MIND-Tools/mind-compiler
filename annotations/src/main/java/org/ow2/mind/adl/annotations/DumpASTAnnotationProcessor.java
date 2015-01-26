@@ -150,7 +150,7 @@ public class DumpASTAnnotationProcessor
       if (sources.length == 0) {
         System.out.println(prf + "No source (implementation)");
       } else {
-        System.out.println(prf + "Source(s) quantity: " + interfaces.length);
+        System.out.println(prf + "Source(s) quantity: " + sources.length);
       }
 
       for (int i = 0; i < sources.length; i++) {
