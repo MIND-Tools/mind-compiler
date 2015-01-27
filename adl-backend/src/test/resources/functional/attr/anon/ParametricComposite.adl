@@ -1,0 +1,21 @@
+/**
+ * Testing argument propagation.
+ * See mindc documentation 2.21 example and its description.
+ */
+composite attr.anon.ParametricComposite(compositeValue) extends ApplicationType {
+	
+	contains ApplicationType as implementation primitive {
+		
+		attribute int primitiveValue = compositeValue;
+		
+		source {{
+			#include <stdio.h>
+			int METH(main, main)(int argc, char **argv) {
+				return ATTR(primitiveValue) - 2;
+			}
+		}};
+	};
+	
+	binds this.main to implementation.main;
+	
+}

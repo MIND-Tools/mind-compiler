@@ -79,5 +79,4 @@ public class FunctionalTest extends AbstractFunctionalTest {
       assertEquals(r, runAnno.expectedResult, "Unexpected return value");
     }
   }
-
 }

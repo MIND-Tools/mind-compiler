@@ -1,0 +1,5 @@
+@Run
+composite attr.anon.ParametricComposite2 extends ApplicationType {
+	contains ParametricComposite(2) as subComp;
+	binds this.main to subComp.main;
+}
