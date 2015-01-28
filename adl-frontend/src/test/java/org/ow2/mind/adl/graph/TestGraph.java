@@ -31,8 +31,10 @@ import org.ow2.mind.CommonFrontendModule;
 import org.ow2.mind.adl.ADLFrontendModule;
 import org.ow2.mind.adl.ASTChecker;
 import org.ow2.mind.adl.GraphChecker;
+import org.ow2.mind.error.ErrorManager;
 import org.ow2.mind.idl.IDLFrontendModule;
 import org.ow2.mind.plugin.PluginLoaderModule;
+import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -50,6 +52,8 @@ public class TestGraph {
   ASTChecker          astChecker;
   GraphChecker        graphChecker;
 
+  ErrorManager        errorManager;
+
   @BeforeMethod(alwaysRun = true)
   protected void setUp() throws Exception {
     final Injector injector = Guice.createInjector(new CommonFrontendModule(),
@@ -62,6 +66,8 @@ public class TestGraph {
 
     astChecker = new ASTChecker();
     graphChecker = new GraphChecker(astChecker);
+
+    errorManager = injector.getInstance(ErrorManager.class);
   }
 
   @Test(groups = {"functional"})
@@ -111,5 +117,23 @@ public class TestGraph {
         /* subComp1/subComp2.attr3 */.containsAttributeValue("attr3",
             "{3, {14, 15}}");
 
+  }
+
+  /**
+   * Non-regression test, loading composites such as Composite4 (in Composite3)
+   * using both generic definition argument and formal parameter used to raise
+   * an erroneous {@see org.ow2.mind.adl.ADLErrors.UNDEFINED_PARAMETER} error:
+   * "Composite4.adl:6,35: contains Composite5<Comp>(a) as c1; Parameter "a" is
+   * not defined in current definition.". This was fixed in {@see
+   * TemplateInstantiatorImpl}.
+   * 
+   * @throws Exception
+   */
+  @Test(groups = {"functional"})
+  public void test3() throws Exception {
+
+    // Should not raise org.ow2.mind.adl.ADLErrors.UNDEFINED_PARAMETER anymore.
+    loader.load("pkg1.parameterGeneric.Composite3", context);
+    Assert.assertTrue(errorManager.getErrors().isEmpty());
   }
 }

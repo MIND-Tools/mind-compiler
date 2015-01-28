@@ -1,0 +1,13 @@
+
+import pkg1.pkg2.Type1;
+import pkg1.pkg2.Primitive3;
+
+composite pkg1.parameterGeneric.Composite5<aComp conformsto Type1>(a) extends Type1 {
+
+	contains aComp as c1;
+	contains Primitive3(a) as c2;
+
+	binds this.sItf to c1.sItf;
+	binds c1.cItf to this.cItf;
+	binds c2.cItf to this.cItf;
+}
