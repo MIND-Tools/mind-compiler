@@ -70,7 +70,7 @@ public class TemplateInstantiatorImpl implements TemplateInstantiator {
           final DefinitionReference defRef = subComp.getDefinitionReference();
 
           final Definition d = instantiateDefinitionReference(defRef,
-              typeArgumentValues, context);
+              templateInstance, typeArgumentValues, context);
           setResolvedComponentDefinition(subComp, d);
 
           if (isPartiallyInstantiatedTemplate(d))
@@ -125,7 +125,7 @@ public class TemplateInstantiatorImpl implements TemplateInstantiator {
   }
 
   protected Definition instantiateDefinitionReference(
-      final DefinitionReference defRef,
+      final DefinitionReference defRef, final Definition templateInstance,
       final Map<String, Object> typeArgumentValues,
       final Map<Object, Object> context) throws ADLException {
 
@@ -138,8 +138,8 @@ public class TemplateInstantiatorImpl implements TemplateInstantiator {
       unsetResolvedDefinition(defRef);
     }
 
-    final Definition d = definitionReferenceResolverItf.resolve(defRef, null,
-        context);
+    final Definition d = definitionReferenceResolverItf.resolve(defRef,
+        templateInstance, context);
 
     return d;
   }
