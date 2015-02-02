@@ -26,6 +26,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.LineNumberReader;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -53,18 +55,31 @@ public final class ErrorHelper {
       }
     }
     final String cwd = System.getProperty("user.dir") + File.separator;
+    final File cwdFile = new File(cwd);
 
     String fileLocation = null;
+    File inputFile = null;
 
     if (locator != null && locator.getInputFilePath() != null) {
-      fileLocation = locator.getInputFilePath();
-      if (fileLocation.startsWith(cwd)) {
-        fileLocation = fileLocation.substring(cwd.length());
+
+      // Convert paths to handle different operating systems, conventions, and
+      // special characters (such as space ' ', plus '+', etc)
+      try {
+        fileLocation = URLDecoder.decode(locator.getInputFilePath(), "UTF-8");
+      } catch (final UnsupportedEncodingException e) {
+        fileLocation = locator.getInputFilePath();
+      }
+
+      inputFile = new File(fileLocation);
+
+      if (inputFile.getPath().startsWith(cwdFile.getPath())) {
+        fileLocation = inputFile.getPath().substring(
+            cwdFile.getPath().length() + 1);
       }
     }
 
     final StringBuilder sb = new StringBuilder();
-    if (locator != null && fileLocation != null) {
+    if (locator != null && fileLocation != null && inputFile != null) {
       sb.append("At ").append(fileLocation);
 
       if (locator.getBeginLine() >= 0) {
@@ -75,15 +90,16 @@ public final class ErrorHelper {
       }
       sb.append(":\n |--> ");
       if (locator.getBeginLine() >= 0) {
-        final File inputFile = new File(locator.getInputFilePath());
         if (inputFile.exists()) {
           try {
-            final LineNumberReader reader = new LineNumberReader(
-                new FileReader(inputFile));
+            final FileReader fileReader = new FileReader(inputFile);
+            final LineNumberReader lineNumberReader = new LineNumberReader(
+                fileReader);
             for (int i = 0; i < locator.getBeginLine() - 1; i++) {
-              reader.readLine();
+              lineNumberReader.readLine();
             }
-            final String line = reader.readLine().replace("\t", "    ");
+            final String line = lineNumberReader.readLine().replace("\t",
+                "    ");
             sb.append("  ").append(line).append("\n |-->   ");
             if (locator.getBeginColumn() >= 0) {
               for (int i = 0; i < locator.getBeginColumn() - 1; i++) {
@@ -100,6 +116,7 @@ public final class ErrorHelper {
               sb.append("\n |--> ");
 
             }
+            lineNumberReader.close();
           } catch (final IOException e1) {
             // ignore
           }

@@ -158,26 +158,45 @@ public final class DependencyHelper {
     ps.close();
   }
 
+  /**
+   * The old parseDepFile method parsed the make rule as one line, with entries
+   * separated by the space character. This is the pure "make" rule, however
+   * it's an issue with folders containing spaces, since the GCC dependency file
+   * generation doesn't use quotation marks to differentiate the entries. The
+   * new parseDepFile was developed to split the rule with '\' + newline, We
+   * follow the convention as mentioned in GCC's documentation. @see
+   * {@link https ://gcc.gnu.org/onlinedocs/gcc/Preprocessor-Options.html}.
+   * Concerning the -M option: Unless specified explicitly (with -MT or -MQ),
+   * the object file name consists of the name of the source file with any
+   * suffix replaced with object file suffix and with any leading directory
+   * parts removed. If there are many included files then the rule is split into
+   * several lines using ‘\’-newline.
+   * 
+   * @param depfile
+   * @return
+   */
   public static Map<File, List<File>> parseDepFile(final File depfile) {
     final Map<File, List<File>> rules = new HashMap<File, List<File>>();
     BufferedReader reader = null;
     try {
       reader = new BufferedReader(new FileReader(depfile));
-      String line = null, rule = "";
+      String line = null;
+      List<String> ruleLines = new ArrayList<String>();
       while ((line = reader.readLine()) != null) {
         if (line.endsWith("\\")) {
-          rule += line.substring(0, line.length() - 1);
+          line = line.substring(0, line.length() - 1);
+          if (line.length() > 0) ruleLines.add(line);
         } else {
-          rule += line.trim();
+          if (line.length() > 0) ruleLines.add(line);
 
           // end of rule, start a new one
-          if (rule.length() > 0) {
-            parseRule(rule, rules);
-            rule = "";
+          if (ruleLines.size() > 0) {
+            parseRule(ruleLines, rules);
+            ruleLines = new ArrayList<String>();
           }
         }
       }
-      if (rule.length() > 0) parseRule(rule, rules);
+      if (ruleLines.size() > 0) parseRule(ruleLines, rules);
     } catch (final IOException e) {
       depLogger.log(Level.WARNING, "An error occurs while reading \"" + depfile
           + "\".", e);
@@ -192,26 +211,32 @@ public final class DependencyHelper {
     return rules;
   }
 
-  private static void parseRule(final String rule,
+  private static void parseRule(final List<String> ruleLines,
       final Map<File, List<File>> rules) {
-    final String[] parts = rule.split(":\\s+");
-    if (parts.length != 2) {
-      throw new IllegalArgumentException("Can't find rule target");
+    final String[] line0parts = ruleLines.get(0).split(":\\s+");
+    if (line0parts.length > 2) {
+      throw new IllegalArgumentException("Erroneous rule target format");
     }
-    // Split target part.
-    final List<String> targets = DirectiveHelper.splitOptionString(parts[0]
-        .trim());
+
+    String target = line0parts[0].trim();
+
+    ruleLines.remove(0);
+    if (line0parts.length == 2) ruleLines.add(line0parts[1]);
+
     final List<File> dependencies = new ArrayList<File>();
+
     // Split dependency part.
-    for (String dependency : DirectiveHelper.splitOptionString(parts[1])) {
+    for (String dependency : ruleLines) {
       // un-escape dollar signs.
-      dependency = dependency.replace("$$", "$");
-      if (dependency.length() > 0) dependencies.add(new File(dependency));
+      dependency = DirectiveHelper.formatOptionString(dependency.replace("$$",
+          "$").trim());
+      final File depFile = new File(dependency);
+      if (dependency.length() > 0 && depFile.exists())
+        dependencies.add(depFile);
     }
-    for (String target : targets) {
-      // un-escape dollar signs.
-      target = target.replace("$$", "$");
-      rules.put(new File(target), dependencies);
-    }
+
+    // un-escape dollar signs.
+    target = target.replace("$$", "$");
+    rules.put(new File(target), dependencies);
   }
 }
