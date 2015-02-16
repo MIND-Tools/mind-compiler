@@ -29,13 +29,18 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
+import java.io.File;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.objectweb.fractal.adl.Definition;
 import org.objectweb.fractal.adl.Loader;
 import org.ow2.mind.CommonFrontendModule;
+import org.ow2.mind.DepsHelper;
 import org.ow2.mind.adl.ADLFrontendModule;
 import org.ow2.mind.adl.ASTChecker;
 import org.ow2.mind.adl.ErrorLoader;
@@ -80,6 +85,15 @@ public class TestBindingController {
     context = new HashMap<Object, Object>();
 
     astChecker = new ASTChecker();
+
+    // We need resources from the adl-frontend module, resolve pkg1.I2 base
+    // host folder and add it to the source-path
+    final String depsPath = getDepsDir("pkg1/I2.itf").getAbsolutePath();
+    final URL[] depsURL = {new File(depsPath).toURI().toURL()};
+    final ClassLoader srcLoader = new URLClassLoader(depsURL, this.getClass()
+        .getClassLoader());
+
+    context.put("classloader", srcLoader);
   }
 
   @Test(groups = {"functional"})
@@ -128,6 +142,15 @@ public class TestBindingController {
     assertSame(
         ControllerInterfaceDecorationHelper.getReferencedInterface(ctrlItf),
         ASTHelper.getInterface(d, BINDING_CONTROLLER));
+  }
+
+  protected File getDepsDir(final String resource) {
+    try {
+      return DepsHelper.unpackDeps(resource, this.getClass().getClassLoader());
+    } catch (final Exception e) {
+      fail("Can't unpack dependency containing " + resource, e);
+      return null;
+    }
   }
 
 }

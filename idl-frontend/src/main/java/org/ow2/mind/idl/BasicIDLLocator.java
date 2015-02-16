@@ -27,7 +27,9 @@ import static org.ow2.mind.PathHelper.fullyQualifiedNameToPath;
 import static org.ow2.mind.PathHelper.isRelative;
 import static org.ow2.mind.PathHelper.isValid;
 
+import java.io.IOException;
 import java.net.URL;
+import java.util.Enumeration;
 import java.util.Map;
 
 import org.ow2.mind.InputResource;
@@ -74,8 +76,26 @@ public class BasicIDLLocator implements IDLLocator {
     if (!NameHelper.isValid(name))
       throw new IllegalArgumentException("\"" + name + "\" is not a valid name");
 
-    return getClassLoader(this, context).getResource(
-        getItfSourceName(name).substring(1));
+    try {
+      /*
+       * Usual case was with getResource. However, the Maven plugin case is more
+       * complex: when using elements from fractal-runtime, it would find
+       * matches in the fractal-runtime.jar in the Maven cache + matches in the
+       * compiler's distribution 'runtime' folder. We get all possible contents,
+       * and return a file-system entry only, thus discarding jar contents.
+       */
+      final Enumeration<URL> urls = getClassLoader(this, context).getResources(
+          getItfSourceName(name).substring(1));
+
+      while (urls.hasMoreElements()) {
+        final URL url = urls.nextElement();
+        if (url.getProtocol().equals("file")) return url;
+      }
+    } catch (final IOException e) {
+      // ignore ('null' case handled at higher level)
+    }
+
+    return null;
   }
 
   public URL findBinaryItf(final String name, final Map<Object, Object> context) {
@@ -94,7 +114,26 @@ public class BasicIDLLocator implements IDLLocator {
       throw new IllegalArgumentException("\"" + path
           + "\" is not an absolute path");
 
-    return getClassLoader(this, context).getResource(path.substring(1));
+    try {
+      /*
+       * Usual case was with getResource. However, the Maven plugin case is more
+       * complex: when using elements from fractal-runtime, it would find
+       * matches in the fractal-runtime.jar in the Maven cache + matches in the
+       * compiler's distribution 'runtime' folder. We get all possible contents,
+       * and return a file-system entry only, thus discarding jar contents.
+       */
+      final Enumeration<URL> urls = getClassLoader(this, context).getResources(
+          path.substring(1));
+
+      while (urls.hasMoreElements()) {
+        final URL url = urls.nextElement();
+        if (url.getProtocol().equals("file")) return url;
+      }
+    } catch (final IOException e) {
+      // ignore ('null' case handled at higher level)
+    }
+
+    return null;
   }
 
   public URL findBinaryHeader(final String path,
