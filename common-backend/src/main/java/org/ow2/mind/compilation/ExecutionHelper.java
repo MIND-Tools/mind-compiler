@@ -160,14 +160,21 @@ public final class ExecutionHelper {
           if (line != null) {
             // if the title has not been printed yet.
             if (!titleLogged) {
+              if (execTitle != null) logger.severe(execTitle);
+            }
+
+            // in Log level "FINE" the command was already previously shown,
+            // do not repeat, but display for errors in all other modes
+            // for debug purposes
+            if (!logger.isLoggable(Level.FINE)) {
               String command = "";
               for (final String cmd : cmdList) {
                 command += cmd + " ";
               }
-              logger.severe((execTitle == null) ? command : execTitle);
+              logger.severe(command);
             }
+
             do {
-              logger.severe(line);
               processOutput.append(line).append("\n");
               line = reader.readLine();
             } while (line != null);
