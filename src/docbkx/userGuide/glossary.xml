@@ -1,14 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
-  "../dtd/docbookx.dtd" [
+<!DOCTYPE glossary [
 <!ENTITY % myents SYSTEM "../shared.ent" >
 %myents;
 ]>
-<appendix id="glossary">
-  <title>
-    Glossary
+  <glossary id="glossary" xmlns="http://docbook.org/ns/docbook" version="5.0">
+    <title>
+      Glossary
     </title>
-  <glossary>
     <!-- TODO improve glossary -->
     <glossentry id="ADL">
       <glossterm>Architecture Description Language</glossterm>
@@ -51,5 +49,4 @@
       </glossdef>
     </glossentry>
   </glossary>
-  <para></para>
-</appendix>
+

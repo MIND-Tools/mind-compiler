@@ -1,21 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
-  "./dtd/docbookx.dtd" [
+<!DOCTYPE book [
 <!ENTITY % myents SYSTEM "./shared.ent" >
 %myents;
 ]>
-<book status="draft">
+<book status="draft" xmlns="http://docbook.org/ns/docbook" version="5.0" xml:lang="en">
     <title>
         <emphasis>&productName;</emphasis> User Guide 
     </title>
     <subtitle>version <?eval ${project.version}?></subtitle>
     
     <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="userGuide/intro-chapter.xml" />
-    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="userGuide/adl.xml" />
-    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="userGuide/idl.xml" />
-    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="userGuide/c.xml" />
-    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="userGuide/toolchain.xml" />
-    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="userGuide/advanced.xml" />
-    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="userGuide/api.xml" />
+    <chapter>
+        <title>MIND language</title>
+        <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="userGuide/adl.xml" />
+        <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="userGuide/idl.xml" />
+        <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="userGuide/c.xml" />
+    </chapter>
+    <chapter>
+        <title>MIND tool-chain</title>
+        <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="userGuide/toolchain.xml" />
+    </chapter>
+    <appendix>
+        <title>Annex</title>
+        <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="userGuide/advanced.xml" />
+        <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="userGuide/api.xml" />
+    </appendix>
     <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="userGuide/glossary.xml" />
 </book>

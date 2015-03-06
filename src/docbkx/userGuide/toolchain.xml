@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
-  "../dtd/docbookx.dtd" [
+<!DOCTYPE section [
 <!ENTITY % myents SYSTEM "../shared.ent" >
 %myents;
 ]>
-<chapter id="tool">
+<section id="tool"  xmlns="http://docbook.org/ns/docbook" version="5.0">
   <title>
     The <command>mindc</command> command.
   </title>
@@ -24,13 +23,11 @@
   </para>
   
   <para>
-    <replaceable>adlname</replaceable> is the name of the top-level ADL definition
-      to compile, while <replaceable>execname</replaceable> is the name of the executable 
-      file that will be produced. If this latter is not specified, then the name of 
-      the executable file will be the simple name of the ADL and it will be located in a 
-      directory that corresponds to the package nane of the ADL. Several ADL definitions 
-      can be specified on the same command-line.
-  </para>
+    <replaceable>adlname</replaceable> is the name of the top-level ADL definition to compile, while
+      <replaceable>execname</replaceable> is the name of the executable file that will be produced.
+    If this latter is not specified, then the name of the executable file will be the simple name of
+    the ADL and it will be located in a directory that corresponds to the package name of the ADL.
+    Several ADL definitions can be specified on the same command-line. </para>
   
   <para>
     Available options are :
@@ -154,8 +151,8 @@
     <para>In the above command :
       <itemizedlist>
         <listitem>
-          <para>Input files (ADL, IDL an C files) will be shearched in the 
-            <filename>src</filename> directory.</para>
+          <para>Input files (ADL, IDL an C files) will be searched in the <filename>src</filename>
+            directory.</para>
         </listitem>
         <listitem>
           <para>Output files will be placed in the 
@@ -201,13 +198,11 @@
   <section id="tool-mpp">
     <title>The Mind Pre-Processor</title>
 
-    <para>Component implementation sources are written in the CPL language. This
-      language is a lightweigh dialect on top of the C-language. In order to be 
-      compiled by a traditional C-compiler, the implementation source files must
-      be preprocessed by a specific tool called the 
-      <emphasis>Mind preprocessor</emphasis>. This tools, replaces the CPL constructs
-      like <code>METH</code>, <code>PRIVATE</code> or <code>CALL</code> by a 
-      standard C-code.</para>
+    <para>Component implementation sources are written in the CPL language. This language is a
+      lightweight dialect on top of the C-language. In order to be compiled by a traditional
+      C-compiler, the implementation source files must be preprocessed by a specific tool called the
+        <emphasis>Mind preprocessor</emphasis>. This tools, replaces the CPL constructs like
+        <code>METH</code>, <code>PRIVATE</code> or <code>CALL</code> by a standard C-code.</para>
   </section>
   
   <section id="tool-compil">
@@ -223,19 +218,18 @@
       
     <itemizedlist>
       <listitem>
-        <para><code>--compiler-command</code> and <code>--linker-command</code>
-          allows to specify the command of the C-compiler and the linker (respectivly).
-          The default value of these options is <code>gcc</code>. These options 
-          are particularly usefull to use cross-compiler.</para>
+        <para><code>--compiler-command</code> and <code>--linker-command</code> allows to specify
+          the command of the C-compiler and the linker (respectively). The default value of these
+          options is <code>gcc</code>. These options are particularly useful to use
+          cross-compiler.</para>
       </listitem>
       <listitem>
-        <para><code>--c-flags</code> (or <code>-c</code>) option allows to specify
-          additional flags that must be passed to the C-compiler. This is particularly 
-          usefull to specify warning flags (<code>-Wall</code> for instance) or to
-          define preprocessor macros (<code>-DFOO=2</code> for instance). This option can 
-          be specify several times. Note that c-flags can also be specified in ADL
-          using the <classname>CFlags</classname> annotation (see 
-          <xref linkend="adl-annot-cflags"/> for more details).</para>
+        <para><code>--c-flags</code> (or <code>-c</code>) option allows to specify additional flags
+          that must be passed to the C-compiler. This is particularly useful to specify warning
+          flags (<code>-Wall</code> for instance) or to define preprocessor macros
+            (<code>-DFOO=2</code> for instance). This option can be specify several times. Note that
+          c-flags can also be specified in ADL using the <classname>CFlags</classname> annotation
+          (see <xref linkend="adl-annot-cflags"/> for more details).</para>
       </listitem>
       <listitem>
         <para><code>--ld-flags</code> (or <code>-l</code>) option allows to specify
@@ -245,14 +239,12 @@
           <xref linkend="adl-annot-ldcflags"/> for more details).</para>
       </listitem>
       <listitem>
-        <para><code>--linker-script</code> or <code>-T</code> option allows to 
-          specify the linker-script that must be passed to the linker. 
-          The linker-script file must be located in the source-path. This is 
-          allows to distribute a linker-script for several platforms in a component
-          library alongside component sources. If you want to specify a 
-          linker-script that is not located in the source-path you can use the 
-          <code>--ld-flags</code> option instead (<code>--ld-flags=-TmyLinkerScript.ls</code>
-           for instance).</para>
+        <para><code>--linker-script</code> or <code>-T</code> option allows to specify the
+          linker-script that must be passed to the linker. The linker-script file must be located in
+          the source-path. This is allows to distribute a linker-script for several platforms in a
+          component library alongside component sources. If you want to specify a linker-script that
+          is not located in the source-path you can use the <code>--ld-flags</code> option instead
+            (<code>--ld-flags=-Superscriptions</code> for instance).</para>
       </listitem>
     </itemizedlist>
     
@@ -265,12 +257,10 @@
 
   <section id="tool-targetdesc">
     <title>Target-descriptor</title>
-    <para>When developping component-based application for various embedded 
-      platforms, the managment of the compilation options presented in 
-      <xref linkend="tool-compil"/> can be tedious. The &productName; toolchain 
-      uses the notion of <emphasis>target-descriptor</emphasis> to regroup all 
-      these options (and some other things) in a single file or in a hierarchy 
-      of files.</para>
+    <para>When developing component-based application for various embedded platforms, the management
+      of the compilation options presented in <xref linkend="tool-compil"/> can be tedious. The
+      &productName; toolchain uses the notion of <emphasis>target-descriptor</emphasis> to regroup
+      all these options (and some other things) in a single file or in a hierarchy of files.</para>
     <para>A target-descriptor file is a small XML file suffixed by 
       <filename>".td"</filename>. It must be placed along-side the component sources
       and follows naming conventions similar to ADL files (target-descriptor 
@@ -284,13 +274,12 @@
       must be wrapped in a bootstrap component to be compiled and run correctly
       on a given platform.</para>
       
-    <para>A target descriptor may extends one or more other descriptors. This 
-      allows to reuse and extends existing descriptors. This is particularly 
-      useful when many different target platforms partially shares the same 
-      hardware. This can also be usefull to defines different compilation 
-      profiles for a given target platform. For instance: a debug profile with 
-      debug information in binary file and without optimization; and a production
-      profile without debug info and with optimizations.</para>
+    <para>A target descriptor may extends one or more other descriptors. This allows to reuse and
+      extends existing descriptors. This is particularly useful when many different target platforms
+      partially shares the same hardware. This can also be useful to defines different compilation
+      profiles for a given target platform. For instance: a debug profile with debug information in
+      binary file and without optimization; and a production profile without debug info and with
+      optimizations.</para>
       
     <section id="tool-targetdesc-syntax">
       <title>Target descriptor syntax</title>
@@ -300,7 +289,7 @@
   "classpath://org/ow2/mind/target/ast/targetDescriptor.dtd">]]></programlisting>
       
       <note>
-        <para>The DTD URL must be written on a single line without linebreak. </para>
+        <para>The DTD URL must be written on a single line without line-break. </para>
       </note>
       <para>A target descriptor has a very simple XML structure. The top-level 
         element is called <code>"target"</code> It must have a <code>"name"</code>
@@ -439,7 +428,7 @@
             <para>Lines 2 and 3 define a mapping from the input ADL (the ADL given on the
               <command>mindc</command> command line), and the ADL that is actually
               compiled by the toolchain. So if the command line is </para>
-            <programlisting>mindc --target-descriptor=unix foo.bar.MyComponent</programlisting>
+            <programlisting> $ mindc --target-descriptor=unix foo.bar.MyComponent</programlisting>
             <para>Then the ADL that is actually compiled by the toolchain will be
             <code>unix.boot.BootstrappedApplication&lt;foo.bar.MyComponent&gt;</code></para>
           </listitem>
@@ -586,13 +575,13 @@
         traditional object file (<filename>.o</filename> file). This intermediate files 
         are used or generated by the Mind-preprocessor.</para>
       
-      <para>Compilation files of user implementation of components (i.e. source files 
-        referenced in ADL using the <code>source</code> are called 
-        <filename><replaceable>&lt;ADL name&gt;</replaceable>_impl<replaceable>&lt;NUM&gt;.&lt;ext&gt;</replaceable></filename>,
-        where .<replaceable>&lt;NUM&gt;</replaceable> is the index of the source file 
-        in the ADL (since implementation of primitive components may be splitted in several files).
-        While compilation files of generated source files have the same name as the 
-        source file (except the extension).</para>
+      <para>Compilation files of user implementation of components (i.e. source files referenced in
+        ADL using the <code>source</code> are called <filename><replaceable>&lt;ADL
+            name&gt;</replaceable>_impl<replaceable>&lt;NUM&gt;.&lt;ext&gt;</replaceable></filename>,
+        where .<replaceable>&lt;NUM&gt;</replaceable> is the index of the source file in the ADL
+        (since implementation of primitive components may be split in several files). While
+        compilation files of generated source files have the same name as the source file (except
+        the extension).</para>
         
       <para>The following compilation files are generated:</para>
       
@@ -600,20 +589,19 @@
         <varlistentry>
           <term><filename><replaceable>&lt;filename&gt;</replaceable>.i</filename></term>
           <listitem>
-            <para>The C-preprocessed file. This file contains the C-source afer 
-            the execution of the C-preprocessor. That is, every C-preprocessor 
-            directives (<code>#include</code>, <code>#define</code>, ...) are 
-            replaced. This file is the input file of the Mind-preprocessor.</para>
+            <para>The C-preprocessed file. This file contains the C-source after the execution of
+              the C-preprocessor. That is, every C-preprocessor directives (<code>#include</code>,
+                <code>#define</code>, ...) are replaced. This file is the input file of the
+              Mind-preprocessor.</para>
           </listitem>
         </varlistentry>
         <varlistentry>
           <term><filename><replaceable>&lt;filename&gt;</replaceable>.mpp.c</filename></term>
           <listitem>
-            <para>The Mind-preprocessed file. This file contains the C-source afer 
-            the execution of the Mind-preprocessor, where every CPL macros 
-            (<code>METH</code>, <code>CALL</code>, ...) are replaced. 
-            This file is the C-source file that is actually compiled by the 
-            C-compiler.</para>
+            <para>The Mind-preprocessed file. This file contains the C-source after the execution of
+              the Mind-preprocessor, where every CPL macros (<code>METH</code>, <code>CALL</code>,
+              ...) are replaced. This file is the C-source file that is actually compiled by the
+              C-compiler.</para>
           </listitem>
         </varlistentry>
         <varlistentry>
@@ -628,14 +616,12 @@
     <section>
       <title>Generated files for generic ADLs</title>
       
-      <para>The prefix of the generated files for generic ADLs is more complex.
-        Indeed, since a generic ADL definition may by used in different contexts,
-        with different values for its template variables, the generated source-code
-        must be different for each set of values of its template variables.
-        For instance, source-code generated for 
-        <classname>MyGeneric&lt;ADL1, ADL2&gt;</classname> must be
-        difiirent from the code generated for 
-        <classname>MyGeneric&lt;ADL3, ADL4&gt;</classname>.</para>
+      <para>The prefix of the generated files for generic ADLs is more complex. Indeed, since a
+        generic ADL definition may by used in different contexts, with different values for its
+        template variables, the generated source-code must be different for each set of values of
+        its template variables. For instance, source-code generated for
+          <classname>MyGeneric&lt;ADL1, ADL2&gt;</classname> must be different from the code
+        generated for <classname>MyGeneric&lt;ADL3, ADL4&gt;</classname>.</para>
       
       <para>That is, the name of generated files for generic ADLS will match
         <filename><replaceable>&lt;generic ADL name&gt;</replaceable>_tmpl_<replaceable>&lt;hashcode&gt;</replaceable></filename>
@@ -645,13 +631,11 @@
         of <code>&lt;ADL1, ADL2&gt;</code> or <code>&lt;ADL3, ADL4&gt;</code> in
         previous examples).</para>
       
-      <para>If a given generic ADL definition is used several times with different 
-        value for its template variables, then it may be difficult to figure out which
-        files correspond to which component. To solve
-        this problem, the toolchain will generate a file that is called 
-        <filename><replaceable>&lt;generic ADL name&gt;</replaceable>.map</filename>
-        that details the value of the template variables that correspond to a 
-        given hascode.</para>
+      <para>If a given generic ADL definition is used several times with different value for its
+        template variables, then it may be difficult to figure out which files correspond to which
+        component. To solve this problem, the toolchain will generate a file that is called
+            <filename><replaceable>&lt;generic ADL name&gt;</replaceable>.map</filename> that
+        details the value of the template variables that correspond to a given hashcode.</para>
     </section>
   </section>
   
@@ -686,10 +670,9 @@
         uses internal a highly configurable logging system that
         can be customized using the <code>MIND_OPTS</code> environment variable.</para>
       
-      <para>By setting the <code>MIND_OPTS</code> environment variable to the 
-       following value, the toolchain will print more detailled messages. In 
-       particular it will print the actual command line that is executed for each
-       compilation task.</para>
+      <para>By setting the <code>MIND_OPTS</code> environment variable to the following value, the
+        toolchain will print more detailed messages. In particular it will print the actual command
+        line that is executed for each compilation task.</para>
        
      <programlisting>-Ddefault.console.level=FINE</programlisting>
 
@@ -745,4 +728,4 @@
 <!--      </variablelist>-->
     </section>
   </section>
-</chapter>
+</section>

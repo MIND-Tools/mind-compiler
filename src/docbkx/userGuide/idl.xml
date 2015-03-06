@@ -1,18 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
-  "../dtd/docbookx.dtd" [
+<!DOCTYPE section [
 <!ENTITY % myents SYSTEM "../shared.ent" >
 %myents;
 ]>
-<chapter id="idl">
-     <title>Interface definition language</title>
+<section id="idl" xmlns="http://docbook.org/ns/docbook" version="5.0">
+     <title>Interface Definition Language</title>
     <titleabbrev>IDL</titleabbrev>
-    <para>The IDL language allows to define component interface types. 
-      It is highly inspired by the C-type system. That is, most of the types that can
-      be declared in C can be declared similarly in the IDL language (except 
-      function pointers that are not allowed by the IDL language). In addition
-      the IDL language provides a special construct for the definition of interface 
-      since this kind of notion is not present in C.</para>
+    <para>The Interface Definition Language (IDL) allows to define component interface types. It is
+    highly inspired by the C-type system. That is, most of the types that can be declared in C can
+    be declared similarly in the IDL language (except function pointers that are not allowed by the
+    IDL language). In addition the IDL language provides a special construct for the definition of
+    interface since this kind of notion is not present in C.</para>
     
     <para>The IDL language defines two kinds of files : </para>
     <variablelist>
@@ -257,4 +255,4 @@
   </section>
   
   
-</chapter>
+</section>

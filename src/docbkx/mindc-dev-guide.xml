@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE book SYSTEM "./dtd/minddoc.dtd" [
+<!DOCTYPE book [
 <!ENTITY % myents SYSTEM "./shared.ent" >
 %myents;
 ]>
-<book>
+<book xmlns="http://docbook.org/ns/docbook" version="5.0" xml:lang="en">
   <title>
       <emphasis>&productName;</emphasis> developer guide 
   </title>

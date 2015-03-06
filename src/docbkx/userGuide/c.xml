@@ -1,17 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
-  "../dtd/docbookx.dtd" [
+<!DOCTYPE section [
 <!ENTITY % myents SYSTEM "../shared.ent" >
 %myents;
 ]>
-<chapter id="c">
+<section id="c"  xmlns="http://docbook.org/ns/docbook" version="5.0">
   <title>
       Component Programming Language
   </title>
   <titleabbrev>CPL</titleabbrev>
-  <para>The CPL allows to capture the component notions inside traditional
-    C source code. The CPL is a very lightweight pre-processed language on 
-    top of the C-language.</para>
+  <para>The Component Programming Language (CPL) allows to capture the component notions inside
+    traditional C source code. The CPL is a very lightweight pre-processed language on top of the
+    C-language.</para>
 
   <section id="c-prvdecl">
     <title>Component's private-data declaration</title>
@@ -89,12 +88,12 @@
   <section id="c-call">
     <title>Invocation of component's methods</title>
 
-    <para>The invocation of component's methods is done using the <code>"CALL"</code>
-      macro. This macro can take one or two parameters. To invoke a private method, 
-      the macro takes one parameter that correspond to the name of the private method to invoke.
-      To invoke a method of a provided or a required interface, the macro takes two parameters 
-      where the first one must correspond to the name of the interface, and the second one must
-      correspond the the name of the method to invoke.</para>
+    <para>The invocation of component's methods is done using the <code>"CALL"</code> macro. This
+      macro can take one or two parameters. To invoke a private method, the macro takes one
+      parameter that correspond to the name of the private method to invoke. To invoke a method of a
+      provided or a required interface, the macro takes two parameters where the first one must
+      correspond to the name of the interface, and the second one must correspond to the name of the
+      method to invoke.</para>
 
     <para>Invocation of method can only be done inside an implementation of method
       of a provided interface or an implementation of a private method.</para>
@@ -273,8 +272,8 @@
           In the above code excerpt: 
           <itemizedlist>
             <listitem>
-              <para>Lline 2 declares a variable called <varname>f_ptr</varname>
-                that is a pointer to a method that takes an integer and return an integer.</para>
+              <para>Line 2 declares a variable called <varname>f_ptr</varname> that is a pointer to
+                a method that takes an integer and return an integer.</para>
             </listitem>
             <listitem>
               <para>Line 3, the <varname>f_ptr</varname> variable is initialized 
@@ -288,4 +287,4 @@
       </example>
     </section>
   </section>
-</chapter>
+</section>
