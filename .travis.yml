@@ -1,9 +1,9 @@
 language: java
 before_install:
-  - "git clone https://github.com/MIND-Tools/maven.git"
-  - "cd maven/mind-parent"
+  - "git clone https://github.com/MIND-Tools/mind-parent.git"
+  - "cd mind-parent"
   - "mvn -U install"
-  - "cd ../.."    
+  - "cd .."    
 install: 
   - "mvn -U clean -PCI-profile"
 script: 
