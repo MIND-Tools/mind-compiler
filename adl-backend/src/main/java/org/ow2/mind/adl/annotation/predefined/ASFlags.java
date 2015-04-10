@@ -54,6 +54,6 @@ public class ASFlags implements Annotation {
   }
 
   public boolean isInherited() {
-    return false;
+    return true;
   }
 }

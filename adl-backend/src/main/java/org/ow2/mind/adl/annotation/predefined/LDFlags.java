@@ -47,6 +47,6 @@ public class LDFlags implements Annotation {
   }
 
   public boolean isInherited() {
-    return false;
+    return true;
   }
 }
